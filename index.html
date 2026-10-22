@@ -10233,6 +10233,29 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     for (let p = 0; p < len; p++) { const n = norm[p] || 1; outL[p] /= n; outR[p] /= n; }
     return stereo ? [outL, outR] : [outL];
   }
+  // the same separator in a worker, so the screen and the decks never stall; main thread only where workers can't start
+  const VX_SEP_ORIG = vxSeparate;
+  let vxWorkerOK = true, vxSrcCache = "";
+  function vxQuick(chans, rate, opts, onProgress, isCancelled) {
+    if (!vxWorkerOK) return VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled);
+    if (!vxSrcCache) vxSrcCache = "const VX_N = " + VX_N + ", VX_HOP = " + VX_HOP + "; let vxTw = null;\n" + String(vxTables) + "\n" + String(vxFFT) + "\n" + String(VX_SEP_ORIG) + "\n" +
+      "onmessage = async e => { const { chans, rate, opts } = e.data; const out = await vxSeparate(chans, rate, opts, p => postMessage({ p }), null);" +
+      " if (opts.both) { for (let c = 0; c < out.length; c++) { const a = chans[c], b = out[c]; for (let i = 0; i < a.length; i++) a[i] -= b[i]; } postMessage({ out, voc: chans.slice(0, out.length) }, out.map(c => c.buffer).concat(chans.slice(0, out.length).map(c => c.buffer))); }" +
+      " else postMessage({ out }, out.map(c => c.buffer)); };";
+    let w = null;
+    try { const url = URL.createObjectURL(new Blob([vxSrcCache], { type: "text/javascript" })); w = new Worker(url); setTimeout(() => URL.revokeObjectURL(url), 5000); }
+    catch (e) { vxWorkerOK = false; return VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled); }
+    return new Promise(res => {
+      let done = false;
+      const poll = setInterval(() => { if (isCancelled && isCancelled()) finish(null); }, 150);
+      function finish(v) { if (done) return; done = true; clearInterval(poll); w.terminate(); res(v); }
+      w.onmessage = e => { if (e.data.out) { const r = e.data.out; if (e.data.voc) r.voc = e.data.voc; finish(r); } else if (onProgress) onProgress(e.data.p); };
+      w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); if (done) return; done = true; clearInterval(poll); w.terminate(); vxWorkerOK = false; VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled).then(res); };
+      const copy = chans.map(c => c.slice());   // the caller keeps its arrays
+      w.postMessage({ chans: copy, rate, opts }, copy.map(c => c.buffer));
+    });
+  }
+  vxSeparate = vxQuick;
 
   // ---------- the sheet, inside the sample editor ----------
   const vxEl = document.getElementById("vocalSheet"), vxStatus = document.getElementById("vxStatus"), vxBar = document.getElementById("vxBar");
@@ -10612,6 +10635,35 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const djPer = d => 60 / d.bpm0;                // one beat, in seconds of the song itself
 
   // --- beat finder: onset strength → autocorrelation → a comb fit over the whole song ---
+  // analysis results per decoded song (doesn't keep the song alive), and the worker that computes them off the main thread
+  const DJ_AN_CACHE = new WeakMap(), DJ_AN_SRC = { base: "" };
+  let djAnWorker = null, djAnSeq = 0; const djAnWait = new Map();
+  function djAnWorkerGet() {
+    if (djAnWorker !== null) return djAnWorker;
+    try {
+      const src = "const FFT4K = (" + String(FFT4K_MAKE) + ")();\nconst KEYS = " + JSON.stringify(KEYS) + ", CAM = " + JSON.stringify(CAM) + ", KPROF = " + JSON.stringify(KPROF) + ";\n" +
+        DJ_AN_SRC.base + "\n" + String(djKey) + "\n" +
+        "onmessage = e => { const { id, mono, sr } = e.data; try { const buf = { sampleRate: sr, length: mono.length, duration: mono.length / sr, numberOfChannels: 1, getChannelData: () => mono };" +
+        " const r = djAnalyse(buf); try { Object.assign(r, djKey(buf)); } catch (x) {} let s = 0; for (const v of r.env) s += v; r.energy = Math.min(1, (s / Math.max(1, r.env.length)) * 2.2);" +
+        " postMessage({ id, r }, [r.env.buffer]); } catch (x) { postMessage({ id, err: String(x && x.message || x) }); } };";
+      djAnWorker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+      djAnWorker.onmessage = e => { const w = djAnWait.get(e.data.id); if (w) { djAnWait.delete(e.data.id); w(e.data); } };
+      djAnWorker.onerror = () => { djAnWorker.terminate(); djAnWorker = false; djAnWait.forEach(w => w({ err: "worker" })); djAnWait.clear(); };
+    } catch (e) { djAnWorker = false; }
+    return djAnWorker;
+  }
+  async function djAnalyseAsync(buf) {
+    if (DJ_AN_CACHE.has(buf)) return DJ_AN_CACHE.get(buf);
+    const w = DJ_AN_SRC.base ? djAnWorkerGet() : false;
+    if (w) {
+      const c0 = buf.getChannelData(0), c1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null, n = buf.length, mono = new Float32Array(n);
+      if (c1) for (let i = 0; i < n; i++) mono[i] = 0.5 * (c0[i] + c1[i]); else mono.set(c0);
+      const id = ++djAnSeq;
+      const res = await new Promise(r => { djAnWait.set(id, r); w.postMessage({ id, mono, sr: buf.sampleRate }, [mono.buffer]); });
+      if (res && res.r) { DJ_AN_CACHE.set(buf, res.r); return res.r; }
+    }
+    return djAnalyse(buf);   // no worker here: the same code on the main thread
+  }
   function djAnalyse(buf) {
     const sr = buf.sampleRate, n = buf.length, hop = Math.max(1, Math.round(sr / 200)), fr = sr / hop, F = Math.floor(n / hop);
     const c0 = buf.getChannelData(0), c1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
@@ -10839,7 +10891,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     d.buf = buf; d.name = name || "Song"; d.p0 = 0; d.cue = 0; d.loop = null; d.rate = 1; d.bend = 1; d.img = null; d.bpm0 = 0; d.off = 0; d.cues = [null, null, null, null];
     djPaintDeck(d); djMsg("Finding the beat on " + "AB"[d.i] + "…", true);
     await new Promise(r => setTimeout(r, 30));
-    const an = djAnalyse(buf); d.env = an.env; d.envRate = an.envRate;
+    const an = meta && meta.env ? { env: meta.env, envRate: meta.envRate } : await djAnalyseAsync(buf); d.env = an.env; d.envRate = an.envRate;
     if (meta && meta.bpm) { d.bpm0 = meta.bpm; d.off = meta.off || 0; } else { d.bpm0 = an.bpm; d.off = an.off; }
     if (d.bpm0 && d.bpm0 < 70) { d.bpm0 *= 2; } else if (d.bpm0 > 180) d.bpm0 /= 2;
     d.img = null; djPaintDeck(d);
@@ -11409,7 +11461,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const CAM = { maj: { 0: "8B", 7: "9B", 2: "10B", 9: "11B", 4: "12B", 11: "1B", 6: "2B", 1: "3B", 8: "4B", 3: "5B", 10: "6B", 5: "7B" },
                 min: { 9: "8A", 4: "9A", 11: "10A", 6: "11A", 1: "12A", 8: "1A", 3: "2A", 10: "3A", 5: "4A", 0: "5A", 7: "6A", 2: "7A" } };
   const KPROF = { maj: [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], min: [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17] };
-  const FFT4K = (() => {
+  const FFT4K_MAKE = () => {
     const N = 4096, rev = new Uint16Array(N), cos = new Float32Array(N / 2), sin = new Float32Array(N / 2);
     for (let i = 0; i < N; i++) { let r = 0, x = i; for (let b = 0; b < 12; b++) { r = (r << 1) | (x & 1); x >>= 1; } rev[i] = r; }
     for (let i = 0; i < N / 2; i++) { cos[i] = Math.cos(2 * Math.PI * i / N); sin[i] = Math.sin(2 * Math.PI * i / N); }
@@ -11417,7 +11469,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       for (let i = 0; i < N; i++) { const j = rev[i]; if (j > i) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
       for (let size = 2; size <= N; size <<= 1) { const half = size >> 1, step = N / size; for (let s = 0; s < N; s += size) for (let k = 0; k < half; k++) { const wr = cos[k * step], wi = -sin[k * step], a = s + k, b = a + half; const xr = re[b] * wr - im[b] * wi, xi = re[b] * wi + im[b] * wr; re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi; } }
     } };
-  })();
+  };
+  const FFT4K = FFT4K_MAKE();
   function djKey(buf) {
     const sr = buf.sampleRate, N = FFT4K.N, c0 = buf.getChannelData(0), c1 = buf.numberOfChannels > 1 ? buf.getChannelData(1) : null;
     const frames = Math.max(1, Math.min(160, Math.floor(buf.duration / 1.2))), chroma = new Float64Array(12), re = new Float32Array(N), im = new Float32Array(N);
@@ -11450,19 +11503,19 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return 0;
   }
   {
-    const an0 = djAnalyse;
+    const an0 = djAnalyse; DJ_AN_SRC.base = String(an0);
     djAnalyse = function (buf) {
       const r = an0(buf);
       try { Object.assign(r, djKey(buf)); } catch (e) {}
       let s = 0; for (const v of r.env) s += v; r.energy = Math.min(1, (s / Math.max(1, r.env.length)) * 2.2);
-      r.buf = buf; DJ.lastAn = r; return r;
+      DJ_AN_CACHE.set(buf, r); return r;
     };
     const dl0 = djLoad;
     djLoad = async function (d, buf, name, raw, meta) {
       d.crate = meta && meta.crate != null ? meta.crate : -1; d.key = ""; d.cam = ""; d.energy = 0;
       await dl0(d, buf, name, raw, meta);
       if (meta && meta.cam) { d.key = meta.key; d.cam = meta.cam; d.energy = meta.energy || 0; }
-      else if (DJ.lastAn && DJ.lastAn.buf === buf) { d.key = DJ.lastAn.key || ""; d.cam = DJ.lastAn.cam || ""; d.energy = DJ.lastAn.energy || 0; }
+      else if (DJ_AN_CACHE.has(buf)) { const r = DJ_AN_CACHE.get(buf); d.key = r.key || ""; d.cam = r.cam || ""; d.energy = r.energy || 0; }
       if (d.crate >= 0 && DJ.crate[d.crate] && !DJ.crate[d.crate].cam && d.cam) { Object.assign(DJ.crate[d.crate], { key: d.key, cam: d.cam, energy: d.energy, bpm: d.bpm0, off: d.off }); djStoreCrate(d.crate); }
       djPaintCrate();
     };
@@ -11470,15 +11523,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
 
   // --- the crate ---
   const djCrateEl = document.getElementById("djSongs");
-  function djStoreCrate(i) { const it = DJ.crate[i]; djIdbPut("crate" + i, it ? { name: it.name, data: it.raw || (it.buf.duration < 90 ? bufferToWav(it.buf) : null), bpm: it.bpm, off: it.off, key: it.key, cam: it.cam, energy: it.energy, phrase: it.phrase != null ? it.phrase : null } : null); }
+  function djStoreCrate(i) { const it = DJ.crate[i]; djIdbPut("crate" + i, it ? { name: it.name, data: it.raw || (it.buf && it.buf.duration < 90 ? bufferToWav(it.buf) : null), env: it.env || null, envRate: it.envRate || 0, bpm: it.bpm, off: it.off, key: it.key, cam: it.cam, energy: it.energy, phrase: it.phrase != null ? it.phrase : null } : null); }
   async function djCrateAdd(buf, name, raw, meta) {
     let i = DJ.crate.findIndex(x => !x); if (i < 0) { djMsg("All four song spots are full: remove one first"); return -1; }
     const it = { buf, name: name || "Song", raw: raw || null, bpm: 0, off: 0, key: "", cam: "", energy: 0, played: 0, busy: true };
     DJ.crate[i] = it; djPaintCrate(); djMsg("Analysing " + it.name + "…", true);
     await new Promise(r => setTimeout(r, 30));
     if (meta && meta.bpm) Object.assign(it, { bpm: meta.bpm, off: meta.off || 0, key: meta.key || "", cam: meta.cam || "", energy: meta.energy || 0 });
-    else { const an = djAnalyse(buf); let bpm = an.bpm; if (bpm && bpm < 70) bpm *= 2; else if (bpm > 180) bpm /= 2; Object.assign(it, { bpm, off: an.off, key: an.key || "", cam: an.cam || "", energy: an.energy || 0 }); }
-    it.busy = false; djStoreCrate(i); djPaintCrate();
+    else { const an = await djAnalyseAsync(buf); it.env = an.env; it.envRate = an.envRate; let bpm = an.bpm; if (bpm && bpm < 70) bpm *= 2; else if (bpm > 180) bpm /= 2; Object.assign(it, { bpm, off: an.off, key: an.key || "", cam: an.cam || "", energy: an.energy || 0 }); }
+    it.busy = false; djStoreCrate(i); if (it.raw && !DJ.decks.some(d => d.buf === it.buf || d.full === it.buf)) it.buf = null; djPaintCrate();
     djMsg(it.name + ": " + (it.bpm ? it.bpm.toFixed(1) + " BPM" : "no steady beat") + (it.key ? " · " + it.key + " (" + it.cam + ")" : ""));
     return i;
   }
@@ -11490,7 +11543,16 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
   async function djLoadCrate(d, i, play) {
     const it = DJ.crate[i]; if (!it || it.busy) return;
-    await djLoad(d, it.buf, it.name, false, { bpm: it.bpm, off: it.off, key: it.key, cam: it.cam, energy: it.energy, crate: i, phrase: it.phrase != null ? it.phrase : null });
+    let buf = it.buf;
+    if (!buf) { const on = DJ.decks.find(x => x.crate === i && (x.full || x.buf)); buf = on ? (on.full || on.buf) : null; }
+    if (!buf && it.raw) {
+      it.busy = true; djPaintCrate(); djMsg("Opening " + it.name + "…", true);
+      try { buf = await decode(it.raw.slice(0)); } catch (e) { buf = null; }
+      it.busy = false; djPaintCrate();
+      if (!buf) { djMsg("Couldn't open " + it.name + " again: remove it and add the file once more"); return; }
+    }
+    if (!buf) return;
+    await djLoad(d, buf, it.name, false, { env: it.env || null, envRate: it.envRate || 0, bpm: it.bpm, off: it.off, key: it.key, cam: it.cam, energy: it.energy, crate: i, phrase: it.phrase != null ? it.phrase : null });
     if (play) { it.played = Date.now(); djPlay(d, true); }
     djPaintCrate();
   }
@@ -11774,8 +11836,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     djRestore = async function () {
       const first = !DJ.loaded; await rs0();
       if (!first) return;
-      for (let i = 0; i < 4; i++) { const r = await djIdbGet("crate" + i); if (r && r.data) { try { DJ.crate[i] = { buf: await decode(r.data.slice(0)), name: r.name, raw: null, bpm: r.bpm || 0, off: r.off || 0, key: r.key || "", cam: r.cam || "", energy: r.energy || 0, played: 0, busy: false, phrase: r.phrase != null ? r.phrase : null }; } catch (e) {} } }
-      DJ.decks.forEach(d => { if (d.buf) { const i = DJ.crate.findIndex(it => it && it.name === d.name && Math.abs((it.bpm || 0) - d.bpm0) < 0.5); if (i >= 0) d.crate = i; } });
+      for (let i = 0; i < 4; i++) { const r = await djIdbGet("crate" + i); if (r && r.data) { try { DJ.crate[i] = { buf: null, name: r.name, raw: r.data, env: r.env || null, envRate: r.envRate || 0, bpm: r.bpm || 0, off: r.off || 0, key: r.key || "", cam: r.cam || "", energy: r.energy || 0, played: 0, busy: false, phrase: r.phrase != null ? r.phrase : null }; } catch (e) {} } }
+      DJ.decks.forEach(d => { if (d.buf) { const i = DJ.crate.findIndex(it => it && it.name === d.name && Math.abs((it.bpm || 0) - d.bpm0) < 0.5); if (i >= 0) { d.crate = i; if (!DJ.crate[i].env && d.env) { DJ.crate[i].env = d.env; DJ.crate[i].envRate = d.envRate; } } } });
       djPaintCrate();
     };
     const hp = document.querySelector("#djHelp .dj-helptext");
@@ -11807,13 +11869,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
 class NBStretch extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.L = null; this.R = null; this.len = 0; this.pos = 0; this.rate = 1; this.playing = false; this.startAt = -1; this.stopAt = -1; this.loop = null; this.on = true;
+    this.L = null; this.R = null; this.len = 0; this.sc = 1; this.pos = 0; this.rate = 1; this.playing = false; this.startAt = -1; this.stopAt = -1; this.loop = null; this.on = true;
     const N = this.N = 2048, H = this.H = 512; this.OV = 512; this.SR = 360;
     this.win = new Float32Array(N); for (let i = 0; i < N; i++) this.win[i] = (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N)) * 0.5;
     this.accL = new Float32Array(N); this.accR = new Float32Array(N); this.outL = new Float32Array(H); this.outR = new Float32Array(H); this.outN = 0; this.outI = 0; this.prev = -1; this.sent = 0;
     this.port.onmessage = e => {
       const m = e.data;
-      if (m.buf) { this.L = m.buf.L; this.R = m.buf.R; this.len = this.L.length; }
+      if (m.buf) { this.L = m.buf.L; this.R = m.buf.R; this.len = this.L.length; this.sc = this.L instanceof Int16Array ? 1 / 32767 : 1; }
       switch (m.cmd) {
         case "start": this.pos = m.from * sampleRate; this.rate = m.rate; this.startAt = m.at; this.stopAt = -1; this.loop = m.loop ? { a: m.loop.a * sampleRate, b: m.loop.b * sampleRate } : null; this.on = m.on !== false; this.playing = true; this.fresh(); break;
         case "stop": this.stopAt = m.at; break;
@@ -11862,8 +11924,8 @@ class NBStretch extends AudioWorkletProcessor {
     if (this.stopAt >= 0 && t + n / sr > this.stopAt) { kEnd = Math.max(0, Math.min(n, Math.round((this.stopAt - t) * sr))); stopping = true; }
     const direct = !this.on || Math.abs(this.rate - 1) < 0.003;
     for (let k = k0; k < kEnd; k++) {
-      if (direct) { const p = this.wrap(this.pos); if (p >= this.len - 1) { this.end(); break; } oL[k] = this.at(this.L, p); oR[k] = this.at(this.R, p); this.pos += this.rate; }
-      else { if (this.outI >= this.outN) { if (this.wrap(this.pos) >= this.len - this.N) { this.end(); break; } this.produce(); } oL[k] = this.outL[this.outI]; oR[k] = this.outR[this.outI]; this.outI++; }
+      if (direct) { const p = this.wrap(this.pos); if (p >= this.len - 1) { this.end(); break; } oL[k] = this.at(this.L, p) * this.sc; oR[k] = this.at(this.R, p) * this.sc; this.pos += this.rate; }
+      else { if (this.outI >= this.outN) { if (this.wrap(this.pos) >= this.len - this.N) { this.end(); break; } this.produce(); } oL[k] = this.outL[this.outI] * this.sc; oR[k] = this.outR[this.outI] * this.sc; this.outI++; }
     }
     if (stopping) { this.playing = false; this.stopAt = -1; }
     this.sent += n; if (this.sent >= 4096) { this.sent = 0; this.port.postMessage({ pos: this.posOut() / sr }); }
@@ -11893,8 +11955,9 @@ registerProcessor("nb-stretch", NBStretch);`;
         else if (m.pos != null && d.playing && d.src && d.src.isStretch) { const want = djPos(d); if (Math.abs(m.pos - want) > 0.025 && !d.loop) { d.p0 = m.pos; d.t0 = ctx.currentTime; } }
       };
     }
-    const L = d.buf.getChannelData(0).slice(), R = (d.buf.numberOfChannels > 1 ? d.buf.getChannelData(1) : d.buf.getChannelData(0)).slice();
-    d.st.port.postMessage({ buf: { L, R } }, [L.buffer, R.buffer]);
+    const i16 = a => { const o = new Int16Array(a.length); for (let i = 0; i < a.length; i++) { const v = a[i]; o[i] = v >= 1 ? 32767 : v <= -1 ? -32767 : v * 32767; } return o; };
+    const L = i16(d.buf.getChannelData(0)), R = d.buf.numberOfChannels > 1 ? i16(d.buf.getChannelData(1)) : L.slice();
+    d.st.port.postMessage({ buf: { L, R } }, [L.buffer, R.buffer]);   // 16-bit: half the memory of a float copy
   }
   // a stand-in for the buffer source the deck code already knows how to drive
   function djStretchSrc(d) {
@@ -12194,6 +12257,7 @@ registerProcessor("nb-capture", NBCap);`;
       if (aiPossible()) {
         try {
           await aiSession(say);
+          if (AI.ep !== "webgpu") throw new Error("cpu");   // on the CPU the model would stall the decks for minutes
           const [L, R] = await aiResample(chans, rate, 44100);
           const res = await aiSeparate(L, R, "music", (p, eta) => { d.stemProg = p; say("Separating with AI… " + Math.round(p * 100) + "%" + (eta > 1 ? " · " + Math.round(eta) + " s left" : "")); }, () => false);
           if (res) {
@@ -12202,16 +12266,17 @@ registerProcessor("nb-capture", NBCap);`;
             const ri = await aiResample(res, 44100, rate), rv = await aiResample([vL, vR], 44100, rate);
             inst = makeBuffer(ri, rate); voc = makeBuffer(rv, rate); how = "ai";
           }
-        } catch (e) { say("AI couldn't run here (" + (e && e.message || e) + ") · using the quick split"); }
+        } catch (e) { say(e && e.message === "cpu" ? "AI runs on the CPU on this device and would stall the decks · quick split (AI still works in the sample editor)" : "AI couldn't run here (" + (e && e.message || e) + ") · using the quick split"); await new Promise(r => setTimeout(r, 1200)); }
       }
       if (!inst) {
         say("Splitting (quick method)…");
-        const oi = await vxSeparate(chans, rate, { mode: "music", strength: 2, lowCut: 120, highCut: 12000 }, p => { d.stemProg = p * 0.5; djPaintDeck(d); }, () => false);
-        const ov = await vxSeparate(chans, rate, { mode: "vocals", strength: 2, lowCut: 120, highCut: 12000 }, p => { d.stemProg = 0.5 + p * 0.5; djPaintDeck(d); }, () => false);
-        inst = makeBuffer(oi, rate); voc = makeBuffer(ov, rate);
+        const oi = await vxQuick(chans, rate, { mode: "music", strength: 2, lowCut: 120, highCut: 12000, both: true }, p => { d.stemProg = p; djPaintDeck(d); }, () => false);
+        const yieldNow = () => new Promise(r => setTimeout(r, 0));
+        if (!oi.voc) for (let c = 0; c < 2; c++) { const a = chans[c], b = oi[c]; for (let i = 0; i < a.length; i++) a[i] -= b[i]; }
+        inst = makeBuffer(oi, rate); await yieldNow(); voc = makeBuffer(oi.voc || chans, rate); await yieldNow();
       }
       d.stems = { inst, voc }; d.stemsHow = how;
-      try { if (full.duration < 420) djIdbPut(stemKey(d), { inst: bufferToWav(inst), voc: bufferToWav(voc), how }); } catch (e) {}
+      if (how === "ai" && full.duration < 420) setTimeout(async () => { try { const a = bufferToWav(inst); await new Promise(r => setTimeout(r, 0)); const b = bufferToWav(voc); await new Promise(r => setTimeout(r, 0)); djIdbPut(stemKey(d), { inst: a, voc: b, how }); } catch (e) {} }, 1500);
       say("");
       return d.stems;
     } finally { STEMS.busy = null; d.stemProg = null; d.stemMsg = ""; djPaintDeck(d); }
@@ -12542,6 +12607,7 @@ registerProcessor("nb-capture", NBCap);`;
   lineRec.addEventListener("click", () => { if (!LINE.src) { lineOpen(); return; } if (LINE.rec) lineStop(true); else lineStart(); });
   document.getElementById("lineDone").addEventListener("click", lineClose);
   document.getElementById("lineRefresh").addEventListener("click", () => lineOpen());
+
 
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
