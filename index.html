@@ -1412,6 +1412,15 @@ body.trk-open { overflow: hidden; }
     </div>
     <div class="dj-songs" id="djSongs"></div>
     <div class="dj-autobar">
+      <span class="dj-lab">Next song on</span>
+      <div class="seg small" id="djNextDeck" role="group" aria-label="Deck the next song goes on">
+        <button data-nd="auto" aria-pressed="true" title="Whichever deck isn't playing">Auto</button>
+        <button data-nd="0" aria-pressed="false" title="The next song always comes in on deck A">Deck A</button>
+        <button data-nd="1" aria-pressed="false" title="The next song always comes in on deck B">Deck B</button>
+      </div>
+      <span class="dj-lab" id="djNextHint"></span>
+    </div>
+    <div class="dj-autobar">
       <button class="btn" id="djAutoOn" aria-pressed="false" title="Mixes the next song in by itself when the playing one is nearly over">Auto DJ</button>
       <span class="dj-lab">Style</span>
       <div class="seg small" id="djStyle" role="group" aria-label="Mix style">
@@ -11576,7 +11585,7 @@ onmessage = async e => {
   // and the drum machine can play a suggested beat in time with the decks.
   Object.assign(DJ, { crate: [null, null, null, null], next: null, trans: null, mixBpm: null, auto: false, style: "auto", beat: null, beatIdx: -1, beatVol: 0.7, tick: 0, lastAn: null, fileTarget: -1 });
   try { const o = JSON.parse(localStorage.getItem("nightbloom-dj2") || "{}"); ["style", "beatVol", "beatIdx", "beatUser"].forEach(k => { if (o[k] != null) DJ[k] = o[k]; }); } catch (e) {}
-  const dj2Save = () => { try { localStorage.setItem("nightbloom-dj2", JSON.stringify({ style: DJ.style, beatVol: DJ.beatVol, beatIdx: DJ.beatIdx, beatUser: !!DJ.beatUser })); } catch (e) {} };
+  const dj2Save = () => { try { const o = JSON.parse(localStorage.getItem("nightbloom-dj2") || "{}"); localStorage.setItem("nightbloom-dj2", JSON.stringify(Object.assign(o, { style: DJ.style, beatVol: DJ.beatVol, beatIdx: DJ.beatIdx, beatUser: !!DJ.beatUser }))); } catch (e) {} };
   const DJ_STYLES = { blend: ["Blend", 16], swap: ["Bass swap", 8], cut: ["Cut", 1], filter: ["Filter", 8], echo: ["Echo out", 8] };
 
   // --- key and energy ---
@@ -11964,7 +11973,7 @@ onmessage = async e => {
       djPaintCrate();
     };
     const hp = document.querySelector("#djHelp .dj-helptext");
-    if (hp) hp.insertAdjacentHTML("beforeend", "<p><b>Songs &amp; Auto DJ:</b> add up to four songs; each is analysed for tempo, key (Camelot code, e.g. 8A) and energy. Tap a song for <b>Next up</b>, or let Auto pick the best fit. <b>MIX IN NEXT</b> brings it in on the free deck in the chosen style: Blend (16 bars, bass swaps halfway), Bass swap (8 bars), Cut (on the next bar), Filter (the old song filters away), Echo out (the old song echoes away); Auto chooses from the two songs' tempo, key and energy. Tap MIXING… or grab the crossfader to take over. <b>Auto DJ</b> starts the mix by itself when the playing song is nearly over. <b>Mix tempo</b> replaces the lead's own tempo (Recommended = halfway between the two songs when they're close). <b>Beat</b> suggests a drum pattern for the tempo and plays it in time with the decks.</p>");
+    if (hp) hp.insertAdjacentHTML("beforeend", "<p><b>Songs &amp; Auto DJ:</b> add up to four songs; each is analysed for tempo, key (Camelot code, e.g. 8A) and energy. Tap a song for <b>Next up</b>, or let Auto pick the best fit. <b>MIX IN NEXT</b> brings it in on the free deck (or the one you pick under <b>Next song on</b>) in the chosen style: Blend (16 bars, bass swaps halfway), Bass swap (8 bars), Cut (on the next bar), Filter (the old song filters away), Echo out (the old song echoes away); Auto chooses from the two songs' tempo, key and energy. Tap MIXING… or grab the crossfader to take over. <b>Auto DJ</b> starts the mix by itself when the playing song is nearly over. <b>Mix tempo</b> replaces the lead's own tempo (Recommended = halfway between the two songs when they're close). <b>Beat</b> suggests a drum pattern for the tempo and plays it in time with the decks.</p>");
   }
   // --- the record button, mirrored from the top bar, so the mix can be recorded from here ---
   {
@@ -12935,6 +12944,34 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     const re1 = renderEngine; renderEngine = function () { re1(); paintLoop(); paint(); };
     { const sb0 = setBpm; setBpm = function (b) { sb0(b); paint(); }; }
     paintLoop(); paint();
+  }
+  // ---------- DJ: choose the deck the next song comes in on ----------
+  {
+    DJ.nextDeck = "auto";
+    try { const o = JSON.parse(localStorage.getItem("nightbloom-dj2") || "{}"); if (o.nextDeck === 0 || o.nextDeck === 1) DJ.nextDeck = o.nextDeck; } catch (e) {}
+    const ft0 = djFromTo;
+    djFromTo = function () {
+      const d = DJ.nextDeck; if (d !== 0 && d !== 1) return ft0();
+      const to = DJ.decks[d], other = DJ.decks[1 - d];
+      if (!to.playing && !other.playing) return { from: to, to: other, chosen: true };   // nothing playing: the next song simply starts on the chosen deck
+      if (to.playing && !other.playing) return ft0();                                    // the chosen deck is the one playing: it can't be replaced mid-song
+      return { from: other, to, chosen: true };                                          // the chosen deck takes the next song; the other one mixes out
+    };
+    const seg = document.getElementById("djNextDeck"), hint = document.getElementById("djNextHint");
+    function paintNext() {
+      seg.querySelectorAll("[data-nd]").forEach(b => b.setAttribute("aria-pressed", String(String(DJ.nextDeck) === b.dataset.nd)));
+      const d = DJ.nextDeck; let h = "";
+      if (d === 0 || d === 1) { const to = DJ.decks[d], other = DJ.decks[1 - d]; if (to.playing && !other.playing) h = "AB"[d] + " is the one playing, so this time it goes on " + "AB"[1 - d]; }
+      hint.textContent = h;
+    }
+    seg.querySelectorAll("[data-nd]").forEach(b => b.addEventListener("click", () => {
+      DJ.nextDeck = b.dataset.nd === "auto" ? "auto" : +b.dataset.nd;
+      try { const o = JSON.parse(localStorage.getItem("nightbloom-dj2") || "{}"); o.nextDeck = DJ.nextDeck; localStorage.setItem("nightbloom-dj2", JSON.stringify(o)); } catch (e) {}
+      paintNext(); djPaintAll();
+      djMsg(DJ.nextDeck === "auto" ? "The next song goes on whichever deck isn't playing" : "The next song comes in on deck " + "AB"[DJ.nextDeck]);
+    }));
+    const pa = djPaintAll; djPaintAll = function () { pa(); paintNext(); };
+    paintNext();
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
