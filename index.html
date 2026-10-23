@@ -1057,6 +1057,24 @@ body.trk-open { overflow: hidden; }
 .sfit.busy .ed-val { color: var(--lilac); }
 .ed-tempo .btn, .ed-stretch .btn { height: 30px; }
 #mLoop[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+/* where ● Rec puts the recording */
+.rectarget { appearance: none; -webkit-appearance: none; height: 32px; border-radius: 8px; border: 1px solid #6b3348; background: var(--raised); color: #ff8fab; font-family: var(--font-body); font-weight: 700; font-size: 0.8rem; padding: 0 8px; flex: none; cursor: pointer; max-width: 92px; }
+.recbanner .rectarget { background: #1a0f16; color: #ffd0de; border-color: #1a0f16; height: 32px; }
+@media (max-width: 440px) { .hright .rectarget { padding: 0 5px; max-width: 64px; font-size: 0.74rem; } }
+/* recording banner: a bar across the top of every screen while ● Rec runs; the page moves down to make room */
+.recbanner { position: fixed; left: 0; right: 0; top: 0; z-index: 58; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap;
+  padding: max(5px, env(safe-area-inset-top, 0px)) 10px 5px; min-height: 44px; box-sizing: border-box; background: #ff5c8a; color: #1a0f16; font-weight: 700; font-size: 0.86rem; box-shadow: 0 4px 18px rgba(255,92,138,0.4); white-space: nowrap; }
+.recbanner[hidden] { display: none; }
+.recbanner .dot { width: 10px; height: 10px; border-radius: 50%; background: #1a0f16; animation: recblink 1s steps(2, start) infinite; flex: none; }
+.recbanner .lbl { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.recbanner .t { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+.recbanner .btn { height: 32px; padding: 0 10px; font-size: 0.8rem; background: #1a0f16; color: #ffd0de; border-color: #1a0f16; flex: none; }
+body.recording .app { padding-top: calc(44px + env(safe-area-inset-top, 0px)); }
+body.recording .dj { top: calc(44px + env(safe-area-inset-top, 0px)); }
+body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
+@keyframes recblink { to { visibility: hidden; } }
+@media (max-width: 440px) { .recbanner .lbl-long { display: none; } }
+@media (prefers-reduced-motion: reduce) { .recbanner .dot { animation: none; } }
 @media (max-height: 640px) {
   .fader { height: 48px; }
   .scope { height: 36px; }
@@ -1066,6 +1084,24 @@ body.trk-open { overflow: hidden; }
 </style>
 </head>
 <body>
+<script>
+// Flight recorder for the Report button: taps, setting changes, errors, slow moments, app switches.
+(() => {
+  const L = window.__nbLog = [];
+  const add = window.__nbAdd = (k, d) => { L.push([Math.round(performance.now()), k, String(d == null ? "" : d).slice(0, 400)]); if (L.length > 1200) L.splice(0, 300); };
+  const desc = t => (t.id ? "#" + t.id : (t.getAttribute && (t.getAttribute("data-engine") || t.getAttribute("data-stem") || t.getAttribute("data-style"))) || String(t.className || t.tagName).split(" ")[0]) + (t.textContent && t.textContent.trim() ? ' "' + t.textContent.trim().replace(/\s+/g, " ").slice(0, 28) + '"' : "");
+  addEventListener("error", e => add("error", (e.message || e.type) + " @" + String(e.filename || (e.target && (e.target.src || e.target.tagName)) || "").split("/").pop() + ":" + (e.lineno || "")), true);
+  addEventListener("unhandledrejection", e => add("reject", e.reason && (e.reason.stack || e.reason.message) || e.reason));
+  document.addEventListener("pointerdown", e => { const t = e.target && e.target.closest && e.target.closest("button, select, input, a, .w, .b, .kpad, .pad, canvas, .dj-song, .slot, [data-engine]"); add("tap", t ? desc(t) : String(e.target && e.target.tagName)); }, true);
+  document.addEventListener("change", e => { const t = e.target; add("set", (t.id || t.getAttribute("aria-label") || t.tagName) + " = " + (t.type === "checkbox" ? t.checked : t.value)); }, true);
+  document.addEventListener("keydown", e => { if (!e.repeat) add("key", e.key); }, true);
+  document.addEventListener("visibilitychange", () => add("visible", !document.hidden));
+  addEventListener("pagehide", () => add("pagehide", "")); addEventListener("pageshow", e => add("pageshow", e.persisted ? "from cache" : ""));
+  ["error", "warn"].forEach(k => { const o = console[k]; console[k] = function (...a) { try { add("console." + k, a.map(x => x && x.stack || x).join(" ")); } catch (e) {} return o.apply(this, a); }; });
+  try { new PerformanceObserver(l => { for (const e of l.getEntries()) if (e.duration > 150) add("slow", Math.round(e.duration) + " ms (screen frozen)"); }).observe({ type: "longtask", buffered: true }); } catch (e) {}
+  add("load", location.href.split("?")[0]);
+})();
+</script>
 
 <div class="uitoast" id="uiToast" hidden></div>
 <div class="nbtoast" id="nbToast" hidden><span></span><button class="btn">Undo</button></div>
@@ -1074,6 +1110,7 @@ body.trk-open { overflow: hidden; }
     <h1>Nate <span>Bloom</span></h1>
     <div class="hright">
     <button class="btn mixbtn" id="mixBtn" aria-label="Mixer">Mix</button>
+    <select class="rectarget" id="recTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
     <div class="seg" role="group" aria-label="View">
       <button id="modeKeys" aria-pressed="true">Keys</button>
@@ -1094,6 +1131,7 @@ body.trk-open { overflow: hidden; }
     <button class="btn" id="moBtn">Motion</button>
     <button class="btn" id="msBtn">My sounds</button>
     <button class="btn" id="prBtn">Projects</button>
+    <button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report</button>
     <button class="btn" id="helpBtn" aria-label="Help">?</button>
   </div>
   <div class="takebar" id="takeBar" hidden>
@@ -1375,6 +1413,7 @@ body.trk-open { overflow: hidden; }
     <span class="dj-msg" id="djMsg">Load a song on each deck, then press Auto sync</span>
     <button class="btn" id="djKeep" title="Keep the last 90 seconds you heard, after the fact">Keep</button>
     <button class="btn" id="djKeyLock" aria-pressed="true" title="Speed changes keep the song's pitch">Key lock</button>
+    <select class="rectarget" id="djRecTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="djRec" aria-label="Record the mix" title="Record everything you hear">● Rec</button>
     <button class="btn" id="djStop" title="Stop both decks and the pads">■ Stop</button>
     <button class="btn" id="djHelpBtn" aria-label="How the DJ tab works">?</button>
@@ -1727,6 +1766,7 @@ body.trk-open { overflow: hidden; }
       <p><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
+      <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p><b>Isolate vocals:</b> in the Smp tab, load a song (MP3, WAV, M4A), tap <b>Edit</b>, then <b>Vocals…</b>. Pick Vocals or Instrumental and listen to 8 seconds of the result, then choose: <b>→ New slot</b> (the original stays, the result lands in a new slot and plays), <b>Replace</b> (this slot becomes the result), <b>Keep editing</b> (apply here, trim or fade, then Save), or <b>Save WAV</b>. Select part of the wave first to isolate just that part. <b>AI</b> runs the Ultimate Vocal Remover model (MDX-Net) on the device: real stems, a few minutes per song. The first use downloads the 67 MB model once (from Hugging Face, or from a <code>models/</code> folder next to index.html if you put <code>UVR-MDX-NET-Inst_HQ_3.onnx</code> there) and keeps it on the device. <b>Quick</b> is instant and only pulls out the centre of a stereo mix.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> silences everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
@@ -12980,6 +13020,109 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }));
     const pa = djPaintAll; djPaintAll = function () { pa(); paintNext(); };
     paintNext();
+  }
+  // ---------- recording banner: impossible to miss, on every screen, with Stop → sampler ----------
+  // (set up once the rest of the script has run: the Rec button and take code are declared further down)
+  setTimeout(() => {
+    const bn = document.createElement("div"); bn.className = "recbanner"; bn.hidden = true; bn.setAttribute("role", "status");
+    bn.innerHTML = '<span class="dot"></span><span class="lbl">REC<span class="lbl-long"> · everything you hear</span></span><span class="t">0:00</span><select class="rectarget" id="recbTo" aria-label="Where the recording goes"></select><button class="btn" id="recbStop">■ Stop</button>';
+    document.body.appendChild(bn);
+    const tEl = bn.querySelector(".t");
+    let timer = 0;
+    // where the recording goes: "take" (decide afterwards), a sampler slot "s0".."s7", or "trk" (a new track in Tracks)
+    let recTo = "take"; try { const v = localStorage.getItem("nightbloom-recto"); if (v) recTo = v; } catch (e) {}
+    const sels = ["recTo", "djRecTo", "recbTo"].map(id => document.getElementById(id)).filter(Boolean);
+    const label = v => v === "take" ? "→ Take" : v === "trk" ? "→ Tracks" : "→ S" + (+v.slice(1) + 1);
+    function fillSels() {
+      const opts = [["take", "→ Take", "Keep it as a take: export, sampler or Tracks afterwards"]];
+      for (let j = 0; j < NSLOTS; j++) opts.push(["s" + j, "→ S" + (j + 1), "Sampler slot S" + (j + 1) + (sampBuf[j] ? " (replaces " + baseName(state.samp.slots[j].name || "its sound").slice(0, 18) + ")" : " (empty)")]);
+      opts.push(["trk", "→ Tracks", "A new track in the Tracks editor"]);
+      sels.forEach(sel => { sel.innerHTML = ""; opts.forEach(([v, l, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; o.title = t; sel.appendChild(o); }); sel.value = recTo; sel.title = opts.find(o => o[0] === recTo)[2]; });
+    }
+    sels.forEach(sel => {
+      sel.addEventListener("focus", fillSels);
+      sel.addEventListener("change", () => { recTo = sel.value; try { localStorage.setItem("nightbloom-recto", recTo); } catch (e) {} fillSels(); noteMsg("Recordings go " + label(recTo).replace("→", "to").replace("to Take", "to the take bar")); });
+    });
+    fillSels();
+    const paint = () => { tEl.textContent = fmtClock(ctx.currentTime - take.startedAt); };
+    const st0 = startTake; startTake = function () { st0(); if (take.rec) { bn.hidden = false; document.body.classList.add("recording"); paint(); clearInterval(timer); timer = setInterval(paint, 250); } };
+    // stopping delivers the recording where it was set to go
+    const sp0 = stopTake; stopTake = function () {
+      clearInterval(timer); bn.hidden = true; document.body.classList.remove("recording");
+      const r = sp0(); const where = recTo;
+      if (take.done && where !== "take") {
+        if (where === "trk") document.getElementById("takeToTracks").click();
+        else { const j = +where.slice(1); state.samp.slot = j; document.getElementById("takeToSlot").click(); setTimeout(() => { fillSels(); noteMsg("Recorded into S" + (j + 1)); if (typeof djMsg === "function" && !document.getElementById("djView").hidden) djMsg("Recorded into sampler slot S" + (j + 1)); }, 400); }
+        takeBar.hidden = true;   // it's been delivered: no take bar or "what to do with it" menu
+      }
+      return r;
+    };
+    takeBtn.title = "Record everything you hear; stop it from the red banner, or send it straight to the sampler";
+    bn.querySelector("#recbStop").addEventListener("click", () => stopTake());
+  }, 0);
+  // ---------- Report: everything needed to diagnose a problem, in one zip ----------
+  {
+    const add = window.__nbAdd || (() => {});
+    // more detail in the log from inside the app
+    try { if (ctx) ctx.addEventListener("statechange", () => add("audio", ctx.state)); } catch (e) {}
+    { const st = start; start = function () { const had = !!ctx; st(); if (!had && ctx) { add("audio", "started · " + ctx.sampleRate + " Hz · " + ctx.state); ctx.addEventListener("statechange", () => add("audio", ctx.state)); } }; }
+    { const j0 = jobRun; jobRun = async function (id, label, fn, c) { const t0 = performance.now(); add("job", "start " + label); try { const r = await j0(id, label, fn, c); add("job", "done " + label + " · " + Math.round(performance.now() - t0) + " ms" + (r == null ? " (cancelled or empty)" : "")); return r; } catch (e) { add("job", "failed " + label + ": " + (e && e.message || e)); throw e; } }; }
+    { const sm = setMode; setMode = function (m) { add("view", m); return sm(m); }; }
+    { const ns = noteMsg; noteMsg = function (m, err) { add(err ? "msg!" : "msg", m); return ns(m, err); }; }
+
+    const brief = b => b ? { sec: +(b.duration).toFixed(2), ch: b.numberOfChannels, rate: b.sampleRate } : null;
+    async function snapshot() {
+      const r = { app: "Nate Bloom", made: new Date().toString(), page: location.href.split("?")[0] };
+      r.device = { ua: navigator.userAgent, screen: screen.width + "x" + screen.height, window: innerWidth + "x" + innerHeight, dpr: devicePixelRatio, cores: navigator.hardwareConcurrency, memoryGB: navigator.deviceMemory,
+        installed: matchMedia("(display-mode: standalone)").matches, online: navigator.onLine, touch: navigator.maxTouchPoints, language: navigator.language };
+      try { if (performance.memory) r.device.jsHeapMB = Math.round(performance.memory.usedJSHeapSize / 1048576) + " of " + Math.round(performance.memory.jsHeapSizeLimit / 1048576); } catch (e) {}
+      try { const est = await navigator.storage.estimate(); r.device.storageMB = Math.round(est.usage / 1048576) + " of " + Math.round(est.quota / 1048576); r.device.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) {}
+      try { const a = navigator.gpu ? await navigator.gpu.requestAdapter() : null; r.device.gpu = a ? (a.info ? { vendor: a.info.vendor, arch: a.info.architecture, device: a.info.device, desc: a.info.description } : "available") : "none"; } catch (e) { r.device.gpu = "error " + e.message; }
+      r.audio = ctx ? { state: ctx.state, rate: ctx.sampleRate, baseLatency: ctx.baseLatency, outputLatency: ctx.outputLatency, time: +ctx.currentTime.toFixed(2), capture: CAP.kind || "off", sounding: voices.size, held: heldVoices.length } : "not started";
+      r.state = Object.assign({}, { view: state.mode, engine: state.engine, panel: state.panel, octave: state.octave, hold: state.hold, bpm: state.seq.bpm, playing: playing, fx: state.fx, fxMode: FXC.mode });
+      r.sampler = state.samp.slots.map((x, i) => ({ slot: "S" + (i + 1), name: x.name, mode: x.mode, loop: !!x.loop, fit: x.fit || null, audio: brief(sampBuf[i]) }));
+      r.dj = { open: !document.getElementById("djView").hidden, lead: DJ.lead, sync: DJ.sync, xf: DJ.xf, keylock: DJ.keylock, auto: DJ.auto, style: DJ.style, nextDeck: DJ.nextDeck, mixing: DJ.trans ? { style: DJ.trans.style, bars: DJ.trans.bars } : null,
+        decks: DJ.decks.map(d => ({ name: d.name, bpm: d.bpm0, rate: d.rate, bend: d.bend, playing: d.playing, pos: d.buf ? +djPos(d).toFixed(2) : null, loop: d.loop ? d.loop.n : null, stem: d.stem, stems: d.stemsHow || "", eq: d.eq, keyLockNode: !!d.st, audio: brief(d.buf) })),
+        songs: DJ.crate.map(it => it && { name: it.name, bpm: it.bpm, key: it.key, cam: it.cam, decoded: !!it.buf, busy: it.busy }), bank: DJ.bank.map(it => it && { name: it.name, beats: it.beats }) };
+      r.ai = { possible: aiPossible(), engine: AI.ep || "", ready: !!AI.session, worker: !!AI.worker, noGpuFlag: (() => { try { return localStorage.getItem("nightbloom-ai-nogpu"); } catch (e) { return null; } })(), lastChunkSec: AI.chunkSec };
+      r.jam = { loops: JAM.tracks.map(t => ({ len: t.len, on: t.on, events: t.events.length })), band: JAM.band && { on: JAM.band.on, style: JAM.band.style }, recording: !!JAM.rec, clock: !!JAM.clock };
+      r.recording = { take: !!take.rec, takeReady: !!take.done, recTo: (() => { try { return localStorage.getItem("nightbloom-recto"); } catch (e) { return null; } })() };
+      r.jobsOnScreen = [...document.querySelectorAll(".job .jl span")].map(x => x.textContent);
+      r.openSheets = [...document.querySelectorAll(".editor:not([hidden]), .dj:not([hidden]), .trk:not([hidden]), .browser:not([hidden])")].map(e => e.id || e.className);
+      r.settings = {};
+      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith("nightbloom")) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
+      r.log = (window.__nbLog || []).map(([t, k, d]) => (t / 1000).toFixed(2) + "s  " + k.padEnd(13) + " " + d);
+      return r;
+    }
+    function wav16(L, R, rate) {
+      const n = L.length, b = new ArrayBuffer(44 + n * 4), v = new DataView(b), w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+      w(0, "RIFF"); v.setUint32(4, 36 + n * 4, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n * 4, true);
+      const o = new Int16Array(b, 44); for (let i = 0; i < n; i++) { o[2 * i] = Math.max(-1, Math.min(1, L[i])) * 32767; o[2 * i + 1] = Math.max(-1, Math.min(1, R[i])) * 32767; }
+      return new Uint8Array(b);
+    }
+    async function makeReport() {
+      const btn = document.getElementById("reportBtn"); btn.disabled = true;
+      add("report", "building");
+      try {
+        const files = [];
+        const snap = await snapshot();
+        let soundNote = "no sound captured (audio wasn't started)";
+        try {
+          if (ctx && CAP.node) {
+            const got = await Promise.race([capGrab(), new Promise(r => setTimeout(() => r(null), 3000))]);
+            if (got && got.L.length) { const keep = Math.min(got.L.length, got.rate * 30), a = got.L.length - keep; files.push({ name: "last-30-seconds.wav", data: wav16(got.L.subarray(a), got.R.subarray(a), got.rate) }); soundNote = "last " + (keep / got.rate).toFixed(1) + " s of sound in last-30-seconds.wav"; }
+          }
+        } catch (e) { soundNote = "sound capture failed: " + (e && e.message || e); }
+        snap.sound = soundNote;
+        files.unshift({ name: "report.json", data: new TextEncoder().encode(JSON.stringify(snap, null, 2)) });
+        files.splice(1, 0, { name: "log.txt", data: new TextEncoder().encode(snap.log.join("\n")) });
+        const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "").replace(/^(\d{8})(\d{4})$/, "$1-$2");
+        const msg = await saveZip("nate-bloom-report-" + stamp, zipMany(files));
+        noteMsg(msg ? msg + " · attach it in the chat with Claude" : "Report not saved");
+      } catch (e) { noteMsg("Couldn't build the report (" + (e && e.message || e) + ")", true); }
+      finally { btn.disabled = false; }
+    }
+    document.getElementById("reportBtn").addEventListener("click", () => { start(); capInit().then(makeReport, makeReport); });
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
