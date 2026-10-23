@@ -1075,6 +1075,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
 @keyframes recblink { to { visibility: hidden; } }
 @media (max-width: 440px) { .recbanner .lbl-long { display: none; } }
 @media (prefers-reduced-motion: reduce) { .recbanner .dot { animation: none; } }
+.dj-restart { min-width: 40px; padding: 0 8px; font-size: 0.95rem; }
 @media (max-height: 640px) {
   .fader { height: 48px; }
   .scope { height: 36px; }
@@ -1522,7 +1523,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <p><b>Load</b> a song on each deck (a file, or anything already in a sampler slot or the bank). The tempo (BPM) and the beat grid are found automatically. If the BPM looks doubled or halved, use <b>½×</b> / <b>2×</b>; if it's wrong, tap <b>Tap</b> along with 4+ beats.</p>
       <p><b>AUTO SYNC</b> matches the other song's tempo to the lead song and lines up the beats, starting it if it's stopped. While it's lit, the songs stay locked: change the lead's tempo and the other follows.</p>
       <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
-      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> sets a spot when stopped and jumps back to it while playing; the four <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is, tap it again to jump there (on the beat), hold it to clear. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
+      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> sets a spot when stopped and jumps back to it while playing; <b>⏮</b> restarts the song from the beginning; the four <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is, tap it again to jump there (on the beat), hold it to clear. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line. <b>Stems</b> on each deck switch between the full song, the instrumental and the vocals (separated once, with the AI model where it can run); <b>Mashup</b> puts the lead's vocal over the other deck's instrumental in one tap.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
@@ -1582,6 +1583,14 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <span class="ed-info" style="text-align:left">Drag to set each sound's volume. Double-tap a slider to reset it.</span>
     <div class="mx-meter" aria-label="Output level"><div><i id="mxMeterBar"></i></div><span id="mxMeterLab">Silent</span></div>
     <div class="mx-list" id="mxList"></div>
+    <div class="ed-row" style="padding:2px 0 4px">
+      <span class="lab2">Audio buffer</span>
+      <div class="seg small" id="mxLat" role="group" aria-label="Audio buffer">
+        <button data-lat="stable" aria-pressed="true" title="A little more headroom: no crackles or scrambled sound when a lot is playing">Stable</button>
+        <button data-lat="low" aria-pressed="false" title="The tightest buffer the device allows: the shortest delay from key to sound, but it can crackle under load">Lowest delay</button>
+      </div>
+      <small class="mx-latinfo" id="mxLatInfo" style="font-family:var(--font-mono);font-size:0.62rem;color:var(--dim)"></small>
+    </div>
     <div class="ed-foot sheet-foot">
       <button class="btn big" id="mxReset">Reset levels</button>
       <button class="btn big primary" id="mxDone">Done</button>
@@ -2488,7 +2497,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
 
   function buildAudio() {
-    ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
+    let lat = 0.012; try { if (localStorage.getItem("nightbloom-latency") === "low") lat = "interactive"; } catch (e) {}   // ~12 ms gives the audio engine headroom; "low" = the device's tightest buffer
+    try { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: lat }); } catch (e) { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" }); }
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
     analyser.connect(ctx.destination);
     const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -11228,6 +11238,7 @@ onmessage = async e => {
     <div class="dj-row">
       <button class="btn dj-play" aria-pressed="false" aria-label="Play or pause">▶</button>
       <button class="btn dj-cue" title="Stopped: set the cue point here · Playing: jump back to it and keep going">Cue</button>
+      <button class="btn dj-restart" aria-label="Restart the song" title="Back to the start of the song (starts it if it's stopped)">⏮</button>
       <div class="dj-bpm"><b>—</b><small>BPM</small></div>
       <span class="dj-gridfix"><small>BPM wrong?</small><button class="btn sm dj-half" title="The BPM was found twice too fast: halve the number (the speed doesn't change)">½×</button><button class="btn sm dj-dbl" title="The BPM was found twice too slow: double the number (the speed doesn't change)">2×</button><button class="btn sm dj-tap" title="Tap 4 or more times on the beat to set the BPM by hand">Tap</button></span>
     </div>
@@ -11247,6 +11258,11 @@ onmessage = async e => {
     q(".dj-load").addEventListener("click", () => { djBuild(); djRestore(); djLoadMenu(d); });
     q(".dj-play").addEventListener("click", () => { if (!d.buf) { djLoadMenu(d); return; } djPlay(d); });
     q(".dj-cue").addEventListener("click", () => djCue(d));
+    q(".dj-restart").addEventListener("click", () => {
+      if (!d.buf) { djLoadMenu(d); return; }
+      djSeek(d, 0); if (!d.playing) djPlay(d, true);
+      djMsg("Deck " + "AB"[d.i] + ": " + (d.name || "the song") + " from the start"); djPaintDeck(d);
+    });
     q(".dj-tap").addEventListener("click", () => djTap(d));
     const gridFix = m => { if (!d.buf) { djMsg("Load a song on " + "AB"[d.i] + " first"); return; } if (!d.bpm0) { djMsg("No beat grid on " + "AB"[d.i] + " yet: tap Tap along with the beat"); return; } d.bpm0 *= m; djStoreGrid(d); djPaintDeck(d); if (DJ.sync) djAlign(false); djMsg("Beat grid on " + "AB"[d.i] + " is now " + d.bpm0.toFixed(1) + " BPM · the speed didn't change (that's the Speed slider)"); };
     q(".dj-half").addEventListener("click", () => gridFix(0.5));
@@ -11531,7 +11547,7 @@ onmessage = async e => {
     const c = fxChan[id]; if (!c) return;
     const base = FXC.mode === "global" ? state.fx : fxcParams(id), a = fxcAmt(id), t = ctx.currentTime;
     const p = { drive: base.drive * a, wobble: base.wobble * a, echo: base.echo * a, space: base.space * a };
-    c.shaper.curve = driveCurve(p.drive);
+    if (p.drive > 0.001) { c.shaper.curve = driveCurve(p.drive); c.shaper.oversample = "2x"; } else { c.shaper.curve = null; c.shaper.oversample = "none"; }   // no drive: a plain wire
     c.driveIn.gain.setTargetAtTime(1 + p.drive * 1.5, t, 0.02);
     c.wowDepth.gain.setTargetAtTime(p.wobble * 0.0045, t, 0.05); c.flutterDepth.gain.setTargetAtTime(p.wobble * 0.0006, t, 0.05);
     c.tapeTone.frequency.setTargetAtTime(14000 - p.wobble * 9000, t, 0.05);
@@ -12187,8 +12203,8 @@ registerProcessor("nb-stretch", NBStretch);`;
   const CAP_SRC = `
 class NBCap extends AudioWorkletProcessor {
   constructor() { super(); this.n = Math.round(sampleRate * ${CAP.secs}); this.L = new Float32Array(this.n); this.R = new Float32Array(this.n); this.w = 0; this.filled = 0;
-    this.port.onmessage = e => { if (e.data === "keep") this.send(); }; }
-  send() { const m = Math.min(this.filled, this.n), L = new Float32Array(m), R = new Float32Array(m), start = (this.w - m + this.n) % this.n, first = Math.min(m, this.n - start);
+    this.port.onmessage = e => { if (e.data === "keep") this.send(); else if (e.data && e.data.keep) this.send(Math.round(e.data.keep * sampleRate)); }; }
+  send(want) { const m = Math.min(this.filled, this.n, want || this.n), L = new Float32Array(m), R = new Float32Array(m), start = (this.w - m + this.n) % this.n, first = Math.min(m, this.n - start);
     L.set(this.L.subarray(start, start + first)); R.set(this.R.subarray(start, start + first));
     if (m > first) { L.set(this.L.subarray(0, m - first), first); R.set(this.R.subarray(0, m - first), first); }
     this.port.postMessage({ L, R, rate: sampleRate }, [L.buffer, R.buffer]); }
@@ -12212,10 +12228,10 @@ registerProcessor("nb-capture", NBCap);`;
     }
     analyser.connect(CAP.node); CAP.node.connect(mute).connect(ctx.destination);
   }
-  function capGrab() {
+  function capGrab(secs) {
     return new Promise(res => {
       if (!CAP.node) { res(null); return; }
-      if (CAP.kind === "worklet") { CAP.node.port.onmessage = e => res(e.data); CAP.node.port.postMessage("keep"); return; }
+      if (CAP.kind === "worklet") { CAP.node.port.onmessage = e => res(e.data); CAP.node.port.postMessage(secs ? { keep: secs } : "keep"); return; }
       const n = CAP.L.length, m = Math.min(CAP.filled, n), L = new Float32Array(m), R = new Float32Array(m), start = (CAP.w - m + n) % n, first = Math.min(m, n - start);
       L.set(CAP.L.subarray(start, start + first)); R.set(CAP.R.subarray(start, start + first));
       if (m > first) { L.set(CAP.L.subarray(0, m - first), first); R.set(CAP.R.subarray(0, m - first), first); }
@@ -13078,7 +13094,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       try { if (performance.memory) r.device.jsHeapMB = Math.round(performance.memory.usedJSHeapSize / 1048576) + " of " + Math.round(performance.memory.jsHeapSizeLimit / 1048576); } catch (e) {}
       try { const est = await navigator.storage.estimate(); r.device.storageMB = Math.round(est.usage / 1048576) + " of " + Math.round(est.quota / 1048576); r.device.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) {}
       try { const a = navigator.gpu ? await navigator.gpu.requestAdapter() : null; r.device.gpu = a ? (a.info ? { vendor: a.info.vendor, arch: a.info.architecture, device: a.info.device, desc: a.info.description } : "available") : "none"; } catch (e) { r.device.gpu = "error " + e.message; }
-      r.audio = ctx ? { state: ctx.state, rate: ctx.sampleRate, baseLatency: ctx.baseLatency, outputLatency: ctx.outputLatency, time: +ctx.currentTime.toFixed(2), capture: CAP.kind || "off", sounding: voices.size, held: heldVoices.length } : "not started";
+      r.audio = ctx ? { state: ctx.state, rate: ctx.sampleRate, baseLatency: ctx.baseLatency, outputLatency: ctx.outputLatency, time: +ctx.currentTime.toFixed(2), capture: CAP.kind || "off", sounding: voices.size, held: heldVoices.size != null ? heldVoices.size : heldVoices.length } : "not started";
       r.state = Object.assign({}, { view: state.mode, engine: state.engine, panel: state.panel, octave: state.octave, hold: state.hold, bpm: state.seq.bpm, playing: playing, fx: state.fx, fxMode: FXC.mode });
       r.sampler = state.samp.slots.map((x, i) => ({ slot: "S" + (i + 1), name: x.name, mode: x.mode, loop: !!x.loop, fit: x.fit || null, audio: brief(sampBuf[i]) }));
       r.dj = { open: !document.getElementById("djView").hidden, lead: DJ.lead, sync: DJ.sync, xf: DJ.xf, keylock: DJ.keylock, auto: DJ.auto, style: DJ.style, nextDeck: DJ.nextDeck, mixing: DJ.trans ? { style: DJ.trans.style, bars: DJ.trans.bars } : null,
@@ -13106,10 +13122,10 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       try {
         const files = [];
         const snap = await snapshot();
-        let soundNote = "no sound captured (audio wasn't started)";
+        let soundNote = ctx ? "no sound captured: the audio engine didn't answer within 6 s (overloaded)" : "no sound captured (audio wasn't started)";
         try {
           if (ctx && CAP.node) {
-            const got = await Promise.race([capGrab(), new Promise(r => setTimeout(() => r(null), 3000))]);
+            const got = await Promise.race([capGrab(30), new Promise(r => setTimeout(() => r(null), 6000))]);
             if (got && got.L.length) { const keep = Math.min(got.L.length, got.rate * 30), a = got.L.length - keep; files.push({ name: "last-30-seconds.wav", data: wav16(got.L.subarray(a), got.R.subarray(a), got.rate) }); soundNote = "last " + (keep / got.rate).toFixed(1) + " s of sound in last-30-seconds.wav"; }
           }
         } catch (e) { soundNote = "sound capture failed: " + (e && e.message || e); }
@@ -13123,6 +13139,86 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       finally { btn.disabled = false; }
     }
     document.getElementById("reportBtn").addEventListener("click", () => { start(); capInit().then(makeReport, makeReport); });
+  }
+  // ---------- resource diet: nothing processes unless it can be heard ----------
+  {
+    // 1. FX Lab stages: "off" used to mean volume 0 while still processing every sample. Now an off stage is unplugged
+    //    once its tail has died away, and plugged back in the moment it's switched on.
+    const unplugT = {};
+    function plug(key, on, conn, cut, tail) {
+      clearTimeout(unplugT[key]);
+      const st = (plug.st = plug.st || {});
+      if (on) { if (st[key] !== "on") { try { conn(); } catch (e) {} st[key] = "on"; } }
+      else if (st[key] !== "off") unplugT[key] = setTimeout(() => { try { cut(); } catch (e) {} st[key] = "off"; }, tail * 1000);
+    }
+    function dietLab() {
+      if (!ctx || !B) return;
+      const on = betaOn;
+      if (B !== dietLab.B) { dietLab.B = B; plug.st = { dens: "on", lofi: "on", hall: "on" }; }   // a rebuilt chain starts fully wired
+      plug("dens", on && bfx.densOn && bfx.dens > 0.01, () => B.densShaper.connect(B.densWet), () => B.densShaper.disconnect(B.densWet), 0.2);
+      plug("lofi", on && bfx.lofiOn, () => B.bitShaper.connect(B.lofiTone), () => B.bitShaper.disconnect(B.lofiTone), 0.2);
+      plug("hall", on && bfx.hallOn, () => B.hall.connect(B.hallWet), () => B.hall.disconnect(B.hallWet), 8);
+      if (typeof BM !== "undefined" && BM) {
+        if (BM !== dietLab.BM) { dietLab.BM = BM; plug.st.shim = "on"; plug.st.frz = "on"; }
+        plug("shim", on && bfx.shimOn, () => BM.shimWet.connect(fx.comp), () => BM.shimWet.disconnect(fx.comp), 10);
+        plug("frz", on && bfx.frzOn, () => BM.frzWet.connect(fx.comp), () => BM.frzWet.disconnect(fx.comp), 4);
+      }
+    }
+    { const ab = applyBfx; applyBfx = function (r) { ab(r); dietLab(); }; }
+    { const af = applyFreeze; applyFreeze = function () { const v = af.apply(this, arguments); dietLab(); return v; }; }
+    setTimeout(dietLab, 0);
+
+    // 2. per-sound effect chains park after 20 s without a note on that sound (and nothing still sounding)
+    const PARK_AFTER = 20;
+    const park = c => { if (c.parked) return; try { c.dry.disconnect(fx.master); } catch (e) {} try { c.echoOut.disconnect(fx.master); } catch (e) {} try { c.verbSend.disconnect(fx.verbIn); } catch (e) {} c.parked = true; };
+    const unpark = c => { if (!c.parked) return; c.dry.connect(fx.master); c.echoOut.connect(fx.master); c.verbSend.connect(fx.verbIn); c.parked = false; };
+    { const g0 = fxcGet; fxcGet = function (id) { const c = g0(id); if (c) { c.lastUse = ctx.currentTime; if (c.parked) unpark(c); } return c; }; }
+    setInterval(() => {
+      if (!ctx || document.hidden) return;
+      const held = heldVoices.size != null ? heldVoices.size : heldVoices.length;
+      const quiet = voices.size === 0 && !held && !padPlaying.some(Boolean) && !playing;
+      if (!quiet) return;
+      const now = ctx.currentTime;
+      for (const id in fxChan) { if (id === "drum") continue; const c = fxChan[id]; if (!c.parked && now - (c.lastUse || 0) > PARK_AFTER) park(c); }
+    }, 2000);
+
+    // 3. drawing: skip frames nobody can see or that wouldn't change
+    const djView = document.getElementById("djView");
+    const covered = () => !djView.hidden || document.body.classList.contains("trk-open");
+    let flat = 0;
+    { const d0 = draw; draw = function () {
+        if (covered()) { requestAnimationFrame(draw); return; }
+        if (analyser && state.engine !== "samp" && state.engine !== "pads") {
+          if (!draw.buf) draw.buf = new Float32Array(analyser.fftSize);
+          analyser.getFloatTimeDomainData(draw.buf); let pk = 0; for (let i = 0; i < draw.buf.length; i += 8) { const a = Math.abs(draw.buf[i]); if (a > pk) pk = a; }
+          if (pk < 1e-4) { if (++flat > 2) { requestAnimationFrame(draw); return; } } else flat = 0;
+        } else flat = 0;
+        d0();
+      }; }
+    if (typeof djFrame === "function") {
+      let sig = "", still = 0;
+      const f0 = djFrame; djFrame = function (t) {
+        const moving = DJ.trans || DJ.decks.some(d => d.playing) || DJ.beat || DJ.padPlay && DJ.padPlay.some(Boolean);
+        const now = JSON.stringify([DJ.decks.map(d => [d.p0, d.rate, d.bend, !!d.loop, d.cue, d.cues, d.phrase, d.stem, d.bpm0, d.off, d.stemProg]), DJ.xf, DJ.lead, DJ.sync, innerWidth, innerHeight]);
+        if (!moving && now === sig && ++still > 3) { DJ.raf = requestAnimationFrame(djFrame); if (djView.hidden) { cancelAnimationFrame(DJ.raf); DJ.raf = 0; } return; }
+        if (now !== sig) still = 0; sig = now;
+        return f0(t);
+      };
+    }
+  }
+  // ---------- audio buffer choice (Mix sheet) ----------
+  {
+    const seg = document.getElementById("mxLat"), info = document.getElementById("mxLatInfo");
+    let cur = "stable"; try { if (localStorage.getItem("nightbloom-latency") === "low") cur = "low"; } catch (e) {}
+    const paint = () => { seg.querySelectorAll("[data-lat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lat === cur))); info.textContent = ctx ? "now " + Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000) + " ms" : ""; };
+    seg.querySelectorAll("[data-lat]").forEach(b => b.addEventListener("click", () => {
+      if (b.dataset.lat === cur) return; cur = b.dataset.lat;
+      try { localStorage.setItem("nightbloom-latency", cur); } catch (e) {}
+      paint(); info.textContent = "applies next time you open the app";
+      noteMsg(cur === "low" ? "Lowest delay: close and reopen Nate Bloom to apply" : "Stable buffer: close and reopen Nate Bloom to apply");
+    }));
+    document.getElementById("mixBtn").addEventListener("click", () => setTimeout(paint, 50));
+    paint();
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
