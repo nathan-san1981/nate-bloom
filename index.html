@@ -8917,7 +8917,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // ======================================================================
   // Blend: notes you play swell in softly and ring on after you let go,
   // so each one melts into the next. The slider sets how much.
-  // Only touches notes you play live (keys, pads, Hold, MIDI keyboards).
+  // Only touches notes you play live on synths and instruments (keys, Hold, MIDI keyboards); never the sampler.
   // ======================================================================
   {
     const bl = { on: false, amt: 0.45 };
@@ -8930,7 +8930,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     {
       const om = makeNote;
       makeNote = function (root) {
-        if (!bl.on) return om(root);
+        if (!bl.on || state.engine === "samp") return om(root);   // samples play exactly as recorded
         live = true; let v;
         try { v = om(root); } finally { live = false; }
         const stop0 = v.stop.bind(v), tail = tailSec();
@@ -8955,7 +8955,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       btn.setAttribute("aria-pressed", String(bl.on)); btn.textContent = bl.on ? "Blend: On" : "Blend: Off";
       sl.value = Math.round(bl.amt * 100); val.textContent = sl.value + "%";
       row.classList.toggle("off", !bl.on);
-      row.hidden = state.mode === "seq" || ["drum", "pads"].includes(state.engine);
+      row.hidden = state.mode === "seq" || ["drum", "pads", "samp"].includes(state.engine);
     }
     btn.addEventListener("click", () => { bl.on = !bl.on; saveBl(); paint(); });
     sl.addEventListener("input", () => { bl.amt = sl.value / 100; if (!bl.on) bl.on = true; saveBl(); paint(); });
@@ -10587,7 +10587,8 @@ onmessage = async e => {
       onStatus("Loading the AI engine…"); await aiLoadOrt();
       const bytes = await aiModelBytes((got, total) => onStatus("Downloading the separation model (once)… " + (got / 1048576).toFixed(0) + " / " + (total / 1048576).toFixed(0) + " MB"));
       onStatus("Starting the model…");
-      return aiCreate(bytes, ["webgpu", "wasm"]);
+      let noGpu = false; try { noGpu = localStorage.getItem("nightbloom-ai-nogpu") === "1"; } catch (e) {}
+      return aiCreate(bytes, noGpu ? ["wasm"] : ["webgpu", "wasm"]);
     })();
     try { return await AI.loading; } finally { AI.loading = null; }
   }
@@ -10607,6 +10608,11 @@ onmessage = async e => {
       const y = (await aiCall({ cmd: "run", x, dims: [1, 4, DIMF, DIMT] })).y;
       const [cL, cR] = aiSpecOut(y);
       const m = Math.min(GEN, len - i);
+      if (AI.ep === "webgpu") {
+        let si = 0, so = 0, bad = false;
+        for (let k = 0; k < m; k++) { const a = cL[TRIM + k], b = cR[TRIM + k]; if (!Number.isFinite(a) || !Number.isFinite(b)) { bad = true; break; } so += a * a + b * b; const x = mL[i + TRIM + k], z = mR[i + TRIM + k]; si += x * x + z * z; }
+        if (bad || so > si * 2.25 + 1e-6 * m) throw new Error("the GPU gave a garbled result");
+      }
       for (let k = 0; k < m; k++) { oL[i + k] = cL[TRIM + k] / g; oR[i + k] = cR[TRIM + k] / g; }
       AI.chunkSec = (performance.now() - t0) / 1000 / (c + 1);
       if (onProgress) onProgress((c + 1) / n, AI.chunkSec * (n - c - 1));
@@ -10676,6 +10682,7 @@ onmessage = async e => {
       catch (e) {
         if (vx.cancel || (e && e.message === "cancelled")) return null;
         if (AI.ep === "webgpu") {   // a GPU that can't run it: start again on the CPU, once
+          if (e && /garbled/.test(e.message)) { try { localStorage.setItem("nightbloom-ai-nogpu", "1"); } catch (x) {} }   // this GPU gives wrong answers: use the CPU from now on
           try { status("The GPU couldn't run the model; starting again on the CPU…"); AI.session = null; await aiCreate(await aiModelBytes(), ["wasm"]); res = await aiSeparate(L, R, mode, prog, isCancelled); }
           catch (e2) { return quick("AI separation failed" + (e2 && e2.message ? " (" + e2.message + ")" : "") + "."); }
         } else return quick("AI separation failed" + (e && e.message ? " (" + e.message + ")" : "") + ".");
