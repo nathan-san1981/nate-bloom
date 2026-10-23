@@ -2629,6 +2629,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     let lastScan = t;
     const timer = setInterval(() => {
       const horizon = Math.min(ctx.currentTime + 0.1, endAt);
+      if (nextGrain < ctx.currentTime - 0.05) { nextGrain = lastScan = ctx.currentTime + 0.01; }   // timers were paused: don't fire the missed grains in a burst
       while (nextGrain < horizon) {
         // scan sweeps the read position forward through the file, wrapping at the end
         const speed = P.scan * P.scan * 1.5;
@@ -3649,6 +3650,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     playQueue.push({ s, t: swingT });
   }
   function tick() {
+    // back from another app (timers were paused): skip to the current step instead of playing every missed one at once
+    if (nextTime < ctx.currentTime - 0.05) { const d = stepDur(), k = Math.ceil((ctx.currentTime - nextTime) / d); nextTime += k * d; curStep = (curStep + k) % stepsNow(); }
     while (nextTime < ctx.currentTime + 0.12) {
       if (curStep >= stepsNow()) curStep = 0;
       scheduleStep(curStep, nextTime);
@@ -5881,6 +5884,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const dur = 60 / bpm / 4;
     pv = { i, step: 0, next: ctx.currentTime + 0.06 };
     const tick = () => {
+      if (pv && pv.next < ctx.currentTime - 0.05) { const k = Math.ceil((ctx.currentTime - pv.next) / dur); pv.next += k * dur; pv.step = (pv.step + k) % n; }
       while (pv && pv.next < ctx.currentTime + 0.12) {
         const s = pv.step, t = s % 2 === 1 ? pv.next + swing * dur * 0.5 : pv.next;
         for (const [id] of DRUMS) if (rows[id][s]) playDrum(id, t);
@@ -6061,6 +6065,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         else { if (arpFree == null) arpFree = now + 0.01; next = arpFree + Math.ceil(Math.max(0, now + 0.005 - arpFree) / dur) * dur; }
         run = arpRun[c.key] = { step: 0, next };
       }
+      if (run.next < now - 0.05) { const k = Math.ceil((now - run.next) / dur); run.next += k * dur; run.step += k; }   // back from the background: resume on the grid
       while (run.next < now + 0.1) {
         const t = run.next, len = Math.max(0.03, dur * cfg.gate);
         let hits;
@@ -9185,6 +9190,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const dur = 60 / bpm / 4;
     pv = { i, step: 0, next: ctx.currentTime + 0.06 };
     const tick = () => {
+      if (pv && pv.next < ctx.currentTime - 0.05) { const k = Math.ceil((ctx.currentTime - pv.next) / dur); pv.next += k * dur; pv.step = (pv.step + k) % n; }
       while (pv && pv.next < ctx.currentTime + 0.12) {
         const s = pv.step, t = s % 2 === 1 ? pv.next + swing * dur * 0.5 : pv.next;
         for (const [id] of DRUMS) if (rows[id][s]) { const r = (rolls[id] && rolls[id][s]) || 1; for (let k = 0; k < r; k++) playDrum(id, t + k * dur / r); }
@@ -11925,6 +11931,7 @@ onmessage = async e => {
   function djBeatSched() {
     const Bt = DJ.beat; if (!Bt) return;
     const bpm = djShownBpm(), dur = 60 / bpm / 4, swing = BEATS[Bt.i][3];
+    if (Bt.next < ctx.currentTime - 0.05) { const k = Math.ceil((ctx.currentTime - Bt.next) / dur); Bt.next += k * dur; Bt.step = (Bt.step + k) % Bt.n; }
     while (Bt.next < ctx.currentTime + 0.12) {
       const s = Bt.step, t = s % 2 === 1 ? Bt.next + swing * dur * 0.5 : Bt.next, keep = fx.drumBus;
       fx.drumBus = DJ.beatBus;
@@ -12509,6 +12516,7 @@ registerProcessor("nb-capture", NBCap);`;
   }
   // --- the clock ---
   function jamSchedule() {
+    if (JAM.nextT < ctx.currentTime - 0.05) { const d = jamStepDur(), k = Math.ceil((ctx.currentTime - JAM.nextT) / d); JAM.nextT += k * d; JAM.step += k; }
     while (JAM.nextT < ctx.currentTime + 0.12) {
       const s = JAM.step, t = JAM.nextT, dur = jamStepDur();
       if (JAM.rec) {
