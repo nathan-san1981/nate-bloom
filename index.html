@@ -1027,12 +1027,14 @@ body.trk-open { overflow: hidden; }
 /* progress strip: one row per job, pinned to the top of the screen, above every sheet */
 .jobs { position: fixed; left: 0; right: 0; top: 0; z-index: 60; display: flex; flex-direction: column; gap: 4px; padding: max(6px, env(safe-area-inset-top, 0px)) 10px 6px; pointer-events: none; }
 .jobs:empty { display: none; }
-.job { background: rgba(15,13,22,0.94); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px 7px; box-shadow: 0 6px 20px rgba(0,0,0,0.35); backdrop-filter: blur(6px); }
+.job { background: rgba(15,13,22,0.96); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px 7px; box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
 .job .jl { display: flex; justify-content: space-between; gap: 10px; font-size: 0.78rem; font-weight: 600; margin-bottom: 5px; }
 .job .jl small { font-family: var(--font-mono); font-size: 0.66rem; color: var(--dim); font-variant-numeric: tabular-nums; flex: none; }
+.job .jx { pointer-events: auto; appearance: none; flex: none; width: 26px; height: 22px; border-radius: 6px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font-size: 0.8rem; line-height: 1; cursor: pointer; margin: -3px -4px -3px 0; }
+.job .jx[hidden] { display: none; } .job .jx:disabled { opacity: 0.5; }
 .job .jb { height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
 .job .jb i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width 0.15s linear; }
-.job.wait .jb i { width: 40%; background: linear-gradient(90deg, transparent, var(--lilac), transparent); animation: jobwait 1.1s ease-in-out infinite; }
+.job.wait .jb i { width: 40%; background: linear-gradient(90deg, transparent, var(--lilac), transparent); animation: jobwait 1.1s ease-in-out infinite; will-change: transform; }
 @keyframes jobwait { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 .dj-prog { height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; margin-top: 3px; }
 .dj-prog i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width 0.15s linear; }
@@ -2244,7 +2246,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return { bpm: 96, meter: "4/4", rows, synth };
   }
   state.seq = examplePattern();
-  state.samp = { slot: 0, slots: Array.from({ length: NSLOTS }, (_, i) => ({ name: "", mode: i === 0 ? "grain" : "play", p: sampleDefaults() })) };
+  state.samp = { slot: 0, slots: Array.from({ length: NSLOTS }, (_, i) => ({ name: "", mode: "play", p: sampleDefaults() })) };
   const sampBuf = Array(NSLOTS).fill(null), sampPeaks = Array(NSLOTS).fill(null);
   const padBuf = Array(NPADS).fill(null), padPeaks = Array(NPADS).fill(null), padPlaying = Array(NPADS).fill(null);
   state.pads = { sel: 0, p: Array.from({ length: NPADS }, () => Object.fromEntries(PAD_KNOBS.map(([k,,v]) => [k, v]))), names: Array(NPADS).fill("") };
@@ -3286,7 +3288,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       }
       buf = trimBuffer(buf);
       setSample(i, buf, nm);
-      state.samp.slots[i].mode = buf.duration > 4 ? "grain" : "play";
+      if (state.samp.slots[i].mode === "grain") state.samp.slots[i].mode = "play";   // a new file plays as it is; Grain stays a choice
       storeSample(i, state.samp.slots[i].name, stored);
       renderEngine(); save();
     } catch (e) {
@@ -10908,7 +10910,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     d.buf = buf; d.name = name || "Song"; d.p0 = 0; d.cue = 0; d.loop = null; d.rate = 1; d.bend = 1; d.img = null; d.bpm0 = 0; d.off = 0; d.cues = [null, null, null, null];
     djPaintDeck(d); djMsg("Finding the beat on " + "AB"[d.i] + "…", true);
     await new Promise(r => setTimeout(r, 30));
-    const an = meta && meta.env ? { env: meta.env, envRate: meta.envRate } : await djAnalyseAsync(buf); d.env = an.env; d.envRate = an.envRate;
+    let an; try { an = meta && meta.env ? { env: meta.env, envRate: meta.envRate } : await djAnalyseAsync(buf); } catch (e) { d.buf = null; d.name = ""; djPaintDeck(d); djMsg("Cancelled"); return; } d.env = an.env; d.envRate = an.envRate;
     if (meta && meta.bpm) { d.bpm0 = meta.bpm; d.off = meta.off || 0; } else { d.bpm0 = an.bpm; d.off = an.off; }
     if (d.bpm0 && d.bpm0 < 70) { d.bpm0 *= 2; } else if (d.bpm0 > 180) d.bpm0 /= 2;
     d.img = null; djPaintDeck(d);
@@ -11550,7 +11552,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     DJ.crate[i] = it; djPaintCrate(); djMsg("Analysing " + it.name + "…", true);
     await new Promise(r => setTimeout(r, 30));
     if (meta && meta.bpm) Object.assign(it, { bpm: meta.bpm, off: meta.off || 0, key: meta.key || "", cam: meta.cam || "", energy: meta.energy || 0 });
-    else { const an = await djAnalyseAsync(buf); it.env = an.env; it.envRate = an.envRate; let bpm = an.bpm; if (bpm && bpm < 70) bpm *= 2; else if (bpm > 180) bpm /= 2; Object.assign(it, { bpm, off: an.off, key: an.key || "", cam: an.cam || "", energy: an.energy || 0 }); }
+    else { let an; try { an = await djAnalyseAsync(buf); } catch (e) { DJ.crate[i] = null; djPaintCrate(); djMsg("Cancelled: " + it.name + " wasn't added"); return -1; } it.env = an.env; it.envRate = an.envRate; let bpm = an.bpm; if (bpm && bpm < 70) bpm *= 2; else if (bpm > 180) bpm /= 2; Object.assign(it, { bpm, off: an.off, key: an.key || "", cam: an.cam || "", energy: an.energy || 0 }); }
     it.busy = false; djStoreCrate(i); if (it.raw && !DJ.decks.some(d => d.buf === it.buf || d.full === it.buf)) it.buf = null; djPaintCrate();
     djMsg(it.name + ": " + (it.bpm ? it.bpm.toFixed(1) + " BPM" : "no steady beat") + (it.key ? " · " + it.key + " (" + it.cam + ")" : ""));
     return i;
@@ -12276,6 +12278,7 @@ registerProcessor("nb-capture", NBCap);`;
       let inst = null, voc = null, how = "quick";
       if (aiPossible()) {
         try {
+          if (!AI.session) { let ad = null; try { ad = navigator.gpu ? await navigator.gpu.requestAdapter() : null; } catch (e) { ad = null; } if (!ad) throw new Error("cpu"); }
           await aiSession(say);
           if (AI.ep !== "webgpu") throw new Error("cpu");   // on the CPU the model would stall the decks for minutes
           const [L, R] = await aiResample(chans, rate, 44100);
@@ -12292,6 +12295,7 @@ registerProcessor("nb-capture", NBCap);`;
         say("Splitting (quick method)…");
         const oi = await vxQuick(chans, rate, { mode: "music", strength: 2, lowCut: 120, highCut: 12000, both: true }, p => { d.stemProg = p; djPaintDeck(d); }, () => false);
         const yieldNow = () => new Promise(r => setTimeout(r, 0));
+        if (!oi) { say("Cancelled"); return null; }
         if (!oi.voc) for (let c = 0; c < 2; c++) { const a = chans[c], b = oi[c]; for (let i = 0; i < a.length; i++) a[i] -= b[i]; }
         inst = makeBuffer(oi, rate); await yieldNow(); voc = makeBuffer(oi.voc || chans, rate); await yieldNow();
       }
@@ -12607,7 +12611,7 @@ registerProcessor("nb-capture", NBCap);`;
     if (b - a < ctx.sampleRate * 0.1) { lineStatus.textContent = "Nothing came in: check the input and its level, then try again"; return; }
     const chans = [L.subarray(a, b), R.subarray(a, b)], rate = ctx.sampleRate, buf = makeBuffer(chans, rate), i = state.samp.slot;
     const nm = (lineDev.selectedOptions[0] ? lineDev.selectedOptions[0].textContent.split(" (")[0].slice(0, 16) : "Input") + " " + new Date().toTimeString().slice(0, 5);
-    setSample(i, buf, nm); storeSample(i, nm, bufferToWav(buf)); state.samp.slots[i].mode = buf.duration > 4 ? "grain" : "play"; renderEngine(); save();
+    setSample(i, buf, nm); storeSample(i, nm, bufferToWav(buf)); if (state.samp.slots[i].mode === "grain") state.samp.slots[i].mode = "play"; renderEngine(); save();
     let msg = "S" + (i + 1) + " = " + nm + " (" + buf.duration.toFixed(1) + " s)";
     if (document.getElementById("lineChop").checked) {
       const nPads = 8, cuts = detectSlices(chans, rate, nPads, 0.6); let made = 0;
@@ -12632,10 +12636,11 @@ registerProcessor("nb-capture", NBCap);`;
 
   // ---------- progress strip: anything that analyses, separates, downloads or encodes shows a bar ----------
   const JOBS = { el: null, map: new Map() };
-  function jobSet(id, label, p) {
+  function jobSet(id, label, p, onCancel) {
     if (!JOBS.el) { JOBS.el = document.createElement("div"); JOBS.el.className = "jobs"; JOBS.el.setAttribute("aria-live", "polite"); document.body.appendChild(JOBS.el); }
     let j = JOBS.map.get(id);
-    if (!j) { j = document.createElement("div"); j.className = "job"; j.innerHTML = '<div class="jl"><span></span><small></small></div><div class="jb"><i></i></div>'; JOBS.el.appendChild(j); JOBS.map.set(id, j); }
+    if (!j) { j = document.createElement("div"); j.className = "job"; j.innerHTML = '<div class="jl"><span></span><small></small><button class="jx" aria-label="Cancel" hidden>✕</button></div><div class="jb"><i></i></div>'; JOBS.el.appendChild(j); JOBS.map.set(id, j); }
+    if (onCancel) { const x = j.querySelector(".jx"); x.hidden = false; x.onclick = () => { x.disabled = true; j.querySelector(".jl span").textContent = "Cancelling…"; try { onCancel(); } catch (e) {} }; }
     if (label != null) j.querySelector(".jl span").textContent = label;
     const wait = p == null || !(p >= 0);
     j.classList.toggle("wait", wait);
@@ -12644,29 +12649,37 @@ registerProcessor("nb-capture", NBCap);`;
   }
   function jobEnd(id) { const j = JOBS.map.get(id); if (j) { j.remove(); JOBS.map.delete(id); } }
   // every job runs through here: label, a progress callback the task calls with 0..1, and cleanup whatever happens
-  async function jobRun(id, label, fn) {
-    jobSet(id, label, null);
-    try { return await fn(p => jobSet(id, null, p)); } finally { jobEnd(id); }
+  // fn(report, cancelled) — report(0..1) moves the bar; cancelled() turns true when the ✕ is tapped (only shown when `cancellable`)
+  async function jobRun(id, label, fn, cancellable) {
+    let off = false; const cancelled = () => off;
+    jobSet(id, label, null, cancellable ? () => { off = true; } : null);
+    try { return await fn(p => { if (!off) jobSet(id, null, p); }, cancelled); } finally { jobEnd(id); }
   }
   {
     // quick vocal split (sampler sheet and the decks)
     const q0 = vxQuick;
     vxQuick = (chans, rate, opts, onProgress, isCancelled) => jobRun("sep", "Separating " + (opts && opts.mode === "music" ? "the instrumental" : "the vocals") + "…",
-      rep => q0(chans, rate, opts, p => { rep(p); if (onProgress) onProgress(p); }, isCancelled));
+      (rep, off) => q0(chans, rate, opts, p => { rep(p); if (onProgress) onProgress(p); }, () => off() || (isCancelled ? isCancelled() : false)), true);
     // AI separation
     const ai0 = aiSeparate;
     aiSeparate = (L, R, mode, onProgress, isCancelled) => jobRun("sep", "AI separation on the " + (AI.ep === "webgpu" ? "GPU" : "CPU") + "…",
-      rep => ai0(L, R, mode, (p, eta) => { rep(p); if (onProgress) onProgress(p, eta); }, isCancelled));
+      (rep, off) => ai0(L, R, mode, (p, eta) => { rep(p); if (onProgress) onProgress(p, eta); }, () => off() || (isCancelled ? isCancelled() : false)), true);
     // the AI engine and its one-time model download
     const as0 = aiSession;
-    aiSession = onStatus => AI.session ? as0(onStatus) : jobRun("ai", "Loading the AI engine…", rep => as0(m => {
-      const mm = /\((once)\)… (\d+) \/ (\d+) MB/.exec(m || "");
-      if (mm) { jobSet("ai", "Downloading the AI model (once)…", +mm[2] / Math.max(1, +mm[3])); } else jobSet("ai", m, null);
-      if (onStatus) onStatus(m);
-    }));
+    aiSession = onStatus => AI.session ? as0(onStatus) : jobRun("ai", "Loading the AI engine…", (rep, off) => new Promise((res, rej) => {
+      const poll = setInterval(() => { if (off()) { clearInterval(poll); rej(new Error("cancelled")); } }, 120);
+      as0(m => {
+        const mm = /\((once)\)… (\d+) \/ (\d+) MB/.exec(m || "");
+        if (mm) { jobSet("ai", "Downloading the AI model (once)…", +mm[2] / Math.max(1, +mm[3])); } else jobSet("ai", m, null);
+        if (onStatus) onStatus(m);
+      }).then(v => { clearInterval(poll); res(v); }, e => { clearInterval(poll); rej(e); });
+    }), true);
     // beat and key analysis
     const an0 = djAnalyseAsync;
-    djAnalyseAsync = buf => DJ_AN_CACHE.has(buf) ? an0(buf) : jobRun("an", "Finding the beat and key…", () => an0(buf));
+    djAnalyseAsync = buf => DJ_AN_CACHE.has(buf) ? an0(buf) : jobRun("an", "Finding the beat and key…", (rep, off) => new Promise((res, rej) => {
+      const poll = setInterval(() => { if (off()) { clearInterval(poll); if (djAnWorker) { try { djAnWorker.terminate(); } catch (e) {} djAnWorker = null; djAnWait.clear(); } rej(new Error("cancelled")); } }, 120);
+      an0(buf).then(v => { clearInterval(poll); res(v); }, e => { clearInterval(poll); rej(e); });
+    }), true);
     // opening a song file
     const df0 = djDecodeFile;
     djDecodeFile = file => jobRun("open", "Opening " + file.name + "…", () => df0(file));
@@ -12808,7 +12821,7 @@ registerProcessor("nb-capture", NBCap);`;
       const buf = trimBuffer(await decode(wav.slice(0)));
       const nm = "Resampled take " + fmtClock(take.done.len / take.done.rate);
       setSample(i, buf, nm);
-      state.samp.slots[i].mode = buf.duration > 4 ? "grain" : "play";
+      if (state.samp.slots[i].mode === "grain") state.samp.slots[i].mode = "play";
       storeSample(i, nm, wav);
       state.engine = "samp"; renderEngine(); save();
       takeInfo.textContent = "Loaded into sampler slot S" + (i + 1);
