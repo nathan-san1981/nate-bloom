@@ -1042,6 +1042,9 @@ body.trk-open { overflow: hidden; }
 .dj-song .busy { display: block; height: 4px; border-radius: 2px; margin-top: 3px; background: linear-gradient(90deg, var(--raised), var(--lilac), var(--raised)); background-size: 200% 100%; animation: jobslide 1.1s linear infinite; }
 @keyframes jobslide { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .job.wait .jb i, .dj-song .busy { animation: none; } }
+/* an instrument, not a web page: no long-press callouts, text selection or tap flashes on the controls */
+.app, .app *, .editor, .editor *, .dj, .dj * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+.app input, .app textarea, .app [contenteditable], .editor input, .editor textarea, .editor [contenteditable], .dj input, .dj textarea { -webkit-touch-callout: default; -webkit-user-select: text; user-select: text; }
 @media (max-height: 640px) {
   .fader { height: 48px; }
   .scope { height: 36px; }
@@ -10373,7 +10376,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const nm = vxName() + "-" + vxWord();
     saveWav(nm, bufferToWav(makeBuffer(r.out, ed.rate))); vxStatus.textContent = "Saving " + nm + ".wav…";
   }));
-  document.getElementById("vxCancel").addEventListener("click", () => { if (vx.busy) { vx.cancel = true; return; } vxStop(); vxEl.hidden = true; });
+  document.getElementById("vxCancel").addEventListener("click", () => { if (vx.busy) { vx.cancel = true; if (typeof aiKill === "function" && (AI.loading || AI.wwait.size)) aiKill(); return; } vxStop(); vxEl.hidden = true; });
   document.getElementById("edVocals").addEventListener("click", () => {
     if (!ed.chans) return; edStop(); start();
     const stereo = ed.chans.length >= 2, [a, b] = edSel(), whole = a === 0 && b === edLen(), secs = (b - a) / ed.rate;
@@ -10524,12 +10527,64 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     }
     throw new Error("no engine could run the model here");
   }
+
+  // ---------- the AI engine runs in a worker ----------
+  // onnxruntime-web, the model session and each inference live off the main thread, so starting the
+  // model (seconds to minutes on a CPU) never freezes the screen, and Cancel can stop it at once.
+  const AI_WSRC = `
+let session = null, ep = "";
+onmessage = async e => {
+  const m = e.data;
+  try {
+    if (m.cmd === "init") {
+      if (typeof ort === "undefined") importScripts(m.ort + "ort.all.min.js");
+      ort.env.wasm.wasmPaths = m.ort; ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false;
+      postMessage({ id: m.id, ok: true });
+    } else if (m.cmd === "create") {
+      session = null; ep = "";
+      for (const want of m.eps) {
+        if (want === "webgpu" && !(self.navigator && navigator.gpu)) continue;
+        try { session = await ort.InferenceSession.create(m.bytes, { executionProviders: [want], graphOptimizationLevel: "all" }); ep = want; break; }
+        catch (x) { session = null; }
+      }
+      postMessage(session ? { id: m.id, ep } : { id: m.id, err: "no engine could run the model here" });
+    } else if (m.cmd === "run") {
+      const out = await session.run({ input: new ort.Tensor("float32", m.x, m.dims) });
+      const y = out[Object.keys(out)[0]].data;
+      postMessage({ id: m.id, y }, [y.buffer]);
+    }
+  } catch (x) { postMessage({ id: m.id, err: String(x && x.message || x) }); }
+};`;
+  AI.worker = null; AI.wseq = 0; AI.wwait = new Map(); AI.winit = false;
+  function aiW() {
+    if (AI.worker) return AI.worker;
+    const url = URL.createObjectURL(new Blob([AI_WSRC], { type: "text/javascript" }));
+    const w = new Worker(url); setTimeout(() => URL.revokeObjectURL(url), 5000);
+    w.onmessage = e => { const r = AI.wwait.get(e.data.id); if (r) { AI.wwait.delete(e.data.id); r(e.data); } };
+    w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); const waiting = [...AI.wwait.values()]; AI.wwait.clear(); aiKill(); waiting.forEach(r => r({ err: "the AI engine stopped" + (ev && ev.message ? " (" + ev.message + ")" : "") })); };
+    AI.worker = w; AI.winit = false; return w;
+  }
+  function aiCall(msg, transfer) {
+    const id = ++AI.wseq;
+    return new Promise((res, rej) => { AI.wwait.set(id, d => d.err ? rej(new Error(d.err)) : res(d)); aiW().postMessage(Object.assign({ id }, msg), transfer || []); });
+  }
+  // stop everything the engine is doing; the next AI use starts it again (the model comes from the device cache)
+  function aiKill() {
+    if (AI.worker) { try { AI.worker.terminate(); } catch (e) {} AI.worker = null; }
+    AI.session = null; AI.ep = ""; AI.winit = false; AI.loading = null;
+    const waiting = [...AI.wwait.values()]; AI.wwait.clear(); waiting.forEach(r => r({ err: "cancelled" }));
+  }
+  aiLoadOrt = async function () { if (!AI.winit) { await aiCall({ cmd: "init", ort: AI.ort }); AI.winit = true; } };
+  aiCreate = async function (bytes, eps) {
+    await aiLoadOrt();
+    const r = await aiCall({ cmd: "create", bytes, eps }, [bytes.buffer]);
+    AI.ep = r.ep; AI.session = { inWorker: true }; return AI.session;
+  };
   async function aiSession(onStatus) {
     if (AI.session) return AI.session;
     if (AI.loading) return AI.loading;
     AI.loading = (async () => {
       onStatus("Loading the AI engine…"); await aiLoadOrt();
-      ort.env.wasm.wasmPaths = AI.ort; ort.env.wasm.numThreads = 1;
       const bytes = await aiModelBytes((got, total) => onStatus("Downloading the separation model (once)… " + (got / 1048576).toFixed(0) + " / " + (total / 1048576).toFixed(0) + " MB"));
       onStatus("Starting the model…");
       return aiCreate(bytes, ["webgpu", "wasm"]);
@@ -10549,8 +10604,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (isCancelled && isCancelled()) return null;
       const i = c * GEN;
       const x = aiSpecIn(mL.subarray(i, i + CHUNK), mR.subarray(i, i + CHUNK));
-      const out = await AI.session.run({ input: new ort.Tensor("float32", x, [1, 4, DIMF, DIMT]) });
-      const y = out[Object.keys(out)[0]].data;
+      const y = (await aiCall({ cmd: "run", x, dims: [1, 4, DIMF, DIMT] })).y;
       const [cL, cR] = aiSpecOut(y);
       const m = Math.min(GEN, len - i);
       for (let k = 0; k < m; k++) { oL[i + k] = cL[TRIM + k] / g; oR[i + k] = cR[TRIM + k] / g; }
@@ -10610,6 +10664,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const quick = why => { vx.note = why + " Used the quick method instead ·"; status(why + " Using the quick method instead…"); return classic(chans, rate, opts, onProgress, isCancelled); };
       try { await aiSession(status); }
       catch (e) {
+        if (vx.cancel || (e && e.message === "cancelled")) return null;
         if (e && e.message === "model-missing") return quick("The AI model couldn't be downloaded (no connection, or this copy of Nate Bloom can't reach it).");
         return quick("The AI engine couldn't start here" + (e && e.message ? " (" + e.message + ")" : "") + ".");
       }
@@ -10619,6 +10674,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       let res = null;
       try { res = await aiSeparate(L, R, mode, prog, isCancelled); }
       catch (e) {
+        if (vx.cancel || (e && e.message === "cancelled")) return null;
         if (AI.ep === "webgpu") {   // a GPU that can't run it: start again on the CPU, once
           try { status("The GPU couldn't run the model; starting again on the CPU…"); AI.session = null; await aiCreate(await aiModelBytes(), ["wasm"]); res = await aiSeparate(L, R, mode, prog, isCancelled); }
           catch (e2) { return quick("AI separation failed" + (e2 && e2.message ? " (" + e2.message + ")" : "") + "."); }
@@ -12663,11 +12719,14 @@ registerProcessor("nb-capture", NBCap);`;
     // AI separation
     const ai0 = aiSeparate;
     aiSeparate = (L, R, mode, onProgress, isCancelled) => jobRun("sep", "AI separation on the " + (AI.ep === "webgpu" ? "GPU" : "CPU") + "…",
-      (rep, off) => ai0(L, R, mode, (p, eta) => { rep(p); if (onProgress) onProgress(p, eta); }, () => off() || (isCancelled ? isCancelled() : false)), true);
+      (rep, off) => new Promise((res, rej) => {
+        const poll = setInterval(() => { if (off()) { clearInterval(poll); aiKill(); if (typeof vx !== "undefined") vx.cancel = true; res(null); } }, 120);
+        ai0(L, R, mode, (p, eta) => { rep(p); if (onProgress) onProgress(p, eta); }, () => off() || (isCancelled ? isCancelled() : false)).then(v => { clearInterval(poll); res(off() ? null : v); }, e => { clearInterval(poll); if (off()) res(null); else rej(e); });
+      }), true);
     // the AI engine and its one-time model download
     const as0 = aiSession;
     aiSession = onStatus => AI.session ? as0(onStatus) : jobRun("ai", "Loading the AI engine…", (rep, off) => new Promise((res, rej) => {
-      const poll = setInterval(() => { if (off()) { clearInterval(poll); rej(new Error("cancelled")); } }, 120);
+      const poll = setInterval(() => { if (off()) { clearInterval(poll); aiKill(); if (typeof vx !== "undefined") vx.cancel = true; rej(new Error("cancelled")); } }, 120);
       as0(m => {
         const mm = /\((once)\)… (\d+) \/ (\d+) MB/.exec(m || "");
         if (mm) { jobSet("ai", "Downloading the AI model (once)…", +mm[2] / Math.max(1, +mm[3])); } else jobSet("ai", m, null);
@@ -12700,6 +12759,8 @@ registerProcessor("nb-capture", NBCap);`;
       document.querySelectorAll(".dj-song").forEach((row, i) => { const it = DJ.crate[i], t = row.querySelector(".t"); if (!t) return; let b = t.querySelector(".busy"); if (it && it.busy) { if (!b) { b = document.createElement("span"); b.className = "busy"; t.appendChild(b); } } else if (b) b.remove(); });
     };
   }
+  // long-press anywhere (keys, pads, buttons) must never open the browser's page menu; text fields keep theirs
+  document.addEventListener("contextmenu", e => { const t = e.target; if (t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return; e.preventDefault(); }, { capture: true });
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
