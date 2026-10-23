@@ -1048,7 +1048,13 @@ body.trk-open { overflow: hidden; }
 .ed-val { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink); min-width: 46px; font-variant-numeric: tabular-nums; }
 .ed-grp { display: inline-flex; align-items: center; gap: 6px; }
 .ed-sl { flex: 1 1 240px; min-width: 0; }
-.ed-stretch input[type=range] { flex: 1 1 auto; min-width: 90px; accent-color: var(--lilac); height: 28px; }
+.sfit { display: flex; flex-direction: column; gap: 6px; flex: none; padding: 2px 0 4px; }
+.sfit[hidden] { display: none; }
+.sfit-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sfit .btn { height: 30px; padding: 0 9px; font-size: 0.8rem; }
+.sfit .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.sfit input[type=range] { flex: 1 1 auto; min-width: 90px; accent-color: var(--lilac); height: 28px; }
+.sfit.busy .ed-val { color: var(--lilac); }
 .ed-tempo .btn, .ed-stretch .btn { height: 30px; }
 #mLoop[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
 @media (max-height: 640px) {
@@ -1151,6 +1157,29 @@ body.trk-open { overflow: hidden; }
       </div>
       <button class="btn" id="mLoop" aria-pressed="false" title="Held notes keep looping the sample (or the part between Start and Length)">Loop</button>
       <button class="btn rec" id="recBtn">● Hold to record</button>
+    </div>
+    <div class="sfit" id="sfit" hidden>
+      <div class="sfit-row">
+        <span class="lab2">Tempo</span>
+        <span class="ed-val" id="sfBpm" title="This sample's tempo (found automatically)">—</span>
+        <button class="btn" id="sfHalf" title="The tempo is double what it should be">½×</button>
+        <button class="btn" id="sfDbl" title="The tempo is half what it should be">2×</button>
+        <button class="btn" id="sfMatch" title="Stretch the sample to the app's tempo, pitch unchanged">Match 96</button>
+        <span class="ed-grp"><span class="lab2">Fit</span>
+        <button class="btn" data-sfit="1" title="Make the sample exactly 1 bar long at the app's tempo">1 bar</button>
+        <button class="btn" data-sfit="2">2</button>
+        <button class="btn" data-sfit="4">4</button>
+        <button class="btn" data-sfit="8">8</button></span>
+        <button class="btn" id="sfReset" title="Back to the sample's own length and pitch">Reset</button>
+      </div>
+      <div class="sfit-row">
+        <span class="ed-grp ed-sl"><span class="lab2">Length</span>
+        <input type="range" id="sfLen" min="-200" max="200" step="1" value="0" aria-label="Length: slower and longer, or faster and shorter, without changing pitch">
+        <span class="ed-val" id="sfLenV">1.00×</span></span>
+        <span class="ed-grp ed-sl"><span class="lab2">Pitch</span>
+        <input type="range" id="sfPitch" min="-12" max="12" step="1" value="0" aria-label="Pitch in semitones, without changing length">
+        <span class="ed-val" id="sfPitchV">0 st</span></span>
+      </div>
     </div>
     <div class="pending" id="pending" hidden>
       <div class="pinfo" id="pendInfo">Take ready</div>
@@ -1688,7 +1717,7 @@ body.trk-open { overflow: hidden; }
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
-      <p><b>Fit a sample to the beat (Smp → Edit):</b> the sample's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. The <b>Length</b> slider slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. <b>Reset</b> goes back; Undo works too. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
+      <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Isolate vocals:</b> in the Smp tab, load a song (MP3, WAV, M4A), tap <b>Edit</b>, then <b>Vocals…</b>. Pick Vocals or Instrumental and listen to 8 seconds of the result, then choose: <b>→ New slot</b> (the original stays, the result lands in a new slot and plays), <b>Replace</b> (this slot becomes the result), <b>Keep editing</b> (apply here, trim or fade, then Save), or <b>Save WAV</b>. Select part of the wave first to isolate just that part. <b>AI</b> runs the Ultimate Vocal Remover model (MDX-Net) on the device: real stems, a few minutes per song. The first use downloads the 67 MB model once (from Hugging Face, or from a <code>models/</code> folder next to index.html if you put <code>UVR-MDX-NET-Inst_HQ_3.onnx</code> there) and keeps it on the device. <b>Quick</b> is instant and only pulls out the centre of a stereo mix.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> silences everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
@@ -1837,27 +1866,6 @@ body.trk-open { overflow: hidden; }
       </div>
       <button class="btn" id="edChop">Chop → Pads</button>
       <button class="btn" id="edToPad">Selection → P1</button>
-    </div>
-    <div class="ed-row ed-tempo">
-      <span class="lab2">Tempo</span>
-      <span class="ed-val" id="edBpm" title="The sample's tempo (found automatically)">finding…</span>
-      <button class="btn" id="edBpmHalf" title="The tempo is double what it should be">½×</button>
-      <button class="btn" id="edBpmDbl" title="The tempo is half what it should be">2×</button>
-      <button class="btn" id="edMatch" title="Stretch the sample to the app's tempo, pitch unchanged">Match 96 BPM</button>
-      <span class="ed-grp"><span class="lab2">Fit</span>
-      <button class="btn" data-fit="1" title="Make the sample exactly 1 bar long at the app's tempo">1 bar</button>
-      <button class="btn" data-fit="2">2</button>
-      <button class="btn" data-fit="4">4</button>
-      <button class="btn" data-fit="8">8</button></span>
-    </div>
-    <div class="ed-row ed-stretch">
-      <span class="ed-grp ed-sl"><span class="lab2">Length</span>
-      <input type="range" id="edStretch" min="-200" max="200" step="1" value="0" aria-label="Length: slower and longer, or faster and shorter, without changing pitch">
-      <span class="ed-val" id="edStretchVal">1.00×</span></span>
-      <span class="ed-grp ed-sl"><span class="lab2">Pitch</span>
-      <input type="range" id="edPitch" min="-12" max="12" step="1" value="0" aria-label="Pitch in semitones, without changing length">
-      <span class="ed-val" id="edPitchVal">0 st</span></span>
-      <button class="btn" id="edStretchReset" title="Back to the original length and pitch">Reset</button>
     </div>
     <div class="ed-foot">
       <button class="btn" id="edCancel">Cancel</button>
@@ -2310,7 +2318,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         state.samp.slot = Math.min(NSLOTS - 1, saved.samp.slot | 0);
         saved.samp.slots.slice(0, NSLOTS).forEach((x, i) => {
           if (!x) return;
-          state.samp.slots[i].mode = ["grain", "play", "slice"].includes(x.mode) ? x.mode : "play"; state.samp.slots[i].loop = !!x.loop;
+          state.samp.slots[i].mode = ["grain", "play", "slice"].includes(x.mode) ? x.mode : "play"; state.samp.slots[i].loop = !!x.loop; if (x.fit && typeof x.fit === "object") state.samp.slots[i].fit = { s: +x.fit.s || 1, st: +x.fit.st || 0, bpm: +x.fit.bpm || 0 };
           if (x.p) Object.assign(state.samp.slots[i].p, x.p);
         });
       }
@@ -2332,7 +2340,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       try { localStorage.setItem("nightbloom", JSON.stringify({ engine: state.engine, params: state.params, fx: state.fx, layers: state.layers, drum: state.drum, seq: state.seq,
-        samp: { slot: state.samp.slot, slots: state.samp.slots.map(x => ({ mode: x.mode, p: x.p, loop: !!x.loop })) },
+        samp: { slot: state.samp.slot, slots: state.samp.slots.map(x => ({ mode: x.mode, p: x.p, loop: !!x.loop, fit: x.fit || null })) },
         pads: { sel: state.pads.sel, p: state.pads.p }, inst: state.inst, lib: state.lib, cur: state.cur, melodic: state.melodic,
         drumPads: state.drumPads, drumSel: state.drumSel, arp: state.arp })); } catch (e) {}
     }, 300);
@@ -2440,7 +2448,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     fx = { noise };
     buildChain();
     applyFx(); applyDrum();
-    setSample(0, makeExampleChime(), "Example chime (generated)");
+    setSample(0, makeExampleChime(), "Example chime (generated)", { placeholder: true });
     loadStoredSamples().then(() => { loadMoreStored(); libStartup(); });
   }
 
@@ -2536,7 +2544,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
           r.onsuccess = () => res(r.result); r.onerror = () => res(null);
         });
         if (rec && rec.data) {
-          try { setSample(i, trimBuffer(await decode(rec.data.slice(0))), rec.name); } catch (e) {}
+          try { setSample(i, trimBuffer(await decode(rec.data.slice(0))), rec.name, { keepFit: true }); } catch (e) {}
         }
       }
     } catch (e) {}
@@ -12799,9 +12807,10 @@ registerProcessor("nb-capture", NBCap);`;
   // long-press anywhere (keys, pads, buttons) must never open the browser's page menu; text fields keep theirs
   document.addEventListener("contextmenu", e => { const t = e.target; if (t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return; e.preventDefault(); }, { capture: true });
 
-  // ---------- sampler tools: Length / Pitch / Tempo / Fit / Loop ----------
+  // ---------- sampler tools on the panel: Tempo / Match / Fit / Length / Pitch, and Loop ----------
+  // Each slot keeps its original audio (sampOrig); the slot plays a copy rendered at its Length and Pitch.
+  // Rendering runs in a worker, so it works while everything else keeps playing.
   {
-    // time-stretch without changing pitch (WSOLA), in a worker: same idea as the DJ key lock, done offline
     const STR_SRC = `
 function stretch(L, R, s, report) {
   const N = 2048, H = 512, OV = 512, SR = 360, len = L.length, outLen = Math.max(1, Math.round(len * s));
@@ -12840,69 +12849,92 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
         w.postMessage({ L, R, s }, [L.buffer, R.buffer]);
       }), true);
     }
-    const tS = document.getElementById("edStretch"), tSV = document.getElementById("edStretchVal"), tP = document.getElementById("edPitch"), tPV = document.getElementById("edPitchVal");
-    const bpmEl = document.getElementById("edBpm"), matchBtn = document.getElementById("edMatch");
-    const T = { base: null, bpm: 0, seq: 0 };   // base: the audio the sliders work from (so moving them never compounds)
+    const sampOrig = Array(NSLOTS).fill(null);
+    const fitOf = i => { const sl = state.samp.slots[i]; if (!sl.fit) sl.fit = { s: 1, st: 0, bpm: 0 }; return sl.fit; };
+    const isPlain = f => Math.abs(f.s - 1) < 0.002 && !f.st;
+    let internal = false;
+    // every way audio gets into a slot comes through here: new audio is the slot's new original
+    const ss0 = setSample;
+    setSample = function (i, buf, name, opts) {
+      if (internal) return ss0(i, buf, name);
+      sampOrig[i] = buf;
+      if (opts && opts.placeholder) { ss0(i, buf, name); return; }   // the startup chime: the slot's saved sound and settings load next
+      const keep = opts && opts.keepFit;
+      if (!keep) state.samp.slots[i].fit = { s: 1, st: 0, bpm: 0 };
+      ss0(i, buf, name);
+      if (buf && keep && !isPlain(fitOf(i))) render(i);
+      if (buf && !fitOf(i).bpm) findBpm(i);
+      if (i === state.samp.slot) paint();
+    };
+    const el = document.getElementById("sfit"), lenS = document.getElementById("sfLen"), lenV = document.getElementById("sfLenV"), pS = document.getElementById("sfPitch"), pV = document.getElementById("sfPitchV");
+    const bpmEl = document.getElementById("sfBpm"), matchBtn = document.getElementById("sfMatch");
     const appBpm = () => state.seq.bpm || 120;
-    const factor = () => T.exact || Math.pow(2, +tS.value / 100);   // Match and Fit use the exact ratio, the slider its steps
     const sliderFor = f => Math.max(-200, Math.min(200, Math.round(Math.log2(f) * 100)));
-    const baseLen = () => (T.base ? T.base.chans : ed.chans)[0].length;
-    function paintT() {
-      const f = factor(), st = +tP.value;
-      tSV.textContent = f.toFixed(2) + "×"; tPV.textContent = (st > 0 ? "+" : "") + st + " st";
-      const nowBpm = T.bpm ? T.bpm / f : 0;
-      bpmEl.textContent = T.bpm ? nowBpm.toFixed(1) + " BPM" + (Math.abs(f - 1) > 0.004 ? " (was " + T.bpm.toFixed(1) + ")" : "") : (T.bpm === 0 && T.found ? "no steady beat" : "finding…");
-      matchBtn.textContent = "Match " + appBpm() + " BPM"; matchBtn.disabled = !T.bpm;
+    const seqs = Array(NSLOTS).fill(0), finding = new Set();
+    function paint() {
+      const i = state.samp.slot, sl = state.samp.slots[i], has = !!sampOrig[i];
+      el.hidden = state.engine !== "samp";
+      if (el.hidden) return;
+      el.querySelectorAll("button, input").forEach(x => { x.disabled = !has; });
+      const f = fitOf(i);
+      if (document.activeElement !== lenS) lenS.value = sliderFor(f.s);
+      if (document.activeElement !== pS) pS.value = f.st;
+      lenV.textContent = f.s.toFixed(2) + "×"; pV.textContent = (f.st > 0 ? "+" : "") + f.st + " st";
+      bpmEl.textContent = !has ? "—" : finding.has(i) ? "finding…" : f.bpm ? (f.bpm / f.s).toFixed(1) + " BPM" + (Math.abs(f.s - 1) > 0.004 ? " (was " + f.bpm.toFixed(1) + ")" : "") : "no steady beat";
+      matchBtn.textContent = "Match " + appBpm(); matchBtn.disabled = !has || !f.bpm;
     }
-    function resetT() { T.base = null; T.exact = 0; tS.value = 0; tP.value = 0; paintT(); }
-    async function findBpm() {
-      T.bpm = 0; T.found = false; paintT();
-      if (!ed.chans) return;
+    async function findBpm(i) {
+      const buf = sampOrig[i]; if (!buf || finding.has(i)) return;
+      if (buf.duration < 4) { fitOf(i).bpm = 0; paint(); return; }
+      finding.add(i); paint();
+      try { const an = await djAnalyseAsync(buf); let b = an && an.bpm || 0; if (b && b < 70) b *= 2; else if (b > 180) b /= 2; if (sampOrig[i] === buf) { fitOf(i).bpm = b; save(); } }
+      catch (e) {}
+      finding.delete(i); paint();
+    }
+    // play the original at this slot's Length and Pitch
+    async function render(i) {
+      const orig = sampOrig[i]; if (!orig) return;
+      const f = fitOf(i), id = ++seqs[i], name = state.samp.slots[i].name;
+      if (isPlain(f)) { internal = true; try { setSample(i, orig, name); } finally { internal = false; } paint(); return; }
+      const r = Math.pow(2, f.st / 12), chans = [orig.getChannelData(0), orig.numberOfChannels > 1 ? orig.getChannelData(1) : orig.getChannelData(0)];
+      el.classList.add("busy");
       try {
-        const buf = makeBuffer(ed.chans.map(c => c.slice()), ed.rate); const an = buf.duration >= 4 ? await djAnalyseAsync(buf) : { bpm: 0 };
-        let b = an && an.bpm || 0; if (b && b < 70) b *= 2; else if (b > 180) b /= 2;
-        T.bpm = b; T.found = true;
-      } catch (e) { T.found = true; }
-      paintT();
+        let out = await stretchRun(chans, f.s * r, "S" + (i + 1) + ": " + (f.st ? "changing length and pitch…" : "changing the length…"));
+        if (!out || id !== seqs[i] || sampOrig[i] !== orig) return;
+        if (f.st) { out = await aiResample(out, Math.round(orig.sampleRate * r), orig.sampleRate); if (id !== seqs[i] || sampOrig[i] !== orig) return; }
+        const buf = makeBuffer(orig.numberOfChannels > 1 ? out : [out[0]], orig.sampleRate);
+        internal = true; try { setSample(i, buf, name); } finally { internal = false; }
+        if (i === state.samp.slot) noteMsg("S" + (i + 1) + ": " + buf.duration.toFixed(2) + " s = " + (buf.duration / (4 * 60 / appBpm())).toFixed(2) + " bars at " + appBpm() + " BPM");
+      } catch (e) { noteMsg("Couldn't change the length here (" + (e && e.message || e) + ")", true); }
+      finally { if (id === seqs[i]) el.classList.remove("busy"); paint(); }
     }
-    // render the base at the sliders' length and pitch
-    async function renderT() {
-      if (!ed.chans) return;
-      if (!T.base) { edStop(); edPush(); T.base = { chans: ed.chans.map(c => c.slice()), a: ed.a, b: ed.b }; }
-      const f = factor(), st = +tP.value, r = Math.pow(2, st / 12), id = ++T.seq;
-      if (Math.abs(f - 1) < 0.004 && st === 0) { ed.chans = T.base.chans.map(c => c.slice()); ed.a = 0; ed.b = edLen(); edRefresh(); paintT(); return; }
-      const mono = T.base.chans.length === 1;
-      let out = await stretchRun(T.base.chans, f * r, st ? "Changing length and pitch…" : "Changing the length…");
-      if (!out || id !== T.seq || !ed.chans) return;
-      if (st) { const from = Math.round(ed.rate * r); out = await aiResample(out, from, ed.rate); if (id !== T.seq || !ed.chans) return; }
-      ed.chans = mono ? [out[0]] : [out[0], out[1]]; ed.a = 0; ed.b = edLen();
-      edRefresh(); paintT();
-      const sec = edLen() / ed.rate, bars = sec / (4 * 60 / appBpm());
-      edInfo.textContent = "Length " + f.toFixed(2) + "×" + (st ? " · pitch " + (st > 0 ? "+" : "") + st + " st" : "") + " · " + sec.toFixed(2) + " s = " + bars.toFixed(2) + " bars at " + appBpm() + " BPM · tap ▶ Play";
-    }
-    tS.addEventListener("input", () => { T.exact = 0; paintT(); }); tP.addEventListener("input", paintT);
-    tS.addEventListener("change", renderT); tP.addEventListener("change", renderT);
-    document.getElementById("edStretchReset").addEventListener("click", () => { T.exact = 0; tS.value = 0; tP.value = 0; renderT(); });
-    document.getElementById("edBpmHalf").addEventListener("click", () => { if (T.bpm) { T.bpm /= 2; paintT(); } });
-    document.getElementById("edBpmDbl").addEventListener("click", () => { if (T.bpm) { T.bpm *= 2; paintT(); } });
-    matchBtn.addEventListener("click", () => { if (!T.bpm) return; T.exact = T.bpm / appBpm(); tS.value = sliderFor(T.exact); paintT(); renderT(); });
-    document.querySelectorAll("[data-fit]").forEach(b => b.addEventListener("click", () => {
-      if (!ed.chans) return;
-      const want = +b.dataset.fit * 4 * 60 / appBpm(), have = baseLen() / ed.rate, f = want / have;
-      if (f < 0.25 || f > 4) { edRefresh("That would need " + f.toFixed(2) + "× (the range is ¼× to 4×) · try " + (f < 0.25 ? "more" : "fewer") + " bars"); return; }
-      T.exact = f; tS.value = sliderFor(f); paintT(); renderT();
+    const set = (s, st) => { const i = state.samp.slot; if (!sampOrig[i]) return; const f = fitOf(i); if (s != null) f.s = Math.max(0.25, Math.min(4, s)); if (st != null) f.st = st; save(); paint(); render(i); };
+    lenS.addEventListener("input", () => { lenV.textContent = Math.pow(2, +lenS.value / 100).toFixed(2) + "×"; });
+    pS.addEventListener("input", () => { pV.textContent = (+pS.value > 0 ? "+" : "") + pS.value + " st"; });
+    lenS.addEventListener("change", () => { set(Math.pow(2, +lenS.value / 100), null); lenS.blur(); });
+    pS.addEventListener("change", () => { set(null, +pS.value); pS.blur(); });
+    document.getElementById("sfReset").addEventListener("click", () => set(1, 0));
+    document.getElementById("sfHalf").addEventListener("click", () => { const f = fitOf(state.samp.slot); if (f.bpm) { f.bpm /= 2; save(); paint(); } });
+    document.getElementById("sfDbl").addEventListener("click", () => { const f = fitOf(state.samp.slot); if (f.bpm) { f.bpm *= 2; save(); paint(); } });
+    matchBtn.addEventListener("click", () => { const f = fitOf(state.samp.slot); if (f.bpm) set(f.bpm / appBpm(), null); });
+    el.querySelectorAll("[data-sfit]").forEach(b => b.addEventListener("click", () => {
+      const i = state.samp.slot, o = sampOrig[i]; if (!o) return;
+      const want = +b.dataset.sfit * 4 * 60 / appBpm(), f = want / o.duration;
+      if (f < 0.25 || f > 4) { noteMsg("That would need " + f.toFixed(2) + "× (the range is ¼× to 4×) · try " + (f < 0.25 ? "more" : "fewer") + " bars", true); return; }
+      set(f, null);
     }));
-    // any other edit starts from the new audio; Undo / Revert / opening the editor reset the sliders
-    const op0 = edOp; edOp = function (fn) { resetT(); return op0(fn); };
-    document.getElementById("edUndo").addEventListener("click", resetT, true);
-    const oe0 = openEditor; openEditor = function (target) { const r = oe0(target); resetT(); findBpm(); return r; };
+    // what's already in the slots counts as their originals
+    for (let i = 0; i < NSLOTS; i++) if (sampBuf[i]) sampOrig[i] = sampBuf[i];
+    // the editor works on the slot's original; saving makes the edit the new original
+    const oe0 = openEditor; openEditor = function (target) { if (target && state.engine === "samp" && /^S\d/.test(target.label || "")) { const i = +target.label.slice(1, 2) - 1; if (sampOrig[i]) target.buf = sampOrig[i]; } return oe0(target); };
 
     // Loop for held notes (play mode)
     const loopBtn = document.getElementById("mLoop");
     const paintLoop = () => { const sl = state.samp.slots[state.samp.slot]; loopBtn.setAttribute("aria-pressed", String(!!(sl && sl.loop))); loopBtn.hidden = !sl || sl.mode !== "play"; };
     loopBtn.addEventListener("click", () => { const sl = state.samp.slots[state.samp.slot]; if (!sl) return; sl.loop = !sl.loop; save(); paintLoop(); });
-    const re1 = renderEngine; renderEngine = function () { re1(); paintLoop(); };
-    paintLoop();
+    const re1 = renderEngine; renderEngine = function () { re1(); paintLoop(); paint(); };
+    { const sb0 = setBpm; setBpm = function (b) { sb0(b); paint(); }; }
+    paintLoop(); paint();
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
