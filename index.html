@@ -9900,7 +9900,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const stack = Array.isArray(NB_PRESETS[i][1]) ? NB_PRESETS[i][1] : [NB_PRESETS[i][1]];
       if (x.levels) for (const id in x.levels) if (state.layers[id]) state.layers[id].level = x.levels[id];
       state.octave = x.oct ?? 0;
-      if (x.fx) { Object.assign(state.fx, x.fx); if (ctx) applyFx(); }
+      if (x.fx) { if (typeof FXC !== "undefined" && FXC.mode === "sound") { for (const id of stack) Object.assign(fxcParams(id), x.fx); fxcSave(); } else Object.assign(state.fx, x.fx); if (ctx) applyFx(); }
       for (const id of Object.keys(ENGINES)) if (state.arp[id]) state.arp[id].on = false;   // a classic sound brings its own arp, or none
       if (x.arp) Object.assign(getArp(stack[0]), x.arp, { on: true });
       arpClock(); refreshFxKnobs();
@@ -10008,10 +10008,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // my sounds carry effects and the octave too
   {
     const cs0 = captureSound, as0 = applySound;
-    captureSound = function (name) { const s = cs0(name); const { on, amount, ...rest } = state.fx; s.fx = rest; s.octave = state.octave; return s; };
+    captureSound = function (name) { const s = cs0(name); const { on, amount, ...rest } = (typeof FXC !== "undefined" && FXC.mode === "sound") ? fxcParams(state.engine) : state.fx; s.fx = rest; s.octave = state.octave; return s; };
     applySound = function (s) {
       as0(s);
-      if (s.fx) { Object.assign(state.fx, s.fx); if (ctx) { applyFx(); applyBfx(false); } refreshFxKnobs(); }
+      if (s.fx) { if (typeof FXC !== "undefined" && FXC.mode === "sound") { const ids = Object.keys(s.layers || {}).filter(id => s.layers[id] && s.layers[id].on); for (const id of (ids.length ? ids : [s.engine])) if (id) Object.assign(fxcParams(id), s.fx); fxcSave(); } else Object.assign(state.fx, s.fx); if (ctx) { applyFx(); applyBfx(false); } refreshFxKnobs(); }
       if (typeof s.octave === "number") state.octave = s.octave;
       renderEngine();
     };
@@ -11328,14 +11328,17 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const FXC = { mode: "sound", by: {} };
   try { const s = JSON.parse(localStorage.getItem("nightbloom-fxby") || "null"); if (s && s.by) { FXC.by = s.by; if (s.mode === "global") FXC.mode = "global"; } } catch (e) {}
   let fxcSaveT = 0; const fxcSave = () => { clearTimeout(fxcSaveT); fxcSaveT = setTimeout(() => { try { localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC)); } catch (e) {} }, 150); };
-  const FXC_DRUM = { drive: 0, wobble: 0, echo: 0, space: 0.14, on: true, amount: 1 };
+  const FXC_DRUM = { drive: 0, wobble: 0, echo: 0, space: 0.14, on: true, amount: 1 }, FXC_CLEAN = new Set(["drum", "samp", "pads", "inst"]);
+  // older copies gave the sampler, pads and instruments whatever the synth knobs happened to be (often drive and wobble from a preset):
+  // once, put them back to clean so recordings play as they were recorded
+  try { if (!(FXC.v >= 2)) { for (const id of FXC_CLEAN) if (FXC.by[id]) FXC.by[id] = Object.assign({}, FXC_DRUM); FXC.v = 2; localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC)); } } catch (e) {}
   const fxChan = {};   // sound id -> its chain's nodes (built the first time the sound plays)
   const fxcNames = { drum: "Drums", samp: "Sampler", pads: "Pads", inst: "Instrument" };
   const fxcName = id => ENGINES[id] ? ENGINES[id].short : (typeof NEW_ENGINES !== "undefined" && NEW_ENGINES[id]) ? NEW_ENGINES[id].short : fxcNames[id] || id;
   const fxcCur = () => state.engine;
   let fxcToastT = 0; const fxcToast = msg => { const t = document.getElementById("uiToast"); if (!t) return; t.textContent = msg; t.hidden = false; clearTimeout(fxcToastT); fxcToastT = setTimeout(() => { t.hidden = true; }, 2400); };
   function fxcParams(id) {
-    if (!FXC.by[id]) FXC.by[id] = id === "drum" ? Object.assign({}, FXC_DRUM) : { drive: state.fx.drive, wobble: state.fx.wobble, echo: state.fx.echo, space: state.fx.space, on: true, amount: 1 };
+    if (!FXC.by[id]) FXC.by[id] = FXC_CLEAN.has(id) ? Object.assign({}, FXC_DRUM) : { drive: state.fx.drive, wobble: state.fx.wobble, echo: state.fx.echo, space: state.fx.space, on: true, amount: 1 };
     return FXC.by[id];
   }
   // what the Effects knobs edit: the open sound's chain, or the global settings
