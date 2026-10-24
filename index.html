@@ -2806,11 +2806,11 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       filt.connect(out);
       const spread = p.detune * 45;
       const offsets = [-1, -0.62, -0.28, 0, 0.28, 0.62, 1];
+      const gC = ctx.createGain(), gS = ctx.createGain(); gC.gain.value = 0.16; gS.gain.value = 0.11; gC.connect(filt); gS.connect(filt);
       offsets.forEach((o, i) => {
         const osc = ctx.createOscillator(); osc.type = "sawtooth";
         osc.frequency.value = f; osc.detune.value = o * spread;
-        const g = ctx.createGain(); g.gain.value = i === 3 ? 0.16 : 0.11;
-        osc.connect(g).connect(filt); osc.start(t, Math.random() * 0.01); oscs.push(osc);
+        osc.connect(i === 3 ? gC : gS); osc.start(t, Math.random() * 0.01); oscs.push(osc);
       });
       ampEnv(out, t, attack, 0.32);
     }
@@ -10858,7 +10858,19 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     dial.addEventListener("pointerup", up); dial.addEventListener("pointercancel", up);
     dial.addEventListener("dblclick", () => { const mr = djMatchRate(); if (mr && djBuild()) { djSetRate(FOL(), mr.r); djMsg("Tempos matched · now line up the beats with ◀◀ ▶▶ or Auto sync"); djPaintAll(); } });
   }
-  const djSize = (cv) => { const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return null; if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); } const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); return { c, w, h }; };
+  // canvas sizes are read once and again only when a canvas resizes (reading them every frame forces a layout)
+  const djSz = new WeakMap(), djRO = (() => { try { return new ResizeObserver(es => es.forEach(e => djSz.delete(e.target))); } catch (e) { return null; } })();
+  window.addEventListener("resize", () => { document.querySelectorAll("#djView canvas").forEach(cv => djSz.delete(cv)); });
+  const djSize = (cv) => {
+    const dpr = window.devicePixelRatio || 1; let S = djSz.get(cv);
+    if (!S || S.dpr !== dpr) {
+      const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return null;
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      S = { c: cv.getContext("2d"), w, h, dpr }; djSz.set(cv, S); if (djRO) djRO.observe(cv);
+    }
+    S.c.setTransform(dpr, 0, 0, dpr, 0, 0); return S;
+  };
+  let djFontFam = "";
   function djDrawDial() {
     const S = djSize(dial); if (!S) return; const { c, w, h } = S, cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 6;
     c.clearRect(0, 0, w, h);
@@ -10881,7 +10893,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       c.fillStyle = good ? "#7fd6c2" : near ? amber : "#ff7a8a"; c.beginPath(); c.arc(cx + Math.cos(ad) * Rb, cy + Math.sin(ad) * Rb, 6, 0, 2 * Math.PI); c.fill();
     }
     // readout
-    c.textAlign = "center"; c.fillStyle = col; c.font = "600 22px " + getComputedStyle(document.body).fontFamily;
+    c.textAlign = "center"; c.fillStyle = col; c.font = "600 22px " + (djFontFam || (djFontFam = getComputedStyle(document.body).fontFamily));
     c.fillText(F.bpm0 ? (djEff(F) * F.bend).toFixed(1) : "—", cx, cy + 4);
     c.fillStyle = "#8e86a6"; c.font = "10px ui-monospace, monospace";
     c.fillText(F.buf ? "AB"[F.i] + " BPM" : "deck " + "AB"[F.i] + " empty", cx, cy + 19);
@@ -10908,7 +10920,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     c.fillStyle = "#ece7f7"; c.fillRect(w / 2 - 0.5, 0, 1, h);
   }
   function djDrawWave(d) {
-    const cv = deckEls[d.i].querySelector(".dj-wave"), S = djSize(cv); if (!S) return; const { c, w, h } = S;
+    const cv = d.waveEl || (d.waveEl = deckEls[d.i].querySelector(".dj-wave")), S = djSize(cv); if (!S) return; const { c, w, h } = S;
     const col = d.i === 0 ? lilac : amber;
     if (!d.img || d.img.w !== w || d.img.h !== h) {
       const off = document.createElement("canvas"), dpr = window.devicePixelRatio || 1; off.width = Math.round(w * dpr); off.height = Math.round(h * dpr);
@@ -10930,7 +10942,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function djFrame(t) {
     DJ.raf = 0; if (djEl.hidden) return;
     DJ.decks.forEach(djDrawWave); djDrawAlign(); djDrawDial();
-    DJ.decks.forEach(d => { const on = d.playing && d.bpm0 && djPhaseAt(d, 0) < 0.15; deckEls[d.i].querySelector(".dj-beat").classList.toggle("on", !!on); });
+    DJ.decks.forEach(d => { const on = d.playing && d.bpm0 && djPhaseAt(d, 0) < 0.15; (d.beatEl || (d.beatEl = deckEls[d.i].querySelector(".dj-beat"))).classList.toggle("on", !!on); });
     if (t - djLastPaint > 250) { djLastPaint = t; DJ.decks.forEach(djPaintDeck); djSyncInfo(); }
     DJ.raf = requestAnimationFrame(djFrame);
   }
@@ -11929,7 +11941,7 @@ registerProcessor("nb-capture", NBCap);`;
     djDrawWave = function (d) {
       dw0(d);
       if (!d.buf || d.phrase == null) return;
-      const cv = deckEls[d.i].querySelector(".dj-wave"), c = cv.getContext("2d"), w = cv.clientWidth, h = cv.clientHeight, x = d.phrase / d.buf.duration * w;
+      const S = djSize(d.waveEl || (d.waveEl = deckEls[d.i].querySelector(".dj-wave"))); if (!S) return; const { c, w, h } = S, x = d.phrase / d.buf.duration * w;
       c.fillStyle = "#ffe066"; c.fillRect(x - 1, 0, 2, h); c.font = "bold 8px ui-monospace, monospace"; c.textAlign = "left"; c.fillText("P", x + 3, h - 3);
     };
     const rs1 = djRestore;
@@ -12530,6 +12542,29 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     document.getElementById("reportCancel").addEventListener("click", () => { rSheet.hidden = true; });
     document.getElementById("reportGo").addEventListener("click", () => { rSheet.hidden = true; REPORT_NOTE = rNote.value.trim(); add("note", REPORT_NOTE); capInit().then(makeReport, makeReport); rNote.value = ""; });
   }
+  // ---------- one place decides how a sound's effects chain is wired ----------
+  // full: the chain's dry, echo and hall send go out. lean: none of its effects are in use, so the sound goes
+  // straight out and the chain (drive, the wobble oscillators, the echo loop) is left unconnected: the audio
+  // engine skips nodes that nothing listens to. parked: quiet for a while, nothing connected at all.
+  function fxcEdges(c, w) {
+    if (w.parked) return [];
+    if (w.lean) return [[c.input, w.to]];
+    return [[c.dry, w.to], [c.echoOut, w.to], [c.verbSend, fx.verbIn]];
+  }
+  function fxcWire(c, patch) {
+    if (!c) return;
+    const was = c.w || { parked: false, lean: false, to: fx.master }, now = Object.assign({}, was, patch);
+    if (!now.to) now.to = fx.master;
+    const A = fxcEdges(c, was), N = fxcEdges(c, now), same = (x, y) => x[0] === y[0] && x[1] === y[1];
+    A.forEach(e => { if (!N.some(n => same(n, e))) { try { e[0].disconnect(e[1]); } catch (er) {} } });
+    N.forEach(e => { if (!A.some(o => same(o, e))) { try { e[0].connect(e[1]); } catch (er) {} } });
+    c.w = now; c.parked = now.parked; c.outTo = now.to;
+  }
+  // a chain is lean when nothing it does would be heard
+  function fxcLean(id) {
+    const a = fxcAmt(id), f = state.fx;
+    return !(a > 0.001 && ((f.drive || 0) > 0.001 || (f.wobble || 0) > 0.001 || (f.echo || 0) > 0.001 || (f.space || 0) > 0.001));
+  }
   // ---------- resource diet: nothing processes unless it can be heard ----------
   {
     // 1. FX Lab stages: "off" used to mean volume 0 while still processing every sample. Now an off stage is unplugged
@@ -12560,8 +12595,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
 
     // 2. per-sound effect chains park after 20 s without a note on that sound (and nothing still sounding)
     const PARK_AFTER = 20;
-    const park = c => { if (c.parked) return; const to = c.outTo || fx.master; try { c.dry.disconnect(to); } catch (e) {} try { c.echoOut.disconnect(to); } catch (e) {} try { c.verbSend.disconnect(fx.verbIn); } catch (e) {} c.parked = true; };
-    const unpark = c => { if (!c.parked) return; const to = c.outTo || fx.master; c.dry.connect(to); c.echoOut.connect(to); c.verbSend.connect(fx.verbIn); c.parked = false; };
+    const park = c => { if (!c.parked) fxcWire(c, { parked: true }); };
+    const unpark = c => { if (c.parked) fxcWire(c, { parked: false }); };
     { const g0 = fxcGet; fxcGet = function (id) { const c = g0(id); if (c) { c.lastUse = ctx.currentTime; if (c.parked) unpark(c); } return c; }; }
     setInterval(() => {
       if (!ctx || document.hidden) return;
@@ -12589,7 +12624,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       let sig = "", still = 0;
       const f0 = djFrame; djFrame = function (t) {
         const moving = DJ.trans || DJ.decks.some(d => d.playing) || DJ.beat || DJ.padPlay && DJ.padPlay.some(Boolean);
-        const now = JSON.stringify([DJ.decks.map(d => [d.p0, d.rate, d.bend, !!d.loop, d.cue, d.cues, d.phrase, d.stem, d.bpm0, d.off, d.stemProg]), DJ.xf, DJ.lead, DJ.sync, innerWidth, innerHeight]);
+        if (moving) { still = 0; sig = ""; return f0(t); }   // playing: just draw, nothing to compare
+        const now = JSON.stringify([DJ.decks.map(d => [d.p0, d.rate, d.bend, !!d.loop, d.cue, d.cues, d.phrase, d.bpm0, d.off]), DJ.xf, DJ.lead, DJ.sync, innerWidth, innerHeight]);
         if (!moving && now === sig && ++still > 3) { DJ.raf = requestAnimationFrame(djFrame); if (djView.hidden) { cancelAnimationFrame(DJ.raf); DJ.raf = 0; } return; }
         if (now !== sig) still = 0; sig = now;
         return f0(t);
@@ -12609,10 +12645,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     // route each sound's chain: picked → effects and FX Lab; not picked → straight out
     function routeChain(id) {
       const c = fxChan[id]; if (!c) return;
-      const to = fxcOn(id) ? fx.master : (dryBus() || fx.master);
-      if (c.outTo === to) return;
-      if (!c.parked) { try { c.dry.disconnect(c.outTo || fx.master); } catch (e) {} try { c.echoOut.disconnect(c.outTo || fx.master); } catch (e) {} c.dry.connect(to); c.echoOut.connect(to); }
-      c.outTo = to;
+      fxcWire(c, { to: fxcOn(id) ? fx.master : (dryBus() || fx.master), lean: fxcLean(id) });
     }
     { const fa = fxcApply; fxcApply = function (id) { fa(id); routeChain(id); }; }
     const DEFAULT_ON = id => !["drum", "samp", "pads", "inst", "dj"].includes(id);
@@ -12690,6 +12723,59 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     try { const db = await idb(); await new Promise(res => { const tx = db.transaction("samples", "readwrite"); tx.objectStore("samples").delete(IDBKeyRange.bound("stems:", "stems:￿")); tx.oncomplete = tx.onerror = tx.onabort = () => res(); }); } catch (e) {}
     try { localStorage.setItem("nightbloom-sepgone", "1"); } catch (e) {}
   }, 8000);
+  // ---------- one frame clock for every drawing loop, capped at 30 frames a second ----------
+  // The tablet's screen runs at 90 Hz and some iPhones at 120: drawing the scope, the decks and the meters at that
+  // rate costs 3-4x what anyone can see. Every requestAnimationFrame joins one queue that runs at most every 33 ms.
+  (() => {
+    const raf0 = window.requestAnimationFrame.bind(window);
+    let q = new Map(), seq = 0, pending = 0, last = -1e9;
+    const MIN = 1000 / 30 - 3;
+    function pump(t) {
+      pending = 0;
+      if (t - last < MIN) { pending = raf0(pump); return; }
+      last = t; const run = q; q = new Map();
+      run.forEach(cb => { try { cb(t); } catch (e) { setTimeout(() => { throw e; }, 0); } });
+      if (q.size && !pending) pending = raf0(pump);
+    }
+    window.requestAnimationFrame = cb => { const id = ++seq; q.set(id, cb); if (!pending) pending = raf0(pump); return id; };
+    window.cancelAnimationFrame = id => { q.delete(id); };
+  })();
+  // ---------- Motion stage: out of the master path while no LFO runs and the XY pad rests ----------
+  {
+    const neutral = () => {
+      if (betaOn && mo.lfo.some(L => L.on)) return false;
+      const moved = (target, v) => target === "filter" ? v < 0.985 : target === "pan" ? Math.abs(v - 0.5) > 0.01 : false;
+      return !(betaOn && (moved(mo.xyX, mo.x) || moved(mo.xyY, mo.y)));
+    };
+    function moSync(force) {
+      if (!BM || !B || !fx || !fx.master) return;
+      const by = !force && neutral();
+      if (by === !!BM.bypass) return;
+      if (by) { try { fx.master.disconnect(BM.modFilter); } catch (e) {} fx.master.connect(B.densIn); }
+      else { try { fx.master.disconnect(B.densIn); } catch (e) {} fx.master.connect(BM.modFilter); }
+      BM.bypass = by;
+    }
+    const ma0 = motionApply;
+    motionApply = function () {
+      const r = ma0.apply(this, arguments);
+      moSync();
+      const xa = xyApply; xyApply = (dx, dy) => { moSync(true); xa(dx, dy); clearTimeout(moSync.t); moSync.t = setTimeout(() => moSync(), 400); };
+      return r;
+    };
+    setTimeout(() => { try { motionApply(); } catch (e) {} }, 0);
+  }
+  // ---------- previews (kit browser, editor, takes) play clean; the old global chain's effects stop running ----------
+  {
+    const bc = buildChain;
+    buildChain = function () {
+      const r = bc.apply(this, arguments);
+      try { fx.dry.disconnect(fx.master); } catch (e) {} try { fx.echoOut.disconnect(fx.master); } catch (e) {}
+      try { if (fx.verbSend) fx.verbSend.disconnect(fx.verbIn); } catch (e) {}
+      try { fx.input.disconnect(fx.driveIn); } catch (e) {}
+      fx.input.connect(fx.master);
+      return r;
+    };
+  }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
@@ -12820,6 +12906,9 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
 
   // ---------- Scope ----------
   const scope = document.getElementById("scope"), sctx = scope.getContext("2d");
+  const scopeSz = { w: 0, h: 0 };
+  try { new ResizeObserver(() => { scopeSz.w = 0; }).observe(scope); } catch (e) {}
+  window.addEventListener("resize", () => { scopeSz.w = 0; });
   const lilac = getComputedStyle(document.documentElement).getPropertyValue("--lilac").trim() || "#c4a3ff";
   let wave = null;
   const amber = getComputedStyle(document.documentElement).getPropertyValue("--amber").trim() || "#ffb65c";
@@ -12874,7 +12963,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   }
   function draw() {
     const dpr = window.devicePixelRatio || 1;
-    const w = scope.clientWidth, h = scope.clientHeight;
+    if (!scopeSz.w) { scopeSz.w = scope.clientWidth; scopeSz.h = scope.clientHeight; }
+    const w = scopeSz.w, h = scopeSz.h;
     if (scope.width !== Math.round(w * dpr)) { scope.width = Math.round(w * dpr); scope.height = Math.round(h * dpr); }
     sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     sctx.clearRect(0, 0, w, h);
@@ -12889,8 +12979,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       // trigger on rising zero crossing for a stable trace
       let s = 0;
       for (let i = 1; i < wave.length / 2; i++) if (wave[i - 1] < 0 && wave[i] >= 0) { s = i; break; }
-      const n = wave.length / 2;
-      for (let i = 0; i < n; i++) {
+      const n = wave.length / 2, stp = Math.max(1, Math.floor(n / Math.max(64, w / 2)));   // one point per ~2 px is all a screen shows
+      for (let i = 0; i < n; i += stp) {
         const x = (i / (n - 1)) * w, y = h / 2 - wave[s + i] * h * 0.9;
         i ? sctx.lineTo(x, y) : sctx.moveTo(x, y);
       }
