@@ -935,6 +935,12 @@ body.trk-open { overflow: hidden; }
 .dj-syncinfo { font-family: var(--font-mono); font-size: 0.7rem; text-align: center; min-height: 1.4em; font-variant-numeric: tabular-nums; }
 .dj-syncinfo.ok { color: #7fd6c2; } .dj-syncinfo.near { color: var(--amber); } .dj-syncinfo.off { color: #ff7a8a; }
 .dj-autorow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; }
+.dj-bothrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto; gap: 6px; }
+.dj-bothrow #djBothPlay[data-on="1"] { background: #7fd6c2; border-color: #7fd6c2; }
+.dj-bothrow #djLink[aria-pressed="true"], .dj-bothrow #djQuant[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.dj-cues .btn[data-c][aria-pressed="true"] { background: var(--hc, #7fd6c2); border-color: var(--hc, #7fd6c2); color: var(--panel); }
+.dj-cues .btn[data-c][aria-pressed="false"] { border-color: var(--hc, var(--line)); border-style: dashed; }
+.dj-cue.prev { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
 .dj .btn.dj-auto { height: 46px; font-size: 0.95rem; letter-spacing: 0.04em; }
 .dj-xf { display: grid; grid-template-columns: 18px minmax(0, 1fr) 18px; align-items: center; gap: 8px; }
 .dj-xf b { font-family: var(--font-display); font-size: 0.85rem; text-align: center; }
@@ -1573,6 +1579,12 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
         <button class="btn primary dj-auto" id="djAuto" aria-pressed="false">AUTO SYNC</button>
         <button class="btn" id="djJumpR" title="Move the other song forward exactly one beat">+1 beat</button>
       </div>
+      <div class="dj-bothrow">
+        <button class="btn primary" id="djBothPlay" title="Start both decks at the same moment (the other comes in on the lead's beat) · stops both when both are playing">▶ Both</button>
+        <button class="btn" id="djBothTop" title="Both decks back to their first beat and start together">⏮ Both</button>
+        <button class="btn" id="djLink" aria-pressed="true" title="Link: start a deck within 1.5 s of the other and it joins it, as if you'd pressed both at once">Link</button>
+        <button class="btn" id="djQuant" aria-pressed="true" title="Q: hot cue jumps wait for the next beat so the rhythm carries on">Q</button>
+      </div>
       <label class="dj-xf"><b>A</b><input type="range" id="djXf" min="0" max="1" step="0.01" value="0.5" aria-label="Crossfader"><b>B</b></label>
       <div class="dj-cap">Crossfader · double-tap to centre</div>
     </section>
@@ -1657,7 +1669,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
       <p><b>Load</b> a song on each deck (a file, or anything already in a sampler slot or the bank). The tempo (BPM) and the beat grid are found automatically. If the BPM looks doubled or halved, use <b>½×</b> / <b>2×</b>; if it's wrong, tap <b>Tap</b> along with 4+ beats.</p>
       <p><b>AUTO SYNC</b> matches the other song's tempo to the lead song and lines up the beats, starting it if it's stopped. While it's lit, the songs stay locked: change the lead's tempo and the other follows.</p>
       <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
-      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> sets a spot when stopped and jumps back to it while playing; <b>⏮</b> restarts the song from the beginning; the four <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is, tap it again to jump there (on the beat), hold it to clear. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
+      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it); hold to clear. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
@@ -10765,7 +10777,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (!raw && d.buf && d.buf.duration < 90) raw = bufferToWav(d.buf);
     djIdbPut("deck" + d.i, raw ? { name: d.name, data: raw, bpm: d.bpm0, off: d.off } : null);
   }
-  const djStoreGrid = d => { djIdbGet("deck" + d.i).then(r => { if (r) { r.bpm = d.bpm0; r.off = d.off; r.cues = d.cues; r.phrase = d.phrase; djIdbPut("deck" + d.i, r); } }); };
+  const djStoreGrid = d => { djIdbGet("deck" + d.i).then(r => { if (r) { r.bpm = d.bpm0; r.off = d.off; r.cues = d.cues; r.cue = d.cue; r.phrase = d.phrase; djIdbPut("deck" + d.i, r); } }); };
   async function djIdbPut(key, val) { try { const db = await idb(), st = db.transaction("samples", "readwrite").objectStore("samples"); if (val) st.put(val, key); else st.delete(key); } catch (e) {} }
   async function djIdbGet(key) { try { const db = await idb(); return await new Promise(res => { const r = db.transaction("samples").objectStore("samples").get(key); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); } catch (e) { return null; } }
   async function djRestore() {
@@ -10775,7 +10787,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     for (const d of DJ.decks) {
       if (d.buf) continue;
       const r = await djIdbGet("deck" + d.i);
-      if (r && r.data) { try { await djLoad(d, await decode(r.data.slice(0)), r.name, false, { bpm: r.bpm, off: r.off }); if (Array.isArray(r.cues)) d.cues = r.cues.slice(0, 4).concat([null, null, null, null]).slice(0, 4); djPaintDeck(d); } catch (e) {} }
+      if (r && r.data) { try { await djLoad(d, await decode(r.data.slice(0)), r.name, false, { bpm: r.bpm, off: r.off }); if (Array.isArray(r.cues)) d.cues = r.cues.slice(0, 4).concat([null, null, null, null]).slice(0, 4); if (r.cue != null && r.cue < d.buf.duration) { d.cue = r.cue; if (!d.playing) d.p0 = r.cue; } djPaintDeck(d); } catch (e) {} }
     }
     djMsgEl.textContent = djHint();
   }
@@ -10985,8 +10997,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const tempo = q(".dj-tempo"), pct = (d.rate - 1) * 100;
     if (document.activeElement !== tempo) tempo.value = Math.max(-25, Math.min(25, pct));
     q(".dj-speed output").textContent = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
-    el.querySelectorAll(".dj-cues .btn").forEach(b => { const v = d.cues[+b.dataset.c]; b.setAttribute("aria-pressed", String(v != null)); b.textContent = v != null ? (+b.dataset.c + 1) + " · " + djFmt(v) : String(+b.dataset.c + 1); });
-    el.querySelectorAll(".dj-loops .btn").forEach(b => b.setAttribute("aria-pressed", String(!!d.loop && d.loop.n === +b.dataset.n)));
+    el.querySelectorAll(".dj-cues .btn[data-c]").forEach(b => { const v = d.cues[+b.dataset.c]; b.setAttribute("aria-pressed", String(v != null)); b.textContent = v != null ? (+b.dataset.c + 1) + " · " + djFmt(v) : String(+b.dataset.c + 1); });
+    el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.setAttribute("aria-pressed", String(!!d.loop && d.loop.n === +b.dataset.n)));
     el.querySelectorAll("[data-eq]").forEach(r => {
       const k = r.dataset.eq, v = d.eq[k]; r.value = v;
       r.nextElementSibling.textContent = k === "vol" ? Math.round(v * 100) + "%" : k === "filt" ? (Math.abs(v) < 0.02 ? "off" : v < 0 ? "low-p" : "high-p") : v <= -25.5 ? "kill" : (v > 0 ? "+" : "") + v + " dB";
@@ -11142,7 +11154,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     c.save(); c.beginPath(); c.rect(0, 0, px, h); c.clip(); c.drawImage(d.img.cv, 0, 0, w, h); c.restore();
     if (d.loop) { c.fillStyle = "rgba(127,214,194,0.22)"; c.fillRect(d.loop.a / dur * w, 0, Math.max(2, (d.loop.b - d.loop.a) / dur * w), h); }
     c.fillStyle = "#7fd6c2"; c.fillRect(d.cue / dur * w - 1, h - 8, 2, 8);
-    d.cues.forEach((v, k) => { if (v == null) return; const x = v / dur * w; c.fillStyle = "#7fd6c2"; c.beginPath(); c.moveTo(x - 5, 0); c.lineTo(x + 5, 0); c.lineTo(x, 7); c.fill(); c.fillStyle = "#0f0d16"; c.font = "bold 8px ui-monospace, monospace"; c.textAlign = "center"; c.fillText(String(k + 1), x, 6); });
+    d.cues.forEach((v, k) => { if (v == null) return; const x = v / dur * w; c.fillStyle = DJ_HC_COL[k]; c.beginPath(); c.moveTo(x - 5, 0); c.lineTo(x + 5, 0); c.lineTo(x, 7); c.fill(); c.fillStyle = "#0f0d16"; c.font = "bold 8px ui-monospace, monospace"; c.textAlign = "center"; c.fillText(String(k + 1), x, 6); });
     c.fillStyle = "#ece7f7"; c.fillRect(px - 1, 0, 2, h);
   }
   let djLastPaint = 0;
@@ -11837,7 +11849,7 @@ registerProcessor("nb-stretch", NBStretch);`;
       d.st.port.onmessage = e => {
         const m = e.data;
         if (m.ended) { if (d.src && d.src.isStretch && d.src.onended) d.src.onended(); }
-        else if (m.pos != null && d.playing && d.src && d.src.isStretch) { const want = djPos(d); if (Math.abs(m.pos - want) > 0.025 && !d.loop) { d.p0 = m.pos; d.t0 = ctx.currentTime; } }
+        else if (m.pos != null && d.playing && d.src && d.src.isStretch && ctx.currentTime > d.t0 + 0.15) { const want = djPos(d); if (Math.abs(m.pos - want) > 0.025 && !d.loop) { d.p0 = m.pos; d.t0 = ctx.currentTime; } }
       };
     }
     const i16 = a => { const o = new Int16Array(a.length); for (let i = 0; i < a.length; i++) { const v = a[i]; o[i] = v >= 1 ? 32767 : v <= -1 ? -32767 : v * 32767; } return o; };
@@ -13828,6 +13840,138 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     paintInstall(); window.addEventListener("appinstalled", () => setTimeout(paintInstall, 300));
     try { matchMedia("(display-mode: standalone)").addEventListener("change", paintInstall); } catch (e) {}
     document.getElementById("reportBtn").addEventListener("click", () => { document.getElementById("helpSheet").hidden = true; });
+  }
+  // ======================================================================
+  // DJ: start both decks together, link near-simultaneous starts, CDJ-style Cue, coloured quantized hot cues
+  // ======================================================================
+  const DJ_HC_COL = ["#7fd6c2", "#7fb0ff", "#ffb65c", "#ff7ab8"];
+  {
+    const LINK_WIN = 1.5;
+    DJ.link = true; DJ.quant = true;
+    try { const o = JSON.parse(localStorage.getItem("nightbloom-djopts") || "{}"); if (o.link === false) DJ.link = false; if (o.quant === false) DJ.quant = false; } catch (e) {}
+    const saveOpts = () => { try { localStorage.setItem("nightbloom-djopts", JSON.stringify({ link: DJ.link, quant: DJ.quant })); } catch (e) {} };
+    const firstBeat = d => { if (!d.bpm0) return 0; const p = djPer(d); return ((d.off % p) + p) % p; };
+    const topOf = d => { const fb = firstBeat(d); return fb < 1.2 ? fb : 0; };
+    const lastStart = [-1e9, -1e9];
+    DJ.lastStart = lastStart;
+    const otherPlaying = d => DJ.decks[1 - d.i].playing;
+    // a deck started soon after the other joins it: it plays as if both had been pressed at the same moment
+    const locked = (d, o) => DJ.sync && o.bpm0 && d.bpm0;
+    // start d from \`from\` on the playing deck o's beat (sync on): o leads, d comes in at the nearest matching beat
+    const inOnBeat = (d, o, from) => { DJ.lead = o.i; d.playing = false; d.p0 = Math.max(0, Math.min(from, d.buf.duration - 0.05)); if (!djAlign(true)) djStartSrc(d, ctx.currentTime + 0.02, d.p0); };
+    function joinOther(d, from) {
+      const o = DJ.decks[1 - d.i];
+      if (!DJ.link || !o.playing || !o.buf || !ctx) return false;
+      const now = ctx.currentTime + 0.03;
+      if (now - lastStart[o.i] > LINK_WIN) return false;
+      const at = Math.max(now, lastStart[o.i]), ahead = Math.max(0, at - lastStart[o.i]) * d.rate * d.bend, p = Math.min(from + ahead, d.buf.duration - 0.05);
+      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      if (locked(d, o)) inOnBeat(d, o, p); else djStartSrc(d, at, p);
+      lastStart[d.i] = lastStart[o.i];
+      djMsg("Deck " + "AB"[d.i] + " joined " + "AB"[o.i] + ": started together" + (ahead > 0.02 ? " (caught up " + ahead.toFixed(2) + " s)" : ""));
+      return true;
+    }
+    const startDeck = (d, from, msg) => {
+      if (d.loop && (from < d.loop.a || from >= d.loop.b)) djLoop(d, 0);
+      if (!joinOther(d, from)) {
+        const o = DJ.decks[1 - d.i];
+        if (o.playing && locked(d, o)) inOnBeat(d, o, from); else djStartSrc(d, ctx.currentTime + 0.02, from);
+        lastStart[d.i] = d.t0;
+        if (msg) djMsg(msg);
+      }
+      if (DJ.auto) djTickOn();
+    };
+    // ▶: a stopped deck may join the other; ▶ while previewing from Cue keeps it playing
+    { const pl = djPlay; djPlay = function (d, on) {
+        if (d.cuePrev && (on == null || on)) { d.cuePrev = false; paintCue(d); djPaintAll(); return; }
+        if (on == null) on = !d.playing;
+        if (on && !d.playing && d.buf && djBuild()) {
+          if (d.p0 >= d.buf.duration - 0.05) d.p0 = 0;
+          if (joinOther(d, d.p0)) { if (DJ.auto) djTickOn(); djPaintAll(); return; }
+        }
+        const r = pl.call(this, d, on); if (on && d.playing) lastStart[d.i] = d.t0; return r;
+      }; }
+    function paintCue(d) { const b = deckEls[d.i].querySelector(".dj-cue"); if (b) b.classList.toggle("prev", !!d.cuePrev); }
+    function hotJump(d, p, k) {
+      if (!djBuild()) return;
+      if (!d.playing) { startDeck(d, p, "Deck " + "AB"[d.i] + " from hot cue " + (k + 1) + " (" + djFmt(p) + ")"); djPaintAll(); return; }
+      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      let at = ctx.currentTime + 0.01;
+      if (DJ.quant && d.bpm0) { const per = djPer(d), sp = d.rate * d.bend; let wait = (1 - djPhaseAt(d, 0)) * per / sp; if (wait < 0.03) wait += per / sp; at = ctx.currentTime + wait; }
+      djStartSrc(d, at, p); const onBeat = DJ.quant && d.bpm0;
+      if (!onBeat && DJ.sync && LEAD().playing && FOL().playing) setTimeout(() => djAlign(false), Math.max(40, (at - ctx.currentTime) * 1000 + 40));
+      djMsg("Hot cue " + (k + 1) + " (" + djFmt(p) + ")" + (onBeat ? " on the next beat" : ""));
+      djPaintDeck(d);
+    }
+    deckEls.forEach((el, i) => {
+      const d = DJ.decks[i];
+      const swap = sel => { const old = el.querySelector(sel), nb = old.cloneNode(true); old.replaceWith(nb); return nb; };   // drop the old handlers
+      // ⏮: the song's first beat, playing; two restarts close together start together
+      const rb = swap(".dj-restart"); rb.title = "Back to the first beat and play · restart both decks within 1.5 s and they start together";
+      rb.addEventListener("click", () => {
+        if (!d.buf) { djLoadMenu(d); return; } if (!djBuild()) return;
+        d.cuePrev = false; startDeck(d, topOf(d), "Deck " + "AB"[d.i] + ": " + (d.name || "the song") + " from the top"); djPaintAll();
+      });
+      // Cue, CDJ style
+      const cb = swap(".dj-cue"); cb.title = "Stopped: tap to set the cue here, hold to hear it from the cue · Playing: back to the cue, stopped";
+      cb.addEventListener("pointerdown", e => {
+        e.preventDefault(); if (!d.buf) { djMsg("Load a song on " + "AB"[d.i] + " first"); return; } if (!djBuild()) return;
+        try { cb.setPointerCapture(e.pointerId); } catch (er) {}
+        if (d.playing) { djPlay(d, false); d.p0 = d.cue; djMsg("Back to the cue (" + djFmt(d.cue) + ") on " + "AB"[d.i] + " · hold Cue to hear it, ▶ to go"); djPaintAll(); return; }
+        if (Math.abs(d.p0 - d.cue) < 0.03) { d.cuePrev = true; djStartSrc(d, ctx.currentTime + 0.01, d.cue); paintCue(d); djPaintAll(); return; }
+        d.cue = d.bpm0 ? Math.max(0, djBeatFloor(d, d.p0 + djPer(d) / 2)) : d.p0; d.p0 = d.cue; djStoreGrid(d);
+        djMsg("Cue set at " + djFmt(d.cue) + " on " + "AB"[d.i] + " · hold Cue to hear it, ▶ to play"); djPaintDeck(d);
+      });
+      const cueUp = () => { if (!d.cuePrev) return; d.cuePrev = false; if (d.playing) { djStopSrc(d, ctx.currentTime); d.playing = false; } d.p0 = d.cue; paintCue(d); djPaintAll(); };
+      cb.addEventListener("pointerup", cueUp); cb.addEventListener("pointercancel", cueUp); cb.addEventListener("lostpointercapture", cueUp);
+      cb.addEventListener("contextmenu", e => e.preventDefault());
+      // hot cues
+      el.querySelectorAll(".dj-cues .btn[data-c]").forEach(old => {
+        const b = old.cloneNode(true); old.replaceWith(b); const k = +b.dataset.c; let hold = 0, held = false;
+        b.style.setProperty("--hc", DJ_HC_COL[k]);
+        b.title = "Empty: tap to set it here · Set: tap to jump there (a stopped deck starts from it) · hold to clear";
+        b.addEventListener("pointerdown", e => { e.preventDefault(); held = false; clearTimeout(hold); if (d.cues[k] != null) hold = setTimeout(() => { held = true; d.cues[k] = null; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " cleared"); }, 550); });
+        b.addEventListener("pointerup", () => {
+          clearTimeout(hold); if (held) { held = false; return; }
+          if (!d.buf) { djMsg("Load a song on " + "AB"[d.i] + " first"); return; }
+          if (d.cues[k] == null) { const p = djPos(d); d.cues[k] = d.bpm0 ? Math.max(0, djBeatFloor(d, p + djPer(d) / 2)) : p; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " set at " + djFmt(d.cues[k]) + " on " + "AB"[d.i] + " · tap to jump there, hold to clear"); return; }
+          hotJump(d, d.cues[k], k);
+        });
+        b.addEventListener("pointerleave", () => clearTimeout(hold)); b.addEventListener("pointercancel", () => clearTimeout(hold)); b.addEventListener("contextmenu", e => e.preventDefault());
+      });
+    });
+    // a new song's cue point is its first beat
+    { const dl = djLoad; djLoad = async function (d) { const r = await dl.apply(this, arguments); if (d.buf && d.cue === 0 && d.bpm0) { const fb = firstBeat(d); if (fb > 0.005 && fb < 2) { d.cue = fb; if (!d.playing && d.p0 === 0) d.p0 = fb; djPaintDeck(d); } } return r; }; }
+    // both decks at once
+    function bothGo(top) {
+      if (!djBuild()) return;
+      const A = DJ.decks[0], B = DJ.decks[1];
+      if (!A.buf || !B.buf) { djMsg("Load a song on both decks first"); return; }
+      if (!top && A.playing && B.playing) { const t = ctx.currentTime + 0.01; [A, B].forEach(d => { d.p0 = djPos(d); djStopSrc(d, t); d.playing = false; d.cuePrev = false; }); djMsg("Both decks stopped together"); djPaintAll(); return; }
+      if (!top && A.playing !== B.playing) DJ.lead = A.playing ? 0 : 1;   // the one already playing leads and keeps going
+      const at = ctx.currentTime + 0.08, L = LEAD(), F = FOL(), grids = L.bpm0 && F.bpm0;
+      if (DJ.sync && grids) { const mr = djMatchRate(); if (mr) { if (mr.m !== 1) { F.bpm0 *= mr.m; F.off = ((F.off % djPer(F)) + djPer(F)) % djPer(F); } F.rate = Math.max(0.5, Math.min(2, mr.r)); F.bend = 1; } }
+      const fromOf = d => top ? topOf(d) : d.playing ? djPos(d) + (at - ctx.currentTime) * d.rate * d.bend : (d.p0 >= d.buf.duration - 0.05 ? 0 : d.p0);
+      const fL = fromOf(L); let fF = fromOf(F);
+      if (!top && grids) { const phL = frac((fL - L.off) / djPer(L)), pF = djPer(F); fF = F.off + (Math.round((fF - F.off) / pF - phL) + phL) * pF; if (fF < 0) fF += pF; }   // in on the lead's beat
+      const go = (d, f) => { d.cuePrev = false; if (d.loop && (f < d.loop.a || f >= d.loop.b)) djLoop(d, 0); djStartSrc(d, at, Math.min(f, d.buf.duration - 0.05)); lastStart[d.i] = at; };
+      if (top || !L.playing) go(L, fL);
+      go(F, fF);
+      if (DJ.auto) djTickOn();
+      djMsg(top ? "Both decks from their first beat, together" : "Both decks started together" + (grids ? ", " + "AB"[F.i] + " on " + "AB"[L.i] + "'s beat" : ""));
+      djPaintAll();
+    }
+    const bp = document.getElementById("djBothPlay"), bt = document.getElementById("djBothTop"), lk = document.getElementById("djLink"), qb = document.getElementById("djQuant");
+    bp.addEventListener("click", () => bothGo(false)); bt.addEventListener("click", () => bothGo(true));
+    lk.addEventListener("click", () => { DJ.link = !DJ.link; saveOpts(); paintBoth(); djMsg(DJ.link ? "Link on: start a deck within 1.5 s of the other and they start together" : "Link off: each deck starts exactly when you press it"); });
+    qb.addEventListener("click", () => { DJ.quant = !DJ.quant; saveOpts(); paintBoth(); djMsg(DJ.quant ? "Q on: hot cue jumps wait for the next beat" : "Q off: hot cue jumps happen right away"); });
+    function paintBoth() {
+      const both = DJ.decks.every(d => d.playing);
+      bp.textContent = both ? "■ Both" : "▶ Both"; bp.dataset.on = both ? "1" : "0";
+      lk.setAttribute("aria-pressed", String(!!DJ.link)); qb.setAttribute("aria-pressed", String(!!DJ.quant));
+    }
+    { const pa = djPaintAll; djPaintAll = function () { const r = pa.apply(this, arguments); paintBoth(); return r; }; }
+    paintBoth();
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
