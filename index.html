@@ -866,27 +866,11 @@ body.trk-open { overflow: hidden; }
 #nsInput { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); padding: 0 12px; font-size: 1rem; font-family: var(--font-body); width: 100%; box-sizing: border-box; }
 
 
-/* vocal isolation */
-#vocalSheet { z-index: 34; }
-.vx-bar { height: 6px; border-radius: 3px; background: var(--raised); overflow: hidden; }
-.vx-bar i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width 0.15s linear; }
-#vocalSheet.busy .mx-row, #vocalSheet.busy .seg, #vocalSheet.busy #vxPrev, #vocalSheet.busy #vxPrevOrig, #vocalSheet.busy .vx-acts { opacity: 0.45; pointer-events: none; }
-#vocalSheet .ed-card > * { flex-shrink: 0; }   /* a scrolling sheet must not squash its rows */
-.vx-acts { display: grid; gap: 8px; }
-.vx-acts .btn { height: auto; min-height: 52px; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; text-align: left; padding: 8px 14px; white-space: normal; }
-.vx-acts .btn b { font-size: 0.95rem; }
-.vx-acts .btn small { font-family: var(--font-mono); font-size: 0.6rem; opacity: 0.75; font-weight: 400; line-height: 1.3; }
-.vx-acts .btn[hidden] { display: none; }
-@media (min-width: 700px) { .vx-acts { grid-template-columns: 1fr 1fr; } }
 .ed-legend { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); line-height: 1.5; }
 .ed-legend b { color: var(--ink); font-weight: 600; }
 
-#vocalSheet .seg.small { align-self: flex-start; }
-#vocalSheet .mx-row { grid-template-columns: minmax(0, 1.3fr) minmax(90px, 1fr) 52px; }
 
 
-#vxQuality .seg button { padding: 7px 12px; }
-#vxAiNote { font-family: var(--font-mono); font-size: 0.62rem; color: #7fd6c2; text-align: left; }
 
 /* ---------- DJ ---------- */
 .dj { position: fixed; inset: 0; z-index: 26; background: var(--panel); display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overscroll-behavior: contain;
@@ -1041,9 +1025,6 @@ body.trk-open { overflow: hidden; }
 .job .jb i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width 0.15s linear; }
 .job.wait .jb i { width: 40%; background: linear-gradient(90deg, transparent, var(--lilac), transparent); animation: jobwait 1.1s ease-in-out infinite; will-change: transform; }
 @keyframes jobwait { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-.dj-prog { height: 4px; border-radius: 2px; background: var(--raised); overflow: hidden; margin-top: 3px; }
-.dj-prog i { display: block; height: 100%; width: 0; background: var(--lilac); transition: width 0.15s linear; }
-.dj-prog[hidden] { display: none; }
 .dj-song .busy { display: block; height: 4px; border-radius: 2px; margin-top: 3px; background: linear-gradient(90deg, var(--raised), var(--lilac), var(--raised)); background-size: 200% 100%; animation: jobslide 1.1s linear infinite; }
 @keyframes jobslide { to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .job.wait .jb i, .dj-song .busy { animation: none; } }
@@ -1531,7 +1512,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
       <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> sets a spot when stopped and jumps back to it while playing; <b>⏮</b> restarts the song from the beginning; the four <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is, tap it again to jump there (on the beat), hold it to clear. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
-      <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line. <b>Stems</b> on each deck switch between the full song, the instrumental and the vocals (separated once, with the AI model where it can run); <b>Mashup</b> puts the lead's vocal over the other deck's instrumental in one tap.</p>
+      <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
       <p>The decks keep playing when you press Done, so you can play the keys over the mix. The Stop button stops them too.</p>
     </div>
@@ -1581,6 +1562,19 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
   <button class="btn" id="trkMiniRec" aria-label="Record">●</button>
   <span class="time" id="trkMiniTime">0:00.00</span>
   <button class="btn" id="trkMiniOpen">▤ Tracks</button>
+</div>
+
+<div class="editor sheet" id="reportSheet" style="align-items:center" hidden>
+  <div class="ed-card" role="dialog" aria-label="Report" style="padding-bottom:12px">
+    <div class="ed-head"><strong>Report a problem</strong></div>
+    <span class="ed-info" style="text-align:left">Saves one zip: what happened in the app, every setting, and the last 30 seconds of sound. Nothing is sent anywhere by itself.</span>
+    <label class="sp-lab" for="reportNote"><span>What went wrong? (optional)</span></label>
+    <textarea id="reportNote" rows="3" placeholder="e.g. the keys stopped making sound after I opened DJ" style="width:100%;box-sizing:border-box;background:var(--raised);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:0.9rem;resize:vertical"></textarea>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="reportCancel">Cancel</button>
+      <button class="btn big primary" id="reportGo">Save report</button>
+    </div>
+  </div>
 </div>
 
 <div class="editor sheet" id="mixer" hidden>
@@ -1775,7 +1769,6 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
-      <p><b>Isolate vocals:</b> in the Smp tab, load a song (MP3, WAV, M4A), tap <b>Edit</b>, then <b>Vocals…</b>. Pick Vocals or Instrumental and listen to 8 seconds of the result, then choose: <b>→ New slot</b> (the original stays, the result lands in a new slot and plays), <b>Replace</b> (this slot becomes the result), <b>Keep editing</b> (apply here, trim or fade, then Save), or <b>Save WAV</b>. Select part of the wave first to isolate just that part. <b>AI</b> runs the Ultimate Vocal Remover model (MDX-Net) on the device: real stems, a few minutes per song. The first use downloads the 67 MB model once (from Hugging Face, or from a <code>models/</code> folder next to index.html if you put <code>UVR-MDX-NET-Inst_HQ_3.onnx</code> there) and keeps it on the device. <b>Quick</b> is instant and only pulls out the centre of a stereo mix.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> silences everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
@@ -1866,34 +1859,6 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
   </div>
 </div>
 
-<div class="editor sheet" id="vocalSheet" hidden>
-  <div class="ed-card" role="dialog" aria-label="Isolate vocals">
-    <div class="ed-head"><strong>Isolate vocals</strong><span class="ed-info" id="vxInfo"></span></div>
-    <div id="vxQuality" hidden><div class="sp-lab"><span>How</span></div><div class="seg small" role="group" aria-label="Separation method"><button data-q="ai" aria-pressed="true">AI (best)</button><button data-q="quick" aria-pressed="false">Quick (centre of the mix)</button></div></div>
-    <div class="sp-lab"><span>Keep</span></div>
-    <div class="seg small" role="group" aria-label="What to keep"><button data-vx="vocals" aria-pressed="true">Vocals</button><button data-vx="music" aria-pressed="false">Instrumental</button></div>
-    <span class="ed-info" id="vxIntro" style="text-align:left">Keeps what sits in the centre of the stereo mix (the lead vocal) or removes it for an instrumental. Best on stereo mixes where the vocal is centred.</span>
-    <span id="vxAiNote" hidden>The first use downloads the 67 MB model once and keeps it on this device. A whole song takes a few minutes on a tablet; Quick is instant but only pulls out the centre of a stereo mix.</span>
-    <div class="mx-list">
-      <div class="mx-row"><div class="mx-lab"><b>Strength</b><small>higher = cleaner split, more warble</small></div><input type="range" id="vxStr" min="1" max="4" step="0.5" value="2" aria-label="Strength"><span class="mx-val" id="vxStrV">2</span></div>
-      <div class="mx-row"><div class="mx-lab"><b>Low cut</b><small>keeps bass and kick out of the vocal</small></div><input type="range" id="vxLo" min="40" max="400" step="10" value="120" aria-label="Low cut"><span class="mx-val" id="vxLoV">120 Hz</span></div>
-      <div class="mx-row"><div class="mx-lab"><b>High cut</b><small>tames cymbals and hiss</small></div><input type="range" id="vxHi" min="4000" max="16000" step="500" value="12000" aria-label="High cut"><span class="mx-val" id="vxHiV">12k</span></div>
-    </div>
-    <div class="sp-lab"><span>Listen first · 8 seconds</span></div>
-    <div class="ly-quick"><button class="btn" id="vxPrevOrig" title="The mix as it is now">▶ Original</button><button class="btn primary" id="vxPrev" title="What you'll get">▶ Result</button></div>
-    <div class="vx-bar"><i id="vxBar"></i></div>
-    <span class="ed-info" id="vxStatus" style="text-align:left"></span>
-    <div class="sp-lab"><span>Then</span></div>
-    <div class="vx-acts">
-      <button class="btn primary" id="vxToSlot"><b>→ New slot</b><small></small></button>
-      <button class="btn" id="vxReplace"><b>Replace</b><small></small></button>
-      <button class="btn" id="vxApply"><b>Keep editing</b><small></small></button>
-      <button class="btn" id="vxWav"><b>Save WAV</b><small></small></button>
-    </div>
-    <div class="ed-foot sheet-foot"><button class="btn big" id="vxCancel">Cancel</button></div>
-  </div>
-</div>
-
 <div class="editor" id="editor" hidden>
   <div class="ed-card" role="dialog" aria-label="Sample editor">
     <div class="ed-head"><strong id="edTitle">Edit</strong><span class="ed-info" id="edInfo"></span></div>
@@ -1909,11 +1874,10 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <button class="btn" id="edFadeOut">Fade out</button>
       <button class="btn" id="edDown">−3 dB</button>
       <button class="btn" id="edUp">+3 dB</button>
-      <button class="btn" id="edVocals" title="Keep or remove the lead vocal">Vocals…</button>
       <button class="btn" id="edUndo">Undo</button>
       <button class="btn" id="edRevert">Revert</button>
     </div>
-    <div class="ed-legend">Drag on the wave to select part · <b>Trim</b> keeps the selection, <b>Cut</b> removes it · <b>Vocals…</b> splits singer and music · <b>Save</b> puts it back in the slot</div>
+    <div class="ed-legend">Drag on the wave to select part · <b>Trim</b> keeps the selection, <b>Cut</b> removes it · <b>Save</b> puts it back in the slot</div>
     <div class="ed-row">
       <span class="lab2">Chop</span>
       <label class="meter"><select id="edChopN" aria-label="Number of pads"><option value="4">4 pads</option><option value="8" selected>8 pads</option><option value="12">12 pads</option></select></label>
@@ -9012,7 +8976,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if ("serviceWorker" in navigator && location.protocol === "https:" && !location.hostname.endsWith("claude.ai") && !(window.claude && window.claude.use)) {
       fetch("sw.js", { method: "HEAD" }).then(r => { if (r.ok) navigator.serviceWorker.register("sw.js").catch(() => {}); }).catch(() => {});
     }
-    // ask the browser to keep the samples, songs and the AI model even when storage gets tight (granted silently once installed)
+    // ask the browser to keep the samples and songs even when storage gets tight (granted silently once installed)
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   } catch (e) {}
 
@@ -10280,451 +10244,12 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     updateSoundBar();
   }
 
-  // ---------- Isolate vocals (centre-channel extraction) ----------
-  // Lead vocals sit in the centre of almost every mix, the band is spread wider. For each slice of
-  // the spectrum (4096-point frames, 75% overlap) the left and right channels are compared: where
-  // they match, that's centre content and it is kept (Vocals) or removed (Instrumental). A low cut
-  // keeps the centred bass and kick out of the vocal. Works on stereo files; a mono file only gets
-  // the vocal-band filter. Everything runs here in the page, in chunks, so nothing leaves the device.
-  const VX_N = 4096, VX_HOP = VX_N / 4;
-  let vxTw = null;
-  function vxTables() {
-    if (vxTw) return vxTw;
-    const cos = new Float32Array(VX_N / 2), sin = new Float32Array(VX_N / 2), rev = new Uint16Array(VX_N), win = new Float32Array(VX_N);
-    for (let i = 0; i < VX_N / 2; i++) { cos[i] = Math.cos(2 * Math.PI * i / VX_N); sin[i] = Math.sin(2 * Math.PI * i / VX_N); }
-    const bits = Math.log2(VX_N);
-    for (let i = 0; i < VX_N; i++) { let r = 0, x = i; for (let b = 0; b < bits; b++) { r = (r << 1) | (x & 1); x >>= 1; } rev[i] = r; }
-    for (let i = 0; i < VX_N; i++) win[i] = Math.sqrt(0.5 - 0.5 * Math.cos(2 * Math.PI * i / VX_N));   // sqrt-Hann: analysis × synthesis = Hann
-    return (vxTw = { cos, sin, rev, win });
-  }
-  function vxFFT(re, im, inverse) {
-    const { cos, sin, rev } = vxTables(), n = VX_N;
-    for (let i = 0; i < n; i++) { const j = rev[i]; if (j > i) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
-    for (let size = 2; size <= n; size <<= 1) {
-      const half = size >> 1, step = n / size;
-      for (let start = 0; start < n; start += size) {
-        for (let k = 0; k < half; k++) {
-          const wr = cos[k * step], wi = inverse ? sin[k * step] : -sin[k * step];
-          const a = start + k, b = a + half;
-          const xr = re[b] * wr - im[b] * wi, xi = re[b] * wi + im[b] * wr;
-          re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi;
-        }
-      }
-    }
-    if (inverse) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
-  }
-  // chans: [L, R] Float32Arrays (or [M]); opts: { mode: "vocals"|"music", strength, lowCut, highCut }
-  async function vxSeparate(chans, rate, opts, onProgress, isCancelled) {
-    const { win } = vxTables();
-    const stereo = chans.length >= 2, L = chans[0], R = stereo ? chans[1] : chans[0], len = L.length;
-    const outL = new Float32Array(len), outR = new Float32Array(len), norm = new Float32Array(len);
-    const re = new Float32Array(VX_N), im = new Float32Array(VX_N), wPrev = new Float32Array(VX_N / 2 + 1);
-    const binHz = rate / VX_N, keepVocals = opts.mode !== "music", str = opts.strength, lo = opts.lowCut, hi = opts.highCut;
-    // frequency weighting of the vocal band
-    const fw = new Float32Array(VX_N / 2 + 1);
-    for (let k = 0; k <= VX_N / 2; k++) { const f = k * binHz; let g = 1; if (f < lo) g = Math.pow(f / lo, 2); if (f > hi) g = Math.max(0, 1 - (f - hi) / (hi * 0.6)); fw[k] = g; }
-    const frames = Math.ceil((len + VX_N) / VX_HOP), start0 = -VX_N + VX_HOP;
-    for (let fi = 0; fi < frames; fi++) {
-      const s0 = start0 + fi * VX_HOP;
-      // pack L as the real part and R as the imaginary part: one FFT gives both spectra
-      for (let i = 0; i < VX_N; i++) { const p = s0 + i, w = win[i]; const inside = p >= 0 && p < len; re[i] = inside ? L[p] * w : 0; im[i] = inside ? R[p] * w : 0; }
-      vxFFT(re, im, false);
-      // unpack, mask, repack as (vocalsL + i·vocalsR)
-      for (let k = 0; k <= VX_N / 2; k++) {
-        const j = (VX_N - k) & (VX_N - 1);
-        const ar = 0.5 * (re[k] + re[j]), ai = 0.5 * (im[k] - im[j]);      // L spectrum
-        const br = 0.5 * (im[k] + im[j]), bi = -0.5 * (re[k] - re[j]);     // R spectrum
-        let w;
-        if (stereo) {
-          const mL = Math.sqrt(ar * ar + ai * ai), mR = Math.sqrt(br * br + bi * bi), dr = ar - br, di = ai - bi, d = Math.sqrt(dr * dr + di * di);
-          w = Math.max(0, 1 - d / (mL + mR + 1e-9));
-          w = Math.pow(w, str);
-        } else w = 1;
-        w *= fw[k];
-        w = 0.65 * w + 0.35 * wPrev[k]; wPrev[k] = w;
-        const g = keepVocals ? w : 1 - w;
-        const vlr = ar * g, vli = ai * g, vrr = br * g, vri = bi * g;
-        re[k] = vlr - vri; im[k] = vli + vrr;                    // Y[k]   = VL + i·VR
-        if (k > 0 && k < VX_N / 2) { re[j] = vlr + vri; im[j] = -vli + vrr; }   // Y[N−k] = conj(VL) + i·conj(VR)
-      }
-      vxFFT(re, im, true);
-      for (let i = 0; i < VX_N; i++) { const p = s0 + i; if (p < 0 || p >= len) continue; const w = win[i]; outL[p] += re[i] * w; outR[p] += im[i] * w; norm[p] += w * w; }
-      if ((fi & 31) === 31) {
-        if (isCancelled && isCancelled()) return null;
-        if (onProgress) onProgress(fi / frames);
-        await new Promise(r => setTimeout(r, 0));
-      }
-    }
-    for (let p = 0; p < len; p++) { const n = norm[p] || 1; outL[p] /= n; outR[p] /= n; }
-    return stereo ? [outL, outR] : [outL];
-  }
-  // the same separator in a worker, so the screen and the decks never stall; main thread only where workers can't start
-  const VX_SEP_ORIG = vxSeparate;
-  let vxWorkerOK = true, vxSrcCache = "";
-  function vxQuick(chans, rate, opts, onProgress, isCancelled) {
-    if (!vxWorkerOK) return VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled);
-    if (!vxSrcCache) vxSrcCache = "const VX_N = " + VX_N + ", VX_HOP = " + VX_HOP + "; let vxTw = null;\n" + String(vxTables) + "\n" + String(vxFFT) + "\n" + String(VX_SEP_ORIG) + "\n" +
-      "onmessage = async e => { const { chans, rate, opts } = e.data; const out = await vxSeparate(chans, rate, opts, p => postMessage({ p }), null);" +
-      " if (opts.both) { for (let c = 0; c < out.length; c++) { const a = chans[c], b = out[c]; for (let i = 0; i < a.length; i++) a[i] -= b[i]; } postMessage({ out, voc: chans.slice(0, out.length) }, out.map(c => c.buffer).concat(chans.slice(0, out.length).map(c => c.buffer))); }" +
-      " else postMessage({ out }, out.map(c => c.buffer)); };";
-    let w = null;
-    try { const url = URL.createObjectURL(new Blob([vxSrcCache], { type: "text/javascript" })); w = new Worker(url); setTimeout(() => URL.revokeObjectURL(url), 5000); }
-    catch (e) { vxWorkerOK = false; return VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled); }
-    return new Promise(res => {
-      let done = false;
-      const poll = setInterval(() => { if (isCancelled && isCancelled()) finish(null); }, 150);
-      function finish(v) { if (done) return; done = true; clearInterval(poll); w.terminate(); res(v); }
-      w.onmessage = e => { if (e.data.out) { const r = e.data.out; if (e.data.voc) r.voc = e.data.voc; finish(r); } else if (onProgress) onProgress(e.data.p); };
-      w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); if (done) return; done = true; clearInterval(poll); w.terminate(); vxWorkerOK = false; VX_SEP_ORIG(chans, rate, opts, onProgress, isCancelled).then(res); };
-      const copy = chans.map(c => c.slice());   // the caller keeps its arrays
-      w.postMessage({ chans: copy, rate, opts }, copy.map(c => c.buffer));
-    });
-  }
-  vxSeparate = vxQuick;
-
-  // ---------- the sheet, inside the sample editor ----------
-  const vxEl = document.getElementById("vocalSheet"), vxStatus = document.getElementById("vxStatus"), vxBar = document.getElementById("vxBar");
-  const vx = { mode: "vocals", strength: 2, lowCut: 120, highCut: 12000, busy: false, cancel: false, src: null, voice: null };
-  const vxOpts = () => ({ mode: vx.mode, strength: vx.strength, lowCut: vx.lowCut, highCut: vx.highCut });
-  const vxWord = () => vx.mode === "music" ? "instrumental" : "vocals";
-  const vxName = () => baseName(ed.name || "sample").replace(/\s*\((vocals|instrumental|edited)\)/gi, "");   // "song (vocals) (edited)" -> "song"
-  const vxSlotOf = () => { const m = ed.target && /^S(\d+)/.exec(ed.target.label); return m ? +m[1] - 1 : -1; };   // the sampler slot the editor is on, if any
-  const vxEmpty = () => vxSlotOf() >= 0 ? sampBuf.findIndex(b => !b) : -1;
-  const fmtMS = n => { const s = Math.round(n / ed.rate); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
-  function vxPaint() {
-    vxEl.querySelectorAll("button[data-vx]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.vx === vx.mode)));
-    document.getElementById("vxStrV").textContent = vx.strength; document.getElementById("vxLoV").textContent = vx.lowCut + " Hz";
-    document.getElementById("vxHiV").textContent = (vx.highCut / 1000).toFixed(vx.highCut % 1000 ? 1 : 0) + "k";
-    const w = vxWord(), j = vxEmpty(), [a, b] = ed.chans ? edSel() : [0, 0], whole = !ed.chans || (a === 0 && b === edLen()), part = whole ? "" : " (just the selection)";
-    const q = (id, big, small) => { const el = document.getElementById(id); el.querySelector("b").textContent = big; el.querySelector("small").textContent = small; };
-    q("vxToSlot", "→ New slot" + (j >= 0 ? " S" + (j + 1) : ""), "keeps this sample as it is · the result" + part + " lands in S" + (j + 1) + " and plays right away");
-    q("vxReplace", "Replace " + (ed.target ? ed.target.label : "this sample"), "this sample becomes the " + w + part + " and plays right away");
-    q("vxApply", "Keep editing", "apply the " + w + " here" + (whole ? "" : " (selection only)") + ", trim or fade it, then Save");
-    q("vxWav", "Save WAV", "download the " + w + part + " as a file");
-    document.getElementById("vxToSlot").hidden = j < 0;
-    document.getElementById("vxToSlot").classList.toggle("primary", j >= 0); document.getElementById("vxReplace").classList.toggle("primary", j < 0);
-  }
-  vxEl.querySelectorAll("button[data-vx]").forEach(b => b.addEventListener("click", () => { vx.mode = b.dataset.vx; vxPaint(); }));
-  [["vxStr", "strength"], ["vxLo", "lowCut"], ["vxHi", "highCut"]].forEach(([id, key]) => document.getElementById(id).addEventListener("input", e => { vx[key] = +e.target.value; vxPaint(); }));
-  function vxSetBusy(on, msg) { vx.busy = on; vxEl.classList.toggle("busy", on); vxBar.style.width = on ? "0%" : "100%"; vxStatus.textContent = msg || ""; }
-  function vxStop() { if (vx.src) { try { vx.src.stop(); } catch (e) {} vx.src = null; } document.getElementById("vxPrev").textContent = "▶ Result"; document.getElementById("vxPrevOrig").textContent = "▶ Original"; }
-  // what gets separated: the whole sample, or the part selected on the wave
-  function vxPart() { const [a, b] = edSel(); return { a, b, whole: a === 0 && b === edLen(), chans: ed.chans.map(c => c.slice(a, b)) }; }
-  function vxExcerpt() {
-    // 8 seconds: from the selection, or from a third of the way in (where the singing usually is)
-    const [a, b] = edSel(), whole = a === 0 && b === edLen(), n = Math.min(b - a, Math.round(8 * ed.rate));
-    const s = whole ? Math.min(Math.floor(edLen() * 0.33), edLen() - n) : a;
-    return [Math.max(0, s), Math.max(0, s) + n];
-  }
-  function vxPlay(chans, btn, label) {
-    vxStop();
-    const src = ctx.createBufferSource(); src.buffer = makeBuffer(chans, ed.rate); src.connect(fx.comp);
-    src.onended = () => { if (vx.src === src) vxStop(); };
-    vx.src = src; src.start(); btn.textContent = "■ " + label;
-  }
-  // every action reports a failure in the status line instead of dying quietly
-  const vxGuard = fn => async () => { if (!ed.chans || vx.busy) return; try { await fn(); } catch (e) { vxSetBusy(false, "Something went wrong: " + (e && e.message || e) + ". Try again, or the Quick method."); } };
-  document.getElementById("vxPrevOrig").addEventListener("click", () => {
-    if (!ed.chans) return; if (vx.src) { vxStop(); return; }
-    const [a, b] = vxExcerpt(); vxPlay(ed.chans.map(c => c.slice(a, b)), document.getElementById("vxPrevOrig"), "Stop");
-  });
-  document.getElementById("vxPrev").addEventListener("click", vxGuard(async () => {
-    if (vx.src) { vxStop(); return; }
-    const [a, b] = vxExcerpt();
-    vxSetBusy(true, "Separating an 8-second preview…"); vx.cancel = false;
-    const out = await vxSeparate(ed.chans.map(c => c.slice(a, b)), ed.rate, vxOpts(), p => { vxBar.style.width = Math.round(p * 100) + "%"; }, () => vx.cancel);
-    vxSetBusy(false, out ? "Playing the " + vxWord() + " from " + fmtMS(a) + ". " + (vx.ai ? "Happy with it? Pick what to do with it below." : "Adjust the sliders and listen again, or pick what to do with it below.") : "Stopped");
-    if (out && !vxEl.hidden) vxPlay(out, document.getElementById("vxPrev"), "Stop");
-  }));
-  async function vxRun(chans) {
-    vxSetBusy(true, "Separating… a whole song takes a little while"); vx.cancel = false;
-    const t0 = performance.now(); let out = null;
-    try { out = await vxSeparate(chans, ed.rate, vxOpts(), p => { vxBar.style.width = Math.round(p * 100) + "%"; vxStatus.textContent = "Separating… " + Math.round(p * 100) + "%"; }, () => vx.cancel); }
-    catch (e) { vxSetBusy(false, "Couldn't separate this one (" + (e && e.message || "error") + "). Try the Quick method, or select a shorter part."); return null; }
-    vxSetBusy(false, out ? "Done in " + ((performance.now() - t0) / 1000).toFixed(1) + " s" : "Cancelled");
-    return out;
-  }
-  async function vxResult() { const p = vxPart(); const out = await vxRun(p.chans); return out ? { out, a: p.a, b: p.b, whole: p.whole } : null; }
-  // a finished result lands in a sampler slot, the sampler shows that slot, and a few seconds of it play right away
-  function vxLand(j, out, nm, msg) {
-    const buf = makeBuffer(out, ed.rate);
-    vxStop(); vxEl.hidden = true; closeEditor();
-    setSample(j, buf, nm); storeSample(j, nm, bufferToWav(buf));
-    state.engine = "samp"; state.samp.slot = j; renderEngine(); save();
-    noteMsg(msg);
-    try { if (vx.voice) vx.voice.stop(); const v = makeSampleVoice(60, j); vx.voice = v; if (v) setTimeout(() => { if (vx.voice === v) { v.stop(); vx.voice = null; } }, 6000); } catch (e) {}
-  }
-  document.getElementById("vxToSlot").addEventListener("click", vxGuard(async () => {
-    vxStop(); const j = vxEmpty(); if (j < 0) { vxStatus.textContent = "All sampler slots are full. Clear one first, or use Replace."; return; }
-    const r = await vxResult(); if (!r) return;
-    vxLand(j, r.out, vxName() + " (" + vxWord() + ")", "S" + (j + 1) + " = the " + vxWord() + " · playing a bit of it · tap the keys to play it");
-  }));
-  document.getElementById("vxReplace").addEventListener("click", vxGuard(async () => {
-    vxStop(); const r = await vxResult(); if (!r) return;
-    const sl = vxSlotOf(), nm = vxName() + " (" + vxWord() + ")";
-    if (sl >= 0) vxLand(sl, r.out, nm, "S" + (sl + 1) + " is now the " + vxWord() + " · playing a bit of it · tap the keys to play it");
-    else { const t = ed.target, buf = makeBuffer(r.out, ed.rate); vxStop(); vxEl.hidden = true; closeEditor(); t.save(buf); }
-  }));
-  document.getElementById("vxApply").addEventListener("click", vxGuard(async () => {
-    vxStop(); const r = await vxResult(); if (!r) return;
-    edPush();
-    if (r.whole) ed.chans = r.out;
-    else ed.chans = ed.chans.map((c, k) => { const o = c.slice(); o.set(r.out[Math.min(k, r.out.length - 1)].subarray(0, r.b - r.a), r.a); return o; });
-    vxEl.hidden = true;
-    const w = vxWord();
-    edRefresh(w[0].toUpperCase() + w.slice(1) + " applied" + (r.whole ? "" : " to the selection") + " · ▶ Play to hear it · Undo brings the mix back · Save to " + (ed.target ? ed.target.label : "the slot") + " keeps it");
-  }));
-  document.getElementById("vxWav").addEventListener("click", vxGuard(async () => {
-    vxStop(); const r = await vxResult(); if (!r) return;
-    const nm = vxName() + "-" + vxWord();
-    saveWav(nm, bufferToWav(makeBuffer(r.out, ed.rate))); vxStatus.textContent = "Saving " + nm + ".wav…";
-  }));
-  document.getElementById("vxCancel").addEventListener("click", () => { if (vx.busy) { vx.cancel = true; if (typeof aiKill === "function" && (AI.loading || AI.wwait.size)) aiKill(); return; } vxStop(); vxEl.hidden = true; });
-  document.getElementById("edVocals").addEventListener("click", () => {
-    if (!ed.chans) return; edStop(); start();
-    const stereo = ed.chans.length >= 2, [a, b] = edSel(), whole = a === 0 && b === edLen(), secs = (b - a) / ed.rate;
-    document.getElementById("vxInfo").textContent = (stereo ? "stereo · " : "mono · ") + (whole ? fmtMS(edLen()) : "selection " + fmtMS(a) + "–" + fmtMS(b));
-    vxStatus.textContent = stereo ? (secs > 150 ? "Long song: applying takes a while on a phone. Listen to 8 seconds first." : "Listen to 8 seconds first, then pick what to do with it.")
-      : "Mono file: the Quick method can't pick out a centre, only its low/high cut applies. AI works fine on mono.";
-    vxBar.style.width = "0%"; vxPaint(); vxEl.hidden = false;
-  });
-  vxPaint();
   // what the editor's buttons do, for anyone hovering or using a reader
   Object.entries({ edPlay: "Play the selection (or everything)", edAll: "Select the whole sample", edTrim: "Keep only the selection", edCut: "Remove the selection", edRev: "Play the selection backwards",
-    edNorm: "As loud as it can be without clipping", edFadeIn: "Fade the selection in", edFadeOut: "Fade the selection out", edDown: "Quieter", edUp: "Louder", edVocals: "Keep the singer or the music (AI or quick)",
+    edNorm: "As loud as it can be without clipping", edFadeIn: "Fade the selection in", edFadeOut: "Fade the selection out", edDown: "Quieter", edUp: "Louder",
     edUndo: "Undo the last change", edRevert: "Back to the original", edChop: "Cut into pieces, one per pad", edToPad: "Send the selection to the selected pad", edCancel: "Close without saving", edSave: "Put this back in the slot" })
     .forEach(([id, t]) => { const el = document.getElementById(id); if (el) el.title = t; });
 
-  // ---------- AI separation: MDX-Net (the Ultimate Vocal Remover model) in the browser ----------
-  // A neural separator trained on real music: the instrumental comes out of the model and the vocal
-  // is what's left. Runs on the device with onnxruntime-web (WebGPU when the browser has it, else
-  // WebAssembly). The 67 MB model is fetched once (from the site's models/ folder if it's there,
-  // otherwise from Hugging Face) and kept in the browser's cache storage.
-  const AI = {
-    model: "models/UVR-MDX-NET-Inst_HQ_3.onnx",
-    remote: "https://huggingface.co/Politrees/UVR_resources/resolve/main/models/MDXNet/UVR-MDX-NET-Inst_HQ_3.onnx",
-    size: 66759214,
-    ort: "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/",
-    session: null, ep: "", loading: null, chunkSec: 0,
-    N: 6144, HOP: 1024, DIMF: 3072, DIMT: 256, COMP: 1.022,
-  };
-  try {
-    const o = localStorage.getItem("nightbloom-ort"); if (o) AI.ort = o;
-    const m = localStorage.getItem("nightbloom-model"); if (m) AI.model = m;
-    const r = localStorage.getItem("nightbloom-model-remote"); if (r) AI.remote = r;
-  } catch (e) {}
-  AI.CHUNK = AI.HOP * (AI.DIMT - 1); AI.TRIM = AI.N / 2; AI.GEN = AI.CHUNK - 2 * AI.TRIM; AI.BINS = AI.N / 2 + 1;
-  let aiOk = null;
-  function aiPossible() {
-    if (aiOk !== null) return aiOk;
-    aiOk = false;
-    try {
-      if (window.isSecureContext && window.WebAssembly && !(window.claude && window.claude.use)) {
-        new WebAssembly.Module(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]));   // throws where the page's policy forbids WebAssembly (the claude.ai preview)
-        aiOk = true;
-      }
-    } catch (e) { aiOk = false; }
-    return aiOk;
-  }
-
-  // --- FFT of size 6144 = 3 × 2048: three radix-2 transforms and a radix-3 combine ---
-  const F2 = (() => {
-    const M = 2048, bits = 11, rev = new Uint16Array(M), cos = new Float32Array(M / 2), sin = new Float32Array(M / 2);
-    for (let i = 0; i < M; i++) { let r = 0, x = i; for (let b = 0; b < bits; b++) { r = (r << 1) | (x & 1); x >>= 1; } rev[i] = r; }
-    for (let i = 0; i < M / 2; i++) { cos[i] = Math.cos(2 * Math.PI * i / M); sin[i] = Math.sin(2 * Math.PI * i / M); }
-    const N = 6144, c6 = new Float32Array(N), s6 = new Float32Array(N);
-    for (let i = 0; i < N; i++) { c6[i] = Math.cos(2 * Math.PI * i / N); s6[i] = Math.sin(2 * Math.PI * i / N); }
-    const win = new Float32Array(N); for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / N);
-    const sr = [0, 1, 2].map(() => new Float32Array(M)), si = [0, 1, 2].map(() => new Float32Array(M));
-    function fft2048(re, im, inv) {
-      for (let i = 0; i < M; i++) { const j = rev[i]; if (j > i) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
-      for (let size = 2; size <= M; size <<= 1) {
-        const half = size >> 1, step = M / size;
-        for (let s = 0; s < M; s += size) for (let k = 0; k < half; k++) {
-          const wr = cos[k * step], wi = inv ? sin[k * step] : -sin[k * step], a = s + k, b = a + half;
-          const xr = re[b] * wr - im[b] * wi, xi = re[b] * wi + im[b] * wr;
-          re[b] = re[a] - xr; im[b] = im[a] - xi; re[a] += xr; im[a] += xi;
-        }
-      }
-    }
-    // in place on arrays of length 6144
-    function fft6144(re, im, inv) {
-      for (let r = 0; r < 3; r++) { const R = sr[r], I = si[r]; for (let n = 0; n < M; n++) { R[n] = re[3 * n + r]; I[n] = im[3 * n + r]; } fft2048(R, I, inv); }
-      for (let q = 0; q < 3; q++) for (let k = 0; k < M; k++) {
-        const kk = k + q * M; let xr = sr[0][k], xi = si[0][k];
-        for (let r = 1; r < 3; r++) {
-          const idx = (r * kk) % N, wr = c6[idx], wi = inv ? s6[idx] : -s6[idx];
-          xr += sr[r][k] * wr - si[r][k] * wi; xi += sr[r][k] * wi + si[r][k] * wr;
-        }
-        re[kk] = xr; im[kk] = xi;
-      }
-      if (inv) for (let i = 0; i < N; i++) { re[i] /= N; im[i] /= N; }
-    }
-    return { fft6144, win, N, M };
-  })();
-  // stereo chunk (2 × CHUNK samples) -> model tensor [1, 4, DIMF, DIMT]: L re, L im, R re, R im
-  function aiSpecIn(L, R) {
-    const { N, HOP, DIMF, DIMT, CHUNK } = AI, half = N / 2, win = F2.win;
-    const padLen = CHUNK + N, pL = new Float32Array(padLen), pR = new Float32Array(padLen);
-    // centre padding with reflection, as torch.stft does
-    for (let i = 0; i < padLen; i++) { let p = i - half; if (p < 0) p = -p; else if (p >= CHUNK) p = 2 * CHUNK - 2 - p; pL[i] = L[p]; pR[i] = R[p]; }
-    const out = new Float32Array(4 * DIMF * DIMT), re = new Float32Array(N), im = new Float32Array(N);
-    for (let t = 0; t < DIMT; t++) {
-      const s0 = t * HOP;
-      for (let i = 0; i < N; i++) { re[i] = pL[s0 + i] * win[i]; im[i] = pR[s0 + i] * win[i]; }
-      F2.fft6144(re, im, false);
-      for (let k = 0; k < DIMF; k++) {
-        const j = (N - k) % N;
-        const lr = 0.5 * (re[k] + re[j]), li = 0.5 * (im[k] - im[j]), rr = 0.5 * (im[k] + im[j]), ri = -0.5 * (re[k] - re[j]);
-        const base = k * DIMT + t;
-        out[base] = lr; out[DIMF * DIMT + base] = li; out[2 * DIMF * DIMT + base] = rr; out[3 * DIMF * DIMT + base] = ri;
-      }
-    }
-    return out;
-  }
-  // model tensor -> stereo chunk, overlap-added with the window-square normalisation torch.istft uses
-  function aiSpecOut(y) {
-    const { N, HOP, DIMF, DIMT, CHUNK } = AI, half = N / 2, win = F2.win, S = DIMF * DIMT;
-    const padLen = CHUNK + N, oL = new Float32Array(padLen), oR = new Float32Array(padLen), norm = new Float32Array(padLen);
-    const re = new Float32Array(N), im = new Float32Array(N);
-    for (let t = 0; t < DIMT; t++) {
-      re.fill(0); im.fill(0);
-      for (let k = 0; k < DIMF; k++) {
-        const b = k * DIMT + t, lr = y[b], li = y[S + b], rr = y[2 * S + b], ri = y[3 * S + b];
-        re[k] = lr - ri; im[k] = li + rr;
-        if (k > 0) { const j = N - k; re[j] = lr + ri; im[j] = -li + rr; }
-      }
-      F2.fft6144(re, im, true);
-      const s0 = t * HOP;
-      for (let i = 0; i < N; i++) { const w = win[i]; oL[s0 + i] += re[i] * w; oR[s0 + i] += im[i] * w; norm[s0 + i] += w * w; }
-    }
-    const L = new Float32Array(CHUNK), R = new Float32Array(CHUNK);
-    for (let i = 0; i < CHUNK; i++) { const n = Math.max(norm[half + i], 1e-8); L[i] = oL[half + i] / n; R[i] = oR[half + i] / n; }
-    return [L, R];
-  }
-  // --- the engine and the model ---
-  function aiLoadOrt() {
-    if (window.ort) return Promise.resolve();
-    return new Promise((res, rej) => { const s = document.createElement("script"); s.src = AI.ort + "ort.all.min.js"; s.onload = () => res(); s.onerror = () => rej(new Error("couldn't load onnxruntime-web")); document.head.appendChild(s); });
-  }
-  async function aiModelBytes(onProgress) {
-    let cache = null;
-    try { cache = await caches.open("nate-bloom-models"); const hit = await cache.match(AI.model); if (hit) return new Uint8Array(await hit.arrayBuffer()); } catch (e) { cache = null; }
-    let r = null;
-    for (const src of [AI.model, AI.remote]) {   // the site's own copy first, then Hugging Face
-      if (!src) continue;
-      try { const t = await fetch(src, { cache: "no-store" }); if (t.ok) { r = t; break; } } catch (e) {}
-    }
-    if (!r) throw new Error("model-missing");
-    const total = +r.headers.get("content-length") || AI.size, chunks = []; let got = 0;
-    const reader = r.body.getReader();
-    for (;;) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; if (onProgress) onProgress(got, total); }
-    const bytes = new Uint8Array(got); let o = 0; for (const c of chunks) { bytes.set(c, o); o += c.length; }
-    if (cache) { try { await cache.put(AI.model, new Response(bytes, { headers: { "content-type": "application/octet-stream" } })); } catch (e) {} }
-    return bytes;
-  }
-  async function aiCreate(bytes, eps) {
-    for (const ep of eps) {
-      try { AI.session = await ort.InferenceSession.create(bytes, { executionProviders: [ep], graphOptimizationLevel: "all" }); AI.ep = ep; return AI.session; }
-      catch (e) { AI.session = null; }
-    }
-    throw new Error("no engine could run the model here");
-  }
-
-  // ---------- the AI engine runs in a worker ----------
-  // onnxruntime-web, the model session and each inference live off the main thread, so starting the
-  // model (seconds to minutes on a CPU) never freezes the screen, and Cancel can stop it at once.
-  const AI_WSRC = `
-let session = null, ep = "";
-onmessage = async e => {
-  const m = e.data;
-  try {
-    if (m.cmd === "init") {
-      if (typeof ort === "undefined") importScripts(m.ort + "ort.all.min.js");
-      ort.env.wasm.wasmPaths = m.ort; ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false;
-      postMessage({ id: m.id, ok: true });
-    } else if (m.cmd === "create") {
-      session = null; ep = "";
-      for (const want of m.eps) {
-        if (want === "webgpu" && !(self.navigator && navigator.gpu)) continue;
-        try { session = await ort.InferenceSession.create(m.bytes, { executionProviders: [want], graphOptimizationLevel: "all" }); ep = want; break; }
-        catch (x) { session = null; }
-      }
-      postMessage(session ? { id: m.id, ep } : { id: m.id, err: "no engine could run the model here" });
-    } else if (m.cmd === "run") {
-      const out = await session.run({ input: new ort.Tensor("float32", m.x, m.dims) });
-      const y = out[Object.keys(out)[0]].data;
-      postMessage({ id: m.id, y }, [y.buffer]);
-    }
-  } catch (x) { postMessage({ id: m.id, err: String(x && x.message || x) }); }
-};`;
-  AI.worker = null; AI.wseq = 0; AI.wwait = new Map(); AI.winit = false;
-  function aiW() {
-    if (AI.worker) return AI.worker;
-    const url = URL.createObjectURL(new Blob([AI_WSRC], { type: "text/javascript" }));
-    const w = new Worker(url); setTimeout(() => URL.revokeObjectURL(url), 5000);
-    w.onmessage = e => { const r = AI.wwait.get(e.data.id); if (r) { AI.wwait.delete(e.data.id); r(e.data); } };
-    w.onerror = ev => { if (ev && ev.preventDefault) ev.preventDefault(); const waiting = [...AI.wwait.values()]; AI.wwait.clear(); aiKill(); waiting.forEach(r => r({ err: "the AI engine stopped" + (ev && ev.message ? " (" + ev.message + ")" : "") })); };
-    AI.worker = w; AI.winit = false; return w;
-  }
-  function aiCall(msg, transfer) {
-    const id = ++AI.wseq;
-    return new Promise((res, rej) => { AI.wwait.set(id, d => d.err ? rej(new Error(d.err)) : res(d)); aiW().postMessage(Object.assign({ id }, msg), transfer || []); });
-  }
-  // stop everything the engine is doing; the next AI use starts it again (the model comes from the device cache)
-  function aiKill() {
-    if (AI.worker) { try { AI.worker.terminate(); } catch (e) {} AI.worker = null; }
-    AI.session = null; AI.ep = ""; AI.winit = false; AI.loading = null;
-    const waiting = [...AI.wwait.values()]; AI.wwait.clear(); waiting.forEach(r => r({ err: "cancelled" }));
-  }
-  aiLoadOrt = async function () { if (!AI.winit) { await aiCall({ cmd: "init", ort: AI.ort }); AI.winit = true; } };
-  aiCreate = async function (bytes, eps) {
-    await aiLoadOrt();
-    const r = await aiCall({ cmd: "create", bytes, eps }, [bytes.buffer]);
-    AI.ep = r.ep; AI.session = { inWorker: true }; return AI.session;
-  };
-  async function aiSession(onStatus) {
-    if (AI.session) return AI.session;
-    if (AI.loading) return AI.loading;
-    AI.loading = (async () => {
-      onStatus("Loading the AI engine…"); await aiLoadOrt();
-      const bytes = await aiModelBytes((got, total) => onStatus("Downloading the separation model (once)… " + (got / 1048576).toFixed(0) + " / " + (total / 1048576).toFixed(0) + " MB"));
-      onStatus("Starting the model…");
-      let noGpu = false; try { noGpu = localStorage.getItem("nightbloom-ai-nogpu") === "1"; } catch (e) {}
-      return aiCreate(bytes, noGpu ? ["wasm"] : ["webgpu", "wasm"]);
-    })();
-    try { return await AI.loading; } finally { AI.loading = null; }
-  }
-  // --- the separation itself: stereo 44.1 kHz in, the chosen stem out as [L, R] ---
-  async function aiSeparate(L, R, mode, onProgress, isCancelled) {
-    const { CHUNK, TRIM, GEN, DIMF, DIMT, COMP } = AI, len = L.length;
-    let peak = 1e-6; for (let i = 0; i < len; i++) { const a = Math.abs(L[i]), b = Math.abs(R[i]); if (a > peak) peak = a; if (b > peak) peak = b; }
-    const g = 0.9 / peak, pad = (GEN - (len % GEN)) % GEN, total = TRIM + len + pad + TRIM;
-    let mL = new Float32Array(total), mR = new Float32Array(total);
-    for (let i = 0; i < len; i++) { mL[TRIM + i] = L[i] * g; mR[TRIM + i] = R[i] * g; }
-    const oL = new Float32Array(len), oR = new Float32Array(len);   // the instrumental, back at the input's level
-    const n = (len + pad) / GEN, t0 = performance.now();
-    for (let c = 0; c < n; c++) {
-      if (isCancelled && isCancelled()) return null;
-      const i = c * GEN;
-      const x = aiSpecIn(mL.subarray(i, i + CHUNK), mR.subarray(i, i + CHUNK));
-      const y = (await aiCall({ cmd: "run", x, dims: [1, 4, DIMF, DIMT] })).y;
-      const [cL, cR] = aiSpecOut(y);
-      const m = Math.min(GEN, len - i);
-      if (AI.ep === "webgpu") {
-        let si = 0, so = 0, bad = false;
-        for (let k = 0; k < m; k++) { const a = cL[TRIM + k], b = cR[TRIM + k]; if (!Number.isFinite(a) || !Number.isFinite(b)) { bad = true; break; } so += a * a + b * b; const x = mL[i + TRIM + k], z = mR[i + TRIM + k]; si += x * x + z * z; }
-        if (bad || so > si * 2.25 + 1e-6 * m) throw new Error("the GPU gave a garbled result");
-      }
-      for (let k = 0; k < m; k++) { oL[i + k] = cL[TRIM + k] / g; oR[i + k] = cR[TRIM + k] / g; }
-      AI.chunkSec = (performance.now() - t0) / 1000 / (c + 1);
-      if (onProgress) onProgress((c + 1) / n, AI.chunkSec * (n - c - 1));
-      await new Promise(r => setTimeout(r, 0));
-    }
-    mL = mR = null;
-    if (mode === "vocals") for (let i = 0; i < len; i++) { oL[i] = L[i] - oL[i] * COMP; oR[i] = R[i] - oR[i] * COMP; }
-    return [oL, oR];
-  }
   // sample-rate conversion with the browser's own (windowed-sinc) decoder resampler; linear interpolation only as a last resort
   function aiWav(chans, rate, asFloat) {
     const n = chans[0].length, ch = chans.length, bps = asFloat ? 4 : 2, dataLen = n * ch * bps, head = asFloat ? 58 : 44;
@@ -10749,61 +10274,6 @@ onmessage = async e => {
       } catch (e) {}
     }
     return chans.map(a => { const o = new Float32Array(n); for (let i = 0; i < n; i++) { const p = i * from / to, j = Math.floor(p), f = p - j; o[i] = a[j] * (1 - f) + (a[Math.min(j + 1, a.length - 1)] || 0) * f; } return o; });
-  }
-  // --- hook into the Vocals sheet: a How choice, AI by default wherever it can run ---
-  {
-    const row = document.getElementById("vxQuality"), note = document.getElementById("vxAiNote"), intro = document.getElementById("vxIntro"), sliders = vxEl.querySelector(".mx-list");
-    const INTRO_QUICK = intro.textContent;
-    const INTRO_AI = "AI separation (the Ultimate Vocal Remover model, MDX-Net) pulls the singer and the music apart right on this device.";
-    vx.ai = aiPossible();
-    try { const q = localStorage.getItem("nightbloom-vxai"); if (q === "0") vx.ai = false; } catch (e) {}
-    function paintQ() {
-      row.querySelectorAll("button[data-q]").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.q === "ai") === vx.ai)));
-      row.hidden = !aiPossible();
-      note.hidden = !vx.ai; sliders.hidden = vx.ai;
-      intro.textContent = vx.ai ? INTRO_AI : INTRO_QUICK;
-    }
-    row.querySelectorAll("button[data-q]").forEach(b => b.addEventListener("click", () => { vx.ai = b.dataset.q === "ai"; try { localStorage.setItem("nightbloom-vxai", vx.ai ? "1" : "0"); } catch (e) {} paintQ(); }));
-    const fmtT = s => s < 60 ? Math.round(s) + " s" : Math.round(s / 60) + " min";
-    // vxSeparate is what the sheet calls; route it through the model when AI is chosen
-    const classic = vxSeparate;
-    vxSeparate = async function (chans, rate, opts, onProgress, isCancelled) {
-      if (!vx.ai || !aiPossible()) return classic(chans, rate, opts, onProgress, isCancelled);
-      const status = msg => { vxStatus.textContent = msg; };
-      const quick = why => { vx.note = why + " Used the quick method instead ·"; status(why + " Using the quick method instead…"); return classic(chans, rate, opts, onProgress, isCancelled); };
-      try { await aiSession(status); }
-      catch (e) {
-        if (vx.cancel || (e && e.message === "cancelled")) return null;
-        if (e && e.message === "model-missing") return quick("The AI model couldn't be downloaded (no connection, or this copy of Nate Bloom can't reach it).");
-        return quick("The AI engine couldn't start here" + (e && e.message ? " (" + e.message + ")" : "") + ".");
-      }
-      const mode = opts.mode === "music" ? "music" : "vocals";
-      let [L, R] = await aiResample(chans.length > 1 ? [chans[0], chans[1]] : [chans[0], chans[0]], rate, 44100);   // the model wants 44.1 kHz stereo
-      const prog = (p, eta) => { if (onProgress) onProgress(p); status("AI separation on the " + (AI.ep === "webgpu" ? "GPU" : "CPU") + "… " + Math.round(p * 100) + "%" + (eta > 1 ? " · about " + fmtT(eta) + " left" : "")); };
-      let res = null;
-      try { res = await aiSeparate(L, R, mode, prog, isCancelled); }
-      catch (e) {
-        if (vx.cancel || (e && e.message === "cancelled")) return null;
-        if (AI.ep === "webgpu") {   // a GPU that can't run it: start again on the CPU, once
-          if (e && /garbled/.test(e.message)) { try { localStorage.setItem("nightbloom-ai-nogpu", "1"); } catch (x) {} }   // this GPU gives wrong answers: use the CPU from now on
-          try { status("The GPU couldn't run the model; starting again on the CPU…"); AI.session = null; await aiCreate(await aiModelBytes(), ["wasm"]); res = await aiSeparate(L, R, mode, prog, isCancelled); }
-          catch (e2) { return quick("AI separation failed" + (e2 && e2.message ? " (" + e2.message + ")" : "") + "."); }
-        } else return quick("AI separation failed" + (e && e.message ? " (" + e.message + ")" : "") + ".");
-      }
-      L = R = null;
-      if (!res) return null;
-      let out = await aiResample(res, 44100, rate);
-      const n = chans[0].length;
-      out = out.map(a => { if (a.length === n) return a; const o = new Float32Array(n); o.set(a.subarray(0, n)); return o; });
-      vx.note = "AI on the " + (AI.ep === "webgpu" ? "GPU" : "CPU") + " ·";
-      return chans.length > 1 ? out : [out[0]];
-    };
-    // keep the method visible in the final status line ("AI on the GPU · Done in 95 s")
-    const run0 = vxRun;
-    vxRun = async function (chans) { vx.note = ""; const out = await run0(chans); if (vx.note && out) vxStatus.textContent = vx.note + " " + vxStatus.textContent; return out; };
-    paintQ();
-    // a word about timing when the sheet opens
-    document.getElementById("edVocals").addEventListener("click", () => { if (vx.ai && aiPossible()) setTimeout(() => { if (!vx.busy) vxStatus.textContent = (AI.session ? "AI model ready. " : "") + "Listen to 8 seconds first" + (AI.session ? "" : " (the first time fetches the 67 MB model)") + ", then pick what to do with it below."; }, 0); });
   }
   // ---------- DJ: two decks, beat-grid sync (dial + auto), and an 8-pad grab bank ----------
   const DJ = { decks: [], lead: 0, sync: false, bus: null, padBus: null, bank: Array(8).fill(null), padPlay: Array(8).fill(null),
@@ -12204,13 +11674,22 @@ registerProcessor("nb-stretch", NBStretch);`;
   const CAP_SRC = `
 class NBCap extends AudioWorkletProcessor {
   constructor() { super(); this.n = Math.round(sampleRate * ${CAP.secs}); this.L = new Float32Array(this.n); this.R = new Float32Array(this.n); this.w = 0; this.filled = 0;
-    this.port.onmessage = e => { if (e.data === "keep") this.send(); else if (e.data && e.data.keep) this.send(Math.round(e.data.keep * sampleRate)); }; }
-  send(want) { const m = Math.min(this.filled, this.n, want || this.n), L = new Float32Array(m), R = new Float32Array(m), start = (this.w - m + this.n) % this.n, first = Math.min(m, this.n - start);
-    L.set(this.L.subarray(start, start + first)); R.set(this.R.subarray(start, start + first));
-    if (m > first) { L.set(this.L.subarray(0, m - first), first); R.set(this.R.subarray(0, m - first), first); }
-    this.port.postMessage({ L, R, rate: sampleRate }, [L.buffer, R.buffer]); }
-  process(inputs) { const i = inputs[0]; if (!i || !i[0]) return true; const l = i[0], r = i[1] || i[0];
-    for (let k = 0; k < l.length; k++) { this.L[this.w] = l[k]; this.R[this.w] = r[k]; this.w++; if (this.w >= this.n) this.w = 0; } this.filled += l.length; return true; }
+    this.job = null;
+    this.port.onmessage = e => { const d = e.data;
+      if (d === "ping") { this.port.postMessage({ pong: true, filled: this.filled }); return; }
+      const want = d === "keep" ? this.n : d && d.keep ? Math.round(d.keep * sampleRate) : 0; if (!want) return;
+      const m = Math.min(this.filled, this.n, want); this.job = { m, start: (this.w - m + this.n) % this.n, sent: 0 };
+      this.port.postMessage({ begin: true, total: m, rate: sampleRate }); }; }
+  // big transfers from the audio thread can get lost on some phones: send the ring a piece at a time
+  sendSome() { const J = this.job; try {
+      const k = Math.min(16384, J.m - J.sent);
+      if (k > 0) { const L = new Float32Array(k), R = new Float32Array(k); for (let i = 0; i < k; i++) { let p = J.start + J.sent + i; if (p >= this.n) p -= this.n; L[i] = this.L[p]; R[i] = this.R[p]; } this.port.postMessage({ at: J.sent, L, R }, [L.buffer, R.buffer]); J.sent += k; }
+      if (J.sent >= J.m) { this.port.postMessage({ done: true }); this.job = null; }
+    } catch (err) { this.port.postMessage({ err: String(err && err.message || err) }); this.job = null; } }
+  process(inputs) { const i = inputs[0];
+    if (i && i[0]) { const l = i[0], r = i[1] || i[0]; for (let k = 0; k < l.length; k++) { this.L[this.w] = l[k]; this.R[this.w] = r[k]; this.w++; if (this.w >= this.n) this.w = 0; } this.filled += l.length; }
+    if (this.job) this.sendSome();
+    return true; }
 }
 registerProcessor("nb-capture", NBCap);`;
   async function capInit() {
@@ -12232,7 +11711,16 @@ registerProcessor("nb-capture", NBCap);`;
   function capGrab(secs) {
     return new Promise(res => {
       if (!CAP.node) { res(null); return; }
-      if (CAP.kind === "worklet") { CAP.node.port.onmessage = e => res(e.data); CAP.node.port.postMessage(secs ? { keep: secs } : "keep"); return; }
+      if (CAP.kind === "worklet") {
+        let L = null, R = null, rate = 0;
+        const t = setTimeout(() => { CAP.node.port.onmessage = null; CAP.lastErr = "the capture didn't answer within 8 s"; if (window.__nbAdd) window.__nbAdd("capture", CAP.lastErr); res(null); }, 8000);
+        CAP.node.port.onmessage = e => { const d = e.data;
+          if (d.begin) { L = new Float32Array(d.total); R = new Float32Array(d.total); rate = d.rate; if (!d.total) { clearTimeout(t); res({ L, R, rate }); } }
+          else if (d.L && L) { L.set(d.L, d.at); R.set(d.R, d.at); }
+          else if (d.done) { clearTimeout(t); CAP.lastErr = ""; res({ L, R, rate }); }
+          else if (d.err) { clearTimeout(t); CAP.lastErr = d.err; if (window.__nbAdd) window.__nbAdd("capture", "error " + d.err); res(null); } };
+        CAP.node.port.postMessage(secs ? { keep: secs } : "keep"); return;
+      }
       const n = CAP.L.length, m = Math.min(CAP.filled, n), L = new Float32Array(m), R = new Float32Array(m), start = (CAP.w - m + n) % n, first = Math.min(m, n - start);
       L.set(CAP.L.subarray(start, start + first)); R.set(CAP.R.subarray(start, start + first));
       if (m > first) { L.set(CAP.L.subarray(0, m - first), first); R.set(CAP.R.subarray(0, m - first), first); }
@@ -12268,6 +11756,23 @@ registerProcessor("nb-capture", NBCap);`;
       ["btn", "Keep for later", () => {}],
       ["btn danger wide", "Discard", () => document.getElementById("takeDiscard").click()]]);
   }
+  // a worklet that never answers (seen on some Android tablets) is swapped for the main-thread ring
+  function capCheck() {
+    if (CAP.kind !== "worklet") return Promise.resolve();
+    if (CAP.checkP) return CAP.checkP;
+    return (CAP.checkP = (async () => {
+      const t0 = performance.now();
+      const ok = await new Promise(r => { const to = setTimeout(() => r(false), 2500); CAP.node.port.onmessage = e => { if (e.data && e.data.pong) { clearTimeout(to); r(true); } }; CAP.node.port.postMessage("ping"); });
+      if (ok) { CAP.pingMs = Math.round(performance.now() - t0); return; }
+      try { analyser.disconnect(CAP.node); CAP.node.disconnect(); } catch (e) {}
+      const n = Math.round(ctx.sampleRate * CAP.secs); CAP.L = new Float32Array(n); CAP.R = new Float32Array(n); CAP.w = 0; CAP.filled = 0;
+      const sp = ctx.createScriptProcessor(4096, 2, 1), mute = ctx.createGain(); mute.gain.value = 0;
+      sp.onaudioprocess = ev => { const ib = ev.inputBuffer, l = ib.getChannelData(0), r = ib.numberOfChannels > 1 ? ib.getChannelData(1) : l; for (let k = 0; k < l.length; k++) { CAP.L[CAP.w] = l[k]; CAP.R[CAP.w] = r[k]; CAP.w = (CAP.w + 1) % n; } CAP.filled += l.length; };
+      analyser.connect(sp); sp.connect(mute).connect(ctx.destination); CAP.node = sp; CAP.kind = "script (worklet didn't answer)";
+      if (window.__nbAdd) window.__nbAdd("capture", "worklet silent, switched to main-thread capture");
+    })());
+  }
+  { const ci = capInit; capInit = async function () { await ci(); try { await capCheck(); } catch (e) {} }; }
   // capture starts with the audio
   { const st0 = start; start = function () { st0(); capInit(); }; }
 
@@ -12431,99 +11936,6 @@ registerProcessor("nb-capture", NBCap);`;
     djRestore = async function () { const first = !DJ.loaded; await rs1(); if (!first) return; for (const d of DJ.decks) { const r = await djIdbGet("deck" + d.i); if (r && d.buf && r.phrase != null) { d.phrase = r.phrase; djPaintDeck(d); } } };
     const dl2 = djLoad;
     djLoad = async function (d, buf, name, raw, meta) { await dl2(d, buf, name, raw, meta); d.phrase = meta && meta.phrase != null ? meta.phrase : null; djPaintDeck(d); };
-  }
-
-  // ---------- Stems on the decks: Full / Instrumental / Vocals, for live mashups ----------
-  // The AI separator (or the quick centre method where AI can't run) splits a deck's song once;
-  // both stems are kept on this device, and a deck can switch between them without losing its place.
-  // Mashup puts the lead song's vocal over the other song's instrumental in one tap.
-  const STEMS = { busy: null };
-  const stemKey = d => "stems:" + d.name + ":" + (d.full || d.buf).length;
-  async function djStemsFor(d) {
-    if (d.stems) return d.stems;
-    const full = d.full || d.buf; if (!full) return null;
-    const cached = await djIdbGet(stemKey(d));
-    if (cached && cached.inst && cached.voc) { try { d.stems = { inst: await decode(cached.inst.slice(0)), voc: await decode(cached.voc.slice(0)) }; d.stemsHow = cached.how || "ai"; return d.stems; } catch (e) {} }
-    if (STEMS.busy) { djMsg("Already separating " + STEMS.busy + " · wait for it to finish"); return null; }
-    STEMS.busy = d.name; d.stemProg = 0; djPaintDeck(d);
-    const say = m => { d.stemMsg = m; djPaintDeck(d); };
-    try {
-      const chans = [full.getChannelData(0).slice(), (full.numberOfChannels > 1 ? full.getChannelData(1) : full.getChannelData(0)).slice()], rate = full.sampleRate;
-      let inst = null, voc = null, how = "quick";
-      if (aiPossible()) {
-        try {
-          if (!AI.session) { let ad = null; try { ad = navigator.gpu ? await navigator.gpu.requestAdapter() : null; } catch (e) { ad = null; } if (!ad) throw new Error("cpu"); }
-          await aiSession(say);
-          if (AI.ep !== "webgpu") throw new Error("cpu");   // on the CPU the model would stall the decks for minutes
-          const [L, R] = await aiResample(chans, rate, 44100);
-          const res = await aiSeparate(L, R, "music", (p, eta) => { d.stemProg = p; say("Separating with AI… " + Math.round(p * 100) + "%" + (eta > 1 ? " · " + Math.round(eta) + " s left" : "")); }, () => false);
-          if (res) {
-            const vL = new Float32Array(L.length), vR = new Float32Array(R.length);
-            for (let i = 0; i < L.length; i++) { vL[i] = L[i] - res[0][i] * AI.COMP; vR[i] = R[i] - res[1][i] * AI.COMP; }
-            const ri = await aiResample(res, 44100, rate), rv = await aiResample([vL, vR], 44100, rate);
-            inst = makeBuffer(ri, rate); voc = makeBuffer(rv, rate); how = "ai";
-          }
-        } catch (e) { say(e && e.message === "cpu" ? "AI runs on the CPU on this device and would stall the decks · quick split (AI still works in the sample editor)" : "AI couldn't run here (" + (e && e.message || e) + ") · using the quick split"); await new Promise(r => setTimeout(r, 1200)); }
-      }
-      if (!inst) {
-        say("Splitting (quick method)…");
-        const oi = await vxQuick(chans, rate, { mode: "music", strength: 2, lowCut: 120, highCut: 12000, both: true }, p => { d.stemProg = p; djPaintDeck(d); }, () => false);
-        const yieldNow = () => new Promise(r => setTimeout(r, 0));
-        if (!oi) { say("Cancelled"); return null; }
-        if (!oi.voc) for (let c = 0; c < 2; c++) { const a = chans[c], b = oi[c]; for (let i = 0; i < a.length; i++) a[i] -= b[i]; }
-        inst = makeBuffer(oi, rate); await yieldNow(); voc = makeBuffer(oi.voc || chans, rate); await yieldNow();
-      }
-      d.stems = { inst, voc }; d.stemsHow = how;
-      if (how === "ai" && full.duration < 420) setTimeout(async () => { try { const a = bufferToWav(inst); await new Promise(r => setTimeout(r, 0)); const b = bufferToWav(voc); await new Promise(r => setTimeout(r, 0)); djIdbPut(stemKey(d), { inst: a, voc: b, how }); } catch (e) {} }, 1500);
-      say("");
-      return d.stems;
-    } finally { STEMS.busy = null; d.stemProg = null; d.stemMsg = ""; djPaintDeck(d); }
-  }
-  async function djUseStem(d, which) {
-    if (!d.buf) { djMsg("Load a song on " + "AB"[d.i] + " first"); return; }
-    if (!d.full) d.full = d.buf;
-    let buf = d.full;
-    if (which !== "full") { const st = await djStemsFor(d); if (!st) return; buf = st[which]; }
-    if (d.buf === buf) { d.stem = which; djPaintDeck(d); return; }
-    const pos = djPos(d), playing = d.playing;
-    d.buf = buf; d.stem = which; d.img = null;
-    if (DJ.stretchOK && d.st) djStretchAttach(d);
-    if (playing) djStartSrc(d, ctx.currentTime + 0.03, pos); else d.p0 = pos;
-    djPaintDeck(d);
-    djMsg("Deck " + "AB"[d.i] + ": " + ({ full: "the full song", inst: "instrumental only", voc: "vocals only" })[which] + (d.stemsHow === "quick" && which !== "full" ? " (quick split: AI gives a much cleaner one on the tablet)" : ""));
-  }
-  deckEls.forEach((el, i) => {
-    const d = DJ.decks[i]; d.stem = "full"; d.full = null; d.stems = null;
-    const row = document.createElement("div"); row.className = "dj-loops dj-stems";
-    row.innerHTML = '<span>Stems</span><button class="btn" data-stem="full" aria-pressed="true" title="The whole song">Full</button><button class="btn" data-stem="inst" title="The music without the singer (separated on first use)">Instrumental</button><button class="btn" data-stem="voc" title="Just the singer (separated on first use)">Vocals</button>';
-    el.querySelector(".dj-cues").after(row);
-    row.querySelectorAll("[data-stem]").forEach(b => b.addEventListener("click", () => djUseStem(d, b.dataset.stem)));
-  });
-  {
-    const pd1 = djPaintDeck;
-    djPaintDeck = function (d) {
-      pd1(d);
-      const el = deckEls[d.i];
-      el.querySelectorAll("[data-stem]").forEach(b => b.setAttribute("aria-pressed", String((d.stem || "full") === b.dataset.stem)));
-      if (d.stemProg != null || d.stemMsg) { const s = el.querySelector(".dj-name small"); if (s) s.textContent = d.stemMsg || ("Separating… " + Math.round((d.stemProg || 0) * 100) + "%"); }
-    };
-    // a new song on a deck starts as the full song
-    const dl3 = djLoad;
-    djLoad = async function (d, buf, name, raw, meta) { d.full = null; d.stems = null; d.stem = "full"; d.stemsHow = ""; await dl3(d, buf, name, raw, meta); d.full = d.buf; };
-  }
-  // Mashup: the lead's vocal over the other deck's instrumental
-  {
-    const bar = document.querySelector(".dj-mixrow");
-    const b = document.createElement("button"); b.className = "btn"; b.id = "djMashup"; b.textContent = "Mashup"; b.title = "The lead song's vocals over the other deck's instrumental";
-    bar.insertBefore(b, bar.firstChild.nextSibling);
-    b.addEventListener("click", async () => {
-      const L = LEAD(), F = FOL();
-      if (!L.buf || !F.buf) { djMsg("Mashup needs a song on both decks"); return; }
-      djMsg("Mashup: " + L.name + "'s vocals over " + F.name + "'s music · separating if needed…", true);
-      await djUseStem(F, "inst"); await djUseStem(L, "voc");
-      if (!DJ.sync && L.playing && F.playing) djAuto();
-      djMsg("Mashup: " + "AB"[L.i] + " sings, " + "AB"[F.i] + " plays the music · tap Full on a deck to go back");
-    });
   }
 
   // ---------- Jam: four loops that record what you play, and a band that follows your chords ----------
@@ -12809,7 +12221,7 @@ registerProcessor("nb-capture", NBCap);`;
 
 
 
-  // ---------- progress strip: anything that analyses, separates, downloads or encodes shows a bar ----------
+  // ---------- progress strip: anything that analyses, downloads or encodes shows a bar ----------
   const JOBS = { el: null, map: new Map() };
   function jobSet(id, label, p, onCancel) {
     if (!JOBS.el) { JOBS.el = document.createElement("div"); JOBS.el.className = "jobs"; JOBS.el.setAttribute("aria-live", "polite"); document.body.appendChild(JOBS.el); }
@@ -12831,27 +12243,6 @@ registerProcessor("nb-capture", NBCap);`;
     try { return await fn(p => { if (!off) jobSet(id, null, p); }, cancelled); } finally { jobEnd(id); }
   }
   {
-    // quick vocal split (sampler sheet and the decks)
-    const q0 = vxQuick;
-    vxQuick = (chans, rate, opts, onProgress, isCancelled) => jobRun("sep", "Separating " + (opts && opts.mode === "music" ? "the instrumental" : "the vocals") + "…",
-      (rep, off) => q0(chans, rate, opts, p => { rep(p); if (onProgress) onProgress(p); }, () => off() || (isCancelled ? isCancelled() : false)), true);
-    // AI separation
-    const ai0 = aiSeparate;
-    aiSeparate = (L, R, mode, onProgress, isCancelled) => jobRun("sep", "AI separation on the " + (AI.ep === "webgpu" ? "GPU" : "CPU") + "…",
-      (rep, off) => new Promise((res, rej) => {
-        const poll = setInterval(() => { if (off()) { clearInterval(poll); aiKill(); if (typeof vx !== "undefined") vx.cancel = true; res(null); } }, 120);
-        ai0(L, R, mode, (p, eta) => { rep(p); if (onProgress) onProgress(p, eta); }, () => off() || (isCancelled ? isCancelled() : false)).then(v => { clearInterval(poll); res(off() ? null : v); }, e => { clearInterval(poll); if (off()) res(null); else rej(e); });
-      }), true);
-    // the AI engine and its one-time model download
-    const as0 = aiSession;
-    aiSession = onStatus => AI.session ? as0(onStatus) : jobRun("ai", "Loading the AI engine…", (rep, off) => new Promise((res, rej) => {
-      const poll = setInterval(() => { if (off()) { clearInterval(poll); aiKill(); if (typeof vx !== "undefined") vx.cancel = true; rej(new Error("cancelled")); } }, 120);
-      as0(m => {
-        const mm = /\((once)\)… (\d+) \/ (\d+) MB/.exec(m || "");
-        if (mm) { jobSet("ai", "Downloading the AI model (once)…", +mm[2] / Math.max(1, +mm[3])); } else jobSet("ai", m, null);
-        if (onStatus) onStatus(m);
-      }).then(v => { clearInterval(poll); res(v); }, e => { clearInterval(poll); rej(e); });
-    }), true);
     // beat and key analysis
     const an0 = djAnalyseAsync;
     djAnalyseAsync = buf => DJ_AN_CACHE.has(buf) ? an0(buf) : jobRun("an", "Finding the beat and key…", (rep, off) => new Promise((res, rej) => {
@@ -12865,12 +12256,7 @@ registerProcessor("nb-capture", NBCap);`;
     const m0 = mp3Encode;
     mp3Encode = (L, R, rate, kbps, onProgress) => jobRun("mp3", "Making the MP3…", rep => m0(L, R, rate, kbps, p => { rep(p); if (onProgress) onProgress(p); }));
   }
-  // a bar under each deck's name while its stems are being separated, and a shimmer on a song that's being analysed
-  deckEls.forEach((el, i) => {
-    const d = DJ.decks[i], nm = el.querySelector(".dj-name"), bar = document.createElement("div"); bar.className = "dj-prog"; bar.hidden = true; bar.innerHTML = "<i></i>"; nm.appendChild(bar);
-    const pd = djPaintDeck;
-    djPaintDeck = function (x) { pd(x); if (x !== d) return; const on = d.stemProg != null; bar.hidden = !on; if (on) bar.firstChild.style.width = Math.round((d.stemProg || 0) * 100) + "%"; };
-  });
+  // a shimmer on a song that's being analysed
   {
     const pc0 = djPaintCrate;
     djPaintCrate = function () {
@@ -13088,20 +12474,20 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     { const ns = noteMsg; noteMsg = function (m, err) { add(err ? "msg!" : "msg", m); return ns(m, err); }; }
 
     const brief = b => b ? { sec: +(b.duration).toFixed(2), ch: b.numberOfChannels, rate: b.sampleRate } : null;
+    let REPORT_NOTE = "";
     async function snapshot() {
-      const r = { app: "Nate Bloom", made: new Date().toString(), page: location.href.split("?")[0] };
+      const r = { app: "Nate Bloom", made: new Date().toString(), page: location.href.split("?")[0], whatWentWrong: REPORT_NOTE };
       r.device = { ua: navigator.userAgent, screen: screen.width + "x" + screen.height, window: innerWidth + "x" + innerHeight, dpr: devicePixelRatio, cores: navigator.hardwareConcurrency, memoryGB: navigator.deviceMemory,
         installed: matchMedia("(display-mode: standalone)").matches, online: navigator.onLine, touch: navigator.maxTouchPoints, language: navigator.language };
       try { if (performance.memory) r.device.jsHeapMB = Math.round(performance.memory.usedJSHeapSize / 1048576) + " of " + Math.round(performance.memory.jsHeapSizeLimit / 1048576); } catch (e) {}
       try { const est = await navigator.storage.estimate(); r.device.storageMB = Math.round(est.usage / 1048576) + " of " + Math.round(est.quota / 1048576); r.device.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) {}
       try { const a = navigator.gpu ? await navigator.gpu.requestAdapter() : null; r.device.gpu = a ? (a.info ? { vendor: a.info.vendor, arch: a.info.architecture, device: a.info.device, desc: a.info.description } : "available") : "none"; } catch (e) { r.device.gpu = "error " + e.message; }
-      r.audio = ctx ? { state: ctx.state, rate: ctx.sampleRate, baseLatency: ctx.baseLatency, outputLatency: ctx.outputLatency, time: +ctx.currentTime.toFixed(2), capture: CAP.kind || "off", sounding: voices.size, held: heldVoices.size != null ? heldVoices.size : heldVoices.length } : "not started";
+      r.audio = ctx ? { state: ctx.state, rate: ctx.sampleRate, baseLatency: ctx.baseLatency, outputLatency: ctx.outputLatency, time: +ctx.currentTime.toFixed(2), pageTime: +(performance.now() / 1000).toFixed(2), capture: CAP.kind || "off", capturePingMs: CAP.pingMs, captureErr: CAP.lastErr || "", sounding: voices.size, held: heldVoices.size != null ? heldVoices.size : heldVoices.length } : "not started";
       r.state = Object.assign({}, { view: state.mode, engine: state.engine, panel: state.panel, octave: state.octave, hold: state.hold, bpm: state.seq.bpm, playing: playing, fx: state.fx, fxMode: FXC.mode });
       r.sampler = state.samp.slots.map((x, i) => ({ slot: "S" + (i + 1), name: x.name, mode: x.mode, loop: !!x.loop, fit: x.fit || null, audio: brief(sampBuf[i]) }));
       r.dj = { open: !document.getElementById("djView").hidden, lead: DJ.lead, sync: DJ.sync, xf: DJ.xf, keylock: DJ.keylock, auto: DJ.auto, style: DJ.style, nextDeck: DJ.nextDeck, mixing: DJ.trans ? { style: DJ.trans.style, bars: DJ.trans.bars } : null,
-        decks: DJ.decks.map(d => ({ name: d.name, bpm: d.bpm0, rate: d.rate, bend: d.bend, playing: d.playing, pos: d.buf ? +djPos(d).toFixed(2) : null, loop: d.loop ? d.loop.n : null, stem: d.stem, stems: d.stemsHow || "", eq: d.eq, keyLockNode: !!d.st, audio: brief(d.buf) })),
+        decks: DJ.decks.map(d => ({ name: d.name, bpm: d.bpm0, rate: d.rate, bend: d.bend, playing: d.playing, pos: d.buf ? +djPos(d).toFixed(2) : null, loop: d.loop ? d.loop.n : null, eq: d.eq, keyLockNode: !!d.st, audio: brief(d.buf) })),
         songs: DJ.crate.map(it => it && { name: it.name, bpm: it.bpm, key: it.key, cam: it.cam, decoded: !!it.buf, busy: it.busy }), bank: DJ.bank.map(it => it && { name: it.name, beats: it.beats }) };
-      r.ai = { possible: aiPossible(), engine: AI.ep || "", ready: !!AI.session, worker: !!AI.worker, noGpuFlag: (() => { try { return localStorage.getItem("nightbloom-ai-nogpu"); } catch (e) { return null; } })(), lastChunkSec: AI.chunkSec };
       r.jam = { loops: JAM.tracks.map(t => ({ len: t.len, on: t.on, events: t.events.length })), band: JAM.band && { on: JAM.band.on, style: JAM.band.style }, recording: !!JAM.rec, clock: !!JAM.clock };
       r.recording = { take: !!take.rec, takeReady: !!take.done, recTo: (() => { try { return localStorage.getItem("nightbloom-recto"); } catch (e) { return null; } })() };
       r.jobsOnScreen = [...document.querySelectorAll(".job .jl span")].map(x => x.textContent);
@@ -13123,10 +12509,10 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       try {
         const files = [];
         const snap = await snapshot();
-        let soundNote = ctx ? "no sound captured: the audio engine didn't answer within 6 s (overloaded)" : "no sound captured (audio wasn't started)";
+        let soundNote = ctx ? "no sound captured: " + (CAP.lastErr || "unknown") + " · capture " + (CAP.kind || "off") + (CAP.pingMs != null ? " · ping " + CAP.pingMs + " ms" : " · no ping") : "no sound captured (audio wasn't started)";
         try {
           if (ctx && CAP.node) {
-            const got = await Promise.race([capGrab(30), new Promise(r => setTimeout(() => r(null), 6000))]);
+            const got = await capGrab(30);
             if (got && got.L.length) { const keep = Math.min(got.L.length, got.rate * 30), a = got.L.length - keep; files.push({ name: "last-30-seconds.wav", data: wav16(got.L.subarray(a), got.R.subarray(a), got.rate) }); soundNote = "last " + (keep / got.rate).toFixed(1) + " s of sound in last-30-seconds.wav"; }
           }
         } catch (e) { soundNote = "sound capture failed: " + (e && e.message || e); }
@@ -13139,7 +12525,10 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       } catch (e) { noteMsg("Couldn't build the report (" + (e && e.message || e) + ")", true); }
       finally { btn.disabled = false; }
     }
-    document.getElementById("reportBtn").addEventListener("click", () => { start(); capInit().then(makeReport, makeReport); });
+    const rSheet = document.getElementById("reportSheet"), rNote = document.getElementById("reportNote");
+    document.getElementById("reportBtn").addEventListener("click", () => { start(); capInit(); rSheet.hidden = false; setTimeout(() => { try { rNote.focus(); } catch (e) {} }, 50); });
+    document.getElementById("reportCancel").addEventListener("click", () => { rSheet.hidden = true; });
+    document.getElementById("reportGo").addEventListener("click", () => { rSheet.hidden = true; REPORT_NOTE = rNote.value.trim(); add("note", REPORT_NOTE); capInit().then(makeReport, makeReport); rNote.value = ""; });
   }
   // ---------- resource diet: nothing processes unless it can be heard ----------
   {
@@ -13154,7 +12543,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }
     function dietLab() {
       if (!ctx || !B) return;
-      const on = betaOn;
+      const on = betaOn && state.fx.on !== false;   // FX: Off silences the Lab stages, so they needn't process either
       if (B !== dietLab.B) { dietLab.B = B; plug.st = { dens: "on", lofi: "on", hall: "on" }; }   // a rebuilt chain starts fully wired
       plug("dens", on && bfx.densOn && bfx.dens > 0.01, () => B.densShaper.connect(B.densWet), () => B.densShaper.disconnect(B.densWet), 0.2);
       plug("lofi", on && bfx.lofiOn, () => B.bitShaper.connect(B.lofiTone), () => B.bitShaper.disconnect(B.lofiTone), 0.2);
@@ -13288,6 +12677,19 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     };
     setTimeout(() => { paintPick(); fxcPaint2(); refreshFxKnobs(); }, 0);
   }
+  // ---------- vocal separation was removed: free what it left on this device (once) ----------
+  setTimeout(async () => {
+    try { if (localStorage.getItem("nightbloom-sepgone")) return; } catch (e) { return; }
+    try { ["nightbloom-ai-nogpu", "nightbloom-vxai", "nightbloom-ort", "nightbloom-model", "nightbloom-model-remote"].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    try {
+      if (window.caches) {
+        await caches.delete("nate-bloom-models");   // the 67 MB model
+        for (const name of await caches.keys()) { const c = await caches.open(name); for (const req of await c.keys()) if (req.url.includes("onnxruntime-web")) await c.delete(req); }
+      }
+    } catch (e) {}
+    try { const db = await idb(); await new Promise(res => { const tx = db.transaction("samples", "readwrite"); tx.objectStore("samples").delete(IDBKeyRange.bound("stems:", "stems:￿")); tx.oncomplete = tx.onerror = tx.onabort = () => res(); }); } catch (e) {}
+    try { localStorage.setItem("nightbloom-sepgone", "1"); } catch (e) {}
+  }, 8000);
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
