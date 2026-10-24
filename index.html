@@ -1141,6 +1141,71 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
   .scope { height: 36px; }
   .tab small { display: none; }
 }
+
+/* ---------- now playing ---------- */
+.nowbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: none; }
+.nowbar .now-lab { font-family: var(--font-mono); font-size: 11px; color: #7fd6c2; text-transform: uppercase; letter-spacing: 0.1em; }
+.nowbar .btn { height: 34px; padding: 0 10px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 7px; }
+.now-chip i { width: 7px; height: 7px; border-radius: 50%; background: #7fd6c2; animation: nowpulse 1.2s ease-in-out infinite; }
+.now-chip b { font-size: 0.68rem; color: var(--dim); font-weight: 400; }
+.now-all { border-color: var(--amber); color: var(--amber); }
+@keyframes nowpulse { 50% { opacity: 0.25; } }
+/* ---------- feature row groups ---------- */
+.betabar .bsep { width: 1px; align-self: stretch; margin: 4px 2px; background: var(--line); flex: none; }
+.betabar .spacer { flex: 1; min-width: 4px; }
+#helpSheet .ed-head { align-items: center; }
+#helpSheet .ed-head .btn { height: 32px; padding: 0 10px; font-size: 0.8rem; }
+#helpSheet .sheet-foot { display: flex; gap: 8px; }
+#hapticBtn[aria-pressed="false"] { color: var(--dim); }
+/* ---------- undo toast ---------- */
+.undotoast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; align-items: center; gap: 12px;
+  padding: 8px 8px 8px 16px; border-radius: 24px; background: #2a2538; border: 1px solid var(--line); color: var(--ink); font-size: 0.86rem; box-shadow: 0 6px 24px rgba(0,0,0,0.5); max-width: calc(100vw - 32px); }
+.undotoast .btn { height: 32px; padding: 0 14px; background: var(--amber); border-color: var(--amber); color: var(--panel); font-weight: 700; }
+/* ---------- Rhythm Creator: zoom, paint, step options ---------- */
+.rc-grid { touch-action: pan-y; }
+.rc-row { grid-template-columns: 60px repeat(var(--rcw, 16), minmax(0, 1fr)) !important; }
+@media (min-width: 900px) { .rc-row { grid-template-columns: 112px repeat(var(--rcw, 16), minmax(0, 1fr)) !important; } }
+@media (max-width: 430px) { .rc-row { grid-template-columns: 50px repeat(var(--rcw, 16), minmax(0, 1fr)) !important; } }
+.rc-grid.zoom .rc-c { height: 38px; }
+.rc-grid.zoom .rc-c i { font-size: 0.6rem; }
+#rcZoom[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.rc-c.lp { outline: 2px solid var(--amber); outline-offset: -2px; }
+.rc-pop { position: fixed; z-index: 28; width: min(340px, calc(100vw - 16px)); background: var(--panel); border: 1px solid var(--lilac); border-radius: 12px; padding: 10px; box-shadow: 0 10px 34px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 8px; }
+.rc-pop-h { display: flex; align-items: center; gap: 6px; }
+.rc-pop-h b { flex: 1; font-size: 0.86rem; }
+.rc-pop-r { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.rc-pop-r span { width: 54px; font-family: var(--font-mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.rc-pop .btn { height: 34px; padding: 0 9px; font-size: 0.8rem; }
+.rc-pop .btn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
+/* ---------- Play view ---------- */
+body.perf .betabar, body.perf #tabs, body.perf .machbar, body.perf .fmbar, body.perf .panelbar, body.perf #engineRow, body.perf #arpRow,
+body.perf #fxRow, body.perf #jamRow, body.perf #labRow, body.perf #blendRow, body.perf .gridbar { display: none !important; }
+body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
+#perfBtn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
+/* ---------- phones: bottom view bar, readable small text, the chord picker's full name ---------- */
+@media (max-width: 600px) {
+  header .seg { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; border-radius: 0; border: none; border-top: 1px solid var(--line);
+    background: var(--panel); padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+  header .seg button { flex: 1; height: 52px; padding: 0 2px !important; font-size: 0.84rem !important; border-radius: 0; }
+  .app { padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important; }
+  .jumpbtn { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  .undotoast { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+  header .hright > .btn { padding-left: 10px !important; padding-right: 10px !important; }
+  header .hright > select.rectarget { max-width: 92px !important; }
+  .wlab, .k-val, .lab, .lab2, .hint, .hint2, .labhint, .arp-gate, .jam-lab, .fname, .sbsub, .ed-info, #engineLabel, #drummerNow, #stepHint,
+  #alsoLab, #arpHint, .rc-mini, .rc-k, .rc-euc, .dj-msg, .mx-lab small, .meter, .tinfo { font-size: 11px !important; }
+  .w { font-size: 10px; }
+  .panelbar .meter select { max-width: 64vw; }
+  .tab small { font-size: 11px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .mchip small { font-size: 11px !important; }
+  .tabs-lab { font-size: 11px !important; }
+}
+@media (max-width: 400px) {
+  .transport { gap: 3px !important; }
+  .transport .btn { padding: 0 6px !important; font-size: 0.78rem !important; }
+  .transport .oct { min-width: 26px !important; }
+  .transport #gridBtn, .transport #perfBtn, .transport #seqUndo, .transport #clickBtn { min-width: 30px !important; padding: 0 4px !important; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1183,18 +1248,22 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     </div>
   </header>
 
+  <div class="nowbar" id="nowBar" hidden></div>
   <div class="betabar" id="betaBar">
     <button class="btn" id="betaTracksBtn">▤ Tracks</button>
-    <button class="btn" id="betaFxBtn">FX Lab</button>
     <button class="btn" id="songBtn">Song</button>
-    <button class="btn" id="midiBtn">MIDI</button>
-    <button class="btn" id="exBtn">Export</button>
-    <button class="btn" id="installBtn">Install</button>
+    <button class="btn" id="prBtn">Projects</button>
+    <span class="bsep" aria-hidden="true"></span>
+    <button class="btn" id="betaFxBtn">FX Lab</button>
     <button class="btn" id="moBtn">Motion</button>
     <button class="btn" id="msBtn">My sounds</button>
-    <button class="btn" id="prBtn">Projects</button>
-    <button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report</button>
-    <button class="btn" id="helpBtn" aria-label="Help">?</button>
+    <span class="bsep" aria-hidden="true"></span>
+    <button class="btn" id="exBtn">Export</button>
+    <button class="btn" id="midiBtn">MIDI</button>
+    <span class="bsep" id="installSep" aria-hidden="true"></span>
+    <button class="btn" id="installBtn">Install</button>
+    <span class="spacer"></span>
+    <button class="btn" id="helpBtn" aria-label="Help, settings and Report">?</button>
   </div>
   <div class="takebar" id="takeBar" hidden>
     <div class="tinfo" id="takeInfo">Take ready</div>
@@ -1359,6 +1428,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <button class="btn" id="octUp" aria-label="Octave up">+</button>
     </div>
     <button class="btn" id="gridBtn" aria-pressed="false" aria-label="Lighted note pads" title="Lighted note pads">▦</button>
+    <button class="btn" id="perfBtn" aria-pressed="false" aria-label="Play view" title="Play view: just the keys">⤢</button>
     <div class="tgroup" id="bpmGroup" hidden>
       <button class="btn" id="bpmDown" aria-label="Slower">−</button>
       <div class="oct" id="bpmLabel">96 bpm</div>
@@ -1369,6 +1439,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <button class="btn" id="play" aria-pressed="false">▶ Play</button>
     <button class="btn" id="hold" aria-pressed="false">Hold</button>
     <button class="btn" id="clear" hidden>Clear</button>
+    <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button>
     <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
     <button class="btn" id="panic">Stop</button>
   </div>
@@ -1482,6 +1553,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <button class="btn" id="djHelpBtn" aria-label="How the DJ tab works">?</button>
     <button class="btn primary" id="djDone">Done</button>
   </div>
+  <div class="nowbar" id="djNow" hidden></div>
   <div class="dj-main">
     <section class="dj-deck" data-d="0"></section>
     <section class="dj-mid">
@@ -1648,11 +1720,19 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <button class="btn" id="rcHelpBtn" aria-label="How the Rhythm Creator works">?</button>
     <button class="btn primary" id="rcDone">Done</button>
   </div>
+  <div class="nowbar" id="rcNow" hidden></div>
+  <div class="rc-pop" id="rcPop" hidden role="dialog" aria-label="Step options">
+    <div class="rc-pop-h"><b id="rcPopT">Step</b><button class="btn" id="rcPopPlay" aria-label="Hear it">▶</button><button class="btn primary" id="rcPopX">Done</button></div>
+    <div class="rc-pop-r"><span>Hit</span><button class="btn" data-k="on">On</button><button class="btn" data-k="acc">Accent</button><button class="btn" data-k="flam">Flam</button></div>
+    <div class="rc-pop-r"><span>Roll</span><button class="btn" data-roll="0">1</button><button class="btn" data-roll="2">2</button><button class="btn" data-roll="3">3</button><button class="btn" data-roll="4">4</button></div>
+    <div class="rc-pop-r"><span>Chance</span><button class="btn" data-prob="0">100%</button><button class="btn" data-prob="1">75%</button><button class="btn" data-prob="2">50%</button><button class="btn" data-prob="3">25%</button><button class="btn" data-prob="4">1:2</button><button class="btn" data-prob="5">2:2</button><button class="btn" data-prob="6">1:4</button><button class="btn" data-prob="7">4:4</button></div>
+    <div class="rc-pop-r"><span>Nudge</span><button class="btn" data-nudge="3">−½</button><button class="btn" data-nudge="4">−¼</button><button class="btn" data-nudge="0">0</button><button class="btn" data-nudge="1">+¼</button><button class="btn" data-nudge="2">+½</button></div>
+  </div>
   <div class="rc-bar">
     <div class="seg small" id="rcModes" role="group" aria-label="What a tap on a step does">
       <button data-m="hits" aria-pressed="true">Hits</button><button data-m="acc" aria-pressed="false">Accent</button><button data-m="flam" aria-pressed="false">Flam</button><button data-m="roll" aria-pressed="false">Roll</button><button data-m="prob" aria-pressed="false">Chance</button><button data-m="nudge" aria-pressed="false">Nudge</button>
     </div>
-    <div class="seg small" id="rcPages" role="group" aria-label="Page"><button data-p="0">1–16</button><button data-p="1">17–32</button><button data-p="2">33–48</button><button data-p="3">49–64</button></div>
+    <div class="seg small" id="rcPages" role="group" aria-label="Page"></div><button class="btn" id="rcZoom" aria-pressed="false" title="Show 8 steps at a time, with bigger cells">8 steps</button>
     <label class="rc-mini">Steps <select id="rcLen"><option value="16">16</option><option value="32">32</option><option value="48">48</option><option value="64">64</option></select></label>
     <label class="rc-mini">Swing <input type="range" id="rcSwing" min="0" max="75" value="0"><em id="rcSwingV">0%</em></label>
   </div>
@@ -1661,7 +1741,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <div class="rc-tool"><span class="lab2">Make a beat</span><select id="rcStyle" aria-label="Style"></select>
       <label class="rc-mini">Busy <input type="range" id="rcBusy" min="0" max="100" value="50"></label>
       <label class="rc-mini">Complex <input type="range" id="rcCplx" min="0" max="100" value="40"></label>
-      <button class="btn primary" id="rcMake">Make</button><button class="btn" id="rcVary">Vary</button><button class="btn" id="rcClear">Clear all</button></div>
+      <button class="btn primary" id="rcMake">Make</button><button class="btn" id="rcVary">Vary</button><button class="btn" id="rcClear">Clear all</button><button class="btn" id="rcUndo" disabled title="Undo the last change">↶ Undo</button></div>
     <div class="rc-tool"><span class="lab2">Morph</span><button class="btn" id="rcMorphA" title="Save the kit as it sounds now as A">Save A</button>
       <input type="range" id="rcMorph" min="0" max="100" value="0" aria-label="Morph between kit A and kit B" disabled>
       <button class="btn" id="rcMorphB" title="Save the kit as it sounds now as B">Save B</button>
@@ -1881,8 +1961,9 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
 
 <div class="editor sheet" id="helpSheet" hidden>
   <div class="ed-card" role="dialog" aria-label="Help">
-    <div class="ed-head"><strong>How Nate Bloom works</strong></div>
+    <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
+      <p><b>Getting around:</b> on a phone the views (Keys, Seq, Notes, DJ, Rhythm) sit in the bar along the bottom. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples, and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
@@ -1911,7 +1992,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <kbd>Shift+Enter</kbd><span>Hold on / off</span>
       <kbd>?</kbd><span>this help</span>
     </div>
-    <div class="ed-foot sheet-foot"><button class="btn big primary" id="helpDone">Done</button></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="hapticBtn" aria-pressed="true">Vibrate on taps: On</button><button class="btn big primary" id="helpDone">Done</button></div>
   </div>
 </div>
 
@@ -13395,17 +13476,21 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   }
   const rcStepLen = () => Math.max(16, RCP.steps);
   function rcRender() {
-    const pages = Math.ceil(rcStepLen() / 16); if (RC.page >= pages) RC.page = 0;
-    document.querySelectorAll("#rcPages button").forEach((b, k) => { b.hidden = k >= pages; b.setAttribute("aria-pressed", String(k === RC.page)); });
-    const base = RC.page * 16, anySolo = RCP.tracks.some(t => t.solo);
+    const W = RC.zoom ? 8 : 16, pages = Math.ceil(rcStepLen() / W); if (RC.page >= pages) RC.page = 0;
+    const pg = document.getElementById("rcPages"); let ph = "";
+    for (let k = 0; k < pages; k++) ph += `<button data-p="${k}" aria-pressed="${k === RC.page}">${k * W + 1}–${(k + 1) * W}</button>`;
+    pg.innerHTML = ph; pg.hidden = pages < 2;
+    rcGrid.style.setProperty("--rcw", W); rcGrid.classList.toggle("zoom", W === 8);
+    document.getElementById("rcZoom").setAttribute("aria-pressed", String(!!RC.zoom));
+    const base = RC.page * W, anySolo = RCP.tracks.some(t => t.solo);
     let h = "";
     RCP.tracks.forEach((tr, i) => {
       const s = rcSnd(tr.snd) || { code: "?", name: "?" };
       h += `<div class="rc-row${i === RC.sel ? " sel" : ""}${tr.mute || (anySolo && !tr.solo) ? " muted" : ""}" data-t="${i}"><button class="rc-lab" data-t="${i}" title="${s.name}"><b>${s.code}</b><small>${s.name}</small></button>`;
-      for (let k = 0; k < 16; k++) {
+      for (let k = 0; k < W; k++) {
         const st = base + k, out = st >= tr.len, on = !out && tr.on[st];
         const marks = on ? (tr.roll[st] > 1 ? `<i class="r">${tr.roll[st]}</i>` : "") + (tr.flam[st] ? `<i class="f"></i>` : "") + (tr.prob[st] ? `<i class="p">${RC_CHANCE_LAB[tr.prob[st]]}</i>` : "") + (tr.nudge[st] ? `<i class="n${RC_NUDGE[tr.nudge[st]] > 0 ? "r" : "l"}"></i>` : "") : "";
-        h += `<button class="rc-c${on ? " on" : ""}${on && tr.acc[st] ? " acc" : ""}${out ? " out" : ""}${k % 4 === 0 ? " beat" : ""}" data-t="${i}" data-s="${st}" aria-label="${s.name} step ${st + 1}">${marks}</button>`;
+        h += `<button class="rc-c${on ? " on" : ""}${on && tr.acc[st] ? " acc" : ""}${out ? " out" : ""}${st % 4 === 0 ? " beat" : ""}" data-t="${i}" data-s="${st}" aria-label="${s.name} step ${st + 1}">${marks}</button>`;
       }
       h += `</div>`;
     });
@@ -13475,6 +13560,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   }
   // tapping the grid: what a tap does depends on the mode row
   rcGrid.addEventListener("click", e => {
+    if (RC.noClick) { RC.noClick = false; return; }
     const lab = e.target.closest(".rc-lab");
     if (lab) { RC.sel = +lab.dataset.t; rcRender(); rcAudition(RC.sel); return; }
     const c = e.target.closest(".rc-c"); if (!c || c.classList.contains("out")) return;
@@ -13523,12 +13609,226 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     const col = cur < 0 ? -1 : cur;
     if (col === RC.shown) return;
     rcGrid.querySelectorAll(".rc-c.now").forEach(c => c.classList.remove("now"));
-    if (col >= 0) RCP.tracks.forEach((tr, i) => { const s = col % tr.len; if (Math.floor(s / 16) !== RC.page) return; const el = rcGrid.querySelector(`.rc-c[data-t="${i}"][data-s="${s}"]`); if (el) el.classList.add("now"); });
+    if (col >= 0) RCP.tracks.forEach((tr, i) => { const s = col % tr.len; if (Math.floor(s / (RC.zoom ? 8 : 16)) !== RC.page) return; const el = rcGrid.querySelector(`.rc-c[data-t="${i}"][data-s="${s}"]`); if (el) el.classList.add("now"); });
     RC.shown = col;
   }
   requestAnimationFrame(rcFrame);
   // the mixer gets a Rhythm Creator fader; the FX "Apply to" row gets Rhythm
   { const mc = mixChannels; mixChannels = function () { const ch = mc(); const at = ch.findIndex(c => c.group === "DJ"); ch.splice(at < 0 ? ch.length : at, 0, { group: "Rhythm Creator", name: "Rhythm Creator", sub: "all 16 tracks", get: () => RCP.level, set: v => { RCP.level = v; if (RC.bus) RC.bus.gain.setTargetAtTime(v, ctx.currentTime, 0.02); rcSave(); }, dflt: 0.85, live: true }); return ch; }; }
+  // ======================================================================
+  // UI / UX round: now playing, Back, undo, phone layout, Rhythm Creator touch, Play view, haptics
+  // ======================================================================
+  // ---------- a tap of vibration on steps and pads (Android; iPhone browsers can't) ----------
+  let HAPTIC = true; try { HAPTIC = localStorage.getItem("nightbloom-haptic") !== "0"; } catch (e) {}
+  const buzz = ms => { if (!HAPTIC || !navigator.vibrate) return; try { navigator.vibrate(ms || 8); } catch (e) {} };
+  document.addEventListener("pointerdown", e => { if (e.pointerType === "touch" && e.target.closest && e.target.closest(".cell, .rc-c, .pad, .kpad, .dj-pad")) buzz(8); }, { capture: true, passive: true });
+  {
+    const hb = document.getElementById("hapticBtn"), paint = () => { hb.setAttribute("aria-pressed", String(HAPTIC)); hb.textContent = "Vibrate on taps: " + (HAPTIC ? "On" : "Off"); };
+    if (!navigator.vibrate) hb.hidden = true;
+    hb.addEventListener("click", () => { HAPTIC = !HAPTIC; try { localStorage.setItem("nightbloom-haptic", HAPTIC ? "1" : "0"); } catch (e) {} paint(); buzz(20); });
+    paint();
+  }
+
+  // ---------- Now playing ----------
+  {
+    const bars = [...document.querySelectorAll(".nowbar")], trkPlayBtn = document.getElementById("trkPlay");
+    const stopPads = () => padPlaying.forEach((p, k) => { if (!p) return; try { const t = ctx.currentTime; p.g.gain.cancelScheduledValues(t); p.g.gain.setTargetAtTime(0, t, 0.01); p.src.stop(t + 0.06); } catch (e) {} padPlaying[k] = null; });
+    const sources = () => {
+      const s = [];
+      if (playing) s.push(["seq", "Sequencer", () => stopSeq()]);
+      if (RC.playing) s.push(["rc", "Rhythm Creator", () => rcPlay(false)]);
+      DJ.decks.forEach(d => { if (d.playing) s.push(["dj" + d.i, "DJ deck " + "AB"[d.i], () => { djPlay(d, false); djPaintAll(); }]); });
+      if (DJ.padPlay && DJ.padPlay.some(Boolean)) s.push(["djpad", "DJ pads", () => DJ.padPlay.forEach((p, k) => djPadStop(k))]);
+      if (DJ.beat) s.push(["djbeat", "DJ beat", () => djBeatStop()]);
+      if (JAM.band.on) s.push(["band", "Jam band", () => jamBandOn(false)]);
+      if (JAM.rec || JAM.tracks.some(t => t.on && t.len > 0)) s.push(["loops", "Jam loops", () => jamLoopsOff()]);
+      if (trkPlayBtn && trkPlayBtn.getAttribute("aria-pressed") === "true") s.push(["trk", "Tracks", () => trkPlayBtn.click()]);
+      if (heldVoices.size) s.push(["held", "Held notes · " + heldVoices.size, () => { releaseHeld(); updateHoldBtn(); }]);
+      if (padPlaying.some(Boolean)) s.push(["pads", "Pads", stopPads]);
+      return s;
+    };
+    let sig = "", cur = [];
+    function paintNow() {
+      cur = sources(); const k = cur.map(x => x[0] + x[1]).join("|"); if (k === sig) return; sig = k;
+      const h = cur.length ? '<span class="now-lab">Playing</span>' + cur.map(([id, name]) => `<button class="btn now-chip" data-now="${id}" title="Stop ${name}"><i></i>${name}<b>■</b></button>`).join("") + (cur.length > 1 ? '<button class="btn now-all" data-now="all">Stop all</button>' : "") : "";
+      bars.forEach(b => { b.hidden = !cur.length; b.innerHTML = h; });
+    }
+    bars.forEach(b => b.addEventListener("click", e => {
+      const btn = e.target.closest("button[data-now]"); if (!btn) return;
+      const run = x => { try { x[2](); } catch (er) {} };
+      if (btn.dataset.now === "all") { cur.forEach(run); document.getElementById("panic").click(); stopPads(); }
+      else { const x = cur.find(c => c[0] === btn.dataset.now); if (x) run(x); }
+      sig = null; setTimeout(paintNow, 80);
+    }));
+    setInterval(() => { if (!document.hidden) paintNow(); }, 400);
+  }
+
+  // ---------- Back closes what's on top (Android's back gesture, the browser's Back, Escape) ----------
+  {
+    const isLayer = el => el.matches && el.matches(".editor, .dj, .trk, .browser, .rc-pop");
+    const stack = []; let ignorePop = 0, popBudget = 0;
+    const closeBtnOf = el => [...el.querySelectorAll("button")].find(b => /(Done|Cancel|Close)$/.test(b.id) && !b.closest("[hidden]"))
+      || [...el.querySelectorAll("button")].find(b => /^(Done|Cancel|Close|Back)$/i.test(b.textContent.trim()) && !b.closest("[hidden]"));
+    const closeLayer = el => { const b = closeBtnOf(el); if (b) b.click(); else el.hidden = true; };
+    // every sheet, overlay and pop-up that opens gets a history entry; closing it any way takes the entry back
+    new MutationObserver(recs => recs.forEach(r => {
+      const el = r.target; if (!isLayer(el)) return;
+      if (!el.hidden && !stack.includes(el)) { stack.push(el); try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} }
+      else if (el.hidden && stack.includes(el)) {
+        stack.splice(stack.indexOf(el), 1);
+        if (popBudget > 0) { popBudget--; return; }   // closed by Back: its history entry is already gone
+        ignorePop++; try { history.back(); } catch (e) { ignorePop--; }
+      }
+    })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
+    window.addEventListener("popstate", () => {
+      if (ignorePop) { ignorePop--; return; }
+      const el = stack[stack.length - 1]; if (!el) return;
+      popBudget = 1; closeLayer(el);
+      // a layer that refused to close keeps its place in history
+      setTimeout(() => { if (popBudget && !el.hidden) { try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} } popBudget = 0; }, 50);
+    });
+    window.addEventListener("keydown", e => {
+      if (e.key !== "Escape" || !stack.length) return;
+      const t = e.target; if (t && t.closest && t.closest("input, textarea, select")) return;
+      e.preventDefault(); e.stopImmediatePropagation(); closeLayer(stack[stack.length - 1]);
+    }, true);
+    window.__nbLayers = () => stack.map(e => e.id || e.className);
+  }
+
+  // ---------- undo: a toast after big changes, and an Undo button ----------
+  const undoToast = (() => {
+    const el = document.createElement("div"); el.className = "undotoast"; el.hidden = true; el.setAttribute("role", "status");
+    el.innerHTML = '<span></span><button class="btn">Undo</button>'; document.body.appendChild(el);
+    let fn = null, t = 0;
+    el.querySelector("button").addEventListener("click", () => { const f = fn; fn = null; el.hidden = true; clearTimeout(t); if (f) f(); });
+    return (msg, undo) => { fn = undo; el.querySelector("span").textContent = msg; el.hidden = false; clearTimeout(t); t = setTimeout(() => { el.hidden = true; fn = null; }, 8000); };
+  })();
+  // Rhythm Creator: every change to the pattern can be undone (20 steps back)
+  const rcUndo = [];
+  const rcSnapP = () => JSON.stringify({ tracks: RCP.tracks, steps: RCP.steps, swing: RCP.swing, bpm: state.seq.bpm });
+  const rcUndoBtn = document.getElementById("rcUndo");
+  const rcPaintUndo = () => { rcUndoBtn.disabled = !rcUndo.length; rcUndoBtn.textContent = rcUndo.length ? "↶ Undo" : "↶ Undo"; };
+  function rcPushUndo() { const s = rcSnapP(); if (rcUndo[rcUndo.length - 1] === s) return; rcUndo.push(s); if (rcUndo.length > 20) rcUndo.shift(); rcPaintUndo(); }
+  function rcDoUndo() {
+    const s = rcUndo.pop(); if (!s) return; const o = JSON.parse(s);
+    RCP.tracks = o.tracks; RCP.steps = o.steps; RCP.swing = o.swing; if (o.bpm && o.bpm !== state.seq.bpm) setBpm(o.bpm);
+    if (ctx) RCP.tracks.forEach((tr, i) => rcApplyTrack(i));
+    rcSave(); rcRender(); rcPaintUndo(); noteMsg("Undone");
+  }
+  rcUndoBtn.addEventListener("click", rcDoUndo);
+  { const mb = rcMakeBeat; rcMakeBeat = function () { rcPushUndo(); const r = mb.apply(this, arguments); undoToast("New " + arguments[0] + " beat", rcDoUndo); return r; }; }
+  { const v0 = rcVary; rcVary = function () { rcPushUndo(); const r = v0.apply(this, arguments); undoToast("Varied the pattern", rcDoUndo); return r; }; }
+  document.getElementById("rcClear").addEventListener("click", () => { rcPushUndo(); setTimeout(() => undoToast("Cleared every track", rcDoUndo), 0); }, true);
+  rcEd.addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; if (b.id === "rcClrT" || b.id === "rcEgo") { rcPushUndo(); if (b.id === "rcClrT") setTimeout(() => undoToast("Cleared the track", rcDoUndo), 0); } }, true);
+  rcEd.addEventListener("input", e => { if (e.target.id === "rcTlen" && !rcEd.dataset.lenUndo) { rcPushUndo(); rcEd.dataset.lenUndo = "1"; setTimeout(() => { delete rcEd.dataset.lenUndo; }, 1500); } }, true);
+  document.getElementById("rcLen").addEventListener("change", () => rcPushUndo(), true);
+  // the sequencer: steps, Clear, Reset and beats can be undone too
+  const seqUndo = [], seqUndoBtn = document.getElementById("seqUndo");
+  const seqSnap = () => JSON.stringify({ seq: state.seq, swing: state.drum.swing });
+  const seqPaintUndo = () => { seqUndoBtn.disabled = !seqUndo.length; };
+  function seqPushUndo() { const s = seqSnap(); if (seqUndo[seqUndo.length - 1] === s) return; seqUndo.push(s); if (seqUndo.length > 20) seqUndo.shift(); seqPaintUndo(); }
+  function seqDoUndo() {
+    const s = seqUndo.pop(); if (!s) return; const o = JSON.parse(s);
+    Object.keys(state.seq).forEach(k => { if (!(k in o.seq)) delete state.seq[k]; }); Object.assign(state.seq, o.seq);
+    state.drum.swing = o.swing; setBpm(state.seq.bpm);
+    if (seqBuilt) paintSeq(); save(); seqPaintUndo(); noteMsg("Undone");
+  }
+  seqUndoBtn.addEventListener("click", seqDoUndo);
+  seqEl.addEventListener("pointerdown", e => { if (e.target.closest(".cell")) seqPushUndo(); }, true);
+  document.getElementById("clear").addEventListener("click", () => { if (clearBtn.textContent === "Clear all?") { seqPushUndo(); setTimeout(() => undoToast("Cleared the pattern", seqDoUndo), 0); } }, true);
+  document.getElementById("stepReset").addEventListener("click", () => { seqPushUndo(); setTimeout(() => undoToast("Reset chance and rolls", seqDoUndo), 0); }, true);
+  { const ab = applyBeat; applyBeat = function (i, fromUser) { if (fromUser) seqPushUndo(); return ab.apply(this, arguments); }; }
+  { const sm = setMode; setMode = function (m) { const r = sm.apply(this, arguments); seqUndoBtn.hidden = clearBtn.hidden; const pb = document.getElementById("perfBtn"); pb.hidden = m !== "keys"; if (m !== "keys" && document.body.classList.contains("perf")) perfOn(false); return r; }; }
+  setTimeout(() => { seqUndoBtn.hidden = clearBtn.hidden; seqPaintUndo(); rcPaintUndo(); }, 0);
+
+  // ---------- Rhythm Creator: drag to paint, long-press for a step's options, 8-step zoom ----------
+  try { const z = localStorage.getItem("nightbloom-rczoom"); RC.zoom = z == null ? innerWidth < 500 : z === "1"; } catch (e) { RC.zoom = innerWidth < 500; }
+  document.getElementById("rcZoom").addEventListener("click", () => { RC.zoom = !RC.zoom; RC.page = 0; try { localStorage.setItem("nightbloom-rczoom", RC.zoom ? "1" : "0"); } catch (e) {} rcRender(); });
+  {
+    const pop = document.getElementById("rcPop");
+    let g = null;   // the gesture in progress
+    const cellAt = (x, y) => { const el = document.elementFromPoint(x, y); return el && el.closest ? el.closest(".rc-c") : null; };
+    const setCell = (c, val) => {
+      const i = +c.dataset.t, st = +c.dataset.s, tr = RCP.tracks[i]; if (c.classList.contains("out")) return;
+      tr.on[st] = val ? 1 : 0; if (!val) tr.acc[st] = tr.flam[st] = tr.roll[st] = tr.prob[st] = tr.nudge[st] = 0;
+      c.classList.toggle("on", !!val); if (!val) { c.classList.remove("acc"); c.innerHTML = ""; }
+    };
+    rcGrid.addEventListener("pointerdown", e => {
+      const c = e.target.closest(".rc-c"); if (!c || c.classList.contains("out") || e.button > 0) return;
+      const i = +c.dataset.t, st = +c.dataset.s;
+      g = { c, i, x: e.clientX, y: e.clientY, paint: false, val: !RCP.tracks[i].on[st], id: e.pointerId, lp: 0 };
+      g.lp = setTimeout(() => { if (!g || g.paint) return; RC.noClick = true; openPop(i, st, c); g = null; }, 480);
+    });
+    rcGrid.addEventListener("pointermove", e => {
+      if (!g || e.pointerId !== g.id) return;
+      const dx = e.clientX - g.x, dy = e.clientY - g.y;
+      if (!g.paint) {
+        if (Math.abs(dx) < 9 && Math.abs(dy) < 9) return;
+        clearTimeout(g.lp);
+        if (RC.mode !== "hits" || Math.abs(dy) > Math.abs(dx)) { g = null; return; }   // a vertical drag scrolls the page
+        g.paint = true; rcPushUndo(); setCell(g.c, g.val);
+      }
+      const c = cellAt(e.clientX, e.clientY);
+      if (c && +c.dataset.t === g.i && !c.classList.contains("out") && !!RCP.tracks[g.i].on[+c.dataset.s] !== g.val) { setCell(c, g.val); buzz(5); }
+    });
+    const end = () => { if (!g) return; clearTimeout(g.lp); if (g.paint) { RC.noClick = true; rcSave(); rcRender(); } g = null; };
+    rcGrid.addEventListener("pointerup", end); rcGrid.addEventListener("pointercancel", () => { if (g) { clearTimeout(g.lp); if (g.paint) { rcSave(); rcRender(); } g = null; } });
+    rcGrid.addEventListener("contextmenu", e => { if (e.target.closest(".rc-c")) e.preventDefault(); });
+    // a plain tap still toggles (the existing click handler), with an undo step first
+    rcGrid.addEventListener("click", e => { if (!RC.noClick && e.target.closest(".rc-c:not(.out)")) rcPushUndo(); }, true);
+    // the step's options
+    let P = null;
+    function paintPop() {
+      if (!P) return; const tr = RCP.tracks[P.i], s = P.s, snd = rcSnd(tr.snd) || { code: "?", name: "?" };
+      document.getElementById("rcPopT").textContent = snd.code + " · " + snd.name + " · step " + (s + 1);
+      pop.querySelectorAll("[data-k]").forEach(b => b.setAttribute("aria-pressed", String(!!tr[b.dataset.k][s])));
+      pop.querySelectorAll("[data-roll]").forEach(b => b.setAttribute("aria-pressed", String((tr.roll[s] || 0) === +b.dataset.roll || (+b.dataset.roll === 0 && (tr.roll[s] || 0) <= 1))));
+      pop.querySelectorAll("[data-prob]").forEach(b => b.setAttribute("aria-pressed", String((tr.prob[s] || 0) === +b.dataset.prob)));
+      pop.querySelectorAll("[data-nudge]").forEach(b => b.setAttribute("aria-pressed", String((tr.nudge[s] || 0) === +b.dataset.nudge)));
+    }
+    function openPop(i, s, c) {
+      P = { i, s }; RC.sel = i; buzz(15);
+      pop.hidden = false; paintPop();
+      const r = c.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+      let top = r.bottom + 6; if (top + h > innerHeight - 8) top = Math.max(8, r.top - h - 6);
+      pop.style.top = top + "px"; pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + "px";
+      rcGrid.querySelectorAll(".rc-c.lp").forEach(x => x.classList.remove("lp")); c.classList.add("lp");
+    }
+    pop.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b || !P) return;
+      const tr = RCP.tracks[P.i], s = P.s;
+      if (b.id === "rcPopX") { pop.hidden = true; P = null; rcRender(); return; }
+      if (b.id === "rcPopPlay") { rcAudition(P.i); return; }
+      rcPushUndo();
+      if (b.dataset.k) { const k = b.dataset.k; tr[k][s] = tr[k][s] ? 0 : 1; if (k !== "on") tr.on[s] = 1; else if (!tr.on[s]) tr.acc[s] = tr.flam[s] = tr.roll[s] = tr.prob[s] = tr.nudge[s] = 0; }
+      if (b.dataset.roll != null) { tr.on[s] = 1; tr.roll[s] = +b.dataset.roll; }
+      if (b.dataset.prob != null) { tr.on[s] = 1; tr.prob[s] = +b.dataset.prob; }
+      if (b.dataset.nudge != null) { tr.on[s] = 1; tr.nudge[s] = +b.dataset.nudge; }
+      rcSave(); rcRender(); paintPop();
+      const c = rcGrid.querySelector(`.rc-c[data-t="${P.i}"][data-s="${s}"]`); if (c) c.classList.add("lp");
+    });
+    document.addEventListener("pointerdown", e => { if (!pop.hidden && !e.target.closest("#rcPop") && !e.target.closest(".rc-c")) { pop.hidden = true; P = null; rcGrid.querySelectorAll(".rc-c.lp").forEach(x => x.classList.remove("lp")); } }, true);
+    document.getElementById("rcDone").addEventListener("click", () => { pop.hidden = true; P = null; });
+  }
+
+  // ---------- Play view: just the keys ----------
+  const perfBtn = document.getElementById("perfBtn");
+  function perfOn(on) {
+    document.body.classList.toggle("perf", on); perfBtn.setAttribute("aria-pressed", String(on));
+    perfBtn.title = on ? "Back to the full view" : "Play view: just the keys";
+    if (on) { const k = document.querySelector(".keys"); if (k) setTimeout(() => k.scrollIntoView({ block: "end", behavior: "smooth" }), 50); }
+    setTimeout(() => { try { buildKeys(); } catch (e) {} }, 60);
+  }
+  perfBtn.addEventListener("click", () => perfOn(!document.body.classList.contains("perf")));
+
+  // ---------- the feature row: Install only until it's installed; Report lives in Help ----------
+  {
+    const installed = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    const paintInstall = () => { const h = installed(); document.getElementById("installBtn").hidden = h; document.getElementById("installSep").hidden = h; };
+    paintInstall(); window.addEventListener("appinstalled", () => setTimeout(paintInstall, 300));
+    try { matchMedia("(display-mode: standalone)").addEventListener("change", paintInstall); } catch (e) {}
+    document.getElementById("reportBtn").addEventListener("click", () => { document.getElementById("helpSheet").hidden = true; });
+  }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
