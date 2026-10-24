@@ -941,6 +941,12 @@ body.trk-open { overflow: hidden; }
 .dj-cues .btn[data-c][aria-pressed="true"] { background: var(--hc, #7fd6c2); border-color: var(--hc, #7fd6c2); color: var(--panel); }
 .dj-cues .btn[data-c][aria-pressed="false"] { border-color: var(--hc, var(--line)); border-style: dashed; }
 .dj-cue.prev { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
+.dj-cues .btn { touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.dj-cues .btn.dj-hcx { flex: 0 0 34px; color: var(--dim); font-size: 0.9rem; }
+.dj-cues .btn.dj-hcx[aria-pressed="true"] { background: #ff7a7a; border-color: #ff7a7a; color: var(--panel); }
+.dj-cues.clearing .btn[data-c][aria-pressed="true"] { text-decoration: line-through; animation: djHcPulse 0.7s ease-in-out infinite alternate; }
+.dj-cues.clearing .btn[data-c][aria-pressed="false"] { opacity: 0.35; }
+@keyframes djHcPulse { to { opacity: 0.5; } }
 .dj .btn.dj-auto { height: 46px; font-size: 0.95rem; letter-spacing: 0.04em; }
 .dj-xf { display: grid; grid-template-columns: 18px minmax(0, 1fr) 18px; align-items: center; gap: 8px; }
 .dj-xf b { font-family: var(--font-display); font-size: 0.85rem; text-align: center; }
@@ -1073,6 +1079,9 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
 .rc-top .rc-tempo { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 0.78rem; }
 .rc-top .rc-tempo span { min-width: 58px; text-align: center; }
 .rc-top #rcPlay[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; }
+.rc-top #rcDj { padding: 0 8px; font-size: 0.72rem; letter-spacing: 0.04em; }
+.rc-top #rcDj[aria-pressed="true"] { border-color: #7fd6c2; color: #7fd6c2; }
+.rc-top #rcDj.live { background: #7fd6c2; color: var(--panel); }
 .rc-bar, .rc-tool { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 .rc-bar .seg.small button { padding: 6px 9px; }
 .rc-mini { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 0.66rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
@@ -1669,7 +1678,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
       <p><b>Load</b> a song on each deck (a file, or anything already in a sampler slot or the bank). The tempo (BPM) and the beat grid are found automatically. If the BPM looks doubled or halved, use <b>½×</b> / <b>2×</b>; if it's wrong, tap <b>Tap</b> along with 4+ beats.</p>
       <p><b>AUTO SYNC</b> matches the other song's tempo to the lead song and lines up the beats, starting it if it's stopped. While it's lit, the songs stay locked: change the lead's tempo and the other follows.</p>
       <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
-      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it); hold to clear. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
+      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it). To clear one, hold it, or tap <b>✕</b> at the end of the row and then the cue; hold <b>✕</b> to clear all four. Hot cues only ever move their own deck: with sync on, the jump lands on the other song's beat and the other song carries on untouched. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
@@ -1727,7 +1736,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
   <div class="dj-top rc-top">
     <strong>Rhythm Creator</strong>
     <button class="btn primary" id="rcPlay" aria-pressed="false">▶ Play</button>
-    <div class="rc-tempo"><button class="btn" id="rcBpmDown" aria-label="Slower">−</button><span id="rcBpm">96 bpm</span><button class="btn" id="rcBpmUp" aria-label="Faster">+</button></div>
+    <div class="rc-tempo"><button class="btn" id="rcBpmDown" aria-label="Slower">−</button><span id="rcBpm">96 bpm</span><button class="btn" id="rcBpmUp" aria-label="Faster">+</button><button class="btn" id="rcDj" aria-pressed="true" title="Auto BPM: while a DJ deck plays, follow its tempo and lock to its beat">DJ</button></div>
     <button class="btn takebtn" id="rcRec" title="Record everything you hear">● Rec</button>
     <button class="btn" id="rcHelpBtn" aria-label="How the Rhythm Creator works">?</button>
     <button class="btn primary" id="rcDone">Done</button>
@@ -1773,7 +1782,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
       <p><b>Euclid.</b> Under the knobs: spreads a number of hits as evenly as possible over the track's length; Rotate shifts the result.</p>
       <p><b>Make a beat.</b> Pick a style, how busy and how complex, and tap Make: every track gets a part that fits its sound, and the tempo and swing are set for the style. <b>Vary</b> changes about 15% of the hits and keeps the downbeats.</p>
       <p><b>Morph.</b> Save A, change the knobs, Save B, then slide between the two kits.</p>
-      <p><b>Timing.</b> Tempo is shared with the sequencer. When the sequencer is playing, the Rhythm Creator locks to it; when a DJ deck is playing, it follows the deck's tempo. Closed hats cut off open hats. Steps sets the pattern length (16 to 64, in pages).</p>
+      <p><b>Timing.</b> Tempo is shared with the sequencer, and when the sequencer is playing the Rhythm Creator locks to it. <b>DJ</b> next to the tempo is Auto BPM (on by default): while a DJ deck plays, the Rhythm Creator takes that deck's tempo and locks to its beat, with step 1 on the song's bar lines (or on its Phrase mark), and stays with it through speed changes, sync and hot cue jumps. When the deck stops it keeps that tempo until you stop. Tap − or + to take the tempo back (Auto turns off; Undo turns it on again). Closed hats cut off open hats. Steps sets the pattern length (16 to 64, in pages).</p>
       <p><b>Sound.</b> FX → Apply to → Rhythm sends it through the effects. Mix has a Rhythm Creator fader. ● Rec records everything you hear.</p>
       <p class="rc-credits">808 voices follow iO-808 by Vincent Riemer (MIT licence). Analog models are ported from Mutable Instruments Plaits by Emilie Gillet (MIT licence). Real 808 samples: Michael Fischer's TR-808 set (CC0).</p>
     </div>
@@ -10683,9 +10692,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function djSeek(d, p) {
     if (!d.buf) return;
     p = Math.max(0, Math.min(p, d.buf.duration - 0.05));
+    const o = DJ.decks[1 - d.i];
+    if (d.playing && DJ.sync && o.playing && o.bpm0 && d.bpm0) p = djInPhase(d, o, p, ctx.currentTime + 0.01);   // stay locked by landing on the other song's beat; the other song is never moved
     if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
     if (d.playing) djStartSrc(d, ctx.currentTime + 0.01, p); else d.p0 = p;
-    if (DJ.sync && LEAD().playing && FOL().playing) setTimeout(() => djAlign(false), 30);   // keep the other song locked
   }
   const djBeatFloor = (d, p) => d.bpm0 ? d.off + Math.floor((p - d.off) / djPer(d) + 1e-6) * djPer(d) : p;
   function djLoop(d, n) {
@@ -13364,7 +13374,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   }
 
   // ---------- the clock ----------
-  const rcBpm = () => playing ? state.seq.bpm : jamBpm();
+  const rcBpm = () => { const f = rcFollow(); return f ? f.bpm : (RC.playing && RC.djHold) || state.seq.bpm; };   // Auto BPM: a playing DJ deck sets the tempo
   const rcStepDur = () => 60 / rcBpm() / 4;
   function rcScheduleStep(n, t, sd) {
     const swingT = n % 2 === 1 ? t + RCP.swing * sd * 0.5 : t;
@@ -13896,10 +13906,10 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       if (!djBuild()) return;
       if (!d.playing) { startDeck(d, p, "Deck " + "AB"[d.i] + " from hot cue " + (k + 1) + " (" + djFmt(p) + ")"); djPaintAll(); return; }
       if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      const o = DJ.decks[1 - d.i], locked = DJ.sync && o.playing && o.bpm0 && d.bpm0;
       let at = ctx.currentTime + 0.01;
-      if (DJ.quant && d.bpm0) { const per = djPer(d), sp = d.rate * d.bend; let wait = (1 - djPhaseAt(d, 0)) * per / sp; if (wait < 0.03) wait += per / sp; at = ctx.currentTime + wait; }
-      djStartSrc(d, at, p); const onBeat = DJ.quant && d.bpm0;
-      if (!onBeat && DJ.sync && LEAD().playing && FOL().playing) setTimeout(() => djAlign(false), Math.max(40, (at - ctx.currentTime) * 1000 + 40));
+      if (DJ.quant && d.bpm0) { const ref = locked ? o : d, per = djPer(ref), sp = ref.rate * ref.bend; let wait = (1 - djPhaseAt(ref, 0)) * per / sp; if (wait < 0.03) wait += per / sp; at = ctx.currentTime + wait; }
+      djStartSrc(d, at, locked ? djInPhase(d, o, p, at) : p); const onBeat = DJ.quant && d.bpm0;   // only this deck moves
       djMsg("Hot cue " + (k + 1) + " (" + djFmt(p) + ")" + (onBeat ? " on the next beat" : ""));
       djPaintDeck(d);
     }
@@ -13929,12 +13939,12 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       el.querySelectorAll(".dj-cues .btn[data-c]").forEach(old => {
         const b = old.cloneNode(true); old.replaceWith(b); const k = +b.dataset.c; let hold = 0, held = false;
         b.style.setProperty("--hc", DJ_HC_COL[k]);
-        b.title = "Empty: tap to set it here · Set: tap to jump there (a stopped deck starts from it) · hold to clear";
+        b.title = "Empty: tap to set it here · Set: tap to jump there (a stopped deck starts from it) · hold to clear (or ✕, then the cue)";
         b.addEventListener("pointerdown", e => { e.preventDefault(); held = false; clearTimeout(hold); if (d.cues[k] != null) hold = setTimeout(() => { held = true; d.cues[k] = null; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " cleared"); }, 550); });
         b.addEventListener("pointerup", () => {
           clearTimeout(hold); if (held) { held = false; return; }
           if (!d.buf) { djMsg("Load a song on " + "AB"[d.i] + " first"); return; }
-          if (d.cues[k] == null) { const p = djPos(d); d.cues[k] = d.bpm0 ? Math.max(0, djBeatFloor(d, p + djPer(d) / 2)) : p; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " set at " + djFmt(d.cues[k]) + " on " + "AB"[d.i] + " · tap to jump there, hold to clear"); return; }
+          if (d.cues[k] == null) { const p = djPos(d); d.cues[k] = d.bpm0 ? Math.max(0, djBeatFloor(d, p + djPer(d) / 2)) : p; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " set at " + djFmt(d.cues[k]) + " on " + "AB"[d.i] + " · tap to jump there · to clear it: hold it, or ✕ then the cue"); return; }
           hotJump(d, d.cues[k], k);
         });
         b.addEventListener("pointerleave", () => clearTimeout(hold)); b.addEventListener("pointercancel", () => clearTimeout(hold)); b.addEventListener("contextmenu", e => e.preventDefault());
@@ -13972,6 +13982,104 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }
     { const pa = djPaintAll; djPaintAll = function () { const r = pa.apply(this, arguments); paintBoth(); return r; }; }
     paintBoth();
+  }
+  // ======================================================================
+  // DJ: land a deck on the other song's beat (sync) without moving the other song; ✕ to clear hot cues
+  // ======================================================================
+  const djInPhase = (d, o, p, at) => {   // the spot nearest p where d's beat lines up with o's at time `at`
+    const ph = djPhaseAt(o, Math.max(0, at - ctx.currentTime)), per = djPer(d);
+    let x = d.off + (Math.round((p - d.off) / per - ph) + ph) * per;
+    if (x < 0) x += per; if (x > d.buf.duration - 0.1) x -= per;
+    return Math.max(0, x);
+  };
+  deckEls.forEach((el, i) => {
+    const d = DJ.decks[i], row = el.querySelector(".dj-cues"), x = document.createElement("button");
+    x.className = "btn dj-hcx"; x.textContent = "✕"; x.setAttribute("aria-pressed", "false"); x.setAttribute("aria-label", "Clear hot cues");
+    x.title = "Clear a hot cue: tap ✕, then the cue · hold ✕ to clear all four";
+    row.querySelector('.btn[data-c="3"]').after(x);
+    let armT = 0, hold = 0, held = false;
+    const arm = on => { d.hcClear = on; clearTimeout(armT); row.classList.toggle("clearing", on); x.setAttribute("aria-pressed", String(on)); if (on) armT = setTimeout(() => arm(false), 8000); };
+    const any = () => d.cues.some(v => v != null);
+    x.addEventListener("pointerdown", e => {
+      e.preventDefault(); held = false; clearTimeout(hold);
+      hold = setTimeout(() => { held = true; arm(false); if (any()) { d.cues = [null, null, null, null]; djStoreGrid(d); djPaintDeck(d); djMsg("All hot cues cleared on " + "AB"[d.i]); } else djMsg("No hot cues set on " + "AB"[d.i]); }, 600);
+    });
+    x.addEventListener("pointerup", () => {
+      clearTimeout(hold); if (held) { held = false; return; }
+      if (d.hcClear) { arm(false); djMsg("Hot cues kept"); return; }
+      if (!any()) { djMsg("No hot cues set on " + "AB"[d.i]); return; }
+      arm(true); djMsg("Tap a hot cue on " + "AB"[d.i] + " to clear it · hold ✕ to clear all four");
+    });
+    x.addEventListener("pointerleave", () => clearTimeout(hold)); x.addEventListener("pointercancel", () => clearTimeout(hold)); x.addEventListener("contextmenu", e => e.preventDefault());
+    // while ✕ is lit, a tap on a hot cue clears it (caught on the row, before the cue's own handlers)
+    const cueOf = e => { const b = e.target.closest && e.target.closest(".btn[data-c]"); return b && row.contains(b) ? b : null; };
+    row.addEventListener("pointerdown", e => { if (d.hcClear && cueOf(e)) { e.preventDefault(); e.stopPropagation(); } }, true);
+    row.addEventListener("pointerup", e => {
+      const b = cueOf(e); if (!d.hcClear || !b) return;
+      e.stopPropagation(); const k = +b.dataset.c; arm(false);
+      if (d.cues[k] == null) { djMsg("Hot cue " + (k + 1) + " is already empty"); return; }
+      d.cues[k] = null; djStoreGrid(d); djPaintDeck(d); djMsg("Hot cue " + (k + 1) + " cleared on " + "AB"[d.i]);
+    }, true);
+  });
+  // ======================================================================
+  // Rhythm Creator: Auto BPM, locked to the DJ deck that's playing
+  // ======================================================================
+  function rcFollow() {   // the DJ deck the Rhythm Creator follows right now, or null
+    if (RCP.djLock === false) return null;
+    for (const d of [LEAD(), FOL()]) if (d && d.buf && d.playing && d.bpm0) return { d, bpm: djEff(d) * d.bend };
+    return null;
+  }
+  {
+    const RC_OFF = 2882880;   // a large multiple of every common track length, so patterns stay on the song's bars
+    const djBtnRc = document.getElementById("rcDj"), bpmEl = document.getElementById("rcBpm");
+    const tk = rcTick;
+    rcTick = function () {
+      if (ctx && RC.playing) {
+        const f = rcFollow();
+        if (f) {
+          const d = f.d, now = ctx.currentTime; RC.djHold = f.bpm;
+          if (now >= d.t0 + 0.02) {   // (a start or jump that's still pending: keep time until it lands)
+            const speed = d.rate * d.bend, per = djPer(d), sd = per / 4 / speed, ref = d.phrase != null ? d.phrase : d.off;
+            const mf = (djPos(d) + (RC.nextT - now) * speed - ref) / per * 4;
+            let m = Math.round(mf), tg = RC.nextT - (mf - m) * sd;
+            while (tg < now + 0.004) { m++; tg += sd; }
+            const diff = tg - RC.nextT;
+            if (Math.abs(diff) > sd * 0.3) RC.nextT = tg;                                  // the song jumped: snap
+            else if (Math.abs(diff) > 0.0015) RC.nextT += Math.max(-0.003, Math.min(0.003, diff));   // drift: ease back
+            if (!d.loop) RC.step = m + RC_OFF;   // (in a deck loop the pattern keeps running instead of repeating with it)
+          }
+        }
+      }
+      const r = tk.apply(this, arguments);
+      const shown = Math.round(rcBpm() * 10) + (rcFollow() ? 1e6 : 0);
+      if (shown !== RC.bpmShown) { RC.bpmShown = shown; rcPaintTransport(); }
+      return r;
+    };
+    { const rp = rcPlay; rcPlay = function (on) { if (!on) RC.djHold = 0; return rp.apply(this, arguments); }; }
+    { const pt = rcPaintTransport; rcPaintTransport = function () {
+        pt.apply(this, arguments);
+        const f = rcFollow();
+        if (f) bpmEl.textContent = f.bpm.toFixed(1) + " · DJ";
+        else if (RC.playing && RC.djHold) bpmEl.textContent = RC.djHold.toFixed(1) + " bpm";
+        djBtnRc.setAttribute("aria-pressed", String(RCP.djLock !== false)); djBtnRc.classList.toggle("live", !!f);
+      }; }
+    { const pa = djPaintAll; djPaintAll = function () { const r = pa.apply(this, arguments); if (!rcView.hidden) rcPaintTransport(); return r; }; }
+    const setLock = on => { RCP.djLock = on; rcSave(); RC.bpmShown = null; rcPaintTransport(); };
+    djBtnRc.addEventListener("click", () => {
+      const on = RCP.djLock === false;
+      if (!on) { const f = rcFollow(), cur = f ? f.bpm : (RC.playing && RC.djHold) || 0; if (cur) setBpm(Math.round(cur)); RC.djHold = 0; }   // carry on at about the same tempo
+      setLock(on);
+      undoToast(on ? "Auto BPM on: follows the DJ's tempo and beat while a deck plays" : "Auto BPM off: the Rhythm Creator keeps its own tempo (" + state.seq.bpm + " bpm)", () => setLock(!on));
+    });
+    // − / + while following: take the tempo back, starting from the DJ's
+    [["rcBpmDown", -1], ["rcBpmUp", 1]].forEach(([id, dir]) => {
+      const old = document.getElementById(id), btn = old.cloneNode(true); old.replaceWith(btn);
+      btn.addEventListener("click", () => {
+        const f = rcFollow(), from = f ? f.bpm : (RC.playing && RC.djHold) || 0;
+        if (f) { RCP.djLock = false; rcSave(); undoToast("Auto BPM off: you set the tempo", () => setLock(true)); }
+        RC.djHold = 0; setBpm((from ? Math.round(from) : state.seq.bpm) + dir); RC.bpmShown = null; rcPaintTransport();
+      });
+    });
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
