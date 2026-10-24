@@ -540,6 +540,11 @@ body { overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: none; }
   font-family: var(--font-body); font-weight: 700; font-size: 0.85rem; box-shadow: 0 4px 18px rgba(0,0,0,0.5); cursor: pointer; }
 
 
+.fxpick { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 2px 0 2px; }
+.fxpick .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 2px; }
+.fxpick .btn { height: 28px; padding: 0 9px; font-size: 0.76rem; }
+.fxpick .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+#fxModeBtn, #fxCopyBtn { display: none !important; }
 .fxmix { height: 26px; padding: 0 10px; font-size: 0.72rem; letter-spacing: 0; text-transform: none; }
 .row.fx .row-label { align-items: center; }
 .uitoast { position: fixed; left: 50%; transform: translateX(-50%); top: max(64px, calc(env(safe-area-inset-top, 0px) + 56px)); z-index: 40;
@@ -1269,6 +1274,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
   <div class="row fx" id="fxRow" hidden>
     <div class="row-label"><span>Effects</span><span class="rtools"><button class="btn fxmix" id="fxOnBtn" aria-pressed="true" title="Switch every effect off or on">FX: On</button><button class="btn demo" data-demo="fx" title="Hear the effects">▶ Demo</button><button class="btn fxmix" id="fxMix">Mixer…</button></span></div>
     <div class="knobs" id="fxKnobs"></div>
+    <div class="fxpick" id="fxPick" role="group" aria-label="Sounds that go through the effects"></div>
   </div>
 
   <div class="row jam" id="jamRow" hidden>
@@ -1583,14 +1589,6 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
     <span class="ed-info" style="text-align:left">Drag to set each sound's volume. Double-tap a slider to reset it.</span>
     <div class="mx-meter" aria-label="Output level"><div><i id="mxMeterBar"></i></div><span id="mxMeterLab">Silent</span></div>
     <div class="mx-list" id="mxList"></div>
-    <div class="ed-row" style="padding:2px 0 4px">
-      <span class="lab2">Audio buffer</span>
-      <div class="seg small" id="mxLat" role="group" aria-label="Audio buffer">
-        <button data-lat="stable" aria-pressed="true" title="A little more headroom: no crackles or scrambled sound when a lot is playing">Stable</button>
-        <button data-lat="low" aria-pressed="false" title="The tightest buffer the device allows: the shortest delay from key to sound, but it can crackle under load">Lowest delay</button>
-      </div>
-      <small class="mx-latinfo" id="mxLatInfo" style="font-family:var(--font-mono);font-size:0.62rem;color:var(--dim)"></small>
-    </div>
     <div class="ed-foot sheet-foot">
       <button class="btn big" id="mxReset">Reset levels</button>
       <button class="btn big primary" id="mxDone">Done</button>
@@ -1772,7 +1770,8 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
-      <p><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
+      <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the FX Lab, applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
+      <p hidden><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
@@ -2497,8 +2496,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
 
   function buildAudio() {
-    let lat = 0.012; try { if (localStorage.getItem("nightbloom-latency") === "low") lat = "interactive"; } catch (e) {}   // ~12 ms gives the audio engine headroom; "low" = the device's tightest buffer
-    try { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: lat }); } catch (e) { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" }); }
+    // "interactive" keeps Android on its fast audio path (asking for a bigger buffer switched it to the slow one: ~250 ms of lag)
+    try { localStorage.removeItem("nightbloom-latency"); } catch (e) {}
+    ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
     analyser.connect(ctx.destination);
     const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -11516,9 +11516,10 @@ onmessage = async e => {
     return FXC.by[id];
   }
   // what the Effects knobs edit: the open sound's chain, or the global settings
-  const fxcTarget = () => FXC.mode === "global" ? state.fx : fxcParams(fxcCur());
-  const fxcOn = id => FXC.mode === "global" ? fxOn() : fxOn() && fxcParams(id).on !== false;
-  const fxcAmt = id => !fxcOn(id) ? 0 : FXC.mode === "global" ? fxAmt() : fxAmt() * Math.min(1, Math.max(0, fxcParams(id).amount ?? 1));
+  const fxcTarget = () => state.fx;
+  // one set of knobs (state.fx); each sound either goes through the effects or bypasses them all
+  const fxcOn = id => fxOn() && !!(FXC.by[id] && FXC.by[id].on !== false);
+  const fxcAmt = id => !fxcOn(id) ? 0 : fxAmt();
   function fxcBuild() {
     const g = () => ctx.createGain(), c = {};
     c.input = g(); c.driveIn = g(); c.shaper = ctx.createWaveShaper(); c.shaper.oversample = "2x";
@@ -11545,7 +11546,7 @@ onmessage = async e => {
   }
   function fxcApply(id) {
     const c = fxChan[id]; if (!c) return;
-    const base = FXC.mode === "global" ? state.fx : fxcParams(id), a = fxcAmt(id), t = ctx.currentTime;
+    const base = state.fx, a = fxcAmt(id), t = ctx.currentTime;
     const p = { drive: base.drive * a, wobble: base.wobble * a, echo: base.echo * a, space: base.space * a };
     if (p.drive > 0.001) { c.shaper.curve = driveCurve(p.drive); c.shaper.oversample = "2x"; } else { c.shaper.curve = null; c.shaper.oversample = "none"; }   // no drive: a plain wire
     c.driveIn.gain.setTargetAtTime(1 + p.drive * 1.5, t, 0.02);
@@ -11610,7 +11611,7 @@ onmessage = async e => {
     const so0 = setFxOn;
     setFxOn = function (on) {
       // the Effects panel's switch is per sound; the Mixer's switch (and global mode) is the master
-      if (FXC.mode === "sound" && mxEl.hidden) { const p = fxcParams(fxcCur()); p.on = p.on === false; fxcSave(); if (ctx) applyFx(); paintFxState(); if (!labRow.hidden) renderLab(); return; }
+      if (false) { return; }
       so0(on);
     };
     refreshFxKnobs = function () {
@@ -13170,8 +13171,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
 
     // 2. per-sound effect chains park after 20 s without a note on that sound (and nothing still sounding)
     const PARK_AFTER = 20;
-    const park = c => { if (c.parked) return; try { c.dry.disconnect(fx.master); } catch (e) {} try { c.echoOut.disconnect(fx.master); } catch (e) {} try { c.verbSend.disconnect(fx.verbIn); } catch (e) {} c.parked = true; };
-    const unpark = c => { if (!c.parked) return; c.dry.connect(fx.master); c.echoOut.connect(fx.master); c.verbSend.connect(fx.verbIn); c.parked = false; };
+    const park = c => { if (c.parked) return; const to = c.outTo || fx.master; try { c.dry.disconnect(to); } catch (e) {} try { c.echoOut.disconnect(to); } catch (e) {} try { c.verbSend.disconnect(fx.verbIn); } catch (e) {} c.parked = true; };
+    const unpark = c => { if (!c.parked) return; const to = c.outTo || fx.master; c.dry.connect(to); c.echoOut.connect(to); c.verbSend.connect(fx.verbIn); c.parked = false; };
     { const g0 = fxcGet; fxcGet = function (id) { const c = g0(id); if (c) { c.lastUse = ctx.currentTime; if (c.parked) unpark(c); } return c; }; }
     setInterval(() => {
       if (!ctx || document.hidden) return;
@@ -13179,7 +13180,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const quiet = voices.size === 0 && !held && !padPlaying.some(Boolean) && !playing;
       if (!quiet) return;
       const now = ctx.currentTime;
-      for (const id in fxChan) { if (id === "drum") continue; const c = fxChan[id]; if (!c.parked && now - (c.lastUse || 0) > PARK_AFTER) park(c); }
+      for (const id in fxChan) { if (id === "drum" || id === "dj") continue; const c = fxChan[id]; if (!c.parked && now - (c.lastUse || 0) > PARK_AFTER) park(c); }
     }, 2000);
 
     // 3. drawing: skip frames nobody can see or that wouldn't change
@@ -13206,19 +13207,86 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       };
     }
   }
-  // ---------- audio buffer choice (Mix sheet) ----------
+  // ---------- FX on the sounds you pick (one set of knobs) + DJ in the master mix ----------
   {
-    const seg = document.getElementById("mxLat"), info = document.getElementById("mxLatInfo");
-    let cur = "stable"; try { if (localStorage.getItem("nightbloom-latency") === "low") cur = "low"; } catch (e) {}
-    const paint = () => { seg.querySelectorAll("[data-lat]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lat === cur))); info.textContent = ctx ? "now " + Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000) + " ms" : ""; };
-    seg.querySelectorAll("[data-lat]").forEach(b => b.addEventListener("click", () => {
-      if (b.dataset.lat === cur) return; cur = b.dataset.lat;
-      try { localStorage.setItem("nightbloom-latency", cur); } catch (e) {}
-      paint(); info.textContent = "applies next time you open the app";
-      noteMsg(cur === "low" ? "Lowest delay: close and reopen Nate Bloom to apply" : "Stable buffer: close and reopen Nate Bloom to apply");
-    }));
-    document.getElementById("mixBtn").addEventListener("click", () => setTimeout(paint, 50));
-    paint();
+    // a dry path that skips every effect, FX Lab included, at the master volume
+    function dryBus() {
+      if (!ctx || !fx || !fx.comp) return null;
+      if (!fx.dryBus) { fx.dryBus = ctx.createGain(); fx.dryBus.gain.value = fx.master.gain.value; fx.dryBus.connect(fx.comp); }
+      return fx.dryBus;
+    }
+    { const af = applyFx; applyFx = function () { const r = af.apply(this, arguments); try { const d = dryBus(); if (d) d.gain.setTargetAtTime(state.fx.volume * state.fx.volume * 0.9, ctx.currentTime, 0.03); } catch (e) {} return r; }; }
+    { const bc = buildChain; buildChain = function () { fx.dryBus = null; const r = bc.apply(this, arguments); return r; }; }
+    // route each sound's chain: picked → effects and FX Lab; not picked → straight out
+    function routeChain(id) {
+      const c = fxChan[id]; if (!c) return;
+      const to = fxcOn(id) ? fx.master : (dryBus() || fx.master);
+      if (c.outTo === to) return;
+      if (!c.parked) { try { c.dry.disconnect(c.outTo || fx.master); } catch (e) {} try { c.echoOut.disconnect(c.outTo || fx.master); } catch (e) {} c.dry.connect(to); c.echoOut.connect(to); }
+      c.outTo = to;
+    }
+    { const fa = fxcApply; fxcApply = function (id) { fa(id); routeChain(id); }; }
+    const DEFAULT_ON = id => !["drum", "samp", "pads", "inst", "dj"].includes(id);
+    // everyone moves to the new model once: one set of knobs, synths picked, everything else clean
+    try {
+      if (!(FXC.v >= 3)) {
+        const ids = new Set(["drum", "samp", "pads", "inst", "dj"].concat(Object.keys(ENGINES), typeof NEW_ENGINES !== "undefined" ? Object.keys(NEW_ENGINES) : []));
+        ids.forEach(id => { fxcParams(id).on = DEFAULT_ON(id); });
+        FXC.mode = "global"; FXC.v = 3; localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC));
+      }
+    } catch (e) {}
+    FXC.mode = "global";
+    // the DJ decks can go through the effects too (off by default)
+    function routeDj() {
+      if (!DJ.bus || !ctx) return;
+      const on = fxcOn("dj"), to = on ? (fxcGet("dj") || {}).input : fx.comp;
+      if (!to || DJ.busTo === to) return;
+      try { DJ.bus.disconnect(); } catch (e) {} DJ.bus.connect(to); DJ.busTo = to;
+    }
+    // the panel: knobs edit the one set; the row below says which sounds use them
+    const pick = document.getElementById("fxPick");
+    const pickIds = () => {
+      const tabs = [...document.querySelectorAll(".tab[data-engine]")].map(t => t.dataset.engine).filter(id => ENGINES[id] || (typeof NEW_ENGINES !== "undefined" && NEW_ENGINES[id]));
+      return [...new Set(tabs)].concat(["drum", "samp", "pads", "inst", "dj"]);
+    };
+    const pickName = id => id === "dj" ? "DJ" : id === "inst" ? "Lib & Inst" : fxcName(id);
+    function paintPick() {
+      pick.innerHTML = '<span class="lab2">Apply to</span>';
+      pickIds().forEach(id => {
+        const b = document.createElement("button"); b.className = "btn"; b.textContent = pickName(id);
+        const on = !!(FXC.by[id] && FXC.by[id].on !== false); b.setAttribute("aria-pressed", String(on));
+        b.title = on ? pickName(id) + " goes through the effects · tap to play it clean" : pickName(id) + " plays clean · tap to send it through the effects";
+        b.addEventListener("click", () => {
+          start(); const p = fxcParams(id); p.on = !on; fxcSave();
+          if (ctx) { if (id === "dj") routeDj(); else { fxcGet(id); applyFx(); } }
+          paintPick(); fxcPaint2();
+        });
+        pick.appendChild(b);
+      });
+    }
+    function fxcPaint2() {
+      const n = pickIds().filter(id => FXC.by[id] && FXC.by[id].on !== false).length;
+      if (fxRowLabel) fxRowLabel.textContent = "Effects · on " + n + (n === 1 ? " sound" : " sounds");
+      const on = state.fx.on !== false; fxOnBtn.setAttribute("aria-pressed", String(on)); fxOnBtn.textContent = on ? "FX: On" : "FX: Off";
+      fxOnBtn.title = "Switch every effect off or on"; appRoot.classList.toggle("fxoff", !on);
+    }
+    { const pf = paintFxState; paintFxState = function () { pf(); fxcPaint2(); }; }
+    { const re = renderEngine; renderEngine = function () { re(); fxcPaint2(); }; }
+    { const db = djBuild; djBuild = function () { const had = !!DJ.bus; const r = db(); if (DJ.bus && !had) { DJ.bus.gain.value = DJ.busVol; routeDj(); } return r; }; }
+    document.getElementById("pFx").addEventListener("click", () => setTimeout(paintPick, 0));
+
+    // ---- DJ in the Mix sheet ----
+    DJ.busVol = 0.85; try { const v = parseFloat(localStorage.getItem("nightbloom-djvol")); if (v >= 0 && v <= 1.5) DJ.busVol = v; } catch (e) {}
+    const om = mixChannels;
+    mixChannels = function () {
+      const ch = om(), at = ch.findIndex(c => c.group !== "Master"), add = [];
+      const mk = (name, sub, get, set, dflt) => add.push({ group: "DJ", name, sub, get, set, dflt, live: true });
+      mk("DJ (both decks)", "the songs on the decks", () => DJ.busVol, v => { DJ.busVol = v; if (DJ.bus) DJ.bus.gain.setTargetAtTime(v, ctx.currentTime, 0.03); try { localStorage.setItem("nightbloom-djvol", String(v)); } catch (e) {} }, 0.85);
+      DJ.decks.forEach(d => mk("Deck " + "AB"[d.i], d.name ? d.name.slice(0, 26) : "empty", () => d.eq.vol, v => { d.eq.vol = v; djApplyEq(d); try { djPaintDeck(d); } catch (e) {} }, 0.9));
+      ch.splice(at < 0 ? ch.length : at, 0, ...add);
+      return ch;
+    };
+    setTimeout(() => { paintPick(); fxcPaint2(); refreshFxKnobs(); }, 0);
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
