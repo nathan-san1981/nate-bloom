@@ -1765,7 +1765,7 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
-      <p><b>✦ Smart mix</b> reads both songs (the coloured strip under each waveform shows their sections: intro, build-up, drop, breakdown, groove, outro) and plans the mix into the song on the other deck, or the next one from Songs: where to leave the playing song (usually its outro or a breakdown), where the next one comes in (its first downbeat or Phrase mark, so its first drop lands as the mix ends), the tempo they meet at, the style and its length, and a key shift when that makes the keys fit. The plan says why; pick another spot, style or key there, then <b>Start the mix</b>. The next song comes in exactly when the playing one gets there: MIX IN counts down (tap it to go now) and ✦ cancels. It can't hear vocals, so two vocals over each other are still up to your ears.</p>
+      <p><b>✦ Smart mix</b> reads both songs (the coloured strip under each waveform shows their sections: intro, build-up, drop, breakdown, groove, outro) and plans the mix into the song on the other deck, or the next one from Songs: where to leave the playing song (usually its outro or a breakdown), where the next one comes in (its first downbeat or Phrase mark, so its first drop lands as the mix ends), the tempo they meet at, the style and its length, and a key shift when that makes the keys fit. The plan says why; pick another spot, style or key there, then <b>Start the mix</b>. The next song comes in exactly when the playing one gets there: MIX IN counts down (tap it to go now) and ✦ cancels. While it gets ready (loading the next song, reading both), the progress bar at the top shows each step and about how long is left; ✕ there cancels. It can't hear vocals, so two vocals over each other are still up to your ears.</p>
       <p><b>Key</b> on each deck moves the song up or down in semitones without changing its speed (it uses key lock); tap the number to put it back. Next to it are the song's key and Camelot code, and where a shift takes it.</p>
       <p><b>→ Tracks</b> puts both songs on Tracks at one tempo (a whole BPM; the app's tempo is set to match so the grid lines up), with key lock and any key shift, lined up on the beat: as you hear them if both decks are playing, otherwise with their first downbeats on the same bar. If the keys clash and neither deck is shifted, the second song is moved to fit. Then split, copy and move sections to build a mashup.</p>
       <p>The decks keep playing when you press Done, so you can play the keys over the mix. <b>■ Stop</b> here stops the DJ (decks, pads, the play-along beat, a mix in progress); the red <b>■ All</b>, or <b>■ Stop all</b> on the main screen, stops everything. The main screen's own Stop leaves the DJ playing.</p>
@@ -11995,9 +11995,17 @@ registerProcessor("nb-stretch", NBStretch);`;
         else if (m.pos != null && d.playing && d.src && d.src.isStretch && ctx.currentTime > d.t0 + 0.15) { const want = djPos(d); if (Math.abs(m.pos - want) > 0.025 && !d.loop) { d.p0 = m.pos; d.t0 = ctx.currentTime; } }
       };
     }
-    const i16 = a => { const o = new Int16Array(a.length); for (let i = 0; i < a.length; i++) { const v = a[i]; o[i] = v >= 1 ? 32767 : v <= -1 ? -32767 : v * 32767; } return o; };
-    const L = i16(d.buf.getChannelData(0)), R = d.buf.numberOfChannels > 1 ? i16(d.buf.getChannelData(1)) : L.slice();
-    d.st.port.postMessage({ buf: { L, R } }, [L.buffer, R.buffer]);   // 16-bit: half the memory of a float copy
+    // 16-bit (half the memory of a float copy), made a slice at a time so the screen never stalls; the deck plays
+    // the plain way until it's ready, then switches over if its speed or key has moved
+    const buf = d.buf, my = d.stJob = (d.stJob || 0) + 1; d.stReady = false;
+    const i16 = async a => { const o = new Int16Array(a.length); for (let s0 = 0; s0 < a.length; s0 += 1 << 18) { const e = Math.min(a.length, s0 + (1 << 18)); for (let i = s0; i < e; i++) { const v = a[i]; o[i] = v >= 1 ? 32767 : v <= -1 ? -32767 : v * 32767; } await new Promise(r => setTimeout(r, 0)); if (d.stJob !== my) return null; } return o; };
+    (async () => {
+      const L = await i16(buf.getChannelData(0)); if (!L) return;
+      const R = buf.numberOfChannels > 1 ? await i16(buf.getChannelData(1)) : L.slice(); if (!R || d.buf !== buf || d.stJob !== my) return;
+      d.st.port.postMessage({ buf: { L, R } }, [L.buffer, R.buffer]);
+      d.stReady = true;
+      if (d.playing && ctx && (Math.abs(d.rate * d.bend - 1) > 0.003 || d.semi)) djStartSrc(d, ctx.currentTime + 0.03, djPos(d));
+    })();
   }
   // a stand-in for the buffer source the deck code already knows how to drive
   function djStretchSrc(d) {
@@ -12014,7 +12022,7 @@ registerProcessor("nb-stretch", NBStretch);`;
   {
     const ss0 = djStartSrc;
     djStartSrc = function (d, at, from) {
-      if (!(DJ.keylock !== null && DJ.stretchOK && d.st)) return ss0(d, at, from);
+      if (!(DJ.keylock !== null && DJ.stretchOK && d.st && d.stReady !== false)) return ss0(d, at, from);
       from = Math.max(0, Math.min(from, d.buf.duration - 0.01));
       const src = djStretchSrc(d); src.playbackRate.value = d.rate * d.bend;
       const g = ctx.createGain(); g.gain.setValueAtTime(0, at); g.gain.linearRampToValueAtTime(1, at + 0.008);
@@ -12252,7 +12260,7 @@ registerProcessor("nb-capture", NBCap);`;
       const T = DJ.trans; if (!T) return;
       if (ctx.currentTime < T.t0) {   // waiting for the bar or phrase line: keep the countdown fresh
         const left = (T.t0 - ctx.currentTime) / T.beat / 4, mi = document.getElementById("djMixIn");
-        if (mi) mi.textContent = "MIX IN · " + (left < 1 ? "next bar…" : Math.ceil(left) + " bars…") + " (tap = go now)";
+        if (mi) { const tx = "MIX IN · " + (left < 1 ? "next bar…" : Math.ceil(left) + " bars…") + " (tap = go now)"; if (mi.textContent !== tx) mi.textContent = tx; }
         return;
       }
       ms0();
@@ -14349,7 +14357,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   const DJ_SECT_COL = { intro: "#6f83ad", build: "#ffb65c", drop: "#ff6b9a", break: "#7fd6c2", groove: "#9b8ae0", outro: "#6a6280" };
   const DJ_SECT_NAME = { intro: "intro", build: "build-up", drop: "drop", break: "breakdown", groove: "groove", outro: "outro" };
   const DJ_SECT = new WeakMap();
-  async function djSections(d) {
+  async function djSections(d, onProg) {
     if (!d || !d.buf || !d.bpm0) return null;
     const buf = d.buf, per = djPer(d), bar = per * 4, a0 = d.phrase != null ? d.phrase : d.off;
     const sig = d.bpm0.toFixed(4) + "|" + d.off.toFixed(4) + "|" + (d.phrase == null ? "" : d.phrase.toFixed(4));
@@ -14359,8 +14367,9 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     const E = new Float64Array(nb), Lo = new Float64Array(nb), Hi = new Float64Array(nb), C = new Float64Array(nb);
     const D = 4, dt = D / sr, aLo = 1 - Math.exp(-2 * Math.PI * 150 * dt), aHi = 1 - Math.exp(-2 * Math.PI * 2000 * dt), spb = bar * sr;
     let lo = 0, lp = 0;
-    for (let s0 = 0; s0 < n; s0 += 1 << 19) {
-      const s1 = Math.min(n, s0 + (1 << 19));
+    for (let s0 = 0; s0 < n; s0 += 1 << 18) {
+      const s1 = Math.min(n, s0 + (1 << 18));
+      if (onProg) { try { onProg(s0 / n); } catch (e) {} }
       for (let i = s0; i < s1; i += D) {
         const x = (L[i] + R[i]) * 0.5; lo += aLo * (x - lo); lp += aHi * (x - lp); const hi = x - lp;
         const b = Math.floor((i - first * sr) / spb); if (b < 0 || b >= nb) continue;
@@ -14397,7 +14406,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     DJ_SECT.set(buf, r); return r;
   }
   // read every song that goes onto a deck, then draw its sections under the waveform
-  const djSectFor = d => { if (!d.buf || !d.bpm0) return Promise.resolve(null); const p = djSections(d).then(r => { if (r && d.buf === r.buf) { d.sect = r; d.img = null; djPaintDeck(d); djPaintAll(); } return r; }); d.sectP = p; return p; };
+  const djSectFor = (d, onProg) => { if (!d.buf || !d.bpm0) return Promise.resolve(null); const p = djSections(d, onProg).then(r => { if (r && d.buf === r.buf) { d.sect = r; d.img = null; djPaintDeck(d); djPaintAll(); } return r; }); d.sectP = p; return p; };
   { const dl = djLoad; djLoad = async function (d) { d.sect = null; const r = await dl.apply(this, arguments); djSectFor(d); return r; }; }
   { const dw = djDrawWave; djDrawWave = function (d) {
       dw.apply(this, arguments);
@@ -14432,7 +14441,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       if (!to.bpm0) return { err: "Deck " + "AB"[to.i] + " has no beat grid: tap Tap along with it first" };
       return { from, to };
     }
-    const ensureSect = async d => { if (d.sect && d.sect.buf === d.buf) return d.sect; if (d.sectP) { try { await d.sectP; } catch (e) {} if (d.sect && d.sect.buf === d.buf) return d.sect; } return await djSectFor(d); };
+    const ensureSect = async (d, onProg) => { if (d.sect && d.sect.buf === d.buf) return d.sect; if (d.sectP) { try { await d.sectP; } catch (e) {} if (d.sect && d.sect.buf === d.buf) return d.sect; } return await djSectFor(d, onProg); };
 
     function inPointOf(to, rB) {
       if (to.phrase != null) return { pos: to.phrase, label: "its Phrase mark" };
@@ -14526,15 +14535,36 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }
     function replan(o) { if (!PLAN) return; PLAN = plan(PLAN.from, PLAN.to, PLAN.rA, PLAN.rB, Object.assign({}, PLAN.opt, o)); render(); }
 
+    let preparing = false;
     async function openSmart() {
+      if (preparing) return;
       if (DJ.trans) { if (DJ.trans.smart) { djMixEnd(true); djMsg("Smart mix cancelled"); } else djMsg("A mix is already running"); djPaintAll(); return; }
       if (!djBuild()) return;
-      const pr = await pickPair(); if (pr.err) { djMsg(pr.err); return; }
-      djMsg("Reading both songs…", true);
-      const [rA, rB] = await Promise.all([ensureSect(pr.from), ensureSect(pr.to)]);
-      if (!rA || !rB) { djMsg("Couldn't read the songs' structure"); return; }
-      PLAN = plan(pr.from, pr.to, rA, rB, {}); render(); smSheet.hidden = false;
-      djMsg("Smart mix: " + PLAN.why[0]);
+      preparing = true; let off = false, tStep = performance.now();
+      smBtn.textContent = "✦ Reading…"; smBtn.classList.add("on");
+      // the progress banner: each step, its % and roughly how long is left
+      const show = (label, p) => {
+        let l = "✦ Smart mix · " + label;
+        if (p != null && p > 0.05 && p < 0.995) { const left = (performance.now() - tStep) / p * (1 - p) / 1000; l += " · about " + Math.max(1, Math.ceil(left)) + " s left"; }
+        jobSet("smart", l, p == null ? null : p, () => { off = true; });
+      };
+      try {
+        const A = DJ.decks[0], B = DJ.decks[1], playing = A.playing !== B.playing ? (A.playing ? A : B) : null, other = playing ? DJ.decks[1 - playing.i] : null;
+        if (other && !other.buf && !other.playing) { const idx = djNextIdx(); if (idx != null) show("loading " + DJ.crate[idx].name + " on deck " + "AB"[other.i] + "…", null); }
+        else show("getting ready…", null);
+        const pr = await pickPair(); if (off) { djMsg("Smart mix cancelled"); return; }
+        if (pr.err) { djMsg(pr.err); return; }
+        const need = [pr.from, pr.to].filter(d => !(d.sect && d.sect.buf === d.buf)), done = {};
+        tStep = performance.now();
+        const prog = d => p => { done[d.i] = p; const tot = need.reduce((a, x) => a + (done[x.i] || 0), 0) / Math.max(1, need.length); show("reading " + need.map(x => "AB"[x.i]).join(" and ") + " (intro, drops, breakdowns, outro)", tot); };
+        if (need.length) show("reading " + need.map(x => "AB"[x.i]).join(" and ") + " (intro, drops, breakdowns, outro)", 0);
+        const [rA, rB] = await Promise.all([ensureSect(pr.from, prog(pr.from)), ensureSect(pr.to, prog(pr.to))]);
+        if (off) { djMsg("Smart mix cancelled"); return; }
+        if (!rA || !rB) { djMsg("Couldn't read the songs' structure"); return; }
+        show("planning…", 1);
+        PLAN = plan(pr.from, pr.to, rA, rB, {}); render(); smSheet.hidden = false;
+        djMsg("Smart mix: " + PLAN.why[0]);
+      } finally { preparing = false; jobEnd("smart"); smBtn.classList.remove("on"); djPaintAll(); }
     }
     function startSmart(P) {
       if (!P || DJ.trans || !djBuild()) return;
@@ -14581,11 +14611,16 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     { const pa = djPaintAll; djPaintAll = function () {
         const r = pa.apply(this, arguments);
         const T = DJ.trans, on = !!(T && T.smart);
+        if (preparing) return r;
         smBtn.classList.toggle("on", on);
         smBtn.textContent = on ? (T.smart.pending ? "✦ In " + Math.max(0, Math.ceil((T.t0 - ctx.currentTime) / T.beat / 4)) + " bars · ✕" : "✦ Mixing · ✕") : "✦ Smart mix";
         return r;
       }; }
-    setInterval(() => { if (DJ.trans && DJ.trans.smart && !djEl.hidden) djPaintAll(); }, 500);
+    setInterval(() => {
+      const T = DJ.trans; if (!T || !T.smart || djEl.hidden || preparing) return;
+      const tx = T.smart.pending ? "✦ In " + Math.max(0, Math.ceil((T.t0 - ctx.currentTime) / T.beat / 4)) + " bars · ✕" : "✦ Mixing · ✕";
+      if (smBtn.textContent !== tx) smBtn.textContent = tx;
+    }, 500);
     smBtn.addEventListener("click", openSmart);
     document.getElementById("smCancel").addEventListener("click", () => { smSheet.hidden = true; PLAN = null; djMsg(djHint()); });
     document.getElementById("smGo").addEventListener("click", () => { const P = PLAN; smSheet.hidden = true; PLAN = null; startSmart(P); });
