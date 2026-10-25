@@ -1221,6 +1221,45 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
   .transport .oct { min-width: 26px !important; }
   .transport #gridBtn, .transport #perfBtn, .transport #seqUndo, .transport #clickBtn { min-width: 30px !important; padding: 0 4px !important; }
 }
+/* ---------- UI round 2 ---------- */
+.srcrow { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.srcline { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.srcline .slots { flex: 1; min-width: 0; flex-wrap: nowrap; }
+.srcline .slot { flex: 1 1 0; width: auto; min-width: 28px; max-width: 46px; }
+.srcline #loadBtn { flex: none; }
+#loadBtn .sm { display: none; }
+body.perf #srcRow { display: none !important; }
+.tabs { padding-top: 10px; }
+.tabs .tabwrap { width: 74px; }
+.tabwrap.eng .tab[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); box-shadow: none; }
+.tabwrap.eng .tab[aria-pressed="true"] small { color: var(--panel); opacity: 0.85; }
+.pwr { width: 22px; height: 22px; top: -9px; right: -8px; }
+.pwr::before { content: ""; position: absolute; inset: -7px; border-radius: 50%; }
+.pwr::after { font-size: 14px; }
+.pwr[aria-pressed="true"]::after { font-size: 11px; }
+.hfade { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fl, 0px), #000 calc(100% - var(--fr, 0px)), transparent 100%); }
+#menuBtn { display: none; font-size: 1.05rem; }
+.menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow-y: auto; min-height: 0; }
+.menu-tile { appearance: none; text-align: left; border: 1px solid var(--line); background: var(--raised); color: var(--ink); border-radius: 12px;
+  padding: 12px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; font-family: var(--font-body); min-height: 74px; }
+.menu-tile b { font-size: 0.95rem; }
+.menu-tile small { font-family: var(--font-mono); font-size: 11px; color: var(--dim); line-height: 1.35; }
+.menu-tile:active { border-color: var(--lilac); }
+.start-sub { color: var(--ink) !important; }
+.thead { width: 148px; }
+.sbtext { background: linear-gradient(to right, rgba(13,11,19,0.94) 62%, rgba(13,11,19,0)); }
+#blendRow:has(#blendBtn[aria-pressed="false"]) #blendAmt, #blendRow:has(#blendBtn[aria-pressed="false"]) #blendVal { opacity: 0.4; }
+input[type=range] { accent-color: var(--lilac); }
+.rc-top #rcDj[aria-pressed="true"]:not(.live) { background: transparent; }
+@media (max-width: 900px) { .betabar { gap: 4px; } .betabar .btn { padding: 0 8px; } }
+@media (max-width: 700px) { .dj-top .dj-msg { flex: 1 1 100%; order: 10; white-space: normal; overflow: visible; line-height: 1.35; } }
+@media (max-width: 600px) {
+  .betabar { display: none !important; }
+  #menuBtn { display: inline-flex; margin-left: auto; }
+  header .hright { flex: 1; }
+  #loadBtn .lg { display: none; } #loadBtn .sm { display: inline; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1253,6 +1292,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
     <button class="btn mixbtn" id="mixBtn" aria-label="Mixer">Mix</button>
     <select class="rectarget" id="recTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
+    <button class="btn" id="menuBtn" aria-label="Menu" aria-haspopup="dialog">☰</button>
     <div class="seg" role="group" aria-label="View">
       <button id="modeKeys" aria-pressed="true">Keys</button>
       <button id="modeSeq" aria-pressed="false">Seq</button>
@@ -1331,7 +1371,7 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
     <div class="row-label"><span id="engineLabel">Supersaw</span><span class="rtools"><span id="engineAfter" class="fname">after Surge XT</span><button class="btn demo" data-demo="sound" title="Hear this sound">▶ Demo</button></span></div>
     <div class="sbar" id="sbar" hidden>
       <div class="slots" id="slots" role="group" aria-label="Sample slot"></div>
-      <button class="btn" id="loadBtn">Load WAV/MP3</button>
+      <button class="btn" id="loadBtn" title="Load a WAV, MP3, M4A or AIFF into the selected slot"><span class="lg">Load WAV/MP3</span><span class="sm">Load…</span></button>
       <button class="btn" id="lineBtn" title="Record from a USB interface, the mic, or anything plugged in">Record input</button>
       <button class="btn" id="editBtn">Edit</button>
       <div class="seg small" role="group" aria-label="Sample mode">
@@ -1451,8 +1491,8 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
       <button class="btn" id="clickBtn" aria-pressed="false" aria-label="Click track" title="Click track">♩</button>
     </div>
     <div class="spacer"></div>
-    <button class="btn" id="play" aria-pressed="false">▶ Play</button>
-    <button class="btn" id="hold" aria-pressed="false">Hold</button>
+    <button class="btn" id="play" aria-pressed="false" title="Play the beat (the pattern in Seq)">▶ Play</button>
+    <button class="btn" id="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go; tap again to release">Hold</button>
     <button class="btn" id="clear" hidden>Clear</button>
     <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button>
     <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
@@ -1984,9 +2024,9 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
   <div class="ed-card" role="dialog" aria-label="Help">
     <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
-      <p><b>Getting around:</b> on a phone the views (Keys, Seq, Notes, DJ, Rhythm) sit in the bar along the bottom. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Getting around:</b> on a phone the views (Keys, Seq, Notes, DJ, Rhythm) sit in the bar along the bottom, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
-      <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples, and Drums, three drum machines you can play together.</p>
+      <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
@@ -2123,12 +2163,20 @@ body.perf .keys { max-height: none; min-height: min(68vh, 640px); }
   </div>
 </div>
 
+<div class="editor sheet" id="menuSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Menu">
+    <div class="ed-head"><strong>Menu</strong></div>
+    <div class="menu-grid" id="menuGrid"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="menuDone">Done</button></div>
+  </div>
+</div>
+
 <div class="start" id="start">
   <div class="start-card">
     <h2>Nate Bloom</h2>
-    <p>Eight synth engines modeled on free plugins Reddit loves (Surge XT, OB-Xf, Vital, TAL-NoiseMaker, TyrellN6, Spitfire LABS, Zebralette, Triple Cheese) plus 808, 909 and CR-78 drum machines, with tape wobble, echo and big reverb. Tap the sound name to browse 450+ sounds. Tap the dot on each engine to stack several at once, switch to Seq to program beats on the drum machines, load your own WAV or MP3 files in Smp (edit them, slice them or chop them onto Pads), load SoundFont, SFZ or DecentSampler instruments in Inst, or hold the record button to sample your voice, then play, sequence or turn them into granular clouds. Drag sliders up and down, slide across the keys, and use Hold to latch a drone: tap Hold, tap your notes or chords, tap Hold again, then play over it.</p>
+    <p class="start-sub">Synths, drums, samples, a sequencer, DJ decks and a drum machine.</p>
     <button class="btn" id="startBtn">Tap to start sound</button>
-    <p style="font-size:0.78rem">Plays with the silent switch on or off. No sound? Raise the volume.</p>
+    <p style="font-size:0.78rem">Plays with the silent switch on or off. No sound? Raise the volume. Help is under <b>?</b>.</p>
   </div>
 </div>
 
@@ -7388,7 +7436,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   //   mute/solo/volume/pan · snap to beat/bar · trkUndoFn · WAV mixdown
   //   Audio lives in IndexedDB; the arrangement in localStorage.
   // ======================================================================
-  const TRK_HEAD = 124, TRK_ROW = 66, TRK_MAX = 128;
+  const TRK_HEAD = 148, TRK_ROW = 66, TRK_MAX = 128;
   const TRK_COLORS = ["#c4a3ff", "#ffb65c", "#7fd6c2", "#ff8fa3", "#9ec1ff", "#e6d27a", "#b6e37f", "#f2a2e8"];
   const T = { tracks: [], clips: [], pps: 40, snap: "beat", playhead: 0, withBeat: false, sel: null, selTrack: null };
   const trkAudio = new Map(), trkPeaks = new Map();
@@ -13693,15 +13741,25 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       || [...el.querySelectorAll("button")].find(b => /^(Done|Cancel|Close|Back)$/i.test(b.textContent.trim()) && !b.closest("[hidden]"));
     const closeLayer = el => { const b = closeBtnOf(el); if (b) b.click(); else el.hidden = true; };
     // every sheet, overlay and pop-up that opens gets a history entry; closing it any way takes the entry back
-    new MutationObserver(recs => recs.forEach(r => {
-      const el = r.target; if (!isLayer(el)) return;
-      if (!el.hidden && !stack.includes(el)) { stack.push(el); try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} }
-      else if (el.hidden && stack.includes(el)) {
-        stack.splice(stack.indexOf(el), 1);
-        if (popBudget > 0) { popBudget--; return; }   // closed by Back: its history entry is already gone
-        ignorePop++; try { history.back(); } catch (e) { ignorePop--; }
-      }
-    })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
+    new MutationObserver(recs => {
+      let closed = 0; const opened = [];
+      recs.forEach(r => {
+        const el = r.target; if (!isLayer(el)) return;
+        if (!el.hidden && !stack.includes(el)) { if (!opened.includes(el)) opened.push(el); }
+        else if (el.hidden && stack.includes(el)) {
+          stack.splice(stack.indexOf(el), 1);
+          if (popBudget > 0) { popBudget--; return; }   // closed by Back: its history entry is already gone
+          closed++;
+        }
+      });
+      opened.forEach(el => {
+        if (el.hidden) return;
+        stack.push(el);
+        if (closed > 0) { closed--; try { history.replaceState({ nbLayer: stack.length }, ""); } catch (e) {} }   // took over the closed sheet's entry
+        else { try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} }
+      });
+      for (; closed > 0; closed--) { ignorePop++; try { history.back(); } catch (e) { ignorePop--; } }
+    }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
     window.addEventListener("popstate", () => {
       if (ignorePop) { ignorePop--; return; }
       const el = stack[stack.length - 1]; if (!el) return;
@@ -14080,6 +14138,75 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
         RC.djHold = 0; setBpm((from ? Math.round(from) : state.seq.bpm) + dir); RC.bpmShown = null; rcPaintTransport();
       });
     });
+  }
+  // ======================================================================
+  // UI round 2: source row, engine strip, phone menu, sideways-scroll fades
+  // ======================================================================
+  {
+    // ---- the sampler's slots + Load and the Inst picker show with every panel ----
+    const srcRow = document.createElement("div"); srcRow.className = "srcrow"; srcRow.id = "srcRow";
+    document.querySelector(".panelbar").after(srcRow);
+    const sline = document.createElement("div"); sline.className = "sbar srcline"; sline.id = "srcSamp"; sline.setAttribute("role", "group"); sline.setAttribute("aria-label", "Sampler slots");
+    sline.append(document.getElementById("slots"), document.getElementById("loadBtn"));
+    srcRow.append(sline, document.getElementById("instbar"));
+    const syncSrc = () => {
+      sline.hidden = state.engine !== "samp";
+      srcRow.hidden = state.panel === "hide" || ![...srcRow.children].some(c => !c.hidden);
+    };
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); syncSrc(); return r; }; }
+    { const rm = renderMore; renderMore = function () { const r = rm.apply(this, arguments); syncSrc(); return r; }; }
+    { const sp = setPanel; setPanel = function () { const r = sp.apply(this, arguments); syncSrc(); return r; }; }
+    syncSrc();
+
+    // ---- the engine strip scrolls to the selected tab when it changes ----
+    let shownEng = null;
+    const showTab = smooth => {
+      const t = tabsEl.querySelector('.tab[aria-pressed="true"]'); if (!t || !t.offsetParent) return;
+      const r = t.getBoundingClientRect(), s = tabsEl.getBoundingClientRect();
+      if (r.left >= s.left + 20 && r.right <= s.right - 20) return;
+      tabsEl.scrollBy({ left: (r.left + r.width / 2) - (s.left + s.width / 2), behavior: smooth ? "smooth" : "auto" });
+    };
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); if (state.engine !== shownEng) { const first = shownEng === null; shownEng = state.engine; requestAnimationFrame(() => showTab(!first)); } return r; }; }
+    requestAnimationFrame(() => { shownEng = state.engine; showTab(false); });
+
+    // ---- phones: ☰ Menu instead of the sideways tool row ----
+    const menu = document.getElementById("menuSheet"), grid = document.getElementById("menuGrid");
+    const ITEMS = [
+      ["betaTracksBtn", "Tracks", "Record and arrange audio on a timeline"],
+      ["songBtn", "Song", "Chain patterns A–D into a song"],
+      ["prBtn", "Projects", "Save, open and share everything"],
+      ["betaFxBtn", "FX Lab", "Extra effects on the whole mix"],
+      ["moBtn", "Motion", "LFOs, XY pad and drift"],
+      ["msBtn", "My sounds", "Save the sound you've dialled in"],
+      ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
+      ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
+      ["installBtn", "Install", "Add Nate Bloom to the home screen"],
+      ["helpBtn", "Help", "How it works · vibration · report a problem"],
+    ];
+    const fill = () => {
+      grid.innerHTML = "";
+      ITEMS.forEach(([id, name, sub]) => {
+        const src = document.getElementById(id); if (!src || src.hidden) return;
+        const t = document.createElement("button"); t.className = "menu-tile"; t.innerHTML = "<b></b><small></small>";
+        t.querySelector("b").textContent = name; t.querySelector("small").textContent = sub;
+        t.addEventListener("click", () => { menu.hidden = true; src.click(); });
+        grid.appendChild(t);
+      });
+    };
+    document.getElementById("menuBtn").addEventListener("click", () => { fill(); menu.hidden = false; });
+    document.getElementById("menuDone").addEventListener("click", () => { menu.hidden = true; });
+    menu.addEventListener("click", e => { if (e.target === menu) menu.hidden = true; });
+
+    // ---- rows that scroll sideways fade at the edge that has more ----
+    const hf = el => {
+      if (!el || el.__hf) return; el.__hf = true; el.classList.add("hfade");
+      const upd = () => { const max = el.scrollWidth - el.clientWidth; el.style.setProperty("--fl", el.scrollLeft > 2 ? "26px" : "0px"); el.style.setProperty("--fr", max > 2 && el.scrollLeft < max - 2 ? "26px" : "0px"); };
+      el.addEventListener("scroll", upd, { passive: true });
+      try { new ResizeObserver(upd).observe(el); } catch (e) {}
+      new MutationObserver(upd).observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+      upd();
+    };
+    ["#tabs", "#betaBar", ".sc-tools", ".trk-tools", ".trk-sel", "#drChips"].forEach(sel => document.querySelectorAll(sel).forEach(hf));
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
