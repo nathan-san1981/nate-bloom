@@ -1260,6 +1260,13 @@ input[type=range] { accent-color: var(--lilac); }
   header .hright { flex: 1; }
   #loadBtn .lg { display: none; } #loadBtn .sm { display: inline; }
 }
+/* ---------- the red global Stop ---------- */
+.btn.stopall { background: #e5484d; border-color: #e5484d; color: #fff; font-weight: 700; }
+.btn.stopall:active { background: #c43a3f; border-color: #c43a3f; }
+#stopAll .sm { display: none; }
+.now-all { background: #e5484d !important; border-color: #e5484d !important; color: #fff !important; }
+@media (max-width: 600px) { #stopAll .lg { display: none; } #stopAll .sm { display: inline; } header .hright > #stopAll { padding-left: 8px !important; padding-right: 8px !important; } }
+@media (max-width: 385px) { header .hright > select.rectarget { max-width: 76px !important; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1292,6 +1299,7 @@ input[type=range] { accent-color: var(--lilac); }
     <button class="btn mixbtn" id="mixBtn" aria-label="Mixer">Mix</button>
     <select class="rectarget" id="recTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
+    <button class="btn stopall" id="stopAll" aria-label="Stop everything" title="Stop everything: sequencer, Rhythm Creator, DJ, Jam, Tracks, pads and held notes"><span class="lg">■ Stop all</span><span class="sm">■ All</span></button>
     <button class="btn" id="menuBtn" aria-label="Menu" aria-haspopup="dialog">☰</button>
     <div class="seg" role="group" aria-label="View">
       <button id="modeKeys" aria-pressed="true">Keys</button>
@@ -1496,7 +1504,7 @@ input[type=range] { accent-color: var(--lilac); }
     <button class="btn" id="clear" hidden>Clear</button>
     <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button>
     <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
-    <button class="btn" id="panic">Stop</button>
+    <button class="btn" id="panic" title="Stop the beat and what you're playing here. Other parts keep going; the red ■ at the top stops everything">Stop</button>
   </div>
 
   <div class="notesarea" id="notesArea" hidden>
@@ -1604,7 +1612,8 @@ input[type=range] { accent-color: var(--lilac); }
     <button class="btn" id="djKeyLock" aria-pressed="true" title="Speed changes keep the song's pitch">Key lock</button>
     <select class="rectarget" id="djRecTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="djRec" aria-label="Record the mix" title="Record everything you hear">● Rec</button>
-    <button class="btn" id="djStop" title="Stop both decks and the pads">■ Stop</button>
+    <button class="btn" id="djStop" title="Stop the DJ: both decks, the pads, the play-along beat and a mix in progress">■ Stop</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
     <button class="btn" id="djHelpBtn" aria-label="How the DJ tab works">?</button>
     <button class="btn primary" id="djDone">Done</button>
   </div>
@@ -1737,6 +1746,7 @@ input[type=range] { accent-color: var(--lilac); }
     <button class="btn round" id="trkPlay" aria-pressed="false" aria-label="Play or stop">▶</button>
     <button class="btn round" id="trkRec" aria-label="Record">●</button>
     <span class="time" id="trkTime">0:00.00</span>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
   </div>
   <div class="trk-tools">
     <button class="btn" id="trkAdd">+ Track</button>
@@ -1778,6 +1788,7 @@ input[type=range] { accent-color: var(--lilac); }
     <button class="btn primary" id="rcPlay" aria-pressed="false">▶ Play</button>
     <div class="rc-tempo"><button class="btn" id="rcBpmDown" aria-label="Slower">−</button><span id="rcBpm">96 bpm</span><button class="btn" id="rcBpmUp" aria-label="Faster">+</button><button class="btn" id="rcDj" aria-pressed="true" title="Auto BPM: while a DJ deck plays, follow its tempo and lock to its beat">DJ</button></div>
     <button class="btn takebtn" id="rcRec" title="Record everything you hear">● Rec</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
     <button class="btn" id="rcHelpBtn" aria-label="How the Rhythm Creator works">?</button>
     <button class="btn primary" id="rcDone">Done</button>
   </div>
@@ -2038,7 +2049,7 @@ input[type=range] { accent-color: var(--lilac); }
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
-      <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> silences everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
+      <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (toolbar) chains your own patterns A–D into an arrangement.</p>
@@ -11248,7 +11259,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   document.getElementById("djBtn").addEventListener("click", djOpen);
   // Stop (here or in the main view) stops the decks and the pads
   const djStopAll = () => { DJ.decks.forEach(d => { if (d.playing) djPlay(d, false); }); DJ.padPlay.forEach((p, k) => djPadStop(k)); djPaintAll(); };
-  document.getElementById("panic").addEventListener("click", djStopAll);
+  document.getElementById("stopAll").addEventListener("click", djStopAll);
   document.getElementById("djStop").addEventListener("click", djStopAll);
   window.addEventListener("resize", () => DJ.decks.forEach(d => { d.img = null; }));
   djPaintAll();
@@ -11335,10 +11346,12 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       for (const id in fxChan) fxcApply(id);
     };
     // Stop empties every sound's echo and hall send too (the global tails are handled by killTails)
-    document.getElementById("panic").addEventListener("click", () => {
+    const tailsOff = all => () => {
       if (!ctx) return; const now = ctx.currentTime;
-      for (const id in fxChan) { const c = fxChan[id]; [c.fb.gain, c.echoOut.gain, c.verbSend.gain].forEach(p => { try { p.cancelScheduledValues(now); } catch (e) {} p.setTargetAtTime(0, now, 0.01); }); }
-    });
+      for (const id in fxChan) { if (!all && (id === "dj" || id === "rc")) continue; const c = fxChan[id]; [c.fb.gain, c.echoOut.gain, c.verbSend.gain].forEach(p => { try { p.cancelScheduledValues(now); } catch (e) {} p.setTargetAtTime(0, now, 0.01); }); }
+    };
+    document.getElementById("panic").addEventListener("click", tailsOff(false));
+    document.getElementById("stopAll").addEventListener("click", tailsOff(true));
   }
   // every voice goes into its own sound's chain (the global input stays for previews)
   const fxcRoute = (fn, pick) => function (...a) {
@@ -11785,7 +11798,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       return om0(title, info, items);
     };
     const pa0 = djPaintAll; djPaintAll = function () { pa0(); djPaintAuto(); };
-    document.getElementById("panic").addEventListener("click", () => { if (DJ.trans) djMixEnd(true); if (DJ.beat) djBeatStop(); });
+    document.getElementById("stopAll").addEventListener("click", () => { if (DJ.trans) djMixEnd(true); if (DJ.beat) djBeatStop(); });
     document.getElementById("djStop").addEventListener("click", () => { if (DJ.trans) djMixEnd(true); if (DJ.beat) djBeatStop(); });
     const rs0 = djRestore;
     djRestore = async function () {
@@ -12413,7 +12426,7 @@ registerProcessor("nb-capture", NBCap);`;
     toggleHeld = function (m) { const r = h0(m); jamNoteChange(); return r; };
     playDrum = function (id, t) { if (!JAM.replaying && JAM.rec && ctx && (t == null || t <= ctx.currentTime + 0.03)) jamRecord("drum", { id }); return pd0(id, t); };
     playPad = function (k, t) { if (!JAM.replaying && JAM.rec && ctx && (t == null || t <= ctx.currentTime + 0.03)) jamRecord("pad", { k }); return pp0(k, t); };
-    document.getElementById("panic").addEventListener("click", () => { jamLoopsOff(); if (JAM.band.on) jamBandOn(false); });
+    document.getElementById("stopAll").addEventListener("click", () => { jamLoopsOff(); if (JAM.band.on) jamBandOn(false); });
     // the panel button
     const pJam = document.getElementById("pJam"), sp1 = setPanel;
     setPanel = function (which) { if (which === "jam") { sp1("hide"); state.panel = "jam"; } else sp1(which); jamRow.hidden = which !== "jam"; pJam.setAttribute("aria-pressed", String(which === "jam")); document.getElementById("pHide").setAttribute("aria-pressed", String(which === "hide")); if (which === "jam") { jamPaintLoops(); jamPaintBand(); } try { localStorage.setItem("nightbloom-jam-open", which === "jam" ? "1" : "0"); } catch (e) {} };
@@ -13459,7 +13472,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     } else { RC.playing = false; clearInterval(RC.timer); RC.queue.length = 0; }
     rcPaintTransport();
   }
-  document.getElementById("panic").addEventListener("click", () => rcPlay(false));
+  document.getElementById("stopAll").addEventListener("click", () => rcPlay(false));
   document.addEventListener("visibilitychange", () => { if (document.hidden && RC.playing) rcPlay(false); });
   // the sequencer starting while the Rhythm Creator plays: line up with it
   { const ss = startSeq; startSeq = function () { const was = playing; const r = ss.apply(this, arguments); if (!was && playing && RC.playing) { RC.nextT = nextTime; RC.step = curStep; } return r; }; }
@@ -13699,6 +13712,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     paint();
   }
 
+  let nbStopSources = () => {};
   // ---------- Now playing ----------
   {
     const bars = [...document.querySelectorAll(".nowbar")], trkPlayBtn = document.getElementById("trkPlay");
@@ -13718,6 +13732,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       return s;
     };
     let sig = "", cur = [];
+    nbStopSources = () => { sources().forEach(x => { try { x[2](); } catch (er) {} }); stopPads(); };
     function paintNow() {
       cur = sources(); const k = cur.map(x => x[0] + x[1]).join("|"); if (k === sig) return; sig = k;
       const h = cur.length ? '<span class="now-lab">Playing</span>' + cur.map(([id, name]) => `<button class="btn now-chip" data-now="${id}" title="Stop ${name}"><i></i>${name}<b>■</b></button>`).join("") + (cur.length > 1 ? '<button class="btn now-all" data-now="all">Stop all</button>' : "") : "";
@@ -13726,7 +13741,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     bars.forEach(b => b.addEventListener("click", e => {
       const btn = e.target.closest("button[data-now]"); if (!btn) return;
       const run = x => { try { x[2](); } catch (er) {} };
-      if (btn.dataset.now === "all") { cur.forEach(run); document.getElementById("panic").click(); stopPads(); }
+      if (btn.dataset.now === "all") document.getElementById("stopAll").click();
       else { const x = cur.find(c => c[0] === btn.dataset.now); if (x) run(x); }
       sig = null; setTimeout(paintNow, 80);
     }));
@@ -14207,6 +14222,14 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       upd();
     };
     ["#tabs", "#betaBar", ".sc-tools", ".trk-tools", ".trk-sel", "#drChips"].forEach(sel => document.querySelectorAll(sel).forEach(hf));
+  }
+  // ======================================================================
+  // the red global Stop
+  // ======================================================================
+  {
+    const sa = document.getElementById("stopAll");
+    sa.addEventListener("click", () => { nbStopSources(); document.getElementById("panic").click(); });   // + the DJ, Jam, Rhythm Creator and tail stops hooked on it
+    document.querySelectorAll("[data-stopall]").forEach(b => b.addEventListener("click", () => sa.click()));
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
