@@ -1135,8 +1135,7 @@ body.recording .jobs { top: calc(44px + env(safe-area-inset-top, 0px)); }
 .rc-helptext { overflow-y: auto; font-size: 0.86rem; line-height: 1.45; }
 .rc-helptext p { margin: 0 0 8px; }
 .rc-credits { font-size: 0.72rem; color: var(--dim); }
-#rcBtn.live { color: #7fd6c2; }
-#rcBtn.live[aria-pressed="true"] { color: var(--panel); }
+
 @media (min-width: 900px) {
   .rc-row { grid-template-columns: 112px repeat(16, minmax(0, 1fr)); gap: 3px; }
   .rc-lab, .rc-c { height: 34px; }
@@ -1297,6 +1296,138 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
 .sm-row .btn[aria-pressed="true"] { background: #c4a3ff; border-color: #c4a3ff; color: var(--panel); }
 .sm-legend { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--dim); }
 .sm-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 3px; vertical-align: -1px; }
+/* ---------- keyboard letters as keycaps ---------- */
+body.kbd .kl { display: flex; align-items: center; justify-content: center; position: absolute; left: 50%; right: auto; bottom: 24px; transform: translateX(-50%);
+  width: 22px; height: 22px; box-sizing: border-box; border-radius: 6px; font: 600 11px/1 var(--font-mono); color: #5b4f86;
+  background: linear-gradient(#fbf9ff, #e7e1f8); border: 1px solid #cbc1ea; box-shadow: 0 2px 0 #cbc1ea; }
+body.kbd .b .kl { bottom: 12px; width: 20px; height: 20px; color: #ece6ff; background: linear-gradient(#433a62, #2c2643); border-color: #5a4e82; box-shadow: 0 2px 0 #17131f; }
+body.kbd #keys .down > .kl { background: #c4a3ff; color: #1a1426; border-color: #c4a3ff; box-shadow: none; transform: translate(-50%, 2px); }
+body.kbd .pad .kl { left: auto; right: 6px; top: 6px; bottom: auto; transform: none; width: 18px; height: 18px; font-size: 10px; color: #ece6ff; background: linear-gradient(#433a62, #2c2643); border-color: #5a4e82; box-shadow: 0 2px 0 #17131f; }
+body.kbd [data-key]::after { content: attr(data-key); display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; box-sizing: border-box; padding: 0 3px; margin-left: 6px;
+  border-radius: 4px; font: 600 9px/1 var(--font-mono); color: #cfc6ec; background: #2c2643; border: 1px solid #5a4e82; box-shadow: 0 1px 0 #17131f; vertical-align: 1px; }
+@media (max-width: 600px) {
+  body.kbd .kl { width: 16px; height: 16px; bottom: 20px; border-radius: 4px; font-size: 9px; }
+  body.kbd .b .kl { width: 14px; height: 14px; bottom: 8px; }
+  body.kbd [data-key]::after { display: none; }
+}
+/* bigger keycaps, readable from a normal seat */
+body.kbd .kl { width: min(38px, calc(100% - 6px)); height: auto; aspect-ratio: 1; bottom: 22px; border-radius: 8px; border-width: 1.5px;
+  font: 700 20px/1 var(--font-mono); color: #2a2048; box-shadow: 0 3px 0 #b8acdf; }
+body.kbd .b .kl { width: min(28px, calc(100% - 4px)); height: auto; bottom: 10px; border-radius: 6px; font-size: 15px; color: #fff; box-shadow: 0 2px 0 #17131f; }
+body.kbd #keys .down > .kl { transform: translate(-50%, 3px); }
+body.kbd .pad .kl { width: 28px; height: 28px; aspect-ratio: auto; right: 6px; top: 6px; border-radius: 6px; font-size: 15px; color: #fff; }
+body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; margin-left: 7px; border-radius: 5px; font-size: 12px; font-weight: 700; color: #fff; }
+@media (max-width: 600px) {
+  body.kbd .kl { width: 16px; height: 16px; bottom: 18px; border-radius: 4px; border-width: 1px; font-size: 10px; box-shadow: 0 2px 0 #b8acdf; }
+  body.kbd .b .kl { width: 14px; height: 14px; bottom: 8px; font-size: 9px; }
+  body.kbd .pad .kl { width: 20px; height: 20px; font-size: 11px; }
+}
+/* ---------- mouse ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .btn:not(:disabled):hover, .tab:hover, .slot:hover, .menu-tile:hover { border-color: #6d5fa3; filter: brightness(1.12); }
+  .btn, .tab, .slot, .knob, .cell, .rc-c, .pad, .menu-tile { cursor: pointer; }
+  .cell:hover, .rc-c:hover { outline: 1px solid rgba(196, 163, 255, 0.55); outline-offset: -1px; }
+}
+.knob:focus-visible { outline: 1.5px solid rgba(255, 182, 92, 0.7); outline-offset: 1px; }
+/* ---------- what you play (Synths · Samples · Drums · DJ · Rhythm) and the views (Keys · Seq · Notes) ---------- */
+.toolrow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; flex: none; }
+.toolrow > .betabar { flex: 1 1 auto; min-width: 0; }
+.views { flex: none; margin-left: auto; width: 222px; box-sizing: border-box; border-radius: 10px; background: rgba(255,255,255,0.03); }
+.views button { flex: 1; height: 42px; padding: 0 6px; font-size: 0.86rem; }
+.modes { display: flex; align-items: stretch; flex: none; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.03); }
+.modes .btn.mode { flex: 1 1 auto; min-width: 0; height: 34px; padding: 0 11px; gap: 6px; display: inline-flex; align-items: center; justify-content: center; position: relative;
+  border: none; border-radius: 0; background: transparent; color: var(--dim); font-weight: 700; white-space: nowrap; }
+.modes .btn.mode + .btn.mode { box-shadow: inset 1px 0 0 var(--line); }
+.modes .btn.mode[aria-pressed="true"] { background: var(--lilac); color: var(--panel); box-shadow: none; }
+.modes .msep { flex: none; width: 3px; background: var(--line); }
+.mode svg { width: 16px; height: 16px; flex: none; }
+#djBtn svg { color: var(--lilac); }
+#rcBtn svg { color: #7fd6c2; }
+.modes .studio { color: var(--ink); }
+.studio.live::after { content: ""; position: absolute; top: 4px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: #5fd38d; box-shadow: 0 0 0 2px var(--panel); }
+@media (hover: hover) and (pointer: fine) { .modes .btn.mode:not([aria-pressed="true"]):hover { background: rgba(196,163,255,0.12); filter: none; } }
+/* engine row: only the current section's tabs */
+#tabs > [data-m="none"] { display: none !important; }
+#tabs[data-mode="synths"] > [data-m="samples"], #tabs[data-mode="synths"] > [data-m="drums"],
+#tabs[data-mode="samples"] > [data-m="synths"], #tabs[data-mode="samples"] > [data-m="drums"] { display: none !important; }
+#tabs[data-mode="drums"] { display: none !important; }
+/* doesn't apply here: dimmed, a tap says why */
+.na { opacity: 0.32 !important; filter: grayscale(1); }
+.na select { pointer-events: none; }
+/* narrower tablets: the section and Keys · Seq · Notes share the row under the title, the tools go under them */
+@media (min-width: 601px) and (max-width: 1099px) {
+  .toolrow > .modes { order: 1; flex: 1 1 auto; }
+  .toolrow > .views { order: 2; }
+  .toolrow > .betabar { order: 3; flex: 1 1 100%; }
+  .modes .btn.mode { height: 42px; padding: 0 6px; }
+}
+@media (min-width: 601px) and (max-width: 860px) {
+  .modes .btn.mode { flex-direction: column; gap: 2px; font-size: 0.72rem; }
+  .views { width: 186px; }
+}
+/* phones: the section is the bar along the bottom; Keys · Seq · Notes sit under the title */
+@media (max-width: 600px) {
+  .toolrow { display: contents; }
+  .views { width: auto; margin: 0; }
+  .views button { height: 36px; font-size: 0.86rem; }
+  .modes { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; border: none; border-top: 1px solid var(--line); border-radius: 0; background: var(--panel);
+    padding: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+  .modes .btn.mode { flex: 1 1 0; height: 54px; flex-direction: column; gap: 3px; padding: 0 1px; font-size: 11px; font-weight: 600; }
+  .modes .btn.mode + .btn.mode { box-shadow: none; }
+  .modes .btn.mode[aria-pressed="true"] { background: rgba(196,163,255,0.16); color: var(--ink); box-shadow: inset 0 3px 0 var(--lilac); }
+  .modes .msep { width: 1px; margin: 10px 0; }
+  .mode svg { width: 20px; height: 20px; }
+  .studio.live::after { top: 7px; right: calc(50% - 18px); }
+}
+
+/* ---------- fit the window (tablets, Chromebooks, computers): no page scrolling ---------- */
+@media (min-width: 601px) {
+  html, body { height: 100%; }
+  body { overflow-y: hidden; }
+  .app { height: 100vh; height: 100dvh; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: thin; }
+  .app > * { flex-shrink: 0; }
+  .app > .playrow { flex: 1 1 0; min-height: 110px; }
+  .app.notesmode > .playrow { min-height: 100px; }
+  .app.gridmode > .playrow { min-height: 180px; }
+  .app > .seqarea { flex: 1 1 0; min-height: 140px; }
+  body.perf .keys { min-height: 0; }
+  .jumpbtn { display: none !important; }
+}
+@media (min-width: 601px) and (max-height: 820px) {
+  .app { gap: 6px; padding-block: 6px; }
+  .tabs { padding-top: 6px; }
+  .tab { padding: 5px 4px 4px; }
+  .scope { height: 42px; }
+  .soundbar.compact .scope { height: 34px; }
+  .fader { height: 48px; }
+  .knob { gap: 2px; }
+}
+@media (min-width: 601px) and (max-height: 700px) {
+  .fader { height: 38px; }
+  .scope { height: 38px; }
+  .betabar { padding-top: 4px; padding-bottom: 4px; }
+  .views button { height: 38px; }
+}
+/* ---------- Fix sound banner ---------- */
+.sndfix { position: fixed; left: 50%; transform: translateX(-50%); top: max(10px, env(safe-area-inset-top, 0px)); z-index: 90; display: flex; align-items: center; gap: 8px;
+  max-width: calc(100vw - 24px); box-sizing: border-box; padding: 8px 8px 8px 14px; border-radius: 12px; background: #2a1c10; border: 1px solid var(--amber); color: var(--ink);
+  font-size: 0.84rem; box-shadow: 0 6px 24px rgba(0,0,0,0.5); }
+.sndfix span { min-width: 0; }
+.sndfix .btn { height: 34px; flex: none; }
+.sndfix #sndFixGo, .sndfix #sndFixRe { background: var(--amber); border-color: var(--amber); color: var(--panel); font-weight: 700; }
+@media (max-width: 600px) { .sndfix { flex-wrap: wrap; } .sndfix span { flex: 1 1 100%; } }
+/* ---------- Exit ---------- */
+.betabar .exitbtn { color: var(--dim); }
+.exit-foot { flex-wrap: wrap; }
+.editor.sheet#exitSheet { align-items: center; padding-top: 0; }
+#exitSheet .ed-card { height: auto; padding-bottom: 14px; }
+.ex-card .btn.primary { background: var(--lilac); border-color: var(--lilac); color: var(--panel); font-weight: 700; }
+.exitscreen { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg, #13111b); }
+.exitscreen[hidden] { display: none; }
+.ex-card { max-width: 420px; text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.ex-card h2 { margin: 0; font-family: var(--font-display); font-size: 1.4rem; }
+.ex-card p { margin: 0; color: var(--ink); line-height: 1.45; }
+.ex-card .ex-sub { color: var(--dim); font-size: 0.9rem; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1331,17 +1462,19 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
     <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
     <button class="btn stopall" id="stopAll" aria-label="Stop everything" title="Stop everything: sequencer, Rhythm Creator, DJ, Jam, Tracks, pads and held notes"><span class="lg">■ Stop all</span><span class="sm">■ All</span></button>
     <button class="btn" id="menuBtn" aria-label="Menu" aria-haspopup="dialog">☰</button>
-    <div class="seg" role="group" aria-label="View">
-      <button id="modeKeys" aria-pressed="true">Keys</button>
-      <button id="modeSeq" aria-pressed="false">Seq</button>
-      <button id="modeNotes" aria-pressed="false">Notes</button>
-      <button id="djBtn" aria-pressed="false" title="Mix two songs and grab samples">DJ</button>
-      <button id="rcBtn" aria-pressed="false" title="Rhythm Creator: a 16-track drum machine">Rhythm</button>
+    <div class="modes" id="modes" role="group" aria-label="What to play">
+      <button class="btn mode" id="mSynths" data-mode="synths" aria-pressed="true" title="Synths: the engines, the sound library and instruments, played on the keys"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M8.8 19V12.5M15.2 19V12.5"/><rect x="6.6" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/><rect x="13.8" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="stl">Synths</span></button>
+      <button class="btn mode" id="mSamples" data-mode="samples" aria-pressed="false" title="Samples: the sampler (8 slots) and the 12 pads"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h1.5M6.5 8.5v7M10 5v14M13.5 9v6M17 6.5v11M20.5 11v2"/></svg><span class="stl">Samples</span></button>
+      <button class="btn mode" id="mDrums" data-mode="drums" aria-pressed="false" title="Drums: the 808, 909 and CR-78 drum machine"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="10" rx="8" ry="3"/><path d="M4 10v6.5c0 1.7 3.6 3 8 3s8-1.3 8-3V10"/><path d="M8 4.5l3.5 4.2M16.5 3.5l-3 5.2"/></svg><span class="stl">Drums</span></button>
+      <span class="msep" aria-hidden="true"></span>
+      <button class="btn mode studio" id="djBtn" title="DJ: mix two songs and grab samples"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7.5"/><circle cx="10" cy="13.5" r="2"/><path d="M20 3v8l-4.5 3.5"/></svg><span class="stl">DJ</span></button>
+      <button class="btn mode studio" id="rcBtn" title="Rhythm Creator: a 16-track drum machine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="3.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="3.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="16.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="stl">Rhythm</span></button>
     </div>
     </div>
   </header>
 
   <div class="nowbar" id="nowBar" hidden></div>
+  <div class="toolrow" id="toolRow">
   <div class="betabar" id="betaBar">
     <button class="btn" id="betaTracksBtn">▤ Tracks</button>
     <button class="btn" id="songBtn">Song</button>
@@ -1357,6 +1490,13 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
     <button class="btn" id="installBtn">Install</button>
     <span class="spacer"></span>
     <button class="btn" id="helpBtn" aria-label="Help, settings and Report">?</button>
+    <button class="btn exitbtn" id="exitBtn" title="Save your work and close">⏻ Exit</button>
+  </div>
+  <div class="seg views" id="views" role="group" aria-label="View">
+    <button id="modeKeys" aria-pressed="true">Keys</button>
+    <button id="modeSeq" aria-pressed="false">Seq</button>
+    <button id="modeNotes" aria-pressed="false">Notes</button>
+  </div>
   </div>
   <div class="takebar" id="takeBar" hidden>
     <div class="tinfo" id="takeInfo">Take ready</div>
@@ -1516,9 +1656,9 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
 
   <div class="transport">
     <div class="tgroup" id="octGroup">
-      <button class="btn" id="octDown" aria-label="Octave down">−</button>
+      <button class="btn" id="octDown" aria-label="Octave down (↓ key)" data-key="↓">−</button>
       <div class="oct" id="octLabel">C3</div>
-      <button class="btn" id="octUp" aria-label="Octave up">+</button>
+      <button class="btn" id="octUp" aria-label="Octave up (↑ key)" data-key="↑">+</button>
     </div>
     <button class="btn" id="gridBtn" aria-pressed="false" aria-label="Lighted note pads" title="Lighted note pads">▦</button>
     <button class="btn" id="perfBtn" aria-pressed="false" aria-label="Play view" title="Play view: just the keys">⤢</button>
@@ -1529,12 +1669,12 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
       <button class="btn" id="clickBtn" aria-pressed="false" aria-label="Click track" title="Click track">♩</button>
     </div>
     <div class="spacer"></div>
-    <button class="btn" id="play" aria-pressed="false" title="Play the beat (the pattern in Seq)">▶ Play</button>
-    <button class="btn" id="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go; tap again to release">Hold</button>
+    <button class="btn" id="play" aria-pressed="false" title="Play the beat (the pattern in Seq)" data-key="Space">▶ Play</button>
+    <button class="btn" id="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go; tap again to release" data-key="⇧↵">Hold</button>
     <button class="btn" id="clear" hidden>Clear</button>
     <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button>
     <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
-    <button class="btn" id="panic" title="Stop the beat and what you're playing here. Other parts keep going; the red ■ at the top stops everything">Stop</button>
+    <button class="btn" id="panic" data-key="Esc" title="Stop the beat and what you're playing here. Other parts keep going; the red ■ at the top stops everything">Stop</button>
   </div>
 
   <div class="notesarea" id="notesArea" hidden>
@@ -1969,6 +2109,20 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
   </div>
 </div>
 
+<div class="editor sheet" id="exitSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Exit">
+    <div class="ed-head"><strong>Exit Nate Bloom</strong></div>
+    <span class="ed-info" style="text-align:left">Save and exit adds what you have now to <b>Projects</b>, so you can open this exact version again. Either way, the next time you open Nate Bloom it starts where you left off.</span>
+    <div class="pr-new"><input id="exitName" maxlength="40" aria-label="Save as"></div>
+    <span class="ed-info" id="exitInfo" style="text-align:left"></span>
+    <div class="ed-foot sheet-foot exit-foot">
+      <button class="btn big" id="exitCancel">Cancel</button>
+      <button class="btn big" id="exitNoSave">Exit without saving</button>
+      <button class="btn big primary" id="exitSave">Save and exit</button>
+    </div>
+  </div>
+</div>
+
 <div class="editor sheet" id="projects" hidden>
   <div class="ed-card" role="dialog" aria-label="Projects">
     <div class="ed-head"><strong>Projects</strong></div>
@@ -2072,7 +2226,7 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
   <div class="ed-card" role="dialog" aria-label="Help">
     <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
-      <p><b>Getting around:</b> on a phone the views (Keys, Seq, Notes, DJ, Rhythm) sit in the bar along the bottom, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b> and <b>Rhythm</b> open full screens of their own (a green dot means one is playing). Things that don't apply to the pads (Chord, octave, Arp, Hold) are dimmed; tap one to see why. <b>Keys · Seq · Notes</b> switch what this page shows. On a computer or a tablet in landscape these are at the top right, with Keys · Seq · Notes under DJ and Rhythm; on a phone the five sit in the bar along the bottom and Keys · Seq · Notes under the title, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
@@ -2086,19 +2240,20 @@ body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(-
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
-      <p><b>Playing from a keyboard</b> (Bluetooth or USB): the A row plays the white keys, A S D F G H J K L ; ', and the row above the black keys, W E T Y U O P, an octave and a half from the left edge of the keys; <b>Z</b> / <b>X</b> move an octave down or up. With Drums or Pads the same keys play the pads in order. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>−</b> / <b>=</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
+      <p><b>Playing from a keyboard</b> (Bluetooth or USB): three octaves from the left edge of the keys. The bottom letter row, <b>Z X C V B N M , . /</b>, plays the white keys, with <b>S D G H J L ;</b> above it as the black keys; the top letter row, <b>Q W E R T Y U I O P [ ]</b>, carries on from there, with the number keys <b>2 3 4 6 7 9 0 −</b> as its black keys. Every key shows its letter. <b>↓</b> / <b>↑</b> move an octave down or up. With Drums or Pads, <b>Q W E R / A S D F / Z X C V</b> play the pads in the same grid as on screen. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (toolbar) chains your own patterns A–D into an arrangement.</p>
     </div>
+    <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
     <div class="sp-lab"><span>Keyboard shortcuts</span></div>
     <div class="help-grid">
-      <kbd>A W S E D …</kbd><span>play notes (like a piano)</span>
+      <kbd>Z X C V … / Q W E R …</kbd><span>play notes: bottom letter row and top letter row (the rows above them are the black keys)</span>
       <kbd>Space</kbd><span>play / pause</span>
       <kbd>Esc</kbd><span>stop everything, or close a sheet</span>
-      <kbd>Z / X</kbd><span>octave down / up</span>
-      <kbd>− / =</kbd><span>tempo down / up</span>
+      <kbd>↓ / ↑</kbd><span>octave down / up</span>
+      <kbd>← / →</kbd><span>tempo down / up</span>
       <kbd>Shift+Enter</kbd><span>Hold on / off</span>
       <kbd>?</kbd><span>this help</span>
     </div>
@@ -3636,7 +3791,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const wrap = document.createElement("div"); wrap.className = "tabwrap";
     const b = document.createElement("button");
     b.className = "tab"; b.dataset.engine = "samp";
-    b.innerHTML = `${SAMP.short}<small>import</small>`;
+    b.innerHTML = `Sampler<small>8 slots</small>`;
     b.addEventListener("click", () => { state.engine = "samp"; renderEngine(); save(); });
     wrap.append(b);
     tabsEl.appendChild(wrap);
@@ -3801,14 +3956,24 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   keysEl.addEventListener("pointerup", lift);
   keysEl.addEventListener("pointercancel", lift);
 
-  // Computer keyboard (Bluetooth or USB), by key position so any layout works: the A row plays the white keys and the
-  // row above it the black keys (the Ableton / Logic layout), an octave and a half from the left edge of the keys
-  const KBC = ["KeyA", "KeyW", "KeyS", "KeyE", "KeyD", "KeyF", "KeyT", "KeyG", "KeyY", "KeyH", "KeyU", "KeyJ", "KeyK", "KeyO", "KeyL", "KeyP", "Semicolon", "Quote"];
-  const KBL = ["A", "W", "S", "E", "D", "F", "T", "G", "Y", "H", "U", "J", "K", "O", "L", "P", ";", "'"];
-  const KBK = "awsedftgyhujkolp;'";
+  // Computer keyboard (Bluetooth or USB), by key position so any layout works. Two manuals, 37 keys from the left edge
+  // of the keys: the Z row plays the white keys with the A row as their black keys; the Q row carries on from F with
+  // the number row as its black keys. Each black key's letter sits between its two white keys' letters.
+  const KB_MAP = [["KeyZ","Z","z"],["KeyS","S","s"],["KeyX","X","x"],["KeyD","D","d"],["KeyC","C","c"],["KeyV","V","v"],["KeyG","G","g"],["KeyB","B","b"],["KeyH","H","h"],["KeyN","N","n"],["KeyJ","J","j"],["KeyM","M","m"],
+    ["Comma",",",","],["KeyL","L","l"],["Period",".","."],["Semicolon",";",";"],["Slash","/","/"],
+    ["KeyQ","Q","q"],["Digit2","2","2"],["KeyW","W","w"],["Digit3","3","3"],["KeyE","E","e"],["Digit4","4","4"],["KeyR","R","r"],["KeyT","T","t"],["Digit6","6","6"],["KeyY","Y","y"],["Digit7","7","7"],["KeyU","U","u"],
+    ["KeyI","I","i"],["Digit9","9","9"],["KeyO","O","o"],["Digit0","0","0"],["KeyP","P","p"],["Minus","−","-"],["BracketLeft","[","["],["BracketRight","]","]"]];
+  const KBC = KB_MAP.map(x => x[0]), KBL = KB_MAP.map(x => x[1]), KBKS = KB_MAP.map(x => x[2]);
+  // drum machine and Pads: the left-hand block, in the same grid as the pads on screen
+  const PADC = ["KeyQ", "KeyW", "KeyE", "KeyR", "KeyA", "KeyS", "KeyD", "KeyF", "KeyZ", "KeyX", "KeyC", "KeyV"], PADL = "QWERASDFZXCV".split(""), PADK = "qwerasdfzxcv".split("");
   const kbDown = new Map();   // key -> the note it started (null for a drum or pad hit)
   let KBD_LABELS = null; try { const v = localStorage.getItem("nightbloom-kbd"); KBD_LABELS = v == null ? null : v === "1"; } catch (e) {}
-  const kbIdx = e => { const i = KBC.indexOf(e.code); return i >= 0 ? i : (e.code ? -1 : KBK.indexOf((e.key || "").toLowerCase())); };
+  if (KBD_LABELS === null) { try { if (matchMedia("(any-pointer: fine)").matches) KBD_LABELS = true; } catch (e) {} }   // a mouse or touchpad: likely a keyboard too
+  const kbPadMode = () => state.engine === "drum" || state.engine === "pads";
+  const kbIdx = e => {
+    const [C, K] = kbPadMode() ? [PADC, PADK] : [KBC, KBKS];
+    const i = C.indexOf(e.code); return i >= 0 ? i : (e.code ? -1 : K.indexOf((e.key || "").toLowerCase()));
+  };
   const kbBusy = e => {
     const t = e.target; if (t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return true;
     return !!document.querySelector(".editor:not([hidden]), .browser:not([hidden]), .trk:not([hidden]), #start:not([hidden])");
@@ -3818,12 +3983,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     keysEl.querySelectorAll(".kl").forEach(x => x.remove());
     if (!KBD_LABELS) return;
     const tag = (el, i) => { if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = KBL[i]; el.appendChild(sp); };
-    if (state.engine === "drum") { DRUMS.forEach(([id], i) => { if (i < KBL.length) tag(padEls.get(id), i); }); return; }
-    if (state.engine === "pads") { keysEl.querySelectorAll(".pad").forEach((el, i) => { if (i < KBL.length) tag(el, i); }); return; }
+    const tagP = (el, i) => { if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = PADL[i]; el.appendChild(sp); };
+    if (state.engine === "drum") { DRUMS.forEach(([id], i) => { if (i < PADL.length) tagP(padEls.get(id), i); }); return; }
+    if (state.engine === "pads") { keysEl.querySelectorAll(".pad").forEach((el, i) => { if (i < PADL.length) tagP(el, i); }); return; }
     const start = BASE + state.octave * 12; for (let i = 0; i < KBL.length; i++) tag(keyEls.get(start + i), i);
   }
   window.addEventListener("keydown", e => {
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
     const i = kbIdx(e); if (i < 0 || kbBusy(e)) return;
     e.preventDefault();
     const key = e.code || e.key; if (e.repeat || kbDown.has(key)) return;
@@ -9777,9 +9943,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const k = e.key;
     if (k === " ") { e.preventDefault(); start(); playBtn.click(); }
     else if (k === "Escape") { e.preventDefault(); document.getElementById("panic").click(); }
-    else if (k === "z" || k === "x") { if (!e.repeat) document.getElementById(k === "z" ? "octDown" : "octUp").click(); }
-    else if (k === "-" || k === "=" || k === "+") { setBpm(state.seq.bpm + (k === "-" ? -2 : 2)); }
-    else if (k === "?" || k === "/") { e.preventDefault(); openHelp(); }
+    else if (k === "ArrowDown" || k === "ArrowUp" || k === "ArrowLeft" || k === "ArrowRight") {
+      // a focused knob or slider keeps its arrows
+      if (tgt && tgt.closest && tgt.closest(".knob, [role=slider], .cell, .rc-c")) return;
+      e.preventDefault();
+      if (k === "ArrowDown" || k === "ArrowUp") { if (!e.repeat) document.getElementById(k === "ArrowDown" ? "octDown" : "octUp").click(); }
+      else setBpm(state.seq.bpm + (k === "ArrowLeft" ? -2 : 2));
+    }
+    else if (k === "?") { e.preventDefault(); openHelp(); }
     else if (k === "Enter" && e.shiftKey) { e.preventDefault(); holdBtn.click(); }
   });
 
@@ -11151,7 +11322,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     document.getElementById("djQ").setAttribute("aria-pressed", String(DJ.q));
     document.getElementById("djLoopPads").setAttribute("aria-pressed", String(DJ.loopPads));
     document.getElementById("djPadVol").value = DJ.padVol;
-    const live = DJ.decks.some(d => d.playing), hb = document.getElementById("djBtn"); if (hb) { hb.setAttribute("aria-pressed", String(live)); hb.textContent = live ? "DJ ●" : "DJ"; }
+    const live = DJ.decks.some(d => d.playing), hb = document.getElementById("djBtn"); if (hb) { hb.classList.toggle("live", live); hb.setAttribute("aria-label", live ? "DJ (playing)" : "DJ"); }
     djPaintPads();
   }
   const djPadsEl = document.getElementById("djPads"); DJ.busy = -1;
@@ -13634,7 +13805,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   const rcBtn = document.getElementById("rcBtn"), rcPlayBtn = document.getElementById("rcPlay");
   function rcPaintTransport() {
     rcPlayBtn.textContent = RC.playing ? "■ Stop" : "▶ Play"; rcPlayBtn.setAttribute("aria-pressed", String(RC.playing));
-    rcBtn.classList.toggle("live", RC.playing);
+    rcBtn.classList.toggle("live", RC.playing); rcBtn.setAttribute("aria-label", RC.playing ? "Rhythm (playing)" : "Rhythm");
     document.getElementById("rcBpm").textContent = Math.round(rcBpm()) + " bpm";
   }
   const rcStepLen = () => Math.max(16, RCP.steps);
@@ -13742,8 +13913,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   document.getElementById("rcModes").addEventListener("click", e => { const b = e.target.closest("button[data-m]"); if (!b) return; RC.mode = b.dataset.m; rcRender(); });
   document.getElementById("rcPages").addEventListener("click", e => { const b = e.target.closest("button[data-p]"); if (!b) return; RC.page = +b.dataset.p; rcRender(); });
   rcPlayBtn.addEventListener("click", () => rcPlay(!RC.playing));
-  document.getElementById("rcDone").addEventListener("click", () => { rcView.hidden = true; rcBtn.setAttribute("aria-pressed", "false"); });
-  rcBtn.addEventListener("click", () => { start(); rcView.hidden = false; rcBtn.setAttribute("aria-pressed", "true"); rcRender(); if (ctx && RCP.tracks.some(tr => rcEngine(tr.snd) === "an")) rcAnalogReady().then(ok => { RC.anOK = ok; }); RCP.tracks.forEach(tr => { if (ctx && rcEngine(tr.snd) === "smp") rcSampleBuf(tr.snd); }); });
+  document.getElementById("rcDone").addEventListener("click", () => { rcView.hidden = true; });
+  rcBtn.addEventListener("click", () => { start(); rcView.hidden = false; rcRender(); if (ctx && RCP.tracks.some(tr => rcEngine(tr.snd) === "an")) rcAnalogReady().then(ok => { RC.anOK = ok; }); RCP.tracks.forEach(tr => { if (ctx && rcEngine(tr.snd) === "smp") rcSampleBuf(tr.snd); }); });
   document.getElementById("rcBpmDown").addEventListener("click", () => { setBpm(state.seq.bpm - 1); rcPaintTransport(); });
   document.getElementById("rcBpmUp").addEventListener("click", () => { setBpm(state.seq.bpm + 1); rcPaintTransport(); });
   document.getElementById("rcSwing").addEventListener("input", e => { RCP.swing = +e.target.value / 100; document.getElementById("rcSwingV").textContent = e.target.value + "%"; rcSave(); });
@@ -14277,6 +14448,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
       ["installBtn", "Install", "Add Nate Bloom to the home screen"],
       ["helpBtn", "Help", "How it works · vibration · report a problem"],
+      ["exitBtn", "Exit", "Save your work and close"],
     ];
     const fill = () => {
       grid.innerHTML = "";
@@ -14703,6 +14875,170 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }
     btn.addEventListener("click", toTracks);
   }
+  // ======================================================================
+  // mouse: the wheel scrolls sideways rows, and fine-tunes the slider or knob you've clicked
+  // ======================================================================
+  {
+    const sideways = el => {
+      for (let n = 0; el && el !== document.body && n < 8; el = el.parentElement, n++) {
+        if (el.scrollWidth <= el.clientWidth + 2) continue;
+        const cs = getComputedStyle(el);
+        if ((cs.overflowX === "auto" || cs.overflowX === "scroll") && !(el.scrollHeight > el.clientHeight + 2 && (cs.overflowY === "auto" || cs.overflowY === "scroll"))) return el;
+      }
+      return null;
+    };
+    document.addEventListener("wheel", e => {
+      if (e.ctrlKey) return;
+      const t = e.target;
+      // a focused slider or knob: the wheel moves it
+      const kn = t.closest && t.closest(".knob");
+      if (kn && kn === document.activeElement) { e.preventDefault(); kn.dispatchEvent(new KeyboardEvent("keydown", { key: e.deltaY < 0 ? "ArrowUp" : "ArrowDown", bubbles: true })); return; }
+      if (t.matches && t.matches('input[type="range"]') && t === document.activeElement && !t.disabled) {
+        e.preventDefault();
+        const st = +t.step || 1, mn = +t.min || 0, mx = t.max === "" ? 100 : +t.max, by = Math.max(st, (mx - mn) / 100);
+        t.value = Math.max(mn, Math.min(mx, +t.value + (e.deltaY < 0 ? by : -by)));
+        t.dispatchEvent(new Event("input", { bubbles: true })); t.dispatchEvent(new Event("change", { bubbles: true })); return;
+      }
+      // a row that scrolls sideways takes vertical wheel turns until it reaches its end
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      const row = sideways(t); if (!row) return;
+      const before = row.scrollLeft; row.scrollLeft += e.deltaY * (e.deltaMode === 1 ? 32 : 1);
+      if (row.scrollLeft !== before) e.preventDefault();
+    }, { passive: false, capture: true });
+    // clicking a knob with the mouse focuses it, so the wheel and arrow keys reach it
+    document.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") return; const kn = e.target.closest && e.target.closest(".knob"); if (kn && kn !== document.activeElement) { try { kn.focus({ preventScroll: true }); } catch (er) {} } }, true);
+  }
+  // the start screen answers Enter or Space
+  { const sb = document.getElementById("startBtn"), st = document.getElementById("start"); if (sb && st && !st.hidden) { try { sb.focus({ preventScroll: true }); } catch (e) {} } }
+  // ======================================================================
+  // fit: on a short window, Seq and Notes start with the slider panel tucked away (Sound / FX / Arp bring it back);
+  // going back to Keys brings back whatever was open
+  // ======================================================================
+  {
+    const shortWin = () => innerWidth > 600 && innerHeight < 820;
+    let autoHid = null;
+    const om = setMode;
+    setMode = function (mode) {
+      om(mode);
+      try {
+        if (((mode === "seq" && shortWin()) || (mode === "notes" && innerWidth > 600 && innerHeight < 960)) && state.panel !== "hide" && state.panel !== "jam") { if (autoHid == null) autoHid = state.panel; setPanel("hide"); }
+        else if (mode === "keys" && autoHid != null) { const was = autoHid; autoHid = null; if (state.panel === "hide") setPanel(was); }
+      } catch (e) {}
+    };
+    ["pSound", "pFx", "pArp", "pLab", "pJam", "pHide"].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener("click", () => { autoHid = null; }); });
+  }
+  // ======================================================================
+  // Exit: save your work as a project, stop everything, let go of the sound
+  // ======================================================================
+  {
+    const sheet = document.getElementById("exitSheet"), nameEl = document.getElementById("exitName"), info = document.getElementById("exitInfo");
+    const saveBtn = document.getElementById("exitSave"), noBtn = document.getElementById("exitNoSave");
+    const shut = document.createElement("div");
+    shut.className = "exitscreen"; shut.id = "exitScreen"; shut.hidden = true;
+    shut.innerHTML = '<div class="ex-card"><h2>Nate Bloom is closed</h2><p id="exitMsg"></p><p class="ex-sub">You can close this window. Opening Nate Bloom again picks up where you left off.</p><button class="btn big primary" id="exitAgain">Open again</button></div>';
+    document.body.appendChild(shut);
+    document.getElementById("exitBtn").addEventListener("click", () => {
+      nameEl.value = "Session " + stamp(); info.textContent = ""; saveBtn.disabled = noBtn.disabled = false; sheet.hidden = false;
+    });
+    document.getElementById("exitCancel").addEventListener("click", () => { sheet.hidden = true; });
+    async function leave(msg) {
+      window.__nbClosed = true;
+      try { save(); } catch (e) {}
+      try { document.getElementById("stopAll").click(); } catch (e) {}
+      try { if (ctx && ctx.state === "running") await ctx.suspend(); } catch (e) {}
+      try { if (keepAlive) keepAlive.pause(); } catch (e) {}
+      sheet.hidden = true;
+      document.getElementById("exitMsg").textContent = msg;
+      shut.hidden = false;
+      try { window.__nbAdd && window.__nbAdd("exit", msg); } catch (e) {}
+      // an installed app's window can close itself; a browser tab usually can't, and keeps this screen
+      try { if (matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: window-controls-overlay)").matches) setTimeout(() => { try { window.close(); } catch (e) {} }, 900); } catch (e) {}
+    }
+    saveBtn.addEventListener("click", async () => {
+      const name = (nameEl.value || "").trim() || "Session " + stamp();
+      saveBtn.disabled = noBtn.disabled = true; info.textContent = "Saving…";
+      try {
+        const p = await snapshotProject(name); p.size = sizeOf(p);
+        const st = await projDB("readwrite");
+        await new Promise((res, rej) => { const r = st.put(p, "p" + Date.now()); r.onsuccess = res; r.onerror = () => rej(r.error); });
+        await leave("Saved as “" + name + "” in Projects.");
+      } catch (e) {
+        info.textContent = "Couldn't save: " + (e && e.message ? e.message : "storage is full?") + " Nothing was closed.";
+        saveBtn.disabled = noBtn.disabled = false;
+      }
+    });
+    noBtn.addEventListener("click", () => leave("Closed without adding a project."));
+    document.getElementById("exitAgain").addEventListener("click", () => { window.__nbClosed = false; shut.hidden = true; start(); });
+  }
+  // ======================================================================
+  // what you play: Synths · Samples · Drums (DJ and Rhythm open their own screens)
+  // ======================================================================
+  {
+    const modesEl = document.getElementById("modes"), toolRow = document.getElementById("toolRow"), hright = document.querySelector("header .hright");
+    const MODE_OF = e => e === "drum" ? "drums" : (e === "samp" || e === "pads") ? "samples" : "synths";
+    const PADLIKE = () => state.engine === "drum" || state.engine === "pads";
+    let mem = { synths: "saw", samples: "samp" };
+    try { Object.assign(mem, JSON.parse(localStorage.getItem("nightbloom-modemem") || "{}")); } catch (e) {}
+    // where the section sits: top right on wide screens, the row under the title otherwise (fixed along the bottom on a phone)
+    const wide = matchMedia("(min-width: 1100px)");
+    const place = () => { if (wide.matches) { if (modesEl.parentElement !== hright) hright.appendChild(modesEl); } else if (modesEl.parentElement !== toolRow) toolRow.insertBefore(modesEl, toolRow.firstChild); };
+    place(); try { wide.addEventListener("change", place); } catch (e) { wide.addListener(place); }
+    // the engine row: label each tab with its section
+    const classify = () => {
+      [...tabsEl.children].forEach(el => {
+        const t = el.querySelector && el.querySelector(".tab"), eng = t && t.dataset.engine;
+        let m = "synths";
+        if (el.classList.contains("tabs-lab")) m = (el.classList.contains("eng") || el.classList.contains("snd")) ? "synths" : "none";
+        else if (eng === "drum") m = "drums";
+        else if (eng === "samp" || eng === "pads") m = "samples";
+        if (el.dataset.m !== m) el.dataset.m = m;
+      });
+    };
+    new MutationObserver(classify).observe(tabsEl, { childList: true });
+    // dimmed, with the reason
+    const NA = [
+      ["chordWrap", "Chords play on the keys. Each pad plays one sound."],
+      ["octGroup", "The octave moves the keys. The pads stay the same."],
+      ["pArp", "The arpeggiator plays held keys, not pads."],
+      ["hold", "Hold keeps keys ringing. Pads play once per tap."],
+    ];
+    const say = msg => { const el = document.getElementById("uiToast"); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(say.t); say.t = setTimeout(() => { el.hidden = true; }, 2600); };
+    const block = e => {
+      const na = e.target && e.target.closest && e.target.closest(".na"); if (!na) return;
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      if (e.type === "click") say(na.dataset.why || "That doesn't apply here.");
+    };
+    ["click", "pointerdown", "mousedown", "touchstart"].forEach(t => document.addEventListener(t, block, { capture: true, passive: false }));
+    function paintModes() {
+      const m = MODE_OF(state.engine);
+      if (m !== "drums") mem[m] = state.engine;
+      try { localStorage.setItem("nightbloom-modemem", JSON.stringify(mem)); } catch (e) {}
+      classify();
+      if (tabsEl.dataset.mode !== m) tabsEl.dataset.mode = m;
+      modesEl.querySelectorAll(".btn.mode[data-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+      const pad = PADLIKE();
+      NA.forEach(([id, why]) => {
+        const el = document.getElementById(id); if (!el) return;
+        el.classList.toggle("na", pad); if (pad) { el.dataset.why = why; el.setAttribute("aria-disabled", "true"); } else el.removeAttribute("aria-disabled");
+      });
+      // the selected tab of this section scrolls into view
+      const cur = tabsEl.querySelector('.tab[aria-pressed="true"]');
+      if (cur && m !== "drums") { const r = cur.getBoundingClientRect(), R = tabsEl.getBoundingClientRect(); if (r.right > R.right || r.left < R.left) tabsEl.scrollLeft += r.left - R.left - 40; }
+    }
+    window.__nbPaintModes = paintModes;
+    const usb = updateSoundBar;
+    updateSoundBar = function () { const r = usb.apply(this, arguments); try { paintModes(); } catch (e) {} return r; };
+    modesEl.querySelectorAll(".btn.mode[data-mode]").forEach(b => b.addEventListener("click", () => {
+      start();
+      const m = b.dataset.mode; if (MODE_OF(state.engine) === m) return;
+      let target = m === "drums" ? "drum" : mem[m];
+      if (!target || MODE_OF(target) !== m || !tabsEl.querySelector('.tab[data-engine="' + target + '"]')) target = m === "samples" ? "samp" : "saw";
+      const tab = tabsEl.querySelector('.tab[data-engine="' + target + '"]');
+      if (tab) tab.click(); else { state.engine = target; renderEngine(); save(); }
+      paintModes();
+    }));
+    paintModes();
+  }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
@@ -14959,6 +15295,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     } catch (e) {}
   }
   function wake() {
+    if (window.__nbClosed) return;
     setPlayback();
     ensureKeepAlive();
     if (ctx && ctx.state !== "running" && ctx.state !== "closed") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); }
@@ -14974,7 +15311,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   // Watchdog: resume a stalled context, and rebuild the effects chain if it has gone NaN (dead silence).
   const probe = new Float32Array(1024);
   setInterval(() => {
-    if (!ctx || !analyser || document.hidden) return;
+    if (!ctx || !analyser || document.hidden || window.__nbClosed) return;
     if (ctx.state !== "running") { if (ctx.state !== "closed") { const p = ctx.resume(); if (p && p.catch) p.catch(() => {}); } return; }
     analyser.getFloatTimeDomainData(probe);
     for (let i = 0; i < probe.length; i += 16) {
@@ -14989,6 +15326,65 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     if (document.hidden) { if (take.rec) stopTake(); stopSeq(); allOff(); if (rec.active) endRec(); }
     else if (ctx) wake();
   });
+  // ---------- sound that survives other apps and headphone changes ----------
+  {
+    const log = d => { try { window.__nbAdd && window.__nbAdd("audio", d); } catch (e) {} };
+    const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const within = (p, ms) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
+    let busy = false, stalled = 0, kicks = 0, lastT = -1, hiddenAt = 0;
+    // reopen the output on whatever is plugged in now
+    async function reopen(why) {
+      if (!ctx || ctx.state === "closed" || busy || window.__nbClosed) return;
+      busy = true; log("reopen output · " + why + " · was " + ctx.state);
+      try {
+        // a pause and resume: the browser builds a fresh output stream on the device in use now
+        if (ctx.state === "running") { try { await within(ctx.suspend(), 1000); } catch (e) {} }
+        try { await within(ctx.resume(), 1500); } catch (e) { log("resume: " + (e && e.message)); }
+      } finally { busy = false; stalled = 0; lastT = -1; }
+      wake();
+      log("output now " + ctx.state);
+    }
+    window.__nbReopen = reopen;
+    // banner when it won't come back by itself
+    const bar = document.createElement("div");
+    bar.className = "sndfix"; bar.id = "sndFix"; bar.hidden = true; bar.setAttribute("role", "alert");
+    bar.innerHTML = '<span>The sound stopped (another app, or headphones changed).</span><button class="btn" id="sndFixGo">Fix sound</button><button class="btn" id="sndFixRe" hidden>Restart Nate Bloom</button><button class="btn" id="sndFixX" aria-label="Close">✕</button>';
+    document.body.appendChild(bar);
+    const go = bar.querySelector("#sndFixGo"), re = bar.querySelector("#sndFixRe");
+    const showFix = () => { if (!bar.hidden) return; bar.hidden = false; go.hidden = false; re.hidden = true; log("fix banner shown"); };
+    go.addEventListener("click", async () => {
+      go.disabled = true; await reopen("Fix sound"); go.disabled = false;
+      const t0 = ctx.currentTime;
+      setTimeout(() => { if (ctx.state === "running" && ctx.currentTime - t0 > 0.2) { bar.hidden = true; kicks = 0; } else { go.hidden = true; re.hidden = false; } }, 700);
+    });
+    re.addEventListener("click", () => { log("restart"); try { save(); } catch (e) {} setTimeout(() => location.reload(), 150); });
+    bar.querySelector("#sndFixX").addEventListener("click", () => { bar.hidden = true; });
+    // the audio clock stopped while the app is on screen
+    setInterval(() => {
+      if (!ctx || document.hidden || busy || ctx.state !== "running") { lastT = -1; stalled = 0; return; }
+      const t = ctx.currentTime;
+      if (lastT >= 0 && t - lastT < 0.02) {
+        if (++stalled >= 3) { stalled = 0; if (++kicks <= 2) reopen("audio clock stopped"); else showFix(); }
+      } else if (lastT >= 0) { stalled = 0; if (kicks && t - lastT > 0.2) { kicks = 0; if (!bar.hidden && go.hidden === false) bar.hidden = true; } }
+      lastT = t;
+    }, 300);
+    // headphones or speakers plugged in or out
+    let dcT = 0;
+    try {
+      navigator.mediaDevices && navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener("devicechange", () => {
+        log("devices changed"); clearTimeout(dcT);
+        dcT = setTimeout(() => { if (ctx && !document.hidden) reopen("headphones or speakers changed"); }, 400);
+      });
+    } catch (e) {}
+    // back from another app: reopen the output (Chrome); Safari resumes on the first touch as before
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) { hiddenAt = performance.now(); return; }
+      if (ctx && hiddenAt && performance.now() - hiddenAt > 1000 && !apple) setTimeout(() => { if (!document.hidden) reopen("back from another app"); }, 120);
+    });
+    // Help: for when nothing can tell (the sound going somewhere you can't hear)
+    const hb = document.getElementById("helpFixSound");
+    if (hb) hb.addEventListener("click", async () => { start(); await reopen("Help · Fix sound"); try { noteMsg("Sound reopened on " + (ctx.state === "running" ? "what's plugged in now" : "the next tap")); } catch (e) {} });
+  }
   try { navigator.wakeLock && navigator.wakeLock.request("screen").catch(() => {}); } catch (e) {}
 })();
 </script>
