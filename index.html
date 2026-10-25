@@ -915,6 +915,11 @@ body.trk-open { overflow: hidden; }
 .dj-gridfix small { font-family: var(--font-mono); font-size: 0.56rem; color: var(--dim); white-space: nowrap; }
 .dj-speed { display: grid; grid-template-columns: 50px auto minmax(0, 1fr) auto 54px; align-items: center; gap: 6px; }
 .dj-speed > span { font-family: var(--font-mono); font-size: 0.62rem; color: var(--dim); }
+.dj-key { display: grid; grid-template-columns: 50px auto 54px auto minmax(0, 1fr); align-items: center; gap: 6px; }
+.dj-key > span { font-family: var(--font-mono); font-size: 0.62rem; color: var(--dim); }
+.dj-key output { font-family: var(--font-mono); font-size: 0.8rem; text-align: center; cursor: pointer; }
+.dj-key output.moved { color: #ffb65c; }
+.dj-key small { font-family: var(--font-mono); font-size: 0.68rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
 .dj-speed input { width: 100%; accent-color: var(--lilac); height: 26px; }
 .dj-deck[data-d="1"] .dj-speed input { accent-color: var(--amber); }
 .dj-speed output { font-family: var(--font-mono); font-size: 0.68rem; text-align: right; font-variant-numeric: tabular-nums; }
@@ -1267,6 +1272,31 @@ input[type=range] { accent-color: var(--lilac); }
 .now-all { background: #e5484d !important; border-color: #e5484d !important; color: #fff !important; }
 @media (max-width: 600px) { #stopAll .lg { display: none; } #stopAll .sm { display: inline; } header .hright > #stopAll { padding-left: 8px !important; padding-right: 8px !important; } }
 @media (max-width: 385px) { header .hright > select.rectarget { max-width: 76px !important; } }
+/* ---------- keyboard letters on the keys ---------- */
+.kl { display: none; pointer-events: none; }
+body.kbd .kl { display: block; position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font: 600 11px/1 var(--font-mono); color: #8a83a3; }
+body.kbd .b .kl { bottom: 8px; color: #cfc8e6; }
+body.kbd .pad .kl { top: 5px; right: 7px; left: auto; bottom: auto; color: var(--dim); }
+.pad { position: relative; }
+/* ---------- DJ Smart mix ---------- */
+.dj-smartrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+.dj-smartrow #djSmart { border-color: #c4a3ff; color: #c4a3ff; font-weight: 700; }
+.dj-smartrow #djSmart.on { background: #c4a3ff; color: var(--panel); }
+.sm-body { display: flex; flex-direction: column; gap: 10px; }
+.sm-song { display: flex; flex-direction: column; gap: 4px; }
+.sm-song b { font-size: 0.86rem; } .sm-song b small { font-family: var(--font-mono); font-weight: 400; color: var(--dim); font-size: 11px; margin-left: 6px; }
+.sm-strip { position: relative; height: 26px; border-radius: 6px; overflow: hidden; background: #0d0b13; display: flex; }
+.sm-strip i { height: 100%; display: block; border-right: 1px solid #0d0b13; font-style: normal; font: 600 9px/26px var(--font-mono); color: #0d0b13; text-transform: uppercase; overflow: hidden; white-space: nowrap; text-indent: 3px; }
+.sm-strip .mk { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; }
+.sm-strip .mk.now { background: #fff; opacity: 0.6; }
+.sm-strip .zone { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.28); border-left: 2px solid #fff; }
+.sm-why { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.86rem; line-height: 1.35; }
+.sm-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sm-row > span { font-family: var(--font-mono); font-size: 11px; color: var(--dim); width: 64px; }
+.sm-row .btn { height: 32px; padding: 0 10px; font-size: 0.8rem; }
+.sm-row .btn[aria-pressed="true"] { background: #c4a3ff; border-color: #c4a3ff; color: var(--panel); }
+.sm-legend { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--dim); }
+.sm-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 3px; vertical-align: -1px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1643,6 +1673,10 @@ input[type=range] { accent-color: var(--lilac); }
         <button class="btn" id="djLink" aria-pressed="true" title="Link: start a deck within 1.5 s of the other and it joins it, as if you'd pressed both at once">Link</button>
         <button class="btn" id="djQuant" aria-pressed="true" title="Q: hot cue jumps wait for the next beat so the rhythm carries on">Q</button>
       </div>
+      <div class="dj-smartrow">
+        <button class="btn" id="djSmart" title="Smart mix: reads both songs and plans where and how to mix into the next one">✦ Smart mix</button>
+        <button class="btn" id="djToTracks" title="Put both songs on Tracks, matched in tempo and key and lined up on the beat, to build a mashup">→ Tracks</button>
+      </div>
       <label class="dj-xf"><b>A</b><input type="range" id="djXf" min="0" max="1" step="0.01" value="0.5" aria-label="Crossfader"><b>B</b></label>
       <div class="dj-cap">Crossfader · double-tap to centre</div>
     </section>
@@ -1731,7 +1765,10 @@ input[type=range] { accent-color: var(--lilac); }
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
-      <p>The decks keep playing when you press Done, so you can play the keys over the mix. The Stop button stops them too.</p>
+      <p><b>✦ Smart mix</b> reads both songs (the coloured strip under each waveform shows their sections: intro, build-up, drop, breakdown, groove, outro) and plans the mix into the song on the other deck, or the next one from Songs: where to leave the playing song (usually its outro or a breakdown), where the next one comes in (its first downbeat or Phrase mark, so its first drop lands as the mix ends), the tempo they meet at, the style and its length, and a key shift when that makes the keys fit. The plan says why; pick another spot, style or key there, then <b>Start the mix</b>. The next song comes in exactly when the playing one gets there: MIX IN counts down (tap it to go now) and ✦ cancels. It can't hear vocals, so two vocals over each other are still up to your ears.</p>
+      <p><b>Key</b> on each deck moves the song up or down in semitones without changing its speed (it uses key lock); tap the number to put it back. Next to it are the song's key and Camelot code, and where a shift takes it.</p>
+      <p><b>→ Tracks</b> puts both songs on Tracks at one tempo (a whole BPM; the app's tempo is set to match so the grid lines up), with key lock and any key shift, lined up on the beat: as you hear them if both decks are playing, otherwise with their first downbeats on the same bar. If the keys clash and neither deck is shifted, the second song is moved to fit. Then split, copy and move sections to build a mashup.</p>
+      <p>The decks keep playing when you press Done, so you can play the keys over the mix. <b>■ Stop</b> here stops the DJ (decks, pads, the play-along beat, a mix in progress); the red <b>■ All</b>, or <b>■ Stop all</b> on the main screen, stops everything. The main screen's own Stop leaves the DJ playing.</p>
     </div>
     <div class="ed-foot sheet-foot"><button class="btn big primary" id="djHelpDone">Got it</button></div>
   </div>
@@ -2049,6 +2086,7 @@ input[type=range] { accent-color: var(--lilac); }
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
+      <p><b>Playing from a keyboard</b> (Bluetooth or USB): the A row plays the white keys, A S D F G H J K L ; ', and the row above the black keys, W E T Y U O P, an octave and a half from the left edge of the keys; <b>Z</b> / <b>X</b> move an octave down or up. With Drums or Pads the same keys play the pads in order. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>−</b> / <b>=</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
@@ -2171,6 +2209,14 @@ input[type=range] { accent-color: var(--lilac); }
       <button class="btn" id="edCancel">Cancel</button>
       <button class="btn primary" id="edSave">Save</button>
     </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="smartSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Smart mix">
+    <div class="ed-head"><strong>✦ Smart mix</strong><span class="ed-info" id="smSub"></span></div>
+    <div class="sm-body" id="smBody"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="smCancel">Cancel</button><button class="btn big primary" id="smGo">Start the mix</button></div>
   </div>
 </div>
 
@@ -3703,6 +3749,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     }
     document.getElementById("octLabel").textContent = "C" + (Math.floor(start / 12) - 1);
     if (more2Ready) decorateZones();
+    try { kbLabel(); } catch (e) {}   // (not ready yet during the first build)
     voices.forEach(v => markTones(v.tones, markKey, true));
     heldVoices.forEach(v => markTones(v.tones, markHeld, true));
   }
@@ -3754,24 +3801,45 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   keysEl.addEventListener("pointerup", lift);
   keysEl.addEventListener("pointercancel", lift);
 
-  // Computer keyboard: A W S E D F T G Y H U J K O L P ;
-  const KB = "awsedftgyhujkolp;";
-  const kbDown = new Set();
+  // Computer keyboard (Bluetooth or USB), by key position so any layout works: the A row plays the white keys and the
+  // row above it the black keys (the Ableton / Logic layout), an octave and a half from the left edge of the keys
+  const KBC = ["KeyA", "KeyW", "KeyS", "KeyE", "KeyD", "KeyF", "KeyT", "KeyG", "KeyY", "KeyH", "KeyU", "KeyJ", "KeyK", "KeyO", "KeyL", "KeyP", "Semicolon", "Quote"];
+  const KBL = ["A", "W", "S", "E", "D", "F", "T", "G", "Y", "H", "U", "J", "K", "O", "L", "P", ";", "'"];
+  const KBK = "awsedftgyhujkolp;'";
+  const kbDown = new Map();   // key -> the note it started (null for a drum or pad hit)
+  let KBD_LABELS = null; try { const v = localStorage.getItem("nightbloom-kbd"); KBD_LABELS = v == null ? null : v === "1"; } catch (e) {}
+  const kbIdx = e => { const i = KBC.indexOf(e.code); return i >= 0 ? i : (e.code ? -1 : KBK.indexOf((e.key || "").toLowerCase())); };
+  const kbBusy = e => {
+    const t = e.target; if (t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return true;
+    return !!document.querySelector(".editor:not([hidden]), .browser:not([hidden]), .trk:not([hidden]), #start:not([hidden])");
+  };
+  const kbSeen = () => { if (KBD_LABELS !== null) return; KBD_LABELS = true; try { localStorage.setItem("nightbloom-kbd", "1"); } catch (e) {} document.body.classList.add("kbd"); kbLabel(); };
+  function kbLabel() {
+    keysEl.querySelectorAll(".kl").forEach(x => x.remove());
+    if (!KBD_LABELS) return;
+    const tag = (el, i) => { if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = KBL[i]; el.appendChild(sp); };
+    if (state.engine === "drum") { DRUMS.forEach(([id], i) => { if (i < KBL.length) tag(padEls.get(id), i); }); return; }
+    if (state.engine === "pads") { keysEl.querySelectorAll(".pad").forEach((el, i) => { if (i < KBL.length) tag(el, i); }); return; }
+    const start = BASE + state.octave * 12; for (let i = 0; i < KBL.length; i++) tag(keyEls.get(start + i), i);
+  }
   window.addEventListener("keydown", e => {
-    if (e.repeat || e.metaKey || e.ctrlKey) return;
-    const i = KB.indexOf(e.key.toLowerCase());
-    if (i < 0) return;
-    if (state.engine === "drum") { if (i < DRUMS.length && ctx) playDrum(DRUMS[i][0], ctx.currentTime); return; }
-    if (state.engine === "pads") { if (i < NPADS) kitPadDown(i); return; }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const i = kbIdx(e); if (i < 0 || kbBusy(e)) return;
+    e.preventDefault();
+    const key = e.code || e.key; if (e.repeat || kbDown.has(key)) return;
+    kbSeen();
+    if (state.engine === "drum") { kbDown.set(key, null); if (i < DRUMS.length && ctx) playDrum(DRUMS[i][0], ctx.currentTime); return; }
+    if (state.engine === "pads") { kbDown.set(key, null); if (i < NPADS) kitPadDown(i); return; }
     const m = BASE + state.octave * 12 + i;
-    kbDown.add(m); press(m);
+    kbDown.set(key, m); press(m);
   });
   window.addEventListener("keyup", e => {
-    const i = KB.indexOf(e.key.toLowerCase());
-    if (i < 0 || state.engine === "drum" || state.engine === "pads") return;
-    const m = BASE + state.octave * 12 + i;
-    kbDown.delete(m); release(m);
+    const key = e.code || e.key; if (!kbDown.has(key)) return;
+    const m = kbDown.get(key); kbDown.delete(key); if (m != null) release(m);
   });
+  const kbAllUp = () => { kbDown.forEach(m => { if (m != null) release(m); }); kbDown.clear(); };
+  window.addEventListener("blur", kbAllUp);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) kbAllUp(); });
 
   document.getElementById("octDown").addEventListener("click", () => { if (state.octave > -2) { state.octave--; buildKeys(); } });
   document.getElementById("octUp").addEventListener("click", () => { if (state.octave < 2) { state.octave++; buildKeys(); } });
@@ -10846,7 +10914,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (!raw && d.buf && d.buf.duration < 90) raw = bufferToWav(d.buf);
     djIdbPut("deck" + d.i, raw ? { name: d.name, data: raw, bpm: d.bpm0, off: d.off } : null);
   }
-  const djStoreGrid = d => { djIdbGet("deck" + d.i).then(r => { if (r) { r.bpm = d.bpm0; r.off = d.off; r.cues = d.cues; r.cue = d.cue; r.phrase = d.phrase; djIdbPut("deck" + d.i, r); } }); };
+  const djStoreGrid = d => { if (d && d.buf) setTimeout(() => { try { djSectFor(d); } catch (e) {} }, 50); djIdbGet("deck" + d.i).then(r => { if (r) { r.bpm = d.bpm0; r.off = d.off; r.cues = d.cues; r.cue = d.cue; r.phrase = d.phrase; djIdbPut("deck" + d.i, r); } }); };
   async function djIdbPut(key, val) { try { const db = await idb(), st = db.transaction("samples", "readwrite").objectStore("samples"); if (val) st.put(val, key); else st.delete(key); } catch (e) {} }
   async function djIdbGet(key) { try { const db = await idb(); return await new Promise(res => { const r = db.transaction("samples").objectStore("samples").get(key); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); } catch (e) { return null; } }
   async function djRestore() {
@@ -11835,9 +11903,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // run (the claude.ai preview) the decks keep working the old way and the button stays hidden.
   const STRETCH_SRC = `
 class NBStretch extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
-    this.L = null; this.R = null; this.len = 0; this.sc = 1; this.pos = 0; this.rate = 1; this.playing = false; this.startAt = -1; this.stopAt = -1; this.loop = null; this.on = true;
+    this.P = 1; this.L = null; this.R = null; this.len = 0; this.sc = 1; this.pos = 0; this.rate = 1; this.playing = false; this.startAt = -1; this.stopAt = -1; this.loop = null; this.on = true;
     const N = this.N = 2048, H = this.H = 512; this.OV = 512; this.SR = 360;
     this.win = new Float32Array(N); for (let i = 0; i < N; i++) this.win[i] = (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N)) * 0.5;
     this.accL = new Float32Array(N); this.accR = new Float32Array(N); this.outL = new Float32Array(H); this.outR = new Float32Array(H); this.outN = 0; this.outI = 0; this.prev = -1; this.sent = 0;
@@ -11845,28 +11913,31 @@ class NBStretch extends AudioWorkletProcessor {
       const m = e.data;
       if (m.buf) { this.L = m.buf.L; this.R = m.buf.R; this.len = this.L.length; this.sc = this.L instanceof Int16Array ? 1 / 32767 : 1; }
       switch (m.cmd) {
-        case "start": this.pos = m.from * sampleRate; this.rate = m.rate; this.startAt = m.at; this.stopAt = -1; this.loop = m.loop ? { a: m.loop.a * sampleRate, b: m.loop.b * sampleRate } : null; this.on = m.on !== false; this.playing = true; this.fresh(); break;
+        case "start": this.pos = m.from * sampleRate; this.rate = m.rate; this.P = m.pitch || 1; this.startAt = m.at; this.stopAt = -1; this.loop = m.loop ? { a: m.loop.a * sampleRate, b: m.loop.b * sampleRate } : null; this.on = m.on !== false; this.playing = true; this.fresh(); break;
         case "stop": this.stopAt = m.at; break;
         case "rate": this.rate = m.rate; break;
         case "loop": this.loop = m.loop ? { a: m.loop.a * sampleRate, b: m.loop.b * sampleRate } : null; break;
         case "keylock": if (this.playing) this.pos = this.posOut(); this.on = !!m.on; this.fresh(); break;
+        case "pitch": if (this.playing) this.pos = this.posOut(); this.P = m.pitch || 1; this.fresh(); break;
       }
     };
+    const po = options && options.processorOptions;   // set up in one go (offline rendering)
+    if (po && po.L) { this.L = po.L; this.R = po.R || po.L; this.len = this.L.length; this.sc = this.L instanceof Int16Array ? 1 / 32767 : 1; this.pos = (po.from || 0) * sampleRate; this.rate = po.rate || 1; this.P = po.pitch || 1; this.on = true; this.playing = true; this.startAt = -1; }
   }
   fresh() { this.accL.fill(0); this.accR.fill(0); this.outN = 0; this.outI = 0; this.prev = -1; }
   wrap(p) { const l = this.loop; if (l && p >= l.b && l.b > l.a) p = l.a + ((p - l.a) % (l.b - l.a)); return p; }
   at(arr, p) { const i = Math.floor(p); if (i < 0 || i >= this.len) return 0; if (i >= this.len - 1) return arr[i]; const f = p - i; return arr[i] + (arr[i + 1] - arr[i]) * f; }
   produce() {
-    const N = this.N, H = this.H, OV = this.OV, SR = this.SR, L = this.L, R = this.R, win = this.win, accL = this.accL, accR = this.accR, len = this.len;
+    const N = this.N, H = this.H, OV = this.OV, SR = this.SR, L = this.L, R = this.R, win = this.win, accL = this.accL, accR = this.accR, len = this.len, P = this.P;
     const target = this.wrap(this.pos); let src = target;
     if (this.prev >= 0) {
-      const ref = this.prev + H; let best = -1e30, bestD = 0;
-      if (ref + OV < len) {
+      const ref = this.prev + H * P; let best = -1e30, bestD = 0;
+      if (ref + OV * P + 2 < len) {
         const scan = (step, from, to) => {
           for (let d = from; d <= to; d += step) {
-            const c = Math.floor(target + d); if (c < 0 || c + OV >= len) continue;
+            const c = Math.floor(target + d); if (c < 0 || c + OV * P + 2 >= len) continue;
             let s = 0, e = 0;
-            for (let i = 0; i < OV; i += 2) { const a = L[ref + i] + R[ref + i], b = L[c + i] + R[c + i]; s += a * b; e += b * b; }
+            for (let i = 0; i < OV; i += 2) { const q = Math.floor(i * P), ri = Math.floor(ref) + q, ci = c + q; const a = L[ri] + R[ri], b = L[ci] + R[ci]; s += a * b; e += b * b; }
             const v = e > 1e-9 ? s / Math.sqrt(e) : -1e30; if (v > best) { best = v; bestD = d; }
           }
         };
@@ -11875,7 +11946,8 @@ class NBStretch extends AudioWorkletProcessor {
       src = target + bestD;
     }
     const si = Math.max(0, Math.floor(src));
-    for (let i = 0; i < N; i++) { const k = si + i; if (k >= len) break; accL[i] += L[k] * win[i]; accR[i] += R[k] * win[i]; }
+    if (P === 1) { for (let i = 0; i < N; i++) { const k = si + i; if (k >= len) break; accL[i] += L[k] * win[i]; accR[i] += R[k] * win[i]; } }
+    else { for (let i = 0; i < N; i++) { const q = si + i * P, k = Math.floor(q); if (k >= len - 1) break; const f = q - k; accL[i] += (L[k] + (L[k + 1] - L[k]) * f) * win[i]; accR[i] += (R[k] + (R[k + 1] - R[k]) * f) * win[i]; } }
     this.outL.set(accL.subarray(0, H)); this.outR.set(accR.subarray(0, H)); this.outN = H; this.outI = 0;
     accL.copyWithin(0, H); accL.fill(0, N - H); accR.copyWithin(0, H); accR.fill(0, N - H);
     this.prev = si; this.pos += H * this.rate;
@@ -11890,10 +11962,10 @@ class NBStretch extends AudioWorkletProcessor {
     if (this.startAt >= 0) { if (t + n / sr <= this.startAt) return true; k0 = Math.max(0, Math.min(n, Math.round((this.startAt - t) * sr))); this.startAt = -1; }
     let kEnd = n, stopping = false;
     if (this.stopAt >= 0 && t + n / sr > this.stopAt) { kEnd = Math.max(0, Math.min(n, Math.round((this.stopAt - t) * sr))); stopping = true; }
-    const direct = !this.on || Math.abs(this.rate - 1) < 0.003;
+    const direct = (!this.on || Math.abs(this.rate - 1) < 0.003) && this.P === 1;
     for (let k = k0; k < kEnd; k++) {
       if (direct) { const p = this.wrap(this.pos); if (p >= this.len - 1) { this.end(); break; } oL[k] = this.at(this.L, p) * this.sc; oR[k] = this.at(this.R, p) * this.sc; this.pos += this.rate; }
-      else { if (this.outI >= this.outN) { if (this.wrap(this.pos) >= this.len - this.N) { this.end(); break; } this.produce(); } oL[k] = this.outL[this.outI] * this.sc; oR[k] = this.outR[this.outI] * this.sc; this.outI++; }
+      else { if (this.outI >= this.outN) { if (this.wrap(this.pos) >= this.len - this.N * this.P - 2) { this.end(); break; } this.produce(); } oL[k] = this.outL[this.outI] * this.sc; oR[k] = this.outR[this.outI] * this.sc; this.outI++; }
     }
     if (stopping) { this.playing = false; this.stopAt = -1; }
     this.sent += n; if (this.sent >= 4096) { this.sent = 0; this.port.postMessage({ pos: this.posOut() / sr }); }
@@ -11935,7 +12007,7 @@ registerProcessor("nb-stretch", NBStretch);`;
     Object.defineProperty(s, "loopStart", { get: () => s._a, set: v => { s._a = v; if (s._loop) sendLoop(); } });
     Object.defineProperty(s, "loopEnd", { get: () => s._b, set: v => { s._b = v; if (s._loop) sendLoop(); } });
     s.connect = n => { try { node.disconnect(); } catch (e) {} node.connect(n); return n; };
-    s.start = (at, from) => node.port.postMessage({ cmd: "start", at, from, rate: s.playbackRate.value, loop: s._loop ? { a: s._a, b: s._b } : null, on: DJ.keylock });
+    s.start = (at, from) => node.port.postMessage({ cmd: "start", at, from, rate: s.playbackRate.value, loop: s._loop ? { a: s._a, b: s._b } : null, on: DJ.keylock || !!d.semi, pitch: Math.pow(2, (d.semi || 0) / 12) });
     s.stop = at => node.port.postMessage({ cmd: "stop", at });
     return s;
   }
@@ -14230,6 +14302,371 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     const sa = document.getElementById("stopAll");
     sa.addEventListener("click", () => { nbStopSources(); document.getElementById("panic").click(); });   // + the DJ, Jam, Rhythm Creator and tail stops hooked on it
     document.querySelectorAll("[data-stopall]").forEach(b => b.addEventListener("click", () => sa.click()));
+  }
+  // ---- keyboard letters on the keys: the Help switch ----
+  {
+    const b = document.getElementById("kbdLabBtn");
+    const paint = () => { b.textContent = "Letters on keys: " + (KBD_LABELS ? "On" : "Off"); b.setAttribute("aria-pressed", String(!!KBD_LABELS)); document.body.classList.toggle("kbd", !!KBD_LABELS); };
+    b.addEventListener("click", () => { KBD_LABELS = !KBD_LABELS; try { localStorage.setItem("nightbloom-kbd", KBD_LABELS ? "1" : "0"); } catch (e) {} paint(); kbLabel(); });
+    paint(); kbLabel();
+    { const bp = buildPads; buildPads = function () { const r = bp.apply(this, arguments); kbLabel(); return r; }; }
+    { const bk = buildKitPads; buildKitPads = function () { const r = bk.apply(this, arguments); kbLabel(); return r; }; }
+  }
+  // ======================================================================
+  // DJ key shift: a Key row on each deck (needs key lock's stretcher)
+  // ======================================================================
+  const camShift = (cam, st) => { if (!cam || !st) return cam || ""; const n = +cam.slice(0, -1), l = cam.slice(-1); return ((((n - 1 + 7 * st) % 12) + 12) % 12 + 1) + l; };
+  const keyShiftName = (key, st) => { if (!key || !st) return key || ""; const m = key.match(/^(\S+)\s+(major|minor)$/); if (!m) return key; const i = KEYS.indexOf(m[1]); return i < 0 ? key : KEYS[((i + st) % 12 + 12) % 12] + " " + m[2]; };
+  function djSetSemi(d, st) {
+    st = Math.max(-6, Math.min(6, Math.round(st || 0)));
+    if ((d.semi || 0) === st) return;
+    d.semi = st;
+    if (d.playing && d.buf && ctx) { const p = djPos(d); djStartSrc(d, ctx.currentTime + 0.02, p); if (DJ.sync && LEAD().playing && FOL().playing) setTimeout(() => djAlign(false), 60); }
+    djPaintDeck(d);
+  }
+  deckEls.forEach((el, i) => {
+    const d = DJ.decks[i]; d.semi = 0;
+    const row = document.createElement("div"); row.className = "dj-key"; row.hidden = true;
+    row.innerHTML = '<span>Key</span><button class="btn sm dj-kd" aria-label="Key down a semitone">−</button><output title="Tap to put the song back in its own key">0 st</output><button class="btn sm dj-ku" aria-label="Key up a semitone">+</button><small></small>';
+    el.querySelector(".dj-speed").after(row);
+    row.querySelector(".dj-kd").addEventListener("click", () => { if (!d.buf) return; djSetSemi(d, (d.semi || 0) - 1); djMsg("Deck " + "AB"[d.i] + " key " + (d.semi > 0 ? "+" : "") + d.semi + " st" + (d.cam ? " · " + camShift(d.cam, d.semi) : "")); });
+    row.querySelector(".dj-ku").addEventListener("click", () => { if (!d.buf) return; djSetSemi(d, (d.semi || 0) + 1); djMsg("Deck " + "AB"[d.i] + " key " + (d.semi > 0 ? "+" : "") + d.semi + " st" + (d.cam ? " · " + camShift(d.cam, d.semi) : "")); });
+    row.querySelector("output").addEventListener("click", () => { if (d.semi) { djSetSemi(d, 0); djMsg("Deck " + "AB"[d.i] + " back in its own key"); } });
+  });
+  { const pd = djPaintDeck; djPaintDeck = function (d) {
+      pd.apply(this, arguments);
+      const row = deckEls[d.i].querySelector(".dj-key"); if (!row) return;
+      row.hidden = !DJ.stretchOK;
+      const st = d.semi || 0, o = row.querySelector("output");
+      o.textContent = (st > 0 ? "+" : "") + st + " st"; o.classList.toggle("moved", !!st);
+      row.querySelector("small").textContent = !d.buf ? "" : !d.cam ? "key not found" : st ? keyShiftName(d.key, st) + " · " + d.cam + " → " + camShift(d.cam, st) : d.key + " · " + d.cam;
+    }; }
+  { const dl = djLoad; djLoad = async function (d) { d.semi = 0; const r = await dl.apply(this, arguments); djPaintDeck(d); return r; }; }
+  { const sr = djStretchReady; djStretchReady = async function () { const r = await sr.apply(this, arguments); DJ.decks.forEach(djPaintDeck); return r; }; }
+  // ======================================================================
+  // DJ song structure: 8-bar phrases labelled intro / build / drop / break / groove / outro
+  // ======================================================================
+  const DJ_SECT_COL = { intro: "#6f83ad", build: "#ffb65c", drop: "#ff6b9a", break: "#7fd6c2", groove: "#9b8ae0", outro: "#6a6280" };
+  const DJ_SECT_NAME = { intro: "intro", build: "build-up", drop: "drop", break: "breakdown", groove: "groove", outro: "outro" };
+  const DJ_SECT = new WeakMap();
+  async function djSections(d) {
+    if (!d || !d.buf || !d.bpm0) return null;
+    const buf = d.buf, per = djPer(d), bar = per * 4, a0 = d.phrase != null ? d.phrase : d.off;
+    const sig = d.bpm0.toFixed(4) + "|" + d.off.toFixed(4) + "|" + (d.phrase == null ? "" : d.phrase.toFixed(4));
+    const have = DJ_SECT.get(buf); if (have && have.sig === sig) return have;
+    const first = a0 - Math.ceil(a0 / bar - 1e-9) * bar, nb = Math.max(1, Math.ceil((buf.duration - first) / bar));
+    const L = buf.getChannelData(0), R = buf.numberOfChannels > 1 ? buf.getChannelData(1) : L, sr = buf.sampleRate, n = L.length;
+    const E = new Float64Array(nb), Lo = new Float64Array(nb), Hi = new Float64Array(nb), C = new Float64Array(nb);
+    const D = 4, dt = D / sr, aLo = 1 - Math.exp(-2 * Math.PI * 150 * dt), aHi = 1 - Math.exp(-2 * Math.PI * 2000 * dt), spb = bar * sr;
+    let lo = 0, lp = 0;
+    for (let s0 = 0; s0 < n; s0 += 1 << 19) {
+      const s1 = Math.min(n, s0 + (1 << 19));
+      for (let i = s0; i < s1; i += D) {
+        const x = (L[i] + R[i]) * 0.5; lo += aLo * (x - lo); lp += aHi * (x - lp); const hi = x - lp;
+        const b = Math.floor((i - first * sr) / spb); if (b < 0 || b >= nb) continue;
+        E[b] += x * x; Lo[b] += lo * lo; Hi[b] += hi * hi; C[b]++;
+      }
+      await new Promise(z => setTimeout(z, 0));
+      if (d.buf !== buf) return null;   // a new song went on the deck meanwhile
+    }
+    for (let b = 0; b < nb; b++) { const c = C[b] || 1; E[b] = Math.sqrt(E[b] / c); Lo[b] = Math.sqrt(Lo[b] / c); Hi[b] = Math.sqrt(Hi[b] / c); }
+    const norm = A => { const v = [...A].filter(x => x > 0).sort((p, q) => p - q), m = v.length ? v[Math.floor(v.length * 0.9)] || v[v.length - 1] : 1; return [...A].map(x => Math.min(1.3, x / (m || 1))); };
+    const e = norm(E), l = norm(Lo), h = norm(Hi);
+    // where the 8-bar phrases fall: the Phrase mark if there is one, else the offset where the music changes most
+    let o = 0;
+    if (d.phrase == null) {
+      let best = -1;
+      for (let k = 0; k < 8; k++) { let sc = 0, cnt = 0; for (let b = k === 0 ? 8 : k; b < nb; b += 8) { sc += Math.abs(e[b] - e[b - 1]) + Math.abs(l[b] - l[b - 1]) + 0.5 * Math.abs(h[b] - h[b - 1]); cnt++; } sc /= Math.max(1, cnt); if (sc > best + 1e-9) { best = sc; o = k; } }
+    } else o = Math.round((a0 - first) / bar) % 8;
+    const cuts = []; if (o > 0) cuts.push([0, o]); for (let b = o; b < nb; b += 8) cuts.push([b, Math.min(nb, b + 8)]);
+    if (cuts.length > 1 && cuts[cuts.length - 1][1] - cuts[cuts.length - 1][0] < 3) { const t = cuts.pop(); cuts[cuts.length - 1][1] = t[1]; }
+    const mean = (A, b0, b1) => { let s2 = 0; for (let b = b0; b < b1; b++) s2 += A[b]; return s2 / Math.max(1, b1 - b0); };
+    const P = cuts.map(([b0, b1]) => ({ b0, b1, bars: b1 - b0, start: Math.max(0, first + b0 * bar), end: Math.min(buf.duration, first + b1 * bar), e: mean(e, b0, b1), l: mean(l, b0, b1), h: mean(h, b0, b1) }));
+    const high = p => p.e >= 0.72;
+    let fi = P.findIndex(high), li = P.length - 1 - [...P].reverse().findIndex(high); if (fi < 0) { fi = 0; li = P.length - 1; }
+    P.forEach((p, i) => {
+      if (i < fi) p.label = "intro";
+      else if (i > li) p.label = "outro";
+      else if (p.e >= 0.8 && p.l >= 0.7) p.label = "drop";
+      else if (p.l < 0.45 && p.e < 0.72) p.label = "break";
+      else p.label = "groove";
+    });
+    P.forEach((p, i) => { const nx = P[i + 1]; if (i > 0 && nx && nx.label === "drop" && p.label !== "drop" && nx.e > p.e + 0.08) p.label = "build"; });
+    const sections = []; P.forEach(p => { const lst = sections[sections.length - 1]; if (lst && lst.label === p.label) { lst.end = p.end; lst.bars += p.bars; } else sections.push({ label: p.label, start: p.start, end: p.end, bars: p.bars }); });
+    const r = { sig, bar, first, phrases: P, sections, buf };
+    DJ_SECT.set(buf, r); return r;
+  }
+  // read every song that goes onto a deck, then draw its sections under the waveform
+  const djSectFor = d => { if (!d.buf || !d.bpm0) return Promise.resolve(null); const p = djSections(d).then(r => { if (r && d.buf === r.buf) { d.sect = r; d.img = null; djPaintDeck(d); djPaintAll(); } return r; }); d.sectP = p; return p; };
+  { const dl = djLoad; djLoad = async function (d) { d.sect = null; const r = await dl.apply(this, arguments); djSectFor(d); return r; }; }
+  { const dw = djDrawWave; djDrawWave = function (d) {
+      dw.apply(this, arguments);
+      const r = d.sect; if (!d.buf || !r || r.buf !== d.buf) return;
+      const S = djSize(d.waveEl || (d.waveEl = deckEls[d.i].querySelector(".dj-wave"))); if (!S) return;
+      const { c, w, h } = S, dur = d.buf.duration;
+      r.phrases.forEach(p => { c.fillStyle = DJ_SECT_COL[p.label]; c.fillRect(p.start / dur * w, h - 4, Math.max(1, (p.end - p.start) / dur * w - 1), 4); });
+    }; }
+  // ======================================================================
+  // DJ Smart mix
+  // ======================================================================
+  {
+    const smSheet = document.getElementById("smartSheet"), smBody = document.getElementById("smBody"), smSub = document.getElementById("smSub"), smBtn = document.getElementById("djSmart");
+    const fmt = djFmt, sname = l => DJ_SECT_NAME[l] || l;
+    const phraseAt = (r, pos) => r.phrases.find(p => pos >= p.start - 0.01 && pos < p.end - 0.01) || r.phrases[r.phrases.length - 1];
+    let PLAN = null;
+
+    // the songs: the one playing leads; the other deck's song, or the next one from the songs list, comes in
+    async function pickPair() {
+      const A = DJ.decks[0], B = DJ.decks[1];
+      let from = A.playing && !B.playing ? A : B.playing && !A.playing ? B : A.playing && B.playing ? LEAD() : null;
+      if (!from) return { err: "Start the song you're mixing out of, then tap Smart mix" };
+      const to = DJ.decks[1 - from.i];
+      if (to.playing) return { err: "Both decks are playing: stop the one you're not mixing out of, or load the next song on it" };
+      if (!from.bpm0) return { err: "Deck " + "AB"[from.i] + " has no beat grid: tap Tap along with it first" };
+      if (!to.buf) {
+        const idx = djNextIdx();
+        if (idx == null) return { err: "Load the next song on deck " + "AB"[to.i] + ", or add songs to the list" };
+        djMsg("Loading " + DJ.crate[idx].name + " on " + "AB"[to.i] + "…", true); await djLoadCrate(to, idx, false);
+        if (!to.buf) return { err: "Couldn't load the next song" };
+      }
+      if (!to.bpm0) return { err: "Deck " + "AB"[to.i] + " has no beat grid: tap Tap along with it first" };
+      return { from, to };
+    }
+    const ensureSect = async d => { if (d.sect && d.sect.buf === d.buf) return d.sect; if (d.sectP) { try { await d.sectP; } catch (e) {} if (d.sect && d.sect.buf === d.buf) return d.sect; } return await djSectFor(d); };
+
+    function inPointOf(to, rB) {
+      if (to.phrase != null) return { pos: to.phrase, label: "its Phrase mark" };
+      const first = rB.first >= -0.02 ? Math.max(0, rB.first) : rB.first + rB.bar;
+      const p = phraseAt(rB, first + 0.01);
+      return { pos: first, label: p && p.label === "intro" ? "the start of its intro" : "its first downbeat" };
+    }
+    function plan(from, to, rA, rB, opt) {
+      opt = opt || {};
+      const perA = djPer(from), barA = perA * 4, spA = from.rate * from.bend, now = djPos(from), durA = from.buf.duration;
+      const rec = djRecBpm(from, { bpm: to.bpm0 }), far = !!(rec && rec.far);
+      const bpm = DJ.mixBpm || (rec && !far ? rec.bpm : djEff(from) * from.bend);
+      // keys: shift the incoming song a semitone or two when that makes them fit
+      const camA = camShift(from.cam, from.semi || 0), camB = to.cam;
+      let semi = 0; const comp0 = djCompat(camA, camB);
+      if (DJ.stretchOK && camA && camB && comp0 < 2) for (const st of [1, -1, 2, -2]) if (djCompat(camA, camShift(camB, st)) >= 2) { semi = st; break; }
+      if (opt.semi != null) semi = opt.semi;
+      const comp = djCompat(camA, camShift(camB, semi));
+      // the incoming song: where it starts and how long until its first drop
+      const inn = inPointOf(to, rB), barB = djPer(to) * 4;
+      const dropB = rB.phrases.find(p => p.start >= inn.pos - 0.01 && (p.label === "drop" || p.label === "groove"));
+      const toDrop = dropB ? Math.round((dropB.start - inn.pos) / barB) : 16;
+      // the style and its length
+      let style, bars, why = [];
+      if (opt.style) { style = opt.style; bars = style === "cut" ? 1 : style === "blend" || style === "swap" ? Math.max(8, Math.min(32, Math.round(toDrop / 8) * 8 || 16)) : 8; }
+      else if (DJ.style !== "auto" && DJ_STYLES[DJ.style]) { style = DJ.style; bars = DJ_STYLES[style][1]; }
+      else if (far) { style = "cut"; bars = 1; why.push("the tempos are far apart (" + from.bpm0.toFixed(0) + " and " + to.bpm0.toFixed(0) + "), so a clean cut on the phrase"); }
+      else if (comp <= 0) { style = "echo"; bars = 8; why.push("the keys clash (" + (camA || "?") + " and " + (camB || "?") + "), so the old song echoes out"); }
+      else if (comp === 1) { style = "filter"; bars = 8; why.push("the keys only half fit, so the old song is filtered away"); }
+      else {
+        bars = Math.max(8, Math.min(32, Math.round(toDrop / 8) * 8 || 16));
+        style = (to.energy || 0) > (from.energy || 0) + 0.12 ? "swap" : "blend";
+        why.push(style === "swap" ? "it's more energetic: bring it in without bass and drop the bass over halfway" : "the keys fit: a long blend");
+      }
+      // where to leave the playing song
+      const outLen = Math.max(1, bars) * barA, lead = 3 * spA;
+      const score = (p, i) => {
+        const P = rA.phrases, prev = P[i - 1], afterLastDrop = !P.slice(i).some(q => q.label === "drop");
+        let sc = { outro: 5, break: afterLastDrop ? 3.5 : 2.5, groove: afterLastDrop ? 3 : 1.2, build: -0.5, drop: -1.5, intro: -3 }[p.label] || 0;
+        if (prev && prev.label === "drop" && p.label !== "drop") sc += 1.5;
+        if (p.label === "outro" && prev && prev.label !== "outro") sc += 1;
+        sc -= 0.6 * ((p.start - now) / spA) / 60;
+        return sc;
+      };
+      const cands = rA.phrases.map((p, i) => ({ p, i })).filter(({ p }) => p.start >= now + lead && p.start + Math.min(outLen, 8 * barA) <= durA - 0.5);
+      let out;
+      if (opt.outPos != null) { const p = phraseAt(rA, opt.outPos + 0.01); out = { pos: opt.outPos, label: p ? p.label : "groove" }; }
+      else if (cands.length) { let best = cands[0], bs = -1e9; cands.forEach(c => { const v = score(c.p, c.i); if (v > bs) { bs = v; best = c; } }); out = { pos: best.p.start, label: best.p.label }; }
+      else { const b = djNextBoundary(from, 4); out = { pos: b.pos, label: "end" }; if (!opt.style) { style = "echo"; bars = 4; why.push("the song is nearly over, so the next one comes in on the next bar"); } }
+      // the transition has to fit in what's left of the playing song
+      if (style !== "cut") { const left = (durA - out.pos) / barA; if (bars > left) bars = Math.max(4, Math.floor(left / 4) * 4 || 4); }
+      // other spots to offer
+      const alts = []; const okOut = c => c.p.label === "outro" || c.p.label === "break" || c.p.label === "groove";
+      const soon = cands.find(okOut); if (soon && Math.abs(soon.p.start - out.pos) > 0.5) alts.push({ pos: soon.p.start, label: soon.p.label, tag: "Soonest" });
+      cands.filter(c => c.p.start > out.pos + 0.5 && (c.p.label === "outro" || c.p.label === "break" || (c.p.label === "groove" && c.i > 0 && rA.phrases[c.i - 1].label === "drop"))).slice(0, 1).forEach(c => alts.push({ pos: c.p.start, label: c.p.label, tag: "Later" }));
+      cands.filter(c => c.p.start < out.pos - 0.5 && c.p.start > (soon ? soon.p.start + 0.5 : now) && (c.p.label === "break" || c.p.label === "outro" || c.p.label === "groove")).slice(-1).forEach(c => alts.push({ pos: c.p.start, label: c.p.label, tag: "Sooner" }));
+      let inPos = inn.pos, inLabel = inn.label;
+      if (style === "cut" && dropB) { inPos = dropB.start; inLabel = "its first " + sname(dropB.label); }
+      const wait = (out.pos - now) / spA;
+      why.unshift((out.label === "end" ? "Out of " + "AB"[from.i] + " on the next bar" : "Out of " + "AB"[from.i] + " at " + fmt(out.pos) + ", the start of its " + sname(out.label)) + " (in " + fmt(wait) + ")");
+      why.splice(1, 0, "Deck " + "AB"[to.i] + " comes in from " + fmt(inPos) + ", " + inLabel + (style !== "cut" && dropB && toDrop > 0 && Math.abs(toDrop - bars) <= 4 ? ", so its first " + sname(dropB.label) + " lands as the mix ends" : ""));
+      why.push(DJ_STYLES[style][0] + (style === "cut" ? "" : " over " + bars + " bars") + " at " + bpm.toFixed(1) + " BPM");
+      if (semi) why.push("Deck " + "AB"[to.i] + " " + (semi > 0 ? "up " : "down ") + Math.abs(semi) + " semitone" + (Math.abs(semi) > 1 ? "s" : "") + " so the keys fit: " + camB + " → " + camShift(camB, semi) + " against " + camA);
+      else if (camA && camB) why.push("Keys: " + camA + " and " + camB + ([" clash", " half fit", " fit", " match"][comp0] || ""));
+      why = why.map(t => t.charAt(0).toUpperCase() + t.slice(1));
+      return { from, to, rA, rB, outPos: out.pos, outLabel: out.label, inPos, inLabel, style, bars, bpm, semi, comp, camA, camB, why, alts, wait, now, opt };
+    }
+
+    // ---- the plan card ----
+    function strip(r, dur, marks) {
+      const el = document.createElement("div"); el.className = "sm-strip";
+      r.sections.forEach(p => { const i = document.createElement("i"); i.style.width = ((p.end - p.start) / dur * 100) + "%"; i.style.background = DJ_SECT_COL[p.label]; if ((p.end - p.start) / dur > 0.06) i.textContent = sname(p.label); i.title = sname(p.label) + " · " + p.bars + " bars · " + fmt(p.start); el.appendChild(i); });
+      marks.forEach(m => { const e = document.createElement("div"); e.className = m.cls; e.style.left = (m.a / dur * 100) + "%"; if (m.b != null) e.style.width = Math.max(0.6, (m.b - m.a) / dur * 100) + "%"; el.appendChild(e); });
+      return el;
+    }
+    function render() {
+      const P = PLAN; if (!P) return;
+      const { from, to } = P, durA = from.buf.duration, durB = to.buf.duration, barA = djPer(from) * 4, barB = djPer(to) * 4;
+      smSub.textContent = "AB"[from.i] + " → " + "AB"[to.i];
+      smBody.innerHTML = "";
+      const song = (d, r, marks, tag) => { const w = document.createElement("div"); w.className = "sm-song"; const b = document.createElement("b"); b.textContent = "AB"[d.i] + " · " + (d.name || "song"); const sm = document.createElement("small"); sm.textContent = tag; b.appendChild(sm); w.append(b, strip(r, d.buf.duration, marks)); return w; };
+      smBody.appendChild(song(from, P.rA, [{ cls: "mk now", a: djPos(from) }, { cls: "zone", a: P.outPos, b: Math.min(durA, P.outPos + (P.style === "cut" ? barA / 2 : P.bars * barA)) }], (djEff(from) * from.bend).toFixed(1) + " BPM" + (P.camA ? " · " + P.camA : "") + " · now " + fmt(djPos(from))));
+      smBody.appendChild(song(to, P.rB, [{ cls: "zone", a: P.inPos, b: Math.min(durB, P.inPos + (P.style === "cut" ? barB / 2 : P.bars * barB)) }], to.bpm0.toFixed(1) + " BPM" + (P.camB ? " · " + P.camB : "")));
+      const lg = document.createElement("div"); lg.className = "sm-legend"; Object.keys(DJ_SECT_COL).forEach(k => { const s2 = document.createElement("span"); s2.innerHTML = '<i style="background:' + DJ_SECT_COL[k] + '"></i>' + sname(k); lg.appendChild(s2); }); smBody.appendChild(lg);
+      const ul = document.createElement("ul"); ul.className = "sm-why"; P.why.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); }); smBody.appendChild(ul);
+      const row = (lab, items) => { const r = document.createElement("div"); r.className = "sm-row"; const sp = document.createElement("span"); sp.textContent = lab; r.appendChild(sp); items.forEach(([txt, on, fn]) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = txt; b.setAttribute("aria-pressed", String(!!on)); b.addEventListener("click", fn); r.appendChild(b); }); smBody.appendChild(r); };
+      const opts = [[fmt(P.outPos) + " · " + sname(P.outLabel), true, () => {}]].concat(P.alts.map(a => [a.tag + " · " + fmt(a.pos) + " " + sname(a.label), false, () => replan({ outPos: a.pos })]));
+      row("Mix out", opts);
+      row("Style", Object.keys(DJ_STYLES).map(k => [DJ_STYLES[k][0], k === P.style, () => replan({ style: k })]));
+      if (DJ.stretchOK && P.camB) row("Key", [-2, -1, 0, 1, 2].map(st => [(st > 0 ? "+" : "") + st + (st ? "" : " st") + " · " + camShift(P.camB, st) + (P.camA && djCompat(P.camA, camShift(P.camB, st)) >= 2 ? " ✓" : ""), st === P.semi, () => replan({ semi: st })]));
+    }
+    function replan(o) { if (!PLAN) return; PLAN = plan(PLAN.from, PLAN.to, PLAN.rA, PLAN.rB, Object.assign({}, PLAN.opt, o)); render(); }
+
+    async function openSmart() {
+      if (DJ.trans) { if (DJ.trans.smart) { djMixEnd(true); djMsg("Smart mix cancelled"); } else djMsg("A mix is already running"); djPaintAll(); return; }
+      if (!djBuild()) return;
+      const pr = await pickPair(); if (pr.err) { djMsg(pr.err); return; }
+      djMsg("Reading both songs…", true);
+      const [rA, rB] = await Promise.all([ensureSect(pr.from), ensureSect(pr.to)]);
+      if (!rA || !rB) { djMsg("Couldn't read the songs' structure"); return; }
+      PLAN = plan(pr.from, pr.to, rA, rB, {}); render(); smSheet.hidden = false;
+      djMsg("Smart mix: " + PLAN.why[0]);
+    }
+    function startSmart(P) {
+      if (!P || DJ.trans || !djBuild()) return;
+      const { from, to, style } = P;
+      if (!from.playing) { djMsg("Deck " + "AB"[from.i] + " stopped: start it and plan again"); return; }
+      DJ.lead = from.i;
+      if (P.bpm) djSetRate(from, Math.max(0.5, Math.min(2, P.bpm / from.bpm0)));
+      const mr = djMatchRate(); if (mr) { if (mr.m !== 1) to.bpm0 *= mr.m; to.rate = Math.max(0.5, Math.min(2, mr.r)); } to.bend = 1;
+      to.semi = P.semi || 0; to.loop = null; to.p0 = P.inPos;
+      const beat = 60 / (djEff(from) * from.bend), eqFrom = Object.assign({}, from.eq), eqTo = Object.assign({}, to.eq);
+      if (style === "blend" || style === "swap") to.eq.lo = -26;
+      if (style === "filter") to.eq.filt = -0.8;
+      djApplyEq(to);
+      const wait = Math.max(0.05, (P.outPos - djPos(from)) / (from.rate * from.bend));
+      const T = { from, to, idx: to.crate, style, bars: Math.max(1, P.bars), beat, t0: ctx.currentTime + wait, eqFrom, eqTo, xf0: DJ.xf, target: to.i === 0 ? 0 : 1, cutAt: ctx.currentTime + wait, done: false, smart: { outPos: P.outPos, inPos: P.inPos, pending: true } };
+      DJ.sync = true; DJ.trans = T; djTickOn();
+      djMsg("✦ Smart mix: " + "AB"[to.i] + " comes in at " + fmt(P.outPos) + " (" + sname(P.outLabel) + ") · " + DJ_STYLES[style][0] + (style === "cut" ? "" : " over " + T.bars + " bars") + (P.semi ? " · " + (P.semi > 0 ? "+" : "") + P.semi + " st" : "") + " · tap ✦ to cancel", true);
+      djPaintAll(); djPaintDeck(to);
+    }
+    // the incoming song starts exactly when the playing one reaches the mix-out point
+    { const ms = djMixStep; djMixStep = function () {
+        const T = DJ.trans;
+        if (T && T.smart && T.smart.pending && ctx) {
+          const { from, to } = T;
+          if (!from.playing) { djMixEnd(true); djMsg("Smart mix cancelled: " + "AB"[from.i] + " stopped"); return; }
+          if (to.playing) T.smart.pending = false;   // "go now" on MIX IN
+          else {
+            const sp = from.rate * from.bend, rem = (T.smart.outPos - djPos(from)) / sp;
+            if (rem < -0.5) { T.smart.outPos = djNextBoundary(from, 4).pos; return; }   // jumped past it: the next bar
+            if (rem <= 0.6) {
+              const at = ctx.currentTime + Math.max(0.03, rem); T.t0 = at; T.cutAt = at;
+              djStartSrc(to, at, T.smart.inPos);
+              if (T.style === "cut") {
+                to.xfg.gain.setValueAtTime(to.i === 0 ? Math.cos(DJ.xf * Math.PI / 2) : Math.sin(DJ.xf * Math.PI / 2), ctx.currentTime); to.xfg.gain.setValueAtTime(1, at);
+                from.xfg.gain.setValueAtTime(from.i === 0 ? Math.cos(DJ.xf * Math.PI / 2) : Math.sin(DJ.xf * Math.PI / 2), ctx.currentTime); from.xfg.gain.setValueAtTime(0, at);
+              }
+              if (T.idx >= 0 && DJ.crate[T.idx]) DJ.crate[T.idx].played = Date.now();
+              T.smart.pending = false;
+            } else { T.t0 = ctx.currentTime + rem; T.cutAt = T.t0; }
+          }
+        }
+        return ms.apply(this, arguments);
+      }; }
+    { const pa = djPaintAll; djPaintAll = function () {
+        const r = pa.apply(this, arguments);
+        const T = DJ.trans, on = !!(T && T.smart);
+        smBtn.classList.toggle("on", on);
+        smBtn.textContent = on ? (T.smart.pending ? "✦ In " + Math.max(0, Math.ceil((T.t0 - ctx.currentTime) / T.beat / 4)) + " bars · ✕" : "✦ Mixing · ✕") : "✦ Smart mix";
+        return r;
+      }; }
+    setInterval(() => { if (DJ.trans && DJ.trans.smart && !djEl.hidden) djPaintAll(); }, 500);
+    smBtn.addEventListener("click", openSmart);
+    document.getElementById("smCancel").addEventListener("click", () => { smSheet.hidden = true; PLAN = null; djMsg(djHint()); });
+    document.getElementById("smGo").addEventListener("click", () => { const P = PLAN; smSheet.hidden = true; PLAN = null; startSmart(P); });
+    window.__nbSmart = { plan: () => PLAN, open: openSmart, seek: (i, p) => djSeek(DJ.decks[i], p) };
+  }
+  // ======================================================================
+  // DJ → Tracks (mashups)
+  // ======================================================================
+  {
+    const btn = document.getElementById("djToTracks");
+    let busy = false;
+    async function stretchInto(octx) {
+      for (const url of [() => URL.createObjectURL(new Blob([STRETCH_SRC], { type: "text/javascript" })), () => "data:text/javascript;charset=utf-8," + encodeURIComponent(STRETCH_SRC)]) {
+        try { await octx.audioWorklet.addModule(url()); return true; } catch (e) {}
+      }
+      return false;
+    }
+    // the song at `rate` (speed) and `semi` (key), pitch kept by the key-lock stretcher where it can run
+    async function renderDeck(d, rate, semi) {
+      const buf = d.buf, sr = buf.sampleRate;
+      if (Math.abs(rate - 1) < 1e-4 && !semi) return { buf, locked: true };
+      const len = Math.min(Math.ceil(buf.duration / rate * sr) + 1, sr * 60 * 8);
+      const octx = new OfflineAudioContext(2, len, sr);
+      let locked = false;
+      if (DJ.stretchOK && octx.audioWorklet && await stretchInto(octx)) {
+        try {
+          const i16 = a => { const o = new Int16Array(a.length); for (let i = 0; i < a.length; i++) { const v = a[i]; o[i] = v >= 1 ? 32767 : v <= -1 ? -32767 : v * 32767; } return o; };
+          const L = i16(buf.getChannelData(0)), R = buf.numberOfChannels > 1 ? i16(buf.getChannelData(1)) : L;
+          const node = new AudioWorkletNode(octx, "nb-stretch", { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { L, R, from: 0, rate, pitch: Math.pow(2, (semi || 0) / 12) } });
+          node.connect(octx.destination); locked = true;
+        } catch (e) { locked = false; }
+      }
+      if (!locked) { const src = octx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate; src.connect(octx.destination); src.start(0); }
+      return { buf: await octx.startRendering(), locked };
+    }
+    async function toTracks() {
+      if (busy) return;
+      const A = DJ.decks[0], B = DJ.decks[1];
+      if (!A.buf || !B.buf) { djMsg("Load a song on both decks first"); return; }
+      if (!A.bpm0 || !B.bpm0) { djMsg("Both songs need a beat grid (Tap along with the one that has none)"); return; }
+      if (!djBuild()) return;
+      busy = true; btn.disabled = true; btn.textContent = "Rendering…";
+      try {
+        const L = A.playing && !B.playing ? A : B.playing && !A.playing ? B : LEAD(), F = DJ.decks[1 - L.i];
+        const live = A.playing && B.playing;
+        let bpm = A.playing || B.playing ? djEff(L) * L.bend : ((djRecBpm(L, { bpm: F.bpm0 }) || {}).bpm || djEff(L));
+        bpm = Math.max(50, Math.min(180, Math.round(bpm)));
+        const fit = d => { let m = 1; [2, 0.5].forEach(x => { if (Math.abs(Math.log(bpm / (d.bpm0 * x))) < Math.abs(Math.log(bpm / (d.bpm0 * m)))) m = x; }); return bpm / (d.bpm0 * m); };
+        const rL = fit(L), rF = fit(F);
+        let sL = L.semi || 0, sF = F.semi || 0, keyNote = "";
+        if (!sL && !sF && DJ.stretchOK && L.cam && F.cam && djCompat(L.cam, F.cam) < 2) for (const st of [1, -1, 2, -2]) if (djCompat(L.cam, camShift(F.cam, st)) >= 2) { sF = st; keyNote = " · " + "AB"[F.i] + (st > 0 ? " up " : " down ") + Math.abs(st) + " semitone" + (Math.abs(st) > 1 ? "s" : "") + " so the keys fit (" + F.cam + " → " + camShift(F.cam, st) + ")"; break; }
+        const posL = djPos(L), posF = djPos(F);
+        djMsg("Rendering " + "AB"[L.i] + " at " + bpm + " BPM for Tracks…", true);
+        const oL = await renderDeck(L, rL, sL);
+        djMsg("Rendering " + "AB"[F.i] + " at " + bpm + " BPM for Tracks…", true);
+        const oF = await renderDeck(F, rF, sF);
+        // Tracks' grid follows the app's tempo
+        setBpm(bpm);
+        await trkLoad();
+        const barS = barSec(), anc = (d, r) => (d.phrase != null ? d.phrase : d.off) / r;
+        let stL = Math.max(1, Math.ceil(anc(L, rL) / barS - 1e-6)) * barS - anc(L, rL), stF;
+        if (live) stF = stL + posL / rL - posF / rF;            // exactly as they sound now
+        else stF = stL + anc(L, rL) - anc(F, rF);              // first downbeats (or Phrase marks) on the same bar
+        const low = Math.min(stL, stF); if (low < 0) { const k = Math.ceil(-low / barS - 1e-6) * barS; stL += k; stF += k; }
+        snapshot();
+        const add = (d, o, st) => {
+          const name = "AB"[d.i] + " · " + (d.name || "song"), t = newTrack(false, name); if (!t) return false;
+          const id = addAudio(o.buf, name);
+          T.clips.push({ id: trkUid(), track: t.id, audio: id, name, start: Math.max(0, st), offset: 0, dur: o.buf.duration, gain: 1, fadeIn: 0, fadeOut: 0 });
+          return true;
+        };
+        if (!add(L, oL, stL) || !add(F, oF, stF)) { djMsg("Tracks is full (" + TRK_MAX + " tracks)"); return; }
+        trkSave();
+        const pitchNote = !oL.locked || !oF.locked ? " · without key lock here, the speed change moves the pitch" : "";
+        djMsg("Both songs are on Tracks at " + bpm + " BPM" + keyNote + pitchNote, true);
+        openTracks();
+        setTimeout(() => trkSay("Both songs at " + bpm + " BPM, " + (live ? "lined up as they were playing" : "first downbeats on the same bar") + keyNote + ". Split, move and copy to build the mashup" + pitchNote), 400);
+      } catch (e) { djMsg("Couldn't put the songs on Tracks: " + (e && e.message || e)); }
+      finally { busy = false; btn.disabled = false; btn.textContent = "→ Tracks"; }
+    }
+    btn.addEventListener("click", toTracks);
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
