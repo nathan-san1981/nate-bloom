@@ -1438,6 +1438,39 @@ body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; marg
 .srcline { align-items: center; }
 @media (min-width: 601px) { .srcline .slots { flex: 0 1 auto; } .srcline .slot { width: 46px; flex: none; } .srcline #loadBtn { margin-left: 6px; } }
 @media (max-width: 600px) { .btn.loadbig { height: 38px; padding: 0 12px; font-size: 0.9rem; gap: 5px; } }
+/* ---------- Playing ▾ drop-down ---------- */
+.nowbar .now-open { max-width: min(70vw, 640px); min-width: 0; }
+.now-open i { width: 7px; height: 7px; border-radius: 50%; background: #7fd6c2; flex: none; animation: nowpulse 1.2s ease-in-out infinite; }
+.now-open .now-names { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.now-open .now-n { flex: none; min-width: 18px; height: 18px; border-radius: 9px; background: #7fd6c2; color: var(--panel); font: 700 11px/18px var(--font-mono); text-align: center; padding: 0 4px; }
+.now-open b { flex: none; color: var(--dim); font-size: 0.75rem; }
+.now-open[aria-expanded="true"] { border-color: #7fd6c2; }
+.now-hear { border-color: #7fd6c2 !important; color: #7fd6c2 !important; }
+.now-pop { position: fixed; z-index: 60; box-sizing: border-box; overflow-y: auto; padding: 10px; border-radius: 14px; background: var(--raised); border: 1px solid #7fd6c2;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.55); display: flex; flex-direction: column; gap: 10px; }
+.now-pop[hidden] { display: none; }
+.np-head { display: flex; align-items: baseline; gap: 10px; }
+.np-head b { font-family: var(--font-mono); font-size: 11px; color: #7fd6c2; text-transform: uppercase; letter-spacing: 0.1em; }
+.np-head span { font-size: 11px; color: var(--dim); }
+.np-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.np-card { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; min-width: 0; }
+.np-card.solo { border-color: #7fd6c2; box-shadow: inset 0 0 0 1px #7fd6c2; }
+.np-card.muted { opacity: 0.55; }
+.np-name { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.np-name i { width: 8px; height: 8px; border-radius: 50%; background: #7fd6c2; flex: none; animation: nowpulse 1.2s ease-in-out infinite; }
+.np-card.muted .np-name i { animation: none; background: var(--dim); }
+.np-name b { font-size: 0.92rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-name em { margin-left: auto; font-style: normal; font: 600 10px var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: #7fd6c2; flex: none; }
+.np-card.muted .np-name em { color: var(--dim); }
+.np-card small { font-family: var(--font-mono); font-size: 11px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-btns { display: flex; gap: 6px; }
+.np-btns .btn { flex: 1; height: 32px; padding: 0 6px; font-size: 0.8rem; }
+.np-btns .np-only[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
+.np-btns .np-stop { color: #ff8a8f; }
+.np-foot { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.np-foot .btn { height: 34px; }
+@media (max-width: 600px) { .np-cards { grid-template-columns: 1fr; } }
+body.lite .now-open i, body.lite .np-name i { animation: none; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -2236,7 +2269,7 @@ body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; marg
   <div class="ed-card" role="dialog" aria-label="Help">
     <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
-      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b> and <b>Rhythm</b> open full screens of their own (a green dot means one is playing). Things that don't apply to the pads (Chord, octave, Arp, Hold) are dimmed; tap one to see why. <b>Keys · Seq · Notes</b> switch what this page shows. On a computer or a tablet in landscape these are at the top right, with Keys · Seq · Notes under DJ and Rhythm; on a phone the five sit in the bar along the bottom and Keys · Seq · Notes under the title, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing</b> strip under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, Jam, Tracks, held notes, pads): tap one to stop it, or Stop all. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b> and <b>Rhythm</b> open full screens of their own (a green dot means one is playing). Things that don't apply to the pads (Chord, octave, Arp, Hold) are dimmed; tap one to see why. <b>Keys · Seq · Notes</b> switch what this page shows. On a computer or a tablet in landscape these are at the top right, with Keys · Seq · Notes under DJ and Rhythm; on a phone the five sit in the bar along the bottom and Keys · Seq · Notes under the title, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
@@ -7475,7 +7508,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       lofiIn.connect(lofiDry).connect(hallIn); lofiIn.connect(bitShaper).connect(lofiTone).connect(lofiWet).connect(hallIn);
       hallIn.connect(betaOut); hallIn.connect(hall).connect(hallWet).connect(betaOut);
       betaOut.connect(comp);
-      const trackBus = ctx.createGain(); trackBus.connect(comp);
+      const trackBus = ctx.createGain(); trackBus.__soloGroup = "trk"; trackBus.connect(comp);
       B = { densIn, densShaper, densDry, densWet, bitShaper, lofiTone, lofiDry, lofiWet, hall, hallWet, betaOut, trackBus };
       applyBfx(false);
     };
@@ -10918,8 +10951,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function djBuild() {
     if (DJ.bus) return true;
     start(); if (!ctx || !fx || !fx.comp) return false;
-    DJ.bus = ctx.createGain(); DJ.bus.gain.value = 0.85; DJ.bus.connect(fx.comp);
-    DJ.padBus = ctx.createGain(); DJ.padBus.gain.value = DJ.padVol; DJ.padBus.connect(DJ.bus);
+    DJ.bus = ctx.createGain(); DJ.bus.gain.value = 0.85; DJ.bus.__soloGroup = "pass"; DJ.bus.connect(fx.comp);
+    DJ.padBus = ctx.createGain(); DJ.padBus.gain.value = DJ.padVol; DJ.padBus.__soloGroup = "djpad"; DJ.padBus.connect(DJ.bus);
     DJ.decks.forEach(d => djChain(d));
     djApplyXf();
     return true;
@@ -10929,7 +10962,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     d.in = ctx.createGain();
     d.lo = bq("lowshelf", 220, null, 0); d.mid = bq("peaking", 1000, 0.8, 0); d.hi = bq("highshelf", 3500, null, 0);
     d.lp = bq("lowpass", 20000, 0.8); d.hp = bq("highpass", 10, 0.8); d.vol = ctx.createGain(); d.xfg = ctx.createGain();
-    d.in.connect(d.lo).connect(d.mid).connect(d.hi).connect(d.lp).connect(d.hp).connect(d.vol).connect(d.xfg).connect(DJ.bus);
+    d.in.connect(d.lo).connect(d.mid).connect(d.hi).connect(d.lp).connect(d.hp).connect(d.vol).connect(d.xfg); d.xfg.__soloGroup = "dj" + d.i; d.xfg.connect(DJ.bus);
     djApplyEq(d);
   }
   const djEqDb = v => v <= -25.5 ? -50 : v;   // all the way down = kill
@@ -11952,7 +11985,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       ch0(d);
       d.echoSend = ctx.createGain(); d.echoSend.gain.value = 0; d.echoDelay = ctx.createDelay(2); d.echoDelay.delayTime.value = 0.4;
       const fbk = ctx.createGain(); fbk.gain.value = 0.55; const tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = 2800;
-      d.vol.connect(d.echoSend).connect(d.echoDelay).connect(tone).connect(fbk).connect(d.echoDelay); tone.connect(DJ.bus);
+      d.vol.connect(d.echoSend).connect(d.echoDelay).connect(tone).connect(fbk).connect(d.echoDelay); tone.__soloGroup = "dj" + d.i; tone.connect(DJ.bus);
     };
   }
 
@@ -11999,7 +12032,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function djBeatStart() {
     if (!djBuild()) return;
     const i = djBeatPick(), rows = buildBeat(i), n = rows[DRUMS[0][0]].length;
-    if (!DJ.beatBus || DJ.beatBusFor !== fx.drumBus) { DJ.beatBus = ctx.createGain(); DJ.beatBus.gain.value = DJ.beatVol; DJ.beatBus.connect(fx.drumBus); DJ.beatBusFor = fx.drumBus; }
+    if (!DJ.beatBus || DJ.beatBusFor !== fx.drumBus) { DJ.beatBus = ctx.createGain(); DJ.beatBus.gain.value = DJ.beatVol; DJ.beatBus.__soloGroup = "djbeat"; DJ.beatBus.connect(fx.drumBus); DJ.beatBusFor = fx.drumBus; }
     // start on the lead's next bar line so the beat sits on the song
     const L = LEAD(); let at = ctx.currentTime + 0.08;
     if (L.playing && L.bpm0) { const per = djPer(L), pos = djPos(L), k = Math.ceil((pos - L.off) / per / 4 + 0.03) * 4; at = ctx.currentTime + Math.max(0.05, ((L.off + k * per) - pos) / (L.rate * L.bend)); }
@@ -12630,7 +12663,7 @@ registerProcessor("nb-capture", NBCap);`;
   function jamBandStep(s, t) {
     const st = JAM_STYLES[JAM.band.style], b = JAM.band, bi = jamBeatIdx(), rows = buildBeat(bi), n = rows[DRUMS[0][0]].length, swing = BEATS[bi][3], dur = jamStepDur();
     const ds = s % n, dt = ds % 2 === 1 ? t + swing * dur * 0.5 : t;
-    if (!JAM.drumBus || JAM.drumBusFor !== fx.drumBus) { JAM.drumBus = ctx.createGain(); JAM.drumBus.gain.value = b.drumLvl; JAM.drumBus.connect(fx.drumBus); JAM.drumBusFor = fx.drumBus; }
+    if (!JAM.drumBus || JAM.drumBusFor !== fx.drumBus) { JAM.drumBus = ctx.createGain(); JAM.drumBus.gain.value = b.drumLvl; JAM.drumBus.__soloGroup = "band"; JAM.drumBus.connect(fx.drumBus); JAM.drumBusFor = fx.drumBus; }
     const keepBus = fx.drumBus; fx.drumBus = JAM.drumBus; JAM.replaying = true;
     try { for (const [id] of DRUMS) if (rows[id] && rows[id][ds]) playDrum(id, dt); } finally { fx.drumBus = keepBus; JAM.replaying = false; }
     const bs = s % 16;
@@ -13408,7 +13441,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   // ---------- audio: the bus, each track's chain ----------
   fxcNames.rc = "Rhythm";
   function rcBus() {
-    if (!RC.bus) { RC.bus = ctx.createGain(); RC.bus.gain.value = RCP.level; }
+    if (!RC.bus) { RC.bus = ctx.createGain(); RC.bus.gain.value = RCP.level; RC.bus.__soloGroup = "rc"; }
     const c = fxcGet("rc"), to = c ? c.input : fx.comp;
     if (RC.busTo !== to) { try { RC.bus.disconnect(); } catch (e) {} RC.bus.connect(to); RC.busTo = to; }
     return RC.bus;
@@ -13973,6 +14006,165 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     paint();
   }
 
+  // ---------- isolate: every source passes a gate into the mix; isolating one closes the others' ----------
+  let SOLO = null, SOLO_CUR = null;
+  const soloSets = new Map();   // group -> Set of gates
+  const soloLevel = g => (SOLO == null || g === SOLO ? 1 : 0);
+  function setSolo(g) {
+    SOLO = g || null;
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    soloSets.forEach((set, grp) => set.forEach(n => { try { n.gain.setTargetAtTime(soloLevel(grp), t, 0.015); } catch (e) {} }));
+  }
+  {
+    const c0 = AudioNode.prototype.connect, d0 = AudioNode.prototype.disconnect, gates = new Map();
+    const gateFor = (grp, dest) => {
+      let m = gates.get(grp); if (!m) { m = new WeakMap(); gates.set(grp, m); }
+      let g = m.get(dest);
+      if (!g) { g = dest.context.createGain(); g.__solo = true; g.gain.value = soloLevel(grp); c0.call(g, dest); m.set(dest, g);
+        let set = soloSets.get(grp); if (!set) { set = new Set(); soloSets.set(grp, set); } set.add(g); }
+      return g;
+    };
+    AudioNode.prototype.connect = function (dest, out) {
+      if (dest instanceof AudioNode && !this.__solo) {
+        let grp = this.__soloGroup;
+        if (!grp && SOLO_CUR && (dest === fx.input || dest === fx.drumBus)) grp = SOLO_CUR;
+        if (grp && grp !== "pass") {
+          const g = gateFor(grp, dest);
+          (this.__soloLinks || (this.__soloLinks = new Map())).set(dest, g);
+          c0.call(this, g, out || 0); return dest;
+        }
+      }
+      return c0.apply(this, arguments);
+    };
+    AudioNode.prototype.disconnect = function (dest) {
+      if (dest instanceof AudioNode && this.__soloLinks && this.__soloLinks.has(dest)) {
+        const g = this.__soloLinks.get(dest); this.__soloLinks.delete(dest);
+        const a = [...arguments]; a[0] = g; if (a.length > 2) a.length = 2; return d0.apply(this, a);
+      }
+      if (!arguments.length && this.__soloLinks) this.__soloLinks.clear();
+      return d0.apply(this, arguments);
+    };
+    // sounds scheduled by each player belong to it
+    const tagged = (fn, grp) => function () { const was = SOLO_CUR; SOLO_CUR = grp; try { return fn.apply(this, arguments); } finally { SOLO_CUR = was; } };
+    scheduleStep = tagged(scheduleStep, "seq");
+    toggleHeld = tagged(toggleHeld, "held");
+    kitPadDown = tagged(kitPadDown, "pads");
+    jamBandStep = tagged(jamBandStep, "band");
+    jamTrackStep = tagged(jamTrackStep, "loops");
+    rcScheduleStep = tagged(rcScheduleStep, "rc");
+    window.__nbSoloDbg = () => ({ solo: SOLO, gates: [...soloSets].map(([g, set]) => [g, [...set].map(n => +n.gain.value.toFixed(2))]) });
+  }
+
+  // ---------- arp parts: an arp keeps its synth when you pick another one ----------
+  const PARTS = []; let partN = 0, partsTimer = 0;
+  const NOTE_N = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+  const nbNoteName = m => NOTE_N[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1);
+  const nbEngName = e => (ENGINES[e] && ENGINES[e].name) || ({ lib: "Library sound", inst: "Instrument", samp: "Sampler" })[e] || "Synth";
+  const arpDesc = (key, notes) => { const c = getArp(key); return (ARP_MODES.find(m => m[0] === c.mode) || ["", c.mode])[1] + " · " + c.rate + (c.oct > 1 ? " · " + c.oct + " oct" : "") + (notes.length ? " · " + notes.slice().sort((a, b) => a - b).map(nbNoteName).join(" ") : ""); };
+  function partComps(p) {
+    if (ENGINES[p.eng]) { const norm = 1 / Math.sqrt(Math.max(1, p.layers.length)); return p.layers.filter(id => arpOn(id)).map(id => ({ key: id, accepts: () => true, make: (m, when, scale = 1) => makeVoice(m, id, state.layers[id].level * 1.25 * norm * scale, when) })); }
+    return voiceComponents(p.eng).filter(c => arpOn(c.key));
+  }
+  function partsTick() {
+    if (!ctx || !PARTS.length) return;
+    const now = ctx.currentTime;
+    for (const p of PARTS.slice()) {
+      const comps = partComps(p);
+      if (!comps.length) { dropPart(p, true); continue; }
+      const was = SOLO_CUR; SOLO_CUR = p.id;
+      try {
+        for (const c of comps) {
+          const cfg = getArp(c.key), notesS = p.notes.slice().sort((a, b) => a - b).filter(c.accepts), notesP = p.notes.filter(c.accepts);
+          if (!notesS.length) continue;
+          const dur = 60 / state.seq.bpm * (ARP_RATES.find(r => r[0] === cfg.rate) || ARP_RATES[3])[1];
+          let run = p.run[c.key]; if (!run) run = p.run[c.key] = { step: 0, next: now + 0.02 };
+          if (run.next < now - 0.05) { const k = Math.ceil((now - run.next) / dur); run.next += k * dur; run.step += k; }
+          while (run.next < now + 0.1) {
+            const t = run.next, len = Math.max(0.03, dur * cfg.gate);
+            let hits;
+            if (cfg.mode === "chord") hits = notesS.map(n => n + 12 * (run.step % cfg.oct));
+            else if (cfg.mode === "random") { const sq = arpSequence(cfg, notesS); hits = [sq[Math.floor(Math.random() * sq.length)]]; }
+            else { const sq = arpSequence(cfg, cfg.mode === "played" ? notesP : notesS); hits = [sq[run.step % sq.length]]; }
+            const scale = 1 / Math.sqrt(hits.length);
+            for (const m of hits) { const v = c.make(m, t, scale); if (v) v.stop(t + len); }
+            run.step++; run.next += dur;
+          }
+        }
+      } finally { SOLO_CUR = was; }
+    }
+  }
+  const partsClock = () => { if (PARTS.length && !partsTimer) partsTimer = setInterval(partsTick, 25); if (!PARTS.length && partsTimer) { clearInterval(partsTimer); partsTimer = 0; } };
+  function dropPart(p, stopSound) {
+    const i = PARTS.indexOf(p); if (i < 0) return; PARTS.splice(i, 1);
+    if (stopSound) p.held.forEach(v => { try { v.stop(); } catch (e) {} });
+    if (SOLO === p.id) setSolo(null);
+    partsClock();
+  }
+  let lastEng = state.engine, lastLayers = [];
+  function detachArp(eng) {
+    if (eng === "drum" || eng === "pads" || (!heldVoices.size && !voices.size)) return;
+    const keys = (ENGINES[eng] ? lastLayers : voiceComponents(eng).map(c => c.key)).filter(k => arpOn(k));
+    if (!keys.length) return;
+    const notes = []; [heldVoices, voices].forEach(M => M.forEach(v => v.tones.forEach(m => { if (!notes.includes(m)) notes.push(m); })));
+    const run = {}; keys.forEach(k => { if (arpRun[k]) run[k] = Object.assign({}, arpRun[k]); delete arpRun[k]; });
+    const p = { id: "part" + (++partN), eng, layers: ENGINES[eng] ? lastLayers.slice() : [], notes, roots: [...new Set([...heldVoices.keys(), ...voices.keys()])], run, held: [...heldVoices.values()] };
+    // the held notes go with it (anything of theirs that sounds without the arp keeps sounding with it)
+    heldVoices.forEach(v => markTones(v.tones, markHeld, false)); heldVoices.clear(); updateHoldBtn();
+    PARTS.push(p); partsClock();
+    try { noteMsg(nbEngName(eng) + " arp keeps playing · Playing ▾ to edit or stop it"); } catch (e) {}
+  }
+  { const re = renderEngine; renderEngine = function () {
+      if (state.engine !== lastEng) { const from = lastEng; lastEng = state.engine; try { detachArp(from); } catch (e) {} }
+      const r = re.apply(this, arguments);
+      if (ENGINES[state.engine]) lastLayers = activeLayers().slice();
+      return r;
+    }; }
+  if (ENGINES[state.engine]) lastLayers = activeLayers().slice();
+  const nbCloseLayers = () => {
+    [["djView", "djDone"], ["rcView", "rcDone"], ["tracks", "trkDone"]].forEach(([v, d]) => { const el = document.getElementById(v), b = document.getElementById(d); if (el && !el.hidden && b) b.click(); });
+    document.querySelectorAll(".editor:not([hidden]) .ed-foot .btn.primary").forEach(b => { if (/Done|Close/.test(b.textContent)) b.click(); });
+  };
+  function editPart(p) {
+    start(); nbCloseLayers();
+    dropPart(p, false);
+    p.held.forEach(v => { try { v.stop(); } catch (e) {} });   // its notes are held again below, with the same sound
+    if (ENGINES[p.eng]) { for (const x in state.layers) state.layers[x].on = p.layers.includes(x); }
+    state.engine = p.eng;
+    if (state.mode !== "keys") document.getElementById("modeKeys").click();
+    renderEngine(); save();
+    for (const k in p.run) arpRun[k] = p.run[k];   // the arp carries on in time
+    if (!state.hold) { state.hold = true; }
+    p.roots.forEach(m => { if (!heldVoices.has(m)) toggleHeld(m); });
+    updateHoldBtn();
+    setPanel("arp");
+    try { noteMsg("Editing " + nbEngName(p.eng) + " arp: tap keys to add or take away notes"); } catch (e) {}
+  }
+  // the Playing list: what each thing is doing, and where Edit takes you
+  function enrichSources(s) {
+    const open = id => { const b = document.getElementById(id); if (b) b.click(); };
+    const seqHere = () => { nbCloseLayers(); if (state.mode !== "seq") open("modeSeq"); };
+    const keysHere = () => { nbCloseLayers(); if (state.mode !== "keys") open("modeKeys"); };
+    for (const x of s) {
+      const id = x[0];
+      if (id === "seq") { x[3] = state.seq.bpm + " bpm"; x[4] = seqHere; }
+      else if (id === "rc") { x[3] = Math.round(rcBpm()) + " bpm"; x[4] = () => { if (document.getElementById("rcView").hidden) { nbCloseLayers(); open("rcBtn"); } }; }
+      else if (/^dj/.test(id)) { const d = /^dj\d$/.test(id) ? DJ.decks[+id.slice(2)] : null; x[3] = d && d.name ? d.name : ""; x[4] = () => { if (document.getElementById("djView").hidden) { nbCloseLayers(); open("djBtn"); } }; }
+      else if (id === "band" || id === "loops") { x[4] = () => { keysHere(); open("pJam"); }; }
+      else if (id === "trk") { x[4] = () => { if (document.getElementById("tracks").hidden) { nbCloseLayers(); open("betaTracksBtn"); } }; }
+      else if (id === "pads") { x[4] = () => { keysHere(); open("mSamples"); const t = document.querySelector('#tabs .tab[data-engine="pads"]'); if (t && state.engine !== "pads") t.click(); }; }
+      else if (id === "held") {
+        const notes = []; [heldVoices, voices].forEach(M => M.forEach(v => v.tones.forEach(m => { if (!notes.includes(m)) notes.push(m); })));
+        const arpKey = voiceComponents().map(c => c.key).find(k => arpOn(k));
+        if (arpKey) { x[1] = nbEngName(state.engine) + " arp"; x[3] = arpDesc(arpKey, notes); x[4] = () => { keysHere(); setPanel("arp"); }; }
+        else { x[3] = notes.slice().sort((a, b) => a - b).map(nbNoteName).join(" "); x[4] = keysHere; }
+      }
+    }
+    PARTS.forEach(p => { const k = p.layers.find(id => arpOn(id)) || (voiceComponents(p.eng)[0] || {}).key; s.push([p.id, nbEngName(p.eng) + " arp", () => dropPart(p, true), k ? arpDesc(k, p.notes) : "", () => editPart(p)]); });
+    return s;
+  }
+  document.getElementById("panic").addEventListener("click", () => { PARTS.slice().forEach(p => dropPart(p, true)); });
+
   let nbStopSources = () => {};
   // ---------- Now playing ----------
   {
@@ -13990,22 +14182,65 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       if (trkPlayBtn && trkPlayBtn.getAttribute("aria-pressed") === "true") s.push(["trk", "Tracks", () => trkPlayBtn.click()]);
       if (heldVoices.size) s.push(["held", "Held notes · " + heldVoices.size, () => { releaseHeld(); updateHoldBtn(); }]);
       if (padPlaying.some(Boolean)) s.push(["pads", "Pads", stopPads]);
-      return s;
+      return enrichSources(s);
     };
-    let sig = "", cur = [];
+    let sig = "", cur = [], popFor = null;
     nbStopSources = () => { sources().forEach(x => { try { x[2](); } catch (er) {} }); stopPads(); };
-    function paintNow() {
-      cur = sources(); const k = cur.map(x => x[0] + x[1]).join("|"); if (k === sig) return; sig = k;
-      const h = cur.length ? '<span class="now-lab">Playing</span>' + cur.map(([id, name]) => `<button class="btn now-chip" data-now="${id}" title="Stop ${name}"><i></i>${name}<b>■</b></button>`).join("") + (cur.length > 1 ? '<button class="btn now-all" data-now="all">Stop all</button>' : "") : "";
-      bars.forEach(b => { b.hidden = !cur.length; b.innerHTML = h; });
+    const pop = document.createElement("div"); pop.className = "now-pop"; pop.id = "nowPop"; pop.hidden = true;
+    pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "What's playing");
+    document.body.appendChild(pop);
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    function placePop() {
+      if (!popFor || pop.hidden) return;
+      const r = popFor.getBoundingClientRect(), w = Math.min(innerWidth - 16, 760);
+      pop.style.width = w + "px"; pop.style.left = Math.round(Math.max(8, Math.min(r.left, innerWidth - w - 8))) + "px";
+      pop.style.top = Math.round(r.bottom + 6) + "px"; pop.style.maxHeight = Math.max(160, innerHeight - r.bottom - 20) + "px";
     }
-    bars.forEach(b => b.addEventListener("click", e => {
-      const btn = e.target.closest("button[data-now]"); if (!btn) return;
-      const run = x => { try { x[2](); } catch (er) {} };
-      if (btn.dataset.now === "all") document.getElementById("stopAll").click();
-      else { const x = cur.find(c => c[0] === btn.dataset.now); if (x) run(x); }
-      sig = null; setTimeout(paintNow, 80);
-    }));
+    function paintNowPop() {
+      if (pop.hidden) return;
+      const card = ([id, name, , detail]) => {
+        const st = SOLO === id ? " solo" : SOLO ? " muted" : "";
+        return `<div class="np-card${st}" data-edit="${id}" title="Edit"><div class="np-name"><i></i><b>${esc(name)}</b>${SOLO === id ? "<em>only this</em>" : SOLO ? "<em>muted</em>" : ""}</div>`
+          + (detail ? `<small>${esc(detail)}</small>` : "")
+          + `<div class="np-btns"><button class="btn np-only" data-solo="${id}" aria-pressed="${SOLO === id}" title="Hear only this one; the rest keep going, silent">${SOLO === id ? "Hear all" : "Only this"}</button><button class="btn" data-edit="${id}">Edit</button><button class="btn np-stop" data-now="${id}">■ Stop</button></div></div>`;
+      };
+      pop.innerHTML = '<div class="np-head"><b>Playing</b><span>tap one to edit it</span></div><div class="np-cards">' + cur.map(card).join("") + '</div><div class="np-foot">'
+        + (SOLO ? '<button class="btn now-hear" data-hearall="1">Hear all</button>' : "") + (cur.length > 1 ? '<button class="btn now-all" data-now="all">■ Stop all</button>' : "")
+        + '<button class="btn" data-close="1">Close</button></div>';
+      placePop();
+    }
+    function paintNow() {
+      cur = sources();
+      if (SOLO && !cur.some(x => x[0] === SOLO)) setSolo(null);   // the isolated one stopped: everything comes back
+      if (!cur.length && !pop.hidden) { pop.hidden = true; popFor = null; }
+      const k = cur.map(x => x[0] + x[1] + (x[3] || "")).join("|") + "#" + SOLO + "#" + pop.hidden; if (k === sig) return; sig = k;
+      const h = cur.length ? `<span class="now-lab">Playing</span><button class="btn now-open" aria-haspopup="dialog" aria-expanded="${!pop.hidden}" title="What's playing: edit one, hear only one, or stop"><i></i><span class="now-names">${esc(cur.map(x => x[1]).join(" · "))}</span>${cur.length > 1 ? `<span class="now-n">${cur.length}</span>` : ""}<b>▾</b></button>`
+        + (SOLO ? '<button class="btn now-hear" data-hearall="1">Hear all</button>' : "") + (cur.length > 1 ? '<button class="btn now-all" data-now="all">Stop all</button>' : "") : "";
+      bars.forEach(b => { b.hidden = !cur.length; b.innerHTML = h; });
+      paintNowPop();
+    }
+    const act = e => {
+      const t = e.target.closest && e.target.closest("button, .np-card"); if (!t) return;
+      const redo = () => { sig = null; paintNow(); };
+      if (t.classList.contains("now-open")) { if (pop.hidden) { popFor = t.closest(".nowbar"); pop.hidden = false; } else { pop.hidden = true; popFor = null; } return redo(); }
+      if (t.dataset.close) { pop.hidden = true; popFor = null; return redo(); }
+      if (t.dataset.hearall) { setSolo(null); return redo(); }
+      if (t.dataset.solo) { start(); setSolo(SOLO === t.dataset.solo ? null : t.dataset.solo); return redo(); }
+      if (t.dataset.now) {
+        if (t.dataset.now === "all") { setSolo(null); document.getElementById("stopAll").click(); }
+        else { const x = cur.find(c => c[0] === t.dataset.now); if (x) { try { x[2](); } catch (er) {} } }
+        sig = null; setTimeout(paintNow, 80); return;
+      }
+      if (t.dataset.edit) {
+        const x = cur.find(c => c[0] === t.dataset.edit); pop.hidden = true; popFor = null;
+        if (x && x[4]) { try { x[4](); } catch (er) {} }
+        sig = null; setTimeout(paintNow, 80);
+      }
+    };
+    bars.forEach(b => b.addEventListener("click", act)); pop.addEventListener("click", act);
+    document.addEventListener("pointerdown", e => { if (!pop.hidden && !pop.contains(e.target) && !(e.target.closest && e.target.closest(".now-open"))) { pop.hidden = true; popFor = null; sig = null; paintNow(); } }, true);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !pop.hidden) { pop.hidden = true; popFor = null; sig = null; paintNow(); } }, true);
+    addEventListener("resize", placePop);
     setInterval(() => { if (!document.hidden) paintNow(); }, 400);
   }
 
