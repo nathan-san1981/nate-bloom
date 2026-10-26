@@ -1540,6 +1540,24 @@ body.lite .fxlive .fxl-dot { animation: none; }
 #rcFill.armed { background: var(--amber); border-color: var(--amber); color: var(--panel); animation: nowpulse 0.5s ease-in-out infinite; }
 #djRhythm[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
 body.lite .rc-syncdot, body.lite #rcFill.armed { animation: none; }
+/* ---------- what keeps sounding ---------- */
+.carrybar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 7px 10px; margin: 4px 0; border-radius: 12px; border: 1.5px solid var(--amber); background: rgba(255,182,92,0.1); font-size: 0.82rem; }
+.carrybar[hidden] { display: none; }
+.heldbar.carry { border-color: var(--amber) !important; background: rgba(255,182,92,0.1) !important; }
+.heldbar.carry #heldInfo i { color: var(--amber); font-weight: 700; }
+@media (max-width: 700px) { .carrybar { display: none !important; } #nowBar.carryflash { animation: cbflash 1.2s ease-out; border-color: var(--amber) !important; } }
+}
+.carrybar .cb-h { font: 700 0.72rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber); display: inline-flex; align-items: center; gap: 6px; }
+.carrybar .cb-h::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); animation: nowpulse 1s ease-in-out infinite; }
+.carrybar .cb-items { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 260px; min-width: 0; }
+.carrybar .cb-item { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 16px; background: var(--raised); border: 1px solid var(--line); color: var(--ink); }
+.carrybar .cb-item small { color: var(--dim); font-family: var(--font-mono); font-size: 0.7rem; }
+.carrybar .cb-item button { height: 26px; padding: 0 10px; font-size: 0.74rem; border-radius: 13px; }
+.carrybar .cb-all { height: 30px; padding: 0 12px; font-size: 0.78rem; color: #ff8a8f; }
+.carrybar.flash { animation: cbflash 1.2s ease-out; }
+@keyframes cbflash { 0% { box-shadow: 0 0 0 0 rgba(255,182,92,0.9); } 100% { box-shadow: 0 0 0 14px rgba(255,182,92,0); } }
+#pArp.arp-on { background: var(--amber) !important; color: var(--panel) !important; }
+body.lite .carrybar .cb-h::before { animation: none; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -1974,6 +1992,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <span id="blendVal">45%</span>
     <button class="btn" id="scaleBtn" aria-pressed="false" title="Lock the keys to a scale">Scale: Off</button>
   </div>
+  <div class="carrybar" id="carryBar" hidden role="status"><b class="cb-h">Still playing</b><span class="cb-items" id="carryItems"></span><button class="btn cb-all" id="carryStop">Stop these</button></div>
   <div class="heldbar" id="heldBar" hidden>
     <span id="heldInfo">Held</span>
     <button class="btn heldfx" id="heldFx" aria-pressed="true" title="Send the held notes through the effects and FX Lab">FX</button>
@@ -16371,6 +16390,58 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     document.getElementById("fxPick").addEventListener("click", () => setTimeout(paintLive, 0));
     { const pf = paintFxState; paintFxState = function () { const r = pf.apply(this, arguments); try { paintLive(); } catch (e) {} return r; }; }
     paintLive();
+  }
+
+  // ======================================================================
+  // what keeps sounding: Hold On/Off, Arp On, and a Still playing strip
+  // ======================================================================
+  {
+    const carry = document.getElementById("carryBar"), items = document.getElementById("carryItems"), pArpB = document.getElementById("pArp");
+    function holdLabel() {
+      const n = heldCount(), narrow = innerWidth < 700;
+      const t = narrow ? (state.hold ? "Hold ✓" + (n ? " " + n : "") : n ? "Held " + n : "Hold") : state.hold ? "Hold: On" + (n ? " · " + n : "") : n ? "Hold: Off · " + n + " ringing" : "Hold: Off";
+      const tn = [...holdBtn.childNodes].find(x => x.nodeType === 3 && x.textContent.trim());
+      if (tn) tn.textContent = t + " "; else if (!holdBtn.children.length) holdBtn.textContent = t; else holdBtn.prepend(document.createTextNode(t + " "));
+      holdBtn.title = state.hold ? "Hold is on: notes keep sounding after you let go · tap to turn it off" : "Hold is off · tap so notes keep sounding after you let go";
+    }
+    { const u = updateHoldBtn; updateHoldBtn = function () { const r = u.apply(this, arguments); try { holdLabel(); paintCarry(); } catch (e) {} return r; }; }
+    const arpHere = () => {
+      if (ENGINES[state.engine]) return activeLayers().some(id => arpOn(id));
+      try { return voiceComponents(state.engine).some(c => arpOn(c.key)); } catch (e) { return false; }
+    };
+    function paintArpTab() { const on = arpHere(); pArpB.classList.toggle("arp-on", on); const t = on ? "Arp: On" : "Arp"; if (pArpB.textContent !== t) pArpB.textContent = t; }
+    let sig = "";
+    function paintCarry(flash) {
+      const list = [];
+      PARTS.forEach(p => list.push(["arp", p, nbEngName(p.eng) + " arp", p.notes.slice().sort((a, b) => a - b).map(nbNoteName).join(" ")]));
+      // held notes made with another synth: the held bar itself says so
+      const other = [...heldVoices.values()].some(v => v.engine && v.engine !== state.engine);
+      const hb = document.getElementById("heldBar"); hb.classList.toggle("carry", other);
+      const hi = document.querySelector("#heldInfo i"); if (hi && other && !/^Still ringing/.test(hi.textContent)) hi.textContent = hi.textContent.replace(/^Held/, "Still ringing");
+      const k = list.map(x => x[2] + x[3]).join("|");
+      carry.hidden = !list.length;
+      if (k !== sig) {
+        sig = k; items.innerHTML = "";
+        list.forEach(([kind, ref, name, sub]) => {
+          const c = document.createElement("span"); c.className = "cb-item"; c.innerHTML = "<b></b><small></small>";
+          c.querySelector("b").textContent = name; c.querySelector("small").textContent = sub;
+          const b = document.createElement("button"); b.className = "btn"; b.textContent = kind === "arp" ? "■ Stop" : "Release";
+          b.addEventListener("click", () => { if (kind === "arp") dropPart(ref, true); else { ref.forEach(([r]) => dropHeld(r)); updateHoldBtn(); } paintCarry(); });
+          c.appendChild(b); items.appendChild(c);
+        });
+      }
+      if (flash && list.length) { carry.classList.remove("flash"); void carry.offsetWidth; carry.classList.add("flash");
+        const nb = document.getElementById("nowBar"); if (nb) { nb.classList.remove("carryflash"); void nb.offsetWidth; nb.classList.add("carryflash"); } }   // phones: the Playing bar at the top flashes instead
+    }
+    document.getElementById("carryStop").addEventListener("click", () => {
+      PARTS.slice().forEach(p => dropPart(p, true));
+      [...heldVoices.entries()].filter(([, v]) => v.engine && v.engine !== state.engine).forEach(([r]) => dropHeld(r));
+      updateHoldBtn(); paintCarry();
+    });
+    let lastE = state.engine;
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); try { const sw = state.engine !== lastE; lastE = state.engine; paintArpTab(); holdLabel(); paintCarry(sw); } catch (e) {} return r; }; }
+    setInterval(() => { try { paintCarry(); paintArpTab(); } catch (e) {} }, 600);
+    holdLabel(); paintArpTab(); paintCarry();
   }
 
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
