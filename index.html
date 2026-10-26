@@ -1428,6 +1428,16 @@ body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; marg
 .ex-card h2 { margin: 0; font-family: var(--font-display); font-size: 1.4rem; }
 .ex-card p { margin: 0; color: var(--ink); line-height: 1.45; }
 .ex-card .ex-sub { color: var(--dim); font-size: 0.9rem; }
+/* ---------- Load WAV / MP3 stands out ---------- */
+.btn.loadbig { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 40px; padding: 0 16px; border-radius: 10px;
+  background: var(--lilac); border-color: var(--lilac); color: #15111f; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.01em;
+  box-shadow: 0 0 0 3px rgba(196,163,255,0.28), 0 4px 14px rgba(196,163,255,0.25); }
+.btn.loadbig .upi { width: 18px; height: 18px; flex: none; }
+.btn.loadbig:active { filter: brightness(0.92); }
+@media (hover: hover) and (pointer: fine) { .btn.loadbig:not(:disabled):hover { border-color: #d8c4ff; background: #d8c4ff; filter: none; } }
+.srcline { align-items: center; }
+@media (min-width: 601px) { .srcline .slots { flex: 0 1 auto; } .srcline .slot { width: 46px; flex: none; } .srcline #loadBtn { margin-left: 6px; } }
+@media (max-width: 600px) { .btn.loadbig { height: 38px; padding: 0 12px; font-size: 0.9rem; gap: 5px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1549,7 +1559,7 @@ body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; marg
     <div class="row-label"><span id="engineLabel">Supersaw</span><span class="rtools"><span id="engineAfter" class="fname">after Surge XT</span><button class="btn demo" data-demo="sound" title="Hear this sound">▶ Demo</button></span></div>
     <div class="sbar" id="sbar" hidden>
       <div class="slots" id="slots" role="group" aria-label="Sample slot"></div>
-      <button class="btn" id="loadBtn" title="Load a WAV, MP3, M4A or AIFF into the selected slot"><span class="lg">Load WAV/MP3</span><span class="sm">Load…</span></button>
+      <button class="btn loadbig" id="loadBtn" title="Load a WAV, MP3, M4A or AIFF into the selected slot"><svg class="upi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/></svg><span class="lg">Load WAV / MP3</span><span class="sm">Load</span></button>
       <button class="btn" id="lineBtn" title="Record from a USB interface, the mic, or anything plugged in">Record input</button>
       <button class="btn" id="editBtn">Edit</button>
       <div class="seg small" role="group" aria-label="Sample mode">
@@ -1591,7 +1601,7 @@ body.kbd [data-key]::after { min-width: 22px; height: 22px; padding: 0 5px; marg
     </div>
     <input type="file" id="fileIn" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff" hidden>
     <div class="sbar" id="padbar" hidden>
-      <button class="btn" id="padLoad">Load to pad</button>
+      <button class="btn loadbig" id="padLoad"><svg class="upi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/></svg>Load to pad</button>
       <label class="meter">From <select id="padFrom" aria-label="Copy a sample slot to this pad"><option value="">—</option></select></label>
       <button class="btn" id="padEdit">Edit</button>
       <button class="btn" id="padClear">Clear</button>
