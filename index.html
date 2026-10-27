@@ -14149,7 +14149,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     RCV.forEach(V => { if (V.o.context !== ctx) return; if (V.end < now - 1) { RCV.delete(V); return; } try { V.o.gain.cancelScheduledValues(now); V.o.gain.setValueAtTime(V.o.gain.value, now); V.o.gain.linearRampToValueAtTime(0, now + 0.012); } catch (e) {} });
   }
   document.getElementById("stopAll").addEventListener("click", () => { rcPlay(false); rcHush(); });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && RC.playing) rcPlay(false); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && RC.playing && !nbKeepPlaying()) rcPlay(false); });
   // the sequencer starting while the Rhythm Creator plays: line up with it
   { const ss = startSeq; startSeq = function () { const was = playing; const r = ss.apply(this, arguments); if (!was && playing && RC.playing) { RC.nextT = nextTime; RC.step = curStep; } return r; }; }
 
@@ -14571,6 +14571,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       return enrichSources(s);
     };
     let sig = "", cur = [], popFor = null;
+    // the Android app keeps running in the background only while something is sounding
+    if (window.NB_NATIVE && window.NB_NATIVE.setPlaying) { let was = null; setInterval(() => { let on = false; try { on = sources().length > 0; } catch (e) {} if (on !== was) { was = on; window.NB_NATIVE.setPlaying(on); } }, 700); }
     nbStopSources = () => { sources().forEach(x => { try { x[2](); } catch (er) {} }); stopPads(); };
     const pop = document.createElement("div"); pop.className = "now-pop"; pop.id = "nowPop"; pop.hidden = true;
     pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "What's playing");
@@ -16898,7 +16900,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     BP.held.clear(); BP.rep.clear(); BP.free = false; BP.aud = null; BP.wav = null; if (typeof bpAudPaint === "function") bpAudPaint();
   }
   document.getElementById("stopAll").addEventListener("click", () => { bpTransport(false); bpHush(); });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && BP.playing) bpTransport(false); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && BP.playing && !nbKeepPlaying()) bpTransport(false); });
   bpBtn.addEventListener("click", () => {
     start(); bpView.hidden = false; bpPaintGrid(); bpPaintEdit(); bpPaintTop(); bpPaintChop();
     if (ctx) BPS.banks.flat().forEach(P => { if (P && typeof P.src === "string" && rcEngine(P.src) === "smp") rcSampleBuf(P.src); });
@@ -18173,6 +18175,9 @@ registerProcessor("nb-verb", NBVerb);`;
     };
   }
   window.__inst = { NB_INST, NB_SPRESETS, base: NB_INST_BASE, load: nbInstLoad, apply: applyStudio, loadWaf: s => loadWaf(s), cache: () => [...libCache.keys()] };
+  // in the Android app the music goes on when you switch apps (the app holds a playback notification meanwhile)
+  function nbKeepPlaying() { return !!(window.NB_NATIVE && window.NB_NATIVE.background); }
+  if (window.NB_NATIVE) { const ib = document.getElementById("installBtn"); if (ib) { ib.hidden = true; ib.style.display = "none"; } document.body.classList.add("nb-app"); }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
   more2Ready = true;
@@ -18457,7 +18462,7 @@ registerProcessor("nb-verb", NBVerb);`;
     document.addEventListener(t, () => { if (ctx) wake(); }, { capture: true, passive: true }));
   try { navigator.audioSession && navigator.audioSession.addEventListener("statechange", () => { if (ctx && !document.hidden) wake(); }); } catch (e) {}
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { if (take.rec) stopTake(); stopSeq(); allOff(); if (rec.active) endRec(); }
+    if (document.hidden) { if (nbKeepPlaying()) return; if (take.rec) stopTake(); stopSeq(); allOff(); if (rec.active) endRec(); }
     else if (ctx) wake();
   });
   // ---------- sound that survives other apps and headphone changes ----------

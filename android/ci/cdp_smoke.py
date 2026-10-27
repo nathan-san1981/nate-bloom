@@ -1,0 +1,64 @@
+"""Drive the app's WebView over the DevTools protocol (adb-forwarded) and check what the app adds.
+Prints one line per check; the screenshots are taken by smoke.sh between steps it asks for."""
+import json, sys, time, subprocess, urllib.request
+import websocket  # websocket-client
+
+OUT = sys.argv[1]
+
+def adb(*a):
+    return subprocess.run(["adb", *a], capture_output=True, text=True).stdout
+
+def shot(name):
+    with open(f"{OUT}/{name}.png", "wb") as fh:
+        fh.write(subprocess.run(["adb", "exec-out", "screencap", "-p"], capture_output=True).stdout)
+
+def page_ws():
+    for _ in range(60):
+        try:
+            pages = json.load(urllib.request.urlopen("http://127.0.0.1:9222/json", timeout=5))
+            for p in pages:
+                if "nate-bloom" in p.get("url", "") and p.get("webSocketDebuggerUrl"):
+                    return p["webSocketDebuggerUrl"]
+        except Exception as e:
+            pass
+        time.sleep(2)
+    raise SystemExit("no WebView page to debug")
+
+ws = websocket.create_connection(page_ws(), timeout=60, suppress_origin=True)
+seq = 0
+def ev(expr, wait=True):
+    global seq
+    seq += 1
+    ws.send(json.dumps({"id": seq, "method": "Runtime.evaluate", "params": {"expression": expr, "awaitPromise": wait, "returnByValue": True}}))
+    while True:
+        m = json.loads(ws.recv())
+        if m.get("id") == seq:
+            r = m.get("result", {})
+            if "exceptionDetails" in r: return "EXCEPTION " + json.dumps(r["exceptionDetails"])[:300]
+            return r.get("result", {}).get("value")
+
+def check(name, expr):
+    v = ev(expr)
+    print(f"{name}: {json.dumps(v)[:400]}", flush=True)
+    return v
+
+check("page", "document.title + ' | ' + location.href")
+check("native", "JSON.stringify({native: !!window.NB_NATIVE, v: window.NB_NATIVE && NB_NATIVE.version, ua: navigator.userAgent.slice(-40)})")
+check("viewport", "innerWidth + 'x' + innerHeight + ' dpr ' + devicePixelRatio")
+shot("01_start")
+check("start", "(async()=>{ document.getElementById('startBtn').click(); await new Promise(r=>setTimeout(r,2500)); return {startHidden: !document.getElementById('startBtn').offsetParent} })()")
+shot("02_main")
+check("midi", "(async()=>{ const a = await navigator.requestMIDIAccess({sysex:false}); return {inputs: a.inputs.size, outputs: a.outputs.size, kind: a.constructor.name} })()")
+check("midi sheet", "(async()=>{ document.getElementById('midiBtn').click(); await new Promise(r=>setTimeout(r,800)); const c=[...document.querySelectorAll('#midiSheet button')].find(b=>/connect/i.test(b.textContent)); if (c) c.click(); await new Promise(r=>setTimeout(r,800)); return document.getElementById('midiSheet').innerText.slice(0,200) })()")
+shot("03_midi")
+check("midi close", "NB_NATIVE.back()")
+check("save file", "(async()=>{ try { return await NB_NATIVE.saveBlob(new Blob(['Nate Bloom CI test ' + Date.now()], {type:'text/plain'}), 'nb-ci-test.txt'); } catch(e) { return 'ERR ' + e.message } })()")
+check("share path", "(async()=>{ try { await navigator.share({files:[new File([new Uint8Array([1,2,3])], 'nb-ci-share.bin', {type:'application/octet-stream'})]}); return 'ok' } catch(e) { return 'ERR ' + e.message } })()")
+check("studio", "(async()=>{ document.getElementById('sndOpen').click(); await new Promise(r=>setTimeout(r,600)); document.querySelector('#brCats .chip[data-cat=\"studio\"]').click(); await new Promise(r=>setTimeout(r,600)); document.querySelector('#brList .br-row[data-id=\"w:nb-piano\"] .br-main').click(); for (let i=0;i<60;i++){ await new Promise(r=>setTimeout(r,500)); const s=document.getElementById('sndSub').textContent; if(!/Loading|Downloading/.test(s) && /Salamander/.test(s)) return s; } return 'timeout: ' + document.getElementById('sndSub').textContent })()")
+shot("04_studio")
+check("close browser", "NB_NATIVE.back()")
+check("beat pads", "(async()=>{ document.getElementById('bpBtn').click(); await new Promise(r=>setTimeout(r,1200)); return !document.getElementById('bpView').hidden })()")
+shot("05_beatpads")
+check("back closes beat pads", "(async()=>{ const r = NB_NATIVE.back(); await new Promise(r=>setTimeout(r,500)); return [r, document.getElementById('bpView').hidden] })()")
+check("errors so far", "JSON.stringify((window.__nbErrors||[]).slice(0,5))")
+ws.close()

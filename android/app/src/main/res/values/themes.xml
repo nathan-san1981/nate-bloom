@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nb_panel">#FF13111B</color>
+    <style name="Theme.NateBloom" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/nb_panel</item>
+        <item name="android:statusBarColor">@color/nb_panel</item>
+        <item name="android:navigationBarColor">@color/nb_panel</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>
