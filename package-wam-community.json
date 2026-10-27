@@ -1,0 +1,35 @@
+{
+  "name": "wam-community",
+  "version": "0.4.9",
+  "description": "A collection of prebuilt Web Audio Modules ready for use",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "clean": "./tools/clean.sh",
+    "build": "yarn install && node ./tools/build.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boourns/wam-community.git"
+  },
+  "keywords": [
+    "audio",
+    "web-audio",
+    "wam",
+    "web-audio-module",
+    "music",
+    "synthesizer",
+    "effects"
+  ],
+  "author": "Various",
+  "bugs": {
+    "url": "https://github.com/boourns/wam-community/issues"
+  },
+  "homepage": "https://github.com/boourns/wam-community#readme",
+  "devDependencies": {
+    "burns-audio-wam": "^0.2.54",
+    "glob": "^8.0.3",
+    "sharp": "^0.32.1"
+  }
+}

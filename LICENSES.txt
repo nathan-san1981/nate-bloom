@@ -1,0 +1,2 @@
+./LICENSES.txt
+./community/wimmics/utils/sdk-parammgr/LICENSE
