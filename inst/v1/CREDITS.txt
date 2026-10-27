@@ -1,0 +1,16 @@
+Nate Bloom studio instruments (inst/v1)
+
+Each instrument here is a set of single notes, trimmed, levelled and encoded to 128 kbit/s MP3 for download
+on demand. manifest.json lists every note: MIDI note, file, key range, and loop start/end (seconds) for the
+sustained instruments. The app crossfades each loop after decoding.
+
+Grand Piano
+  Salamander Grand Piano V3 by Alexander Holm (Yamaha C5), velocity layer 10.
+  Licence: Creative Commons Attribution 3.0 (CC BY 3.0) https://creativecommons.org/licenses/by/3.0/
+  Source: https://github.com/sfzinstruments/SalamanderGrandPiano
+
+String Ensemble, Cello Section, Pizzicato Strings, Flute, French Horn, Concert Harp, Pipe Organ
+  Versilian Studios Chamber Orchestra 2, Community Edition (VSCO 2 CE), recorded by Sam Gossner and
+  Simon Dalzell; sample cutting by Elan Hickler / Soundemote.
+  Licence: CC0 1.0 (public domain dedication) https://creativecommons.org/publicdomain/zero/1.0/
+  Source: https://github.com/sgossner/VSCO-2-CE
