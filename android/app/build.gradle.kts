@@ -20,7 +20,7 @@ android {
 
     // use the NDK the build machine already has, when it names one
     (System.getenv("ANDROID_NDK_LATEST_HOME") ?: System.getenv("ANDROID_NDK_HOME"))?.let { home ->
-        val v = java.io.File(home).name
+        val v = home.trimEnd('/').substringAfterLast('/')
         if (Regex("""\d+\.\d+\.\d+""").matches(v)) ndkVersion = v
     }
 
