@@ -1,0 +1,135 @@
+{
+ "id": "voice",
+ "build": 1,
+ "name": "Voice",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A singing-voice synthesizer (formant wave functions): bass to soprano, vowels you can glide between, for choirs and vocal pads",
+ "blurb": "A singing voice, bass to soprano, with vowels you can glide between: choirs and vocal pads.",
+ "voices": 6,
+ "poly": {
+  "freq": 262248,
+  "gain": 262144,
+  "gate": 262164
+ },
+ "params": [
+  {
+   "id": "voice",
+   "label": "Voice",
+   "index": 262216,
+   "min": 0,
+   "max": 4,
+   "init": 3,
+   "step": 1,
+   "menu": [
+    [
+     "Bass",
+     0
+    ],
+    [
+     "Tenor",
+     1
+    ],
+    [
+     "Countertenor",
+     2
+    ],
+    [
+     "Alto",
+     3
+    ],
+    [
+     "Soprano",
+     4
+    ]
+   ]
+  },
+  {
+   "id": "vowel",
+   "label": "Vowel",
+   "index": 262224,
+   "min": 0,
+   "max": 4,
+   "init": 0,
+   "step": 0.01
+  },
+  {
+   "id": "attack",
+   "label": "Attack",
+   "index": 262160,
+   "min": 5,
+   "max": 3000,
+   "init": 180,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 262192,
+   "min": 20,
+   "max": 5000,
+   "init": 600,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "vibrato",
+   "label": "Vibrato",
+   "index": 262368,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 262652,
+   "min": 0,
+   "max": 100,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Choir aah",
+   "values": {
+    "voice": 3,
+    "vowel": 0,
+    "attack": 400,
+    "release": 1200,
+    "vibrato": 35,
+    "level": 70
+   }
+  },
+  {
+   "name": "Deep ooh",
+   "values": {
+    "voice": 0,
+    "vowel": 4,
+    "attack": 300,
+    "release": 1500,
+    "vibrato": 25,
+    "level": 75
+   }
+  },
+  {
+   "name": "Soprano eee",
+   "values": {
+    "voice": 4,
+    "vowel": 2,
+    "attack": 200,
+    "release": 900,
+    "vibrato": 50,
+    "level": 60
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

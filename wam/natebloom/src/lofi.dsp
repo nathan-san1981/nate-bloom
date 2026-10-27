@@ -1,0 +1,15 @@
+declare name "Lo-Fi";
+declare description "Crunch and dust: fewer bits, a lower sample rate, a worn-record wobble, crackle and a dark filter";
+import("stdfaust.lib");
+bits   = hslider("[0]Bits", 10, 3, 16, 1);
+rate   = hslider("[1]Sample rate [unit:Hz][scale:log]", 16000, 2000, 44100, 10);
+wobble = hslider("[2]Wobble [unit:%]", 30, 0, 100, 1) / 100 : si.smoo;
+dust   = hslider("[3]Dust [unit:%]", 10, 0, 100, 1) / 100;
+tone   = hslider("[4]Tone [unit:Hz][scale:log]", 6000, 800, 18000, 1) : si.smoo;
+mix    = hslider("[5]Mix [unit:%]", 100, 0, 100, 1) / 100 : si.smoo;
+q = 2 ^ (bits - 1);
+crush(x) = floor(x * q + 0.5) / q;
+wb = wobble * (0.0018 * os.osc(0.33) + 0.0006 * no.lfnoise(1.7));
+crackle = (no.noise > (1 - 0.0004 * dust)) * no.noise * 0.22 * dust + no.pink_noise * 0.0025 * dust;
+ch(x) = x : de.fdelay(2048, (0.004 + wb) * ma.SR) : ba.downSample(rate) : crush : fi.lowpass(2, tone) : +(crackle);
+process = _, _ <: (_, _), (ch, ch) : ro.interleave(2, 2) : par(i, 2, xf) with { xf(d, w) = d * (1 - mix) + w * mix; };

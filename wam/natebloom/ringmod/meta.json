@@ -1,0 +1,46 @@
+{
+ "id": "ringmod",
+ "build": 1,
+ "name": "Ring Mod",
+ "kind": "effect",
+ "type": "Modulation",
+ "description": "A ring modulator: bell tones, metallic shimmer and alien drones, with a slow drift on the carrier",
+ "blurb": "A ring modulator for bells, metallic shimmer and alien drones, with a slow drift on the carrier.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "frequency",
+   "label": "Frequency",
+   "index": 524328,
+   "min": 1,
+   "max": 3000,
+   "init": 220,
+   "step": 0.1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "drift",
+   "label": "Drift",
+   "index": 524340,
+   "min": 0,
+   "max": 100,
+   "init": 15,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

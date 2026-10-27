@@ -1,0 +1,104 @@
+{
+ "id": "violin",
+ "build": 1,
+ "name": "Violin",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A bowed-string physical model: the bow's pressure and position, a slow or sharp attack, and vibrato that grows as the note sustains",
+ "blurb": "A bowed string: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
+ "voices": 6,
+ "poly": {
+  "freq": 270368,
+  "gain": 278700,
+  "gate": 270428
+ },
+ "params": [
+  {
+   "id": "attack",
+   "label": "Attack",
+   "index": 278708,
+   "min": 2,
+   "max": 2000,
+   "init": 90,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 278712,
+   "min": 10,
+   "max": 4000,
+   "init": 300,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "bowpressure",
+   "label": "Bow pressure",
+   "index": 278724,
+   "min": 0,
+   "max": 100,
+   "init": 45,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "bowposition",
+   "label": "Bow position",
+   "index": 270460,
+   "min": 5,
+   "max": 95,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "vibrato",
+   "label": "Vibrato",
+   "index": 270408,
+   "min": 0,
+   "max": 100,
+   "init": 45,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 295164,
+   "min": 0,
+   "max": 100,
+   "init": 75,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Slow swell",
+   "values": {
+    "attack": 700,
+    "release": 900,
+    "bowpressure": 40,
+    "bowposition": 70,
+    "vibrato": 50,
+    "level": 75
+   }
+  },
+  {
+   "name": "Spiccato",
+   "values": {
+    "attack": 8,
+    "release": 60,
+    "bowpressure": 60,
+    "bowposition": 80,
+    "vibrato": 0,
+    "level": 80
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

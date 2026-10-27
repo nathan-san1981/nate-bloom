@@ -1,0 +1,10 @@
+declare name "Auto-Pan";
+declare description "Tremolo or auto-pan: a smooth or choppy level movement, in the same phase on both sides or swinging left to right";
+import("stdfaust.lib");
+rate  = hslider("[0]Rate [unit:Hz][scale:log]", 2, 0.05, 16, 0.01);
+depth = hslider("[1]Depth [unit:%]", 70, 0, 100, 1) / 100 : si.smoo;
+shape = hslider("[2]Shape [unit:%]", 20, 0, 100, 1) / 100 : si.smoo;
+pan   = hslider("[3]Pan [unit:%]", 100, 0, 100, 1) / 100 : si.smoo;
+wave(ph) = os.oscp(rate, ph) : sh with { sh(s) = s * (1 - shape) + ma.signum(s) * shape; };
+g(ph) = 1 - depth * (0.5 + 0.5 * wave(ph));
+process = _, _ : *(g(0)), *(g(pan * ma.PI));

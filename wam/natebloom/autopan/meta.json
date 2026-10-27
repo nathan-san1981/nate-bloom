@@ -1,0 +1,56 @@
+{
+ "id": "autopan",
+ "build": 1,
+ "name": "Auto-Pan",
+ "kind": "effect",
+ "type": "Modulation",
+ "description": "Tremolo or auto-pan: a smooth or choppy level movement, in the same phase on both sides or swinging left to right",
+ "blurb": "Tremolo (Pan at 0) or auto-pan (Pan at 100): smooth or choppy.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "rate",
+   "label": "Rate",
+   "index": 524328,
+   "min": 0.05,
+   "max": 16,
+   "init": 2,
+   "step": 0.01,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "depth",
+   "label": "Depth",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "shape",
+   "label": "Shape",
+   "index": 524348,
+   "min": 0,
+   "max": 100,
+   "init": 20,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "pan",
+   "label": "Pan",
+   "index": 524360,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

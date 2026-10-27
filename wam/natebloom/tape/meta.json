@@ -1,0 +1,96 @@
+{
+ "id": "tape",
+ "build": 1,
+ "name": "Tape",
+ "kind": "effect",
+ "type": "Saturation",
+ "description": "A tape machine: soft saturation, head bump, high-frequency loss, wow and flutter and a little hiss, for warmth and age",
+ "blurb": "A tape machine: soft saturation, a low-end bump, rolled-off highs, wow and flutter and a little hiss. Age takes it from fresh to worn.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "drive",
+   "label": "Drive",
+   "index": 270592,
+   "min": 0,
+   "max": 24,
+   "init": 6,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "age",
+   "label": "Age",
+   "index": 262176,
+   "min": 0,
+   "max": 100,
+   "init": 30,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "wowflutter",
+   "label": "Wow & flutter",
+   "index": 270392,
+   "min": 0,
+   "max": 100,
+   "init": 20,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "hiss",
+   "label": "Hiss",
+   "index": 270632,
+   "min": 0,
+   "max": 100,
+   "init": 8,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "output",
+   "label": "Output",
+   "index": 270644,
+   "min": -18,
+   "max": 6,
+   "init": 0,
+   "step": 0.1,
+   "unit": "dB"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Warm",
+   "values": {
+    "drive": 6,
+    "age": 20,
+    "wowflutter": 10,
+    "hiss": 4,
+    "output": 0
+   }
+  },
+  {
+   "name": "Cassette",
+   "values": {
+    "drive": 10,
+    "age": 60,
+    "wowflutter": 45,
+    "hiss": 20,
+    "output": -1
+   }
+  },
+  {
+   "name": "Old reel",
+   "values": {
+    "drive": 14,
+    "age": 85,
+    "wowflutter": 70,
+    "hiss": 35,
+    "output": -2
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

@@ -1,0 +1,124 @@
+{
+ "id": "ladder",
+ "build": 1,
+ "name": "Ladder Filter",
+ "kind": "effect",
+ "type": "Equalizer & Filter",
+ "description": "A Moog-style ladder filter that moves: an LFO and an envelope follower sweep the cutoff, for filter swells and wah-like motion",
+ "blurb": "A Moog-style ladder filter with an LFO and an envelope follower: slow sweeps, swells, or wah when you play harder.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "cutoff",
+   "label": "Cutoff",
+   "index": 524332,
+   "min": 40,
+   "max": 18000,
+   "init": 1200,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "resonance",
+   "label": "Resonance",
+   "index": 524420,
+   "min": 0,
+   "max": 100,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "lforate",
+   "label": "LFO rate",
+   "index": 524348,
+   "min": 0.02,
+   "max": 12,
+   "init": 0.25,
+   "step": 0.01,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "lfodepth",
+   "label": "LFO depth",
+   "index": 524368,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "envelope",
+   "label": "Envelope",
+   "index": 524380,
+   "min": -100,
+   "max": 100,
+   "init": 0,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "drive",
+   "label": "Drive",
+   "index": 524408,
+   "min": 0,
+   "max": 18,
+   "init": 0,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Slow sweep",
+   "values": {
+    "cutoff": 900,
+    "resonance": 45,
+    "lforate": 0.08,
+    "lfodepth": 70,
+    "envelope": 0,
+    "drive": 3,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Envelope wah",
+   "values": {
+    "cutoff": 400,
+    "resonance": 60,
+    "lforate": 0.5,
+    "lfodepth": 0,
+    "envelope": 80,
+    "drive": 2,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Dark",
+   "values": {
+    "cutoff": 700,
+    "resonance": 15,
+    "lforate": 0.2,
+    "lfodepth": 10,
+    "envelope": 0,
+    "drive": 0,
+    "mix": 100
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

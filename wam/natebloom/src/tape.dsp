@@ -1,0 +1,14 @@
+declare name "Tape";
+declare description "A tape machine: soft saturation, head bump, high-frequency loss, wow and flutter and a little hiss, for warmth and age";
+import("stdfaust.lib");
+drive = hslider("[0]Drive [unit:dB]", 6, 0, 24, 0.1) : ba.db2linear : si.smoo;
+age   = hslider("[1]Age [unit:%]", 30, 0, 100, 1) / 100 : si.smoo;
+wow   = hslider("[2]Wow & flutter [unit:%]", 20, 0, 100, 1) / 100 : si.smoo;
+hiss  = hslider("[3]Hiss [unit:%]", 8, 0, 100, 1) / 100 : si.smoo;
+out   = hslider("[4]Output [unit:dB]", 0, -18, 6, 0.1) : ba.db2linear : si.smoo;
+w = wow * (0.0011 * os.osc(0.6) + 0.00018 * os.osc(7.4) + 0.00012 * no.lfnoise(4));
+mod(x) = x : de.fdelay(1024, (0.0025 + w) * ma.SR);
+sat(x) = ma.tanh(x * drive + 0.08 * x * x * drive) / drive * (1 + 0.08 * (drive - 1));
+hf = 18000 - age * 13000;
+ch(x) = x : mod : fi.peak_eq(2.5 * (1 - age * 0.3), 90, 70) : sat : fi.lowpass(2, hf) : fi.highpass(1, 25) : +(no.noise * hiss * 0.006 * (0.6 + age)) : *(out);
+process = ch, ch;

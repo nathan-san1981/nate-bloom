@@ -1,0 +1,16 @@
+declare name "Ladder Filter";
+declare description "A Moog-style ladder filter that moves: an LFO and an envelope follower sweep the cutoff, for filter swells and wah-like motion";
+import("stdfaust.lib");
+cut   = hslider("[0]Cutoff [unit:Hz][scale:log]", 1200, 40, 18000, 1) : si.smoo;
+res   = hslider("[1]Resonance [unit:%]", 35, 0, 100, 1) / 100 : si.smoo;
+rate  = hslider("[2]LFO rate [unit:Hz][scale:log]", 0.25, 0.02, 12, 0.01);
+ldep  = hslider("[3]LFO depth [unit:%]", 40, 0, 100, 1) / 100 : si.smoo;
+env   = hslider("[4]Envelope [unit:%]", 0, -100, 100, 1) / 100 : si.smoo;
+drive = hslider("[5]Drive [unit:dB]", 0, 0, 18, 0.1) : ba.db2linear : si.smoo;
+mix   = hslider("[6]Mix [unit:%]", 100, 0, 100, 1) / 100 : si.smoo;
+nf0 = log10(cut / 20) / 3;
+lfo(ph) = os.oscp(rate, ph) * ldep * 0.22;
+follow(l, r) = (abs(l) + abs(r)) * 0.5 : an.amp_follower_ar(0.005, 0.18) : min(1);
+f(x, ph, e) = x * drive : ma.tanh : ve.moogLadder(max(0.01, min(0.995, nf0 + lfo(ph) + env * e * 0.35)), 0.7 + res * 18) : *(1 / sqrt(drive));
+wet(l, r) = f(l, 0, e), f(r, 0.5, e) with { e = follow(l, r); };
+process = _, _ <: (_, _), wet : ro.interleave(2, 2) : par(i, 2, xf) with { xf(d, w) = d * (1 - mix) + w * mix; };

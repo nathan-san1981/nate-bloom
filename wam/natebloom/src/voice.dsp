@@ -1,0 +1,15 @@
+declare name "Voice";
+declare description "A singing-voice synthesizer (formant wave functions): bass to soprano, vowels you can glide between, for choirs and vocal pads";
+import("stdfaust.lib");
+freq = hslider("freq", 440, 20, 8000, 0.01);
+gain = hslider("gain", 0.8, 0, 1, 0.01);
+gate = button("gate");
+vtype = nentry("[0]Voice [style:menu{'Bass':0;'Tenor':1;'Countertenor':2;'Alto':3;'Soprano':4}]", 3, 0, 4, 1);
+vowel = hslider("[1]Vowel", 0, 0, 4, 0.01) : si.smoo;
+att   = hslider("[2]Attack [unit:ms][scale:log]", 180, 5, 3000, 1) / 1000;
+rel   = hslider("[3]Release [unit:ms][scale:log]", 600, 20, 5000, 1) / 1000;
+vib   = hslider("[4]Vibrato [unit:%]", 40, 0, 100, 1) / 100 : si.smoo;
+level = hslider("[5]Level [unit:%]", 70, 0, 100, 1) / 100 : si.smoo;
+env = en.asr(att, 1, rel, gate) * (0.5 + gain * 0.5);
+f = freq * (1 + os.osc(5.2 + no.lfnoise(0.5) * 0.4) * vib * 0.012 * en.asr(0.8, 1, 0.2, gate));
+process = pm.SFFormantModelFofSmooth(vtype, vowel, f, env * 25) * level * 2.4;

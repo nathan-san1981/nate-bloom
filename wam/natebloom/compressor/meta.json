@@ -1,0 +1,110 @@
+{
+ "id": "compressor",
+ "build": 1,
+ "name": "Bus Compressor",
+ "kind": "effect",
+ "type": "Dynamics",
+ "description": "Glue for the whole mix: a stereo-linked compressor with soft attack, auto-free release and a parallel Mix for New York-style compression",
+ "blurb": "Glue for the whole mix. Lower Mix for parallel (New York) compression: punch without losing the transients.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "threshold",
+   "label": "Threshold",
+   "index": 56,
+   "min": -40,
+   "max": 0,
+   "init": -18,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "ratio",
+   "label": "Ratio",
+   "index": 40,
+   "min": 1,
+   "max": 12,
+   "init": 3,
+   "step": 0.1
+  },
+  {
+   "id": "attack",
+   "label": "Attack",
+   "index": 36,
+   "min": 0.3,
+   "max": 80,
+   "init": 10,
+   "step": 0.1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 44,
+   "min": 30,
+   "max": 1200,
+   "init": 160,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "makeup",
+   "label": "Makeup",
+   "index": 68,
+   "min": 0,
+   "max": 18,
+   "init": 4,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Mix glue",
+   "values": {
+    "threshold": -14,
+    "ratio": 2,
+    "attack": 20,
+    "release": 200,
+    "makeup": 3,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Punchy",
+   "values": {
+    "threshold": -20,
+    "ratio": 4,
+    "attack": 15,
+    "release": 120,
+    "makeup": 6,
+    "mix": 100
+   }
+  },
+  {
+   "name": "New York",
+   "values": {
+    "threshold": -30,
+    "ratio": 8,
+    "attack": 3,
+    "release": 100,
+    "makeup": 10,
+    "mix": 40
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

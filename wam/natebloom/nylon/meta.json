@@ -1,0 +1,50 @@
+{
+ "id": "nylon",
+ "build": 1,
+ "name": "Nylon Guitar",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A physical model of a classical guitar string and body; pluck it near the bridge for bite or near the middle for warmth",
+ "blurb": "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth.",
+ "voices": 8,
+ "poly": {
+  "freq": 8232,
+  "gain": 8272,
+  "gate": 8308
+ },
+ "params": [
+  {
+   "id": "pluckposition",
+   "label": "Pluck position",
+   "index": 8240,
+   "min": 5,
+   "max": 95,
+   "init": 80,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "tone",
+   "label": "Tone",
+   "index": 16,
+   "min": 800,
+   "max": 18000,
+   "init": 7000,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 32984,
+   "min": 0,
+   "max": 100,
+   "init": 80,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

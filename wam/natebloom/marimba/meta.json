@@ -1,0 +1,101 @@
+{
+ "id": "marimba",
+ "build": 1,
+ "name": "Marimba",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A physical model of a marimba: a wooden bar with fifty vibrating modes over a tuned tube resonator, struck with a mallet you can soften or harden",
+ "blurb": "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone.",
+ "voices": 8,
+ "poly": {
+  "freq": 9208,
+  "gain": 9260,
+  "gate": 9340
+ },
+ "params": [
+  {
+   "id": "mallet",
+   "label": "Mallet",
+   "index": 9336,
+   "min": 0,
+   "max": 100,
+   "init": 45,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "decay",
+   "label": "Decay",
+   "index": 9244,
+   "min": 0.15,
+   "max": 6,
+   "init": 1.4,
+   "step": 0.01,
+   "unit": "s",
+   "scale": "log"
+  },
+  {
+   "id": "brightness",
+   "label": "Brightness",
+   "index": 9264,
+   "min": 400,
+   "max": 18000,
+   "init": 6500,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "strikeposition",
+   "label": "Strike position",
+   "index": 9256,
+   "min": 0,
+   "max": 4,
+   "init": 1,
+   "step": 1
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 18764,
+   "min": 0,
+   "max": 100,
+   "init": 80,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Soft mallets",
+   "values": {
+    "mallet": 15,
+    "decay": 2,
+    "brightness": 3500,
+    "strikeposition": 1,
+    "level": 85
+   }
+  },
+  {
+   "name": "Hard mallets",
+   "values": {
+    "mallet": 85,
+    "decay": 1.2,
+    "brightness": 12000,
+    "strikeposition": 2,
+    "level": 75
+   }
+  },
+  {
+   "name": "Ringing",
+   "values": {
+    "mallet": 40,
+    "decay": 5,
+    "brightness": 7000,
+    "strikeposition": 0,
+    "level": 75
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

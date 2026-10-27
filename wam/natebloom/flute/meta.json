@@ -1,0 +1,81 @@
+{
+ "id": "flute",
+ "build": 1,
+ "name": "Flute",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A physical model of a flute: breath, embouchure and vibrato; breathy and soft or bright and pure",
+ "blurb": "Breath, embouchure and vibrato: breathy and soft or bright and pure.",
+ "voices": 6,
+ "poly": {
+  "freq": 270368,
+  "gain": 286848,
+  "gate": 286860
+ },
+ "params": [
+  {
+   "id": "attack",
+   "label": "Attack",
+   "index": 286856,
+   "min": 2,
+   "max": 1500,
+   "init": 40,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 286880,
+   "min": 10,
+   "max": 3000,
+   "init": 160,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "breath",
+   "label": "Breath",
+   "index": 286936,
+   "min": 0,
+   "max": 100,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "embouchure",
+   "label": "Embouchure",
+   "index": 270376,
+   "min": 10,
+   "max": 90,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "vibrato",
+   "label": "Vibrato",
+   "index": 286836,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 295172,
+   "min": 0,
+   "max": 100,
+   "init": 75,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

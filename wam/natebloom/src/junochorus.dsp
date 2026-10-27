@@ -1,0 +1,14 @@
+declare name "Juno Chorus";
+declare description "The Roland Juno-60's bucket-brigade chorus: mode I, mode II, or both, with the stereo spread that made it famous";
+import("stdfaust.lib");
+mode = nentry("[0]Mode [style:menu{'I':0;'II':1;'I + II':2}]", 0, 0, 2, 1);
+mix  = hslider("[1]Mix [unit:%]", 50, 0, 100, 1) / 100 : si.smoo;
+tone = hslider("[2]Tone [unit:Hz][scale:log]", 8000, 3000, 14000, 10) : si.smoo;
+noiseAmt = hslider("[3]Noise [unit:%]", 10, 0, 100, 1) / 100;
+rate = ba.selectn(3, mode, 0.513, 0.863, 9.75);
+dmin = ba.selectn(3, mode, 0.00166, 0.00166, 0.00322) : si.smoo;
+dmax = ba.selectn(3, mode, 0.00535, 0.00535, 0.00356) : si.smoo;
+tri = os.lf_triangle(rate) * 0.5 + 0.5;
+bbd(t, x) = x : fi.lowpass(2, tone) : de.fdelay(2048, (dmin + (dmax - dmin) * t) * ma.SR) : fi.lowpass(2, tone) : +(no.noise * 0.00035 * noiseAmt);
+wet(l, r) = m <: bbd(tri), bbd(1 - tri) with { m = (l + r) * 0.5; };
+process = _, _ <: (_, _), wet : ro.interleave(2, 2) : par(i, 2, xf) with { xf(d, w) = d + w * mix * 1.1; } : par(i, 2, *(1 / (1 + mix * 0.45)));

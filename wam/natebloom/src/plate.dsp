@@ -1,0 +1,11 @@
+declare name "Plate";
+declare description "A bright, dense plate reverb after Jon Dattorro's classic design (Faust version by Jakob Zerbian)";
+import("stdfaust.lib");
+pre   = hslider("[0]Pre-delay [unit:ms]", 12, 0, 100, 1);
+decay = hslider("[1]Decay [unit:%]", 72, 10, 98, 1) / 100;
+damp  = hslider("[2]Damping [unit:%]", 30, 0, 90, 1) / 100;
+bw    = hslider("[3]Bandwidth [unit:%]", 75, 10, 100, 1) / 100;
+mix   = hslider("[4]Mix [unit:%]", 25, 0, 100, 1) / 100 : si.smoo;
+pd = int(pre * ma.SR / 1000);
+wet = re.dattorro_rev(pd, bw, 0.75, 0.625, decay, 0.7, 0.5, damp) : fi.highpass(1, 80), fi.highpass(1, 80);
+process = _, _ <: (_, _), wet : ro.interleave(2, 2) : par(i, 2, xf) with { xf(d, w) = d * cos(mix * ma.PI / 2) + w * sin(mix * ma.PI / 2) * 1.4; };

@@ -1,0 +1,81 @@
+{
+ "id": "clarinet",
+ "build": 1,
+ "name": "Clarinet",
+ "kind": "instrument",
+ "type": "Physical model",
+ "description": "A physical model of a clarinet: reed stiffness and bell opening shape a woody, hollow tone",
+ "blurb": "Reed stiffness and bell opening shape a woody, hollow tone.",
+ "voices": 6,
+ "poly": {
+  "freq": 270388,
+  "gain": 270404,
+  "gate": 270416
+ },
+ "params": [
+  {
+   "id": "attack",
+   "label": "Attack",
+   "index": 270412,
+   "min": 2,
+   "max": 1500,
+   "init": 30,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 270436,
+   "min": 10,
+   "max": 3000,
+   "init": 120,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "reed",
+   "label": "Reed",
+   "index": 270544,
+   "min": 0,
+   "max": 100,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "bell",
+   "label": "Bell",
+   "index": 262156,
+   "min": 0,
+   "max": 100,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "vibrato",
+   "label": "Vibrato",
+   "index": 270524,
+   "min": 0,
+   "max": 100,
+   "init": 25,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "level",
+   "label": "Level",
+   "index": 278764,
+   "min": 0,
+   "max": 100,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

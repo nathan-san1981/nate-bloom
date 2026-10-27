@@ -1,0 +1,121 @@
+{
+ "id": "hall",
+ "build": 1,
+ "name": "Hall",
+ "kind": "effect",
+ "type": "Reverb",
+ "description": "A large, smooth stereo hall: the Zita reverb (Fons Adriaensen's design, Faust version by Julius O. Smith III)",
+ "blurb": "A big, smooth stereo hall that keeps its low end apart from its shimmer. Long decays for ambient washes.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "predelay",
+   "label": "Pre-delay",
+   "index": 262280,
+   "min": 20,
+   "max": 140,
+   "init": 40,
+   "step": 1,
+   "unit": "ms"
+  },
+  {
+   "id": "decay",
+   "label": "Decay",
+   "index": 28,
+   "min": 0.8,
+   "max": 14,
+   "init": 4.5,
+   "step": 0.1,
+   "unit": "s"
+  },
+  {
+   "id": "lowdecay",
+   "label": "Low decay",
+   "index": 72,
+   "min": 0.8,
+   "max": 14,
+   "init": 5.5,
+   "step": 0.1,
+   "unit": "s"
+  },
+  {
+   "id": "brightness",
+   "label": "Brightness",
+   "index": 60,
+   "min": 1500,
+   "max": 16000,
+   "init": 5500,
+   "step": 10,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "width",
+   "label": "Width",
+   "index": 1917468,
+   "min": 0,
+   "max": 150,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 28,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Concert hall",
+   "values": {
+    "predelay": 40,
+    "decay": 3.2,
+    "lowdecay": 4,
+    "brightness": 6500,
+    "width": 100,
+    "mix": 25
+   }
+  },
+  {
+   "name": "Cathedral",
+   "values": {
+    "predelay": 70,
+    "decay": 8.5,
+    "lowdecay": 10,
+    "brightness": 4200,
+    "width": 120,
+    "mix": 35
+   }
+  },
+  {
+   "name": "Ambient wash",
+   "values": {
+    "predelay": 110,
+    "decay": 14,
+    "lowdecay": 12,
+    "brightness": 3800,
+    "width": 140,
+    "mix": 50
+   }
+  },
+  {
+   "name": "Small room",
+   "values": {
+    "predelay": 20,
+    "decay": 1,
+    "lowdecay": 1.1,
+    "brightness": 9000,
+    "width": 80,
+    "mix": 18
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

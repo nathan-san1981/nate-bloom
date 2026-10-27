@@ -1,0 +1,135 @@
+{
+ "id": "tapeecho",
+ "build": 1,
+ "name": "Tape Echo",
+ "kind": "effect",
+ "type": "Delay",
+ "description": "A tape delay: repeats that darken, saturate and wobble, ping-ponging across the stereo field, and a feedback that can run away into self-oscillation",
+ "blurb": "Repeats that darken, saturate and wobble like worn tape, bouncing left and right. Push Feedback past 100% for runaway echoes.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "time",
+   "label": "Time",
+   "index": 1572936,
+   "min": 40,
+   "max": 1500,
+   "init": 380,
+   "step": 1,
+   "unit": "ms"
+  },
+  {
+   "id": "feedback",
+   "label": "Feedback",
+   "index": 524344,
+   "min": 0,
+   "max": 115,
+   "init": 48,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "wowflutter",
+   "label": "Wow & flutter",
+   "index": 1572948,
+   "min": 0,
+   "max": 100,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "tone",
+   "label": "Tone",
+   "index": 524332,
+   "min": 500,
+   "max": 12000,
+   "init": 3200,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "saturation",
+   "label": "Saturation",
+   "index": 1573156,
+   "min": 0,
+   "max": 100,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "pingpong",
+   "label": "Ping-pong",
+   "index": 2621784,
+   "min": 0,
+   "max": 100,
+   "init": 60,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 30,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Dub",
+   "values": {
+    "time": 420,
+    "feedback": 72,
+    "wowflutter": 30,
+    "tone": 1800,
+    "saturation": 55,
+    "pingpong": 80,
+    "mix": 35
+   }
+  },
+  {
+   "name": "Slapback",
+   "values": {
+    "time": 110,
+    "feedback": 10,
+    "wowflutter": 15,
+    "tone": 6000,
+    "saturation": 25,
+    "pingpong": 0,
+    "mix": 30
+   }
+  },
+  {
+   "name": "Space echo",
+   "values": {
+    "time": 300,
+    "feedback": 60,
+    "wowflutter": 55,
+    "tone": 2600,
+    "saturation": 45,
+    "pingpong": 50,
+    "mix": 40
+   }
+  },
+  {
+   "name": "Runaway",
+   "values": {
+    "time": 520,
+    "feedback": 108,
+    "wowflutter": 40,
+    "tone": 2200,
+    "saturation": 70,
+    "pingpong": 70,
+    "mix": 40
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

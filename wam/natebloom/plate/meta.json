@@ -1,0 +1,96 @@
+{
+ "id": "plate",
+ "build": 1,
+ "name": "Plate",
+ "kind": "effect",
+ "type": "Reverb",
+ "description": "A bright, dense plate reverb after Jon Dattorro's classic design (Faust version by Jakob Zerbian)",
+ "blurb": "The classic studio plate: dense, bright and quick to bloom. Lovely on vocals, snares and keys.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "predelay",
+   "label": "Pre-delay",
+   "index": 184404,
+   "min": 0,
+   "max": 100,
+   "init": 12,
+   "step": 1,
+   "unit": "ms"
+  },
+  {
+   "id": "decay",
+   "label": "Decay",
+   "index": 36928,
+   "min": 10,
+   "max": 98,
+   "init": 72,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "damping",
+   "label": "Damping",
+   "index": 4148,
+   "min": 0,
+   "max": 90,
+   "init": 30,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "bandwidth",
+   "label": "Bandwidth",
+   "index": 53324,
+   "min": 10,
+   "max": 100,
+   "init": 75,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 25,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Vocal plate",
+   "values": {
+    "predelay": 20,
+    "decay": 70,
+    "damping": 25,
+    "bandwidth": 80,
+    "mix": 22
+   }
+  },
+  {
+   "name": "Long plate",
+   "values": {
+    "predelay": 35,
+    "decay": 92,
+    "damping": 35,
+    "bandwidth": 70,
+    "mix": 35
+   }
+  },
+  {
+   "name": "Dark plate",
+   "values": {
+    "predelay": 10,
+    "decay": 80,
+    "damping": 70,
+    "bandwidth": 45,
+    "mix": 28
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

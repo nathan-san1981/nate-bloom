@@ -1,0 +1,12 @@
+declare name "Hall";
+declare description "A large, smooth stereo hall: the Zita reverb (Fons Adriaensen's design, Faust version by Julius O. Smith III)";
+import("stdfaust.lib");
+pre   = hslider("[0]Pre-delay [unit:ms]", 40, 20, 140, 1);
+decay = hslider("[1]Decay [unit:s]", 4.5, 0.8, 14, 0.1);
+lowd  = hslider("[2]Low decay [unit:s]", 5.5, 0.8, 14, 0.1);
+tone  = hslider("[3]Brightness [unit:Hz][scale:log]", 5500, 1500, 16000, 10);
+width = hslider("[4]Width [unit:%]", 100, 0, 150, 1) / 100 : si.smoo;
+mix   = hslider("[5]Mix [unit:%]", 28, 0, 100, 1) / 100 : si.smoo;
+wide(l, r) = (m + s * width), (m - s * width) with { m = (l + r) / 2; s = (l - r) / 2; };
+wet = fi.highpass(2, 90), fi.highpass(2, 90) : re.zita_rev1_stereo(pre, 220, tone, lowd, decay, 96000) : wide;
+process = _, _ <: (_, _), wet : ro.interleave(2, 2) : par(i, 2, xf) with { xf(d, w) = d * cos(mix * ma.PI / 2) + w * sin(mix * ma.PI / 2) * 1.6; };

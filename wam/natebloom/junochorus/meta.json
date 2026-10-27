@@ -1,0 +1,69 @@
+{
+ "id": "junochorus",
+ "build": 1,
+ "name": "Juno Chorus",
+ "kind": "effect",
+ "type": "Modulation",
+ "description": "The Roland Juno-60's bucket-brigade chorus: mode I, mode II, or both, with the stereo spread that made it famous",
+ "blurb": "The Juno-60's bucket-brigade chorus: I, II, or both at once for the fast, shimmering vibrato.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "mode",
+   "label": "Mode",
+   "index": 16444,
+   "min": 0,
+   "max": 2,
+   "init": 0,
+   "step": 1,
+   "menu": [
+    [
+     "I",
+     0
+    ],
+    [
+     "II",
+     1
+    ],
+    [
+     "I + II",
+     2
+    ]
+   ]
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 16516,
+   "min": 0,
+   "max": 100,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "tone",
+   "label": "Tone",
+   "index": 24,
+   "min": 3000,
+   "max": 14000,
+   "init": 8000,
+   "step": 10,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "noise",
+   "label": "Noise",
+   "index": 16500,
+   "min": 0,
+   "max": 100,
+   "init": 10,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [],
+ "faust": "2.90.17"
+}

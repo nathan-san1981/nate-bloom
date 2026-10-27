@@ -1,0 +1,110 @@
+{
+ "id": "lofi",
+ "build": 1,
+ "name": "Lo-Fi",
+ "kind": "effect",
+ "type": "Saturation",
+ "description": "Crunch and dust: fewer bits, a lower sample rate, a worn-record wobble, crackle and a dark filter",
+ "blurb": "Fewer bits, a lower sample rate, a worn-record wobble, crackle and a dark filter.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "bits",
+   "label": "Bits",
+   "index": 278588,
+   "min": 3,
+   "max": 16,
+   "init": 10,
+   "step": 1
+  },
+  {
+   "id": "samplerate",
+   "label": "Sample rate",
+   "index": 278600,
+   "min": 2000,
+   "max": 44100,
+   "init": 16000,
+   "step": 10,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "wobble",
+   "label": "Wobble",
+   "index": 278604,
+   "min": 0,
+   "max": 100,
+   "init": 30,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "dust",
+   "label": "Dust",
+   "index": 278768,
+   "min": 0,
+   "max": 100,
+   "init": 10,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "tone",
+   "label": "Tone",
+   "index": 278576,
+   "min": 800,
+   "max": 18000,
+   "init": 6000,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 278544,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Sampler (12-bit)",
+   "values": {
+    "bits": 12,
+    "samplerate": 26000,
+    "wobble": 10,
+    "dust": 5,
+    "tone": 12000,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Dusty record",
+   "values": {
+    "bits": 14,
+    "samplerate": 32000,
+    "wobble": 40,
+    "dust": 55,
+    "tone": 5000,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Crushed",
+   "values": {
+    "bits": 5,
+    "samplerate": 6000,
+    "wobble": 0,
+    "dust": 0,
+    "tone": 9000,
+    "mix": 80
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

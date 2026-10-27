@@ -1,0 +1,16 @@
+declare name "Violin";
+declare description "A bowed-string physical model: the bow's pressure and position, a slow or sharp attack, and vibrato that grows as the note sustains";
+import("stdfaust.lib");
+freq = hslider("freq", 440, 20, 8000, 0.01);
+gain = hslider("gain", 0.8, 0, 1, 0.01);
+gate = button("gate");
+att   = hslider("[0]Attack [unit:ms][scale:log]", 90, 2, 2000, 1) / 1000;
+rel   = hslider("[1]Release [unit:ms][scale:log]", 300, 10, 4000, 1) / 1000;
+press = hslider("[2]Bow pressure [unit:%]", 45, 0, 100, 1) / 100 : si.smoo;
+pos   = hslider("[3]Bow position [unit:%]", 70, 5, 95, 1) / 100 : si.smoo;
+vib   = hslider("[4]Vibrato [unit:%]", 45, 0, 100, 1) / 100 : si.smoo;
+level = hslider("[5]Level [unit:%]", 75, 0, 100, 1) / 100 : si.smoo;
+env = en.asr(att, 1, rel, gate) * (0.45 + gain * 0.55);
+vibEnv = en.asr(0.6, 1, 0.2, gate);
+f = freq * (1 + os.osc(5.4) * vib * 0.0075 * vibEnv);
+process = pm.violinModel(f : pm.f2l, press, env, pos) * level * 1.2;

@@ -1,0 +1,156 @@
+{
+ "id": "cloud",
+ "build": 1,
+ "name": "Cloud",
+ "kind": "effect",
+ "type": "Granular",
+ "description": "A granular texture cloud: grains of what you play, scattered in time and pitch, fed back into themselves",
+ "blurb": "Grains of what you play, scattered in time and pitch and fed back into themselves. Set Pitch to 0 / +12 for shimmering clouds.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "grainsize",
+   "label": "Grain size",
+   "index": 1048680,
+   "min": 20,
+   "max": 600,
+   "init": 140,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "density",
+   "label": "Density",
+   "index": 88,
+   "min": 5,
+   "max": 100,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "pitch",
+   "label": "Pitch",
+   "index": 1048724,
+   "min": 0,
+   "max": 4,
+   "init": 4,
+   "step": 1,
+   "menu": [
+    [
+     "−12",
+     0
+    ],
+    [
+     "0",
+     1
+    ],
+    [
+     "+7",
+     2
+    ],
+    [
+     "+12",
+     3
+    ],
+    [
+     "0 / +12",
+     4
+    ]
+   ]
+  },
+  {
+   "id": "scatter",
+   "label": "Scatter",
+   "index": 1048672,
+   "min": 0,
+   "max": 100,
+   "init": 45,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "feedback",
+   "label": "Feedback",
+   "index": 48,
+   "min": 0,
+   "max": 92,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "spread",
+   "label": "Spread",
+   "index": 1048744,
+   "min": 0,
+   "max": 100,
+   "init": 80,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Shimmer cloud",
+   "values": {
+    "grainsize": 160,
+    "density": 75,
+    "pitch": 4,
+    "scatter": 50,
+    "feedback": 45,
+    "spread": 90,
+    "mix": 45
+   }
+  },
+  {
+   "name": "Frozen dust",
+   "values": {
+    "grainsize": 60,
+    "density": 95,
+    "pitch": 1,
+    "scatter": 90,
+    "feedback": 70,
+    "spread": 100,
+    "mix": 55
+   }
+  },
+  {
+   "name": "Octave down drone",
+   "values": {
+    "grainsize": 400,
+    "density": 60,
+    "pitch": 0,
+    "scatter": 30,
+    "feedback": 55,
+    "spread": 70,
+    "mix": 50
+   }
+  },
+  {
+   "name": "Fifths",
+   "values": {
+    "grainsize": 220,
+    "density": 70,
+    "pitch": 2,
+    "scatter": 40,
+    "feedback": 40,
+    "spread": 80,
+    "mix": 40
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}

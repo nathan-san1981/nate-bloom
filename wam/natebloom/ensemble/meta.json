@@ -1,0 +1,83 @@
+{
+ "id": "ensemble",
+ "build": 1,
+ "name": "Ensemble",
+ "kind": "effect",
+ "type": "Modulation",
+ "description": "The three-voice string-machine ensemble chorus: slow swirl plus fast shimmer, the sound of a Solina, an ARP Omni and Vangelis-era pads",
+ "blurb": "The three-voice string-machine ensemble: slow swirl plus fast shimmer, the sound of a Solina and Vangelis-era pads.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "depth",
+   "label": "Depth",
+   "index": 557108,
+   "min": 0,
+   "max": 100,
+   "init": 70,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "speed",
+   "label": "Speed",
+   "index": 557124,
+   "min": 0,
+   "max": 100,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "width",
+   "label": "Width",
+   "index": 557168,
+   "min": 0,
+   "max": 100,
+   "init": 90,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 55,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "String machine",
+   "values": {
+    "depth": 75,
+    "speed": 50,
+    "width": 90,
+    "mix": 60
+   }
+  },
+  {
+   "name": "Subtle",
+   "values": {
+    "depth": 35,
+    "speed": 35,
+    "width": 70,
+    "mix": 35
+   }
+  },
+  {
+   "name": "Seasick",
+   "values": {
+    "depth": 100,
+    "speed": 85,
+    "width": 100,
+    "mix": 70
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}
