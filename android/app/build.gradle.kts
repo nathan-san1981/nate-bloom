@@ -14,6 +14,18 @@ android {
         // CI sets these from the run number, so every build installs over the last one
         versionCode = (System.getenv("NB_VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("NB_VERSION_NAME") ?: "1.0"
+        // the fast pad engine (C++): tablets and phones are arm64; x86_64 is for the test emulator
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+    }
+
+    // use the NDK the build machine already has, when it names one
+    (System.getenv("ANDROID_NDK_LATEST_HOME") ?: System.getenv("ANDROID_NDK_HOME"))?.let { home ->
+        val v = java.io.File(home).name
+        if (Regex("""\d+\.\d+\.\d+""").matches(v)) ndkVersion = v
+    }
+
+    externalNativeBuild {
+        cmake { path = file("src/main/cpp/CMakeLists.txt") }
     }
 
     signingConfigs {

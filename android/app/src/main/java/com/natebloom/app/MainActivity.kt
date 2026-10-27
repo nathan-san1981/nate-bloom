@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
     lateinit var bridge: NativeBridge
         private set
     private lateinit var midi: MidiBridge
+    private var fast: FastPads? = null
     private var startScript = ""
     private var startScriptAtDocStart = false
     private var visible = false
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
         midi = MidiBridge(this)
         web.addJavascriptInterface(bridge, "NBNativeBridge")
         web.addJavascriptInterface(midi, "NBMidiBridge")
+        if (FastPads.available) fast = FastPads(this).also { web.addJavascriptInterface(it, "NBFastPads") }
 
         startScript = assets.open("nb-native.js").bufferedReader().use { it.readText() }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
@@ -229,7 +231,10 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         // nothing playing: let the page rest (timers paused) to save battery
-        if (!bridge.playing) web.onPause()
+        if (!bridge.playing) {
+            web.onPause()
+            fast?.sleep()   // the page wakes it again when Beat Pads is used
+        }
     }
 
     /** Called by the page (through the bridge) when the sound starts or stops. */
@@ -245,6 +250,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         PlaybackService.stop(this)
         midi.close()
+        fast?.sleep()
         web.destroy()
         super.onDestroy()
     }

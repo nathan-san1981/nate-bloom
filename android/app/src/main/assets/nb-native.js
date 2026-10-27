@@ -14,10 +14,11 @@
     foreground(on) { NB.visible = !!on; try { window.dispatchEvent(new CustomEvent("nb-native-foreground", { detail: !!on })); } catch (e) {} return true; },
     // Android Back: close the sheet that's open; false when there's nothing to close
     back() {
-      const open = [...document.querySelectorAll('[role="dialog"], .sheet, .editor, .dj, #browser, #mixer')]
-        .filter(el => !el.hidden && el.offsetParent !== null && el.getClientRects().length);
+      // (full-screen panels are position: fixed, so "is it showing" is about boxes, not offsetParent)
+      const shown = el => !el.hidden && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+      const open = [...document.querySelectorAll('[role="dialog"], .sheet, .editor, .dj, #browser, #mixer')].filter(shown);
       for (let i = open.length - 1; i >= 0; i--) {
-        const btn = [...open[i].querySelectorAll("button")].find(b => b.offsetParent !== null && /^(done|close|cancel|✕|×)$/i.test(b.textContent.trim()));
+        const btn = [...open[i].querySelectorAll("button")].find(b => shown(b) && /^(done|close|cancel|✕|×)$/i.test(b.textContent.trim()));
         if (btn) { btn.click(); return true; }
       }
       return false;
