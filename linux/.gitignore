@@ -1,0 +1,4 @@
+site/
+native/build/
+node_modules/
+dist/

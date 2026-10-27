@@ -1,0 +1,38 @@
+{
+  "name": "nate-bloom",
+  "productName": "Nate Bloom",
+  "version": "1.0.0",
+  "description": "Nate Bloom: synths, Studio instruments, Beat Pads, DJ, Tracks and more, as a Linux app",
+  "homepage": "https://nathan-san1981.github.io/nate-bloom/",
+  "author": { "name": "nathan-san1981", "email": "nathan-san1981@users.noreply.github.com" },
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "native": "cd native && node-gyp rebuild",
+    "dist": "electron-builder --linux deb AppImage --publish never"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^25.1.8",
+    "node-gyp": "^11.0.0"
+  },
+  "build": {
+    "appId": "com.natebloom.desktop",
+    "productName": "Nate Bloom",
+    "files": ["main.js", "preload.js", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node"],
+    "asarUnpack": ["native/build/Release/nbfastpads.node"],
+    "extraResources": [{ "from": "site", "to": "site" }],
+    "linux": {
+      "target": ["deb", "AppImage"],
+      "category": "Audio",
+      "icon": "build/icon.png",
+      "executableName": "nate-bloom",
+      "synopsis": "Synths, Studio instruments, Beat Pads and DJ",
+      "description": "Nate Bloom as a Linux app: works offline, USB MIDI, fast Beat Pads, saves to Downloads/Nate Bloom."
+    },
+    "deb": { "priority": "optional" },
+    "artifactName": "NateBloom-${version}.${ext}"
+  }
+}

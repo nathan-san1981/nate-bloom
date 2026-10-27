@@ -1,0 +1,86 @@
+name: Linux app
+
+on:
+  push:
+    branches: [main]
+    paths: ["linux/**", ".github/workflows/linux.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: linux
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # 22.04 (Mint 21's base): what's built here also runs on Mint 22
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    env:
+      NB_VERSION: 1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: The site goes inside the app
+        run: |
+          mkdir -p /tmp/nb-logs
+          cd linux && rm -rf site && mkdir -p site/lite
+          cp ../index.html ../icon-192.png ../icon-512.png ../manifest.webmanifest site/
+          cp ../lite/index.html ../lite/manifest.webmanifest site/lite/
+          [ -f ../lite/sim.html ] && cp ../lite/sim.html site/lite/ || true
+          cp -r ../inst site/inst
+          date -u +%Y-%m-%dT%H:%M:%SZ > site/BUILD.txt
+          du -sh site
+
+      - name: Install
+        run: cd linux && npm install --no-audit --no-fund 2>&1 | tail -20
+
+      - name: Build the fast-pad engine
+        id: native
+        run: |
+          set -o pipefail
+          cd linux/native && npx --no-install node-gyp rebuild 2>&1 | tee /tmp/nb-logs/native.log
+          node -e "const f = require('./build/Release/nbfastpads.node'); console.log(Object.keys(f).join(' '))" | tee -a /tmp/nb-logs/native.log
+
+      - name: Package (.deb and AppImage)
+        id: build
+        run: |
+          set -o pipefail
+          cd linux && npx --no-install electron-builder --linux deb AppImage --publish never -c.extraMetadata.version=$NB_VERSION 2>&1 | tee /tmp/nb-logs/build.log
+          ls -la dist | tee -a /tmp/nb-logs/build.log
+
+      - name: Smoke test (install the .deb, start it, check it)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: bash linux/ci/smoke.sh /tmp/nb-logs/smoke
+
+      - name: Release
+        if: steps.build.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd linux/dist
+          DEB=$(ls NateBloom-*.deb | head -1); APPI=$(ls NateBloom-*.AppImage | head -1)
+          cp "$DEB" NateBloom-linux.deb; cp "$APPI" NateBloom-linux.AppImage
+          # a release per build, and a fixed "linux-latest" one so the download link never changes
+          # (neither is marked latest: the Android app's link uses the latest release)
+          gh release create "linux-v$NB_VERSION" "$DEB" "$APPI" --title "Nate Bloom for Linux $NB_VERSION" --notes-file ../RELEASE_NOTES.md --latest=false
+          gh release view linux-latest >/dev/null 2>&1 || gh release create linux-latest --title "Nate Bloom for Linux (latest)" --notes-file ../RELEASE_NOTES.md --latest=false
+          gh release edit linux-latest --title "Nate Bloom for Linux (latest: $NB_VERSION)" --notes-file ../RELEASE_NOTES.md --latest=false
+          gh release upload linux-latest NateBloom-linux.deb NateBloom-linux.AppImage --clobber
+
+      - name: Publish logs to the ci-logs-linux branch
+        if: always()
+        run: |
+          cd /tmp/nb-logs || exit 0
+          echo "${{ github.run_number }} ${{ github.sha }} native=${{ steps.native.outcome }} build=${{ steps.build.outcome }}" > run.txt
+          git init -q && git checkout -q -b ci-logs-linux
+          git config user.name "nb-ci" && git config user.email "nb-ci@users.noreply.github.com"
+          git add -A && git commit -qm "Linux run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-logs-linux
