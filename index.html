@@ -18062,10 +18062,14 @@ registerProcessor("nb-verb", NBVerb);`;
   async function nbInstLoad(id, onStep) {
     const I = NB_INST[id]; if (!I) throw new Error("unknown instrument");
     start(); if (!ctx) throw new Error("no audio");
+    // one download per instrument: a 4-byte header length, a JSON index of the notes, then the MP3s back to back
+    const r = await fetch(NB_INST_BASE + id + ".bin"); if (!r.ok) throw new Error("HTTP " + r.status);
+    const all = await r.arrayBuffer(), hl = new DataView(all).getUint32(0, true);
+    const idx = new Map(JSON.parse(new TextDecoder().decode(new Uint8Array(all, 4, hl))).files.map(([n, o, l]) => [n, [4 + hl + o, l]]));
     let done = 0;
     const regions = await Promise.all(I.notes.map(async ([m, fn, lo, hi, ls, le]) => {
-      const r = await fetch(NB_INST_BASE + id + "/" + fn); if (!r.ok) throw new Error("HTTP " + r.status);
-      const buf = await decode(await r.arrayBuffer()), lead = nbLead(buf), loop = ls != null && le != null;
+      const at = idx.get(fn); if (!at) throw new Error("missing " + fn);
+      const buf = await decode(all.slice(at[0], at[0] + at[1])), lead = nbLead(buf), loop = ls != null && le != null;
       let lsS = 0, leS = 0;
       if (loop) { lsS = ls + lead; leS = Math.min(buf.duration - 0.005, le + lead); nbLoopFade(buf, lsS, leS); }
       done++; if (onStep) onStep(done, I.notes.length);
