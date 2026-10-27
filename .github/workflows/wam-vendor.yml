@@ -1,0 +1,42 @@
+name: Gather WAM plugins
+
+# Run by hand: installs the community Web Audio Module collection and pushes its built plugins (with a listing of
+# sizes and licences) to the wam-vendor branch, where the ones Nate Bloom ships are picked from.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gather:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the collection
+        run: |
+          mkdir -p /tmp/w && cd /tmp/w && npm init -y >/dev/null
+          npm install --no-audit --no-fund wam-community burns-audio-wam 2>&1 | tail -5
+          ls node_modules/wam-community node_modules/burns-audio-wam
+      - name: Collect
+        run: |
+          mkdir -p /tmp/out && cd /tmp/w/node_modules
+          { echo "wam-community $(node -p "require('./wam-community/package.json').version")"; echo "burns-audio-wam $(node -p "require('./burns-audio-wam/package.json').version")"; } > /tmp/out/VERSIONS.txt
+          [ -d wam-community/dist/plugins ] && cp -r wam-community/dist/plugins /tmp/out/community || true
+          [ -f wam-community/dist/plugins.json ] && cp wam-community/dist/plugins.json /tmp/out/ || true
+          [ -d burns-audio-wam/dist/plugins ] && cp -r burns-audio-wam/dist/plugins /tmp/out/burns || true
+          for p in wam-community burns-audio-wam; do cp $p/LICENSE* /tmp/out/LICENSE-$p 2>/dev/null || true; cp $p/package.json /tmp/out/package-$p.json; done
+          cd /tmp/out && find . -maxdepth 3 -type d | sort > TREE.txt
+          du -sh community/*/* burns/* 2>/dev/null | sort -h > SIZES.txt || true
+          find . -iname "LICENSE*" -o -iname "COPYING*" | sort > LICENSES.txt
+          tail -40 SIZES.txt
+      - name: Push to wam-vendor
+        run: |
+          cd /tmp/out
+          git init -q && git checkout -q -b wam-vendor
+          git config user.name "nb-ci" && git config user.email "nb-ci@users.noreply.github.com"
+          git add -A && git commit -qm "WAM community plugins, as installed"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" wam-vendor
