@@ -26,7 +26,7 @@
     "extraResources": [{ "from": "site", "to": "site" }],
     "linux": {
       "target": ["deb", "AppImage"],
-      "category": "Audio",
+      "category": "AudioVideo",
       "icon": "build/icon.png",
       "executableName": "nate-bloom",
       "synopsis": "Synths, Studio instruments, Beat Pads and DJ",

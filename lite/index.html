@@ -1572,7 +1572,8 @@ body.lite .carrybar .cb-h::before { animation: none; }
 .bp-main { display: grid; grid-template-columns: minmax(280px, min(58vh, 560px)) minmax(0, 1fr); gap: 14px; align-items: start; }
 @media (max-width: 900px) { .bp-main { grid-template-columns: 1fr; } }
 .bp-left { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.bp-banks { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 6px; }
+.bp-banks { display: grid; grid-template-columns: repeat(4, 1fr) auto auto; gap: 6px; }
+.bp-banks button.bp-bkit { padding: 0 12px; font: 600 0.82rem var(--font-body); color: var(--ink); border-color: #4a4266; }
 .bp-banks button.bp-bclr { padding: 0 10px; font: 600 0.78rem var(--font-body); color: var(--dim); }
 .bp-banks button.bp-bclr:disabled { opacity: 0.4; cursor: default; }
 .bp-banks button { height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); color: var(--dim); font: 700 0.9rem var(--font-body); cursor: pointer; }
@@ -1710,6 +1711,10 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
 .rk-chip[aria-pressed="true"] i { background: var(--pc); box-shadow: 0 0 6px var(--pc); }
 .rk-chip.rk-add { border-style: dashed; color: var(--dim); padding: 4px 12px; }
 @media (max-width: 430px) { .rk-chip { max-width: 160px; min-height: 34px; font-size: 0.78rem; } }
+.bp-kits { display: flex; flex-direction: column; gap: 6px; max-height: calc(100dvh - 240px); overflow-y: auto; padding-right: 2px; }
+.bp-kits .bp-kgrp { font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin: 8px 2px 0; }
+.bp-kits .br-play[aria-pressed="true"] { color: #7fd6c2; }
+.bp-kits .br-row.on .br-name::after { content: " ✓"; color: var(--lilac); }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -2506,11 +2511,20 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     </div>
   </div>
 </div>
+<div class="editor sheet" id="bpKitSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Load a kit">
+    <div class="ed-head"><strong id="bpKitTitle">Load a kit onto bank A</strong></div>
+    <span class="ed-info" style="text-align:left">Fills all 16 pads on this bank. ▶ plays a quick groove first. Your recorded hits stay, so the beat plays on the new kit; Undo puts the old pads back.</span>
+    <div class="bp-kits" id="bpKitList"></div>
+    <div class="ed-foot"><button class="btn primary" id="bpKitDone">Done</button></div>
+  </div>
+</div>
 <div class="editor sheet" id="bpHelp" hidden>
   <div class="ed-card" role="dialog" aria-label="Beat Pads help">
     <div class="ed-head"><strong>Beat Pads</strong></div>
     <div class="rc-helptext">
       <p><b>Pads.</b> 16 pads, 4 banks. Pad 1 is bottom-left, like an MPC. Bank A is the Studio kit (real drums) laid out for finger drumming, bank B is Studio percussion, C and D are for your chops. <b>Clear</b> at the end of the bank row empties every pad on that bank (and its hits in this sequence); Undo brings them back. Hit higher on a pad for louder, lower for softer; <b>Full level</b> makes every hit full. </p>
+      <p><b>Kits.</b> <b>Kit…</b> in the bank row loads a whole kit onto the bank you're on: the Studio drums and percussion, 808, real 808 samples, 909, Trap, FM & FX, hand percussion and the library kits. ▶ plays a quick groove on a kit first. Every kit sits the same way (kick, snare and hats on the bottom row, rim and clap above, then toms, cymbals on top), so a beat you recorded plays on the new kit, and Undo puts the old pads back.</p>
       <p><b>Keyboard.</b> The pads are the left-hand block of keys, laid out like the pads: <b>1 2 3 4</b> are the top row (pads 13–16), <b>Q W E R</b> 9–12, <b>A S D F</b> 5–8 and <b>Z X C V</b> the bottom row (pads 1–4). Each pad shows its key. With the right hand: <b>Space</b> plays or stops, <b>Enter</b> records, <b>← →</b> change the bank, <b>↑ ↓</b> the sequence, <b>Esc</b> closes Beat Pads (it keeps playing), <b>Ctrl Z</b> (⌘ Z on a Mac) takes back the last recording pass, and holding <b>Shift</b> turns on Repeat while you hold pads. The keys show on computers and whenever you use a keyboard; <b>Letters on keys</b> in the menu turns them off.</p>
       <p><b>Recording.</b> Pick the loop length and tap <b>● Rec</b>: one bar of count-in, then everything you hit goes into the loop, and each time round you can add more (overdub). <b>↶ Undo</b> takes back the last pass. <b>Quantize</b> moves hits onto the grid (Strength sets how far) and <b>Swing</b> pushes the off-beats late, MPC style; both work on what's already recorded, so you can change them after.</p>
       <p><b>Repeat.</b> Turn on <b>Repeat</b>, pick a rate, and hold a pad for a roll in time. Move your finger up or down the pad to change how hard it hits.</p>
@@ -16950,7 +16964,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     if (bpView.hidden) return;
     const tg = e.target, range = !!(tg && tg.type === "range");
     if (tg && ((/INPUT|SELECT|TEXTAREA/.test(tg.tagName) && !range) || tg.isContentEditable)) return;
-    if (!document.getElementById("bpHelp").hidden) return;   // the help sheet keeps its own keys (Esc closes it)
+    if (!document.getElementById("bpHelp").hidden || !document.getElementById("bpKitSheet").hidden) return;   // a sheet on top keeps its own keys (Esc closes it)
     const done = () => { e.preventDefault(); e.stopImmediatePropagation(); if (KBD_LABELS === null) kbSeen(); };
     if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.code === "KeyZ") { done(); if (!e.repeat) { const u = document.getElementById("bpUndo"); if (u && !u.disabled) u.click(); } return; }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -16984,6 +16998,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       h += `<button class="bp-pad${P && P.src ? "" : " empty"}${BPS.sel === k ? " sel" : ""}${used.has(k) ? " has" : ""}" data-k="${k}" aria-label="Pad ${i + 1}${P && P.src ? ": " + bpName(P) : " (empty)"}"><b>${i + 1}</b><i>${BP_KEYCAP[i]}</i><span>${P && P.src ? (typeof P.src === "object" ? (P.src.nm || "Chop " + (P.src.n || "")) : bpName(P)) : "empty"}</span></button>`; } });
     bpGrid.innerHTML = h;
     document.getElementById("bpBanks").innerHTML = "ABCD".split("").map((L, b) => `<button data-b="${b}" style="--bk:${BP_BANK_COL[b]}" aria-pressed="${b === bk}">${L}<small>${BPS.banks[b].filter(p => p && p.src).length}</small></button>`).join("")
+      + `<button class="bp-bkit" data-kit title="Load a whole kit onto bank ${"ABCD"[bk]}" aria-label="Load a kit onto bank ${"ABCD"[bk]}">Kit…</button>`
       + `<button class="bp-bclr" data-clr${BPS.banks[bk].some(p => p && p.src) ? "" : " disabled"} title="Empty every pad on bank ${"ABCD"[bk]}" aria-label="Clear every pad on bank ${"ABCD"[bk]}">Clear ${"ABCD"[bk]}</button>`;
   }
   function bpMarkSel() { bpGrid.querySelectorAll(".bp-pad").forEach(el => el.classList.toggle("sel", +el.dataset.k === BPS.sel)); }
@@ -18723,6 +18738,92 @@ registerProcessor("nb-verb", NBVerb);`;
       + "<span>" + K("Space") + " Play</span><span>" + K("↵") + " Rec</span><span>" + K("←", "→") + " Bank</span><span>" + K("↑", "↓") + " Seq</span>"
       + "<span>hold " + K("⇧") + " Repeat</span><span>" + K(mac ? "⌘" : "Ctrl", "Z") + " Undo</span><span>" + K("Esc") + " Close</span>";
     window.__bpkeys = { held: () => [...bpKeyHeld.entries()], shiftRep: () => !!BP.shiftRep };
+  }
+  // ---------- Beat Pads kits: a whole kit onto the bank you're on ----------
+  {
+    // the layout every kit uses: 1 kick · 2 snare · 3 closed hat · 4 open hat / 5 rim · 6 clap · 7 pedal hat or shaker · 8 tambourine or perc /
+    // 9–11 toms · 12 perc / 13 crash · 14 ride · 15 bell · 16 cowbell (pad 1 is bottom-left)
+    const KITS = [
+      ["Drums", [
+        ["studio", "Studio kit", "real drums, recorded · the default bank A", BP_A, [2, 3, 6]],
+        ["808", "808", "the classic drum machine, made live", ["808:bd", "808:sd", "808:ch", "808:oh", "808:rs", "808:cp", "808:ma", "808:cb", "808:lt", "808:mt", "808:ht", "808:cl", "808:cy", "808:lc", "808:mc", "808:hc"], [2, 3]],
+        ["f8", "Real 808", "samples of a real TR-808", ["f8:bd", "f8:sd", "f8:ch", "f8:oh", "f8:rs", "f8:cp", "f8:ma", "f8:cb", "f8:lt", "f8:mt", "f8:ht", "f8:cl", "f8:cy", "f8:bdl", "f8:lc", "f8:hc"], [2, 3]],
+        ["909", "909", "house and techno", ["909:bd", "909:sd", "909:ch", "909:oh", "909:rs", "909:cp", "hp:shaker", "hp:tamb", "909:lt", "909:mt", "909:ht", "808:cl", "909:cr", "909:rd", "808:ma", "808:cb"], [2, 3]],
+        ["trap", "Trap", "808 kick and boom, snaps, trap hats, risers", ["f8:bd", "tr:snap", "tr:hat", "f8:oh", "tr:boom", "tr:clap", "808:ch", "f8:cb", "f8:lt", "f8:mt", "f8:ht", "hp:shaker", "909:cr", "fx:riser", "fx:revcym", "fx:zap"], [2, 3, 6]],
+        ["fm", "FM & FX", "FM drums, zaps, risers and drops", ["fm:bd", "fm:sd", "909:ch", "909:oh", "808:rs", "tr:clap", "fm:metal", "hp:shaker", "fm:tom", "fx:tomdrop", "808:ht", "fm:bell", "fx:revcym", "fx:riser", "fx:zap", "808:cb"], [2, 3]],
+      ]],
+      ["Percussion", [
+        ["stperc", "Studio percussion", "congas, bongos, agogo, shakers, recorded · the default bank B", BP_B, []],
+        ["hand", "Hand percussion", "bongos, timbales, congas, shakers, made live", ["hp:bongolo", "hp:bongohi", "hp:shaker", "hp:tamb", "hp:timblo", "hp:timbhi", "hp:cabasa", "hp:tri", "808:lc", "808:mc", "808:hc", "808:cl", "hp:agogolo", "hp:agogohi", "808:ma", "808:cb"], []],
+      ]],
+      ["Library kits", []],
+    ];
+    // the library kits (12 sounds each): their sounds in the same places, a little hand percussion in the gaps
+    if (window.NB_KITS) Object.entries(NB_KITS).forEach(([kid, K]) => {
+      const at = re => { const j = K.pads.findIndex(pd => pd && re.test(pd.name)); return j < 0 ? null : "k:" + kid + ":" + j; };
+      const ids = [at(/kick/i), at(/snare/i), at(/closed/i), at(/open/i), at(/rim/i), at(/clap/i), at(/cowbell/i), "hp:tamb", at(/low tom/i), at(/mid tom/i), at(/high tom/i), "hp:shaker", at(/crash/i), at(/ride/i), "hp:tri", "808:cl"];
+      KITS[2][1].push(["k:" + kid, K.name, (K.src ? K.src + " · " : "") + "General MIDI drum kit", ids, [2, 3]]);
+    });
+    const kitById = id => { for (const [, list] of KITS) for (const k of list) if (k[0] === id) return k; return null; };
+    const kitPads = kit => kit[3].map((id, i) => { const P = bpPadDef(id && rcSnd(id) ? id : null); if (P.src && kit[4].includes(i)) P.choke = 1; return P; });
+    const kitOn = (kit, bk) => BPS.banks[bk].every((P, i) => (P && P.src || null) === (kit[3][i] && rcSnd(kit[3][i]) ? kit[3][i] : null));
+    const sheet = document.getElementById("bpKitSheet"), list = document.getElementById("bpKitList");
+    let prev = null;   // the groove that's playing: { id, until }
+    function kitLoad(kid) {
+      const kit = kitById(kid); if (!kit) return;
+      const bk = BPS.bank, L = "ABCD"[bk], keep = BPS.banks[bk].map(p => p && Object.assign({}, p));
+      BPS.banks[bk] = kitPads(kit);
+      if (ctx) BPS.banks[bk].forEach(P => { if (P && typeof P.src === "string" && rcEngine(P.src) === "smp") (P.src.startsWith("st:") ? rcStLoad(P.src.slice(3)) : rcSampleBuf(P.src)); });
+      const paint = () => { bpSave(); bpPaintGrid(); bpPaintEdit(); bpPaintTop(); if (typeof bpL16Paint === "function") bpL16Paint(); if (!sheet.hidden) kitRender(); };
+      paint();
+      undoToast("Loaded " + kit[1] + " onto bank " + L, () => { BPS.banks[bk] = keep.map(p => Object.assign(bpPadDef(null), p || {})); paint(); });
+    }
+    // a bar of groove on a kit, without loading it: the bank is swapped in only while the hits are scheduled
+    async function kitPreview(kid) {
+      start(); if (!ctx) return;
+      if (prev && prev.id === kid && ctx.currentTime < prev.until) { bpHush(); prev = null; kitRender(); return; }
+      const kit = kitById(kid); if (!kit) return;
+      const pads = kitPads(kit);
+      for (let tries = 0; tries < 30; tries++) {   // samples load on first use
+        let ok = true;
+        pads.forEach(P => { if (P.src && rcEngine(P.src) === "smp" && !(P.src.startsWith("st:") ? rcStLoad(P.src.slice(3)) : rcSampleBuf(P.src))) ok = false; });
+        if (ok) break; await new Promise(r => setTimeout(r, 100));
+      }
+      bpHush();
+      const sd = 60 / 112 / 4, t0 = ctx.currentTime + 0.06, bk = BPS.bank, keep = BPS.banks[bk];
+      // kick snare hats, a clap, a tom fill and a crash on the way out: everyone gets a turn
+      const G = [[0, 0], [0, 2], [2, 2], [4, 1], [4, 2], [6, 2], [7, 0], [8, 0], [8, 2], [10, 3], [12, 1], [12, 5], [13, 10], [14, 9], [15, 8], [16, 0], [16, 12]];
+      BPS.banks[bk] = pads; BP.kitPrev = true;
+      try { G.forEach(([st, i]) => { if (pads[i] && pads[i].src) bpHit(bk * 16 + i, t0 + st * sd, i === 0 || i === 12 ? 0.95 : 0.8); }); }
+      finally { BPS.banks[bk] = keep; BP.kitPrev = false; }
+      prev = { id: kid, until: t0 + 17 * sd + 1.2 }; kitRender();
+      setTimeout(() => { if (prev && prev.id === kid && ctx.currentTime >= prev.until - 0.05) { prev = null; kitRender(); } }, (17 * sd + 1.3) * 1000);
+    }
+    function kitRender() {
+      const bk = BPS.bank; document.getElementById("bpKitTitle").textContent = "Load a kit onto bank " + "ABCD"[bk];
+      list.innerHTML = "";
+      KITS.forEach(([grp, kits]) => {
+        if (!kits.length) return;
+        const h = document.createElement("div"); h.className = "bp-kgrp"; h.textContent = grp; list.appendChild(h);
+        kits.forEach(kit => {
+          const row = document.createElement("div"); row.className = "br-row" + (kitOn(kit, bk) ? " on" : ""); row.dataset.kit = kit[0];
+          const pl = document.createElement("button"); pl.className = "br-play"; const playing = prev && prev.id === kit[0];
+          pl.textContent = playing ? "■" : "▶"; pl.setAttribute("aria-pressed", String(!!playing)); pl.setAttribute("aria-label", (playing ? "Stop " : "Hear ") + kit[1]);
+          pl.addEventListener("click", () => kitPreview(kit[0]));
+          const main = document.createElement("button"); main.className = "br-main";
+          main.innerHTML = "<span class='br-name'></span><span class='br-sub'></span>";
+          main.querySelector(".br-name").textContent = kit[1];
+          main.querySelector(".br-sub").textContent = kitOn(kit, bk) ? "on bank " + "ABCD"[bk] + " now" : kit[2];
+          main.setAttribute("aria-label", "Load " + kit[1] + " onto bank " + "ABCD"[bk]);
+          main.addEventListener("click", () => { kitLoad(kit[0]); });
+          row.append(pl, main); list.appendChild(row);
+        });
+      });
+    }
+    { const bf = bpFlash; bpFlash = function () { if (BP.kitPrev) return; return bf.apply(this, arguments); }; }
+    document.getElementById("bpBanks").addEventListener("click", e => { if (e.target.closest("button[data-kit]")) { start(); kitRender(); sheet.hidden = false; } });
+    document.getElementById("bpKitDone").addEventListener("click", () => { sheet.hidden = true; if (prev) { bpHush(); prev = null; } });
+    window.__bpkits = { KITS, load: kitLoad, preview: kitPreview, on: (kid, bk) => kitOn(kitById(kid), bk ?? BPS.bank) };
   }
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
   if (window.NB_SIM) { const mv0 = makeVoice; makeVoice = function () { const S = window.NB_SIM, r = S.beginVoice(arguments[1]); try { return mv0.apply(this, arguments); } finally { S.endBuild(r); } }; }

@@ -18,7 +18,7 @@ python3 linux/ci/lx_smoke.py 9333 "$OUT" > "$OUT/checks.txt" 2>&1
 node linux/ci/save_check.mjs 9333 >> "$OUT/checks.txt" 2>&1
 cat "$OUT/checks.txt"
 # a second start reuses the window (single instance), and the app quits cleanly
-timeout 10 "$BIN" --no-sandbox > "$OUT/second.txt" 2>&1; echo "second start exit $?" >> "$OUT/checks.txt"
+DISPLAY=$(ls /tmp/.X11-unix 2>/dev/null | head -1 | sed "s/^X/:/") timeout 10 "$BIN" --no-sandbox > "$OUT/second.txt" 2>&1; echo "second start (hands over to the open window) exit $?" >> "$OUT/checks.txt"
 kill $APP 2>/dev/null; sleep 2
 grep -v "dbus\|DBus" "$OUT/app.log" | tail -30
 exit 0
