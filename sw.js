@@ -14,10 +14,12 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.pathname.includes("/lite/")) return;   // Nate Bloom Lite has its own offline cache
+  if (url.pathname.includes("/lite/") || url.pathname.includes("/brogue/")) return;   // Nate Bloom Lite and Brogue have their own offline caches
   const sameOrigin = url.origin === self.location.origin;
   const isLibrary = url.hostname === "surikov.github.io" || (sameOrigin && url.pathname.includes("/snd/"));
-  if (req.mode === "navigate" || (sameOrigin && /\/(index\.html)?$/.test(url.pathname))) {
+  const isAppPage = sameOrigin && /\/(index\.html)?$/.test(url.pathname);
+  if (req.mode === "navigate" && !isAppPage) return;   // other pages on the site (the clocks) must not replace the cached app
+  if (isAppPage) {
     e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", copy)); return r; })
       .catch(() => caches.match("./index.html")));
     return;
