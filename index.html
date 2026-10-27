@@ -1558,6 +1558,47 @@ body.lite .rc-syncdot, body.lite #rcFill.armed { animation: none; }
 @keyframes cbflash { 0% { box-shadow: 0 0 0 0 rgba(255,182,92,0.9); } 100% { box-shadow: 0 0 0 14px rgba(255,182,92,0); } }
 #pArp.arp-on { background: var(--amber) !important; color: var(--panel) !important; }
 body.lite .carrybar .cb-h::before { animation: none; }
+/* ---------- Beat Pads ---------- */
+#bpBtn svg { color: #ffb65c; }
+.bp { gap: 8px; }
+.bp-top .bp-bpm { font: 600 0.9rem var(--font-mono); min-width: 70px; text-align: center; }
+.bp-top #bpPlay[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; }
+.bp-rec { color: #ff8a8f; }
+.bp-rec[aria-pressed="true"] { background: #e5484d; border-color: #e5484d; color: #fff; }
+.bp-rec.armed { animation: nowpulse 0.5s ease-in-out infinite; }
+.bp-loop { position: relative; flex: none; }
+#bpLoopCv { width: 100%; height: 46px; display: block; border-radius: 8px; background: #17141f; border: 1px solid var(--line); }
+.bp-status { position: absolute; right: 8px; top: 4px; font: 600 11px var(--font-mono); color: var(--dim); pointer-events: none; }
+.bp-main { display: grid; grid-template-columns: minmax(280px, min(58vh, 560px)) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 900px) { .bp-main { grid-template-columns: 1fr; } }
+.bp-left { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.bp-banks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.bp-banks button { height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); color: var(--dim); font: 700 0.9rem var(--font-body); cursor: pointer; }
+.bp-banks button small { font: 500 10px var(--font-mono); margin-left: 4px; opacity: 0.8; }
+.bp-banks button[aria-pressed="true"] { color: var(--panel); background: var(--bk); border-color: var(--bk); }
+.bp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: min(100%, calc(100dvh - 250px)); aspect-ratio: 1; margin: 0 auto; touch-action: none; }
+.bp-pad { position: relative; border-radius: 12px; border: 1px solid #3a3450; background: linear-gradient(180deg, #2a2538, #1d1a28); box-shadow: inset 0 -4px 0 var(--bk, #c4a3ff), 0 2px 6px rgba(0,0,0,0.35);
+  color: var(--ink); display: flex; flex-direction: column; justify-content: space-between; padding: 6px 7px; text-align: left; cursor: pointer; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; }
+.bp-pad b { font: 700 0.8rem var(--font-mono); color: var(--dim); }
+.bp-pad span { font-size: 0.76rem; line-height: 1.15; max-height: 2.4em; overflow: hidden; }
+.bp-pad i { position: absolute; right: 6px; top: 5px; font: 600 10px var(--font-mono); color: var(--dim); font-style: normal; opacity: 0.8; }
+.bp-pad.empty { opacity: 0.5; box-shadow: inset 0 -2px 0 #3a3450; }
+.bp-pad.sel { border-color: var(--bk); outline: 2px solid var(--bk); outline-offset: -2px; }
+.bp-pad.hit { background: var(--bk); color: var(--panel); }
+.bp-pad.hit b, .bp-pad.hit i { color: var(--panel); }
+.bp-pad.has::after { content: ""; position: absolute; left: 7px; bottom: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--bk); }
+.bp-right { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.bp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.bp-row select, .bp-edit select { background: var(--raised); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; height: 32px; padding: 0 6px; font: inherit; font-size: 0.8rem; max-width: 100%; }
+.bp-row .btn { height: 34px; padding: 0 12px; font-size: 0.82rem; }
+.bp-row .btn[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: var(--panel); }
+.bp-edit { border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.bp-edhead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bp-edhead strong { font-size: 1rem; }
+.bp-knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px 14px; }
+.bp-chop { border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+#bpWave { width: 100%; height: 70px; border-radius: 8px; background: #17141f; border: 1px solid var(--line); cursor: pointer; }
+body.lite .bp-rec.armed { animation: none; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1599,6 +1640,7 @@ body.lite .carrybar .cb-h::before { animation: none; }
       <span class="msep" aria-hidden="true"></span>
       <button class="btn mode studio" id="djBtn" title="DJ: mix two songs and grab samples"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7.5"/><circle cx="10" cy="13.5" r="2"/><path d="M20 3v8l-4.5 3.5"/></svg><span class="stl">DJ</span></button>
       <button class="btn mode studio" id="rcBtn" title="Rhythm Creator: a 16-track drum machine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="3.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="3.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="16.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="stl">Rhythm</span></button>
+      <button class="btn mode studio" id="bpBtn" title="Beat Pads: play and record beats on 16 pads, chop samples"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8.5" height="8.5" rx="2" fill="currentColor"/></svg><span class="stl">Beats</span></button>
     </div>
     </div>
   </header>
@@ -2141,6 +2183,68 @@ body.lite .carrybar .cb-h::before { animation: none; }
   <div class="rc-ed" id="rcEd"></div>
 </div>
 
+<div class="dj bp" id="bpView" hidden role="dialog" aria-label="Beat Pads">
+  <div class="dj-top bp-top">
+    <strong>Beat Pads</strong>
+    <button class="btn primary" id="bpPlay" aria-pressed="false">▶ Play</button>
+    <button class="btn bp-rec" id="bpRec" aria-pressed="false" title="Record what you play into the loop (adds to what's there)">● Rec</button>
+    <span class="bp-bpm" id="bpBpm">120 bpm</span>
+    <button class="btn" id="bpUndo" disabled title="Take back the last recording pass">↶ Undo</button>
+    <button class="btn" id="bpClear" title="Clear every hit in the loop">Clear</button>
+    <button class="btn" id="bpFx" aria-pressed="false" title="Send Beat Pads through the effects and FX Lab">FX</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
+    <button class="btn" id="bpHelpBtn" aria-label="How Beat Pads works">?</button>
+    <button class="btn primary" id="bpDone">Done</button>
+  </div>
+  <div class="bp-loop"><canvas id="bpLoopCv" aria-label="The loop: every hit, and where it's playing"></canvas><span class="bp-status" id="bpStatus"></span></div>
+  <div class="bp-main">
+    <div class="bp-left">
+      <div class="bp-banks" id="bpBanks" role="group" aria-label="Pad bank"></div>
+      <div class="bp-grid" id="bpGrid"></div>
+    </div>
+    <div class="bp-right">
+      <div class="bp-row">
+        <label class="rc-mini">Loop <select id="bpBars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></label>
+        <label class="rc-mini">Quantize <select id="bpQ"><option value="0">Off</option><option value="2">1/8</option><option value="1.3333">1/8 T</option><option value="1">1/16</option><option value="0.6667">1/16 T</option><option value="0.5">1/32</option></select></label>
+        <label class="rc-mini">Strength <input type="range" id="bpQs" min="0" max="100" value="100"><em id="bpQsV">100%</em></label>
+        <label class="rc-mini">Swing <input type="range" id="bpSw" min="50" max="75" value="50"><em id="bpSwV">50%</em></label>
+      </div>
+      <div class="bp-row">
+        <button class="btn" id="bpRep" aria-pressed="false" title="Note repeat: hold a pad for a roll in time">Repeat</button>
+        <select id="bpRate" aria-label="Repeat rate"><option value="2">1/8</option><option value="1.3333">1/8 T</option><option value="1" selected>1/16</option><option value="0.6667">1/16 T</option><option value="0.5">1/32</option></select>
+        <button class="btn" id="bpFull" aria-pressed="false" title="Every hit at full level (otherwise: higher on the pad = louder)">Full level</button>
+        <button class="btn" id="bpClick" aria-pressed="false" title="Metronome while playing">Click</button>
+        <button class="btn" id="bpCin" aria-pressed="true" title="One bar of clicks before recording starts">Count-in</button>
+      </div>
+      <div class="bp-edit" id="bpEdit"></div>
+      <div class="bp-chop" id="bpChop">
+        <div class="bp-row"><span class="lab2">Chop</span>
+          <select id="bpSrc" aria-label="Sample to chop"></select><button class="btn" id="bpLoad">Load WAV / MP3…</button>
+          <select id="bpMode" aria-label="How to cut"><option value="tr">Transients</option><option value="16">16 equal</option><option value="8">8 equal</option><option value="4">4 equal</option></select>
+          <label class="rc-mini">Sensitivity <input type="range" id="bpSens" min="0" max="100" value="55"></label>
+          <label class="rc-mini">To bank <select id="bpTo"><option>C</option><option>D</option><option>B</option><option>A</option></select></label>
+          <button class="btn primary" id="bpChopGo">Chop to pads</button>
+        </div>
+        <canvas id="bpWave" aria-label="The sample, with where it gets cut"></canvas>
+        <input type="file" id="bpFile" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff,.flac" hidden>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="editor sheet" id="bpHelp" hidden>
+  <div class="ed-card" role="dialog" aria-label="Beat Pads help">
+    <div class="ed-head"><strong>Beat Pads</strong></div>
+    <div class="rc-helptext">
+      <p><b>Pads.</b> 16 pads, 4 banks. Pad 1 is bottom-left, like an MPC. Bank A is the Studio kit (real drums) laid out for finger drumming, bank B is Studio percussion, C and D are for your chops. Hit higher on a pad for louder, lower for softer; <b>Full level</b> makes every hit full. On a computer: <b>Z X C V</b> are pads 1–4, <b>A S D F</b> 5–8, <b>Q W E R</b> 9–12, <b>1 2 3 4</b> 13–16, and Space plays or stops.</p>
+      <p><b>Recording.</b> Pick the loop length and tap <b>● Rec</b>: one bar of count-in, then everything you hit goes into the loop, and each time round you can add more (overdub). <b>↶ Undo</b> takes back the last pass. <b>Quantize</b> moves hits onto the grid (Strength sets how far) and <b>Swing</b> pushes the off-beats late, MPC style; both work on what's already recorded, so you can change them after.</p>
+      <p><b>Repeat.</b> Turn on <b>Repeat</b>, pick a rate, and hold a pad for a roll in time. Move your finger up or down the pad to change how hard it hits.</p>
+      <p><b>A pad.</b> Tap a pad to pick it: its sound (any Rhythm Creator sound, a sampler slot or a chop), Level, Tune, Decay, Tone, Pan, a choke group (pads in the same group cut each other off, like a closed hat stopping an open one), Reverse for chops, and Erase to remove that pad's hits from the loop.</p>
+      <p><b>Chop.</b> Pick a sampler slot or load a file, choose Transients (cuts where hits start; Sensitivity finds more or fewer) or equal parts, choose a bank and tap <b>Chop to pads</b>: slice 1 goes on pad 1, and so on. Tap the waveform to hear a slice.</p>
+      <p><b>Timing.</b> The tempo is the app's (the Rhythm Creator's, and a playing DJ deck's when Auto BPM is on). When the Rhythm Creator is playing, Beat Pads starts on its next bar. <b>FX</b> sends the pads through the effects and FX Lab; the Mixer has a Beat Pads fader.</p>
+    </div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="bpHelpDone">Done</button></div>
+  </div>
+</div>
 <div class="editor sheet" id="rcHelp" hidden>
   <div class="ed-card" role="dialog" aria-label="Rhythm Creator help">
     <div class="ed-head"><strong>Rhythm Creator</strong></div>
@@ -3017,6 +3121,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return buf;
   }
 
+  // the Effects Drive: saturation without the level jump. g sets how hard it bites; a sound peaking at 0.3 comes out
+  // about 6 dB up at any setting, louder parts round off instead of piling up
+  function driveCurveFx(amount) {
+    const n = 2048, c = new Float32Array(n), a = Math.max(0, Math.min(1, amount || 0)), g = 1 + 20 * a, pre = 1 + 1.5 * a, ref = 0.3, M = 2, norm = M * ref / Math.tanh(g * ref);
+    for (let i = 0; i < n; i++) { const u = (i / (n - 1)) * 2 - 1; c[i] = norm * Math.tanh(g * u / pre); }
+    return c;
+  }
   function driveCurve(amount) {
     const n = 1024, curve = new Float32Array(n), k = 1 + amount * 30;
     for (let i = 0; i < n; i++) {
@@ -3110,7 +3221,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function applyFx() {
     if (!fx) return;
     const p = state.fx, t = ctx.currentTime;
-    fx.shaper.curve = driveCurve(p.drive);
+    fx.shaper.curve = driveCurveFx(p.drive);
     fx.driveIn.gain.setTargetAtTime(1 + p.drive * 1.5, t, 0.02);
     fx.wowDepth.gain.setTargetAtTime(p.wobble * 0.0045, t, 0.05);
     fx.flutterDepth.gain.setTargetAtTime(p.wobble * 0.0006, t, 0.05);
@@ -7569,6 +7680,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     // width: blend the two channels toward mono
     const L = buf.getChannelData(0), R = buf.getChannelData(1), w = P.hwidth;
     for (let i = 0; i < len; i++) { const m = (L[i] + R[i]) * 0.5; L[i] = m + (L[i] - m) * w; R[i] = m + (R[i] - m) * w; }
+    { let e = 0; for (let i = 0; i < len; i++) e += L[i] * L[i] + R[i] * R[i]; const g = Math.sqrt(0.8 / Math.max(1e-9, e)); for (let i = 0; i < len; i++) { L[i] *= g; R[i] *= g; } }
     return buf;
   }
   let irTimer = 0;
@@ -7583,7 +7695,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     B.lofiTone.frequency.setTargetAtTime(lOn ? 1200 + bfx.tone * bfx.tone * 16000 : 20000, now, 0.03);
     set(B.lofiWet.gain, lOn ? 1 : 0); set(B.lofiDry.gain, lOn ? 0 : 1);
     const hOn = on && bfx.hallOn;
-    set(B.hallWet.gain, hOn ? bfx.hmix * 1.9 : 0);
+    set(B.hallWet.gain, hOn ? bfx.hmix * 1.5 : 0); if (B.hallDry) set(B.hallDry.gain, hOn ? 1 - 0.5 * bfx.hmix : 1);
     if (hOn && (rebuildIR || !B.hall.buffer)) {
       clearTimeout(irTimer);
       irTimer = setTimeout(() => { try { B.hall.buffer = hallIR(ctx.sampleRate, bfx); } catch (e) {} }, rebuildIR ? 90 : 0);
@@ -7607,10 +7719,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const betaOut = ctx.createGain();
       m.connect(densIn); densIn.connect(densDry).connect(lofiIn); densIn.connect(densShaper).connect(densWet).connect(lofiIn);
       lofiIn.connect(lofiDry).connect(hallIn); lofiIn.connect(bitShaper).connect(lofiTone).connect(lofiWet).connect(hallIn);
-      hallIn.connect(betaOut); hallIn.connect(hall).connect(hallWet).connect(betaOut);
+      const hallDry = ctx.createGain(); hallIn.connect(hallDry).connect(betaOut); hallIn.connect(hall).connect(hallWet).connect(betaOut);
       betaOut.connect(comp);
       const trackBus = ctx.createGain(); trackBus.__soloGroup = "trk"; trackBus.connect(comp);
-      B = { densIn, densShaper, densDry, densWet, bitShaper, lofiTone, lofiDry, lofiWet, hall, hallWet, betaOut, trackBus };
+      B = { densIn, densShaper, densDry, densWet, bitShaper, lofiTone, lofiDry, lofiWet, hall, hallWet, hallDry, betaOut, trackBus };
       applyBfx(false);
     };
   }
@@ -9934,11 +10046,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     buildChain = function () {
       chain0();
       const lim = ctx.createDynamicsCompressor();
-      lim.threshold.value = -1.5; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.08;
-      const trim = ctx.createGain(); trim.gain.value = 0.98;
+      lim.threshold.value = -3; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.001; lim.release.value = 0.1;
+      const trim = ctx.createGain(); trim.gain.value = Math.pow(10, -(3 - 3 / 20) * 0.6 / 20);   // take the limiter's automatic make-up gain back out
+      // and a soft clipper for the last 1.5 dB: whatever gets past the limiter is rounded off, never clipped flat
+      const safe = ctx.createWaveShaper(); safe.oversample = "2x";
+      safe.curve = (() => { const n = 4096, c = new Float32Array(n), k = 0.84; for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1, a = Math.abs(x); c[i] = Math.sign(x) * (a <= k ? a : k + (1 - k) * Math.tanh((a - k) / (1 - k))); } return c; })();
       try { fx.comp.disconnect(analyser); } catch (e) {}
-      fx.comp.connect(lim).connect(trim).connect(analyser);
-      fx.limiter = lim; fx.chainNodes.push(lim, trim);
+      fx.comp.connect(lim).connect(trim).connect(safe).connect(analyser);
+      fx.limiter = lim; fx.chainNodes.push(lim, trim, safe);
     };
     if (ctx && fx.comp) buildChain();
   }
@@ -11701,7 +11816,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const c = fxChan[id]; if (!c) return;
     const base = state.fx, a = fxcAmt(id), t = ctx.currentTime;
     const p = { drive: base.drive * a, wobble: base.wobble * a, echo: base.echo * a, space: base.space * a };
-    if (p.drive > 0.001) { c.shaper.curve = driveCurve(p.drive); c.shaper.oversample = "2x"; } else { c.shaper.curve = null; c.shaper.oversample = "none"; }   // no drive: a plain wire
+    c.shaper.curve = driveCurveFx(p.drive); c.shaper.oversample = p.drive > 0.05 ? "2x" : "none";   // (no drive: a gentle curve, no oversampling)
     c.driveIn.gain.setTargetAtTime(1 + p.drive * 1.5, t, 0.02);
     c.wowDepth.gain.setTargetAtTime(p.wobble * 0.0045, t, 0.05); c.flutterDepth.gain.setTargetAtTime(p.wobble * 0.0006, t, 0.05);
     c.tapeTone.frequency.setTargetAtTime(14000 - p.wobble * 9000, t, 0.05);
@@ -14245,7 +14360,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }; }
   if (ENGINES[state.engine]) lastLayers = activeLayers().slice();
   const nbCloseLayers = () => {
-    [["djView", "djDone"], ["rcView", "rcDone"], ["tracks", "trkDone"]].forEach(([v, d]) => { const el = document.getElementById(v), b = document.getElementById(d); if (el && !el.hidden && b) b.click(); });
+    [["djView", "djDone"], ["rcView", "rcDone"], ["bpView", "bpDone"], ["tracks", "trkDone"]].forEach(([v, d]) => { const el = document.getElementById(v), b = document.getElementById(d); if (el && !el.hidden && b) b.click(); });
     document.querySelectorAll(".editor:not([hidden]) .ed-foot .btn.primary").forEach(b => { if (/Done|Close/.test(b.textContent)) b.click(); });
   };
   function editPart(p) {
@@ -14297,6 +14412,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const s = [];
       if (playing) s.push(["seq", "Sequencer", () => stopSeq()]);
       if (RC.playing) s.push(["rc", "Rhythm Creator", () => rcPlay(false)]);
+      if (bpIsPlaying()) s.push(["bp", "Beat Pads", () => bpTransport(false)]);
       DJ.decks.forEach(d => { if (d.playing) s.push(["dj" + d.i, "DJ deck " + "AB"[d.i], () => { djPlay(d, false); djPaintAll(); }]); });
       if (DJ.padPlay && DJ.padPlay.some(Boolean)) s.push(["djpad", "DJ pads", () => DJ.padPlay.forEach((p, k) => djPadStop(k))]);
       if (DJ.beat) s.push(["djbeat", "DJ beat", () => djBeatStop()]);
@@ -16235,8 +16351,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
           b.addEventListener("click", () => {
             start(); if (!ctx) return;
             const base = 12 * (state.octave != null ? state.octave + 1 : 4);
-            const roots = chordType === "off" ? [base, base + 4, base + 7] : [base];
-            roots.forEach(m => { if (!heldVoices.has(m)) toggleHeld(m); });
+            const keepC = chordType; if (chordType === "off") chordType = "maj";   // one held chord, at chord level
+            try { if (!heldVoices.has(base)) toggleHeld(base); } finally { chordType = keepC; }
             updateHoldBtn();
           });
           el.append(t, b);
@@ -16302,6 +16418,354 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     setInterval(() => { try { paintCarry(); paintArpTab(); } catch (e) {} }, 600);
     holdLabel(); paintArpTab(); paintCarry();
   }
+
+  // ======================================================================
+  // Beat Pads: 16 pads × 4 banks, chop, live recording with quantize and swing, note repeat
+  // ======================================================================
+  const BP_BANK_COL = ["#c4a3ff", "#7fd6c2", "#ffb65c", "#ff8ac6"];
+  const bpPadDef = src => ({ src, tune: 0, decay: 0.5, tone: 0.5, pan: 0, level: 0.8, choke: 0, rev: false });
+  // bank A for finger drumming (pad 1 bottom-left): kick snare hat open-hat / rim cross-stick pedal tambourine / toms shaker / crash ride bell cowbell
+  const BP_A = ["st:kick", "st:snare", "st:hhc", "st:hho", "st:rim", "st:xstick", "st:hhp", "st:tamb", "st:ltom", "st:mtom", "st:htom", "st:shaker", "st:crash", "st:ride", "st:bell", "st:cowbell"];
+  const BP_B = ["st:conga", "st:tumba", "st:bongoh", "st:bongol", "st:claves", "st:cabasa", "st:agogoh", "st:agogol", "st:tri", "st:cowbell", "st:tamb", "st:shaker", "tr:boom", "tr:snap", "tr:clap", "808:cp"];
+  const BPS = { v: 1, banks: [BP_A.map(bpPadDef), BP_B.map(bpPadDef), new Array(16).fill(null).map(() => bpPadDef(null)), new Array(16).fill(null).map(() => bpPadDef(null))],
+    ev: [], bars: 2, q: 1, qs: 1, sw: 0.5, rep: false, rate: 1, full: false, click: false, cin: true, bank: 0, sel: 0, level: 0.85, src: 0, mode: "tr", sens: 0.55, to: 2 };
+  BPS.banks[0][3].choke = 1; BPS.banks[0][2].choke = 1; BPS.banks[0][6].choke = 1;   // the hats cut each other off
+  try {
+    const o = JSON.parse(localStorage.getItem("nightbloom-bp") || "null");
+    if (o && o.v === 1 && Array.isArray(o.banks)) { Object.assign(BPS, o); BPS.banks = o.banks.map(b => b.map(p => Object.assign(bpPadDef(null), p))); }
+  } catch (e) {}
+  BPS.ev.forEach(e => { delete e.cyc; });
+  let bpSaveT = 0; const bpSave = () => { clearTimeout(bpSaveT); bpSaveT = setTimeout(() => { try { localStorage.setItem("nightbloom-bp", JSON.stringify(BPS)); } catch (e) {} }, 300); };
+  const BP = { playing: false, rec: false, aT: 0, aPos: 0, sd: 0.125, sched: 0, pass: 0, voices: [], held: new Map(), rep: new Map(), bus: null, busTo: null, rev: {}, free: false };
+  const bpPad = k => BPS.banks[Math.floor(k / 16)] && BPS.banks[Math.floor(k / 16)][k % 16];
+  const bpIsPlaying = () => BP.playing;
+  const bpSd = () => 60 / rcBpm() / 4;
+  const bpPosAt = t => BP.aPos + (t - BP.aT) / BP.sd;
+  const bpTimeAt = p => BP.aT + (p - BP.aPos) * BP.sd;
+  const bpName = P => {
+    if (!P || !P.src) return "";
+    if (typeof P.src === "object") { const sl = state.samp.slots[P.src.slot]; return (P.src.n ? "Chop " + P.src.n : "Chop") + (sl && sl.name ? " · " + baseName(sl.name) : ""); }
+    const sd = rcSnd(P.src); return sd ? sd.name.replace(/^Real /, "") : P.src;
+  };
+  // ---------- sound out ----------
+  if (!FXC.by.bp) { fxcParams("bp").on = false; fxcSave(); }
+  fxcNames.bp = "Beat Pads";
+  function bpBus() {
+    if (!BP.bus || BP.bus.context !== ctx) { BP.bus = ctx.createGain(); BP.bus.gain.value = BPS.level; BP.bus.__soloGroup = "bp"; BP.busTo = null; }
+    const c = FXC.by.bp && FXC.by.bp.on ? fxcGet("bp") : null, to = c ? c.input : fx.comp;
+    if (BP.busTo !== to) { try { BP.bus.disconnect(); } catch (e) {} BP.bus.connect(to); BP.busTo = to; }
+    return BP.bus;
+  }
+  function bpRevBuf(slot, b) {
+    const c = BP.rev[slot]; if (c && c.src === b) return c.buf;
+    const r = ctx.createBuffer(b.numberOfChannels, b.length, b.sampleRate);
+    for (let ch = 0; ch < b.numberOfChannels; ch++) { const a = b.getChannelData(ch), o = r.getChannelData(ch), n = a.length; for (let i = 0; i < n; i++) o[i] = a[n - 1 - i]; }
+    BP.rev[slot] = { src: b, buf: r }; return r;
+  }
+  function bpHit(k, t, vel) {
+    const P = bpPad(k); if (!P || !P.src || !ctx) return;
+    const now = ctx.currentTime; t = Math.max(t, now);
+    const cg = ctx.createGain(); cg.gain.value = P.level * P.level * 1.25; let pn = null;
+    if (Math.abs(P.pan) > 0.01) { pn = ctx.createStereoPanner(); pn.pan.value = P.pan; cg.connect(pn).connect(bpBus()); } else cg.connect(bpBus());
+    if (P.choke) BP.voices.forEach(v => { if (v.choke === P.choke && v.k !== k && v.end > t) { try { v.cg.gain.setTargetAtTime(0, t, 0.008); } catch (e) {} v.end = t + 0.05; } });
+    let end = t + 0.5;
+    if (typeof P.src === "string") {
+      const id = P.src, eng = rcEngine(id);
+      const p = { v: vel * rcGain(id), r: Math.pow(2, P.tune / 12), d: Math.pow(2, (P.decay - 0.5) * 2.4), dec: P.decay, tone: P.tone, ch: 0.5, beat: 60 / rcBpm() };
+      if (eng === "smp") { const V = rcSampleHit(id, t, p, cg); if (V) end = V.end; else rcSampleBuf(id); }
+      else if (RC_SYN[id]) { const V = rcV(t, cg, p.v); RC_SYN[id](V, p); V.go(); end = V.end; }
+    } else {
+      const S = P.src, b = sampBuf[S.slot]; if (!b) return;
+      const buf = P.rev ? bpRevBuf(S.slot, b) : b, a0 = Math.max(0, Math.min(b.duration, S.a)), b0 = Math.max(a0 + 0.005, Math.min(b.duration, S.b));
+      const off = P.rev ? b.duration - b0 : a0, len = b0 - a0, rate = Math.pow(2, P.tune / 12), dur = len / rate;
+      const keep = P.decay >= 0.5 ? dur : Math.max(0.03, dur * Math.pow(P.decay / 0.5, 1.4));
+      const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
+      const g = ctx.createGain(), pk = Math.pow(Math.max(0.05, vel), 1.2);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pk, t + 0.002); g.gain.setValueAtTime(pk, t + Math.max(0.003, keep - 0.012)); g.gain.linearRampToValueAtTime(0, t + keep);
+      let node = src;
+      if (P.tone < 0.48) { const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 300 * Math.pow(2, P.tone / 0.48 * 6); node.connect(f); node = f; }
+      else if (P.tone > 0.52) { const f = ctx.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 30 * Math.pow(2, (P.tone - 0.52) / 0.48 * 6); node.connect(f); node = f; }
+      node.connect(g).connect(cg); src.start(t, off, len + 0.02); src.stop(t + keep + 0.03); end = t + keep;
+    }
+    BP.voices.push({ k, choke: P.choke, cg, end });
+    if (BP.voices.length > 64) BP.voices = BP.voices.filter(v => v.end > now - 0.2);
+    setTimeout(() => { try { cg.disconnect(); if (pn) pn.disconnect(); } catch (e) {} }, (end - now + 1) * 1000);
+    bpFlash(k, t);
+  }
+  function bpClick(t, accent) {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = accent ? 1760 : 1175; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(accent ? 0.25 : 0.16, t + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.05);
+    o.connect(g).connect(fx.comp); o.start(t); o.stop(t + 0.06);
+  }
+  // ---------- quantize and swing (on playback, so they can change after recording) ----------
+  function bpQ(s) {
+    const L = BPS.bars * 16, g = +BPS.q; let q = s;
+    if (g > 0) { const qs = Math.round(s / g) * g; q = s + (qs - s) * BPS.qs; }
+    if (BPS.sw > 0.501 && (g === 1 || g === 2 || g === 0.5)) {   // MPC swing: the off-beat of each pair moves late
+      const pair = g === 2 ? 4 : 2, inPair = ((Math.round(q / (pair / 2)) % 2) + 2) % 2;
+      if (inPair === 1 && Math.abs(q - Math.round(q / (pair / 2)) * (pair / 2)) < 0.05) q += (BPS.sw - 0.5) * pair;
+    }
+    return ((q % L) + L) % L;
+  }
+  // ---------- the clock ----------
+  function bpTick() {
+    if (!ctx) return;
+    const now = ctx.currentTime, sd = bpSd();
+    if ((BP.playing || BP.free) && Math.abs(sd - BP.sd) > 1e-7) { const p = bpPosAt(now); BP.aPos = p; BP.aT = now; BP.sd = sd; }
+    const L = BPS.bars * 16, horizon = bpPosAt(now + 0.12);
+    if (BP.playing) {
+      while (BP.sched < horizon - 1e-9) {
+        const from = BP.sched, cyc = Math.floor(from / L), base = cyc * L, to = Math.min(horizon, from < 0 ? Math.min(0, horizon) : base + L);
+        if (from >= 0) for (const e of BPS.ev) { const q = bpQ(e.s); if (q >= from - base && q < to - base && e.cyc !== cyc) bpHit(e.k, bpTimeAt(base + q), e.v); }
+        for (let b = Math.ceil(from / 4) * 4; b < to; b += 4) if (BPS.click || from < 0) bpClick(bpTimeAt(b), ((b % 16) + 16) % 16 === 0);
+        BP.sched = to;
+        if (from < 0 && to >= 0 && BP.armed) { BP.armed = false; BP.rec = true; bpPaintTop(); }
+      }
+    }
+    // note repeat: every held pad rolls on the grid
+    if (BPS.rep && BP.held.size) {
+      const rg = +BPS.rate;
+      for (const [k, h] of BP.rep) {
+        if (![...BP.held.values()].some(x => x.k === k)) { BP.rep.delete(k); continue; }
+        while (h.next < horizon) {
+          const t = bpTimeAt(h.next); bpHit(k, t, h.vel);
+          if (BP.rec && h.next >= 0) bpRecord(k, h.next, h.vel, true);
+          h.next += rg;
+        }
+      }
+    }
+    if (BP.free && !BP.held.size && !BP.playing) BP.free = false;
+  }
+  setInterval(bpTick, 25);
+  function bpTransport(on) {
+    if (on) {
+      start(); if (!ctx) return; if (BP.playing) return;
+      bpBus(); BP.sd = bpSd(); BPS.banks.flat().forEach(P => { if (P && typeof P.src === "string" && rcEngine(P.src) === "smp") rcSampleBuf(P.src); });
+      let t0 = ctx.currentTime + 0.08;
+      if (RC.playing) {   // start on the Rhythm Creator's next bar
+        const sd = BP.sd, nb = Math.ceil(RC.step / 16) * 16; t0 = RC.nextT + (nb - RC.step) * sd; if (t0 < ctx.currentTime + 0.03) t0 += 16 * sd;
+      }
+      const cin = BP.armed && BPS.cin && !RC.playing;
+      BP.aT = t0; BP.aPos = cin ? -16 : 0; BP.sched = BP.aPos; BP.playing = true; BP.free = false;
+      if (BP.armed && !cin) { BP.armed = false; BP.rec = true; }
+    } else { BP.playing = false; BP.rec = false; BP.armed = false; BP.rep.clear(); }
+    bpPaintTop();
+  }
+  // ---------- recording ----------
+  function bpRecord(k, pos, vel, onGrid) {
+    const L = BPS.bars * 16, cyc = Math.floor(pos / L), s = pos - cyc * L;
+    BPS.ev.push({ s: onGrid ? s : Math.round(s * 1000) / 1000, k, v: Math.round(vel * 100) / 100, pass: BP.pass, cyc });
+    bpSave(); const el = bpGrid.querySelector(`.bp-pad[data-k="${k}"]`); if (el) el.classList.add("has");   // (no repaint: a finger may be on a pad)
+    document.getElementById("bpUndo").disabled = false;
+  }
+  function bpStartRec() {
+    start(); if (!ctx) return;
+    if (BP.rec || BP.armed) { BP.rec = false; BP.armed = false; BPS.ev.forEach(e => { delete e.cyc; }); bpSave(); bpPaintTop(); return; }
+    BP.pass++;
+    if (BP.playing) { BP.rec = true; }
+    else { BP.armed = true; bpTransport(true); }
+    bpPaintTop();
+  }
+  // ---------- pads: touch, mouse and keys ----------
+  const bpGrid = document.getElementById("bpGrid"), bpView = document.getElementById("bpView"), bpBtn = document.getElementById("bpBtn");
+  const bpVel = (el, y) => { if (BPS.full) return 1; const r = el.getBoundingClientRect(); const rel = Math.min(1, Math.max(0, (y - r.top) / r.height)); return Math.round((0.35 + 0.65 * (1 - rel)) * 100) / 100; };
+  function bpDown(k, vel, id) {
+    start(); if (!ctx) return;
+    BP.held.set(id, { k, vel });
+    if (BPS.sel !== k) { BPS.sel = k; bpMarkSel(); bpPaintEdit(); bpSave(); }
+    if (BPS.rep) {
+      if (!BP.playing && !BP.free) { BP.free = true; BP.sd = bpSd(); BP.aT = ctx.currentTime + 0.005; BP.aPos = 0; }
+      const rg = +BPS.rate, pos = bpPosAt(ctx.currentTime + 0.01);
+      if (!BP.playing) { bpHit(k, ctx.currentTime + 0.005, vel); BP.rep.set(k, { next: pos + rg, vel }); }
+      else BP.rep.set(k, { next: Math.ceil(pos / rg) * rg, vel });
+      return;
+    }
+    const t = ctx.currentTime + 0.005; bpHit(k, t, vel);
+    if (BP.rec && BP.playing) { const pos = bpPosAt(t); if (pos > -0.5) bpRecord(k, Math.max(0, pos), vel, false); }
+  }
+  function bpUp(id) { BP.held.delete(id); }
+  bpGrid.addEventListener("pointerdown", e => {
+    const el = e.target.closest(".bp-pad"); if (!el) return; e.preventDefault();
+    try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    bpDown(+el.dataset.k, bpVel(el, e.clientY), "p" + e.pointerId);
+  });
+  bpGrid.addEventListener("pointermove", e => { const h = BP.held.get("p" + e.pointerId); if (!h) return; const el = bpGrid.querySelector(`.bp-pad[data-k="${h.k}"]`); if (el) { h.vel = bpVel(el, e.clientY); const r = BP.rep.get(h.k); if (r) r.vel = h.vel; } });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach(n => bpGrid.addEventListener(n, e => bpUp("p" + e.pointerId)));
+  const BP_KEYS = { z: 0, x: 1, c: 2, v: 3, a: 4, s: 5, d: 6, f: 7, q: 8, w: 9, e: 10, r: 11, "1": 12, "2": 13, "3": 14, "4": 15 };
+  window.addEventListener("keydown", e => {
+    if (bpView.hidden || e.ctrlKey || e.metaKey || e.altKey || (e.target && /INPUT|SELECT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range")) return;
+    const key = e.key.toLowerCase();
+    if (key === " ") { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) bpTransport(!BP.playing); return; }
+    if (!(key in BP_KEYS)) return;
+    e.preventDefault(); e.stopImmediatePropagation(); if (e.repeat) return;
+    bpDown(BPS.bank * 16 + BP_KEYS[key], BPS.full ? 1 : 0.85, "k" + key);
+  }, true);
+  window.addEventListener("keyup", e => { if (bpView.hidden) return; const key = e.key.toLowerCase(); if (key in BP_KEYS) { e.stopImmediatePropagation(); bpUp("k" + key); } }, true);
+  // ---------- the screen ----------
+  const BP_ROWS = [12, 8, 4, 0];   // top row shows pads 13–16; pad 1 is bottom-left
+  const BP_KEYCAP = ["Z", "X", "C", "V", "A", "S", "D", "F", "Q", "W", "E", "R", "1", "2", "3", "4"];
+  function bpPaintGrid() {
+    const bk = BPS.bank, used = new Set(BPS.ev.map(e => e.k));
+    bpGrid.style.setProperty("--bk", BP_BANK_COL[bk]);
+    let h = "";
+    BP_ROWS.forEach(r => { for (let c = 0; c < 4; c++) { const i = r + c, k = bk * 16 + i, P = BPS.banks[bk][i];
+      h += `<button class="bp-pad${P && P.src ? "" : " empty"}${BPS.sel === k ? " sel" : ""}${used.has(k) ? " has" : ""}" data-k="${k}" aria-label="Pad ${i + 1}${P && P.src ? ": " + bpName(P) : " (empty)"}"><b>${i + 1}</b><i>${BP_KEYCAP[i]}</i><span>${P && P.src ? (typeof P.src === "object" ? "Chop " + (P.src.n || "") : bpName(P)) : "empty"}</span></button>`; } });
+    bpGrid.innerHTML = h;
+    document.getElementById("bpBanks").innerHTML = "ABCD".split("").map((L, b) => `<button data-b="${b}" style="--bk:${BP_BANK_COL[b]}" aria-pressed="${b === bk}">${L}<small>${BPS.banks[b].filter(p => p && p.src).length}</small></button>`).join("");
+  }
+  function bpMarkSel() { bpGrid.querySelectorAll(".bp-pad").forEach(el => el.classList.toggle("sel", +el.dataset.k === BPS.sel)); }
+  function bpFlash(k, t) {
+    const ms = Math.max(0, (t - ctx.currentTime) * 1000);
+    setTimeout(() => { const el = bpGrid.querySelector(`.bp-pad[data-k="${k}"]`); if (!el) return; el.classList.add("hit"); setTimeout(() => el.classList.remove("hit"), 110); }, ms);
+  }
+  document.getElementById("bpBanks").addEventListener("click", e => { const b = e.target.closest("button[data-b]"); if (!b) return; BPS.bank = +b.dataset.b; BPS.sel = BPS.bank * 16 + (BPS.sel % 16); bpSave(); bpPaintGrid(); bpPaintEdit(); });
+  const bpPlayBtn = document.getElementById("bpPlay"), bpRecBtn = document.getElementById("bpRec");
+  function bpPaintTop() {
+    bpPlayBtn.textContent = BP.playing ? "■ Stop" : "▶ Play"; bpPlayBtn.setAttribute("aria-pressed", String(BP.playing));
+    bpRecBtn.setAttribute("aria-pressed", String(BP.rec)); bpRecBtn.classList.toggle("armed", !!BP.armed); bpRecBtn.textContent = BP.armed ? "● Count-in…" : BP.rec ? "● Recording" : "● Rec";
+    document.getElementById("bpBpm").textContent = (Math.round(rcBpm() * 10) / 10) + " bpm" + (rcFollow() ? " · DJ" : "");
+    const on = !!(FXC.by.bp && FXC.by.bp.on), fb = document.getElementById("bpFx"); fb.setAttribute("aria-pressed", String(on)); fb.textContent = on ? "FX ✓" : "FX";
+    document.getElementById("bpUndo").disabled = !BPS.ev.length;
+    bpBtn.classList.toggle("live", BP.playing); bpBtn.setAttribute("aria-label", BP.playing ? "Beats (playing)" : "Beats");
+    ["bpBars", "bpQ", "bpRate"].forEach(id => { const el = document.getElementById(id), v = { bpBars: BPS.bars, bpQ: BPS.q, bpRate: BPS.rate }[id]; const o = [...el.options].find(x => Math.abs(+x.value - +v) < 0.01); if (o) el.value = o.value; });
+    document.getElementById("bpQs").value = Math.round(BPS.qs * 100); document.getElementById("bpQsV").textContent = Math.round(BPS.qs * 100) + "%";
+    document.getElementById("bpSw").value = Math.round(BPS.sw * 100); document.getElementById("bpSwV").textContent = Math.round(BPS.sw * 100) + "%";
+    [["bpRep", BPS.rep], ["bpFull", BPS.full], ["bpClick", BPS.click], ["bpCin", BPS.cin]].forEach(([id, v]) => document.getElementById(id).setAttribute("aria-pressed", String(!!v)));
+  }
+  const BP_KN = [["level", "Level", 0, 1, v => Math.round(v * 100)], ["tune", "Tune", -24, 24, v => (v > 0 ? "+" : "") + Math.round(v) + " st"], ["decay", "Decay", 0, 1, v => v >= 0.5 ? "full" : Math.round(v * 200) + "%"], ["tone", "Tone", 0, 1, v => v < 0.48 ? "darker" : v > 0.52 ? "brighter" : "flat"], ["pan", "Pan", -1, 1, v => Math.abs(v) < 0.01 ? "C" : (v < 0 ? "L" : "R") + Math.round(Math.abs(v) * 100)]];
+  function bpPaintEdit() {
+    const k = BPS.sel, P = bpPad(k), el = document.getElementById("bpEdit"); if (!P) { el.innerHTML = ""; return; }
+    const isChop = P.src && typeof P.src === "object";
+    let opts = rcSoundOptions(typeof P.src === "string" ? P.src : "").replace(/<option value="an:[^"]*"[^>]*>[^<]*<\/option>/g, "");
+    opts = `<option value=""${P.src ? "" : " selected"}>Empty</option>` + (isChop ? `<option value="__chop" selected>${bpName(P)}</option>` : "") + opts;
+    el.innerHTML = `<div class="bp-edhead"><strong>Pad ${k % 16 + 1} · bank ${"ABCD"[Math.floor(k / 16)]}</strong><select id="bpSnd" aria-label="Pad sound">${opts}</select>
+        <button class="btn" id="bpAud" title="Hear it">▶</button>
+        <label class="rc-mini">Choke <select id="bpChoke"><option value="0">Off</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+        ${isChop ? `<button class="btn" id="bpRev" aria-pressed="${!!P.rev}">Reverse</button>` : ""}
+        <button class="btn" id="bpErase" title="Remove this pad's hits from the loop">Erase hits</button></div>
+      <div class="bp-knobs">` + BP_KN.map(([kk, lab, lo, hi, fmt]) => `<label class="rc-k"><span>${lab}<em id="bpV_${kk}">${fmt(P[kk])}</em></span><input type="range" data-k="${kk}" min="${lo}" max="${hi}" step="${kk === "tune" ? 1 : 0.01}" value="${P[kk]}"></label>`).join("") + `</div>`;
+    el.querySelector("#bpChoke").value = String(P.choke || 0);
+  }
+  const bpEditEl = document.getElementById("bpEdit");
+  bpEditEl.addEventListener("input", e => { const kk = e.target.dataset && e.target.dataset.k, P = bpPad(BPS.sel); if (!kk || !P) return; P[kk] = +e.target.value; const K = BP_KN.find(x => x[0] === kk); document.getElementById("bpV_" + kk).textContent = K[4](P[kk]); bpSave(); });
+  bpEditEl.addEventListener("change", e => {
+    const P = bpPad(BPS.sel); if (!P) return;
+    if (e.target.id === "bpSnd") { const v = e.target.value; if (v === "__chop") return; P.src = v || null; P.rev = false; if (v && rcEngine(v) === "smp") rcSampleBuf(v); bpSave(); bpPaintGrid(); bpPaintEdit(); if (v) setTimeout(() => bpHit(BPS.sel, ctx ? ctx.currentTime + 0.01 : 0, 0.85), 250); }
+    if (e.target.id === "bpChoke") { P.choke = +e.target.value; bpSave(); }
+  });
+  bpEditEl.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return; const P = bpPad(BPS.sel);
+    if (b.id === "bpAud") { start(); if (ctx) bpHit(BPS.sel, ctx.currentTime + 0.01, 0.85); }
+    if (b.id === "bpRev" && P) { P.rev = !P.rev; bpSave(); bpPaintEdit(); start(); if (ctx) bpHit(BPS.sel, ctx.currentTime + 0.01, 0.85); }
+    if (b.id === "bpErase") { const before = BPS.ev.length; BPS.ev = BPS.ev.filter(x => x.k !== BPS.sel); bpSave(); bpPaintGrid(); BP.loopDirty = true; noteMsg("Erased " + (before - BPS.ev.length) + " hits"); }
+  });
+  // ---------- the loop strip ----------
+  const loopCv = document.getElementById("bpLoopCv");
+  function bpDrawLoop() {
+    const W = loopCv.clientWidth, H = loopCv.clientHeight; if (!W) return;
+    const dpr = Math.min(2, devicePixelRatio || 1); if (loopCv.width !== Math.round(W * dpr)) { loopCv.width = Math.round(W * dpr); loopCv.height = Math.round(H * dpr); }
+    const c = loopCv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    const L = BPS.bars * 16;
+    for (let s = 0; s <= L; s += 4) { c.fillStyle = s % 16 === 0 ? "rgba(196,163,255,0.45)" : "rgba(255,255,255,0.08)"; c.fillRect(Math.round(s / L * (W - 1)), 0, 1, H); }
+    BPS.ev.forEach(e => { const x = bpQ(e.s) / L * W, b = Math.floor(e.k / 16), row = e.k % 16; c.fillStyle = BP_BANK_COL[b]; c.globalAlpha = 0.35 + 0.65 * e.v; c.fillRect(x - 1, 3 + (15 - row) / 16 * (H - 8), 3, 3); });
+    c.globalAlpha = 1;
+    if (BP.playing && ctx) { const p = bpPosAt(ctx.currentTime); if (p >= 0) { const x = ((p % L) + L) % L / L * W; c.fillStyle = BP.rec ? "#e5484d" : "#7fd6c2"; c.fillRect(x - 1, 0, 2, H); } }
+    const st = document.getElementById("bpStatus"), p = BP.playing && ctx ? bpPosAt(ctx.currentTime) : null;
+    st.textContent = p == null ? BPS.ev.length + " hits · " + BPS.bars + " bar" + (BPS.bars > 1 ? "s" : "") : p < 0 ? "count-in " + (4 - Math.floor((p + 16) / 4)) : "bar " + (Math.floor((((p % L) + L) % L) / 16) + 1) + " of " + BPS.bars + " · " + BPS.ev.length + " hits";
+  }
+  let bpLast = 0;
+  (function frame(ts) { requestAnimationFrame(frame); if (bpView.hidden) return; if (ts - bpLast < (window.NB_LITE ? 50 : 33)) return; bpLast = ts; bpDrawLoop(); })(0);
+  // ---------- controls ----------
+  bpPlayBtn.addEventListener("click", () => bpTransport(!BP.playing));
+  bpRecBtn.addEventListener("click", bpStartRec);
+  document.getElementById("bpUndo").addEventListener("click", () => {
+    if (!BPS.ev.length) return; const last = Math.max(...BPS.ev.map(e => e.pass || 0)); const n0 = BPS.ev.length;
+    BPS.ev = BPS.ev.filter(e => (e.pass || 0) !== last); bpSave(); bpPaintGrid(); bpPaintTop(); noteMsg("Took back the last pass (" + (n0 - BPS.ev.length) + " hits)");
+  });
+  document.getElementById("bpClear").addEventListener("click", () => {
+    if (!BPS.ev.length) return; const keep = BPS.ev; BPS.ev = []; bpSave(); bpPaintGrid(); bpPaintTop();
+    undoToast("Cleared " + keep.length + " hits", () => { BPS.ev = keep; bpSave(); bpPaintGrid(); bpPaintTop(); });
+  });
+  document.getElementById("bpFx").addEventListener("click", () => { start(); const p = fxcParams("bp"); p.on = !p.on; fxcSave(); if (ctx) { fxcGet("bp"); applyFx(); bpBus(); } bpPaintTop(); });
+  document.getElementById("bpBars").addEventListener("change", e => { BPS.bars = +e.target.value; BPS.ev = BPS.ev.filter(x => x.s < BPS.bars * 16); bpSave(); bpPaintTop(); bpPaintGrid(); });
+  document.getElementById("bpQ").addEventListener("change", e => { BPS.q = +e.target.value; bpSave(); });
+  document.getElementById("bpRate").addEventListener("change", e => { BPS.rate = +e.target.value; bpSave(); });
+  document.getElementById("bpQs").addEventListener("input", e => { BPS.qs = +e.target.value / 100; document.getElementById("bpQsV").textContent = e.target.value + "%"; bpSave(); });
+  document.getElementById("bpSw").addEventListener("input", e => { BPS.sw = +e.target.value / 100; document.getElementById("bpSwV").textContent = e.target.value + "%"; bpSave(); });
+  [["bpRep", "rep"], ["bpFull", "full"], ["bpClick", "click"], ["bpCin", "cin"]].forEach(([id, k]) => document.getElementById(id).addEventListener("click", () => { BPS[k] = !BPS[k]; bpSave(); bpPaintTop(); }));
+  document.getElementById("bpDone").addEventListener("click", () => { bpView.hidden = true; });
+  document.getElementById("bpHelpBtn").addEventListener("click", () => { document.getElementById("bpHelp").hidden = false; });
+  document.getElementById("bpHelpDone").addEventListener("click", () => { document.getElementById("bpHelp").hidden = true; });
+  document.getElementById("stopAll").addEventListener("click", () => bpTransport(false));
+  document.addEventListener("visibilitychange", () => { if (document.hidden && BP.playing) bpTransport(false); });
+  bpBtn.addEventListener("click", () => {
+    start(); bpView.hidden = false; bpPaintGrid(); bpPaintEdit(); bpPaintTop(); bpPaintChop();
+    if (ctx) BPS.banks.flat().forEach(P => { if (P && typeof P.src === "string" && rcEngine(P.src) === "smp") rcSampleBuf(P.src); });
+  });
+  setInterval(() => { if (!bpView.hidden) { const t = (Math.round(rcBpm() * 10) / 10) + " bpm" + (rcFollow() ? " · DJ" : ""), el = document.getElementById("bpBpm"); if (el.textContent !== t) el.textContent = t; } }, 500);
+  { const mc = mixChannels; mixChannels = function () { const ch = mc(); ch.push({ group: "Beat Pads", name: "Beat Pads", sub: "all 64 pads", get: () => BPS.level, set: v => { BPS.level = v; if (BP.bus) BP.bus.gain.setTargetAtTime(v, ctx.currentTime, 0.03); bpSave(); }, dflt: 0.85, live: true }); return ch; }; }
+  // ---------- chop ----------
+  const bpSrc = document.getElementById("bpSrc"), bpWave = document.getElementById("bpWave");
+  let bpCuts = null;
+  function bpPaintChop() {
+    let h = ""; for (let i = 0; i < NSLOTS; i++) h += `<option value="${i}"${i === BPS.src ? " selected" : ""}${sampBuf[i] ? "" : " disabled"}>S${i + 1}${sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"}</option>`;
+    bpSrc.innerHTML = h;
+    document.getElementById("bpMode").value = BPS.mode; document.getElementById("bpSens").value = Math.round(BPS.sens * 100); document.getElementById("bpTo").value = "ABCD"[BPS.to];
+    bpCuts = sampBuf[BPS.src] ? bpCut(sampBuf[BPS.src]) : null; bpDrawWave();
+  }
+  function bpCut(b) {
+    const d = b.duration;
+    if (BPS.mode !== "tr") { const n = +BPS.mode; return new Array(n).fill(0).map((_, i) => i * d / n); }
+    const x = b.getChannelData(0), x2 = b.numberOfChannels > 1 ? b.getChannelData(1) : x, sr = b.sampleRate, hop = 256, N = Math.floor(x.length / hop);
+    const e = new Float32Array(N); for (let f = 0; f < N; f++) { let s2 = 0; for (let i = f * hop; i < f * hop + hop; i++) { const v = (x[i] + x2[i]) * 0.5; s2 += v * v; } e[f] = Math.log(1e-5 + Math.sqrt(s2 / hop)); }
+    const fl = new Float32Array(N); for (let f = 1; f < N; f++) fl[f] = Math.max(0, e[f] - e[f - 1]);
+    let m = 0, sq = 0; for (let f = 0; f < N; f++) { m += fl[f]; sq += fl[f] * fl[f]; } m /= N; const sdv = Math.sqrt(Math.max(0, sq / N - m * m));
+    const thr = m + (2.6 - BPS.sens * 2.2) * sdv, gap = Math.round(0.07 * sr / hop), peaks = [];
+    for (let f = 2; f < N - 1; f++) if (fl[f] > thr && fl[f] >= fl[f - 1] && fl[f] >= fl[f + 1]) { if (peaks.length && f - peaks[peaks.length - 1][0] < gap) { if (fl[f] > peaks[peaks.length - 1][1]) peaks[peaks.length - 1] = [f, fl[f]]; } else peaks.push([f, fl[f]]); }
+    const top = peaks.sort((a, b2) => b2[1] - a[1]).slice(0, 15).map(p => Math.max(0, (p[0] - 1) * hop / sr - 0.003));
+    const cuts = [0].concat(top.filter(t => t > 0.03)).sort((a, b2) => a - b2);
+    return cuts.filter((t, i) => i === 0 || t - cuts[i - 1] > 0.03).slice(0, 16);
+  }
+  function bpDrawWave() {
+    const W = bpWave.clientWidth, H = bpWave.clientHeight; if (!W) return;
+    const dpr = Math.min(2, devicePixelRatio || 1); bpWave.width = Math.round(W * dpr); bpWave.height = Math.round(H * dpr);
+    const c = bpWave.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    const b = sampBuf[BPS.src];
+    if (!b) { c.fillStyle = "#8e86a6"; c.font = "12px system-ui"; c.fillText("Pick a sampler slot with a sound in it, or load a WAV / MP3", 10, H / 2 + 4); return; }
+    const x = b.getChannelData(0), n = x.length, step = Math.max(1, Math.floor(n / W));
+    c.fillStyle = "#c4a3ff";
+    for (let px = 0; px < W; px++) { let mx = 0; const i0 = Math.floor(px / W * n); for (let i = i0; i < Math.min(n, i0 + step); i++) { const v = Math.abs(x[i]); if (v > mx) mx = v; } const h = Math.max(1, mx * (H - 6)); c.fillRect(px, (H - h) / 2, 1, h); }
+    if (bpCuts) bpCuts.forEach((t, i) => { const px = t / b.duration * W; c.fillStyle = BP_BANK_COL[BPS.to]; c.fillRect(px, 0, 1.5, H); c.font = "600 10px ui-monospace,monospace"; c.fillText(String(i + 1), px + 3, 11); });
+  }
+  bpWave.addEventListener("click", e => {
+    const b = sampBuf[BPS.src]; if (!b || !bpCuts) return; start(); if (!ctx) return;
+    const r = bpWave.getBoundingClientRect(), t = (e.clientX - r.left) / r.width * b.duration; let i = 0; bpCuts.forEach((c0, j) => { if (c0 <= t) i = j; });
+    const s0 = bpCuts[i], s1 = bpCuts[i + 1] ?? b.duration, src = ctx.createBufferSource(), g = ctx.createGain(); src.buffer = b; g.gain.value = 0.9; src.connect(g).connect(bpBus()); src.start(ctx.currentTime + 0.01, s0, s1 - s0);
+  });
+  bpSrc.addEventListener("change", () => { BPS.src = +bpSrc.value; bpSave(); bpPaintChop(); });
+  document.getElementById("bpMode").addEventListener("change", e => { BPS.mode = e.target.value; bpSave(); bpPaintChop(); });
+  document.getElementById("bpSens").addEventListener("input", e => { BPS.sens = +e.target.value / 100; if (sampBuf[BPS.src]) { bpCuts = bpCut(sampBuf[BPS.src]); bpDrawWave(); } });
+  document.getElementById("bpSens").addEventListener("change", () => bpSave());
+  document.getElementById("bpTo").addEventListener("change", e => { BPS.to = "ABCD".indexOf(e.target.value); bpSave(); bpDrawWave(); });
+  document.getElementById("bpChopGo").addEventListener("click", () => {
+    const b = sampBuf[BPS.src]; if (!b) { noteMsg("Load a sound first"); return; }
+    const cuts = bpCut(b), bank = BPS.to, keep = BPS.banks[bank].map(p => Object.assign({}, p)), keepEv = BPS.ev;
+    BPS.banks[bank] = new Array(16).fill(null).map((_, i) => i < cuts.length ? Object.assign(bpPadDef({ slot: BPS.src, a: cuts[i], b: cuts[i + 1] ?? b.duration, n: i + 1 }), {}) : bpPadDef(null));
+    BPS.ev = BPS.ev.filter(e => Math.floor(e.k / 16) !== bank || (e.k % 16) < cuts.length);
+    BPS.bank = bank; BPS.sel = bank * 16; bpSave(); bpPaintGrid(); bpPaintEdit(); bpPaintChop();
+    undoToast(cuts.length + " slices on bank " + "ABCD"[bank] + " · pad 1 is the start", () => { BPS.banks[bank] = keep; BPS.ev = keepEv; bpSave(); bpPaintGrid(); bpPaintEdit(); });
+  });
+  document.getElementById("bpLoad").addEventListener("click", () => { start(); document.getElementById("bpFile").click(); });
+  document.getElementById("bpFile").addEventListener("change", async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = ""; if (!f || !ctx) return;
+    try {
+      const buf = await decode(await f.arrayBuffer());
+      let slot = sampBuf.findIndex((x, i) => !x && i < NSLOTS); if (slot < 0) slot = BPS.src;
+      setSample(slot, buf, f.name); storeSample(slot, f.name, bufferToWav(buf));
+      BPS.src = slot; bpSave(); bpPaintChop(); noteMsg("Loaded " + f.name + " into S" + (slot + 1));
+    } catch (err) { noteMsg("Couldn't read that file", true); }
+  });
+  window.__bp = { BPS, BP, hit: (k, v) => bpHit(k, ctx.currentTime + 0.01, v), down: bpDown, up: bpUp, transport: bpTransport, rec: bpStartRec, q: bpQ, cut: () => bpCuts };
+  bpPaintTop();
 
   more3Ready = true;
   if (state.engine === "drum") renderEngine();
