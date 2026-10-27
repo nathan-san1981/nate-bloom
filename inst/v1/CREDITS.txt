@@ -1,8 +1,8 @@
 Nate Bloom studio instruments (inst/v1)
 
-Each instrument here is a set of single notes, trimmed, levelled and encoded to 128 kbit/s MP3 for download
-on demand. manifest.json lists every note: MIDI note, file, key range, and loop start/end (seconds) for the
-sustained instruments. The app crossfades each loop after decoding.
+Each instrument is one MP3 file (<id>.mp3): single notes, trimmed, levelled and encoded at 128 kbit/s, back to
+back. manifest.json lists every note: MIDI note, name, key range, loop start/end (seconds) for the sustained
+instruments, and where the note sits in the instrument's file. The app crossfades each loop after decoding.
 
 Grand Piano
   Salamander Grand Piano V3 by Alexander Holm (Yamaha C5), velocity layer 10.
