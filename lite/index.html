@@ -1683,6 +1683,9 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
 .tauto polyline { fill: none; stroke: var(--amber); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .tauto circle { fill: var(--amber); }
 .br-credit { font-size: 0.72rem; color: var(--dim); padding: 10px 4px 4px; line-height: 1.4; }
+.bp-top .bp-fast { font-variant-numeric: tabular-nums; }
+.bp-top .bp-fast[aria-pressed="true"] { background: rgba(127,214,194,0.14); border-color: #7fd6c2; color: #7fd6c2; }
+.bp-top .bp-fast.wait { opacity: 0.72; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -18319,6 +18322,236 @@ registerProcessor("nb-verb", NBVerb);`;
   // in the Android app the music goes on when you switch apps (the app holds a playback notification meanwhile)
   function nbKeepPlaying() { return !!(window.NB_NATIVE && window.NB_NATIVE.background); }
   if (window.NB_NATIVE) { const ib = document.getElementById("installBtn"); if (ib) { ib.hidden = true; ib.style.display = "none"; } document.body.classList.add("nb-app"); }
+  // ---------- Android app: fast pads ----------
+  // A tapped pad plays from the app's low-latency audio (AAudio) instead of the browser's, which on Android adds
+  // tens of milliseconds. Each pad is rendered ahead of time, exactly as bpHit plays it and through a copy of the
+  // master compressor, limiter and clipper; a tap then only names a render. Recorders still hear every hit: a
+  // silent copy goes to them, NFP.D later, which the recorders' own feed is delayed by too.
+  const NFP = { api: window.NBFastPads || null, on: true, run: false, rate: 0, info: null, pads: new Map(), q: new Set(), busy: false, bytes: 0,
+    tapping: false, hit: false, ctx: null, recIn: null, ghost: null, recTo: new Set(), D: 0.25, delta: 0, idle: 0, bh: null, plays: 0 };
+  const NFP_V = [0.4, 0.7, 1], NFP_MAX = 10, NFP_BUDGET = 160e6;
+  try { if (localStorage.getItem("nightbloom-fastpads") === "off") NFP.on = false; } catch (e) {}
+  const nfpIds = new WeakMap(); let nfpIdN = 0;
+  const nfpId = o => { if (!o || typeof o !== "object") return 0; let i = nfpIds.get(o); if (!i) { i = ++nfpIdN; nfpIds.set(o, i); } return i; };
+  // everything a pad's sound depends on (null: not ready to render yet)
+  function nfpSig(k) {
+    const P = bpPad(k); if (!P || !P.src) return null;
+    let s;
+    if (typeof P.src === "string") {
+      const id = P.src;
+      if (rcEngine(id) === "smp") { const b = id.startsWith("st:") ? rcStLoad(id.slice(3)) : rcSampleBuf(id); if (!b) return null; s = id + "#" + nfpId(b); }
+      else if (RC_SYN[id]) s = id; else return null;
+      s += "@" + rcGain(id);
+    } else { const b = sampBuf[P.src.slot]; if (!b) return null; s = "s" + nfpId(b) + ":" + P.src.a + ":" + P.src.b; }
+    return [s, P.tune, P.decay, P.tone, P.level, P.pan, !!P.rev, Math.round(rcBpm()), NFP.rate].join("|");
+  }
+  // how long a hit can ring (the render's length; the silence after it is trimmed)
+  function nfpEst(P) {
+    const rate = Math.pow(2, (P.tune || 0) / 12);
+    if (typeof P.src === "object") {
+      const b = sampBuf[P.src.slot]; if (!b) return 0;
+      const a0 = Math.max(0, Math.min(b.duration, P.src.a)), b0 = Math.max(a0 + 0.005, Math.min(b.duration, P.src.b)), dur = (b0 - a0) / rate;
+      return P.decay >= 0.5 ? dur : Math.max(0.03, dur * Math.pow(P.decay / 0.5, 1.4));
+    }
+    const id = P.src;
+    if (rcEngine(id) === "smp") {
+      if (id.startsWith("st:")) { const L = rcStLoad(id.slice(3)); let m = 0; (L || []).forEach(l => l.forEach(b => { if (b && b.duration > m) m = b.duration; })); return m ? m / rate : 4; }
+      const b = rcSampleBuf(id); return b && b.duration ? b.duration / rate : 4;
+    }
+    return 4;
+  }
+  // the end of the master chain (compressor, limiter, trim, clipper), copied from the live one
+  function nfpMaster(c) {
+    const comp = c.createDynamicsCompressor(), lim = c.createDynamicsCompressor(), trim = c.createGain(), safe = c.createWaveShaper();
+    const lc = fx && fx.comp, ll = fx && fx.limiter, cn = (fx && fx.chainNodes) || [], li = ll ? cn.indexOf(ll) : -1, lt = li >= 0 ? cn[li + 1] : null, ls = li >= 0 ? cn[li + 2] : null;
+    const cp = (a, b, k, d) => { a[k].value = b ? b[k].value : d; };
+    cp(comp, lc, "threshold", -14); cp(comp, lc, "ratio", 4); cp(comp, lc, "knee", 30); cp(comp, lc, "attack", 0.005); cp(comp, lc, "release", 0.2);
+    cp(lim, ll, "threshold", -3); cp(lim, ll, "ratio", 20); cp(lim, ll, "knee", 0); cp(lim, ll, "attack", 0.001); cp(lim, ll, "release", 0.1);
+    trim.gain.value = lt && lt.gain ? lt.gain.value : Math.pow(10, -(3 - 3 / 20) * 0.6 / 20);
+    safe.oversample = "2x";
+    if (ls && ls.curve) safe.curve = ls.curve;
+    else safe.curve = (() => { const n = 4096, o = new Float32Array(n), k = 0.84; for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1, a = Math.abs(x); o[i] = Math.sign(x) * (a <= k ? a : k + (1 - k) * Math.tanh((a - k) / (1 - k))); } return o; })();
+    comp.connect(lim).connect(trim).connect(safe);
+    return { input: comp, output: safe };
+  }
+  // one hit, offline, at the app's sample rate. It starts half a second in: a compressor starting from nothing
+  // squashes its first tenth of a second (the live one has long since settled), so the render waits for the copy to settle too.
+  const NFP_PRE = 0.5;
+  async function nfpRender(k, vel) {
+    const P = bpPad(k); if (!P) return null;
+    const est = nfpEst(P); if (!(est > 0) || est > NFP_MAX) return null;
+    const sr = NFP.rate, oc = new OfflineAudioContext(2, Math.ceil((NFP_PRE + est + 0.4) * sr), sr), bus = oc.createGain(), M = nfpMaster(oc);
+    bus.gain.value = BPS.level; bus.connect(M.input); M.output.connect(oc.destination);
+    const live = ctx, keepV = BP.voices; let vo = null;
+    ctx = oc; BP.off = bus; BP.voices = [];
+    try { vo = NFP.bh(k, NFP_PRE, vel); } finally { ctx = live; BP.off = null; BP.voices = keepV; }
+    if (!vo) return null;
+    const b = await oc.startRendering();
+    // from the first sound: the compressor's and limiter's look-ahead (about 12 ms together) and any silence before the hit
+    // (up to 25 ms in all) come off, so a tap starts right away
+    const s0 = Math.round(NFP_PRE * sr), L0 = b.getChannelData(0), R0 = b.getChannelData(1);
+    let a0 = s0; for (let i = s0, e = Math.min(L0.length, s0 + Math.round(sr * 0.025)); i < e; i++) { if (Math.abs(L0[i]) > 1e-3 || Math.abs(R0[i]) > 1e-3) break; a0 = i; }
+    a0 = Math.max(s0, a0 - Math.round(sr * 0.001));
+    const L = L0.subarray(a0), R = R0.subarray(a0);
+    let n = 0; for (let i = L.length - 1; i >= 0; i--) if (Math.abs(L[i]) > 1e-4 || Math.abs(R[i]) > 1e-4) { n = i + 1; break; }
+    if (!n) return null;
+    n = Math.min(L.length, n + Math.round(sr * 0.01));
+    const f = Math.min(n, Math.round(sr * 0.004));   // a few ms of fade at the very end
+    for (let i = 0; i < f; i++) { const g = i / f; L[n - 1 - i] *= g; R[n - 1 - i] *= g; }
+    const pcm = new Int16Array(n * 2);
+    for (let i = 0; i < n; i++) { const a = L[i], c = R[i]; pcm[2 * i] = (a < -1 ? -1 : a > 1 ? 1 : a) * 32767; pcm[2 * i + 1] = (c < -1 ? -1 : c > 1 ? 1 : c) * 32767; }
+    return { pcm, frames: n };
+  }
+  function nfpB64(pcm) { const u = new Uint8Array(pcm.buffer), CH = 0x8000; let s = ""; for (let i = 0; i < u.length; i += CH) s += String.fromCharCode.apply(null, u.subarray(i, i + CH)); return btoa(s); }
+  const nfpTakes = P => typeof P.src === "string" && P.src.startsWith("st:") ? 2 : 1;   // studio drums: two takes, so repeats still vary
+  function nfpDrop(k) { const R = NFP.pads.get(k); if (!R) return; (R.slots || []).forEach(sl => { try { NFP.api.clear(sl); } catch (e) {} }); NFP.bytes -= R.bytes || 0; NFP.pads.delete(k); }
+  async function nfpLoad(k) {
+    const sig = nfpSig(k); if (!sig) return;
+    const P = bpPad(k), takes = nfpTakes(P), R = { sig, lvl: BPS.level, takes, alt: 0, ok: false, bad: false, bytes: 0, slots: [], dur: 0 };
+    for (let li = 0; li < NFP_V.length; li++) for (let a = 0; a < takes; a++) {
+      const r = await nfpRender(k, NFP_V[li]);
+      if (nfpSig(k) !== sig) return;   // changed meanwhile: the next pass renders it again
+      if (!r) { nfpDrop(k); NFP.pads.set(k, { sig, bad: true, bytes: 0, slots: [] }); return; }
+      const slot = k * 8 + li * 2 + a;
+      if (!NFP.api.load(slot, nfpB64(r.pcm), r.frames)) return;
+      R.slots.push(slot); R.bytes += r.frames * 4; R.dur = Math.max(R.dur, r.frames / NFP.rate);
+      await new Promise(res => setTimeout(res, 0));
+    }
+    const old = NFP.pads.get(k); if (old) NFP.bytes -= old.bytes || 0;
+    R.ok = true; NFP.pads.set(k, R); NFP.bytes += R.bytes;
+  }
+  async function nfpWork() {
+    if (NFP.busy) return; NFP.busy = true;
+    try {
+      while (NFP.q.size && NFP.run) {
+        const k = NFP.q.values().next().value; NFP.q.delete(k);
+        const sig = nfpSig(k), R = NFP.pads.get(k);
+        if (!sig || (R && R.sig === sig)) continue;
+        if (NFP.bytes > NFP_BUDGET) break;
+        await nfpLoad(k);
+      }
+    } catch (e) { console.warn("Fast pads:", e && e.message || e); }
+    finally { NFP.busy = false; nfpBadge(); }
+  }
+  // what to (re)render: this bank first, then the rest
+  function nfpScan() {
+    const order = []; for (let i = 0; i < 64; i++) order.push((BPS.bank * 16 + i) % 64);
+    for (const k of order) {
+      const P = bpPad(k), R = NFP.pads.get(k);
+      if (!P || !P.src) { if (R) nfpDrop(k); continue; }
+      const sig = nfpSig(k); if (sig && (!R || R.sig !== sig)) NFP.q.add(k);
+    }
+    nfpWork();
+  }
+  function nfpLat() {
+    try {
+      const i = JSON.parse(NFP.api.info()); NFP.info = i; if (!i.running) { NFP.run = false; return; }
+      const web = (ctx.baseLatency || 0) + (ctx.outputLatency || 0), nat = (i.latencyMs || 0) / 1000;
+      NFP.delta = Math.max(0, Math.min(NFP.D - 0.02, web - nat));
+    } catch (e) {}
+  }
+  function nfpWake() {
+    if (!NFP.api || !NFP.on || !ctx) return false;
+    if (!NFP.run) {
+      try { NFP.run = !!NFP.api.start(); } catch (e) { NFP.run = false; }
+      if (NFP.run) { NFP.rate = NFP.api.rate() || 48000; nfpLat(); }
+    }
+    return NFP.run;
+  }
+  // the recorders (takes, Keep that) listen through a short delay, and the silent copies of fast hits join them there
+  function nfpRecInit() {
+    if (NFP.ctx === ctx || !ctx || !analyser) return;
+    NFP.ctx = ctx;
+    const ac = analyser.connect, ad = analyser.disconnect, recIn = ctx.createGain(), dl = ctx.createDelay(1);
+    dl.delayTime.value = NFP.D; ac.call(analyser, dl); dl.connect(recIn);
+    const gh = ctx.createGain(), M = nfpMaster(ctx); gh.connect(M.input); M.output.connect(recIn);
+    NFP.recIn = recIn; NFP.ghost = gh; NFP.recTo = new Set();
+    const isRec = d => (typeof ScriptProcessorNode !== "undefined" && d instanceof ScriptProcessorNode) || (typeof AudioWorkletNode !== "undefined" && d instanceof AudioWorkletNode);
+    analyser.connect = function (d) { if (isRec(d)) { recIn.connect(d); NFP.recTo.add(d); return d; } return ac.apply(this, arguments); };
+    analyser.disconnect = function (d) { if (d && NFP.recTo.has(d)) { NFP.recTo.delete(d); return recIn.disconnect(d); } return ad.apply(this, arguments); };
+    [CAP.node, take.rec ? take.node : null].forEach(n => { if (!n || NFP.recTo.has(n)) return; try { ad.call(analyser, n); } catch (e) {} recIn.connect(n); NFP.recTo.add(n); });
+  }
+  // why a tap would play the normal way right now ("" = fast)
+  function nfpWhy() {
+    if (!NFP.on) return "off";
+    if (!NFP.run) return "starting";
+    if (FXC.by.bp && FXC.by.bp.on) return "FX";
+    if (!eqFlat(EQS.bp)) return "EQ";
+    if (soloLevel("bp") !== 1) return "solo";
+    if (BPS.l16) return "16 Levels";
+    if (BPS.rep) return "Repeat";
+    if (trec.on || STEM.busy) return "recording";
+    return "";
+  }
+  const NFP_WHY = { off: "Fast pads are off: taps play through the browser's audio. Tap to turn them on.", starting: "Fast pads are starting.",
+    FX: "Fast pads pause while Beat Pads goes through FX (the FX run in the browser's audio).", EQ: "Fast pads pause while Beat Pads has EQ in the mixer.",
+    solo: "Fast pads pause while something else is soloed.", "16 Levels": "Fast pads pause in 16 Levels (each pad changes the sound).",
+    Repeat: "Fast pads pause while Repeat is on (the roll keeps to the browser's clock).", recording: "Fast pads pause while Tracks or stems record." };
+  function nfpPlay(k, vel) {
+    const R = NFP.pads.get(k), sig = nfpSig(k);
+    if (!R || !R.ok || R.sig !== sig) { if (sig) { NFP.q.add(k); nfpWork(); } return null; }
+    if (!(R.lvl > 0) || !(BPS.level > 0)) return null;
+    let li = 0; for (let i = 1; i < NFP_V.length; i++) if (Math.abs(Math.log(vel / NFP_V[i])) < Math.abs(Math.log(vel / NFP_V[li]))) li = i;
+    const a = R.takes > 1 ? (R.alt = (R.alt + 1) % R.takes) : 0, g = Math.max(0, vel) / NFP_V[li] * (BPS.level / R.lvl), P = bpPad(k);
+    let ok = false; try { ok = NFP.api.play(k * 8 + li * 2 + a, g, g, P.choke || 0, k); } catch (e) {}
+    if (!ok) { NFP.run = false; return null; }
+    NFP.hit = true; NFP.plays++;
+    const now = ctx.currentTime;
+    // its choke group stops in the browser's audio now too
+    if (P.choke) BP.voices.forEach(v => { if (!v.ghost && v.choke === P.choke && v.k !== k && v.end > now) { try { v.cg.gain.setTargetAtTime(0, now, 0.008); } catch (e) {} v.end = now + 0.05; } });
+    // the silent copy for the recorders: D later, less the difference in delay between the two outputs
+    let vo = null;
+    if (NFP.ghost) { NFP.ghost.gain.value = BPS.level; BP.off = NFP.ghost; try { vo = NFP.bh(k, now + NFP.D - NFP.delta, vel); } finally { BP.off = null; } if (vo) vo.ghost = true; }
+    bpFlash(k, now);
+    if (NBFX.duck !== "off" && typeof P.src === "string" && isKick(P.src)) nbDuck(now);
+    return vo || { k, choke: P.choke, cg: null, end: now + R.dur, ghost: true };
+  }
+  function nfpBadge() {
+    const fb = document.getElementById("bpFast"); if (!fb) return;
+    const why = nfpWhy(), withSound = BPS.banks[BPS.bank].filter(P => P && P.src).length;
+    let ready = 0; for (let i = 0; i < 16; i++) { const k = BPS.bank * 16 + i, R = NFP.pads.get(k); if (R && R.ok && R.sig === nfpSig(k)) ready++; }
+    const ms = NFP.info && NFP.info.latencyMs > 0 ? Math.round(NFP.info.latencyMs) : null;
+    fb.setAttribute("aria-pressed", String(NFP.on && !why));
+    fb.classList.toggle("wait", NFP.on && (!!why || ready < withSound));
+    fb.textContent = !NFP.on ? "⚡ Off" : why ? "⚡ " + (why === "starting" ? "…" : "paused") : ready < withSound ? "⚡ " + ready + "/" + withSound : "⚡ " + (ms ? ms + " ms" : "Fast");
+    const web = ctx ? Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000) : 0;
+    fb.title = why ? NFP_WHY[why] : ready < withSound ? "Fast pads: getting this bank's pads ready (" + ready + " of " + withSound + "). Pads that aren't ready yet play the normal way."
+      : "Fast pads: a tap sounds in about " + (ms || "?") + " ms" + (web > 0 ? " (the browser's own audio: about " + web + " ms)" : "") + ". Tap to turn off.";
+    fb.setAttribute("aria-label", fb.title);
+  }
+  if (NFP.api) {
+    NFP.bh = bpHit;
+    bpHit = function (k, t, vel, mod) {
+      if (NFP.tapping && !BP.off && mod == null && ctx && !nfpWhy()) { const r = nfpPlay(k, vel); if (r) return r; }
+      const r = NFP.bh.apply(this, arguments);
+      // a hit the browser plays cuts its choke group's fast voices when it is heard
+      if (r && r.choke && NFP.run && !BP.off && ctx) { const ms = Math.max(0, (t - ctx.currentTime + NFP.delta) * 1000), ch = r.choke; setTimeout(() => { try { NFP.api.choke(ch, k); } catch (e) {} }, ms); }
+      return r;
+    };
+    { const bd = bpDown; bpDown = function () { NFP.tapping = true; NFP.hit = false; try { return bd.apply(this, arguments); } finally { NFP.tapping = false; } }; }
+    // a fast hit is heard sooner than the loop playing in the browser: record it where it was heard against the loop
+    { const br = bpRecord; bpRecord = function (k, pos, vel, onGrid, mod) { if (NFP.tapping && NFP.hit && !onGrid && BP.sd > 0) { const p = pos - NFP.delta / BP.sd; if (p >= 0) pos = p; } return br.call(this, k, pos, vel, onGrid, mod); }; }
+    { const bh = bpHush; bpHush = function () { if (NFP.run) { try { NFP.api.stopAll(); } catch (e) {} } return bh.apply(this, arguments); }; }
+    // the button: how fast taps are right now, and off/on
+    const fb = document.createElement("button"); fb.className = "btn bp-fast"; fb.id = "bpFast";
+    document.getElementById("bpFx").after(fb);
+    fb.addEventListener("click", () => {
+      NFP.on = !NFP.on; try { localStorage.setItem("nightbloom-fastpads", NFP.on ? "on" : "off"); } catch (e) {}
+      if (!NFP.on && NFP.run) { try { NFP.api.stopAll(); NFP.api.sleep(); } catch (e) {} NFP.run = false; }
+      if (NFP.on && nfpWake()) { nfpRecInit(); nfpScan(); }
+      nfpBadge(); noteMsg(NFP.on ? "Fast pads on: taps play from Android's low-latency audio" : "Fast pads off: taps play through the browser's audio");
+    });
+    const help = document.querySelector("#bpHelp .rc-helptext");
+    if (help) { const p = document.createElement("p"); p.innerHTML = "<b>Fast pads (the app).</b> In the Android app, a tap plays from Android's low-latency audio instead of the browser's, so the pads answer much sooner. The button next to FX shows how long a tap takes to sound, or why fast pads are paused (FX or EQ on Beat Pads, 16 Levels, Repeat, a solo, a Tracks or stems recording), and turns them off. Takes and Keep that record every hit as you heard it."; help.appendChild(p); }
+    setInterval(() => {
+      if (!ctx) return;
+      if (!bpView.hidden && NFP.on) { NFP.idle = 0; if (nfpWake()) { nfpRecInit(); nfpLat(); nfpScan(); } }
+      else if (NFP.run && ++NFP.idle > 40) { try { NFP.api.sleep(); } catch (e) {} NFP.run = false; }   // a minute after Beat Pads closes
+      if (!bpView.hidden) nfpBadge();
+    }, 1500);
+    bpBtn.addEventListener("click", () => setTimeout(() => { if (NFP.on && nfpWake()) { nfpRecInit(); nfpScan(); } nfpBadge(); }, 0));
+    window.__nfp = { NFP, sig: nfpSig, why: nfpWhy, scan: nfpScan, badge: nfpBadge, ctx: () => ctx, take: () => take, posAt: t => bpPosAt(t), render: (k, v) => nfpRender(k, v), master: c => nfpMaster(c) };
+  }
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
   if (window.NB_SIM) { const mv0 = makeVoice; makeVoice = function () { const S = window.NB_SIM, r = S.beginVoice(arguments[1]); try { return mv0.apply(this, arguments); } finally { S.endBuild(r); } }; }
   more3Ready = true;
