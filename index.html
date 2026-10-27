@@ -1715,6 +1715,32 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
 .bp-kits .bp-kgrp { font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin: 8px 2px 0; }
 .bp-kits .br-play[aria-pressed="true"] { color: #7fd6c2; }
 .bp-kits .br-row.on .br-name::after { content: " ✓"; color: var(--lilac); }
+.wam-list { display: flex; flex-direction: column; gap: 6px; max-height: calc(100dvh - 240px); overflow-y: auto; padding-right: 2px; }
+.wam-list > * { flex-shrink: 0; }
+.wam-list .wam-h { font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin: 10px 2px 0; }
+.wam-row { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; background: var(--raised); border: 1px solid transparent; flex-wrap: wrap; }
+.wam-row.on { border-color: #7fd6c2; }
+.wam-row .wam-t { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 2px; }
+.wam-row .wam-t b { font-size: 0.92rem; }
+.wam-row .wam-t small { font: 0.64rem var(--font-mono); color: var(--dim); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wam-row .btn { height: 32px; padding: 0 10px; font-size: 0.8rem; }
+.wam-row .btn[aria-pressed="true"] { background: rgba(127,214,194,0.14); border-color: #7fd6c2; color: #7fd6c2; }
+.wam-add { display: flex; gap: 6px; flex-wrap: wrap; }
+.wam-add input { flex: 1; min-width: 180px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); padding: 0 10px; font: inherit; font-size: 0.85rem; }
+.wam-msg { font: 0.72rem var(--font-mono); color: var(--amber); min-height: 1em; margin: 2px; line-height: 1.4; }
+.wam-msg.dim { color: var(--dim); }
+.wam-msg a { color: #7fd6c2; }
+/* a plugin's controls dock at the top and leave the rest of the app playable (keys, pads, the computer keyboard) */
+.wam-dock { position: fixed; z-index: 31; left: 0; right: 0; top: max(8px, env(safe-area-inset-top, 0px)); display: flex; justify-content: center;
+  padding: 0 max(8px, env(safe-area-inset-right, 0px)) 0 max(8px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.wam-dock[hidden] { display: none; }
+.wam-dock .ed-card { pointer-events: auto; max-width: min(980px, 100%); max-height: 72vh; box-shadow: 0 16px 48px rgba(0,0,0,0.7); padding-bottom: 10px; }
+.wam-dock .ed-head { display: flex; align-items: center; gap: 10px; }
+.wam-dock .ed-head .ed-info { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wam-dock .ed-head .btn { height: 34px; padding: 0 16px; }
+.wam-gui { overflow: auto; max-height: calc(72vh - 104px); background: #0e0c14; border-radius: 10px; padding: 8px; }
+.wam-gui .wam-size { overflow: hidden; }
+.wam-gui .wam-fit { transform-origin: top left; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -1769,6 +1795,7 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
     <button class="btn" id="prBtn">Projects</button>
     <span class="bsep" aria-hidden="true"></span>
     <button class="btn" id="betaFxBtn">FX Lab</button>
+    <button class="btn" id="wamBtn">Plugins</button>
     <button class="btn" id="moBtn">Motion</button>
     <button class="btn" id="msBtn">My sounds</button>
     <span class="bsep" aria-hidden="true"></span>
@@ -2665,7 +2692,8 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
       <p><b>Playing from a keyboard</b> (Bluetooth or USB): three octaves from the left edge of the keys. The bottom letter row, <b>Z X C V B N M , . /</b>, plays the white keys, with <b>S D G H J L ;</b> above it as the black keys; the top letter row, <b>Q W E R T Y U I O P [ ]</b>, carries on from there, with the number keys <b>2 3 4 6 7 9 0 −</b> as its black keys. Every key shows its letter. <b>↓</b> / <b>↑</b> move an octave down or up. With Drums or Pads, <b>Q W E R / A S D F / Z X C V</b> play the pads in the same grid as on screen. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
       <p><b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
-      <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
+      <p><b>Plugins</b> (in the toolbar): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Synth-101, Spectrum: Modal, the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (amps, fuzz, delays, reverbs, phasers, EQ and more) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Bounces and stems rendered offline leave plugin instruments out: record a take (or Keep 90s) to keep them. Fast pads pause while a plugin effect is on.</p>
+      <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Plugins, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (toolbar) chains your own patterns A–D into an arrangement.</p>
     </div>
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
@@ -2797,6 +2825,20 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
   </div>
 </div>
 
+<div class="editor sheet" id="wamSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugins">
+    <div class="ed-head"><strong>Plugins</strong></div>
+    <span class="ed-info" style="text-align:left">Web Audio Modules, the web's version of VSTs: they run on every device Nate Bloom does. Instruments play from the keys, the sequencer and MIDI; effects run on the whole mix.</span>
+    <div class="wam-list" id="wamList"></div>
+    <div class="ed-foot"><button class="btn primary" id="wamDone">Done</button></div>
+  </div>
+</div>
+<div class="wam-dock" id="wamGui" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugin controls">
+    <div class="ed-head"><strong id="wamGuiTitle">Plugin</strong><span class="ed-info" id="wamGuiSub"></span><button class="btn primary" id="wamGuiDone">Done</button></div>
+    <div class="wam-gui" id="wamGuiBox"></div>
+  </div>
+</div>
 <div class="editor sheet" id="menuSheet" hidden>
   <div class="ed-card" role="dialog" aria-label="Menu">
     <div class="ed-head"><strong>Menu</strong></div>
@@ -5729,8 +5771,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const v = rs.filter(r => r.lov <= 100 && 100 <= r.hiv);
     return (v.length ? v : rs).slice(0, 4);
   }
+  let nbwVoice = null;   // (Plugins, further down)
   function makeInstVoice(midi, when, scale = 1, inst = curInst, P = state.inst.p) {
     if (!ctx || !inst) return null;
+    if (inst.regions && inst.regions.wam) return nbwVoice ? nbwVoice(midi, when, scale, inst, P) : null;
     const rs = pickRegions(midi, inst); if (!rs.length) return null;
     const t = when ?? ctx.currentTime;
     const out = ctx.createGain(); out.gain.value = 0.0001;
@@ -15118,6 +15162,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["songBtn", "Song", "Chain patterns A–D into a song"],
       ["prBtn", "Projects", "Save, open and share everything"],
       ["betaFxBtn", "FX Lab", "Extra effects on the whole mix"],
+      ["wamBtn", "Plugins", "Plugin instruments and effects"],
       ["moBtn", "Motion", "LFOs, XY pad and drift"],
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
       ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
@@ -18683,6 +18728,287 @@ registerProcessor("nb-verb", NBVerb);`;
     document.getElementById("bpBanks").addEventListener("click", e => { if (e.target.closest("button[data-kit]")) { start(); kitRender(); sheet.hidden = false; } });
     document.getElementById("bpKitDone").addEventListener("click", () => { sheet.hidden = true; if (prev) { bpHush(); prev = null; } });
     window.__bpkits = { KITS, load: kitLoad, preview: kitPreview, on: (kid, bk) => kitOn(kitById(kid), bk ?? BPS.bank) };
+  }
+  // ---------- Plugins: Web Audio Modules, the web's plugin format ----------
+  {
+    const NBW_CAT = [{"key":"burns-audio/drumsampler","name":"DRM-16 DrumComputer","vendor":"Sequencer Party","kind":"instrument","type":"Sampler","desc":"16-pad MIDI drum sampler","url":"burns-audio/drumsampler/index.js","trim":0.55},{"key":"burns-audio/modal","name":"Spectrum: Modal","vendor":"Sequencer Party","kind":"instrument","type":"Synthesizer","desc":"Port of a popular eurorack modal synthesizer.  It is a full-blown synthesis voice based on modal synthesis - an under-appreciated flavour of physical modelling synthesis with a strange and abstract feel.","url":"burns-audio/modal/index.js","trim":5.0},{"key":"burns-audio/synth101","name":"Synth-101","vendor":"Sequencer Party","kind":"instrument","type":"Synthesizer","desc":"Software clone of a simple monophonic synthesizer classic, the Roland SH-101","url":"burns-audio/synth101/index.js","trim":0.6},{"key":"wimmics/GuitarAmpSim60s","name":"Vox Amp 30","vendor":"Wimmics","kind":"effect","type":"Amp Simulator","desc":"GuitarAmpSIm60s is a tube guitar amp sim, inspired by old Vox AC30 amps. Authors: Michel Buffa for making it a wam. Original code by the Guitarix team.","url":"wimmics/GuitarAmpSim60s/index.js"},{"key":"wimmics/pingpongdelay/dist","name":"PingPongDelay","vendor":"Wimmics","kind":"effect","type":"Delay","desc":"A classic Ping Pong Delay written using WebAudio standard nodes. Authors: Michel Buffa, Q. Beauchet for GUI improvements.","url":"wimmics/pingpongdelay/dist/index.js"},{"key":"burns-audio/delay","name":"Simple Delay","vendor":"Sequencer Party","kind":"effect","type":"Delay","desc":"Simple stereo filtered delay","url":"burns-audio/delay/index.js"},{"key":"wimmics/SmoothDelay","name":"SmoothDelay","vendor":"Wimmics","kind":"effect","type":"Delay","desc":"Delay that does't click or transpose when the delay time is changed, in Faust. Author: Yann Orlarey.","url":"wimmics/SmoothDelay/index.js"},{"key":"wimmics/BigMuff","name":"Big Muff","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"A reproduction of the BigMuff original Fuzz pedal. Original code from Guitarix project. WAM by Michel Buffa.","url":"wimmics/BigMuff/index.js"},{"key":"wimmics/kppdistorder","name":"KppDistorder","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"This plugin is a distortion pedal emulator with equalizer. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code","url":"wimmics/kppdistorder/index.js"},{"key":"wimmics/Kpp_fuzz","name":"KppFuzz","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"This plugin is a vintage fuzz pedal emulator. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code.","url":"wimmics/Kpp_fuzz/index.js"},{"key":"wimmics/OscTube","name":"OSCTube","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"Tube fuzz effect with vibrato, resonance and fuzz controls. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Guitarix Team for the original FAUST code","url":"wimmics/OscTube/index.js"},{"key":"wimmics/OverdriveRix","name":"Overdriverix","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"Overdrive effect implemented in Faust. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Guitarix Team for the original FAUST code","url":"wimmics/OverdriveRix/index.js"},{"key":"wimmics/quadrafuzz/dist","name":"QuadraFuzz","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"A multiband fuzz effect inspired by the Quadrafuzz VST. Authors: Michel Buffa, Q. Beauchet for GUI improvements","url":"wimmics/quadrafuzz/dist/index.js"},{"key":"burns-audio/distortion","name":"Simple Distortion","vendor":"Sequencer Party","kind":"effect","type":"Distortion","desc":"Simple waveshaper-based distortion with variable curve and gain","url":"burns-audio/distortion/index.js"},{"key":"wimmics/temper","name":"Temper","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"Modern digital distortion. It builds upon traditional waveshaping techniques using modulated filter coefficients to produce a unique phase distortion. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original code Nick Thomson (https://github.com/creativeintent/temper)","url":"wimmics/temper/index.js"},{"key":"wimmics/TS9_Overdrive","name":"TS9 Overdrive","vendor":"Wimmics","kind":"effect","type":"Distortion","desc":"A recreation of the classic TS9 overdrive pedal effect. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust code by the guitarix team","url":"wimmics/TS9_Overdrive/index.js"},{"key":"wimmics/blipper","name":"Blipper","vendor":"Wimmics","kind":"effect","type":"Equalizer & Filter","desc":"Blipper is an Envelope Follower which controls the pitch of a triangle oscillator. It is a rough emulation of some of the features of the BOSS PC-2 Percussion Synthesiser. Arthur Russell used something like this to create interesting percussion parts on his records e.g. <https://www.youtube.com/watch?v=LEZevPziZhY>. It works nicely with drums. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin","url":"wimmics/blipper/index.js"},{"key":"wimmics/graphicEqualizer","name":"GraphicEqualizer","vendor":"Wimmics","kind":"effect","type":"Equalizer & Filter","desc":"A graphic equalizer proposing a bank of filters. Drag control points. Use shift+drag for peaking filters to adjust the curve. Author: Michel Buffa.","url":"wimmics/graphicEqualizer/index.js"},{"key":"burns-audio/simpleEQ","name":"Simple EQ","vendor":"Sequencer Party","kind":"effect","type":"Equalizer & Filter","desc":"Simple three-band equalizer","url":"burns-audio/simpleEQ/index.js"},{"key":"wimmics/sweetWah","name":"SweetWah","vendor":"Wimmics","kind":"effect","type":"Equalizer & Filter","desc":"An autowah effect with modulation. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original faust code https://github.com/pingdynasty/OwlPatches/blob/master/Faust/SweepWah.dsp","url":"wimmics/sweetWah/index.js"},{"key":"wimmics/StereoEnhancer","name":"Stereo Enhancer","vendor":"Wimmics","kind":"effect","type":"Modulation","desc":"Stereo Width/Enhancer effect using the Blumlein Shuffler technique. Author: Michel Buffa.","url":"wimmics/StereoEnhancer/index.js"},{"key":"wimmics/stonephaser","name":"StonePhaser","vendor":"Wimmics","kind":"effect","type":"Modulation","desc":"This is an analog phaser with similarity to the Small Stone. It has a color switch, which makes the phasing stronger when on, and adds some feedback controls. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original faust Code by jpcima https://github.com/jpcima/stone-phaser","url":"wimmics/stonephaser/index.js"},{"key":"wimmics/ThruZeroFlanger","name":"ThruZeroFlanger","vendor":"Wimmics","kind":"effect","type":"Modulation","desc":"Thru-zero flanger that models a pair of tape delays with rate/depth/feedback/synchronization modes controls. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin","url":"wimmics/ThruZeroFlanger/index.js"},{"key":"wimmics/WeirdPhaser","name":"WeirdPhaser","vendor":"Wimmics","kind":"effect","type":"Modulation","desc":"Weird Phaser is a stereo phase shifter based on SSB (single side band) modulation. Unlike Stereo Frequency Shifter, Weird Phaser uses a single LFO which has a fixed phase offset for the right hand channel, causing some interesting between the ears spatial effects at its maximum settting. Weird Phaser also has feedback for a more pronounced effect. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin","url":"wimmics/WeirdPhaser/index.js"},{"key":"wimmics/DualPitchShifter","name":"DualPitchShifter","vendor":"Wimmics","kind":"effect","type":"Pitch","desc":"Dual Pitch Shifter is a dual channel pitch shifter, based on Faust\u2019s pitch_shifter.dsp by Grame. Pitch shifting is (intentionally) extremely basic and introduces significant delay based on window size.","url":"wimmics/DualPitchShifter/index.js"},{"key":"wimmics/StereoFreqShifter","name":"StereoFreqShifter","vendor":"Wimmics","kind":"effect","type":"Pitch","desc":"Stereo Frequency Shifter is a twin frequency shifter with linked control of frequency shift for each channel, that can be slightly offset for lush stereo phasing. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin","url":"wimmics/StereoFreqShifter/index.js"},{"key":"wimmics/greyhole","name":"Grey Hole","vendor":"Wimmics","kind":"effect","type":"Reverb","desc":"A reverb insoired by the famous Eventinde/Blackhole effect. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code Julian Parker, bug fixes by Till Bovermann.","url":"wimmics/greyhole/index.js"},{"key":"wimmics/kbverb","name":"KBVerb","vendor":"Wimmics","kind":"effect","type":"Reverb","desc":"A reverb inspired by https://valhalladsp.com/2010/08/25/rip-keith-barr/ Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code originated from Stephane Letz.","url":"wimmics/kbverb/index.js"},{"key":"wimmics/OwlDirty","name":"OwlDirty","vendor":"Wimmics","kind":"effect","type":"Reverb","desc":"A stereo ambient reverberation with a distortion stage on the reverb tail. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code by Xavier (https://www.rebeltech.org/patch-library/patch/Owlgazer_Dirty_Reverb/)","url":"wimmics/OwlDirty/index.js"},{"key":"wimmics/OwlShimmer","name":"OWLShimmer","vendor":"Wimmics","kind":"effect","type":"Reverb","desc":"A stereo ambient reverberation with a shimmer effect. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code by Xavier (https://www.rebeltech.org/patch-library/patch/Owlgazer_Dirty_Reverb/)","url":"wimmics/OwlShimmer/index.js"},{"key":"wimmics/deathgate","name":"DeathGate","vendor":"Wimmics","kind":"effect","type":"Utility","desc":"This plugin is a multiband noise gate, works pretty well with distorded guitars, drums, bass, etc. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code","url":"wimmics/deathgate/index.js"}];
+    const NBW = { group: null, ctx: null, init: null, parts: new Map(), fx: [], fxIn: null, fxOut: null, saved: {}, fxSaved: [], booted: null, adding: false, rebuilt: [] };
+    const NBW_KEY = "nightbloom-wam";
+    try { const o = JSON.parse(localStorage.getItem(NBW_KEY) || "{}"); NBW.saved = o.parts || {}; NBW.fxSaved = Array.isArray(o.fx) ? o.fx : []; } catch (e) {}
+    // the plugins live next to the site (and inside the apps); a page hosted anywhere else can't load them
+    const NBW_HERE = /github\.io$/.test(location.hostname) || location.protocol === "app:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    const NBW_SITE = "https://nathan-san1981.github.io/nate-bloom/";
+    const nbwBase = () => new URL((window.NB_LITE ? "../" : "") + "wam/", location.href).href;
+    const nbwSpec = key => key.startsWith("url:") ? { key, url: key.slice(4), name: decodeURIComponent(key.slice(4).split("/").slice(-2, -1)[0] || "Plugin"), link: true }
+      : (NBW_CAT.find(c => c.key === key) || { key, url: key + "/index.js", name: key });
+    const nbwUrl = sp => /^https?:/.test(sp.url) ? sp.url : nbwBase() + sp.url;
+    const nbwSay = m => { if (typeof betaToast === "function") betaToast(m); };
+    let nbwTok = 0;
+    function nbwSave() {
+      try { localStorage.setItem(NBW_KEY, JSON.stringify({ parts: NBW.saved, fx: NBW.fx.map(F => ({ key: F.key, on: F.on, state: F.state || null })) })); } catch (e) {}
+    }
+    async function nbwKeep(W) { try { const st = await W.node.getState(); if (W.fxSlot) W.state = st; else NBW.saved[W.id] = st; nbwSave(); } catch (e) {} }
+    async function nbwHost() {
+      if (!NBW_HERE) throw new Error("plugins load on the Nate Bloom site and in the apps");
+      while (!ctx) await new Promise(r => setTimeout(r, 300));   // the first notes wait for Start
+      if (NBW.ctx === ctx && NBW.init) return NBW.init;
+      NBW.ctx = ctx;
+      globalThis.NB_WAM_909 = nbwBase() + "burns-audio/drumsampler/909/";   // the drum sampler's starting kit: Nate Bloom's own 909
+      NBW.init = (async () => {
+        const { default: init } = await import(nbwBase() + "wimmics/utils/sdk/src/initializeWamHost.js");
+        const [g] = await init(ctx); NBW.group = g; return true;
+      })().catch(e => { NBW.init = null; throw e; });
+      return NBW.init;
+    }
+    async function nbwCreate(sp) {
+      await nbwHost();
+      const mod = await import(nbwUrl(sp)), WAM = mod && mod.default;
+      if (!WAM || typeof WAM.createInstance !== "function") throw new Error("that isn't a Web Audio Module");
+      return WAM.createInstance(NBW.group, ctx);
+    }
+    // ---- instruments: library parts called "wam:<plugin>" ----
+    const nbwLoading = new Map();
+    function nbwInstrument(id) {
+      const W0 = NBW.parts.get(id);
+      if (W0 && W0.ctx === ctx && ctx) return Promise.resolve(W0);
+      if (nbwLoading.has(id)) return nbwLoading.get(id);
+      const pr = (async () => {
+        const sp = nbwSpec(id.slice(4)), inst = await nbwCreate(sp);
+        const gain = ctx.createGain(); gain.gain.value = sp.trim || 1; inst.audioNode.connect(gain);
+        const W = { id, key: sp.key, inst, node: inst.audioNode, gain, dest: null, ctx, held: new Set(), name: (inst.descriptor && inst.descriptor.name) || sp.name, vendor: (inst.descriptor && inst.descriptor.vendor) || sp.vendor || "" };
+        NBW.parts.set(id, W);
+        if (NBW.saved[id]) { try { await inst.audioNode.setState(NBW.saved[id]); } catch (e) {} }
+        return W;
+      })().finally(() => nbwLoading.delete(id));
+      nbwLoading.set(id, pr);
+      return pr;
+    }
+    { const lw = loadWaf; loadWaf = function (stem) {
+        if (typeof stem !== "string" || !stem.startsWith("wam:")) return lw.apply(this, arguments);
+        return nbwInstrument(stem).then(W => { const regions = []; regions.wam = W; return { regions }; });
+      }; }
+    const nbwMidi = (W, t, bytes) => { try { W.node.scheduleEvents({ type: "wam-midi", time: t, data: { bytes } }); } catch (e) {} };
+    nbwVoice = function (midi, when, scale, inst, P) {
+      const W = inst.regions.wam;
+      if (!ctx || W.ctx !== ctx || W.muted) return null;   // (an offline render can't reach a live plugin)
+      if (W.dest !== fx.input) { try { W.gain.disconnect(); } catch (e) {} W.gain.connect(fx.input); W.dest = fx.input; }
+      const lv = (P && Number.isFinite(P.level) ? P.level : 0.8) * 1.2 * (scale || 1);
+      const note = Math.max(0, Math.min(127, Math.round(midi))), vel = Math.max(1, Math.min(127, Math.round(lv * 105)));
+      const t = Math.max(ctx.currentTime, when ?? 0);
+      nbwMidi(W, t, [0x90, note, vel]); W.held.add(note);
+      let done = false;
+      return { stop(at) {
+        if (done || !ctx) return; done = true; W.held.delete(note);
+        nbwMidi(W, Math.max(ctx.currentTime, at ?? 0), [0x80, note, 0]);
+      } };
+    };
+    function nbwAllOff(hard) {
+      if (!ctx) return;
+      NBW.parts.forEach(W => {
+        if (W.ctx !== ctx) return;
+        const now = ctx.currentTime;
+        if (hard) { try { W.node.clearEvents && W.node.clearEvents(); } catch (e) {} for (let n = 0; n < 128; n++) nbwMidi(W, now, [0x80, n, 0]); }
+        else W.held.forEach(n => nbwMidi(W, now, [0x80, n, 0]));
+        W.held.clear(); nbwMidi(W, now, [0xB0, 123, 0]);
+      });
+    }
+    { const ao = allOff; allOff = function () { const r = ao.apply(this, arguments); nbwAllOff(false); return r; }; }
+    ["stopAll", "panic"].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener("click", () => nbwAllOff(true)); });
+    // ---- effects on the whole mix: compressor → plugins → limiter ----
+    function nbwWire() {
+      if (!ctx || !fx || !fx.comp || !fx.limiter) return;
+      if (!NBW.fxIn || NBW.fxIn.context !== ctx || NBW.fxComp !== fx.comp) {
+        NBW.fxIn = ctx.createGain(); NBW.fxOut = ctx.createGain(); NBW.fxComp = fx.comp;
+        try { fx.comp.disconnect(fx.limiter); } catch (e) {}
+        fx.comp.connect(NBW.fxIn); NBW.fxOut.connect(fx.limiter);
+      }
+      try { NBW.fxIn.disconnect(); } catch (e) {}
+      NBW.fx.forEach(F => { try { F.node.disconnect(); } catch (e) {} });
+      let n = NBW.fxIn;
+      NBW.fx.forEach(F => { if (F.on && F.node && F.ctx === ctx) { n.connect(F.node); n = F.node; } });
+      n.connect(NBW.fxOut);
+    }
+    async function nbwAddFx(key, on = true, state = null, quiet = false) {
+      const sp = nbwSpec(key), tok = ++nbwTok;
+      const inst = await nbwCreate(sp);
+      const F = { id: "fx" + Date.now().toString(36) + tok, key, inst, node: inst.audioNode, ctx, on, fxSlot: true, state, name: (inst.descriptor && inst.descriptor.name) || sp.name, vendor: (inst.descriptor && inst.descriptor.vendor) || sp.vendor || "" };
+      if (state) { try { await inst.audioNode.setState(state); } catch (e) {} }
+      NBW.fx.push(F); nbwWire(); nbwSave(); if (!quiet) nbwPaint();
+      if (typeof nfpBadge === "function") nfpBadge();
+      return F;
+    }
+    function nbwRemoveFx(F) {
+      const i = NBW.fx.indexOf(F); if (i < 0) return;
+      NBW.fx.splice(i, 1); nbwWire();
+      try { F.node.disconnect(); } catch (e) {} try { F.node.destroy && F.node.destroy(); } catch (e) {}
+      nbwSave(); nbwPaint(); if (typeof nfpBadge === "function") nfpBadge();
+    }
+    // the chain comes back when sound starts
+    async function nbwBoot() {
+      if (!ctx || NBW.booted === ctx) return; NBW.booted = ctx;
+      if (!NBW_HERE || !NBW.fxSaved.length) return;
+      for (const f of NBW.fxSaved) { try { await nbwAddFx(f.key, f.on !== false, f.state, true); } catch (e) { console.warn("Plugin effect didn't load:", f.key, e && e.message); } }
+      nbwPaint();
+    }
+    { const ba = buildAudio; buildAudio = function () { const r = ba.apply(this, arguments); setTimeout(nbwBoot, 0); return r; }; }
+    if (ctx) setTimeout(nbwBoot, 0);
+    // if the sound engine has to rebuild its chain (it went silent), the plugins go back in; twice in a few seconds means
+    // a plugin is breaking it, so they're switched off
+    { const bc = buildChain; buildChain = function () {
+        const r = bc.apply(this, arguments);
+        const now = Date.now(); NBW.rebuilt = NBW.rebuilt.filter(t => now - t < 6000).concat(now);
+        const live = NBW.fx.some(F => F.on) || NBW.parts.size;
+        if (live && NBW.rebuilt.length >= 2) {
+          NBW.fx.forEach(F => { F.on = false; }); NBW.parts.forEach(W => { W.muted = true; try { W.gain.disconnect(); } catch (e) {} W.dest = null; });
+          nbwSave(); nbwSay("A plugin stopped the sound, so plugins are switched off. Reload to try again.");
+        }
+        if (NBW.fxIn) { NBW.fxIn = null; nbwWire(); }
+        NBW.parts.forEach(W => { W.dest = null; });
+        return r;
+      }; }
+    // fast pads skip the browser's output, so they wait while plugin effects shape it
+    { const w0 = nfpWhy; nfpWhy = function () { const r = w0.apply(this, arguments); return r || (NBW.fx.some(F => F.on && F.ctx === ctx) ? "plugin FX" : ""); }; }
+    NFP_WHY["plugin FX"] = "Fast pads pause while a plugin effect is on the mix (plugins run in the browser's audio).";
+    // ---- the plugin's own controls ----
+    const gui = document.getElementById("wamGui"), guiBox = document.getElementById("wamGuiBox");
+    const sheet = document.getElementById("wamSheet"), list = document.getElementById("wamList");
+    let guiNow = null, guiBack = false;
+    async function nbwOpenGui(W) {
+      guiBack = !sheet.hidden; sheet.hidden = true;
+      gui.hidden = false; document.getElementById("wamGuiTitle").textContent = W.name;
+      document.getElementById("wamGuiSub").textContent = (W.vendor ? W.vendor + " · " : "") + (W.fxSlot ? "effect on the mix" : "instrument");
+      guiBox.innerHTML = "<p class='wam-msg dim'>Opening…</p>";
+      const tok = ++nbwTok;
+      try {
+        const el = await W.inst.createGui();
+        if (tok !== nbwTok || gui.hidden) { try { W.inst.destroyGui && W.inst.destroyGui(el); } catch (e) {} return; }
+        // a panel wider than the screen is scaled down to fit (the box keeps the scaled size, so nothing scrolls sideways)
+        const size = document.createElement("div"), wrap = document.createElement("div"); size.className = "wam-size"; wrap.className = "wam-fit";
+        wrap.appendChild(el); size.appendChild(wrap); guiBox.replaceChildren(size); guiNow = { W, el };
+        const fit = () => {
+          wrap.style.transform = ""; wrap.style.width = ""; size.style.width = ""; size.style.height = "";
+          const room = guiBox.clientWidth - 16, w = Math.max(el.scrollWidth, el.offsetWidth, wrap.scrollWidth), h = Math.max(el.scrollHeight, el.offsetHeight, wrap.scrollHeight);
+          // (never below 62%, so knobs stay big enough to use: a phone scrolls sideways instead)
+          if (w > room && w > 0 && room > 0) { const k = Math.max(room / w, 0.62); wrap.style.width = w + "px"; wrap.style.transform = "scale(" + k + ")"; size.style.width = Math.ceil(w * k) + "px"; size.style.height = Math.ceil(h * k) + "px"; }
+        };
+        requestAnimationFrame(fit); setTimeout(fit, 400);
+      } catch (e) { guiBox.innerHTML = "<p class='wam-msg'>This plugin has no controls to show here.</p>"; guiNow = { W, el: null }; }
+    }
+    function nbwCloseGui() {
+      gui.hidden = true; ++nbwTok;
+      if (guiNow) { const { W, el } = guiNow; if (el) { el.remove(); try { W.inst.destroyGui && W.inst.destroyGui(el); } catch (e) {} } nbwKeep(W); guiNow = null; }
+      guiBox.innerHTML = "";
+      if (guiBack) { guiBack = false; sheet.hidden = false; nbwPaint(); }
+    }
+    document.getElementById("wamGuiDone").addEventListener("click", nbwCloseGui);
+    window.addEventListener("keydown", e => { if (e.key === "Escape" && !gui.hidden && !document.querySelector(".editor:not([hidden]), .browser:not([hidden])")) { e.preventDefault(); e.stopImmediatePropagation(); nbwCloseGui(); } }, true);
+    // ---- the Plugins sheet ----
+    let showAdd = false, msg = "";
+    const row = (cls, title, sub) => { const r = document.createElement("div"); r.className = "wam-row " + (cls || ""); const t = document.createElement("div"); t.className = "wam-t"; t.innerHTML = "<b></b><small></small>"; t.querySelector("b").textContent = title; t.querySelector("small").textContent = sub; t.title = sub; r.appendChild(t); return r; };
+    const btn = (label, fn, pressed, aria) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = label; if (pressed != null) b.setAttribute("aria-pressed", String(pressed)); if (aria) b.setAttribute("aria-label", aria); b.addEventListener("click", fn); return b; };
+    const head = t => { const h = document.createElement("div"); h.className = "wam-h"; h.textContent = t; list.appendChild(h); };
+    const note = (t, dim) => { const p = document.createElement("p"); p.className = "wam-msg" + (dim ? " dim" : ""); p.textContent = t; list.appendChild(p); return p; };
+    const entryOf = c => ({ id: "w:wam:" + c.key, name: c.name, sub: c.vendor + " · " + (c.type || "instrument").toLowerCase() + " · plugin", cat: "plugins", sus: 1 });
+    const usedParts = () => state.lib.parts.map((p, i) => [p, i]).filter(([p]) => p && p.id && p.id.startsWith("wam:"));
+    async function nbwTogether(c) {
+      const parts = state.lib.parts, e = entryOf(c);
+      if (state.engine !== "lib" || !parts.some(p => p && p.id)) { sheet.hidden = true; chooseEntry(e, true); return; }
+      if (parts.some(p => p && p.id === "wam:" + c.key)) { msg = c.name + " is already in Play together"; nbwPaint(); return; }
+      const free = parts.findIndex(p => !p || !p.id), i = free < 0 ? parts.length : free;
+      if (i >= MAX_PARTS) { msg = "Play together is full (8 sounds)"; nbwPaint(); return; }
+      msg = "Loading " + c.name + "…"; nbwPaint();
+      await assignPart(i, e, true);
+      msg = state.lib.parts[i] && state.lib.parts[i].id === "wam:" + c.key ? c.name + " added to Play together" : "Couldn't load " + c.name; nbwPaint();
+    }
+    function nbwPaint() {
+      if (sheet.hidden) return;
+      list.innerHTML = "";
+      if (!NBW_HERE) {
+        const p = note("Plugins load on the Nate Bloom site and in the Android and Linux apps. This copy can't load plugin files, so here they're listed only. ", false);
+        const a = document.createElement("a"); a.href = NBW_SITE; a.target = "_blank"; a.rel = "noopener"; a.textContent = "nathan-san1981.github.io/nate-bloom"; p.appendChild(a);
+      }
+      const using = usedParts();
+      head("Instruments");
+      NBW_CAT.filter(c => c.kind === "instrument").forEach(c => {
+        const inUse = using.find(([p]) => p.id === "wam:" + c.key), r = row(inUse && state.engine === "lib" && inUse[0].on ? "on" : "", c.name, c.vendor + " · " + c.desc);
+        if (NBW_HERE) {
+          r.append(btn("Play", () => { sheet.hidden = true; chooseEntry(entryOf(c), true); }, null, "Play " + c.name),
+            btn("+ Together", () => nbwTogether(c), null, "Add " + c.name + " to Play together"));
+          if (inUse) r.append(btn("Controls", async () => { try { nbwOpenGui(await nbwInstrument(inUse[0].id)); } catch (e) { msg = "Couldn't open it: " + (e && e.message || e); nbwPaint(); } }, null, c.name + " controls"));
+        }
+        list.appendChild(r);
+      });
+      using.filter(([p]) => !NBW_CAT.some(c => "wam:" + c.key === p.id)).forEach(([p]) => {
+        const r = row(p.on ? "on" : "", p.name, "added by link"); r.append(btn("Controls", async () => { try { nbwOpenGui(await nbwInstrument(p.id)); } catch (e) {} })); list.appendChild(r);
+      });
+      head("Effects on the whole mix");
+      if (!NBW.fx.length) note("None yet. They run after Nate Bloom's own effects, on everything you hear.", true);
+      NBW.fx.forEach((F, i) => {
+        const r = row(F.on ? "on" : "", (i + 1) + ". " + F.name, (F.vendor ? F.vendor + " · " : "") + (F.on ? "on" : "off"));
+        r.append(btn(F.on ? "On" : "Off", () => { F.on = !F.on; nbwWire(); nbwSave(); nbwPaint(); if (typeof nfpBadge === "function") nfpBadge(); }, F.on, F.name + (F.on ? " is on" : " is off")),
+          btn("Controls", () => nbwOpenGui(F), null, F.name + " controls"));
+        if (i > 0) r.append(btn("↑", () => { NBW.fx.splice(i, 1); NBW.fx.splice(i - 1, 0, F); nbwWire(); nbwSave(); nbwPaint(); }, null, "Move " + F.name + " earlier"));
+        r.append(btn("✕", () => nbwRemoveFx(F), null, "Remove " + F.name));
+        list.appendChild(r);
+      });
+      if (NBW_HERE) { const add = btn(showAdd ? "Close the list" : "+ Add an effect", () => { showAdd = !showAdd; nbwPaint(); }); add.style.alignSelf = "flex-start"; add.id = "wamAddFx"; list.appendChild(add); }
+      if (showAdd || !NBW_HERE) {
+        let type = "";
+        NBW_CAT.filter(c => c.kind === "effect").forEach(c => {
+          if (c.type !== type) { type = c.type; head(type); }
+          const r = row("", c.name, c.vendor + " · " + c.desc); r.dataset.key = c.key;
+          if (NBW_HERE) r.append(btn("Add", async () => {
+            if (NBW.adding) return; NBW.adding = true; msg = "Loading " + c.name + "…"; nbwPaint();
+            try { await nbwAddFx(c.key); msg = c.name + " is on the mix"; showAdd = false; } catch (e) { msg = "Couldn't load " + c.name + ": " + (e && e.message || e); }
+            NBW.adding = false; nbwPaint();
+          }, null, "Add " + c.name));
+          list.appendChild(r);
+        });
+      }
+      if (NBW_HERE) {
+        head("Add by link");
+        const box = document.createElement("div"); box.className = "wam-add";
+        const inp = document.createElement("input"); inp.type = "url"; inp.placeholder = "https://…/index.js of a Web Audio Module"; inp.setAttribute("aria-label", "Plugin address"); inp.id = "wamUrl";
+        const go = kind => async () => {
+          const u = inp.value.trim(); if (!/^https:\/\/\S+\.m?js(\?\S*)?$/.test(u)) { msg = "Paste the address of the plugin's index.js (https://…)"; nbwPaint(); return; }
+          msg = "Loading…"; nbwPaint();
+          try {
+            if (kind === "fx") { await nbwAddFx("url:" + u); msg = "Added to the mix"; }
+            else { const W = await nbwInstrument("wam:url:" + u); sheet.hidden = true; chooseEntry({ id: "w:wam:url:" + u, name: W.name, sub: "plugin · added by link", cat: "plugins", sus: 1 }, true); }
+          } catch (e) { msg = "Couldn't load it: " + (e && e.message || e); }
+          nbwPaint();
+        };
+        box.append(inp, btn("Instrument", go("inst")), btn("Effect", go("fx")));
+        list.appendChild(box);
+        note("Plugins from other sites load only if that site allows it.", true);
+      }
+      const m = note(msg); m.id = "wamMsg"; msg = "";
+      note("Included: the community Web Audio Modules collection (Sequencer Party by Tom Burns, and Wimmics / Université Côte d'Azur: Michel Buffa and the authors named in each plugin). Bounces and stems rendered offline leave plugin instruments out; record a take or Keep 90s to keep them.", true);
+    }
+    document.getElementById("wamBtn").addEventListener("click", () => { start(); sheet.hidden = false; nbwPaint(); if (NBW_HERE) nbwHost().catch(e => { msg = "Plugins can't start here: " + (e && e.message || e); nbwPaint(); }); });
+    document.getElementById("wamDone").addEventListener("click", () => { sheet.hidden = true; NBW.fx.forEach(nbwKeep); NBW.parts.forEach(nbwKeep); });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) { NBW.fx.forEach(nbwKeep); NBW.parts.forEach(nbwKeep); } });
+    // ---- Sounds → Plugins ----
+    LIB_CATS.push(["plugins", "Plugins"]);
+    { const ae = allEntries; allEntries = function () { const l = ae.apply(this, arguments); if (NBW_HERE) NBW_CAT.filter(c => c.kind === "instrument").forEach(c => l.push(entryOf(c))); return l; }; }
+    { const chip = document.createElement("button"); chip.className = "chip"; chip.dataset.cat = "plugins"; chip.textContent = "Plugins";
+      chip.addEventListener("click", () => { brCat = "plugins"; brSearch.value = ""; renderBrowser(true); });
+      const after = brCats.querySelector('.chip[data-cat="studio"]'); if (after) after.after(chip); else brCats.appendChild(chip); }
+    { const rb = renderBrowser; renderBrowser = function () { const r = rb.apply(this, arguments);
+        if (brCat === "plugins" && !brSearch.value.trim()) {
+          if (!NBW_HERE) brList.innerHTML = "";
+          const p = document.createElement("p"); p.className = "br-credit";
+          p.textContent = NBW_HERE ? "Plugin instruments (Web Audio Modules). Plugin effects are under Plugins in the toolbar; ⚙ Plugin in the sound panel opens a plugin's controls."
+            : "Plugin instruments load on the Nate Bloom site and in the apps (nathan-san1981.github.io/nate-bloom), not in this copy.";
+          brList.appendChild(p);
+        }
+        return r; }; }
+    // ⚙ in the sound panel opens the controls of the plugin you're playing
+    { const lb = document.getElementById("libbar"), g = document.createElement("button"); g.className = "btn"; g.id = "wamCtl"; g.textContent = "⚙ Plugin"; g.hidden = true; g.title = "Open the plugin's own controls";
+      if (lb) lb.appendChild(g);
+      g.addEventListener("click", async () => { const u = usedParts(), p = (u.find(([x]) => x.on) || u[0] || [])[0]; if (p) { try { nbwOpenGui(await nbwInstrument(p.id)); } catch (e) {} } });
+      const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); g.hidden = !(state.engine === "lib" && usedParts().length); return r; }; }
+    window.__wam = { NBW, CAT: NBW_CAT, here: NBW_HERE, host: nbwHost, instrument: nbwInstrument, addFx: nbwAddFx, removeFx: nbwRemoveFx, wire: nbwWire, base: nbwBase, openGui: nbwOpenGui, closeGui: nbwCloseGui, allOff: nbwAllOff, paint: nbwPaint, st: () => state };
   }
   more3Ready = true;
   if (state.engine === "drum") renderEngine();

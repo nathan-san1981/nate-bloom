@@ -7,6 +7,7 @@ The **AppImage** runs without installing (make it executable, then double-click)
 What the app adds to the website:
 - **Works offline.** The whole app is inside it; it updates itself from the website in the background and offers a restart when an update is ready. Studio instruments and library sounds are kept after their first download.
 - **Fast pads.** Beat Pads plays from its own low-latency audio player (PipeWire or PulseAudio, else ALSA or JACK). The ⚡ button next to FX shows the delay.
+- **Plugins** (Web Audio Modules): Synth-101, Spectrum: Modal, the DRM-16 drum sampler, and 28 effects for the whole mix, all inside the app so they work offline. Under **Plugins** in the toolbar.
 - **USB MIDI** through Linux's own MIDI: plug in the K.O. II and open MIDI → Connect.
 - **Saves go to Downloads/Nate Bloom** (backups, WAVs, stems, MIDI files); the menu's **Open the Saves Folder** opens it.
 - **Keeps playing when minimised**, and keeps the computer from sleeping while it plays.

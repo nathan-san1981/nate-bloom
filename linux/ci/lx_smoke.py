@@ -49,6 +49,14 @@ async def main():
         await pg.click("#bpDone"); await pg.wait_for_timeout(300)
         # MIDI
         print("midi:", await pg.evaluate("(async () => { try { const a = await navigator.requestMIDIAccess({ sysex: true }); return 'ok: ' + a.inputs.size + ' in, ' + a.outputs.size + ' out'; } catch (e) { return 'error: ' + e.message; } })()"))
+        # plugins from the app's own files: an instrument plays, an effect loads
+        print("plugins:", await pg.evaluate("""(async () => { try {
+            const W = await __wam.instrument('wam:burns-audio/synth101'), F = await __wam.addFx('wimmics/greyhole', true, null, true);
+            const c = W.ctx, an = c.createAnalyser(); W.gain.connect(an); const b = new Float32Array(2048); let pk = 0;
+            W.node.scheduleEvents({ type: 'wam-midi', time: c.currentTime + 0.05, data: { bytes: [0x90, 60, 100] } }, { type: 'wam-midi', time: c.currentTime + 0.6, data: { bytes: [0x80, 60, 0] } });
+            for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 25)); an.getFloatTimeDomainData(b); for (let k = 0; k < b.length; k++) pk = Math.max(pk, Math.abs(b[k])); }
+            __wam.removeFx(F); return 'ok: ' + W.name + ' (peak ' + pk.toFixed(3) + '), ' + F.name + ' on the mix, from ' + __wam.base();
+          } catch (e) { return 'error: ' + (e && e.message || e); } })()"""))
         # (saving is checked by save_check.mjs: Playwright takes over downloads while it's connected)
         # Lite
         await pg.goto("app://nate-bloom/lite/"); await pg.wait_for_timeout(2000)

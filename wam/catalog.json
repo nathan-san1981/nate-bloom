@@ -1,0 +1,316 @@
+{
+ "v": 1,
+ "source": "wam-community 0.4.9 (https://github.com/boourns/wam-community)",
+ "plugins": [
+  {
+   "key": "burns-audio/drumsampler",
+   "name": "DRM-16 DrumComputer",
+   "vendor": "Sequencer Party",
+   "kind": "instrument",
+   "type": "Sampler",
+   "desc": "16-pad MIDI drum sampler",
+   "url": "burns-audio/drumsampler/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "burns-audio/modal",
+   "name": "Spectrum: Modal",
+   "vendor": "Sequencer Party",
+   "kind": "instrument",
+   "type": "Synthesizer",
+   "desc": "Port of a popular eurorack modal synthesizer.  It is a full-blown synthesis voice based on modal synthesis - an under-appreciated flavour of physical modelling synthesis with a strange and abstract feel.",
+   "url": "burns-audio/modal/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "burns-audio/synth101",
+   "name": "Synth-101",
+   "vendor": "Sequencer Party",
+   "kind": "instrument",
+   "type": "Synthesizer",
+   "desc": "Software clone of a simple monophonic synthesizer classic, the Roland SH-101",
+   "url": "burns-audio/synth101/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "wimmics/GuitarAmpSim60s",
+   "name": "Vox Amp 30",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Amp Simulator",
+   "desc": "GuitarAmpSIm60s is a tube guitar amp sim, inspired by old Vox AC30 amps. Authors: Michel Buffa for making it a wam. Original code by the Guitarix team.",
+   "url": "wimmics/GuitarAmpSim60s/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/pingpongdelay/dist",
+   "name": "PingPongDelay",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Delay",
+   "desc": "A classic Ping Pong Delay written using WebAudio standard nodes. Authors: Michel Buffa, Q. Beauchet for GUI improvements.",
+   "url": "wimmics/pingpongdelay/dist/index.js",
+   "site": ""
+  },
+  {
+   "key": "burns-audio/delay",
+   "name": "Simple Delay",
+   "vendor": "Sequencer Party",
+   "kind": "effect",
+   "type": "Delay",
+   "desc": "Simple stereo filtered delay",
+   "url": "burns-audio/delay/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "wimmics/SmoothDelay",
+   "name": "SmoothDelay",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Delay",
+   "desc": "Delay that does't click or transpose when the delay time is changed, in Faust. Author: Yann Orlarey.",
+   "url": "wimmics/SmoothDelay/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/BigMuff",
+   "name": "Big Muff",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "A reproduction of the BigMuff original Fuzz pedal. Original code from Guitarix project. WAM by Michel Buffa.",
+   "url": "wimmics/BigMuff/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/kppdistorder",
+   "name": "KppDistorder",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "This plugin is a distortion pedal emulator with equalizer. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code",
+   "url": "wimmics/kppdistorder/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/Kpp_fuzz",
+   "name": "KppFuzz",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "This plugin is a vintage fuzz pedal emulator. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code.",
+   "url": "wimmics/Kpp_fuzz/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/OscTube",
+   "name": "OSCTube",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "Tube fuzz effect with vibrato, resonance and fuzz controls. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Guitarix Team for the original FAUST code",
+   "url": "wimmics/OscTube/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/OverdriveRix",
+   "name": "Overdriverix",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "Overdrive effect implemented in Faust. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Guitarix Team for the original FAUST code",
+   "url": "wimmics/OverdriveRix/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/quadrafuzz/dist",
+   "name": "QuadraFuzz",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "A multiband fuzz effect inspired by the Quadrafuzz VST. Authors: Michel Buffa, Q. Beauchet for GUI improvements",
+   "url": "wimmics/quadrafuzz/dist/index.js",
+   "site": ""
+  },
+  {
+   "key": "burns-audio/distortion",
+   "name": "Simple Distortion",
+   "vendor": "Sequencer Party",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "Simple waveshaper-based distortion with variable curve and gain",
+   "url": "burns-audio/distortion/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "wimmics/temper",
+   "name": "Temper",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "Modern digital distortion. It builds upon traditional waveshaping techniques using modulated filter coefficients to produce a unique phase distortion. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original code Nick Thomson (https://github.com/creativeintent/temper)",
+   "url": "wimmics/temper/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/TS9_Overdrive",
+   "name": "TS9 Overdrive",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Distortion",
+   "desc": "A recreation of the classic TS9 overdrive pedal effect. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust code by the guitarix team",
+   "url": "wimmics/TS9_Overdrive/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/blipper",
+   "name": "Blipper",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Equalizer & Filter",
+   "desc": "Blipper is an Envelope Follower which controls the pitch of a triangle oscillator. It is a rough emulation of some of the features of the BOSS PC-2 Percussion Synthesiser. Arthur Russell used something like this to create interesting percussion parts on his records e.g. <https://www.youtube.com/watch?v=LEZevPziZhY>. It works nicely with drums. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin",
+   "url": "wimmics/blipper/index.js",
+   "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/Blipper"
+  },
+  {
+   "key": "wimmics/graphicEqualizer",
+   "name": "GraphicEqualizer",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Equalizer & Filter",
+   "desc": "A graphic equalizer proposing a bank of filters. Drag control points. Use shift+drag for peaking filters to adjust the curve. Author: Michel Buffa.",
+   "url": "wimmics/graphicEqualizer/index.js",
+   "site": ""
+  },
+  {
+   "key": "burns-audio/simpleEQ",
+   "name": "Simple EQ",
+   "vendor": "Sequencer Party",
+   "kind": "effect",
+   "type": "Equalizer & Filter",
+   "desc": "Simple three-band equalizer",
+   "url": "burns-audio/simpleEQ/index.js",
+   "site": "https://sequencer.party"
+  },
+  {
+   "key": "wimmics/sweetWah",
+   "name": "SweetWah",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Equalizer & Filter",
+   "desc": "An autowah effect with modulation. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original faust code https://github.com/pingdynasty/OwlPatches/blob/master/Faust/SweepWah.dsp",
+   "url": "wimmics/sweetWah/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/StereoEnhancer",
+   "name": "Stereo Enhancer",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Modulation",
+   "desc": "Stereo Width/Enhancer effect using the Blumlein Shuffler technique. Author: Michel Buffa.",
+   "url": "wimmics/StereoEnhancer/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/stonephaser",
+   "name": "StonePhaser",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Modulation",
+   "desc": "This is an analog phaser with similarity to the Small Stone. It has a color switch, which makes the phasing stronger when on, and adds some feedback controls. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original faust Code by jpcima https://github.com/jpcima/stone-phaser",
+   "url": "wimmics/stonephaser/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/ThruZeroFlanger",
+   "name": "ThruZeroFlanger",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Modulation",
+   "desc": "Thru-zero flanger that models a pair of tape delays with rate/depth/feedback/synchronization modes controls. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin",
+   "url": "wimmics/ThruZeroFlanger/index.js",
+   "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/Thru_zero_flanger"
+  },
+  {
+   "key": "wimmics/WeirdPhaser",
+   "name": "WeirdPhaser",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Modulation",
+   "desc": "Weird Phaser is a stereo phase shifter based on SSB (single side band) modulation. Unlike Stereo Frequency Shifter, Weird Phaser uses a single LFO which has a fixed phase offset for the right hand channel, causing some interesting between the ears spatial effects at its maximum settting. Weird Phaser also has feedback for a more pronounced effect. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin",
+   "url": "wimmics/WeirdPhaser/index.js",
+   "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/WeirdPhaser"
+  },
+  {
+   "key": "wimmics/DualPitchShifter",
+   "name": "DualPitchShifter",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Pitch",
+   "desc": "Dual Pitch Shifter is a dual channel pitch shifter, based on Faust\u2019s pitch_shifter.dsp by Grame. Pitch shifting is (intentionally) extremely basic and introduces significant delay based on window size.",
+   "url": "wimmics/DualPitchShifter/index.js",
+   "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/DualPitchShifter. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin"
+  },
+  {
+   "key": "wimmics/StereoFreqShifter",
+   "name": "StereoFreqShifter",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Pitch",
+   "desc": "Stereo Frequency Shifter is a twin frequency shifter with linked control of frequency shift for each channel, that can be slightly offset for lush stereo phasing. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin",
+   "url": "wimmics/StereoFreqShifter/index.js",
+   "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/StereoFreqShifter"
+  },
+  {
+   "key": "wimmics/greyhole",
+   "name": "Grey Hole",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Reverb",
+   "desc": "A reverb insoired by the famous Eventinde/Blackhole effect. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code Julian Parker, bug fixes by Till Bovermann.",
+   "url": "wimmics/greyhole/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/kbverb",
+   "name": "KBVerb",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Reverb",
+   "desc": "A reverb inspired by https://valhalladsp.com/2010/08/25/rip-keith-barr/ Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code originated from Stephane Letz.",
+   "url": "wimmics/kbverb/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/OwlDirty",
+   "name": "OwlDirty",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Reverb",
+   "desc": "A stereo ambient reverberation with a distortion stage on the reverb tail. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code by Xavier (https://www.rebeltech.org/patch-library/patch/Owlgazer_Dirty_Reverb/)",
+   "url": "wimmics/OwlDirty/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/OwlShimmer",
+   "name": "OWLShimmer",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Reverb",
+   "desc": "A stereo ambient reverberation with a shimmer effect. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, original faust code by Xavier (https://www.rebeltech.org/patch-library/patch/Owlgazer_Dirty_Reverb/)",
+   "url": "wimmics/OwlShimmer/index.js",
+   "site": ""
+  },
+  {
+   "key": "wimmics/deathgate",
+   "name": "DeathGate",
+   "vendor": "Wimmics",
+   "kind": "effect",
+   "type": "Utility",
+   "desc": "This plugin is a multiband noise gate, works pretty well with distorded guitars, drums, bass, etc. Authors: Michel Buffa for making it a WAM, Quentin Beauchet for improving the GUI, Oleg Kapitonov for the original FAUST code",
+   "url": "wimmics/deathgate/index.js",
+   "site": ""
+  }
+ ]
+}

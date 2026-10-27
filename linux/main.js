@@ -24,7 +24,8 @@ if (!app.requestSingleInstanceLock()) { app.quit(); }
 
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".mjs": "text/javascript; charset=utf-8", ".json": "application/json",
   ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json", ".mp3": "audio/mpeg",
-  ".wav": "audio/wav", ".ogg": "audio/ogg", ".wasm": "application/wasm", ".txt": "text/plain; charset=utf-8", ".ico": "image/x-icon" };
+  ".wav": "audio/wav", ".ogg": "audio/ogg", ".wasm": "application/wasm", ".txt": "text/plain; charset=utf-8", ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif", ".ttf": "font/ttf", ".woff": "font/woff", ".woff2": "font/woff2" };
 const typeOf = p => TYPES[path.extname(p).toLowerCase()] || "application/octet-stream";
 const exists = p => fs.promises.stat(p).then(s => s.isFile(), () => false);
 const inside = (root, p) => { const r = path.resolve(root, p); return r.startsWith(path.resolve(root) + path.sep) ? r : null; };
@@ -62,7 +63,7 @@ async function serve(req) {
     let src = null;
     const waf = /^snd\/([\w.-]+)\.json$/.exec(rel);
     if (waf) src = REMOTE_WAF + waf[1] + ".js";
-    else if (/^inst\//.test(rel) || /\.(png|webmanifest)$/.test(rel)) src = SITE + rel;
+    else if (/^(inst|wam)\//.test(rel) || /\.(png|webmanifest)$/.test(rel)) src = SITE + rel;   // (plugins added to the website later)
     if (!src) return new Response("", { status: 404 });
     const buf = await fetchTo(src, dest);
     return new Response(buf, { headers: { "content-type": typeOf(rel) } });

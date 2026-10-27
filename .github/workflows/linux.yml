@@ -35,6 +35,7 @@ jobs:
           cp ../lite/index.html ../lite/manifest.webmanifest site/lite/
           [ -f ../lite/sim.html ] && cp ../lite/sim.html site/lite/ || true
           cp -r ../inst site/inst
+          cp -r ../wam site/wam
           date -u +%Y-%m-%dT%H:%M:%SZ > site/BUILD.txt
           du -sh site
 
