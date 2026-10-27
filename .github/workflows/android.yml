@@ -56,7 +56,7 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -dns-server 8.8.8.8,1.1.1.1
           script: bash android/ci/smoke.sh /tmp/nb-logs/smoke
 
       - name: Release

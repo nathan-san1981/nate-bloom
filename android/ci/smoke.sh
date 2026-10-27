@@ -22,6 +22,6 @@ python3 android/ci/cdp_smoke.py "$OUT" > "$OUT/checks.txt" 2>&1
 cat "$OUT/checks.txt"
 adb shell ls -l "/sdcard/Download/Nate Bloom/" > "$OUT/downloads.txt" 2>&1
 cat "$OUT/downloads.txt"
-adb logcat -d -s NateBloom:V chromium:V AndroidRuntime:E > "$OUT/logcat.txt"
+adb logcat -d -s NateBloom:V NateBloomFast:V chromium:V AndroidRuntime:E > "$OUT/logcat.txt"
 tail -40 "$OUT/logcat.txt"
 exit 0

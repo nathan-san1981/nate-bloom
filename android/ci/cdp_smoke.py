@@ -17,7 +17,7 @@ def page_ws():
         try:
             pages = json.load(urllib.request.urlopen("http://127.0.0.1:9222/json", timeout=5))
             for p in pages:
-                if "nate-bloom" in p.get("url", "") and p.get("webSocketDebuggerUrl"):
+                if p.get("type") == "page" and p.get("webSocketDebuggerUrl"):
                     return p["webSocketDebuggerUrl"]
         except Exception as e:
             pass
@@ -42,6 +42,21 @@ def check(name, expr):
     print(f"{name}: {json.dumps(v)[:400]}", flush=True)
     return v
 
+# the emulator's network can come up after the app has opened on its offline page: retry until the site loads
+for i in range(40):
+    try:
+        href = ev("location.href + ' ' + !!document.getElementById('startBtn')")
+    except Exception as e:
+        href = "ERR " + str(e)
+    if href and "nate-bloom" in href and href.endswith("true"):
+        break
+    print(f"waiting for the site ({i}): {href}", flush=True)
+    try:
+        ev("location.href = 'https://nathan-san1981.github.io/nate-bloom/'", wait=False)
+    except Exception:
+        pass
+    time.sleep(6)
+time.sleep(4)
 check("page", "document.title + ' | ' + location.href")
 check("native", "JSON.stringify({native: !!window.NB_NATIVE, v: window.NB_NATIVE && NB_NATIVE.version, ua: navigator.userAgent.slice(-40)})")
 check("viewport", "innerWidth + 'x' + innerHeight + ' dpr ' + devicePixelRatio")
