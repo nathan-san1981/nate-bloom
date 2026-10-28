@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Unicorn Clock</string>
+    <string name="admin_label">Unicorn Clock lock</string>
+    <string name="admin_desc">Keeps the tablet on the Unicorn Clock (only when a grown-up sets it up as the device owner).</string>
+</resources>
