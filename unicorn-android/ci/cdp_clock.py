@@ -99,6 +99,23 @@ def wait_clock(secs=40):
     return False
 
 
+def tap_text(words):
+    adb("shell", "uiautomator", "dump", "/sdcard/ui.xml")
+    x = adb("shell", "cat", "/sdcard/ui.xml")
+    for w in words:
+        m = re.search(r'text="%s"[^>]*?bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"' % re.escape(w), x, re.I)
+        if m:
+            a, b, c, d = map(int, m.groups())
+            adb("shell", "input", "tap", str((a + c) // 2), str((b + d) // 2))
+            return w
+    return None
+
+
+def top_activity():
+    act = adb("shell", "dumpsys", "activity", "activities")
+    return (re.search(r"(mResumedActivity|topResumedActivity).*", act) or [""])[0].strip()
+
+
 def dismiss():
     P.ev("(function(){var o=document.getElementById('routineOv');if(o&&!o.hidden){var b=document.getElementById('roLater');b&&b.click();}})()")
 
@@ -114,11 +131,31 @@ check("app bridge status", "version" in st, st)
 time.sleep(3)
 shot("01_clock")
 
-# ---------- 2. kiosk pinning ----------
+# ---------- 2. keeps itself on screen; optional pinning ----------
+check("not pinned by default (no Android pin box at start-up)", status().get("lockMode") == "none", status().get("lockMode"))
+adb("shell", "input", "keyevent", "KEYCODE_HOME")
+time.sleep(4)
+check("Home brings the clock straight back", PKG in top_activity(), top_activity()[:160])
+adb("shell", "input", "keyevent", "KEYCODE_APP_SWITCH")
+time.sleep(4)
+check("Recents brings the clock straight back", PKG in top_activity(), top_activity()[:160])
+adb("shell", "input", "keyevent", "KEYCODE_BACK")
+time.sleep(1)
+P.connect(10)
+P.ev("unicornApp.pinAgain()")
+time.sleep(3)
+shot("02_pin_box")
+tapped = tap_text(["Got it", "GOT IT", "Start", "START", "OK"])
+time.sleep(3)
 lock = adb("shell", "dumpsys", "activity", "activities")
 m = re.search(r"mLockTaskModeState=(\w+)", lock)
-check("pinned (Home and Recents locked)", status().get("pinned") is True, {"status": status().get("lockMode"), "dumpsys": m.group(1) if m else None})
+check("Pin the clock (after Android's confirmation)", status().get("pinned") is True, {"tapped": tapped, "status": status().get("lockMode"), "dumpsys": m.group(1) if m else None})
 shot("02_after_pin")
+P.ev("unicornApp.exitToTablet()")
+time.sleep(3)
+adb("shell", "am", "start", "-n", PKG + "/.MainActivity")
+time.sleep(6)
+P.connect(10)
 
 # ---------- 3. real backlight brightness ----------
 P.ev("fully.setScreenBrightness(30)")
@@ -141,13 +178,18 @@ for _ in range(10):
     if ready:
         break
     time.sleep(2)
-check("tablet voice ready", ready, status().get("ttsEngine"))
+eng = status().get("ttsEngine")
+if not ready and not eng:
+    print("INFO tablet voice: this emulator image has no text-to-speech engine installed (Fire tablets ship one)", flush=True)
+else:
+    check("tablet voice ready", ready, eng)
 r = P.ev("(function(){try{fully.textToSpeech('Good morning, unicorn. Time to get dressed.');return 'ok'}catch(e){return 'ERR '+e}})()")
 check("speaks typed words", r == "ok", r)
 r = P.ev("(function(){try{var e=sayNow?1:0}catch(x){}return typeof deviceSay})()")
 
 # ---------- 6. remembers things across a restart ----------
 P.ev("localStorage.setItem('uc.ci.mark','still here')")
+time.sleep(12)   # Chromium writes local storage to disk a few seconds later; a real tablet keeps running
 restart_app()
 wait_clock()
 check("remembers after the app restarts", P.ev("localStorage.getItem('uc.ci.mark')") == "still here")
@@ -185,9 +227,7 @@ adb("shell", "svc", "data", "enable")
 # ---------- 8. leaving through grown-up settings, and opening by itself at start-up ----------
 P.ev("unicornApp.exitToTablet()")
 time.sleep(4)
-act = adb("shell", "dumpsys", "activity", "activities")
-left = PKG + "/.MainActivity" not in (re.search(r"(mResumedActivity|topResumedActivity).*", act) or [""])[0]
-check("Exit to the tablet leaves the clock", left)
+check("Exit to the tablet leaves the clock (and it stays out)", PKG not in top_activity(), top_activity()[:160])
 adb("root")
 time.sleep(4)
 adb("wait-for-device")
@@ -212,6 +252,10 @@ act = adb("shell", "dumpsys", "activity", "activities")
 top = (re.search(r"(mResumedActivity|topResumedActivity).*", act) or [""])[0]
 check("device owner: Home stays on the clock", PKG in top, top.strip()[:160])
 shot("07_owner_locked")
+P.connect(10)
+P.ev("unicornApp.releaseLockdown()")
+time.sleep(3)
+check("Undo full lockdown from grown-up settings", status().get("owner") is False, status())
 
 errs = adb("logcat", "-d", "-s", "UnicornClock:W")
 page_errs = [l for l in errs.splitlines() if "page:" in l]

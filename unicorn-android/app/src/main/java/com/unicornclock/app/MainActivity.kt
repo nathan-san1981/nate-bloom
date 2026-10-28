@@ -19,6 +19,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -67,9 +68,29 @@ class MainActivity : ComponentActivity() {
     private val ui = Handler(Looper.getMainLooper())
     private val prefs by lazy { getSharedPreferences("unicorn", Context.MODE_PRIVATE) }
 
-    // kiosk: pin the clock once each time it opens; after "Exit to the tablet" stay unpinned until reopened
+    // kiosk: keep the clock in front (Home or Recents bring it straight back); after "Exit to the tablet" leave it
+    // alone until it is opened again. Pinning is optional (Android asks to confirm it every time); as device owner
+    // the clock is locked silently.
     private var kioskOn = true
     private var pinTried = false
+    private var pinNow = false
+    private var away = false          // a grown-up opened a system screen from the clock (file picker, settings...)
+    private var inFront = false
+    // if a grown-up wanders off from one of those screens and forgets, the clock still comes back after 3 minutes
+    private val awayTimeout = Runnable {
+        away = false
+        if (!inFront) bringBack.run()
+    }
+    private val bringBack = Runnable {
+        if (kioskOn && !away && screenOn()) {
+            try {
+                startActivity(Intent(this, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            } catch (e: Exception) {
+                Log.w(TAG, "could not come back to the front", e)
+            }
+        }
+    }
     private var brightness = -1f
 
     // the tablet's own text-to-speech, for words the clock has no recording of (names you type, reminders)
@@ -217,6 +238,7 @@ class MainActivity : ComponentActivity() {
                         request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
                     } else {
                         pendingMic = request
+                        away = true
                         askMic.launch(Manifest.permission.RECORD_AUDIO)
                     }
                 }
@@ -226,6 +248,7 @@ class MainActivity : ComponentActivity() {
                 if (has(Manifest.permission.ACCESS_COARSE_LOCATION)) callback.invoke(origin, true, false)
                 else {
                     pendingGeo = origin to callback
+                    away = true
                     askGeo.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                 }
             }
@@ -239,6 +262,7 @@ class MainActivity : ComponentActivity() {
                     type = "*/*"
                 }
                 return try {
+                    away = true
                     pickFile.launch(Intent.createChooser(pick, "Choose the backup file"))
                     true
                 } catch (e: ActivityNotFoundException) {
@@ -271,8 +295,28 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) fullScreen()
     }
 
+    override fun onStart() {
+        super.onStart()
+        inFront = true
+        ui.removeCallbacks(bringBack)
+        ui.removeCallbacks(awayTimeout)
+    }
+
+    // left the clock without a grown-up's say-so (Home, Recents, another app): come straight back,
+    // but never when the screen was turned off, and not while a grown-up is in a system screen we opened
+    override fun onStop() {
+        super.onStop()
+        inFront = false
+        if (!kioskOn || isChangingConfigurations) return
+        if (away) ui.postDelayed(awayTimeout, 180_000)
+        else if (screenOn()) ui.postDelayed(bringBack, 1000)
+    }
+
+    private fun screenOn(): Boolean = getSystemService(PowerManager::class.java).isInteractive
+
     override fun onResume() {
         super.onResume()
+        away = false
         fullScreen()
         if (::web.isInitialized) web.onResume()
         ui.postDelayed({ startKiosk() }, 800)
@@ -303,8 +347,11 @@ class MainActivity : ComponentActivity() {
     private fun startKiosk() {
         if (!kioskOn || isFinishing) return
         if (lockState() != ActivityManager.LOCK_TASK_MODE_NONE) return
-        if (pinTried && !isOwner()) return
+        val owner = isOwner()
+        if (!owner && !pinNow && !prefs.getBoolean("pinEachStart", false)) return
+        if (pinTried && !owner) return
         pinTried = true
+        pinNow = false
         try {
             startLockTask()
         } catch (e: Exception) {
@@ -460,6 +507,8 @@ class MainActivity : ComponentActivity() {
                 put("owner", isOwner())
                 put("opensAtStart", canOpenAlone && prefs.getBoolean("boot", true))
                 put("bootPref", prefs.getBoolean("boot", true))
+                put("pinEachStart", prefs.getBoolean("pinEachStart", false))
+                put("keepsFront", kioskOn && canOpenAlone)
                 put("canOpenAlone", canOpenAlone)
                 put("ttsReady", ttsReady)
                 put("ttsEngine", ttsEngine)
@@ -487,9 +536,36 @@ class MainActivity : ComponentActivity() {
             ui.post {
                 kioskOn = true
                 pinTried = false
+                pinNow = true
                 if (isOwner()) deviceOwnerSetup()
                 startKiosk()
             }
+        }
+
+        /** Undo the optional device-owner lockdown without a factory reset (behind the grown-up PIN). */
+        @JavascriptInterface
+        fun releaseLockdown() {
+            ui.post {
+                val dpm = getSystemService(DevicePolicyManager::class.java)
+                if (!dpm.isDeviceOwnerApp(packageName)) return@post
+                val admin = ComponentName(this@MainActivity, AdminReceiver::class.java)
+                try {
+                    stopKiosk()
+                    dpm.clearPackagePersistentPreferredActivities(admin, packageName)
+                    dpm.setStatusBarDisabled(admin, false)
+                    dpm.setKeyguardDisabled(admin, false)
+                    dpm.setLockTaskPackages(admin, arrayOf())
+                    @Suppress("DEPRECATION")
+                    dpm.clearDeviceOwnerApp(packageName)
+                } catch (e: Exception) {
+                    Log.w(TAG, "release lockdown", e)
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun setPinEachStart(on: Boolean) {
+            prefs.edit().putBoolean("pinEachStart", on).apply()
         }
 
         @JavascriptInterface
@@ -501,7 +577,7 @@ class MainActivity : ComponentActivity() {
         fun openStartAloneSettings() {
             ui.post {
                 try {
-                    stopKiosk()
+                    away = true
                     startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
                 } catch (e: Exception) {
                     try {
@@ -516,7 +592,7 @@ class MainActivity : ComponentActivity() {
         fun openVoiceSettings() {
             ui.post {
                 try {
-                    stopKiosk()
+                    away = true
                     startActivity(Intent("com.android.settings.TTS_SETTINGS"))
                 } catch (e: Exception) {
                 }
@@ -529,6 +605,7 @@ class MainActivity : ComponentActivity() {
             ui.post {
                 saveText = text
                 try {
+                    away = true
                     saveDoc.launch(name)
                 } catch (e: Exception) {
                     saveText = null

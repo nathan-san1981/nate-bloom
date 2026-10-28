@@ -8,10 +8,9 @@ PKG=com.unicornclock.app
 mkdir -p "$OUT"
 adb wait-for-device
 for i in $(seq 1 60); do [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 2; done
-adb shell wm size 1024x600
+sleep 5; adb shell wm size 1024x600; adb shell wm size
 adb shell wm density 160
-adb shell settings put system accelerometer_rotation 0
-adb shell settings put system user_rotation 1
+adb shell settings put system accelerometer_rotation 0 || true
 adb shell settings put global window_animation_scale 0
 adb install -r -g "$APK" > "$OUT/install.txt" 2>&1
 cat "$OUT/install.txt"

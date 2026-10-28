@@ -69,6 +69,7 @@ jobs:
           api-level: ${{ matrix.api }}
           target: google_apis
           arch: x86_64
+          profile: pixel_c
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim -dns-server 8.8.8.8,1.1.1.1
           script: bash unicorn-android/ci/smoke.sh /tmp/uc-test/api${{ matrix.api }} /tmp/uc-build/UnicornClock.apk
