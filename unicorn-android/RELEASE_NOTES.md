@@ -11,7 +11,7 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
 New in this version: Unicorn Meadow (a cozy game where unicorn friends build their meadow), and a kid-sized
-Unicorn Dungeon: a big Pack button with pictures of each item, arrows you can hold to keep walking, a life bar,
+Unicorn Dungeon: a Kid's play button that starts one of 60 gentle dungeons, a big Pack button with pictures of each item, arrows you can hold to keep walking, a life bar,
 Yes / No questions you can hear, tap-the-words-to-hear messages in the clock's natural voice, and calm music.
 
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight

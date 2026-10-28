@@ -5632,7 +5632,7 @@ function dungeonEnter(){setView('dungeon',3600);
     brogueApp=BrogueUI.mount($('dungeonHost'),{wasmB64:$('brogueWasm').textContent.trim(),tilesB64:$('brogueTiles').textContent.trim(),storageKey:'unicornClock.brogue',
     kid:{fixB64:$('brogueKidFix').textContent.trim(),tintB64:$('brogueKidTint').textContent.trim(),has:km.has,tint:km.tint,big:km.big},music:true,audio:function(){return audio();},
     keyTarget:function(){return view==='dungeon'&&$('dunLimit').hidden;},onBack:function(){view='auto';tick();},onRestart:function(a){brogueApp=a;},
-    say:function(t){return sayNow(t)!=='none';}});
+    say:function(t){return sayNow(t)!=='none';},kidSeeds:[436, 611, 268, 3719, 3394, 3278, 103, 730, 674, 3639, 584, 3328, 576, 409, 3638, 605, 705, 437, 3695, 445, 728, 3454, 629, 121, 3218, 47, 92, 3077, 181, 3036, 3657, 222, 421, 3720, 483, 3048, 261, 3336, 67, 3635, 3416, 183, 682, 142, 510, 32, 149, 164, 3029, 3282, 3258, 3517, 3164, 3073, 613, 82, 650, 3387, 3208, 3629]});
     $('dungeonHost').addEventListener('pointerdown',function(){if(view==='dungeon')viewUntil=Date.now()+3600000;},true);}
   setTimeout(function(){window.dispatchEvent(new Event('resize'));},60);}
 $('pickDungeon').addEventListener('click',function(){$('pickOv').hidden=true;dungeonEnter();});
@@ -6490,6 +6490,7 @@ var CSS=`
 .bq .bq-title button{pointer-events:auto;min-height:50px;padding:0 20px;border-radius:16px;border:2px solid rgba(255,255,255,.45);background:rgba(22,24,48,.86);color:#fff;font:700 17px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;backdrop-filter:blur(4px)}
 .bq .bq-title button.main{min-height:60px;font-size:21px;padding:0 30px;background:#6d4fd8;border-color:#fff}
 .bq .bq-title button:active{background:#8c70f0}
+.bq .bq-title button.kidplay{min-height:76px;font-size:26px;padding:0 36px;background:#C2367E;border-color:#fff;box-shadow:0 5px 0 #8C1F59}
 .bq .bq-menu{position:absolute;z-index:5;display:flex;flex-direction:column;gap:6px;padding:8px;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;background:rgba(14,15,32,.94);border:2px solid #4a4f80;border-radius:18px;box-sizing:border-box}
 .bq .bq-menu button{flex:none;min-height:46px;text-align:left;padding:6px 12px;border-radius:12px;border:2px solid #3d4275;background:#23264a;color:#fff;font:600 16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.25;touch-action:manipulation}
 .bq .bq-menu button:active{background:#5b48c4}
@@ -6550,7 +6551,7 @@ function mount(host,opts){
   var cv=el('canvas');root.appendChild(cv);var load=el('div','bq-load','Opening the dungeon…');root.appendChild(load);
   var app=new BrogueApp({canvas:cv,wasmB64:opts.wasmB64,tilesB64:opts.tilesB64,storageKey:opts.storageKey||'brogue.fs',graphics:opts.graphics!==false,kid:opts.kid||null,zoom:opts.kid?2.6:1,
     keyTarget:opts.keyTarget,onExit:function(){load.textContent='Thanks for playing! Reload to play again.';load.hidden=false;},
-    onTextInput:function(on){txt.hidden=!on;if(on){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},50);}},
+    onTextInput:function(on){if(kidSeeding&&on)return;txt.hidden=!on;if(on){inp.value='';setTimeout(function(){try{inp.focus();}catch(e){}},50);}},
     onError:function(e){load.hidden=false;load.textContent='Something went wrong: '+e;},
     onTitle:function(on){showTitle(on);},onBubble:opts.kid?function(b){showBubble(b);}:null,onMenu:function(items,win){showMenu(items,win);},onMenuClose:function(){hideMenu();},
     onMessage:function(t,f){gotMessage(t,f);}});
@@ -6711,7 +6712,17 @@ function mount(host,opts){
   var turn=el('div','bq-turn','Turn your phone sideways for a bigger dungeon');turn.hidden=true;root.appendChild(turn);
   var title=el('div','bq-title');title.hidden=true;root.appendChild(title);
   function tb(label,cls,keys){var b=el('button',cls,label);b.addEventListener('click',function(){for(var i=0;i<keys.length;i++)app.key(K(keys[i]));});title.appendChild(b);return b;}
-  tb('New game','main',['n']);var loadBtn=tb('Load saved game','',['p','l']);tb('Seeded game','',['p','s']);tb('High scores','',['v','h']);tb('Recordings','',['v','r']);
+  // Kid's play: a new game on one of the gentle dungeons in opts.kidSeeds (picked at random, not the last few played)
+  var kidSeeding=false;
+  function kidPlay(){var L=opts.kidSeeds||[];if(!L.length){app.key(K('n'));return;}var key=(opts.storageKey||'brogue')+'.kidseeds',recent=[];
+    try{recent=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+    var pool=L.filter(function(x){return recent.indexOf(x)<0;});if(!pool.length)pool=L;var seed=pool[Math.floor(Math.random()*pool.length)];
+    recent.push(seed);if(recent.length>Math.min(10,Math.floor(L.length/2)))recent.shift();try{localStorage.setItem(key,JSON.stringify(recent));}catch(e){}
+    kidSeeding=true;app.key(K('p'));app.key(K('s'));var d=String(seed);for(var i=0;i<d.length;i++)app.key(d.charCodeAt(i));app.key(10);
+    setTimeout(function(){kidSeeding=false;},4000);app.kidSeed=seed;}
+  if(opts.kid&&opts.kidSeeds&&opts.kidSeeds.length){var kp=el('button','main kidplay','🦄 Kid\'s play');kp.addEventListener('click',kidPlay);title.appendChild(kp);tb('New game','',['n']);}
+  else tb('New game','main',['n']);
+  var loadBtn=tb('Load saved game','',['p','l']);tb('Seeded game','',['p','s']);tb('High scores','',['v','h']);tb('Recordings','',['v','r']);
   function showTitle(on){title.hidden=!on;left.style.visibility=on?'hidden':'';if(opts.kid)pad.style.visibility=on?'hidden':'';if(on){loadBtn.hidden=!app.hasSave();layout();}app.needPresent=true;}
   // ---- big-button menus: every Brogue menu (inventory, item actions, yes/no, file lists) as a tap list ----
   var bigMenus=null;try{var bm=localStorage.getItem('brogue.bigmenus');if(bm)bigMenus=bm==='1';}catch(e){}
