@@ -149,8 +149,8 @@ app.whenReady().then(async () => {
   dropStaleCache();
   protocol.handle("app", serve);
   const ses = session.defaultSession;
-  // MIDI (with SysEx), the microphone, and nothing else
-  const ok = new Set(["midi", "midiSysex", "media", "clipboard-sanitized-write", "fullscreen"]);
+  // MIDI (with SysEx), the microphone, choosing the sound output, and nothing else
+  const ok = new Set(["midi", "midiSysex", "media", "speaker-selection", "clipboard-sanitized-write", "fullscreen"]);
   ses.setPermissionRequestHandler((wc, perm, cb, details) => cb(ok.has(perm) && (details.requestingUrl || "").startsWith(ORIGIN)));
   ses.setPermissionCheckHandler((wc, perm, origin) => ok.has(perm) && (origin || "").startsWith(ORIGIN));
   // saves go to Downloads/Nate Bloom, never over an older file

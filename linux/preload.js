@@ -33,6 +33,8 @@ if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   stopAll: () => fp.stopAll(),
   stopPad: pad => fp.stopPad(pad),
   choke: (group, exceptPad) => fp.choke(group, exceptPad),
+  setDevice: name => fp.setDevice ? fp.setDevice(String(name || "")) : false,
+  devices: () => { try { return JSON.parse(fp.devices ? fp.devices() : "[]"); } catch (e) { return []; } },
 });
 
 // a newer Nate Bloom came down from the website: offer to switch to it

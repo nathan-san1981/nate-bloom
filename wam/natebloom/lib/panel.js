@@ -21,8 +21,17 @@ button:active { transform: scale(0.97); }
 .menu .seg button { border: 0; border-radius: 0; background: #1f1a2a; height: 32px; min-width: 44px; }
 .menu .seg button[aria-pressed="true"] { background: var(--acc); color: #17131f; font-weight: 700; }
 .menu .l { font-size: 11.5px; color: #b9afd0; }
+.g { grid-column: 1 / -1; font: 600 10.5px/1.2 ui-monospace, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #8e86a6; margin: 8px 0 -2px; border-top: 1px solid #2f2840; padding-top: 8px; }
+.g:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
 `;
 const fmt = (p, v) => {
+  if (p.texts) { const i = Math.round((v - p.min) / (p.max - p.min || 1) * 100); return p.texts[Math.max(0, Math.min(100, i))]; }
+  if (p.disp) {   // a control stored 0..1 shown in its own units (the plugin's own curves)
+    const d = p.disp, y = d.f === "exp" ? d.a * Math.pow(d.b, v) : d.f === "sq" ? d.a * v * v : d.f === "id" ? v : d.a + d.b * v, u = d.u || "";
+    if (u === "Hz") return y >= 1000 ? (y / 1000).toFixed(y >= 10000 ? 1 : 2) + " kHz" : (y < 10 ? y.toFixed(2) : Math.round(y)) + " Hz";
+    if (u === "s") return y < 1 ? Math.round(y * 1000) + " ms" : y.toFixed(y < 10 ? 2 : 1) + " s";
+    return (d.sign && y > 0.0001 ? "+" : "") + y.toFixed(d.d ?? 2) + (u ? " " + u : "");
+  }
   const u = p.unit || "";
   if (u === "Hz") return v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 1 : 2) + " kHz" : (v < 10 ? v.toFixed(2) : Math.round(v)) + " Hz";
   if (u === "ms") return (v < 10 ? v.toFixed(1) : Math.round(v)) + " ms";
@@ -32,8 +41,9 @@ const fmt = (p, v) => {
   return p.step >= 1 ? String(Math.round(v)) : v.toFixed(2);
 };
 const isLog = p => p.scale === "log" && p.min > 0;
-const toPos = (p, v) => isLog(p) ? Math.log(v / p.min) / Math.log(p.max / p.min) : (v - p.min) / (p.max - p.min);
-const fromPos = (p, x) => { x = Math.max(0, Math.min(1, x)); let v = isLog(p) ? p.min * Math.pow(p.max / p.min, x) : p.min + x * (p.max - p.min); if (p.step >= 1) v = Math.round(v / p.step) * p.step; return Math.max(p.min, Math.min(p.max, v)); };
+// skew: a control whose knob position x maps to min + (max − min)·x^(1/skew), as the original plugin's own range does
+const toPos = (p, v) => isLog(p) ? Math.log(v / p.min) / Math.log(p.max / p.min) : p.skew ? Math.pow(Math.max(0, (v - p.min) / (p.max - p.min)), p.skew) : (v - p.min) / (p.max - p.min);
+const fromPos = (p, x) => { x = Math.max(0, Math.min(1, x)); let v = isLog(p) ? p.min * Math.pow(p.max / p.min, x) : p.skew ? p.min + (p.max - p.min) * Math.pow(x, 1 / p.skew) : p.min + x * (p.max - p.min); if (p.step >= 1) v = Math.round(v / p.step) * p.step; return Math.max(p.min, Math.min(p.max, v)); };
 const arc = (a0, a1, r) => { const c = 29, p = a => [c + r * Math.cos(a), c + r * Math.sin(a)], [x0, y0] = p(a0), [x1, y1] = p(a1); return `M${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)}`; };
 const A0 = Math.PI * 0.75, SPAN = Math.PI * 1.5;
 
@@ -52,13 +62,16 @@ export function panel(plugin, M) {
     top.appendChild(sel);
   }
   const rs = document.createElement("button"); rs.textContent = "Reset"; rs.addEventListener("click", () => { M.params.forEach(p => set(p, p.init)); flush(); }); top.appendChild(rs);
+  let group = null;
   for (const p of M.params) {
     vals[p.id] = p.init;
+    if (p.hidden) { views[p.id] = () => {}; continue; }
+    if (p.group && p.group !== group) { group = p.group; const g = document.createElement("div"); g.className = "g"; g.textContent = group.replace(/\//g, " · "); grid.appendChild(g); }
     if (p.menu) {
       const w = document.createElement("div"); w.className = "menu";
       const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "radiogroup"); seg.setAttribute("aria-label", p.label);
       const btns = p.menu.map(([lab, val]) => { const b = document.createElement("button"); b.textContent = lab; b.setAttribute("role", "radio"); b.addEventListener("click", () => set(p, val, true)); seg.appendChild(b); return [b, val]; });
-      const l = document.createElement("span"); l.className = "l"; l.textContent = p.label;
+      const l = document.createElement("span"); l.className = "l"; l.textContent = p.short || p.label;
       w.append(seg, l); grid.appendChild(w);
       views[p.id] = () => btns.forEach(([b, val]) => b.setAttribute("aria-pressed", String(Math.round(vals[p.id]) === val)));
       continue;
@@ -66,7 +79,7 @@ export function panel(plugin, M) {
     const k = document.createElement("div"); k.className = "k"; k.tabIndex = 0; k.setAttribute("role", "slider"); k.setAttribute("aria-label", p.label);
     k.innerHTML = `<svg viewBox="0 0 58 58"><path class="bg" fill="none" stroke="#2f2840" stroke-width="5" stroke-linecap="round"/><path class="fg" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round"/><circle cx="29" cy="29" r="15" fill="#241e31" stroke="#3a3249"/><line class="ptr" x1="29" y1="29" x2="29" y2="17" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg><span class="v"></span><span class="l"></span>`;
     k.querySelector(".bg").setAttribute("d", arc(A0, A0 + SPAN, 24));
-    k.querySelector(".l").textContent = p.label;
+    k.querySelector(".l").textContent = p.short || p.label;
     const fg = k.querySelector(".fg"), ptr = k.querySelector(".ptr"), vt = k.querySelector(".v");
     views[p.id] = () => {
       const x = Math.max(0, Math.min(1, toPos(p, vals[p.id]))), a = A0 + SPAN * x;

@@ -1,7 +1,117 @@
 {
  "v": 1,
- "source": "Nate Bloom's own plugins (natebloom/, Faust) and the community collection: wam-community 0.4.9 (https://github.com/boourns/wam-community)",
+ "source": "Your own plugins (CLAP and nih-plug originals compiled to WebAssembly, natebloom/<id>/), Nate Bloom's own (natebloom/, Faust) and the community collection: wam-community 0.4.9 (https://github.com/boourns/wam-community)",
  "plugins": [
+  {
+   "key": "nathan/twin77",
+   "name": "Twin 77",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Polysynth",
+   "desc": "Your 8-voice, two-channel CS-80: lever panel, touch (velocity and pressure), ring modulator, sub oscillator, BBD chorus.",
+   "url": "natebloom/twin77/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/duet80",
+   "name": "Duet 80",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Polysynth",
+   "desc": "The calibrated successor to Twin 77, fitted to a real CS-80's multisamples, with 22 sampled CS-80 patches.",
+   "url": "natebloom/duet80/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/nebula80",
+   "name": "Nebula 80",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "Vangelis's palette: CS-80 brass and leads with aftertouch, ring-modulated bells, an electric grand, a tine piano, strings, choir and timpani, all through a big hall.",
+   "url": "natebloom/nebula80/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/hypnagogia",
+   "name": "Hypnagogia",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "Five engines in the spirit of Oneohtrix Point Never: Juno arpeggios, slowed eccojam loops, uncanny choir pads, glassy FM, harpsichord plucks and walls of noise, through chorus, tape, Echo Jam, delay and reverb. The arp follows the tempo.",
+   "url": "natebloom/hypnagogia/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/parafour",
+   "name": "Para Four",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "A paraphonic four-oscillator synth on the Poly D's signal path: four oscillators into a mixer, a transistor ladder filter, two contours, then distortion and a bucket-brigade chorus.",
+   "url": "natebloom/parafour/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/stab85",
+   "name": "Stab 85",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "The intro stab from Robert Palmer's 1985 \"I Didn't Mean to Turn You On\", recreated.",
+   "url": "natebloom/stab85/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/pop89",
+   "name": "Pop 89",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "Four late-'80s pop sounds: FM slap bass, E. piano, brass stab and orch hit, through a stereo chorus.",
+   "url": "natebloom/pop89/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/unicorn_dream",
+   "name": "Unicorn Dream",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Synth",
+   "desc": "A happy, sparkly rainbow synth: a detuned saw pad, music-box chimes an octave up, magic-dust bells sprinkled from the major pentatonic on a 1/16 grid, and a cloud reverb.",
+   "url": "natebloom/unicorn_dream/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/fuzz_bass",
+   "name": "Fuzz Bass",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Bass",
+   "desc": "A blown-out mono analog-style bass: saw, detuned square and sub through a resonant ladder, then heavy fuzz. Play legato to glide.",
+   "url": "natebloom/fuzz_bass/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/ballad_kit",
+   "name": "Ballad Kit 88",
+   "vendor": "Nathan",
+   "kind": "instrument",
+   "type": "Drums",
+   "desc": "A synthesized late-'80s R&B and pop ballad drum kit, no samples, with a big reverb on the snare, clap and snaps. Notes C1 to B1: kick, rim, snare, clap, snap, low tom, closed hat, mid tom, shaker, high tom, open hat, tambourine.",
+   "url": "natebloom/ballad_kit/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "nathan/glitch_starter",
+   "name": "Glitch Starter",
+   "vendor": "Nathan",
+   "kind": "effect",
+   "type": "Glitch",
+   "desc": "A tempo-synced random glitch: stutter, reverse, tape stop, bitcrush and gate, picked by weight on each step while the sequencer plays.",
+   "url": "natebloom/glitch_starter/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
   {
    "key": "natebloom/marimba",
    "name": "Marimba",
@@ -468,7 +578,7 @@
    "vendor": "Wimmics",
    "kind": "effect",
    "type": "Pitch",
-   "desc": "Dual Pitch Shifter is a dual channel pitch shifter, based on Faust’s pitch_shifter.dsp by Grame. Pitch shifting is (intentionally) extremely basic and introduces significant delay based on window size.",
+   "desc": "Dual Pitch Shifter is a dual channel pitch shifter, based on Faust\u2019s pitch_shifter.dsp by Grame. Pitch shifting is (intentionally) extremely basic and introduces significant delay based on window size.",
    "url": "wimmics/DualPitchShifter/index.js",
    "site": "Original web site with faust code by O.Larkin : https://www.rebeltech.org/patch-library/patch/DualPitchShifter. Authors: Michel Buffa for making it a WAM, Q. Beauchet for GUI improvements, original Faust Code : Oli Larkin"
   },

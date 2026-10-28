@@ -144,14 +144,18 @@ void onAudio(ma_device*, void* output, const void*, ma_uint32 frameCount) {
 // tests and the CI machine have no sound card: NB_FASTPADS_NULL=1 plays into miniaudio's silent "null" device
 const bool gTestMode = std::getenv("NB_FASTPADS_TEST") != nullptr;
 
+// the output the page picked (its name, as the sound server lists it); empty: the system default
+std::string gWantDevice;
+bool ensureContext() {
+    if (gCtxOk) return true;
+    ma_backend nullOnly[] = { ma_backend_null };
+    const bool useNull = std::getenv("NB_FASTPADS_NULL") != nullptr;
+    if (ma_context_init(useNull ? nullOnly : nullptr, useNull ? 1 : 0, nullptr, &gCtx) != MA_SUCCESS) return false;
+    gCtxOk = true; return true;
+}
 bool openDevice() {
     if (gRunning.load()) return true;
-    if (!gCtxOk) {
-        ma_backend nullOnly[] = { ma_backend_null };
-        const bool useNull = std::getenv("NB_FASTPADS_NULL") != nullptr;
-        if (ma_context_init(useNull ? nullOnly : nullptr, useNull ? 1 : 0, nullptr, &gCtx) != MA_SUCCESS) return false;
-        gCtxOk = true;
-    }
+    if (!ensureContext()) return false;
     ma_device_config cfg = ma_device_config_init(ma_device_type_playback);
     cfg.playback.format = ma_format_f32;
     cfg.playback.channels = 2;
@@ -161,6 +165,14 @@ bool openDevice() {
     cfg.performanceProfile = ma_performance_profile_low_latency;
     cfg.dataCallback = onAudio;
     cfg.pulse.pStreamNamePlayback = "Nate Bloom fast pads";
+    ma_device_id chosen; bool haveChosen = false;
+    if (!gWantDevice.empty()) {
+        ma_device_info* pb = nullptr; ma_uint32 nb = 0;
+        if (ma_context_get_devices(&gCtx, &pb, &nb, nullptr, nullptr) == MA_SUCCESS)
+            for (ma_uint32 i = 0; i < nb && !haveChosen; i++)
+                if (gWantDevice == pb[i].name || std::strstr(pb[i].name, gWantDevice.c_str()) || std::strstr(gWantDevice.c_str(), pb[i].name)) { chosen = pb[i].id; haveChosen = true; }
+    }
+    if (haveChosen) cfg.playback.pDeviceID = &chosen;
     if (ma_device_init(&gCtx, &cfg, &gDev) != MA_SUCCESS) return false;
     gRate.store((int32_t) gDev.sampleRate);
     if (ma_device_start(&gDev) != MA_SUCCESS) { ma_device_uninit(&gDev); return false; }
@@ -187,6 +199,26 @@ size_t args(napi_env env, napi_callback_info info, napi_value* argv, size_t n) {
 
 napi_value Start(napi_env env, napi_callback_info) { std::lock_guard<std::mutex> l(gDevLock); return boolean(env, openDevice()); }
 napi_value Sleep(napi_env env, napi_callback_info) { std::lock_guard<std::mutex> l(gDevLock); closeDevice(); return undef(env); }
+// setDevice(name): play on that output from now on ("" for the default); reopens if running
+napi_value SetDevice(napi_env env, napi_callback_info info) {
+    napi_value a[1]; char buf[512] = {0}; size_t len = 0;
+    if (args(env, info, a, 1) >= 1) napi_get_value_string_utf8(env, a[0], buf, sizeof buf, &len);
+    std::lock_guard<std::mutex> l(gDevLock);
+    gWantDevice.assign(buf, len);
+    if (!gRunning.load()) return boolean(env, true);
+    closeDevice(); return boolean(env, openDevice());
+}
+// devices(): the playback outputs the sound server lists, as a JSON array of names
+napi_value Devices(napi_env env, napi_callback_info) {
+    std::lock_guard<std::mutex> l(gDevLock);
+    std::string o = "[";
+    ensureContext();
+    ma_device_info* pb = nullptr; ma_uint32 nb = 0;
+    if (gCtxOk && ma_context_get_devices(&gCtx, &pb, &nb, nullptr, nullptr) == MA_SUCCESS)
+        for (ma_uint32 i = 0; i < nb; i++) { if (i) o += ","; o += "\""; for (const char* c = pb[i].name; *c; c++) { if (*c == '"' || *c == '\\') o += '\\'; o += *c; } o += "\""; }
+    o += "]";
+    napi_value r; napi_create_string_utf8(env, o.c_str(), NAPI_AUTO_LENGTH, &r); return r;
+}
 napi_value Rate(napi_env env, napi_callback_info) { napi_value r; napi_create_int32(env, gRate.load(), &r); return r; }
 
 napi_value Info(napi_env env, napi_callback_info) {
@@ -268,6 +300,8 @@ napi_value Init(napi_env env, napi_value exports) {
         { "stopPad", nullptr, StopPad, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "choke", nullptr, Choke, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "testPull", nullptr, TestPull, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "setDevice", nullptr, SetDevice, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "devices", nullptr, Devices, nullptr, nullptr, nullptr, napi_default, nullptr },
     };
     napi_define_properties(env, exports, sizeof props / sizeof props[0], props);
     return exports;
