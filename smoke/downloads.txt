@@ -1,0 +1,3 @@
+total 16
+-rwxrwx--- 1 u0_a177 media_rw  3 2026-10-28 05:37 nb-ci-share.bin
+-rwxrwx--- 1 u0_a177 media_rw 32 2026-10-28 05:37 nb-ci-test.txt

@@ -1,0 +1,19 @@
+page: "Nate Bloom Synth | https://nathan-san1981.github.io/nate-bloom/"
+native: "{\"native\":true,\"v\":\"1.0.7\",\"ua\":\"672.136 Safari/537.36 NateBloomApp/1.0.7\"}"
+viewport: "800x960 dpr 2"
+start: {"startHidden": true}
+midi: {"inputs": 0, "outputs": 0, "kind": "NBAccess"}
+midi sheet: "MIDI\nConnected. New devices are switched on automatically.\nRescan\nPlay Nate Bloom from MIDI keyboards\nnotes in on any channel\nSend clock and start/stop\nthe K.O. II follows Nate Bloom's tempo\nFollow in"
+midi close: true
+save file: "Downloads/Nate Bloom/nb-ci-test.txt"
+share path: "ok"
+studio: "Salamander Grand Piano (Yamaha C5) \u00b7 CC-BY Alexander Holm \u00b7 2.6 MB, downloads once \u00b7 tap to browse"
+close browser: true
+beat pads: true
+fast pads: {"info": "{\"running\":true,\"rate\":48000,\"burst\":960,\"buffer\":1920,\"exclusive\":false,\"latencyMs\":115.5,\"callbacks\":1248,\"xruns\":0}", "ready": 16, "secs": 11.8, "why": "", "badge": "\u26a1 11/16", "mb": 13.9, "webLatency": [0.09083333333333334, 0.12, 48000]}
+fast taps: {"fast": 6, "of": 6, "delta": 0.10053333333333332, "info": "{\"running\":true,\"rate\":48000,\"burst\":960,\"buffer\":1920,\"exclusive\":false,\"latencyMs\":96.8,\"callbacks\":1448,\"xruns\":1}"}
+back closes beat pads: [true, true]
+fast plugins (native): {"ids": "twin77,duet80,nebula80,hypnagogia,parafour,stab85,pop89,unicorn_dream,fuzz_bass,ballad_kit", "twin77": true, "fuzz_bass": true, "info": "{\"running\":true,\"rate\":48000,\"burst\":960,\"buffer\":2880,\"exclusive\":false,\"latencyMs\":130.8,\"callbacks\":1782,\"xruns\":1}"}
+link (find on the emulator's network): {"msgs": ["{\"t\":\"find-done\"}"], "button": true}
+ableton link (native): {"on": true, "tempo": 121, "peers": 0, "beat0InMs": 50, "playing": true, "beatAfter300ms": 0.509, "stopped": true, "ui": true}
+errors so far: "[]"

@@ -1,0 +1,5 @@
+--------- beginning of main
+10-28 05:37:04.064  3274  3274 I NateBloom: console LOG: NB_NATIVE ready 1.0.7 midi=true (:125)
+10-28 05:37:31.644  3413  3496 I chromium: [INFO:audio_latency.cc(179)] audioHardwareBufferSize = 4360
+10-28 05:37:32.454  3274  4710 W chromium: [WARNING:sync_reader.cc(175)] ASR: No room in socket buffer.: Broken pipe (32)
+10-28 05:37:43.859  3274  3679 I NateBloomFast: stream open: 48000 Hz, burst 960, buffer 1920, shared
