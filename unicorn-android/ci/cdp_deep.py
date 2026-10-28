@@ -112,6 +112,9 @@ def awake():
 
 
 # ---------- start online, from scratch ----------
+# Android's one-time "Viewing full screen" tip takes the Back key while it shows (a grown-up taps Got it once on a
+# real tablet); mark it seen so the Back key checks below reach the clock
+adb("shell", "settings", "put", "secure", "immersive_mode_confirmations", "confirmed")
 adb("shell", "cmd", "connectivity", "airplane-mode", "disable")
 adb("shell", "svc", "wifi", "enable")
 adb("shell", "svc", "data", "enable")
