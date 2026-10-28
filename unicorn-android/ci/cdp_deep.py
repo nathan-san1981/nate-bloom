@@ -247,12 +247,23 @@ else:
     check("app crash: reopens by itself", back and pid1 and pid1 != pid0, {"top": top()[:100], "pid before": pid0, "pid after": pid1})
 
 # ---------- swiped away from Recents: the app's process is gone, and it still comes back ----------
-adb("shell", "input", "keyevent", "KEYCODE_HOME")
-time.sleep(1)
-pid = app_pid()
-adb("shell", "kill", "-9", pid)   # what clearing it from Recents does (the tests run as root)
-time.sleep(2)
-gone = app_pid() != pid
+# kill it while it is out of sight (as Recents does), after it has armed its comeback alarm; if it already
+# came back by itself before that moment, try again
+gone = False
+for attempt in range(3):
+    adb("shell", "input", "keyevent", "KEYCODE_HOME")
+    pid = None
+    for _ in range(20):
+        time.sleep(0.25)
+        if PKG not in top() and re.search(r"#\d+: Alarm\{[^}]*" + re.escape(PKG) + r"\}", adb("shell", "dumpsys", "alarm")):
+            pid = app_pid()
+            break
+    if pid:
+        adb("shell", "kill", "-9", pid)   # what clearing it from Recents does (the tests run as root)
+        time.sleep(2)
+        gone = app_pid() != pid
+        break
+    wait_front(10)
 time.sleep(14)
 check("cleared from Recents: comes back by itself", gone and wait_front(10), {"killed": gone, "top": top()[:100]})
 P.connect(20)
