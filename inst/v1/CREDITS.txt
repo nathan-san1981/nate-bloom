@@ -15,3 +15,16 @@ Solo Violin, Violin Section, String Ensemble, Cello Section, Pizzicato Strings, 
   Simon Dalzell; sample cutting by Elan Hickler / Soundemote.
   Licence: CC0 1.0 (public domain dedication) https://creativecommons.org/publicdomain/zero/1.0/
   Source: https://github.com/sgossner/VSCO-2-CE
+
+Grand Piano · layered
+  Salamander Grand Piano V3 by Alexander Holm (Yamaha C5), velocity layers 5, 10 and 15.
+  Licence: Creative Commons Attribution 3.0 (CC BY 3.0) https://creativecommons.org/licenses/by/3.0/
+  Source: https://github.com/sfzinstruments/SalamanderGrandPiano
+
+Upright Piano, Concert Marimba, Glockenspiel, Xylophone, Trumpet, Trombone, Tuba, Clarinet, Oboe, Bassoon,
+  Double Bass, Double Bass Pizzicato
+  Versilian Studios Chamber Orchestra 2, Community Edition (VSCO 2 CE). The Upright Piano was sampled by
+  Simon Dalzell of Ivy Audio. Instruments with velocity layers keep their softer recordings as separate notes;
+  manifest.json gives each note's velocity range as its last two numbers.
+  Licence: CC0 1.0 (public domain dedication) https://creativecommons.org/publicdomain/zero/1.0/
+  Source: https://github.com/sgossner/VSCO-2-CE
