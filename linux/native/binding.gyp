@@ -41,10 +41,12 @@
       "cflags_cc": [
         "-std=c++17",
         "-O2",
-        "-fexceptions"
+        "-fexceptions",
+        "-frtti"
       ],
       "cflags_cc!": [
-        "-fno-exceptions"
+        "-fno-exceptions",
+        "-fno-rtti"
       ],
       "libraries": [
         "-ldl",
