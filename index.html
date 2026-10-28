@@ -1923,6 +1923,47 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 #bpmLabel.abl { color: #7fd6c2; }
 .help-lic { color: var(--dim); font: 0.72rem/1.45 var(--font-body); margin: 10px 2px 0; } .help-lic a { color: var(--dim); }
 #ablBody .bt-style { padding-top: 10px; }
+#tabs[data-mode="synths"] { display: none; }
+#lyRack { display: none; }
+.br-add { display: none; }
+.stk { display: flex; flex-direction: column; gap: 6px; margin: 2px 0 8px; }
+.stk[hidden] { display: none; }
+.stk-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stk-lab { font: 600 0.62rem var(--font-mono); letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; margin-right: 2px; }
+.stk-chip { display: inline-flex; align-items: stretch; min-height: 46px; max-width: 100%; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); }
+.stk-chip.sel { border-color: var(--lilac); background: #2a2140; box-shadow: 0 0 0 1px var(--lilac) inset; }
+.stk-chip.off { opacity: 0.55; }
+.stk-chip > button { appearance: none; background: none; border: 0; color: var(--ink); cursor: pointer; font: inherit; }
+.stk-chip .sc-main { display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 11px; min-width: 0; text-align: left; }
+.stk-chip .sc-main i { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--kc, var(--lilac)); }
+.stk-chip .sc-main span { display: flex; flex-direction: column; min-width: 0; }
+.stk-chip .sc-main b { font: 600 0.86rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 44vw; }
+.stk-chip .sc-main small { font: 0.63rem var(--font-mono); color: var(--dim); white-space: nowrap; }
+.stk-chip.sel .sc-main small { color: var(--lilac); }
+.stk-chip .sc-g, .stk-chip .sc-x { width: 40px; flex: none; border-left: 1px solid var(--line); color: var(--dim); font-size: 1rem; }
+.stk-chip .sc-g:hover, .stk-chip .sc-x:hover { color: var(--ink); }
+.stk-add { min-height: 46px; border-style: dashed; font-weight: 600; }
+.stk-help { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 0.76rem/1.4 var(--font-body); color: var(--dim); }
+.stk-help b { color: var(--ink); font-weight: 600; }
+.stk-help .btn { height: 30px; padding: 0 10px; font-size: 0.78rem; }
+.br-mode { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font: 0.8rem/1.4 var(--font-body); color: var(--dim); }
+.br-mode b { color: var(--ink); }
+.br-mode.add { border-color: var(--lilac); }
+.br-tog { appearance: none; width: 64px; flex: none; background: none; border: 0; border-left: 1px solid var(--line); color: var(--lilac); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font: 600 1.15rem var(--font-body); }
+.br-tog small { font: 600 0.56rem var(--font-mono); letter-spacing: 0.04em; color: var(--dim); text-transform: uppercase; }
+.br-tog.on { color: var(--amber); }
+.br-tog:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+.stk-help .short { display: none; }
+@media (max-width: 600px) {
+  .stk-lab { display: none; }
+  .stk-chip { min-height: 40px; }
+  .stk-chip .sc-main { padding: 3px 6px 3px 9px; gap: 6px; }
+  .stk-chip .sc-main small { display: none; }
+  .stk-chip .sc-main b { font-size: 0.82rem; max-width: 40vw; }
+  .stk-chip .sc-g, .stk-chip .sc-x { width: 34px; }
+  .stk-add { min-height: 40px; padding: 0 12px; }
+  .stk-help .long { display: none; } .stk-help .short { display: inline; }
+}
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -2010,6 +2051,10 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   </div>
 
   <div class="tabs" role="group" aria-label="Sound engine" id="tabs"></div>
+  <div class="stk" id="stk" role="group" aria-label="Sounds playing together">
+    <div class="stk-row" id="stkRow"></div>
+    <div class="stk-help" id="stkHelp"></div>
+  </div>
 
   <div class="soundbar" id="soundbar">
     <button class="btn sbarrow" id="sndPrev" aria-label="Previous sound">‹</button>
@@ -2923,6 +2968,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
+      <p><b>Playing sounds together</b>: the <b>Playing</b> row under the toolbar (Synths) shows every sound the keys play, and the sequencer and MIDI play them all too. <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
       <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
@@ -3005,8 +3051,9 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
     <button class="btn primary" id="brDone">Done</button>
   </div>
   <div class="br-cats" id="brCats" role="group" aria-label="Sound categories"></div>
+  <div class="br-mode" id="brMode" hidden></div>
   <div class="br-list" id="brList"></div>
-  <div class="br-foot">▶ plays a quick preview · tap a name to use it · + puts it on your tab bar · ☆ saves a favorite<br>Library: GeneralUser GS by S. Christian Collins, FluidR3 by Frank Wen, JCLive, Chaos and more, converted by WebAudioFont (MIT)</div>
+  <div class="br-foot">▶ plays a quick preview · tap a name: it plays alone · + together: it plays with what's playing · ☆ saves a favorite<br>Library: GeneralUser GS by S. Christian Collins, FluidR3 by Frank Wen, JCLive, Chaos and more, converted by WebAudioFont (MIT)</div>
 </div>
 
 <div class="editor sheet" id="lineSheet" hidden>
@@ -3519,6 +3566,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (saved.lib && Array.isArray(saved.lib.parts)) state.lib.parts = saved.lib.parts.filter(x => x && x.id).slice(0, 8);
       if (saved.cur && typeof saved.cur.id === "string") state.cur = { id: saved.cur.id, cat: saved.cur.cat };
       if (typeof saved.melodic === "string") state.melodic = saved.melodic;
+      if (saved.stack && typeof saved.stack === "object") state.stack = { syn: !!saved.stack.syn, lib: !!saved.stack.lib, inst: !!saved.stack.inst, samp: Number.isInteger(saved.stack.samp) ? saved.stack.samp : -1, f: typeof saved.stack.f === "string" ? saved.stack.f : "", ls: Number.isInteger(saved.stack.ls) ? saved.stack.ls : 0 };
       if (saved.pads && Array.isArray(saved.pads.p)) {
         state.pads.sel = Math.min(NPADS - 1, saved.pads.sel | 0);
         saved.pads.p.slice(0, NPADS).forEach((x, k) => { if (x) Object.assign(state.pads.p[k], x); });
@@ -3556,7 +3604,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       try { localStorage.setItem("nightbloom", JSON.stringify({ engine: state.engine, params: state.params, fx: state.fx, layers: state.layers, drum: state.drum, seq: state.seq,
         samp: { slot: state.samp.slot, slots: state.samp.slots.map(x => ({ mode: x.mode, p: x.p, loop: !!x.loop, fit: x.fit || null })) },
         pads: { sel: state.pads.sel, p: state.pads.p }, inst: state.inst, lib: state.lib, cur: state.cur, melodic: state.melodic,
-        drumPads: state.drumPads, drumSel: state.drumSel, arp: state.arp })); } catch (e) {}
+        drumPads: state.drumPads, drumSel: state.drumSel, arp: state.arp, stack: state.stack })); } catch (e) {}
     }, 300);
   }
 
@@ -7425,7 +7473,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const add = (group, name, sub, get, set, dflt, live) => ch.push({ group, name, sub, get, set, dflt, live });
     add("Master", "Master volume", "everything you hear", () => state.fx.volume, v => { state.fx.volume = v; applyFx(); }, 0.7, true);
     ch[ch.length - 1].law = 2;
-    const synthNow = ENGINES[state.engine];
+    const synthNow = ENGINES[state.engine] || !!(state.stack && state.stack.syn);
     for (const [id, e] of Object.entries(ENGINES)) {
       const on = synthNow && state.layers[id].on;
       add("Synths", e.name, on ? "playing now" : e.after, () => state.layers[id].level, v => { state.layers[id].level = v; }, 0.8);
@@ -10710,7 +10758,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (betaOn) ch.splice(1, 0, { group: "Tracks", name: "All tracks", sub: "overall volume of the Tracks editor", get: () => trkVol,
         set: v => { trkVol = v; try { localStorage.setItem("nightbloom-trackvol", v); } catch (e) {} applyTrkVol(); }, dflt: 0.8 });
       // what's sounding right now goes to the top, so the loud thing is easy to find
-      const live = c => (c.group === "Synths" && c.sub === "playing now") || (c.group === "Library layers" && !/ · off$/.test(c.sub) && state.engine === "lib")
+      const live = c => (c.group === "Synths" && c.sub === "playing now") || (c.group === "Library layers" && !/ · off$/.test(c.sub) && (state.engine === "lib" || !!(state.stack && state.stack.lib)))
         || (c.group === "Instrument" && state.engine === "inst") || (c.group === "Sampler" && state.engine === "samp")
         || (c.group === "Drums" && (c.name === "All drums" || / machine$/.test(c.name) && c.sub === "playing"))
         || (c.group === "Notation" && SC().notes.length > 0) || c.group === "Tracks";
@@ -13565,7 +13613,7 @@ registerProcessor("nb-capture", NBCap);`;
         const keep = { engine: state.engine, slot: state.samp.slot, chord: chordType }, delay = Math.max(0, (t - ctx.currentTime) * 1000);
         setTimeout(() => {
           JAM.replaying = true;
-          try { state.engine = ev.engine; state.samp.slot = ev.slot; const v = makeNote(ev.midi); state.engine = keep.engine; state.samp.slot = keep.slot; if (v) setTimeout(() => v.stop(), Math.max(60, ev.h * jamStepDur() * 1000)); } catch (e) {} finally { JAM.replaying = false; }
+          try { const ks = state.stack; state.stack = ev.stk || { syn: false, lib: false, inst: false, samp: -1, f: ks ? ks.f : "" }; state.engine = ev.engine; state.samp.slot = ev.slot; let v; try { v = makeNote(ev.midi); } finally { state.stack = ks; } state.engine = keep.engine; state.samp.slot = keep.slot; if (v) setTimeout(() => v.stop(), Math.max(60, ev.h * jamStepDur() * 1000)); } catch (e) {} finally { JAM.replaying = false; }
         }, delay);
       }
     } finally { JAM.replaying = false; }
@@ -13638,7 +13686,7 @@ registerProcessor("nb-capture", NBCap);`;
     document.getElementById("jamBandOn").addEventListener("click", () => { start(); jamBandOn(!JAM.band.on); });
     // what you play is heard by the band (the chord) and by a recording loop
     const n0 = noteOn, f0 = noteOff, h0 = toggleHeld, pd0 = playDrum, pp0 = playPad;
-    noteOn = function (m) { const r = n0(m); if (JAM.rec && !JAM.rec.armed && !JAM.replaying && voices.has(m)) { const v = voices.get(m); voices.set(m, jamRecord("note", { midi: m, engine: state.engine, slot: state.samp.slot }, v)); } jamNoteChange(); return r; };
+    noteOn = function (m) { const r = n0(m); if (JAM.rec && !JAM.rec.armed && !JAM.replaying && voices.has(m)) { const v = voices.get(m); voices.set(m, jamRecord("note", { midi: m, engine: state.engine, slot: state.samp.slot, stk: state.stack ? JSON.parse(JSON.stringify(state.stack)) : null }, v)); } jamNoteChange(); return r; };
     noteOff = function (m) { const r = f0(m); jamNoteChange(); return r; };
     toggleHeld = function (m) { const r = h0(m); jamNoteChange(); return r; };
     playDrum = function (id, t) { if (!JAM.replaying && JAM.rec && ctx && (t == null || t <= ctx.currentTime + 0.03)) jamRecord("drum", { id }); return pd0(id, t); };
@@ -19535,11 +19583,12 @@ registerProcessor("nb-verb", NBVerb);`;
       }
       const using = usedParts();
       head("Instruments");
+      if (NBW_HERE) note("Play alone plays just that plugin. + Together plays it with what's already playing: other plugins, Nate Bloom's engines, Studio instruments. The Playing row (Synths) lists them all; ✕ there stops one.", true);
       NBW_CAT.filter(c => c.kind === "instrument").forEach(c => {
-        const inUse = using.find(([p]) => p.id === "wam:" + c.key), r = row(inUse && state.engine === "lib" && inUse[0].on ? "on" : "", c.name, subOf(c), ownOf(c));
+        const inUse = using.find(([p]) => p.id === "wam:" + c.key), r = row(inUse && inUse[0].on && (state.engine === "lib" || !!(state.stack && state.stack.lib)) ? "on" : "", c.name, subOf(c), ownOf(c));
         if (NBW_HERE) {
-          r.append(btn("Play", () => { sheet.hidden = true; chooseEntry(entryOf(c), true); }, null, "Play " + c.name),
-            btn("+ Together", () => nbwTogether(c), null, "Add " + c.name + " to Play together"));
+          r.append(btn("Play alone", () => { sheet.hidden = true; chooseEntry(entryOf(c), false); }, null, "Play " + c.name + " alone (stops the others)"),
+            btn("+ Together", async () => { if (window.__nbTogether) { await window.__nbTogether(entryOf(c)); nbwPaint(); } else nbwTogether(c); }, null, "Play " + c.name + " together with what's playing"));
           if (inUse) r.append(btn("Controls", async () => { try { nbwOpenGui(await nbwInstrument(inUse[0].id)); } catch (e) { msg = "Couldn't open it: " + (e && e.message || e); nbwPaint(); } }, null, c.name + " controls"));
         }
         list.appendChild(r);
@@ -22087,6 +22136,330 @@ registerProcessor("nb-wave", NBWave);
       if (A.on) setTimeout(() => setOn(true), 600);   // (it was on last time)
     }
     window.__abl = { A, sample, lock, paint, setOn, kNow, beatAtCtx, ctxAtBeat, ctxToHost, hostToCtx, seq: () => ({ playing, nextTime, curStep, steps: stepsNow(), sd: stepDur() }), rc: () => ({ playing: RC.playing, nextT: RC.nextT, step: RC.step, sd: rcStepDur() }) };
+  }
+  // ---------- Playing together: every kind of sound at once ----------
+  // What plays is a stack of groups: Nate Bloom's synth engines (state.layers[*].on), the library parts (Studio,
+  // library and plugin sounds, state.lib.parts), the SF2/SFZ instrument, and a Sampler slot. The group whose controls
+  // show (state.engine) always plays; state.stack marks the others that play along with it.
+  {
+    const NOSTK = () => ({ syn: false, lib: false, inst: false, samp: -1, f: "" });
+    if (!state.stack || typeof state.stack !== "object") state.stack = NOSTK();
+    const S = () => state.stack || (state.stack = NOSTK());
+    const isSyn = id => !!ENGINES[id] && (id !== "fm" || betaOn);
+    const grp = e => ENGINES[e] ? "syn" : (e === "lib" || e === "inst") ? e : null;   // (Samples and Drums aren't part of it)
+    const melo = () => grp(state.engine) ? state.engine : grp(S().f) ? S().f : (state.melodic || "saw");
+    const PLUG = id => typeof id === "string" && id.startsWith("wam:");
+    const synOn = () => Object.keys(ENGINES).filter(id => state.layers[id] && state.layers[id].on && isSyn(id));
+    let libSel = 0;
+    const ADD = { on: false }, pend = new Set();   // (library slots a sound is loading into)
+    function groupsOn(e = melo()) {
+      const s = S(), g = { syn: !!s.syn, lib: !!s.lib, inst: !!s.inst, samp: Number.isInteger(s.samp) ? s.samp : -1 };
+      const f = grp(e); if (f) g[f] = true;
+      if (!(g.samp >= 0 && g.samp < NSLOTS && sampBuf[g.samp])) g.samp = -1;
+      if (g.lib && f !== "lib" && !state.lib.parts.some(p => p && p.id)) g.lib = false;
+      return g;
+    }
+    // ---- the voices: everything in the stack ----
+    const vc0 = voiceComponents;
+    function stackComps(e) {
+      const g = groupsOn(e), out = [];
+      if (g.syn) out.push(...vc0(isSyn(e) ? e : (synOn()[0] || "saw")));
+      if (g.lib) out.push(...vc0("lib"));
+      if (g.inst) out.push(...vc0("inst"));
+      if (g.samp >= 0) { const sl = g.samp; out.push({ key: "samp", name: "Sampler", accepts: () => true, make: (m, when, scale = 1) => makeSampleVoice(m, sl, when, scale) }); }
+      return out;
+    }
+    voiceComponents = function (eng = state.engine) {
+      if (eng !== state.engine || !grp(eng)) return vc0.apply(this, arguments);
+      return stackComps(eng);
+    };
+    { const mvp = melodicVoices;
+      melodicVoices = function (m, when, scale = 1) {
+        const e = ["drum", "pads"].includes(state.engine) ? melo() : state.engine, f = grp(e);
+        if (!f) return mvp.apply(this, arguments);
+        const ke = state.engine; let vs;
+        state.engine = e; try { vs = mvp.call(this, m, when, scale); } finally { state.engine = ke; }   // (the one with the controls, as before: key lights and all)
+        const g = groupsOn(e), more = [];
+        if (f !== "syn" && g.syn) more.push(...vc0(synOn()[0] || "saw"));
+        if (f !== "lib" && g.lib) more.push(...vc0("lib"));
+        if (f !== "inst" && g.inst) more.push(...vc0("inst"));
+        if (g.samp >= 0) { const sl = g.samp; more.push({ accepts: () => true, make: (mm, w, sc) => makeSampleVoice(mm, sl, w, sc) }); }
+        for (const c of more) if (c.accepts(m)) { const v = c.make(m, when, scale); if (v) vs.push(v); }
+        return vs;
+      }; }
+    // ---- what's in it ----
+    function kindOf(p) {
+      if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? "your plugin" : "plugin"; }
+      return p.id.startsWith("nb-") ? "studio" : "library";
+    }
+    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a" };
+    function items() {
+      const g = groupsOn(), out = [];
+      if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => out.push({ t: "syn", id, name: ENGINES[id].name, kind: "synth" })); }
+      if (g.lib) state.lib.parts.forEach((p, i) => { if (p && p.id) out.push({ t: "lib", i, id: p.id, name: p.name, kind: kindOf(p), off: !p.on, wait: !libInsts[i] }); });
+      if (g.inst) out.push({ t: "inst", name: curInst ? curInst.name : "My instrument", kind: "instrument", wait: !curInst });
+      if (g.samp >= 0) { const sl = state.samp.slots[g.samp]; out.push({ t: "samp", slot: g.samp, name: "Sampler S" + (g.samp + 1) + (sl && sl.name ? " · " + baseName(sl.name) : ""), kind: "sampler" }); }
+      return out;
+    }
+    const libSelOn = () => { const ps = state.lib.parts; return ps[libSel] && ps[libSel].id ? libSel : ps.findIndex(p => p && p.id); };
+    if (Number.isInteger(S().ls)) libSel = S().ls;   // (the highlighted library sound, kept across a reload)
+    const isSel = it => it.t === "syn" ? state.engine === it.id : it.t === "lib" ? state.engine === "lib" && it.i === libSelOn() : it.t === "inst" ? state.engine === "inst" : false;
+    const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : true);
+    let toastT = 0;
+    function say(msg) { const el = document.getElementById("uiToast"); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2800); }
+    // ---- changing it ----
+    function keepFocusPlaying() { const g = grp(state.engine) || grp(S().f); if (g) S()[g] = true; }   // what had the controls plays on
+    function focusOn(it) {
+      const s = S();
+      if (it.t === "samp") { say(it.name + " plays along with the keys. Its sample and settings are in Samples."); return; }
+      const f0 = grp(state.engine), f1 = it.t;
+      if (f0 && f0 !== f1) s[f0] = true;
+      s[f1] = false;
+      if (it.t === "syn") { state.engine = it.id; state.melodic = it.id; if (!(state.cur && state.cur.id.startsWith("n:"))) state.cur = { id: "e:" + it.id, cat: "engines" }; }
+      else if (it.t === "lib") { libSel = it.i; state.engine = "lib"; const e = entryById("w:" + it.id); state.cur = { id: "w:" + it.id, cat: e ? e.cat : "plugins" }; if (it.off) { state.lib.parts[it.i].on = true; } }
+      else state.engine = "inst";
+      renderEngine(); save();
+    }
+    function removePart(i) {
+      const ps = state.lib.parts;
+      for (let k = i; k < MAX_PARTS; k++) libTokens[k]++;   // (a sound still loading into a slot that moves is dropped)
+      ps.splice(i, 1); libInsts.splice(i, 1); libInsts.push(null);
+      libInst = libInsts.find(Boolean) || null; const first = ps.find(p => p && p.id); state.lib.id = first ? first.id : "";
+      if (libSel >= i && libSel > 0) libSel--;
+      try { if (!layersEl.hidden) renderLayers(); } catch (e) {}
+    }
+    function drop(it, quiet) {
+      const all = items(), rest = all.filter(x => !same(x, it)), s = S();
+      if (!quiet && it.t !== "samp" && !rest.some(x => x.t !== "samp")) { say("It's the only sound playing. To change it, pick another sound (tap its name above)."); return false; }
+      const wasSel = isSel(it);
+      if (it.t === "syn") { state.layers[it.id].on = false; if (!synOn().length) s.syn = false; }
+      else if (it.t === "lib") { removePart(it.i); if (!state.lib.parts.some(p => p && p.id)) s.lib = false; }
+      else if (it.t === "inst") s.inst = false;
+      else s.samp = -1;
+      const gone = it.t === "syn" ? !synOn().length : it.t === "lib" ? !state.lib.parts.some(p => p && p.id) : it.t === "inst";
+      if (wasSel || (gone && grp(state.engine) === it.t)) {
+        // its controls go to the next one still playing
+        // (one of the same kind if there's one left, so a plugin's controls go to the next plugin)
+        const cand = items().filter(x => x.t !== "samp" && !(gone && x.t === it.t)), nxt = cand.find(x => x.t === it.t) || cand[0] || rest.find(x => x.t !== "samp");
+        if (nxt) {
+          const g0 = grp(state.engine), left = { syn: synOn().length > 0, lib: state.lib.parts.some(p => p && p.id), inst: it.t !== "inst" };
+          if (g0 && g0 !== nxt.t) s[g0] = !!left[g0];   // what had the controls plays on if anything of it is left
+          if (gone) s[it.t] = false;
+          s[nxt.t] = false;
+          if (nxt.t === "syn") { state.layers[nxt.id].on = true; state.engine = nxt.id; state.melodic = nxt.id; state.cur = { id: "e:" + nxt.id, cat: "engines" }; }
+          else if (nxt.t === "lib") { libSel = nxt.i; state.engine = "lib"; }
+          else state.engine = "inst";
+        }
+      }
+      renderEngine(); save();
+      if (!quiet) say(it.name + " stopped" + (rest.length ? ". Still playing: " + rest.map(x => x.name).join(", ") : ""));
+      return true;
+    }
+    function only(it) {
+      const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1;
+      if (it.t === "syn") { for (const k in state.layers) state.layers[k].on = k === it.id; state.engine = it.id; state.melodic = it.id; }
+      else if (it.t === "lib") { for (let k = MAX_PARTS - 1; k >= 0; k--) if (k !== it.i && state.lib.parts[k]) removePart(k); libSel = 0; state.lib.parts.forEach(p => { if (p) p.on = true; }); state.engine = "lib"; }
+      else if (it.t === "inst") state.engine = "inst";
+      renderEngine(); save(); say("Only " + it.name + " now");
+    }
+    // + Together: this one plays with everything that's playing (and gets the controls)
+    async function together(e) {
+      start();
+      const id = e.id, s = S();
+      if (id.startsWith("e:")) {
+        const k = id.slice(2), g = groupsOn();
+        if (isSyn(k)) {
+          if (g.syn && state.layers[k].on) { say(ENGINES[k].name + " is already playing"); return false; }
+          if (!g.syn) for (const x in state.layers) state.layers[x].on = false;
+          keepFocusPlaying(); state.layers[k].on = true; s.syn = false;
+          state.engine = k; state.melodic = k; state.cur = { id, cat: "engines" };
+          renderEngine(); save(); say(ENGINES[k].name + " added · playing together"); return true;
+        }
+        if (k === "inst") { if (!curInst) { say("Load an instrument in Inst first (SF2 or SFZ), then add it"); return false; } if (g.inst) { say("It's already playing"); return false; } keepFocusPlaying(); s.inst = false; state.engine = "inst"; renderEngine(); save(); say(curInst.name + " added · playing together"); return true; }
+        if (k === "samp") { const sl = state.samp.slot; if (!sampBuf[sl]) { say("Load a sample into a Sampler slot first (in Samples), then add it"); return false; } s.samp = sl; renderEngine(); save(); say("Sampler S" + (sl + 1) + " added · plays along with the keys"); return true; }
+        say("Drums and pads play from their own pads, so they're always on top of the keys"); return false;
+      }
+      if (id.startsWith("w:")) {
+        const stem = id.slice(2), g = groupsOn();
+        if (!g.lib) { for (let k = 0; k < MAX_PARTS; k++) libTokens[k]++; state.lib.parts = []; libInsts.fill(null); libInst = null; libSel = 0; }
+        const ps = state.lib.parts;
+        if (ps.some(p => p && p.id === stem)) { say(e.name + " is already playing"); return false; }
+        let i = 0; while (i < MAX_PARTS && ((ps[i] && ps[i].id) || pend.has(i))) i++;
+        if (i >= MAX_PARTS) { say("8 Studio, library and plugin sounds is the most at once"); return false; }
+        keepFocusPlaying(); s.lib = false;
+        say("Loading " + e.name + "…");
+        pend.add(i); try { await assignPart(i, e, false); } finally { pend.delete(i); }   // (no note by itself)
+        const ok = state.lib.parts[i] && state.lib.parts[i].id === stem;
+        if (ok) { libSel = i; s.lib = false; }
+        renderEngine(); save(); say(ok ? e.name + " added · playing together" : "Couldn't load " + e.name); return ok;
+      }
+      if (id.startsWith("n:")) {   // a Nate Bloom preset: its engines join the others
+        const g = groupsOn(), prev = g.syn ? synOn() : [];
+        keepFocusPlaying();
+        applyPreset(Number(id.slice(2)));
+        prev.forEach(k => { state.layers[k].on = true; }); s.syn = false;
+        renderEngine(); save(); say(e.name + " added · playing together"); return true;
+      }
+      if (id.startsWith("sp:")) {   // a Studio combination: its instruments join the others
+        const P = NB_SPRESETS[Number(id.slice(3))]; if (!P) return false;
+        let n = 0;
+        for (const [pid, level, oct, lo, hi] of P.parts) {
+          const inst = NB_INST[pid]; if (!inst) continue;
+          if (await together({ id: "w:nb-" + pid, name: inst.name, sub: inst.sub, cat: "studio", sus: 1 })) {
+            const pt = state.lib.parts.find(p => p && p.id === "nb-" + pid); if (pt) Object.assign(pt, { level, oct: oct || 0, lo: lo ?? 0, hi: hi ?? 127 }); n++;
+          }
+        }
+        save(); renderEngine(); if (n) say(P.name + " added · playing together"); return n > 0;
+      }
+      if (id.startsWith("m:")) {
+        keepFocusPlaying(); s.inst = false; state.engine = "inst"; state.cur = { id, cat: "mine" }; renderEngine(); save(); selectInstrument(id.slice(2), 0);
+        say(e.name + " added · playing together"); return true;
+      }
+      say("That one doesn't play from the keys"); return false;
+    }
+    window.__nbTogether = together;
+    // tap a sound (the sound list, Play alone in Plugins): it plays alone; the arrows swap the highlighted one
+    let swapping = false;
+    const melodicPick = id => /^(w:|n:|m:|sp:)/.test(id) || (id.startsWith("e:") && (isSyn(id.slice(2)) || ["lib", "inst"].includes(id.slice(2))));
+    async function swap(e, preview) {
+      const it = items().find(isSel); if (!it) return ce0(e, preview);
+      const id = e.id;
+      if (it.t === "syn" && id.startsWith("e:") && isSyn(id.slice(2))) {
+        const k = id.slice(2); if (k !== it.id) { state.layers[it.id].on = false; state.layers[k].on = true; }
+        state.engine = k; state.melodic = k; state.cur = { id, cat: e.cat }; renderEngine(); save(); if (preview) previewSound(); return;
+      }
+      if (it.t === "syn" && id.startsWith("n:")) return ce0(e, preview);   // (a preset sets the engines; the rest play on)
+      if (it.t === "lib" && id.startsWith("w:")) { const ps = state.lib.parts; if (ps.some((p, k) => p && k !== it.i && p.id === id.slice(2))) return; await assignPart(it.i, e, preview && !id.startsWith("w:wam:")); libSel = it.i; state.cur = { id, cat: e.cat }; return; }
+      drop(it, true); return together(e);
+    }
+    const ce0 = chooseEntry;
+    chooseEntry = async function (e, preview = true) {
+      if (!e || typeof e.id !== "string") return ce0.apply(this, arguments);
+      if (ADD.on && !brEl.hidden) { const r = await together(e); if (!brEl.hidden) renderBrowser(false); return r; }
+      if (e.id.startsWith("w:wam:")) preview = false;   // plugins don't play a note by themselves
+      if (melodicPick(e.id)) {
+        if (swapping && items().length > 1) return swap(e, preview);
+        const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1;   // alone: the others stop
+        const k = e.id.startsWith("e:") ? e.id.slice(2) : "";
+        if (isSyn(k)) for (const x in state.layers) state.layers[x].on = x === k;
+        if (e.id.startsWith("w:")) { const ps = state.lib.parts; for (let i = MAX_PARTS - 1; i >= 1; i--) if (ps[i]) removePart(i); if (ps[0]) ps[0].on = true; libSel = 0; }
+      }
+      return ce0.call(this, e, preview);
+    };
+    { const sp0 = stepSound; stepSound = function () { swapping = true; try { return sp0.apply(this, arguments); } finally { swapping = false; } }; }
+    // plugins never play a note by themselves (Layers & zones, Play together, everywhere)
+    { const ap0 = assignPart; assignPart = function (pi, entry, preview) { return ap0.call(this, pi, entry, preview && !(entry && typeof entry.id === "string" && entry.id.startsWith("w:wam:"))); }; }
+    // a saved sound (My sounds, undo) keeps everything that played together
+    { const cs = captureSound; captureSound = function () { const o = cs.apply(this, arguments); try { o.stack = JSON.parse(JSON.stringify(S())); } catch (e) {} return o; }; }
+    { const as = applySound; applySound = function (sd) {
+        const k = sd && sd.stack && typeof sd.stack === "object" ? sd.stack : null;
+        state.stack = k ? { syn: !!k.syn, lib: !!k.lib, inst: !!k.inst, samp: Number.isInteger(k.samp) ? k.samp : -1, f: S().f } : Object.assign(NOSTK(), { f: S().f });
+        const plug = !!(sd && sd.lib && Array.isArray(sd.lib.parts) && sd.lib.parts.some(p => p && PLUG(p.id)) && (sd.engine === "lib" || (k && k.lib)));
+        if (plug && !sndQuiet) { sndQuiet = true; try { return as.apply(this, arguments); } finally { sndQuiet = false; try { msInfo.textContent = "Loaded \"" + sd.name + "\""; } catch (e) {} } }
+        return as.apply(this, arguments);
+      }; }
+    // back to Synths: the sounds that were playing are still there
+    document.addEventListener("click", ev => {
+      const b = ev.target && ev.target.closest && ev.target.closest('.btn.mode[data-mode="synths"]'); if (!b || grp(state.engine)) return;
+      const f = S().f; if (!grp(f) || (f === "inst" && !curInst)) return;
+      ev.stopImmediatePropagation(); ev.preventDefault(); start();
+      state.engine = f; if (ENGINES[f]) state.melodic = f;
+      renderEngine(); save(); try { window.__nbPaintModes && __nbPaintModes(); } catch (e) {}
+    }, true);
+    // ⚙ in the library bar opens the highlighted plugin
+    document.addEventListener("click", ev => {
+      const b = ev.target && ev.target.closest && ev.target.closest("#wamCtl"); if (!b) return;
+      const p = state.lib.parts[libSelOn()]; if (!p || !PLUG(p.id) || !window.__wam) return;
+      ev.stopImmediatePropagation(); __wam.instrument(p.id).then(W => __wam.openGui(W)).catch(() => {});
+    }, true);
+    // ---- the strip ----
+    const stk = document.getElementById("stk"), stkRow = document.getElementById("stkRow"), stkHelp = document.getElementById("stkHelp");
+    const el = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt != null) x.textContent = txt; return x; };
+    function paint() {
+      if (!stk) return;
+      const synths = !["drum", "samp", "pads"].includes(state.engine);
+      stk.hidden = !synths; if (!synths) return;
+      if (grp(state.engine)) S().f = state.engine;
+      S().ls = libSelOn();
+      const its = items(), n = its.length;
+      stkRow.innerHTML = ""; stkRow.appendChild(el("span", "stk-lab", n > 1 ? "Playing together" : "Playing"));
+      its.forEach(it => {
+        const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
+        if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
+        const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
+        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · loading…" : it.off ? " · off, tap to turn on" : isSel(it) && n > 1 ? " · controls below" : "");
+        m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
+        m.addEventListener("click", () => { start(); focusOn(it); });
+        c.appendChild(m);
+        if (it.t === "lib" && PLUG(it.id) && NBW_OK()) { const g = el("button", "sc-g", "⚙"); g.title = it.name + "'s own controls"; g.setAttribute("aria-label", g.title); g.addEventListener("click", () => { start(); __wam.instrument(it.id).then(W => __wam.openGui(W)).catch(() => {}); }); c.appendChild(g); }
+        if (n > 1) { const x = el("button", "sc-x", "✕"); x.title = "Stop " + it.name + " (the others keep playing)"; x.setAttribute("aria-label", "Stop " + it.name); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
+        stkRow.appendChild(c);
+      });
+      const add = el("button", "btn stk-add", "+ Add"); add.title = "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
+      add.addEventListener("click", () => { ADD.on = true; openBrowser(); paintBrMode(); });
+      stkRow.appendChild(add);
+      stkHelp.innerHTML = "";
+      if (n > 1) {
+        const sel = its.find(isSel), t = el("span"); t.innerHTML = "<span class='long'><b>These " + n + " play together</b> on the keys, the sequencer and MIDI. Tap one for its controls · ✕ stops that one · + Add plays another with them.</span><span class='short'><b>" + n + " play together</b> · tap one: its controls · ✕ stops it</span>";
+        stkHelp.appendChild(t);
+        if (sel) { const b = el("button", "btn", "Only " + sel.name); b.title = "Stop the others and keep " + sel.name; b.addEventListener("click", () => { start(); only(sel); }); stkHelp.appendChild(b); }
+      } else {
+        const t = el("span"); t.innerHTML = "<span class='long'><b>+ Add</b> plays another sound at the same time: an engine, a Studio instrument, a plugin, your instrument or a Sampler slot.</span><span class='short'><b>+ Add</b> plays another sound with it</span>";
+        stkHelp.appendChild(t);
+      }
+      const lb = document.getElementById("wamCtl"); if (lb && state.engine === "lib") { const p = state.lib.parts[libSelOn()]; lb.hidden = !(p && PLUG(p.id)); if (p && PLUG(p.id)) lb.textContent = "⚙ " + p.name; }
+    }
+    const NBW_OK = () => !!(window.__wam && __wam.here);
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); try { paint(); } catch (e) {} return r; }; }
+    { const us = updateSoundBar; updateSoundBar = function () { const r = us.apply(this, arguments); try { paint(); } catch (e) {} return r; }; }
+    // the sound bar names the highlighted one when several play
+    { const cl = currentLabel; currentLabel = function () {
+        const r = cl.apply(this, arguments);
+        try { const its = items(); if (its.length > 1 && grp(state.engine)) { const it = its.find(isSel); if (it) return [it.t === "syn" ? r[0] : it.name, "with " + (its.length - 1) + " more · ‹ › swap it · tap for all sounds"]; } } catch (e) {}
+        return r;
+      }; }
+    // ---- the sound list: tap = alone, + Together = with what's playing ----
+    const brEl = document.getElementById("browser"), brMode = document.getElementById("brMode");
+    const inStack = id => {
+      const g = groupsOn();
+      if (id.startsWith("e:")) { const k = id.slice(2); return isSyn(k) ? g.syn && state.layers[k].on : k === "inst" ? g.inst : k === "samp" ? g.samp >= 0 : false; }
+      if (id.startsWith("w:")) return g.lib && state.lib.parts.some(p => p && p.id === id.slice(2));
+      return false;
+    };
+    const togOK = id => /^(w:|n:|m:|sp:)/.test(id) || (id.startsWith("e:") && (isSyn(id.slice(2)) || ["inst", "samp"].includes(id.slice(2))));
+    function paintBrMode() {
+      if (!brMode) return;
+      const its = items(), names = its.map(x => x.name), list = names.length > 3 ? names.slice(0, 3).join(", ") + " and " + (names.length - 3) + " more" : names.join(" + ");
+      brMode.hidden = pickFor != null;
+      brMode.classList.toggle("add", ADD.on);
+      brMode.innerHTML = ADD.on ? "<b>Adding to what's playing</b> (" + list.replace(/</g, "&lt;") + "). Tap a sound to add it, then Done."
+        : its.length > 1 ? "Tap a sound to <b>play it alone</b> (stops " + list.replace(/</g, "&lt;") + ") · <b>+ Together</b> adds it to them."
+        : "Tap a sound to <b>play it</b> · <b>+ Together</b> plays it along with " + list.replace(/</g, "&lt;") + ".";
+    }
+    { const rb = renderBrowser; renderBrowser = function () {
+        const r = rb.apply(this, arguments);
+        try {
+          paintBrMode();
+          if (pickFor != null) return r;
+          brList.querySelectorAll(".br-row[data-id]").forEach(row => {
+            const id = row.dataset.id; if (!togOK(id)) return;
+            const on = inStack(id), b = el("button", "br-tog" + (on ? " on" : "")); b.innerHTML = on ? "✓<small>playing</small>" : "+<small>together</small>";
+            const e = entryById(id), nm = e ? e.name : id;
+            b.title = on ? nm + " is playing" : "Play " + nm + " together with what's playing"; b.setAttribute("aria-label", b.title);
+            b.addEventListener("click", async () => { if (on) return; if (e) { b.innerHTML = "…<small>adding</small>"; await together(e); renderBrowser(false); } });
+            const star = row.querySelector(".br-star"); if (star) star.before(b); else row.append(b);
+          });
+        } catch (e) {}
+        return r;
+      }; }
+    if (brEl) new MutationObserver(() => { if (brEl.hidden) { ADD.on = false; } }).observe(brEl, { attributes: true, attributeFilter: ["hidden"] });
+    // the old tab bar's pinned sounds move to ★ Favorites (the bar is gone in Synths)
+    try { const ids = (tabCfg.sounds || []).filter(id => /^(w:|n:|sp:|m:)/.test(id) && !favs.includes(id)); if (ids.length) { favs = favs.concat(ids); saveFavs(); } } catch (e) {}
+    // (My sounds: the old tab bar is gone in Synths, so no "+ Tab")
+    { const rm = renderMySounds; renderMySounds = function () { const r = rm.apply(this, arguments); try { document.querySelectorAll("#msList .btn").forEach(b => { if (/^[+✓] Tab$/.test(b.textContent.trim())) b.remove(); }); } catch (e) {} return r; }; }
+    setTimeout(() => { try { paint(); } catch (e) {} }, 0);
+    window.__stk = { items, groupsOn, together, drop, only, focusOn, paint, S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
+      seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
