@@ -1926,7 +1926,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 #tabs[data-mode="synths"] { display: none; }
 #lyRack { display: none; }
 .br-add { display: none; }
-.stk { display: flex; flex-direction: column; gap: 6px; margin: 2px 0 8px; }
+.stk { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 2px 0 8px; }
 .stk[hidden] { display: none; }
 .stk-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .stk-lab { font: 600 0.62rem var(--font-mono); letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; margin-right: 2px; }
@@ -1943,7 +1943,22 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .stk-chip .sc-g, .stk-chip .sc-x { width: 40px; flex: none; border-left: 1px solid var(--line); color: var(--dim); font-size: 1rem; }
 .stk-chip .sc-g:hover, .stk-chip .sc-x:hover { color: var(--ink); }
 .stk-add { min-height: 46px; border-style: dashed; font-weight: 600; }
-.stk-help { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 0.76rem/1.4 var(--font-body); color: var(--dim); }
+.stk-help { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 0.76rem/1.4 var(--font-body); color: var(--dim); flex: 1 1 220px; justify-content: flex-end; }
+.qk { flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.qk-lab { font: 600 0.62rem var(--font-mono); letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; flex: none; }
+.qk-row { display: flex; gap: 6px; overflow-x: auto; flex: 1; min-width: 0; padding-bottom: 3px; scrollbar-width: thin; }
+.qk-t { flex: none; display: inline-flex; align-items: stretch; height: 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.qk-t > button { appearance: none; background: none; border: 0; color: var(--ink); cursor: pointer; font: inherit; }
+.qk-t .qm { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 6px 0 10px; min-width: 52px; }
+.qk-t .qm b { font: 600 0.8rem var(--font-body); white-space: nowrap; }
+.qk-t .qm small { font: 0.58rem var(--font-mono); color: var(--dim); white-space: nowrap; }
+.qk-t .qp { width: 32px; border-left: 1px solid var(--line); color: var(--lilac); font-size: 1.05rem; }
+.qk-t.on { border-color: var(--lilac); background: #261f38; }
+.qk-t.on .qp { color: var(--amber); }
+.qk-t.cur .qm b { color: var(--lilac); }
+.qk-ed { flex: none; height: 42px; padding: 0 12px; }
+#qkList .lk-row .btn { height: 34px; padding: 0 10px; }
+#qkList .bt-style { padding-top: 8px; }
 .stk-help b { color: var(--ink); font-weight: 600; }
 .stk-help .btn { height: 30px; padding: 0 10px; font-size: 0.78rem; }
 .br-mode { margin: 0 0 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font: 0.8rem/1.4 var(--font-body); color: var(--dim); }
@@ -1963,6 +1978,8 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   .stk-chip .sc-g, .stk-chip .sc-x { width: 34px; }
   .stk-add { min-height: 40px; padding: 0 12px; }
   .stk-help .long { display: none; } .stk-help .short { display: inline; }
+  .stk-help { justify-content: flex-start; flex-basis: 100%; }
+  .qk-t { height: 40px; }
 }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
@@ -2192,6 +2209,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
   <div class="stk" id="stk" role="group" aria-label="Sounds playing together">
     <div class="stk-row" id="stkRow"></div>
     <div class="stk-help" id="stkHelp"></div>
+    <div class="qk" id="qk"><span class="qk-lab">Quick</span><div class="qk-row" id="qkRow" role="group" aria-label="Quick sounds"></div></div>
   </div>
 
   <div class="soundbar" id="soundbar">
@@ -2964,6 +2982,14 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <div class="ed-foot sheet-foot"><button class="btn big primary" id="lkDone">Done</button></div>
   </div>
 </div>
+<div class="editor sheet" id="qkSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Quick sounds">
+    <div class="ed-head"><strong>Quick sounds</strong></div>
+    <span class="ed-info" style="text-align:left">The row under Playing. Tap one there to play it alone; + plays it with what's playing.</span>
+    <div class="lk-body" id="qkList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="qkAdd">+ Add a sound</button><button class="btn big primary" id="qkDone">Done</button></div>
+  </div>
+</div>
 <div class="lk-code" id="lkCode" hidden role="alertdialog" aria-label="Link code"><div><small id="lkCodeWho"></small><b id="lkCodeNum"></b><span>Type this code on the tablet</span></div></div>
 
 <div class="editor sheet" id="hisSheet" hidden>
@@ -3108,7 +3134,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
-      <p><b>Playing sounds together</b>: the <b>Playing</b> row under the toolbar (Synths) shows every sound the keys play, and the sequencer and MIDI play them all too. <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
+      <p><b>Playing sounds together</b>: the <b>Playing</b> row under the toolbar (Synths) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
       <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
@@ -22543,11 +22569,11 @@ registerProcessor("nb-wave", NBWave);
       stkRow.appendChild(add);
       stkHelp.innerHTML = "";
       if (n > 1) {
-        const sel = its.find(isSel), t = el("span"); t.innerHTML = "<span class='long'><b>These " + n + " play together</b> on the keys, the sequencer and MIDI. Tap one for its controls · ✕ stops that one · + Add plays another with them.</span><span class='short'><b>" + n + " play together</b> · tap one: its controls · ✕ stops it</span>";
+        const sel = its.find(isSel), t = el("span"); t.innerHTML = "<span class='long'><b>" + n + " play together</b> · tap one for its controls · ✕ stops it</span><span class='short'><b>" + n + " play together</b> · tap one: its controls · ✕ stops it</span>";
         stkHelp.appendChild(t);
         if (sel) { const b = el("button", "btn", "Only " + sel.name); b.title = "Stop the others and keep " + sel.name; b.addEventListener("click", () => { start(); only(sel); }); stkHelp.appendChild(b); }
       } else {
-        const t = el("span"); t.innerHTML = "<span class='long'><b>+ Add</b> plays another sound at the same time: an engine, a Studio instrument, a plugin, your instrument or a Sampler slot.</span><span class='short'><b>+ Add</b> plays another sound with it</span>";
+        const t = el("span"); t.innerHTML = "<span class='long'>Tap a Quick sound to switch · <b>+</b> plays it with this one</span><span class='short'>Tap a Quick sound to switch · <b>+</b> plays it with this one</span>";
         stkHelp.appendChild(t);
       }
       const lb = document.getElementById("wamCtl"); if (lb && state.engine === "lib") { const p = state.lib.parts[libSelOn()]; lb.hidden = !(p && PLUG(p.id)); if (p && PLUG(p.id)) lb.textContent = "⚙ " + p.name; }
@@ -22599,9 +22625,113 @@ registerProcessor("nb-wave", NBWave);
     // the old tab bar's pinned sounds move to ★ Favorites (the bar is gone in Synths)
     try { const ids = (tabCfg.sounds || []).filter(id => /^(w:|n:|sp:|m:)/.test(id) && !favs.includes(id)); if (ids.length) { favs = favs.concat(ids); saveFavs(); } } catch (e) {}
     // (My sounds: the old tab bar is gone in Synths, so no "+ Tab")
-    { const rm = renderMySounds; renderMySounds = function () { const r = rm.apply(this, arguments); try { document.querySelectorAll("#msList .btn").forEach(b => { if (/^[+✓] Tab$/.test(b.textContent.trim())) b.remove(); }); } catch (e) {} return r; }; }
+    { const rm = renderMySounds; renderMySounds = function () { const r = rm.apply(this, arguments); try { document.querySelectorAll("#msList .btn").forEach(b => { const t = b.textContent.trim(); if (/^[+✓] Tab$/.test(t)) { b.textContent = t[0] + " Quick"; b.title = t[0] === "+" ? "Put it in Quick sounds" : "In Quick sounds · tap to take it out"; b.addEventListener("click", () => setTimeout(paint, 0)); } }); } catch (e) {} return r; }; }
     setTimeout(() => { try { paint(); } catch (e) {} }, 0);
-    window.__stk = { items, groupsOn, together, drop, only, focusOn, paint, S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
+    // ---- Quick sounds: the sounds he pinned, then the engines (the ones that aren't hidden), then Inst ----
+    const qkRow = document.getElementById("qkRow"), qkSheet = document.getElementById("qkSheet"), qkList = document.getElementById("qkList");
+    const PIN = { on: false };
+    const qkSaveTabs = () => { try { saveTabs(); } catch (e) {} try { renderTabs(); } catch (e) {} };
+    function qkInfo(id) {
+      try { const t = tabInfo(id); if (t) return t; } catch (e) {}
+      const e = entryById(id); return e ? { name: e.name, sub: e.sub } : null;
+    }
+    // (the pins saved with the old tab bar: some, like Studio sounds, weren't known yet when the bar was drawn at start-up)
+    try { const raw = JSON.parse(localStorage.getItem("nightbloom-tabs") || "{}"); if (Array.isArray(raw.sounds)) { const keep = raw.sounds.filter(x => typeof x === "string" && qkInfo(x)); tabCfg.sounds = keep.concat(tabCfg.sounds.filter(x => !keep.includes(x))); } } catch (e) {}
+    function qkItems() {
+      const out = [];
+      (tabCfg.sounds || []).forEach(id => { const inf = qkInfo(id); if (inf) out.push({ id, pin: true, name: inf.name, sub: inf.sub || "" }); });
+      Object.keys(ENGINES).forEach(id => { if (isSyn(id) && !(tabCfg.hidden || []).includes(id)) out.push({ id: "e:" + id, eng: id, name: ENGINES[id].short || ENGINES[id].name, sub: (typeof TAB_SUB !== "undefined" && TAB_SUB[id]) || "" }); });
+      out.push({ id: "e:inst", name: "Inst", sub: "SF2 · SFZ" });
+      return out;
+    }
+    const qkEntry = q => q.id.startsWith("e:") ? { id: q.id, name: q.eng ? ENGINES[q.eng].name : "My instrument", cat: "engines" } : entryById(q.id);
+    function qkPlaying(q) {
+      if (q.id.startsWith("e:") || q.id.startsWith("w:")) return inStack(q.id);
+      if (q.id.startsWith("m:")) return groupsOn().inst && state.cur && state.cur.id === q.id;
+      return false;
+    }
+    async function qkAlone(q) {
+      start();
+      if (q.id.startsWith("my:")) { try { useSoundTab(q.id); } catch (e) {} return; }
+      const e = qkEntry(q); if (!e) return;
+      await chooseEntry(e, !q.id.startsWith("e:"));   // (an engine switches quietly, like its tab did; a sound plays a short note, plugins never)
+      if (q.pin) { state.cur = { id: q.id, cat: e.cat || state.cur && state.cur.cat }; save(); }
+      paint();
+    }
+    async function qkToggle(q) {
+      start();
+      if (qkPlaying(q)) {
+        const it = items().find(x => (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
+        if (it) drop(it); return;
+      }
+      const e = qkEntry(q); if (!e) return;
+      await together(e); paint();
+    }
+    function paintQuick() {
+      if (!qkRow) return;
+      const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
+      const togOn = q => !q.id.startsWith("my:") && togOK(q.id);
+      qkItems().forEach(q => {
+        const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id);
+        const t = el("div", "qk-t" + (on ? " on" : "") + (cur ? " cur" : ""));
+        const m = el("button", "qm"); m.innerHTML = "<b></b><small></small>"; m.querySelector("b").textContent = q.name; m.querySelector("small").textContent = q.sub;
+        m.title = "Play " + q.name + " alone"; m.setAttribute("aria-label", m.title);
+        m.addEventListener("click", () => qkAlone(q));
+        t.appendChild(m);
+        if (togOn(q)) {
+          const p = el("button", "qp", on ? "✓" : "+");
+          p.title = on ? q.name + " is playing · tap to stop it" : "Play " + q.name + " together with what's playing"; p.setAttribute("aria-label", p.title);
+          p.addEventListener("click", () => qkToggle(q));
+          t.appendChild(p);
+        }
+        qkRow.appendChild(t);
+      });
+      const ed = el("button", "btn qk-ed", "✎"); ed.title = "Choose the Quick sounds"; ed.setAttribute("aria-label", ed.title);
+      ed.addEventListener("click", () => { qkSheet.hidden = false; qkPaint(); });
+      qkRow.appendChild(ed);
+      qkRow.scrollLeft = sc;
+    }
+    // ✎: what's in the row
+    function qkPaint() {
+      qkList.innerHTML = "";
+      const row = (title, sub, btns) => { const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", title), el("small", "", sub)); r.append(g, ...btns); return r; };
+      const b = (txt, fn, aria) => { const x = el("button", "btn", txt); if (aria) x.setAttribute("aria-label", aria); x.addEventListener("click", () => { fn(); qkSaveTabs(); qkPaint(); paint(); }); return x; };
+      const pins = tabCfg.sounds || [];
+      qkList.appendChild(el("div", "bt-style", "Your sounds"));
+      if (!pins.length) qkList.appendChild(el("small", "", "None yet. + Add a sound puts any sound from the list here."));
+      pins.forEach((id, i) => {
+        const inf = qkInfo(id) || { name: id, sub: "" }, bs = [];
+        if (i > 0) bs.push(b("◀", () => { pins.splice(i - 1, 0, pins.splice(i, 1)[0]); }, "Move " + inf.name + " left"));
+        if (i < pins.length - 1) bs.push(b("▶", () => { pins.splice(i + 1, 0, pins.splice(i, 1)[0]); }, "Move " + inf.name + " right"));
+        bs.push(b("Remove", () => { pins.splice(i, 1); }, "Take " + inf.name + " out of Quick sounds"));
+        qkList.appendChild(row(inf.name, inf.sub || "", bs));
+      });
+      qkList.appendChild(el("div", "bt-style", "Engines"));
+      Object.keys(ENGINES).filter(isSyn).forEach(id => {
+        const hid = (tabCfg.hidden || []).includes(id);
+        qkList.appendChild(row(ENGINES[id].name, hid ? "hidden" : "in the row", [b(hid ? "Show" : "Hide", () => { const h = tabCfg.hidden; const k = h.indexOf(id); if (k >= 0) h.splice(k, 1); else h.push(id); }, (hid ? "Show " : "Hide ") + ENGINES[id].name)]));
+      });
+      if ((tabCfg.hidden || []).length) qkList.appendChild(b("Show all the engines", () => { tabCfg.hidden = []; }));
+    }
+    document.getElementById("qkDone").addEventListener("click", () => { qkSheet.hidden = true; });
+    document.getElementById("qkAdd").addEventListener("click", () => { qkSheet.hidden = true; PIN.on = true; openBrowser(); paintBrMode(); });
+    function qkPin(e) {
+      const id = e.id;
+      if (id.startsWith("e:") && isSyn(id.slice(2))) { const h = tabCfg.hidden, k = h.indexOf(id.slice(2)); if (k >= 0) h.splice(k, 1); }
+      else if (/^(w:|n:|sp:|m:)/.test(id)) { if (!tabCfg.sounds.includes(id)) tabCfg.sounds.push(id); }
+      else { say("That one can't go in Quick sounds"); return; }
+      qkSaveTabs(); paint(); say(e.name + " is in Quick sounds");
+    }
+    // back to ✎ when the list closes: in the same tap, so the sheet takes over the list's place in Back history
+    document.getElementById("brDone").addEventListener("click", () => { if (PIN.on && brEl.hidden) { PIN.on = false; qkSheet.hidden = false; qkPaint(); } });
+    if (brEl) new MutationObserver(() => { if (brEl.hidden) PIN.on = false; }).observe(brEl, { attributes: true, attributeFilter: ["hidden"] });
+    { const ce = chooseEntry; chooseEntry = async function (e) { if (PIN.on && !brEl.hidden && e && typeof e.id === "string") { qkPin(e); renderBrowser(false); return; } return ce.apply(this, arguments); }; }
+    { const pb = paintBrMode; paintBrMode = function () { pb(); if (PIN.on && brMode) { brMode.hidden = false; brMode.classList.add("add"); brMode.innerHTML = "<b>Adding to Quick sounds.</b> Tap a sound to put it in the row, then Done."; } }; }
+    { const rb = renderBrowser; renderBrowser = function () { const r = rb.apply(this, arguments); if (PIN.on) brList.querySelectorAll(".br-tog").forEach(x => x.remove()); return r; }; }
+    { const p0 = paint; paint = function () { p0(); try { if (!stk.hidden) paintQuick(); } catch (e) {} }; }
+    setTimeout(() => { try { paint(); } catch (e) {} }, 0);
+    window.__qk = { items: qkItems, alone: qkAlone, toggle: qkToggle, pin: qkPin, paint: paintQuick, PIN };
+    window.__stk = { items, groupsOn, together, drop, only, focusOn, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
       seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }
   // ---------- Undo and redo across the app ----------
