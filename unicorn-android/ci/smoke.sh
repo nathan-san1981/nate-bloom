@@ -20,6 +20,7 @@ adb shell am start -n $PKG/.MainActivity
 sleep 25
 python3 unicorn-android/ci/cdp_clock.py "$OUT" > "$OUT/checks.txt" 2>&1
 cat "$OUT/checks.txt"
-adb logcat -d -s UnicornClock:V chromium:W AndroidRuntime:E TextToSpeech:V > "$OUT/logcat.txt"
+adb logcat -d -s UnicornClock:V chromium:W AndroidRuntime:E TextToSpeech:V LockTaskController:V ActivityTaskManager:I DevicePolicyManager:V > "$OUT/logcat.txt"
+adb logcat -d | grep -iE "unicorn|locktask|lock task|devicepolicy|app switch|Abort background|Background activity start" > "$OUT/logcat-kiosk.txt"
 tail -60 "$OUT/logcat.txt"
 exit 0

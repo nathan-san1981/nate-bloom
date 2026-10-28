@@ -98,6 +98,10 @@ jobs:
           cp /tmp/uc-all/build/UnicornClock.apk UnicornClock.apk
           gh release create "unicorn-clock-v$V" "UnicornClock-$V.apk" UnicornClock.apk \
             --title "Unicorn Clock for Fire tablets $V" --notes-file unicorn-android/RELEASE_NOTES.md --latest=false
+          # a fixed "unicorn-clock" release always holds the newest APK, so the download link never changes
+          gh release delete unicorn-clock --yes --cleanup-tag || true
+          gh release create unicorn-clock UnicornClock.apk \
+            --title "Unicorn Clock for Fire tablets (newest)" --notes-file unicorn-android/RELEASE_NOTES.md --latest=false
       - name: Logs, screenshots and the APK to the unicorn-ci branch
         run: |
           cd /tmp/uc-all

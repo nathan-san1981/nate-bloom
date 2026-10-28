@@ -41,13 +41,21 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- lets the clock be the tablet's home screen when it is set up as the device owner -->
+        </activity>
+
+        <!-- the clock as the tablet's home screen: switched on only in device-owner (full lockdown) mode, so other
+             tablets never ask "which home app?" -->
+        <activity-alias
+            android:name=".Home"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
+        </activity-alias>
 
         <receiver
             android:name=".BootReceiver"

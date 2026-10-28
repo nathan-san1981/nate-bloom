@@ -111,6 +111,24 @@ def tap_text(words):
     return None
 
 
+def tap_pin_ok():
+    """Android's 'App is pinned' box: by text when the screen reader works (it waits for the page to go idle,
+    and the clock always animates), otherwise where the box puts its button on a 1024x600 screen."""
+    w = tap_text(["Got it", "GOT IT"])
+    if not w:
+        adb("shell", "input", "tap", "672", "498")
+        w = "tap 672,498"
+    return w
+
+
+def wait_front(secs=16):
+    for _ in range(secs):
+        if PKG in top_activity():
+            return True
+        time.sleep(1)
+    return False
+
+
 def top_activity():
     act = adb("shell", "dumpsys", "activity", "activities")
     return (re.search(r"(mResumedActivity|topResumedActivity).*", act) or [""])[0].strip()
@@ -133,19 +151,24 @@ shot("01_clock")
 
 # ---------- 2. keeps itself on screen; optional pinning ----------
 check("not pinned by default (no Android pin box at start-up)", status().get("lockMode") == "none", status().get("lockMode"))
+print("INFO web engine:", P.ev("navigator.userAgent"), flush=True)
 adb("shell", "input", "keyevent", "KEYCODE_HOME")
-time.sleep(4)
-check("Home brings the clock straight back", PKG in top_activity(), top_activity()[:160])
+time.sleep(1)
+t0 = time.time()
+back = wait_front()
+check("Home brings the clock straight back", back, {"secs": round(time.time() - t0, 1), "top": top_activity()[:120]})
 adb("shell", "input", "keyevent", "KEYCODE_APP_SWITCH")
-time.sleep(4)
-check("Recents brings the clock straight back", PKG in top_activity(), top_activity()[:160])
+time.sleep(1)
+t0 = time.time()
+back = wait_front()
+check("Recents brings the clock straight back", back, {"secs": round(time.time() - t0, 1), "top": top_activity()[:120]})
 adb("shell", "input", "keyevent", "KEYCODE_BACK")
 time.sleep(1)
 P.connect(10)
 P.ev("unicornApp.pinAgain()")
 time.sleep(3)
 shot("02_pin_box")
-tapped = tap_text(["Got it", "GOT IT", "Start", "START", "OK"])
+tapped = tap_pin_ok()
 time.sleep(3)
 lock = adb("shell", "dumpsys", "activity", "activities")
 m = re.search(r"mLockTaskModeState=(\w+)", lock)
@@ -210,7 +233,8 @@ r = P.ev("""(async()=>{const w=t=>new Promise(r=>setTimeout(r,t));
 check("Unicorn Run 2 plays offline", r == "game2", r)
 r = P.ev("""(async()=>{const w=t=>new Promise(r=>setTimeout(r,t));
   document.getElementById('btnGame').click();await w(700);document.getElementById('pickDungeon').click();
-  for(let i=0;i<30;i++){await w(1000);var t=document.querySelector('#dungeonHost .bq-title');if(t&&!t.hidden)return 'title'}return 'no title'})()""")
+  for(let i=0;i<90;i++){await w(1000);var t=document.querySelector('#dungeonHost .bq-title');if(t&&!t.hidden)return 'title'}
+  var l=document.querySelector('#dungeonHost .bq-load');return 'no title: '+(l?l.textContent+(l.hidden?' (hidden)':''):'no loader')})()""")
 check("Unicorn Dungeon opens offline", r == "title", r)
 time.sleep(2)
 shot("04_offline_dungeon")
@@ -239,18 +263,21 @@ check("opens by itself at start-up", PKG in top, top.strip()[:160])
 shot("06_after_boot")
 
 # ---------- 9. optional full lockdown (device owner) ----------
+adb("shell", "input", "keyevent", "KEYCODE_BACK")
+time.sleep(1)
 o = adb("shell", "dpm", "set-device-owner", PKG + "/.AdminReceiver")
 print("dpm:", o.strip()[:200])
 restart_app()
 wait_clock()
 time.sleep(3)
 st = status()
+if st.get("lockMode") != "locked":
+    time.sleep(5)
+    st = status()
 check("device owner: locked to the clock", st.get("owner") is True and st.get("lockMode") == "locked", st)
 adb("shell", "input", "keyevent", "KEYCODE_HOME")
 time.sleep(3)
-act = adb("shell", "dumpsys", "activity", "activities")
-top = (re.search(r"(mResumedActivity|topResumedActivity).*", act) or [""])[0]
-check("device owner: Home stays on the clock", PKG in top, top.strip()[:160])
+check("device owner: Home stays on the clock", PKG in top_activity(), top_activity()[:160])
 shot("07_owner_locked")
 P.connect(10)
 P.ev("unicornApp.releaseLockdown()")

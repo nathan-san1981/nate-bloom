@@ -81,14 +81,18 @@ class MainActivity : ComponentActivity() {
         away = false
         if (!inFront) bringBack.run()
     }
-    private val bringBack = Runnable {
-        if (kioskOn && !away && screenOn()) {
+    // Android holds back app starts for about 5 seconds after Home is pressed, so keep trying until we're back
+    private var backTries = 0
+    private val bringBack: Runnable = object : Runnable {
+        override fun run() {
+            if (!kioskOn || away || inFront || !screenOn()) return
             try {
-                startActivity(Intent(this, MainActivity::class.java)
+                startActivity(Intent(this@MainActivity, MainActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
             } catch (e: Exception) {
                 Log.w(TAG, "could not come back to the front", e)
             }
+            if (++backTries < 40) ui.postDelayed(this, 1500)
         }
     }
     private var brightness = -1f
@@ -309,7 +313,10 @@ class MainActivity : ComponentActivity() {
         inFront = false
         if (!kioskOn || isChangingConfigurations) return
         if (away) ui.postDelayed(awayTimeout, 180_000)
-        else if (screenOn()) ui.postDelayed(bringBack, 1000)
+        else if (screenOn()) {
+            backTries = 0
+            ui.postDelayed(bringBack, 700)
+        }
     }
 
     private fun screenOn(): Boolean = getSystemService(PowerManager::class.java).isInteractive
@@ -342,16 +349,28 @@ class MainActivity : ComponentActivity() {
 
     private fun isOwner(): Boolean = getSystemService(DevicePolicyManager::class.java).isDeviceOwnerApp(packageName)
 
+    private fun lockPermitted(): Boolean = getSystemService(DevicePolicyManager::class.java).isLockTaskPermitted(packageName)
+
+    private fun homeAlias(on: Boolean) {
+        packageManager.setComponentEnabledSetting(
+            ComponentName(this, "$packageName.Home"),
+            if (on) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            PackageManager.DONT_KILL_APP
+        )
+    }
+
     /** Pin the clock (Home and Recents stop working). As device owner it is silent and complete; otherwise
      *  Android asks once to confirm, and we never nag again if a grown-up says no. */
     private fun startKiosk() {
         if (!kioskOn || isFinishing) return
         if (lockState() != ActivityManager.LOCK_TASK_MODE_NONE) return
         val owner = isOwner()
+        if (owner && !lockPermitted()) deviceOwnerSetup()
         if (!owner && !pinNow && !prefs.getBoolean("pinEachStart", false)) return
         if (pinTried && !owner) return
         pinTried = true
         pinNow = false
+        Log.i(TAG, "startLockTask owner=$owner permitted=${lockPermitted()}")
         try {
             startLockTask()
         } catch (e: Exception) {
@@ -375,6 +394,7 @@ class MainActivity : ComponentActivity() {
         val admin = ComponentName(this, AdminReceiver::class.java)
         try {
             dpm.setLockTaskPackages(admin, arrayOf(packageName))
+            Log.i(TAG, "device owner: lock task permitted=${dpm.isLockTaskPermitted(packageName)}")
             if (Build.VERSION.SDK_INT >= 28) dpm.setLockTaskFeatures(admin, DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS)
             dpm.setStatusBarDisabled(admin, true)
             dpm.setKeyguardDisabled(admin, true)
@@ -382,7 +402,8 @@ class MainActivity : ComponentActivity() {
                 addCategory(Intent.CATEGORY_HOME)
                 addCategory(Intent.CATEGORY_DEFAULT)
             }
-            dpm.addPersistentPreferredActivity(admin, home, ComponentName(this, MainActivity::class.java))
+            homeAlias(true)
+            dpm.addPersistentPreferredActivity(admin, home, ComponentName(this, "$packageName.Home"))
             val plugged = BatteryManager.BATTERY_PLUGGED_AC or BatteryManager.BATTERY_PLUGGED_USB or BatteryManager.BATTERY_PLUGGED_WIRELESS
             dpm.setGlobalSetting(admin, Settings.Global.STAY_ON_WHILE_PLUGGED_IN, plugged.toString())
         } catch (e: Exception) {
@@ -396,6 +417,7 @@ class MainActivity : ComponentActivity() {
         val admin = ComponentName(this, AdminReceiver::class.java)
         try {
             dpm.clearPackagePersistentPreferredActivities(admin, packageName)
+            homeAlias(false)
             dpm.setStatusBarDisabled(admin, false)
         } catch (e: Exception) {
         }
@@ -505,6 +527,7 @@ class MainActivity : ComponentActivity() {
                     else -> "none"
                 })
                 put("owner", isOwner())
+                put("lockPermitted", lockPermitted())
                 put("opensAtStart", canOpenAlone && prefs.getBoolean("boot", true))
                 put("bootPref", prefs.getBoolean("boot", true))
                 put("pinEachStart", prefs.getBoolean("pinEachStart", false))
@@ -552,6 +575,7 @@ class MainActivity : ComponentActivity() {
                 try {
                     stopKiosk()
                     dpm.clearPackagePersistentPreferredActivities(admin, packageName)
+                    homeAlias(false)
                     dpm.setStatusBarDisabled(admin, false)
                     dpm.setKeyguardDisabled(admin, false)
                     dpm.setLockTaskPackages(admin, arrayOf())
