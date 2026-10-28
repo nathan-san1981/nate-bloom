@@ -1,0 +1,16 @@
+page: app://nate-bloom/ | Nate Bloom Synth
+native: {"platform":"linux","v":"1.0.9","fast":true,"app":true}
+audio: no ctx
+Studio violin: ['Solo Violin', 'bowed, with vibrato · VSCO 2 (CC0) · 1 MB, downloads once · tap to browse']
+library Cello: ['Cello', 'GeneralUser GS · tap to browse'] | kept: ['0420_GeneralUserGS_sf2_file.json']
+fast pads: {"ready":16,"info":"{\"running\":true,\"rate\":48000,\"burst\":256,\"buffer\":512,\"exclusive\":false,\"latencyMs\":16.0,\"callbacks\":487,\"backend\":\"Null\"}","badge":"⚡ 3/16"}
+keys through fast pads: 8 of 8
+midi: error: Platform dependent initialization failed.
+plugins: ok: Synth-101 (peak 0.424), Grey Hole on the mix, from app://nate-bloom/wam/
+fast plugins (native): {"ids":10,"twin77":true,"info":"{\"running\":true,\"rate\":48000,\"burst\":256,\"buffer\":512,\"exclusive\":false,\"latencyMs\":16.0,\"callbacks\":1045,\"backend\":\"Null\"}"}
+link: {"on":true,"name":"runnervmwhx2h","addresses":["10.1.0.132"],"off":false,"button":true}
+ableton link: {"on":true,"tempo":121,"peers":0,"beat0InMs":50,"playing":true,"beatAfter300ms":0.504,"stopped":true,"ui":true}
+lite: app://nate-bloom/lite/ | Nate Bloom Lite | native true
+errors: []
+saved (raw CDP): [ 'nb-linux-test.txt' ]
+second start (hands over to the open window) exit 1

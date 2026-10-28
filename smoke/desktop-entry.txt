@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Nate Bloom
+Exec="/opt/Nate Bloom/nate-bloom" %U
+Terminal=false
+Type=Application
+Icon=nate-bloom
+StartupWMClass=Nate Bloom
+Comment=Nate Bloom as a Linux app: works offline, USB MIDI, fast Beat Pads, saves to Downloads/Nate Bloom.
+Categories=AudioVideo;

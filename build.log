@@ -1,0 +1,21 @@
+  • electron-builder  version=25.1.8 os=6.8.0-1064-azure
+  • loaded configuration  file=package.json ("build" field)
+  • executing @electron/rebuild  electronVersion=44.10.0 arch=x64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=linux arch=x64 electron=44.10.0 appOutDir=dist/linux-unpacked
+  • downloading     url=https://github.com/electron/electron/releases/download/v44.10.0/electron-v44.10.0-linux-x64.zip size=123 MB parts=8
+  • downloaded      url=https://github.com/electron/electron/releases/download/v44.10.0/electron-v44.10.0-linux-x64.zip duration=507ms
+  • building        target=AppImage arch=x64 file=dist/NateBloom-1.0.9.AppImage
+  • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/appimage-12.0.1/appimage-12.0.1.7z size=1.6 MB parts=1
+  • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/appimage-12.0.1/appimage-12.0.1.7z duration=243ms
+  • building        target=deb arch=x64 file=dist/NateBloom-1.0.9.deb
+  • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/fpm-1.9.3-2.3.1-linux-x86_64/fpm-1.9.3-2.3.1-linux-x86_64.7z size=5.0 MB parts=1
+  • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/fpm-1.9.3-2.3.1-linux-x86_64/fpm-1.9.3-2.3.1-linux-x86_64.7z duration=324ms
+total 296788
+drwxr-xr-x 3 runner runner      4096 Oct 28 05:42 .
+drwxr-xr-x 8 runner runner      4096 Oct 28 05:40 ..
+-rwxr-xr-x 1 runner runner 173195499 Oct 28 05:40 NateBloom-1.0.9.AppImage
+-rw-r--r-- 1 runner runner 130687722 Oct 28 05:42 NateBloom-1.0.9.deb
+-rw-r--r-- 1 runner runner       988 Oct 28 05:42 builder-debug.yml
+drwxr-xr-x 4 runner runner      4096 Oct 28 05:40 linux-unpacked
