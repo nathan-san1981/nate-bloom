@@ -47,12 +47,18 @@ jobs:
           git clone -q --depth 1 --branch v0.8.2 https://github.com/simd-everywhere/simde.git /tmp/simde || git clone -q --depth 1 https://github.com/simd-everywhere/simde.git /tmp/simde
           mkdir -p native/nbsynth/simde && cp -r /tmp/simde/simde native/nbsynth/simde/
 
+      - name: Fetch Ableton Link (native/ablink; GPL-2.0-or-later, see NOTICE.md)
+        run: |
+          git clone -q --depth 1 --branch Link-4.1.1 https://github.com/Ableton/link.git native/ablink/link
+          git -C native/ablink/link submodule update -q --init --depth 1 modules/asio-standalone
+          ls native/ablink/link/include/ableton/Link.hpp native/ablink/link/modules/asio-standalone/asio/include/asio.hpp
+
       - name: Build the fast-pad engine
         id: native
         run: |
           set -o pipefail
           cd linux/native && npx --no-install node-gyp rebuild 2>&1 | tee /tmp/nb-logs/native.log
-          node -e "const f = require('./build/Release/nbfastpads.node'); console.log(Object.keys(f).join(' '))" | tee -a /tmp/nb-logs/native.log
+          node -e "const f = require('./build/Release/nbfastpads.node'); console.log(Object.keys(f).join(' '), '| Ableton Link:', typeof f.ablState)" | tee -a /tmp/nb-logs/native.log
 
       - name: Package (.deb and AppImage)
         id: build

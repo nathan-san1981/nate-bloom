@@ -45,6 +45,18 @@ if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   synthGain: (i, g) => fp.synthGain && fp.synthGain(i | 0, +g),
 });
 
+// Ableton Link (native/ablink, in the same native module): Bitwig and the other Link apps on the network
+if (fp && fp.ablState) contextBridge.exposeInMainWorld("NBAbleton", {
+  enable: (on, bpm) => fp.ablEnable(!!on, +bpm || 120),
+  sync: on => fp.ablSync(!!on),
+  state: q => fp.ablState(+q || 4),
+  now: () => fp.ablNow(),
+  timeAtBeat: (b, q) => fp.ablTimeAtBeat(+b, +q || 4),
+  setTempo: bpm => fp.ablTempo(+bpm),
+  start: (at, q) => fp.ablStart(+at, +q || 4),
+  stop: at => fp.ablStop(+at),
+});
+
 // Link: this computer hosts; the tablet app finds it on the Wi-Fi (linux/link.js does the network part)
 contextBridge.exposeInMainWorld("NBLinkNative", {
   hub: true,

@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
         private set
     private lateinit var midi: MidiBridge
     private var fast: FastPads? = null
+    private var abl: AbletonLink? = null
     private lateinit var link: LinkBridge
     private var startScript = ""
     private var startScriptAtDocStart = false
@@ -105,6 +106,7 @@ class MainActivity : ComponentActivity() {
         link = LinkBridge(this)
         web.addJavascriptInterface(link, "NBLinkNative")
         if (FastPads.available) fast = FastPads(this).also { web.addJavascriptInterface(it, "NBFastPads") }
+        if (FastPads.available) abl = AbletonLink(this).takeIf { it.supported() }?.also { web.addJavascriptInterface(it, "NBAbleton") }
 
         startScript = assets.open("nb-native.js").bufferedReader().use { it.readText() }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
@@ -254,6 +256,7 @@ class MainActivity : ComponentActivity() {
         PlaybackService.stop(this)
         midi.close()
         fast?.sleep()
+        abl?.close()
         web.destroy()
         super.onDestroy()
     }

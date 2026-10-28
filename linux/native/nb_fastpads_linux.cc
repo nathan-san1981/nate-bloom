@@ -24,6 +24,10 @@
 #include <string>
 #include <vector>
 #include "nbsynth_host.h"
+#if __has_include(<ableton/Link.hpp>)
+#include "nb_ablink.h"   // Ableton Link (native/ablink)
+#define NB_HAS_ABLINK 1
+#endif
 
 namespace {
 
@@ -300,6 +304,20 @@ napi_value SynthParam(napi_env env, napi_callback_info info) { napi_value a[3]; 
 napi_value SynthTempo(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); gSynth.tempo(argNum(env, a[0], 120), argInt(env, a[1])); return undef(env); }
 napi_value SynthGain(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); gSynth.setGain(argInt(env, a[0], -1), (float) argNum(env, a[1], 1)); return undef(env); }
 
+#ifdef NB_HAS_ABLINK
+// Ableton Link: tempo, beat grid and Play/Stop shared with Bitwig and the other Link apps on the network
+nbabl::Session gAbl;
+napi_value dbl(napi_env env, double x) { napi_value r; napi_create_double(env, x, &r); return r; }
+napi_value AblEnable(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); bool on = false; napi_get_value_bool(env, a[0], &on); return boolean(env, gAbl.enable(on, argNum(env, a[1], 120))); }
+napi_value AblSync(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); bool on = true; napi_get_value_bool(env, a[0], &on); gAbl.setSync(on); return undef(env); }
+napi_value AblState(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); const std::string s = gAbl.state(argNum(env, a[0], 4)); napi_value r; napi_create_string_utf8(env, s.c_str(), NAPI_AUTO_LENGTH, &r); return r; }
+napi_value AblNow(napi_env env, napi_callback_info) { return dbl(env, gAbl.now()); }
+napi_value AblTimeAtBeat(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); return dbl(env, gAbl.timeAtBeat(argNum(env, a[0]), argNum(env, a[1], 4))); }
+napi_value AblTempo(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); gAbl.setTempo(argNum(env, a[0], 0)); return undef(env); }
+napi_value AblStart(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); return dbl(env, gAbl.start(argNum(env, a[0]), argNum(env, a[1], 4))); }
+napi_value AblStop(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); gAbl.stop(argNum(env, a[0])); return undef(env); }
+#endif
+
 napi_value Init(napi_env env, napi_value exports) {
     const napi_property_descriptor props[] = {
         { "start", nullptr, Start, nullptr, nullptr, nullptr, napi_default, nullptr },
@@ -322,6 +340,16 @@ napi_value Init(napi_env env, napi_value exports) {
         { "synthParam", nullptr, SynthParam, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "synthTempo", nullptr, SynthTempo, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "synthGain", nullptr, SynthGain, nullptr, nullptr, nullptr, napi_default, nullptr },
+#ifdef NB_HAS_ABLINK
+        { "ablEnable", nullptr, AblEnable, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablSync", nullptr, AblSync, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablState", nullptr, AblState, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablNow", nullptr, AblNow, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablTimeAtBeat", nullptr, AblTimeAtBeat, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablTempo", nullptr, AblTempo, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablStart", nullptr, AblStart, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "ablStop", nullptr, AblStop, nullptr, nullptr, nullptr, napi_default, nullptr },
+#endif
     };
     napi_define_properties(env, exports, sizeof props / sizeof props[0], props);
     return exports;

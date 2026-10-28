@@ -65,6 +65,7 @@ async def main():
         print("link:", await pg.evaluate("""(async () => { if (!window.NBLinkNative) return 'no link';
             const on = await NBLinkNative.enable(true), off = await NBLinkNative.enable(false);
             return JSON.stringify({ on: on.enabled, name: on.name, addresses: on.addresses, off: off.enabled, button: !document.getElementById('lkBtn').hidden }); })()"""))
+        print("ableton link:", await pg.evaluate("""(async()=>{ if (!window.NBAbleton) return 'no NBAbleton'; const on = NBAbleton.enable(true, 121); await new Promise(r=>setTimeout(r,500)); const s1 = JSON.parse(NBAbleton.state(4)); const t = NBAbleton.now(); const b0 = NBAbleton.start(t + 50000, 4); await new Promise(r=>setTimeout(r,300)); const s2 = JSON.parse(NBAbleton.state(4)); NBAbleton.stop(NBAbleton.now()); const s3 = JSON.parse(NBAbleton.state(4)); NBAbleton.enable(false, 0); return JSON.stringify({ on, tempo: s1.tempo, peers: s1.peers, beat0InMs: Math.round((b0 - t) / 1000), playing: s2.playing, beatAfter300ms: +s2.beat.toFixed(3), stopped: !s3.playing, ui: !!document.getElementById('ablBody') }) })()"""))
         # (saving is checked by save_check.mjs: Playwright takes over downloads while it's connected)
         # Lite
         await pg.goto("app://nate-bloom/lite/"); await pg.wait_for_timeout(2000)

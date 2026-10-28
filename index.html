@@ -1920,6 +1920,9 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .lk-code > div { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 34px; border-radius: 16px; background: var(--raised); border: 1px solid var(--lilac); }
 .lk-code b { font: 700 3.2rem var(--font-mono); letter-spacing: 0.18em; color: var(--ink); } .lk-code small, .lk-code span { color: var(--dim); font: 0.86rem var(--font-body); }
 #lkBtn.on { border-color: #7fd6c2; color: #7fd6c2; }
+#bpmLabel.abl { color: #7fd6c2; }
+.help-lic { color: var(--dim); font: 0.72rem/1.45 var(--font-body); margin: 10px 2px 0; } .help-lic a { color: var(--dim); }
+#ablBody .bt-style { padding-top: 10px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -2774,6 +2777,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
     <div class="ed-head"><strong>Link</strong><span class="lk-dot" id="lkDot" aria-hidden="true"></span></div>
     <span class="ed-info" id="lkInfo" style="text-align:left"></span>
     <div class="lk-body" id="lkBody"></div>
+    <div class="lk-body" id="ablBody" hidden></div>
     <div class="ed-foot sheet-foot"><button class="btn big primary" id="lkDone">Done</button></div>
   </div>
 </div>
@@ -2921,6 +2925,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
       <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
+      <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
       <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
       <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
       <p><b>Undo and redo</b>: ↶ and ↷ in the toolbar (at the top on a phone; or Ctrl+Z and Ctrl+Shift+Z) take back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (in the toolbar, or the ☰ menu on a phone) lists the changes, newest first; tap one to go back to just before it.</p>
@@ -2941,6 +2946,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
       <kbd>Shift+Enter</kbd><span>Hold on / off</span>
       <kbd>?</kbd><span>this help</span>
     </div>
+    <p class="help-lic">Nate Bloom is free software under the GNU General Public License, version 3 or later, and comes with no warranty. Its source, and the licences of what it includes (Ableton Link is © Ableton AG, under the GPL version 2 or later), are at <a href="https://github.com/nathan-san1981/nate-bloom" target="_blank" rel="noopener">github.com/nathan-san1981/nate-bloom</a> (NOTICE.md).</p>
     <div class="ed-foot sheet-foot"><button class="btn big" id="hapticBtn" aria-pressed="true">Vibrate on taps: On</button><button class="btn big primary" id="helpDone">Done</button></div>
   </div>
 </div>
@@ -4914,9 +4920,11 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
   const playBtn = document.getElementById("play");
   let NB_START_AT = null;   // (Link: when the first step should sound, in this AudioContext's time)
+  let NB_GRID = null;       // (Ableton Link: where a start lands on the session's beat grid: { t, step, abs })
   function startSeq() {
     if (!ctx || playing) return;
     playing = true; curStep = 0; nextTime = NB_START_AT != null && NB_START_AT > ctx.currentTime ? NB_START_AT : ctx.currentTime + 0.06;
+    if (NB_START_AT == null && NB_GRID) { const g = NB_GRID(stepsNow()); if (g) { nextTime = Math.max(ctx.currentTime, g.t); curStep = g.step; } }
     tick(); timer = setInterval(tick, 25);
     playBtn.setAttribute("aria-pressed", "true"); playBtn.textContent = "■ Pause";
   }
@@ -14697,7 +14705,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       RCP.tracks.forEach(tr => { if (rcEngine(tr.snd) === "smp") rcSampleBuf(tr.snd); });
       RC.playing = true;
       if (playing) { RC.nextT = nextTime; RC.step = curStep; }   // lock onto the sequencer's grid
-      else { RC.nextT = ctx.currentTime + 0.06; RC.step = 0; }
+      else { RC.nextT = ctx.currentTime + 0.06; RC.step = 0; const g = NB_GRID && NB_GRID(0); if (g) { RC.nextT = Math.max(ctx.currentTime, g.t); RC.step = g.abs; } }
       rcTick(); RC.timer = setInterval(rcTick, 25);
     } else { RC.playing = false; clearInterval(RC.timer); RC.queue.length = 0; }
     rcPaintTransport();
@@ -21904,6 +21912,181 @@ registerProcessor("nb-wave", NBWave);
       if (LK.hub) setTimeout(async () => { try { const st = await LN.status(); LK.peers = (st && st.peers) || []; if (st && st.name) LK.selfName = st.name; if (LK.peers.length) pinging(true); } catch (e) {} paint(); }, 500);   // (after a reload, the tablet is still linked)
     }
     window.__lk = { LK, handle, send, paint, sendProject, ctxAt, offOf };
+  }
+  // ---------- Ableton Link (the apps): Bitwig and the other Link apps on the network ----------
+  {
+    const AB = window.NBAbleton || null, Q = 4, KEY = "nightbloom-ablink";
+    const A = { on: false, sync: true, nudge: 0, st: null, offs: [], off: null, quiet: 0, tLocal: 0, applied: null, was: null, last: "seq", sig: "", n: 0, timer: 0 };
+    try { if (typeof KEEP_KEYS !== "undefined" && !KEEP_KEYS.includes(KEY)) KEEP_KEYS.push(KEY); } catch (e) {}   // (not part of a project)
+    try { const k = JSON.parse(localStorage.getItem(KEY) || "null"); if (k) { A.on = !!k.on; A.sync = k.sync !== false; A.nudge = Math.max(-80, Math.min(80, +k.nudge || 0)); } } catch (e) {}
+    const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ on: A.on, sync: A.sync, nudge: A.nudge })); } catch (e) {} };
+    const fmt = b => String(Math.round(b * 10) / 10);
+    // ---- clocks: Link's (µs) against this page's (performance.now, ms), the reading with the shortest round trip
+    // of the last few seconds; and the page's against the sound card's (when a sample is heard) ----
+    function sample() {
+      if (!AB) return null;
+      const p0 = performance.now(); let st = null; try { st = JSON.parse(AB.state(Q)); } catch (e) {} const p1 = performance.now();
+      A.st = st; if (!st || !st.on) return st;
+      A.offs.push({ at: p1, rtt: p1 - p0, off: st.now / 1000 - (p0 + p1) / 2 });
+      while (A.offs.length > 1 && (p1 - A.offs[0].at > 4000 || A.offs.length > 120)) A.offs.shift();
+      A.off = A.offs.reduce((b, x) => x.rtt < b.rtt ? x : b).off;
+      st.at = (p0 + p1) / 2;
+      return st;
+    }
+    // (the sound card's clock: performanceTime − contextTime·1000 from getOutputTimestamp, the median of the last
+    // couple of seconds, since each reading jitters by an audio block; it starts over after a jump, like a resume)
+    const K = []; let Kv = null;
+    function kSample() {
+      try {
+        const ts = ctx && ctx.getOutputTimestamp && ctx.getOutputTimestamp();
+        if (!ts || !(ts.performanceTime > 0) || !(ts.contextTime > 0)) return;
+        const k = ts.performanceTime - ts.contextTime * 1000;
+        if (Kv != null && Math.abs(k - Kv) > 50) K.length = 0;
+        K.push(k); if (K.length > 40) K.shift();
+        const so = K.slice().sort((a, b) => a - b); Kv = so[so.length >> 1];
+      } catch (e) {}
+    }
+    const kNow = () => { if (Kv == null) kSample(); return Kv != null ? Kv : performance.now() - (ctx.currentTime - ((ctx.outputLatency || ctx.baseLatency) || 0)) * 1000; };
+    // (A.nudge, ms: Nate Bloom sounds that much later than the session's grid; for a sound card that reports its
+    // delay wrong)
+    const ctxToHost = t => (t * 1000 + kNow() + A.off - A.nudge) * 1000;
+    const hostToCtx = h => (h / 1000 - A.off - kNow() + A.nudge) / 1000;
+    const beatAtHost = h => A.st.beat + (h - A.st.now) / 1e6 * A.st.tempo / 60;
+    const hostAtBeat = b => A.st.now + (b - A.st.beat) * 60 / A.st.tempo * 1e6;
+    const beatAtCtx = t => beatAtHost(ctxToHost(t)), ctxAtBeat = b => hostToCtx(hostAtBeat(b));
+    const live = () => !!(AB && A.on && A.st && A.st.on && A.off != null && ctx);
+    const anyPlaying = () => playing || RC.playing;
+    // ---- a start: beat 0 here when nobody else is in the session, else their next bar; when they're already playing
+    // (Start/Stop Sync), come in on the next 16th, in step with them ----
+    NB_GRID = function (steps) {
+      if (!AB || !A.on || !ctx) return null;
+      if (!sample() || !live()) return null;
+      kSample();
+      const st = A.st, t = ctx.currentTime + 0.08;
+      if (A.sync && st.peers > 0 && st.playing) {
+        let b = beatAtCtx(t); const bp = st.tPlay > st.now ? st.beatAtPlay : -1e9; if (bp > b) b = bp;   // (not before they start)
+        const n = Math.ceil(b * 4 - 1e-6);
+        return { t: ctxAtBeat(n / 4), step: steps ? ((n % steps) + steps) % steps : 0, abs: n };
+      }
+      let T0 = 0; try { T0 = AB.start(ctxToHost(t), Q); } catch (e) {}
+      sample();   // (the local beats moved: beat 0 is the start)
+      A.was = A.sync ? true : A.was;
+      return T0 > 0 ? { t: hostToCtx(T0), step: 0, abs: 0 } : null;
+    };
+    // ---- keep the sequencer and the Rhythm Creator on the session's grid (16ths, and the bar in 4/4) ----
+    function lock() {
+      if (!live()) return;
+      const st = A.st;
+      const fix = (t, step, bar, sd) => {
+        const b = beatAtCtx(t), n = Math.round(b * 4), err = (b * 4 - n) * sd;   // seconds behind the grid (+) or ahead (−)
+        let dt = 0, ds = 0;
+        if (Math.abs(err) > 0.0012) dt = Math.abs(err) > 0.02 ? -err : -err * 0.6;
+        if (bar) { const d = (((n - step) % bar) + bar) % bar; if (d) ds = d > bar / 2 ? d - bar : d; }
+        return { dt, ds };
+      };
+      if (playing && Math.abs(st.tempo - state.seq.bpm) < 0.01) {
+        const f = fix(nextTime, curStep, stepsNow() % 16 === 0 ? 16 : 0, stepDur());
+        nextTime += f.dt; if (f.ds) curStep = (((curStep + f.ds) % stepsNow()) + stepsNow()) % stepsNow();
+        if ((f.dt || f.ds) && RC.playing && Math.abs(RC.nextT - (nextTime - f.dt)) < 0.002) { RC.nextT = nextTime; RC.step += f.ds; return; }   // (locked onto the sequencer: move together)
+      }
+      if (RC.playing && Math.abs(st.tempo - rcBpm()) < 0.01) {
+        const S = rcSigOf(), f = fix(RC.nextT, RC.step, S.bar === 16 ? 16 : 0, rcStepDur());
+        RC.nextT += f.dt; RC.step += f.ds;
+      }
+    }
+    // ---- tempo both ways ----
+    function takeTempo(bpm) {
+      const v = Math.round(bpm * 1000) / 1000; A.applied = v;
+      A.quiet++;
+      try {
+        setBpm(v);
+        if (state.seq.bpm !== v && v >= 20 && v <= 300) { state.seq.bpm = v; bpmLabel.textContent = fmt(v) + " bpm"; save(); }   // (past the buttons' 50–180)
+      } finally { A.quiet--; }
+    }
+    { const b0 = setBpm; setBpm = function () {
+        const r = b0.apply(this, arguments);
+        if (state.seq.bpm % 1) bpmLabel.textContent = fmt(state.seq.bpm) + " bpm";
+        if (AB && A.on && !A.quiet) { A.tLocal = performance.now(); try { AB.setTempo(state.seq.bpm); } catch (e) {} }
+        return r;
+      }; }
+    // ---- Play and Stop (Start/Stop Sync) ----
+    { const s0 = startSeq; startSeq = function () {
+        const was = playing, r = s0.apply(this, arguments);
+        if (!was && playing) { A.last = "seq"; try { if (A.on && arpAnchor != null) arpAnchor = nextTime; } catch (e) {} }
+        return r;
+      };
+      const p0 = stopSeq; stopSeq = function () { const was = playing, r = p0.apply(this, arguments); if (was) stopped(); return r; };
+      const r0 = rcPlay; rcPlay = function (on) { const was = RC.playing, r = r0.apply(this, arguments); if (on && !was && RC.playing && !playing) A.last = "rc"; if (!on && was) stopped(); return r; }; }
+    function stopped() {
+      if (!AB || !A.on || A.quiet || !A.sync || anyPlaying()) return;
+      try { AB.stop(AB.now()); } catch (e) {} A.was = false;
+    }
+    function follow(st) {
+      if (!A.sync || A.quiet) { A.was = st.playing; return; }
+      if (A.was != null && st.playing !== A.was && st.peers > 0) {
+        A.quiet++;
+        try {
+          if (st.playing && !anyPlaying()) { start(); if (ctx) { if (A.last === "rc") rcPlay(true); else startSeq(); } }
+          else if (!st.playing && anyPlaying()) { if (playing) stopSeq(); if (RC.playing) rcPlay(false); }
+        } finally { A.quiet--; }
+      }
+      A.was = st.playing;
+    }
+    // ---- the loop: 20 times a second while it's on ----
+    function poll() {
+      const st = sample(); if (!st || !st.on) return;
+      if (ctx) kSample();
+      if (Math.abs(st.tempo - state.seq.bpm) > 0.004 && st.tempo !== A.applied && performance.now() - A.tLocal > 400) takeTempo(st.tempo);
+      follow(st);
+      if (++A.n % 4 === 0) lock();
+      bpmLabel.classList.toggle("abl", st.peers > 0);
+      const sig = st.peers + "|" + fmt(st.tempo) + "|" + st.playing;
+      if (sig !== A.sig) { A.sig = sig; if (!sheet.hidden) paint(); }
+    }
+    function setOn(on) {
+      A.on = on; keep(); clearInterval(A.timer); A.timer = 0; A.offs = []; A.off = null; A.was = null; A.applied = null;
+      let ok = false; try { ok = AB.enable(on, state.seq.bpm); if (on) AB.sync(A.sync); } catch (e) {}
+      if (on && ok) {
+        A.timer = setInterval(poll, 50);
+        setTimeout(() => { const st = sample(); if (A.on && st && st.on && !st.peers) { try { AB.setTempo(state.seq.bpm); } catch (e) {} } }, 250);   // alone: the session takes this tempo
+      }
+      if (!on) bpmLabel.classList.remove("abl");
+      paint();
+    }
+    // ---- the sheet ----
+    const btn = document.getElementById("lkBtn"), sheet = document.getElementById("lkSheet"), box = document.getElementById("ablBody");
+    const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    function row(title, sub, label, fn, on) {
+      const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", title), el("small", "", sub));
+      const b = el("button", "btn" + (on ? "" : " primary"), label); b.setAttribute("aria-pressed", String(!!on)); b.addEventListener("click", fn); r.append(g, b); return r;
+    }
+    function paint() {
+      if (!AB || !box) return;
+      box.hidden = false; box.innerHTML = "";
+      const st = A.st || {};
+      box.appendChild(el("div", "bt-style", "Ableton Link"));
+      const sub = !A.on ? "Off. Shares the tempo and the bars with Bitwig and other Link apps on this network."
+        : st.on ? (st.peers ? "Connected to " + st.peers + " app" + (st.peers === 1 ? "" : "s") : "On. No other Link apps yet") + " · " + fmt(st.tempo || state.seq.bpm) + " bpm" + (st.peers && st.playing && A.sync ? " · playing" : "") : "Starting…";
+      box.appendChild(row("Ableton Link", sub, A.on ? "On" : "Off", () => { start(); setOn(!A.on); }, A.on));
+      if (A.on) {
+        box.appendChild(row("Start/Stop Sync", A.sync ? "Play and Stop here start and stop the others, and theirs start and stop Nate Bloom" : "Off: tempo and bars only; each starts on its own", A.sync ? "On" : "Off",
+          () => { A.sync = !A.sync; keep(); try { AB.sync(A.sync); } catch (e) {} A.was = null; paint(); }, A.sync));
+        if (st.on && (st.tempo < 20 || st.tempo > 300)) box.appendChild(el("small", "", "The session's tempo (" + fmt(st.tempo) + ") is past what Nate Bloom plays (20–300), so it isn't following."));
+        const r = el("div", "lk-row"), g = el("div", "grow"), v = el("b", "", (A.nudge > 0 ? "+" : A.nudge < 0 ? "−" : "") + Math.abs(A.nudge) + " ms");
+        g.append(el("b", "", "Timing"), el("small", "", A.nudge ? "Nate Bloom plays " + Math.abs(A.nudge) + " ms " + (A.nudge > 0 ? "later" : "earlier") + " than the others' beat" : "If Nate Bloom sounds early or late against the others, move it here"));
+        const nb = (txt, d) => { const b = el("button", "btn", txt); b.setAttribute("aria-label", d > 0 ? "Later" : "Earlier"); b.addEventListener("click", () => { A.nudge = Math.max(-80, Math.min(80, A.nudge + d)); keep(); paint(); }); return b; };
+        v.style.cssText = "min-width:54px;text-align:center;font-family:var(--font-mono)";
+        r.append(g, nb("−", -5), v, nb("+", 5)); box.appendChild(r);
+        if (st.on && st.peers && !(st.tempo < 20 || st.tempo > 300)) box.appendChild(el("small", "", "Play waits for the next bar, so it starts on the beat with the others."));
+      }
+    }
+    if (AB) {
+      btn.hidden = false;
+      btn.addEventListener("click", () => { if (!window.NBLinkNative) { start(); sheet.hidden = false; } paint(); });
+      if (!window.NBLinkNative) document.getElementById("lkDone").addEventListener("click", () => { sheet.hidden = true; });
+      if (A.on) setTimeout(() => setOn(true), 600);   // (it was on last time)
+    }
+    window.__abl = { A, sample, lock, paint, setOn, kNow, beatAtCtx, ctxAtBeat, ctxToHost, hostToCtx, seq: () => ({ playing, nextTime, curStep, steps: stepsNow(), sd: stepDur() }), rc: () => ({ playing: RC.playing, nextT: RC.nextT, step: RC.step, sd: rcStepDur() }) };
   }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
