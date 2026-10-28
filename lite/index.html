@@ -1981,6 +1981,224 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   .stk-help { justify-content: flex-start; flex-basis: 100%; }
   .qk-t { height: 40px; }
 }
+/* ---------- Garage ---------- */
+.dj.gb { padding: 0; gap: 0; overflow: hidden; background: #110f18; }
+.gb-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left)); background: linear-gradient(#211d2e, #191623); border-bottom: 1px solid #2e2a3d; }
+.gb-grp { display: flex; align-items: center; gap: 6px; }
+.gb-ib { appearance: none; height: 40px; min-width: 40px; padding: 0 9px; border-radius: 10px; border: 1px solid #34304a; background: #262234; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font: 600 0.8rem var(--font-body); }
+.gb-ib svg { width: 21px; height: 21px; flex: none; }
+.gb-ib[aria-pressed="true"] { background: #3a3150; border-color: var(--lilac); color: var(--lilac); }
+.gb-ib:disabled { opacity: 0.4; cursor: default; }
+.gb-ib.gb-play { width: 52px; }
+.gb-ib.gb-play.on { background: #3fbf6f; border-color: #3fbf6f; color: #10251a; }
+.gb-ib.gb-rec { color: #ff5c5c; width: 46px; }
+.gb-ib.gb-rec.on { background: #ff5c5c; border-color: #ff5c5c; color: #2a0d0d; animation: gbBlink 1s steps(2) infinite; }
+.gb-ib.gb-rec.count { background: #ff5c5c33; }
+@keyframes gbBlink { 50% { opacity: 0.55; } }
+.gb-lcd { appearance: none; height: 40px; min-width: 120px; padding: 0 12px; border-radius: 10px; border: 1px solid #3c3653; background: #0c0b12; color: #9fe0b5; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+.gb-lcd b { font: 600 1rem/1 var(--font-mono); letter-spacing: 0.04em; }
+.gb-lcd small { font: 0.6rem/1.3 var(--font-mono); color: #8e86a6; }
+.gb .btn.gb-done { height: 40px; padding: 0 14px; }
+.gb-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; position: relative; }
+.gb-main > section { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.gb-main > section[hidden] { display: none; }
+/* instrument browser */
+.gb-browse { overflow-y: auto; padding: 14px max(14px, env(safe-area-inset-right)) 20px max(14px, env(safe-area-inset-left)); }
+.gb-bh { display: flex; flex-direction: column; gap: 3px; margin-bottom: 12px; }
+.gb-bh strong { font: 500 1.15rem var(--font-display); }
+.gb-bh small { color: var(--dim); font: 0.8rem var(--font-body); }
+.gb-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.gb-card { appearance: none; border: 1px solid #ffffff14; border-radius: 16px; min-height: 168px; padding: 14px; text-align: left; color: #fff; cursor: pointer; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; position: relative; overflow: hidden; background: var(--cg, #2b2540); box-shadow: 0 6px 18px #0006; }
+.gb-card:active { transform: scale(0.98); }
+.gb-card:disabled { opacity: 0.45; cursor: default; }
+.gb-card .gi { position: absolute; top: 12px; left: 14px; width: 74px; height: 74px; opacity: 0.95; }
+.gb-card b { font: 600 1.05rem var(--font-body); }
+.gb-card small { font: 0.74rem/1.35 var(--font-body); color: #ffffffcc; }
+.gb-card em { position: absolute; top: 12px; right: 12px; font: normal 600 0.62rem var(--font-mono); background: #0005; padding: 3px 7px; border-radius: 99px; letter-spacing: 0.05em; }
+/* instrument view */
+.gb-ih { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); border-bottom: 1px solid #262234; }
+.gb-trk { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 6px; border-radius: 10px; background: #1d1a28; border: 1px solid #2e2a3d; color: var(--ink); cursor: pointer; font: 600 0.82rem var(--font-body); }
+.gb-trk i { width: 28px; height: 28px; border-radius: 7px; background: var(--kc); display: grid; place-items: center; }
+.gb-trk i svg { width: 19px; height: 19px; }
+.gb-snd { appearance: none; display: inline-flex; flex-direction: column; justify-content: center; align-items: flex-start; height: 40px; min-width: 150px; max-width: 46vw; padding: 0 30px 0 12px; border-radius: 10px; background: #1d1a28; border: 1px solid #3a3550; color: var(--ink); cursor: pointer; position: relative; text-align: left; }
+.gb-snd b { font: 600 0.88rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.gb-snd small { font: 0.6rem var(--font-mono); color: var(--dim); white-space: nowrap; }
+.gb-snd::after { content: "▾"; position: absolute; right: 11px; top: 50%; transform: translateY(-50%); color: var(--lilac); }
+.gb-ctl { display: inline-flex; align-items: center; gap: 4px; height: 40px; }
+.gb-ctl > span { font: 600 0.6rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 2px; }
+.gb-ctl .btn { height: 36px; padding: 0 10px; font-size: 0.8rem; }
+.gb-ctl .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+.gb-ctl .gb-val { min-width: 34px; text-align: center; font: 600 0.8rem var(--font-mono); color: var(--ink); }
+.gb-ibody { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 10px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+.gb-tip { font: 0.76rem/1.4 var(--font-body); color: var(--dim); }
+.gb-tip b { color: var(--ink); }
+/* keyboard */
+.gb-kb { position: relative; flex: 1 1 auto; min-height: 170px; display: flex; touch-action: none; user-select: none; -webkit-user-select: none; }
+.gb-kw { flex: 1 1 0; position: relative; margin: 0 1px; border-radius: 0 0 9px 9px; background: linear-gradient(#f4f1f8, #ddd7e6); box-shadow: inset 0 -6px 0 #c9c1d6; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; color: #6d6585; font: 600 0.62rem var(--font-mono); }
+.gb-kw.on { background: linear-gradient(#ffd9a8, #ffb65c); box-shadow: inset 0 -3px 0 #e2963f; }
+.gb-kbk { position: absolute; top: 0; height: 60%; border-radius: 0 0 7px 7px; background: linear-gradient(#2c2838, #14121b); box-shadow: inset 0 -5px 0 #000, 0 2px 4px #0008; z-index: 2; }
+.gb-kbk.on { background: linear-gradient(#a37a3e, #6f4f22); }
+/* drum pads */
+.gb-pads { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 1fr; gap: 10px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.gb-pad { border-radius: 14px; background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--pc) 55%, #fff 0%), color-mix(in srgb, var(--pc) 60%, #000)); border: 1px solid #ffffff1a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #fff; font: 600 0.86rem var(--font-body); min-height: 70px; text-shadow: 0 1px 2px #0008; }
+.gb-pad small { font: 0.6rem var(--font-mono); opacity: 0.8; }
+.gb-pad.on { filter: brightness(1.45); transform: scale(0.97); }
+/* smart chord strips */
+.gb-strips { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.gb-strip { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.gb-chord { flex: 1.6 1 0; border-radius: 10px; background: linear-gradient(#3a3350, #2a2440); border: 1px solid #4a4266; color: var(--ink); display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; font: 600 0.95rem var(--font-body); min-height: 56px; }
+.gb-chord.auto { border-color: var(--amber); box-shadow: 0 0 0 2px #ffb65c55 inset; background: linear-gradient(#5a4628, #3a2d1c); }
+.gb-seg { flex: 1 1 0; border-radius: 7px; background: #1d1a28; border: 1px solid #2e2a3d; color: #8e86a6; display: flex; align-items: center; justify-content: center; font: 0.62rem var(--font-mono); min-height: 22px; }
+.gb-chord.on, .gb-seg.on { background: #ffb65c; color: #2a1d08; border-color: #ffb65c; }
+/* sampler and audio recorder */
+.gb-slots { display: flex; flex-wrap: wrap; gap: 6px; }
+.gb-slots .btn { height: 38px; font-size: 0.78rem; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gb-slots .btn[aria-pressed="true"] { border-color: var(--lilac); color: var(--lilac); background: #2a2140; }
+.gb-meter { height: 18px; border-radius: 9px; background: #0c0b12; border: 1px solid #2e2a3d; overflow: hidden; }
+.gb-meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3fbf6f, #ffd54f 75%, #ff5c5c); transition: width 0.06s linear; }
+.gb-audio { display: flex; flex-direction: column; gap: 14px; align-items: stretch; max-width: 620px; width: 100%; margin: 10px auto; }
+.gb-audio .big { font: 500 1.05rem var(--font-display); }
+/* tracks */
+.gb-tracks { position: relative; }
+.gb-tl { flex: 1 1 auto; min-height: 0; overflow: auto; position: relative; background: #13111b; overscroll-behavior: contain; }
+.gb-tlin { position: relative; min-height: 100%; }
+.gb-rulerow { position: sticky; top: 0; z-index: 6; display: flex; height: 28px; background: #1b1826; border-bottom: 1px solid #2e2a3d; }
+.gb-corner { position: sticky; left: 0; z-index: 7; flex: none; background: #1b1826; border-right: 1px solid #2e2a3d; display: flex; align-items: center; padding-left: 10px; font: 600 0.6rem var(--font-mono); color: var(--dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.gb-ruler { position: relative; flex: none; height: 100%; cursor: pointer; touch-action: none; }
+.gb-ruler span { position: absolute; top: 0; height: 100%; border-left: 1px solid #3a3550; padding-left: 4px; font: 0.62rem/28px var(--font-mono); color: #8e86a6; pointer-events: none; }
+.gb-cycbar { position: absolute; top: 4px; height: 20px; border-radius: 5px; background: #ffd54f55; border: 1px solid #ffd54f; z-index: 1; touch-action: none; }
+.gb-cycbar::before, .gb-cycbar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 12px; cursor: ew-resize; }
+.gb-cycbar::before { left: -6px; } .gb-cycbar::after { right: -6px; }
+.gb-row { display: flex; border-bottom: 1px solid #221f2e; }
+.gb-head { position: sticky; left: 0; z-index: 4; flex: none; background: #1b1826; border-right: 1px solid #2e2a3d; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 8px; box-sizing: border-box; cursor: pointer; }
+.gb-head.sel { background: #2a2140; box-shadow: inset 3px 0 0 var(--lilac); }
+.gb-head i { width: 34px; height: 34px; border-radius: 8px; background: var(--kc); display: grid; place-items: center; flex: none; }
+.gb-head i svg { width: 22px; height: 22px; }
+.gb-head .hn { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.gb-head .hn b { font: 600 0.8rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gb-head .hn small { font: 0.58rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gb-head .ms { display: flex; flex-direction: column; gap: 3px; }
+.gb-head .ms button { appearance: none; width: 24px; height: 20px; border-radius: 5px; border: 1px solid #3a3550; background: #13111b; color: var(--dim); font: 700 0.62rem var(--font-mono); cursor: pointer; padding: 0; }
+.gb-head .ms button[aria-pressed="true"].m { background: #4aa3ff; color: #08131f; border-color: #4aa3ff; }
+.gb-head .ms button[aria-pressed="true"].s { background: #ffd54f; color: #241d05; border-color: #ffd54f; }
+.gb-lane { position: relative; flex: none; touch-action: pan-x pan-y; }
+.gb-lane.sel { background: #ffffff05; }
+.gb-grid { position: absolute; inset: 0; pointer-events: none; }
+.gb-reg { position: absolute; top: 5px; bottom: 5px; border-radius: 7px; background: var(--rc); border: 1px solid #0006; box-sizing: border-box; overflow: hidden; color: #0d1a10; cursor: grab; touch-action: none; }
+.gb-reg.sel { box-shadow: 0 0 0 2px #fff, 0 2px 10px #000a; z-index: 2; }
+.gb-reg .rl { position: absolute; left: 6px; top: 2px; right: 14px; font: 600 0.62rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.gb-reg canvas { position: absolute; left: 0; top: 16px; width: 100%; height: calc(100% - 18px); pointer-events: none; }
+.gb-reg .rr { position: absolute; top: 0; bottom: 0; width: 1px; background: #0005; pointer-events: none; }
+.gb-reg .rh { position: absolute; right: 0; top: 0; bottom: 0; width: 14px; cursor: ew-resize; background: linear-gradient(90deg, transparent, #0003); }
+.gb-ph { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; z-index: 3; pointer-events: none; box-shadow: 0 0 6px #fff8; }
+.gb-phm { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; z-index: 2; pointer-events: none; }
+.gb-phm::before { content: ""; position: absolute; top: 0; left: -6px; border: 7px solid transparent; border-top: 9px solid #fff; }
+.gb-addrow { display: flex; }
+.gb-addrow .gb-head { justify-content: center; color: var(--lilac); font: 600 0.82rem var(--font-body); }
+.gb-empty { padding: 30px 20px; color: var(--dim); font: 0.9rem/1.5 var(--font-body); text-align: center; }
+.gb-tbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); border-top: 1px solid #262234; background: #181522; }
+.gb-tbar .btn { height: 36px; padding: 0 11px; font-size: 0.8rem; }
+.gb-tbar .btn[aria-pressed="true"] { background: #ffd54f; border-color: #ffd54f; color: #241d05; }
+.gb-tbar .sp { flex: 1; }
+.gb-rmenu { position: absolute; z-index: 9; display: flex; flex-wrap: wrap; max-width: calc(100% - 12px); gap: 2px; padding: 3px; border-radius: 10px; background: #2a2540; border: 1px solid #4a4266; box-shadow: 0 8px 22px #000b; }
+.gb-rmenu button { appearance: none; border: 0; background: none; color: var(--ink); font: 600 0.78rem var(--font-body); padding: 8px 10px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+.gb-rmenu button:hover, .gb-rmenu button:active { background: #3a3350; }
+/* piano roll */
+.gb-ed { position: absolute; left: 0; right: 0; bottom: 0; height: 52%; z-index: 8; background: #15121e; border-top: 2px solid var(--lilac); display: flex; flex-direction: column; box-shadow: 0 -10px 30px #000a; }
+.gb-ed[hidden] { display: none; }
+.gb-edh { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid #2e2a3d; }
+.gb-edh strong { font: 600 0.85rem var(--font-body); margin-right: 4px; }
+.gb-edh .btn { height: 34px; padding: 0 10px; font-size: 0.78rem; }
+.gb-edh .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+.gb-edh input[type=range] { width: 110px; accent-color: var(--amber); }
+.gb-edh .sp { flex: 1; }
+.gb-edw { flex: 1 1 auto; min-height: 0; overflow: auto; position: relative; overscroll-behavior: contain; }
+.gb-edw canvas { display: block; touch-action: none; }
+/* sheets */
+.gb-sb { display: flex; flex-direction: column; gap: 8px; }
+.gb-sb .gb-row2 { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); flex-wrap: wrap; }
+.gb-sb .gb-row2.on { border-color: var(--lilac); background: #261f38; }
+.gb-sb .gb-row2 .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.gb-sb .gb-row2 b { font: 600 0.88rem var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gb-sb .gb-row2 small { font: 0.68rem var(--font-mono); color: var(--dim); }
+.gb-sb .gb-row2 .btn { height: 34px; padding: 0 10px; font-size: 0.8rem; }
+.gb-sb .gb-row2 .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+.gb-sb .gb-row2 input[type=range] { flex: 1 1 140px; accent-color: var(--lilac); }
+.gb-sb .gb-g { font: 600 0.62rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; padding: 8px 2px 0; }
+.gb-sb .gb-in { height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 0.9rem var(--font-body); padding: 0 10px; flex: 1; min-width: 0; }
+.gb-sb .gb-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.gb-sb .gb-chips .btn { height: 32px; padding: 0 9px; font-size: 0.78rem; }
+.gb-sb .gb-chips .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+.gb-sb .gb-knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.gb-sb .gb-knob { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-radius: 10px; background: var(--raised); border: 1px solid var(--line); }
+.gb-sb .gb-knob span { display: flex; justify-content: space-between; font: 600 0.74rem var(--font-body); }
+.gb-sb .gb-knob span small { font: 0.66rem var(--font-mono); color: var(--dim); }
+.gb-sb .gb-knob input { accent-color: var(--lilac); width: 100%; }
+#gbBtn .stl { white-space: nowrap; }
+@media (max-width: 700px) {
+  /* two rows: the editing buttons and Done, then the transport with the metronome and settings */
+  .gb-bar { gap: 6px 5px; justify-content: flex-start; }
+  .gb-bar > .gb-grp { display: contents; }
+  .gb-bar::after { content: ""; order: 3; flex-basis: 100%; height: 0; }
+  .gb-left > * { order: 1; }
+  .gb-right > * { order: 2; }
+  #gbLoopsBtn { margin-left: auto; }
+  .gb-tp > * { order: 4; }
+  #gbHome { margin-left: auto; }
+  #gbMetro, #gbSetBtn { order: 5; }
+  #gbSetBtn { margin-right: auto; }
+  .gb-ib { height: 38px; min-width: 38px; padding: 0 6px; }
+  .gb-ib.gb-songs span { display: none; }
+  .gb-ib.gb-play { width: 48px; } .gb-ib.gb-rec { width: 44px; }
+  .gb-lcd { min-width: 96px; height: 38px; }
+  .gb .btn.gb-done { height: 38px; padding: 0 12px; }
+  /* track heads: icon and M S on top, the name below */
+  .gb-head { flex-wrap: wrap; align-content: center; gap: 3px 4px; padding: 0 5px 0 7px; }
+  .gb-head i { width: 28px; height: 28px; border-radius: 7px; }
+  .gb-head i svg { width: 18px; height: 18px; }
+  .gb-head .ms { flex-direction: row; margin-left: auto; }
+  .gb-head .ms button { width: 26px; height: 24px; }
+  .gb-head .hn { order: 3; flex: 1 1 100%; }
+  .gb-head .hn b { font-size: 0.7rem; }
+  .gb-head .hn small { display: none; }
+  .gb-addrow .gb-head { font-size: 0.74rem; }
+  /* the piano roll's buttons scroll sideways, Done first */
+  .gb-edh { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .gb-edh strong { display: none; }
+  .gb-edh > * { flex: none; }
+  #gbEdX { order: -1; }
+  .gb-tbar .gb-tip { display: none; }
+  .gb-cards { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .gb-card { min-height: 150px; padding: 12px; }
+  .gb-card .gi { width: 58px; height: 58px; }
+  .gb-card small { font-size: 0.68rem; }
+  .gb-pads { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .gb-strips { gap: 3px; }
+  .gb-chord { font-size: 0.72rem; padding-top: 8px; }
+  .gb-snd { max-width: 60vw; min-width: 120px; }
+  .gb-ed { height: 62%; }
+}
+.gb-pad i { font: normal 600 0.58rem var(--font-mono); opacity: 0.65; }
+.gb-pad.dim { opacity: 0.35; }
+/* fretboard (Notes, for Smart Guitar and Smart Bass) */
+.gb-fb { flex: 1 1 auto; min-height: 160px; display: grid; border-radius: 10px; overflow: hidden; background: linear-gradient(90deg, #4a2f1b, #5c3b22 40%, #4a2f1b); touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: inset 0 0 0 1px #0006; }
+.gb-fs { display: grid; position: relative; }
+.gb-fs::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--sw, 2px); transform: translateY(-50%); background: linear-gradient(#f2ead8, #a89a80); box-shadow: 0 1px 2px #0009; pointer-events: none; }
+.gb-fr { position: relative; border-right: 2px solid #b8b0a0aa; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2px; font: 0.55rem var(--font-mono); color: #ffffff50; }
+.gb-fr:first-child { background: #00000040; border-right: 6px solid #e9e2d2; color: #ffffff90; }
+.gb-fr.dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #ffffff35; }
+.gb-fr.on { background: #ffb65caa; color: #2a1d08; }
+.gb-seg.mute { opacity: 0.3; }
+.gb-seg i, .gb-chord i { font-style: normal; }
+.gb-ibody .gb-row3 { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gb-ibody .gb-row3 .btn { height: 38px; font-size: 0.8rem; }
+.gb-ibody .gb-row3 .btn.rec { background: #ff5c5c; border-color: #ff5c5c; color: #2a0d0d; }
+.gb-ibody .gb-row3 .btn[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
+.gb-sb p.gb-p { margin: 0; font: 0.84rem/1.5 var(--font-body); color: var(--ink); }
+.gb-sb p.gb-p b { color: var(--lilac); }
+.gb-sb .gb-row2 .gb-v { font: 600 0.72rem var(--font-mono); color: var(--dim); min-width: 52px; text-align: right; }
+.gb-sb .gb-row2 .gb-lab { font: 600 0.72rem var(--font-body); color: var(--dim); min-width: 56px; }
+.gb-sb .gb-row2 .gb-num { width: 64px; flex: none; text-align: center; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -2162,6 +2380,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <button class="btn mode studio" id="djBtn" title="DJ: mix two songs and grab samples"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7.5"/><circle cx="10" cy="13.5" r="2"/><path d="M20 3v8l-4.5 3.5"/></svg><span class="stl">DJ</span></button>
       <button class="btn mode studio" id="rcBtn" title="Rhythm Creator: a 16-track drum machine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="3.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="3.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="16.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="stl">Rhythm</span></button>
       <button class="btn mode studio" id="bpBtn" title="Beat Pads: play and record beats on 16 pads, chop samples"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8.5" height="8.5" rx="2" fill="currentColor"/></svg><span class="stl">Beats</span></button>
+      <button class="btn mode studio" id="gbBtn" title="Garage: a GarageBand-style studio. Choose an instrument, play it, record tracks, arrange, mix and export a song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 3.4l-7.1 7.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M12.9 10.1c-1.8-1.2-4.3-.9-5.8.6-.8.9-1.2 2-1 3.1-1.4 0-2.7.6-3.4 1.7-1.1 1.7-.4 3.9 1.4 4.7 1.6.7 3.5.1 4.4-1.4.5-.8.6-1.7.4-2.5 1.2.2 2.4-.2 3.3-1.1 1.6-1.6 1.6-4 .7-5.1z" fill="currentColor"/><path d="M17.7 1.9l4.4 4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="stl">Garage</span></button>
     </div>
     </div>
   </header>
@@ -2990,6 +3209,56 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <div class="ed-foot sheet-foot"><button class="btn big" id="qkAdd">+ Add a sound</button><button class="btn big primary" id="qkDone">Done</button></div>
   </div>
 </div>
+<div class="dj gb" id="gbView" hidden role="dialog" aria-label="Garage">
+  <div class="gb-bar" id="gbBar">
+    <div class="gb-grp gb-left">
+      <button class="gb-ib gb-songs" id="gbSongsBtn" aria-label="My Songs" title="My Songs"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h10M4 18h7"/><path d="M18 17V5l3 2"/><circle cx="16" cy="17" r="2.2"/></svg><span>Songs</span></button>
+      <button class="gb-ib" id="gbUndo" aria-label="Undo" title="Undo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button class="gb-ib" id="gbBrowseBtn" aria-label="Instruments" title="Instruments: add a track"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></svg></button>
+      <button class="gb-ib" id="gbViewBtn" aria-label="Tracks" title="Tracks"></button>
+      <button class="gb-ib" id="gbMixBtn" aria-label="Mixer" title="Mixer: every track's volume and pan"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v16M12 4v16M18 4v16"/><rect x="3.5" y="13" width="5" height="3" rx="1" fill="currentColor"/><rect x="9.5" y="7" width="5" height="3" rx="1" fill="currentColor"/><rect x="15.5" y="11" width="5" height="3" rx="1" fill="currentColor"/></svg></button>
+    </div>
+    <div class="gb-grp gb-tp">
+      <button class="gb-ib" id="gbHome" aria-label="Back to the beginning" title="Back to the beginning"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M20 5.5v13L8.5 12z"/></svg></button>
+      <button class="gb-ib gb-play" id="gbPlay" aria-label="Play" title="Play (space)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg></button>
+      <button class="gb-ib gb-rec" id="gbRec" aria-label="Record" title="Record (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg></button>
+      <button class="gb-lcd" id="gbLcd" aria-label="Song settings"><b id="gbPos">1 . 1</b><small id="gbInfo">100 · C · 4/4</small></button>
+    </div>
+    <div class="gb-grp gb-right">
+      <button class="gb-ib" id="gbLoopsBtn" aria-label="Loops" title="Drum loops"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg></button>
+      <button class="gb-ib" id="gbMetro" aria-pressed="true" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 16l5-9"/></svg></button>
+      <button class="gb-ib" id="gbSetBtn" aria-label="Song settings" title="Tempo, key, time, count-in"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
+      <button class="gb-ib" id="gbHelpBtn" aria-label="How the Garage works" title="How it works">?</button>
+      <button class="btn primary gb-done" id="gbDone">Done</button>
+    </div>
+  </div>
+  <div class="gb-main">
+    <section class="gb-browse" id="gbBrowse" hidden>
+      <div class="gb-bh"><strong>Choose an instrument</strong><small id="gbBrowseSub">Each one becomes a track. Play it, press ● to record, then arrange it in Tracks.</small></div>
+      <div class="gb-cards" id="gbCards"></div>
+    </section>
+    <section class="gb-inst" id="gbInst" hidden>
+      <div class="gb-ih" id="gbIh"></div>
+      <div class="gb-ibody" id="gbIb"></div>
+    </section>
+    <section class="gb-tracks" id="gbTracks" hidden>
+      <div class="gb-tl" id="gbTl"><div class="gb-tlin" id="gbTlin"></div></div>
+      <div class="gb-rmenu" id="gbRmenu" hidden></div>
+      <div class="gb-tbar" id="gbTbar"></div>
+      <div class="gb-ed" id="gbEd" hidden>
+        <div class="gb-edh" id="gbEdh"></div>
+        <div class="gb-edw" id="gbEdw"><canvas id="gbEdc"></canvas></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="editor sheet gb-sheet" id="gbSheet" hidden>
+  <div class="ed-card" role="dialog" aria-labelledby="gbShT">
+    <div class="ed-head"><strong id="gbShT">Garage</strong><span class="ed-info" id="gbShI"></span></div>
+    <div class="gb-sb" id="gbShB"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="gbShDone">Done</button></div>
+  </div>
+</div>
 <div class="lk-code" id="lkCode" hidden role="alertdialog" aria-label="Link code"><div><small id="lkCodeWho"></small><b id="lkCodeNum"></b><span>Type this code on the tablet</span></div></div>
 
 <div class="editor sheet" id="hisSheet" hidden>
@@ -3124,6 +3393,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the FX Lab, applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
       <p hidden><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
+      <p><b>Garage:</b> the Garage tab is a GarageBand-style studio. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
       <p><b>Rhythm Creator:</b> the Rhythm button in the top bar opens a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
@@ -20065,7 +20335,7 @@ registerProcessor("nb-verb", NBVerb);`;
         if (r) rate = r;
       }, 1500); }
     window.__fp = { FP, apply: fpApply, nodes: fpNodes };
-    window.__wam = { chainOf, stemTaps: () => nbwStemTaps(), wireTarget: nbwWireTarget, setSend: nbwSetSend, targets: nbwTargets, NBW, CAT: NBW_CAT, here: NBW_HERE, host: nbwHost, instrument: nbwInstrument, addFx: nbwAddFx, removeFx: nbwRemoveFx, wire: nbwWire, base: nbwBase, openGui: nbwOpenGui, closeGui: nbwCloseGui, allOff: nbwAllOff, paint: nbwPaint, st: () => state };
+    window.__wam = { create: k => nbwCreate(nbwSpec(k)).then(inst => ({ inst, sp: nbwSpec(k) })), chainOf, stemTaps: () => nbwStemTaps(), wireTarget: nbwWireTarget, setSend: nbwSetSend, targets: nbwTargets, NBW, CAT: NBW_CAT, here: NBW_HERE, host: nbwHost, instrument: nbwInstrument, addFx: nbwAddFx, removeFx: nbwRemoveFx, wire: nbwWire, base: nbwBase, openGui: nbwOpenGui, closeGui: nbwCloseGui, allOff: nbwAllOff, paint: nbwPaint, st: () => state };
   }
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
   if (window.NB_SIM) { const mv0 = makeVoice; makeVoice = function () { const S = window.NB_SIM, r = S.beginVoice(arguments[1]); try { return mv0.apply(this, arguments); } finally { S.endBuild(r); } }; }
@@ -22734,6 +23004,1793 @@ registerProcessor("nb-wave", NBWave);
     window.__stk = { items, groupsOn, together, drop, only, focusOn, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
       seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }
+  // ======================================================================
+  // Garage: a GarageBand-style studio in its own tab. Pick an instrument (keyboard, drums, smart bass, guitar and
+  // strings with chord strips, Nate Bloom's synths, his plugins, the sampler, an audio recorder), play it on a
+  // touch instrument, record it into a song of tracks, arrange the regions, edit the notes, mix, export.
+  // Every sound comes from the rest of Nate Bloom: the Studio and library instruments, the engines and presets,
+  // the plugins, the Rhythm Creator's kits and the sampler slots.
+  // ======================================================================
+  {
+    const $ = id => document.getElementById(id);
+    const gbEl = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt != null) x.textContent = txt; return x; };
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const NN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+    const nname = m => NN[((m % 12) + 12) % 12] + (Math.floor(m / 12) - 1);
+    let gbToastT = 0;
+    function gbSay(msg) { const t = $("uiToast"); if (!t) return; t.textContent = msg; t.hidden = false; clearTimeout(gbToastT); gbToastT = setTimeout(() => { t.hidden = true; }, 3000); }
+    const btnE = (txt, fn, cls, aria) => { const b = gbEl("button", "btn" + (cls ? " " + cls : ""), txt); if (aria) b.setAttribute("aria-label", aria); if (fn) b.addEventListener("click", fn); return b; };
+
+    // ---------- the kinds of instrument ----------
+    const SV = (d, extra) => '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"' + (extra || "") + ">" + d + "</svg>";
+    const ICON = {
+      keys: SV('<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M7.2 6v12M11.9 6v12M16.6 6v12"/><path d="M5.6 6v6.5M10.3 6v6.5M15 6v6.5M19.7 6v6.5" stroke-width="2.6"/>'),
+      drums: SV('<ellipse cx="12" cy="10" rx="8" ry="3"/><path d="M4 10v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M8 3.5l3 5M16 3.5l-3 5"/>'),
+      bass: SV('<path d="M20.5 3.5l-8.2 8.2"/><path d="M12.6 11.4c-1.6-.8-3.6-.4-4.8 1-.8.9-.9 2-.6 3-1.3-.1-2.6.4-3.3 1.4-1.2 1.6-.7 3.8 1 4.6 1.6.8 3.6.2 4.6-1.3.5-.7.7-1.6.5-2.4 1.1.2 2.2-.2 3-1 1.2-1.2 1.4-3.1.6-4.5"/><path d="M18 3l3 3"/>'),
+      guitar: SV('<path d="M20 4l-6.5 6.5"/><path d="M13.5 10.5c-1.8-1.2-4.4-.9-5.9.7-.9.9-1.2 2.1-1 3.2-1.4 0-2.8.6-3.5 1.7-1.1 1.7-.4 4 1.5 4.8 1.6.7 3.6.1 4.5-1.4.5-.8.6-1.7.4-2.5 1.2.2 2.5-.2 3.4-1.1 1.6-1.6 1.6-4.2.6-5.4z"/><circle cx="8.8" cy="15.2" r="1.3"/><path d="M18.5 2.5l3 3"/>'),
+      strings: SV('<path d="M12 2.5v4"/><path d="M9.5 6.5h5l-.6 2.6c1.7.6 2.8 2 2.8 3.6 0 1.1-.5 2-1.2 2.7.9.6 1.4 1.6 1.4 2.7 0 2.2-2.2 3.4-4.9 3.4s-4.9-1.2-4.9-3.4c0-1.1.5-2.1 1.4-2.7-.7-.7-1.2-1.6-1.2-2.7 0-1.6 1.1-3 2.8-3.6z"/><path d="M10.4 12.5v4M13.6 12.5v4"/>'),
+      synth: SV('<rect x="2.5" y="4" width="19" height="16" rx="2.5"/><circle cx="8" cy="9.5" r="2.2"/><circle cx="16" cy="9.5" r="2.2"/><path d="M5.5 15.5h13M8 9.5l1.2-1.2M16 9.5l-1-1.4"/>'),
+      plugin: SV('<path d="M9 2.5v5M15 2.5v5"/><rect x="5.5" y="7.5" width="13" height="6" rx="1.5"/><path d="M8 13.5v2a4 4 0 0 0 8 0v-2M12 19.5v2"/>'),
+      sampler: SV('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M6 12h1.5l1.5-4 2 8 2-10 2 9 1.5-3H18"/>'),
+      audio: SV('<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7"/>'),
+    };
+    const KIND = {
+      keys: { name: "Keyboard", sub: "Grand piano, upright, organ, electric pianos, bells", kc: "#3f9e5c", cg: "linear-gradient(150deg, #2f7d4a, #16351f)", rc: "#6fd08a" },
+      drums: { name: "Drums", sub: "The Studio kit (real drums), 808, 909, Real 808 and your kits", kc: "#c7922a", cg: "linear-gradient(150deg, #b7832a, #4a3412)", rc: "#f0c14e" },
+      bass: { name: "Smart Bass", sub: "Chord strips that play bass lines, or tap single notes", kc: "#3f7fb0", cg: "linear-gradient(150deg, #2f6d9e, #12283a)", rc: "#6fb4e8" },
+      guitar: { name: "Smart Guitar", sub: "Strum chords, pick strings, or let Autoplay strum", kc: "#b0623f", cg: "linear-gradient(150deg, #a3552f, #3e1d10)", rc: "#f09a6a" },
+      strings: { name: "Smart Strings", sub: "Studio strings: hold a chord to bow it, or Autoplay", kc: "#8a4fb0", cg: "linear-gradient(150deg, #7a3fa3, #2c1340)", rc: "#c79af0" },
+      synth: { name: "Synths", sub: "Nate Bloom's engines and presets: Supersaw, Juno, Moog, CS-80…", kc: "#c74f8a", cg: "linear-gradient(150deg, #b33f7a, #3e1229)", rc: "#f08fc0" },
+      plugin: { name: "Your Plugins", sub: "Twin 77, Duet 80, Hypnagogia, Nebula 80 and the rest", kc: "#d0782a", cg: "linear-gradient(150deg, #c86f22, #4a260a)", rc: "#ffb65c" },
+      sampler: { name: "Sampler", sub: "Record or load a sound, then play it across the keys", kc: "#3fa39e", cg: "linear-gradient(150deg, #2f8f8a, #10302e)", rc: "#7fd6c2" },
+      audio: { name: "Audio Recorder", sub: "Record your voice or an instrument with the mic", kc: "#3f5fb0", cg: "linear-gradient(150deg, #3352a0, #121c3a)", rc: "#7f9cf0" },
+    };
+    const ORDER = ["keys", "drums", "bass", "guitar", "strings", "synth", "plugin", "sampler", "audio"];
+    const SMART = { bass: 1, guitar: 1, strings: 1 };
+
+    // ---------- songs: kept with the rest of Nate Bloom (and in its projects) ----------
+    const GBK = "nightbloom-garage", GBP = "nightbloom-garage-s-";
+    let IDX = { songs: [], cur: "" };
+    try { const v = JSON.parse(localStorage.getItem(GBK) || "null"); if (v && Array.isArray(v.songs)) IDX = { songs: v.songs.filter(x => x && x.id), cur: v.cur || "" }; } catch (e) {}
+    const saveIdx = () => { try { localStorage.setItem(GBK, JSON.stringify(IDX)); } catch (e) {} };
+    function fixSong(s) {
+      const d = { v: 1, name: "My Song", bpm: 100, key: 0, minor: false, sig: 4, bars: 8, auto: true, metro: true, cin: true, merge: false, cyc: { on: false, a: 0, b: 16 }, tracks: [], sel: 0, ph: 0, zoom: 3, view: "browse", mvol: 1 };
+      for (const k in d) if (s[k] == null) s[k] = d[k];
+      s.bpm = clamp(+s.bpm || 100, 40, 240); s.sig = [2, 3, 4, 5, 6, 7].includes(s.sig) ? s.sig : 4;
+      s.tracks = (s.tracks || []).filter(t => t && KIND[t.kind]).map(t => Object.assign({ name: KIND[t.kind].name, snd: defaultSound(t.kind), vol: 0.8, pan: 0, mute: false, solo: false, oct: 0, auto: 0, p: null, regions: [] }, t));
+      s.tracks.forEach(t => { t.regions = (t.regions || []).filter(r => r && r.len > 0).map(r => Object.assign({ rep: 1 }, r)); });
+      s.sel = clamp(s.sel | 0, 0, Math.max(0, s.tracks.length - 1));
+      return s;
+    }
+    function newSong(name) {
+      let n = IDX.songs.length + 1; while (IDX.songs.some(x => x.name === "My Song " + n)) n++;
+      return fixSong({ id: uid(), name: name || "My Song " + n });
+    }
+    function readSong(id) { try { const s = JSON.parse(localStorage.getItem(GBP + id) || "null"); if (s && Array.isArray(s.tracks)) return fixSong(s); } catch (e) {} return null; }
+    let S = null, saveT = 0;
+    function saveNow() {
+      clearTimeout(saveT); if (!S) return;
+      try { localStorage.setItem(GBP + S.id, JSON.stringify(S)); } catch (e) { gbSay("Couldn't save the song: this device's storage is full"); }
+      const e = IDX.songs.find(x => x.id === S.id);
+      if (e) { e.name = S.name; e.t = Date.now(); e.n = S.tracks.length; } else IDX.songs.unshift({ id: S.id, name: S.name, t: Date.now(), n: S.tracks.length });
+      IDX.cur = S.id; saveIdx();
+    }
+    const saveSong = () => { clearTimeout(saveT); saveT = setTimeout(saveNow, 350); };
+    function ensureSong() {
+      if (S) return S;
+      S = (IDX.cur && readSong(IDX.cur)) || (IDX.songs[0] && readSong(IDX.songs[0].id)) || null;
+      if (!S) { S = newSong(); saveNow(); }
+      return S;
+    }
+    // undo: the song as it was before each change
+    const UNDO = [];
+    function gbDo() { if (!S) return; UNDO.push(JSON.stringify(S)); if (UNDO.length > 50) UNDO.shift(); }
+    // ---------- time ----------
+    const spb = () => 60 / S.bpm;
+    const rEnd = r => r.start + r.len * (r.rep || 1);
+    function songEndBeat() { let e = 0; S.tracks.forEach(t => t.regions.forEach(r => { e = Math.max(e, rEnd(r)); })); return e; }
+    function fitLen() { if (S.auto) S.bars = Math.max(8, Math.ceil(songEndBeat() / S.sig / 4 - 1e-6) * 4); }
+    const keyName = () => NN[S.key] + (S.minor ? " minor" : "");
+
+    // ---------- the sounds each kind can use ----------
+    const entries = () => { try { return allEntries(); } catch (e) { return []; } };
+    const plugCat = () => ((window.__wam && __wam.CAT) || []).filter(c => c.kind === "instrument");
+    const plugOK = () => !!(window.__wam && __wam.here && __wam.create);
+    function soundsFor(kind) {
+      const E = entries(), out = [];
+      const add = (ref, name, sub, group) => { if (!out.some(x => x.ref === ref)) out.push({ ref, name, sub: sub || "", group: group || "" }); };
+      const lib = (e, g) => add("lib:" + e.id.slice(2), e.name, e.sub, g);
+      const studio = re => E.filter(e => e.id.startsWith("w:nb-") && re.test(e.id.slice(5)));
+      const cat = (c, re) => E.filter(e => e.cat === c && e.id.startsWith("w:") && !e.id.startsWith("w:nb-") && !e.id.startsWith("w:wam:") && (!re || re.test(e.name)));
+      const presets = re => E.filter(e => e.id.startsWith("n:") && e.cat !== "wave" && (!re || re.test(e.name + " " + e.sub)));
+      const prog = (e, a, b) => { const p = e.prog | 0; return p >= a && p <= b; };
+      if (kind === "keys") {
+        studio(/piano|upright|organ|grand|harp|marimba|glock|xylo|celest/).forEach(e => lib(e, "Studio"));
+        cat("keys").forEach(e => lib(e, "Keys & organ")); cat("bells").forEach(e => lib(e, "Bells & mallets"));
+        if (curInst) add("sf2", curInst.name, "your SF2 / SFZ instrument", "My instrument");
+        studio(/trumpet|sax|flute|clarinet|horn|brass|choir|voice/).forEach(e => lib(e, "Studio"));
+        cat("winds").forEach(e => lib(e, "Winds & brass")); cat("world").forEach(e => lib(e, "World")); cat("perc").forEach(e => lib(e, "Percussion"));
+      }
+      if (kind === "bass") {
+        cat("gtrbass").filter(e => prog(e, 32, 39)).forEach(e => lib(e, "Bass"));
+        studio(/dbass/).forEach(e => lib(e, "Studio"));
+        presets(/bass/i).forEach(e => add("pre:" + e.id.slice(2), e.name, e.sub, "Synth bass"));
+        add("eng:mono", "Mono synth bass", "the Minimoog-style engine", "Synth bass");
+      }
+      if (kind === "guitar") {
+        cat("gtrbass").filter(e => prog(e, 24, 31)).forEach(e => lib(e, "Guitars"));
+        if (plugOK()) plugCat().filter(c => /guitar/i.test(c.name)).forEach(c => add("wam:" + c.key, c.name, "plugin, physical model", "Plugins"));
+      }
+      if (kind === "strings") {
+        studio(/string|violin|cello|pizz|viola|harp|dbass/).forEach(e => lib(e, "Studio"));
+        cat("strings", /string|violin|viola|cello|contrabass|pizz|orchestra|harp|tremolo/i).forEach(e => lib(e, "Library strings"));
+      }
+      if (kind === "synth") {
+        presets().forEach(e => add("pre:" + e.id.slice(2), e.name, e.sub, e.cat === "classic" ? "Classic synths" : "Nate Bloom presets"));
+        Object.keys(ENGINES).filter(id => id !== "fm" || betaOn).forEach(id => add("eng:" + id, ENGINES[id].name, "engine", "Engines"));
+        cat("leads").forEach(e => lib(e, "Synth leads")); cat("pads").forEach(e => lib(e, "Pads & atmos"));
+      }
+      if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? "yours" : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? "Your plugins" : "Nate Bloom's plugins"));
+      if (kind === "drums") Object.keys(RC_KITS).filter(k => k !== "analog").forEach(k => add("kit:" + k, RC_KITS[k][0], "drum kit", "Kits"));
+      if (kind === "sampler") for (let i = 0; i < NSLOTS; i++) add("smp:" + i, "S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"), sampBuf[i] ? "sampler slot" : "load or record a sample", "Sampler slots");
+      return out;
+    }
+    function defaultSound(kind) {
+      const E = entries(), has = id => E.some(e => e.id === "w:" + id);
+      const gm = (a, b, want) => { const l = E.filter(e => e.cat === "gtrbass" && e.id.startsWith("w:") && (e.prog | 0) >= a && (e.prog | 0) <= b); const w = l.find(e => (e.prog | 0) === want) || l[0]; return w ? "lib:" + w.id.slice(2) : null; };
+      switch (kind) {
+        case "keys": return has("nb-piano") ? "lib:nb-piano" : (E.find(e => e.cat === "keys" && e.id.startsWith("w:")) ? "lib:" + E.find(e => e.cat === "keys" && e.id.startsWith("w:")).id.slice(2) : "eng:saw");
+        case "drums": return "kit:studio";
+        case "bass": return gm(32, 39, 33) || "eng:mono";
+        case "guitar": return gm(24, 31, 25) || "eng:pluck";
+        case "strings": return has("nb-strings") ? "lib:nb-strings" : "eng:saw";
+        case "synth": return "pre:0";
+        case "plugin": { const c = plugCat(), y = c.find(x => x.vendor === "Nathan") || c[0]; return y ? "wam:" + y.key : "eng:saw"; }
+        case "sampler": { const i = sampBuf.findIndex(Boolean); return "smp:" + (i < 0 ? 0 : i); }
+        case "audio": return "audio";
+      }
+      return "eng:saw";
+    }
+    function soundName(ref) {
+      ref = ref || "";
+      if (ref.startsWith("lib:")) { const e = entryById("w:" + ref.slice(4)); return e ? e.name : ref.slice(4); }
+      if (ref.startsWith("pre:")) { const p = NB_PRESETS[+ref.slice(4)]; return p ? p[0] : "Preset"; }
+      if (ref.startsWith("eng:")) { const e = ENGINES[ref.slice(4)]; return e ? e.name : "Synth"; }
+      if (ref.startsWith("wam:")) { const c = plugCat().find(x => "wam:" + x.key === ref); return c ? c.name : "Plugin"; }
+      if (ref.startsWith("kit:")) { const k = RC_KITS[ref.slice(4)]; return k ? k[0] : "Kit"; }
+      if (ref.startsWith("smp:")) { const i = +ref.slice(4); return "Sampler S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"); }
+      if (ref === "sf2") return curInst ? curInst.name : "My instrument";
+      if (ref === "audio") return "Audio";
+      return "Sound";
+    }
+
+    // ---------- audio: each track has its own volume and pan, into Nate Bloom's effects and master ----------
+    const AU = { ctx: null, master: null, dest: null, trk: new Map(), plug: new Map(), lib: new Map(), live: new Map(), vs: new Set(), oh: new Map(), sus: new Map() };
+    let GBR = false;   // (while a track's voice is made, it goes to the track, not to a sound's own effects chain)
+    { const fg = fxcGet; fxcGet = function () { return GBR ? null : fg.apply(this, arguments); }; }
+    function gbOut() {
+      if (!ctx) return null;
+      if (AU.ctx !== ctx) {   // (a new audio context: what was made in the old one goes)
+        if (AU.ctx) { AU.trk.clear(); AU.plug.clear(); AU.lib.clear(); AU.live.clear(); AU.vs.clear(); }
+        AU.ctx = ctx; AU.master = null; AU.dest = null; AU.vin = null;
+      }
+      if (!AU.master) { AU.master = ctx.createGain(); AU.master.gain.value = S && S.mvol != null ? S.mvol : 1; }
+      // (straight into the master, after Nate Bloom's effects: each track has its own reverb send into the shared hall)
+      if (fx && fx.master && AU.dest !== fx.master) { try { AU.master.disconnect(); } catch (e) {} AU.master.connect(fx.master); AU.dest = fx.master; }
+      if (fx && fx.verbIn && AU.vin !== fx.verbIn) { AU.vin = fx.verbIn; AU.trk.forEach(N => { try { N.s.disconnect(); } catch (e) {} N.s.connect(AU.vin); }); }
+      return AU.master;
+    }
+    const soloOn = () => S.tracks.some(t => t.solo);
+    const VERB = { keys: 0.22, drums: 0.1, bass: 0, guitar: 0.18, strings: 0.32, synth: 0.18, plugin: 0.14, sampler: 0.14, audio: 0.2 };
+    const tRv = tr => tr.rv != null ? tr.rv : (VERB[tr.kind] ?? 0.15);
+    const tVerb = tr => tRv(tr) * 0.9;
+    const tLevel = tr => (tr.mute || (soloOn() && !tr.solo)) ? 0 : Math.pow(clamp(tr.vol, 0, 1.2), 2) * 1.25;
+    function tNode(tr) {
+      const M = gbOut(); if (!M) return null;
+      let N = AU.trk.get(tr.id);
+      if (!N) {
+        const g = ctx.createGain(), p = ctx.createStereoPanner(), s = ctx.createGain();
+        g.gain.value = tLevel(tr); p.pan.value = clamp(tr.pan, -1, 1); s.gain.value = tVerb(tr);
+        g.connect(p).connect(M); p.connect(s); if (AU.vin) s.connect(AU.vin);
+        N = { g, p, s }; AU.trk.set(tr.id, N);
+      }
+      return N;
+    }
+    function applyLevels() {
+      if (!ctx || !S) return; const t = ctx.currentTime;
+      S.tracks.forEach(tr => { const N = AU.trk.get(tr.id); if (N) { N.g.gain.setTargetAtTime(tLevel(tr), t, 0.02); N.p.pan.setTargetAtTime(clamp(tr.pan, -1, 1), t, 0.02); N.s.gain.setTargetAtTime(tVerb(tr), t, 0.03); } });
+      if (AU.master) AU.master.gain.setTargetAtTime(S.mvol != null ? S.mvol : 1, t, 0.02);
+    }
+    // what a sound needs before it can play: library and Studio recordings, a plugin, a kit's recordings
+    function libInst(stem) {
+      let L = AU.lib.get(stem);
+      if (!L) {
+        L = { inst: null, pr: null }; AU.lib.set(stem, L);
+        const e = entryById("w:" + stem);
+        L.pr = loadWaf(stem).then(x => { L.inst = { name: e ? e.name : stem, sub: e ? e.sub : "", regions: x.regions }; }).catch(() => { AU.lib.delete(stem); });
+      }
+      return L.pr;
+    }
+    function prep(tr) {
+      if (!ctx || !tr) return Promise.resolve();
+      const r = tr.snd || "";
+      if (r.startsWith("lib:")) return libInst(r.slice(4)) || Promise.resolve();
+      if (r.startsWith("wam:")) return plugFor(tr) || Promise.resolve();
+      if (r.startsWith("kit:")) { kitPads(r.slice(4)).forEach(p => { if (p.id) try { rcSampleBuf(p.id); } catch (e) {} }); }
+      return Promise.resolve();
+    }
+    // a plugin per track: its own copy, so two tracks can use one plugin with their own settings and levels
+    function plugFor(tr) {
+      if (!plugOK()) return null;
+      const key = tr.snd.slice(4);
+      let P = AU.plug.get(tr.id);
+      if (P && P.key === key && !(P.failed && Date.now() - P.failed > 10000)) return P.pr;   // (a failed load is tried again after 10 s)
+      if (P) dropPlug(tr.id);
+      P = { key, inst: null, node: null, g: null }; AU.plug.set(tr.id, P);
+      P.pr = __wam.create(key).then(async r => {
+        if (AU.plug.get(tr.id) !== P || !ctx) { try { r.inst.audioNode.disconnect(); } catch (e) {} return; }
+        const g = ctx.createGain(); g.gain.value = (r.sp && r.sp.trim) || 1;
+        r.inst.audioNode.connect(g); g.connect(tNode(tr).g);
+        P.inst = r.inst; P.node = r.inst.audioNode; P.g = g; P.name = (r.inst.descriptor && r.inst.descriptor.name) || (r.sp && r.sp.name) || "Plugin";
+        const st = tr.pst || (__wam.NBW && __wam.NBW.saved && __wam.NBW.saved["gb:" + tr.id]);
+        if (st) { try { await P.node.setState(st); } catch (e) {} }
+      }).catch(() => { if (AU.plug.get(tr.id) === P) { P.failed = Date.now(); if (tr.id !== "gb-preview") gbSay("Couldn't load " + soundName(tr.snd) + ": plugins need the Nate Bloom site or app (and a connection the first time)"); } });
+      return P.pr;
+    }
+    function dropPlug(id) {
+      const P = AU.plug.get(id); if (!P) return; AU.plug.delete(id);
+      try { if (P.node) { P.node.disconnect(); if (P.node.destroy) P.node.destroy(); } if (P.g) P.g.disconnect(); } catch (e) {}
+    }
+    const plugMidi = (P, t, bytes) => { try { P.node.scheduleEvents({ type: "wam-midi", time: t, data: { bytes } }); } catch (e) {} };
+    const engDefaults = id => Object.fromEntries(((ENGINES[id] && ENGINES[id].knobs) || []).map(([k, , v]) => [k, v]));
+    function withParams(id, P, fn) { const keep = state.params[id]; state.params[id] = Object.assign({}, keep, P || {}); try { return fn(); } finally { state.params[id] = keep; } }
+    function routeTo(tr, fn) {
+      const N = tNode(tr); if (!N) return null;
+      const keep = fx.input; GBR = true; fx.input = N.g;
+      try { return fn(); } catch (e) { return null; } finally { fx.input = keep; GBR = false; }
+    }
+    const libP = tr => { const e = entryById("w:" + (tr.snd || "").slice(4)); return Object.assign(Object.fromEntries(LIB_KNOBS.map(([k, , v]) => [k, v])), { decay: e && e.sus ? 1 : 0.62 }, tr.p || {}); };
+    // one note of a track's sound, from time t; returns { stop(at) }
+    function mkVoice(tr, m, t, vel) {
+      const r = tr.snd || "", sc = 0.3 + 0.7 * clamp(vel, 0, 1);
+      if (r.startsWith("eng:")) {
+        const id = r.slice(4); if (!ENGINES[id]) return null;
+        return routeTo(tr, () => withParams(id, Object.assign(engDefaults(id), tr.p || {}), () => makeVoice(m, id, sc, t)));
+      }
+      if (r.startsWith("pre:")) {
+        const P = NB_PRESETS[+r.slice(4)]; if (!P) return null;
+        const ids = (Array.isArray(P[1]) ? P[1] : [P[1]]).filter(id => ENGINES[id]), n = 1 / Math.sqrt(Math.max(1, ids.length)), oct = 12 * ((P[3] && P[3].oct) || 0), vs = [];
+        ids.forEach(id => { const v = routeTo(tr, () => withParams(id, Object.assign(engDefaults(id), (P[2] && P[2][id]) || {}, (tr.p && tr.p[id]) || {}), () => makeVoice(m + oct, id, sc * n, t))); if (v) vs.push(v); });
+        return vs.length ? { stop: at => vs.forEach(v => { try { v.stop(at); } catch (e) {} }) } : null;
+      }
+      if (r.startsWith("lib:")) {
+        const L = AU.lib.get(r.slice(4)); if (!L || !L.inst) { libInst(r.slice(4)); return null; }
+        return routeTo(tr, () => makeInstVoice(m, t, sc, L.inst, libP(tr)));
+      }
+      if (r === "sf2") return curInst ? routeTo(tr, () => makeInstVoice(m, t, sc)) : null;
+      if (r.startsWith("smp:")) return routeTo(tr, () => makeSampleVoice(m, +r.slice(4), t, sc));
+      if (r.startsWith("wam:")) {
+        const P = AU.plug.get(tr.id); if (!P || !P.node) { plugFor(tr); return null; }
+        const note = clamp(Math.round(m), 0, 127), v7 = clamp(Math.round(sc * 118), 1, 127);
+        plugMidi(P, Math.max(ctx.currentTime, t ?? 0), [0x90, note, v7]);
+        let done = false;
+        return { stop(at) { if (done || !ctx) return; done = true; plugMidi(P, Math.max(ctx.currentTime, at ?? 0), [0x80, note, 0]); } };
+      }
+      return null;
+    }
+    // ---------- drums: GM notes onto a kit (the Rhythm Creator's sounds) ----------
+    const GM = { 35: "kick", 36: "kick", 37: "rim", 38: "snare", 40: "snare", 39: "clap", 41: "tomL", 43: "tomL", 45: "tomM", 47: "tomM", 48: "tomH", 50: "tomH", 42: "ch", 44: "ph", 46: "oh",
+      49: "cym", 52: "cym", 55: "cym", 57: "cym", 51: "ride", 59: "ride", 53: "bell", 54: "tamb", 56: "cow", 69: "shaker", 70: "shaker", 82: "shaker", 60: "perc", 61: "perc", 62: "perc", 63: "perc", 64: "perc" };
+    const PADS = [[49, "Crash"], [51, "Ride"], [46, "Open hat"], [42, "Closed hat"], [44, "Pedal hat"], [39, "Clap"], [48, "High tom"], [45, "Mid tom"], [41, "Low tom"], [37, "Rim"], [38, "Snare"], [36, "Kick"]];
+    const PADCOL = { 49: "#d9b43a", 51: "#c9a23a", 46: "#5fb0c9", 42: "#4f9fb9", 44: "#4a8fa8", 39: "#c95f9a", 48: "#9a6fd0", 45: "#8a5fc0", 41: "#7a4fb0", 37: "#d0783a", 38: "#e0603a", 36: "#e04a4a" };
+    const DRUMNAME = m => (PADS.find(p => p[0] === m) || [0, { 53: "Ride bell", 54: "Tambourine", 56: "Cowbell", 69: "Shaker", 70: "Shaker", 82: "Shaker" }[m] || "Perc " + m])[1];
+    function kitSound(kid, role) {
+      const K = RC_KITS[kid] || RC_KITS.studio, m = (K && K[1]) || {}, f = (k, i = 0) => (m[k] && (m[k][i] || m[k][0])) || null;
+      switch (role) {
+        case "kick": return f("kick"); case "snare": return f("snare"); case "rim": return f("rim") || (m.snare && m.snare[1]) || f("snare");
+        case "clap": return f("clap") || f("snare"); case "ch": return f("ch"); case "ph": return (m.ch && m.ch[1]) || f("ch");
+        case "oh": return f("oh") || f("ch"); case "cym": return f("cym") || f("oh"); case "ride": return f("ride") || f("cym");
+        case "bell": return (m.ride && m.ride[1]) || f("bell") || f("ride");
+        case "tomL": return f("tom", 0); case "tomM": return f("tom", 1); case "tomH": return (m.tom && m.tom[2]) || (m.tom && m.tom[m.tom.length - 1]) || null;
+        case "cow": return f("bell") || f("perc"); case "shaker": return f("shaker") || f("ch"); case "tamb": return (m.shaker && m.shaker[1]) || f("shaker") || f("clap");
+        case "perc": return f("perc") || f("tom", 2);
+      }
+      return null;
+    }
+    const kitPads = kid => PADS.map(([m, name]) => ({ m, name, id: kitSound(kid, GM[m]) }));
+    function drumHit(tr, m, t, vel) {
+      if (!ctx) return;
+      const kid = (tr.snd || "kit:studio").slice(4), role = GM[m] || "perc", id = kitSound(kid, role); if (!id) return;
+      const N = tNode(tr); if (!N) return;
+      if (role === "ch" || role === "ph") { const V = AU.oh.get(tr.id); if (V && V.o) { try { V.o.gain.setTargetAtTime(0, Math.max(t, ctx.currentTime), 0.008); } catch (e) {} } AU.oh.delete(tr.id); }
+      const p = { v: clamp(vel, 0.05, 1.2) * rcGain(id), r: 1, d: 1, dec: 0.5, tone: 0.5, ch: 0.5, beat: spb() };
+      let V = null;
+      try {
+        const eng = rcEngine(id);
+        if (eng === "smp") V = rcSampleHit(id, t, p, N.g);
+        else if (RC_SYN[id]) { V = rcV(t, N.g, p.v); RC_SYN[id](V, p); V.go(); }
+      } catch (e) {}
+      if (V && role === "oh") AU.oh.set(tr.id, V);
+    }
+    // ---------- notes: scheduled ones, and live ones from the touch instruments and MIDI ----------
+    function playAt(tr, m, t, d, vel) {
+      if (tr.kind === "drums") { drumHit(tr, m, t, vel); return; }
+      const v = mkVoice(tr, m, t, vel); if (!v) return;
+      AU.vs.add({ v, end: t + Math.max(0.04, d) });
+    }
+    function releaseDue(horizon) { AU.vs.forEach(x => { if (x.end <= horizon) { try { x.v.stop(x.end); } catch (e) {} AU.vs.delete(x); } }); }
+    function click(t, accent) {
+      if (!ctx) return;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "square"; o.frequency.value = accent ? 1760 : 1245;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(accent ? 0.16 : 0.1, t + 0.001); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.06);   // (straight out: never in a recording or an export)
+    }
+    let sustain = false;
+    function liveOn(tr, m, vel, dt = 0) {
+      start(); if (!ctx || !tr) return;
+      const t = ctx.currentTime + dt;
+      if (tr.kind === "drums") { drumHit(tr, m, t, vel); recHit(tr, m, vel); return; }
+      const k = tr.id + ":" + m, old = AU.live.get(k) || AU.sus.get(k);
+      if (old) { try { old.stop(t); } catch (e) {} AU.live.delete(k); AU.sus.delete(k); recOff(tr, m); }
+      const v = mkVoice(tr, m, t, vel);
+      if (v) AU.live.set(k, v); else if (((tr.snd || "").startsWith("wam:") && !(AU.plug.get(tr.id) || {}).failed) || (tr.snd || "").startsWith("lib:")) gbSay("Loading " + soundName(tr.snd) + "…");
+      recOn(tr, m, vel, dt);
+    }
+    function liveOff(tr, m) {
+      if (!tr || tr.kind === "drums") return;
+      const k = tr.id + ":" + m, v = AU.live.get(k);
+      if (v) { AU.live.delete(k); if (sustain) { AU.sus.set(k, v); return; } try { v.stop(ctx.currentTime); } catch (e) {} }
+      recOff(tr, m);   // (recorded even when the sound was still loading)
+    }
+    function sustainOff() {
+      sustain = false; if (!ctx) return;
+      AU.sus.forEach((v, k) => { try { v.stop(ctx.currentTime); } catch (e) {} const [id, m] = k.split(":"), tr = S && S.tracks.find(x => x.id === id); if (tr) recOff(tr, +m); });
+      AU.sus.clear();
+    }
+    function liveAllOff() { if (!ctx) return; [AU.live, AU.sus].forEach(M => { M.forEach(v => { try { v.stop(ctx.currentTime); } catch (e) {} }); M.clear(); }); }
+
+    // ---------- the transport ----------
+    const TP = { on: false, rec: false, t0: 0, b0: 0, next: 0, timer: 0, ev: [], evi: 0, dirty: true, srcs: [], exp: null };
+    const beatAt = t => TP.b0 + (t - TP.t0) / spb();
+    const timeAt = b => TP.t0 + (b - TP.b0) * spb();
+    const beatNow = () => (TP.on && ctx ? beatAt(ctx.currentTime) : S.ph);
+    const dirty = () => { TP.dirty = true; };
+    function flatNotes(r) {
+      const out = [], reps = r.rep || 1;
+      for (let k = 0; k < reps; k++) (r.notes || []).forEach(n => { if (n[0] >= 0 && n[0] < r.len - 1e-6) out.push([r.start + k * r.len + n[0], n[1], Math.min(n[2], r.len - n[0]), n[3]]); });
+      return out;
+    }
+    function buildEv() {
+      const ev = [];
+      S.tracks.forEach(tr => { if (tr.kind !== "audio") tr.regions.forEach(r => flatNotes(r).forEach(n => ev.push({ b: n[0], tr, m: n[1], d: n[2], v: n[3] }))); });
+      ev.sort((a, b) => a.b - b.b); TP.ev = ev; TP.dirty = false;
+    }
+    function seekIdx(b) { let lo = 0, hi = TP.ev.length; while (lo < hi) { const md = (lo + hi) >> 1; if (TP.ev[md].b < b - 1e-6) lo = md + 1; else hi = md; } TP.evi = lo; }
+    function audioStart(tr, r, t, off) {
+      const buf = ABUF.get(r.key); if (!buf || !ctx) return;
+      const N = tNode(tr), o = (r.off || 0) + off, dur = Math.min(r.len * spb() - off, buf.duration - o); if (dur <= 0.01 || o < 0) return;
+      const src = ctx.createBufferSource(); src.buffer = buf; src.connect(N.g);
+      src.start(Math.max(t, ctx.currentTime), o, dur); TP.srcs.push(src);
+    }
+    const audioReps = (r, fn) => { for (let k = 0; k < (r.rep || 1); k++) fn(r.start + k * r.len); };
+    function startAudio(b, t) { S.tracks.forEach(tr => { if (tr.kind === "audio" && tLevel(tr) > 0) tr.regions.forEach(r => audioReps(r, s => { if (s < b - 1e-6 && s + r.len > b + 1e-6) audioStart(tr, r, t ?? timeAt(b), (b - s) * spb()); })); }); }
+    function stopAudio(t) { TP.srcs.forEach(s => { try { s.stop(t ?? 0); } catch (e) {} }); TP.srcs = []; }
+    function schedule(b1, b2) {
+      const ev = TP.ev;
+      while (TP.evi < ev.length && ev[TP.evi].b < b2 - 1e-9) {
+        const e = ev[TP.evi++]; if (e.b < b1 - 1e-6) continue;
+        if (tLevel(e.tr) <= 0) continue;
+        playAt(e.tr, e.m, timeAt(e.b), e.d * spb(), e.v);
+      }
+      S.tracks.forEach(tr => { if (tr.kind === "audio" && tLevel(tr) > 0) tr.regions.forEach(r => audioReps(r, s => { if (s >= b1 - 1e-6 && s < b2 - 1e-9) audioStart(tr, r, timeAt(s), 0); })); });
+      if (S.metro && !TP.exp) for (let k = Math.ceil(b1 - 1e-6); k < b2 - 1e-9; k++) click(timeAt(k), k % S.sig === 0);
+      apTick(b1, b2);
+    }
+    function tick() {
+      if (!TP.on || !ctx) return;
+      if (TP.dirty) { buildEv(); seekIdx(TP.next); }
+      const horizon = ctx.currentTime + 0.16;
+      for (let guard = 0; guard < 8; guard++) {
+        const bEnd = beatAt(horizon), cyc = S.cyc.on && S.cyc.b > S.cyc.a + 0.5 && !TP.exp, lim = cyc ? S.cyc.b : Infinity, seg = Math.min(bEnd, lim);
+        if (seg > TP.next) { schedule(TP.next, seg); TP.next = seg; }
+        if (cyc && bEnd >= lim && TP.next >= lim - 1e-9) {   // the cycle starts over
+          const tw = timeAt(lim);
+          if (TP.rec) recWrap();
+          TP.t0 = tw; TP.b0 = S.cyc.a; TP.next = S.cyc.a; seekIdx(S.cyc.a); stopAudio(tw); startAudio(S.cyc.a, tw);
+          continue;
+        }
+        break;
+      }
+      releaseDue(horizon);
+      const now = beatAt(ctx.currentTime);
+      if (TP.exp) { if (now >= TP.exp.end) expDone(); return; }
+      if (TP.rec) { if (S.auto && now > S.bars * S.sig - 1) { S.bars += 4; if (V.open && S.view === "tracks") renderTracks(); } }
+      else if (!S.cyc.on && now >= Math.max(S.bars * S.sig, songEndBeat()) + 0.02) { stop(); S.ph = 0; paintBar(); placePh(); }
+    }
+    function play(rec) {
+      start(); if (!ctx || !S) return;
+      if (TP.on) stop();
+      const tr = curTr();
+      if (rec && !tr) { gbSay("Pick an instrument first: each one becomes a track you can record"); return; }
+      if (rec && tr.kind === "audio" && !MIC.src) { micOpen().then(ok => { if (ok) play(true); }); return; }
+      liveAllOff(); buildEv();
+      let from = TP.exp ? 0 : S.ph;
+      if (!TP.exp && S.cyc.on && (from < S.cyc.a - 1e-6 || from >= S.cyc.b - 1e-6)) from = S.cyc.a;
+      if (rec && !S.cyc.on) from = Math.floor(from / S.sig + 1e-6) * S.sig;   // a take starts on a bar
+      const lead = 0.1, cin = rec && S.cin ? S.sig * spb() : 0;
+      TP.b0 = from; TP.t0 = ctx.currentTime + lead + cin; TP.next = from; TP.on = true; TP.rec = !!rec;
+      if (cin) for (let i = 0; i < S.sig; i++) click(ctx.currentTime + lead + i * spb(), i === 0);
+      seekIdx(from); startAudio(from);
+      S.tracks.forEach(t => { if ((t.snd || "").startsWith("wam:")) plugFor(t); });
+      if (rec) recStart(tr, from);
+      tick(); TP.timer = setInterval(tick, 25);
+      paintBar(); frame();
+    }
+    function stop() {
+      if (!TP.on) return;
+      const now = ctx ? ctx.currentTime : 0, b = beatAt(now);
+      clearInterval(TP.timer); TP.on = false;
+      AU.vs.forEach(x => { try { x.v.stop(now); } catch (e) {} }); AU.vs.clear();
+      AU.plug.forEach(P => { if (P.node) plugMidi(P, now, [0xB0, 123, 0]); });
+      stopAudio(now); apAfterStop();
+      const wasRec = TP.rec; TP.rec = false;
+      if (wasRec) recFinish(b);
+      if (b >= TP.b0) S.ph = Math.max(0, b);
+      paintBar(); placePh(); saveSong();
+    }
+    // ---------- recording: notes into a region of the selected track ----------
+    const REC = { tr: "", b0: 0, notes: [], held: new Map(), cyc: null };
+    const recBeat = () => beatAt(ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0));
+    function recStart(tr, from) {
+      REC.tr = tr.id; REC.b0 = from; REC.notes = []; REC.held.clear(); REC.cyc = S.cyc.on ? { a: S.cyc.a, b: S.cyc.b } : null;
+      if (tr.kind === "audio") audioRecStart(tr);
+    }
+    const recking = tr => TP.on && TP.rec && tr && REC.tr === tr.id;
+    function recOn(tr, m, vel, dt = 0) { if (!recking(tr)) return; REC.held.set(m, { b: Math.max(REC.b0, recBeat() + dt / spb()), v: vel }); }
+    function recOff(tr, m) {
+      if (!recking(tr)) return;
+      const h = REC.held.get(m); if (!h) return; REC.held.delete(m);
+      let e = recBeat(); if (e < h.b) e = REC.cyc ? REC.cyc.b : h.b + 0.1;
+      REC.notes.push([h.b, m, Math.max(0.06, e - h.b), h.v]);
+    }
+    function recHit(tr, m, vel) { if (recking(tr)) REC.notes.push([Math.max(REC.b0, recBeat()), m, 0.25, vel]); }
+    function recNote(tr, m, b, d, vel) { if (recking(tr) && b >= REC.b0 - 1e-6) REC.notes.push([b, m, d, vel]); }
+    function recWrap() { if (!REC.cyc) return; REC.held.forEach((h, m) => { REC.notes.push([h.b, m, Math.max(0.06, REC.cyc.b - h.b), h.v]); h.b = REC.cyc.a; }); }
+    function trimRegion(r, a, b) {
+      if (b - a < 0.02) return null;
+      if (r.key) return Object.assign({}, r, { id: uid(), start: a, len: b - a, rep: 1, off: (r.off || 0) + (a - r.start) * spb() });
+      const notes = flatNotes(r).filter(n => n[0] >= a - 1e-6 && n[0] < b - 1e-6).map(n => [n[0] - a, n[1], Math.min(n[2], b - n[0]), n[3]]);
+      return { id: uid(), start: a, len: b - a, rep: 1, notes, name: r.name };
+    }
+    function placeRegion(tr, R, merge) {
+      const a = R.start, b = rEnd(R), keep = [];
+      tr.regions.forEach(r => {
+        const ra = r.start, rb = rEnd(r);
+        if (rb <= a + 1e-6 || ra >= b - 1e-6) { keep.push(r); return; }
+        if (merge && !r.key && !R.key) flatNotes(r).forEach(n => { if (n[0] >= a - 1e-6 && n[0] < b - 1e-6) R.notes.push([n[0] - a, n[1], n[2], n[3]]); });
+        if (ra < a) keep.push(trimRegion(r, ra, a));
+        if (rb > b) keep.push(trimRegion(r, b, rb));
+      });
+      keep.push(R); tr.regions = keep.filter(Boolean).sort((x, y) => x.start - y.start);
+    }
+    function recFinish(bStop) {
+      const tr = S.tracks.find(t => t.id === REC.tr); if (!tr) return;
+      if (tr.kind === "audio") { audioRecFinish(tr, bStop); return; }
+      const endB = REC.cyc ? Math.min(bStop, REC.cyc.b) : bStop;
+      REC.held.forEach((h, m) => REC.notes.push([h.b, m, Math.max(0.06, endB - h.b), h.v])); REC.held.clear();
+      const notes0 = REC.notes.filter(n => Number.isFinite(n[0])); if (!notes0.length) return;
+      gbDo();
+      let a, b;
+      if (REC.cyc) { a = REC.cyc.a; b = REC.cyc.b; }
+      else { const hi = Math.max(...notes0.map(n => n[0] + n[2])); a = Math.floor(REC.b0 / S.sig + 1e-6) * S.sig; b = Math.max(a + S.sig, Math.ceil(Math.max(hi, bStop) / S.sig - 1e-6) * S.sig); }
+      const notes = notes0.filter(n => n[0] >= a - 1e-6 && n[0] < b).map(n => [Math.max(0, +(n[0] - a).toFixed(4)), n[1], +n[2].toFixed(4), +n[3].toFixed(3)]).sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+      placeRegion(tr, { id: uid(), start: a, len: b - a, rep: 1, notes }, S.merge || !!REC.cyc);
+      fitLen(); dirty(); saveSong();
+      gbSay("Recorded " + notes.length + (notes.length === 1 ? " note" : " notes") + " into " + tr.name);
+      if (V.open) { paintBar(); if (S.view === "tracks") renderTracks(); }
+    }
+    // ---------- audio: the mic, takes stored with the samples (and in projects) ----------
+    const MIC = { stream: null, src: null, an: null, ctx: null, proc: null, mute: null, chunks: [], t0: null, mon: null };
+    const ABUF = new Map();
+    async function micOpen() {
+      if (MIC.src && MIC.ctx === ctx) return true;
+      start(); if (!ctx) return false;
+      try {
+        MIC.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+        MIC.ctx = ctx; MIC.src = ctx.createMediaStreamSource(MIC.stream); MIC.an = ctx.createAnalyser(); MIC.an.fftSize = 1024; MIC.src.connect(MIC.an);
+        return true;
+      } catch (e) { gbSay("The microphone isn't available: allow it for Nate Bloom, or plug one in"); return false; }
+    }
+    function micClose() {
+      try { if (MIC.stream) MIC.stream.getTracks().forEach(t => t.stop()); if (MIC.src) MIC.src.disconnect(); if (MIC.mon) MIC.mon.disconnect(); } catch (e) {}
+      MIC.stream = MIC.src = MIC.an = MIC.mon = null; MIC.ctx = null;
+    }
+    function micMonitor(tr, on) {
+      if (MIC.mon) { try { MIC.mon.disconnect(); } catch (e) {} MIC.mon = null; }
+      if (on && MIC.src) { MIC.mon = ctx.createGain(); MIC.src.connect(MIC.mon); MIC.mon.connect(tNode(tr).g); }
+    }
+    function audioRecStart() {
+      if (!MIC.src) return;
+      const proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
+      MIC.chunks = []; MIC.t0 = null;
+      proc.onaudioprocess = e => {
+        if (!TP.on || !TP.rec) return;
+        const n = e.inputBuffer.length, tEnd = ctx.currentTime, tStart = tEnd - n / ctx.sampleRate;
+        if (tEnd < TP.t0 - 0.05) return;   // (still counting in)
+        if (MIC.t0 == null) MIC.t0 = tStart;
+        MIC.chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+      };
+      MIC.src.connect(proc); proc.connect(mute).connect(ctx.destination); MIC.proc = proc; MIC.mute = mute;
+    }
+    async function audioRecFinish(tr, bStop) {
+      try { MIC.src.disconnect(MIC.proc); MIC.proc.disconnect(); MIC.mute.disconnect(); } catch (e) {}
+      const chunks = MIC.chunks; MIC.chunks = [];
+      const total = chunks.reduce((a, c) => a + c.length, 0); if (!total || MIC.t0 == null) return;
+      const sr = ctx.sampleRate, buf = ctx.createBuffer(1, total, sr), d = buf.getChannelData(0); let o = 0; chunks.forEach(c => { d.set(c, o); o += c.length; });
+      // the take is late by the trip out to the speakers and back in: line it up with what was playing
+      const lat = (ctx.outputLatency || ctx.baseLatency || 0.02) + 4096 / sr;
+      const a = REC.b0, startT = MIC.t0 - lat, off = Math.max(0, timeAt(a) - startT);
+      const endB = REC.cyc ? Math.min(bStop, REC.cyc.b) : bStop, len = Math.max(0.5, Math.min(endB - a, (buf.duration - off) / spb()));
+      const key = "gb:" + S.id + ":" + uid();
+      ABUF.set(key, buf);
+      gbDo();
+      placeRegion(tr, { id: uid(), start: a, len: +len.toFixed(4), rep: 1, key, off: +off.toFixed(4), dur: buf.duration }, false);
+      fitLen(); dirty(); saveSong();
+      gbSay("Recorded " + (buf.duration - off).toFixed(1) + " s into " + tr.name);
+      if (V.open && S.view === "tracks") renderTracks();
+      try { const wav = bufferToWav(buf); await idbPut(key, { name: tr.name + " take", data: wav instanceof Blob ? await wav.arrayBuffer() : wav }); } catch (e) { gbSay("Couldn't keep the recording: storage is full"); }
+    }
+    async function idbPut(key, val) { const db = await idb(); return new Promise((res, rej) => { const tx = db.transaction("samples", "readwrite"); tx.objectStore("samples").put(val, key); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+    async function idbGet(key) { const db = await idb(); return new Promise(res => { try { const r = db.transaction("samples").objectStore("samples").get(key); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } }); }
+    async function idbDel(key) { try { const db = await idb(); db.transaction("samples", "readwrite").objectStore("samples").delete(key); } catch (e) {} }
+    async function loadAudio(key) {
+      if (ABUF.has(key)) return ABUF.get(key);
+      const rec = await idbGet(key); if (!rec || !rec.data || !ctx) return null;
+      try { const b = await decode(rec.data.slice(0)); ABUF.set(key, b); return b; } catch (e) { return null; }
+    }
+    const loadSongAudio = () => Promise.all(S.tracks.flatMap(t => t.regions.filter(r => r.key).map(r => loadAudio(r.key)))).then(() => { if (V.open && S.view === "tracks") renderTracks(); });
+
+    // ---------- the screen ----------
+    const view = $("gbView"), sheet = $("gbSheet"), shB = $("gbShB"), shT = $("gbShT"), shI = $("gbShI");
+    const V = { open: false, rsel: "", menu: false, clip: null, lastTap: null, keys: null, meter: null, guiTr: "" };
+    const curTr = () => (S && S.tracks[S.sel]) || null;
+    const trById = id => S && S.tracks.find(t => t.id === id);
+    const isPhone = () => innerWidth < 700;
+    const svgOf = k => ICON[k].replace('stroke="#fff"', 'stroke="currentColor"');
+    const TRACKS_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="2.5" y="4" width="11" height="4.2" rx="1.3"/><rect x="8" y="10" width="13.5" height="4.2" rx="1.3"/><rect x="2.5" y="16" width="8" height="4.2" rx="1.3"/></svg>';
+    const PLAY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>';
+    const STOP_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.6"/></svg>';
+    // keys and pads that light up when they play, from the screen, the computer keyboard or MIDI
+    function lit(m, on) {
+      if (!V.keys) return;
+      const el = V.keys.get(m); if (!el) return;
+      if (el.classList.contains("gb-pad")) { el.classList.add("on"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("on"), 120); return; }
+      el.classList.toggle("on", !!on);
+    }
+    function paintBar() {
+      if (!S) return;
+      const pb = $("gbPlay"), rb = $("gbRec");
+      pb.classList.toggle("on", TP.on); pb.innerHTML = TP.on ? STOP_SVG : PLAY_SVG;
+      pb.setAttribute("aria-label", TP.on ? "Stop" : "Play"); pb.title = (TP.on ? "Stop" : "Play") + " (space)";
+      rb.classList.toggle("on", TP.on && TP.rec); rb.setAttribute("aria-pressed", String(TP.on && TP.rec));
+      $("gbMetro").setAttribute("aria-pressed", String(!!S.metro));
+      $("gbUndo").disabled = !UNDO.length;
+      $("gbInfo").textContent = S.bpm + " · " + NN[S.key] + (S.minor ? "m" : "") + " · " + S.sig + "/4";
+      const vb = $("gbViewBtn"), tr = curTr();
+      if (S.view === "tracks") {
+        vb.innerHTML = tr ? svgOf(tr.kind) : svgOf("keys"); vb.disabled = false;
+        const t = tr ? "Play " + tr.name : "Choose an instrument"; vb.setAttribute("aria-label", t); vb.title = t;
+      } else { vb.innerHTML = TRACKS_SVG; vb.disabled = false; vb.setAttribute("aria-label", "Tracks"); vb.title = "Tracks: arrange, edit and mix your song"; }
+      $("gbBrowseBtn").setAttribute("aria-pressed", String(S.view === "browse"));
+      paintPos();
+    }
+    function paintPos() {
+      if (!S) return;
+      const p = $("gbPos"), rb = $("gbRec"); let txt;
+      const counting = TP.on && TP.rec && ctx && ctx.currentTime < TP.t0 - 0.005;
+      if (counting) txt = "Count " + Math.max(1, Math.ceil((TP.t0 - ctx.currentTime) / spb() - 1e-3));
+      else { const b = Math.max(0, beatNow()); txt = (Math.floor(b / S.sig + 1e-9) + 1) + " . " + (Math.floor(b % S.sig + 1e-9) + 1); }
+      rb.classList.toggle("count", !!counting);
+      if (p.textContent !== txt) p.textContent = txt;
+    }
+    function setView(v) {
+      if (v === "inst" && !curTr()) v = "browse";
+      if (S.view === "inst" && v !== "inst") { liveAllOff(); apStop(); micMonitor(null, false); if (SREC) sampRecStop(); }
+      S.view = v; hideMenu(); V.keys = null; V.meter = null;
+      $("gbBrowse").hidden = v !== "browse"; $("gbInst").hidden = v !== "inst"; $("gbTracks").hidden = v !== "tracks";
+      if (v !== "tracks") edClose();
+      if (v === "browse") renderBrowse(); else if (v === "inst") renderInst(); else renderTracks(true);
+      paintBar(); saveSong();
+    }
+
+    // ---------- choose an instrument ----------
+    function renderBrowse() {
+      const box = $("gbCards"); box.replaceChildren();
+      ORDER.forEach(k => {
+        const K = KIND[k], b = gbEl("button", "gb-card"), off = k === "plugin" && !plugOK();
+        b.style.setProperty("--cg", K.cg); b.dataset.kind = k;
+        b.innerHTML = '<span class="gi">' + ICON[k] + "</span>";
+        b.append(gbEl("b", "", K.name), gbEl("small", "", off ? "Plugins open on the Nate Bloom site and in the apps" : K.sub));
+        if (SMART[k]) b.append(gbEl("em", "", "SMART"));
+        if (k === "audio") b.append(gbEl("em", "", "MIC"));
+        b.disabled = off;
+        b.addEventListener("click", () => addTrack(k));
+        box.append(b);
+      });
+      $("gbBrowseSub").textContent = S.tracks.length
+        ? "Each one becomes a new track in " + S.name + " (it has " + S.tracks.length + (S.tracks.length === 1 ? " track" : " tracks") + "). Play it, press ● to record."
+        : "Each one becomes a track. Play it, press ● to record, then arrange it in Tracks.";
+    }
+    function addTrack(kind, opt) {
+      if (S.tracks.length >= 32) { gbSay("A song holds 32 tracks"); return null; }
+      gbDo();
+      const n = S.tracks.filter(t => t.kind === kind).length;
+      const tr = { id: uid(), kind, name: KIND[kind].name + (n ? " " + (n + 1) : ""), snd: defaultSound(kind), vol: 0.8, pan: 0, mute: false, solo: false, oct: 0, auto: 0, p: null, mode: SMART[kind] ? "chords" : "", regions: [] };
+      S.tracks.push(tr); S.sel = S.tracks.length - 1;
+      start(); prep(tr); dirty(); saveSong();
+      if (!(opt && opt.stay)) setView("inst");
+      return tr;
+    }
+
+    // ---------- the touch instruments ----------
+    const IV = { "": [0, 4, 7], m: [0, 3, 7], dim: [0, 3, 6] };
+    function chordsOf() {
+      const maj = [[4, "m"], [9, "m"], [2, "m"], [7, ""], [0, ""], [5, ""], [10, ""], [11, "dim"]];
+      const min = [[0, "m"], [5, "m"], [7, "m"], [8, ""], [3, ""], [10, ""], [2, "dim"], [7, ""]];
+      return (S.minor ? min : maj).map(([r, q]) => { const pc = (S.key + r) % 12; return { pc, q, name: NN[pc] + (q === "m" ? "m" : q === "dim" ? "°" : "") }; });
+    }
+    const G_OPEN = [40, 45, 50, 55, 59, 64], B_OPEN = [28, 33, 38, 43];
+    // how each Smart instrument voices a chord: guitar in first position (lowest string the root), bass a line's notes, strings an open voicing
+    function voicing(kind, ch) {
+      const iv = IV[ch.q], pcs = iv.map(i => (ch.pc + i) % 12);
+      if (kind === "guitar") {
+        let bs = 0, bf = 99;
+        for (let s = 0; s < 3; s++) { const f = ((ch.pc - G_OPEN[s]) % 12 + 12) % 12; if (f < bf) { bf = f; bs = s; } }
+        return G_OPEN.map((o, s) => { if (s < bs) return null; if (s === bs) return o + bf; for (let f = 0; f <= 4; f++) if (pcs.includes((o + f) % 12)) return o + f; return null; });
+      }
+      if (kind === "bass") { const r = 28 + ((ch.pc - 4 + 12) % 12); return [r, r + iv[2], r + 12, r + 12 + iv[1]]; }
+      let r = 48 + ch.pc; if (r > 54) r -= 12;
+      return [r, r + iv[2], r + 12 + iv[1], r + 12 + iv[2]];
+    }
+    function renderInst() {
+      const tr = curTr(), ih = $("gbIh"), ib = $("gbIb"); if (!tr) return;
+      liveAllOff(); apStop(); V.keys = null; V.meter = null;
+      if (tr.kind !== "audio") micMonitor(null, false);
+      ih.replaceChildren(); ib.replaceChildren();
+      const K = KIND[tr.kind];
+      const tb = gbEl("button", "gb-trk"); tb.style.setProperty("--kc", K.kc); tb.innerHTML = "<i>" + ICON[tr.kind] + "</i>"; tb.append(gbEl("span", "", tr.name));
+      tb.title = "Track settings: name, sound, volume"; tb.addEventListener("click", () => trackSheet(tr)); ih.append(tb);
+      if (tr.kind !== "audio") {
+        const sb = gbEl("button", "gb-snd"); sb.append(gbEl("b", "", soundName(tr.snd)), gbEl("small", "", tr.kind === "drums" ? "drum kit" : tr.kind === "plugin" ? "plugin" : "sound"));
+        sb.title = tr.kind === "drums" ? "Choose a kit" : "Choose a sound"; sb.addEventListener("click", () => soundSheet(tr)); ih.append(sb);
+      }
+      const ctl = (label) => { const c = gbEl("div", "gb-ctl"); if (label) c.append(gbEl("span", "", label)); ih.append(c); return c; };
+      const smart = !!SMART[tr.kind], chords = smart && tr.mode !== "notes";
+      if (smart) {
+        const c = ctl("");
+        [["chords", "Chords"], ["notes", "Notes"]].forEach(([v, t]) => { const b = btnE(t, () => { tr.mode = v; saveSong(); renderInst(); }); b.setAttribute("aria-pressed", String((tr.mode || "chords") === v)); c.append(b); });
+      }
+      if (chords) {
+        const c = ctl("Autoplay");
+        ["Off", "1", "2", "3", "4"].forEach((t, i) => { const b = btnE(t, () => { tr.auto = i; saveSong(); apStop(); renderInst(); }, "", "Autoplay " + (i ? "pattern " + i : "off")); b.setAttribute("aria-pressed", String((tr.auto | 0) === i)); c.append(b); });
+      }
+      if (!chords && tr.kind !== "drums" && tr.kind !== "audio") {
+        const c = ctl("Octave"), val = gbEl("span", "gb-val", (tr.oct > 0 ? "+" : "") + (tr.oct | 0));
+        c.append(btnE("−", () => { if (tr.oct > -3) { tr.oct--; saveSong(); renderInst(); } }, "", "Octave down"), val, btnE("+", () => { if (tr.oct < 3) { tr.oct++; saveSong(); renderInst(); } }, "", "Octave up"));
+      }
+      if (["keys", "synth", "plugin", "sampler", "strings"].includes(tr.kind) && !chords) {
+        const c = ctl(""), b = btnE("Sustain", () => { if (sustain) sustainOff(); else sustain = true; b.setAttribute("aria-pressed", String(sustain)); });
+        b.setAttribute("aria-pressed", String(sustain)); b.title = "Notes ring on after you let go (a sustain pedal does the same)"; c.append(b); V.susBtn = b;
+      }
+      if (tr.kind !== "drums" && tr.kind !== "audio" && tr.snd !== "sf2" && !(tr.snd || "").startsWith("smp:")) {
+        const c = ctl(""), b = btnE(tr.kind === "plugin" || (tr.snd || "").startsWith("wam:") ? "Plugin panel" : "Controls", () => ctlSheet(tr));
+        b.title = "Smart Controls: shape this track's sound"; c.append(b);
+      }
+      const tip = t => ib.append(gbEl("div", "gb-tip", t));
+      if (tr.kind === "drums") { tip("Tap the pads: harder in the middle. On a computer keyboard: Q W E R · A S D F · Z X C V."); padsUI(ib, tr); }
+      else if (chords) { tip(tr.auto ? "Autoplay " + tr.auto + ": tap a chord to start the pattern in time, tap another to change, tap it again to stop. Keys 1–8 play the chords." : tr.kind === "guitar" ? "Tap a chord name to strum it, tap the strings one at a time, or drag across them to strum. Keys 1–8 play the chords." : "Touch a chord to play it, or the boxes below it for single notes. Keys 1–8 play the chords."); stripsUI(ib, tr); }
+      else if (smart && tr.kind !== "strings") { tip("Tap a fret to play a note, slide along a string to glide. The left column is the open string."); fretUI(ib, tr); }
+      else if (tr.kind === "sampler") samplerUI(ib, tr);
+      else if (tr.kind === "audio") audioUI(ib, tr);
+      else { tip("Play lower on a key for a louder note, slide across the keys to glide. The computer keyboard plays too (Z to / for the low octave, Q to ] for the next)."); keyboardUI(ib, tr); }
+      paintBar();
+    }
+    // a keyboard: multi-touch, glide, velocity from where the key is struck
+    function keyboardUI(box, tr) {
+      const kb = gbEl("div", "gb-kb"); box.append(kb);
+      const w = box.clientWidth || innerWidth, nW = clamp(Math.floor(w / (isPhone() ? 40 : 52)), 7, 24);
+      const lo = 48 + 12 * (tr.oct | 0), whites = [], keys = new Map();
+      for (let m = lo; whites.length < nW; m++) if (![1, 3, 6, 8, 10].includes(m % 12)) whites.push(m);
+      whites.forEach(m => { const k = gbEl("div", "gb-kw", m % 12 === 0 ? nname(m) : ""); k.dataset.m = m; kb.append(k); keys.set(m, k); });
+      const bw = 100 / nW * 0.62;
+      whites.forEach((m, i) => {
+        if (i === whites.length - 1 || ![0, 2, 5, 7, 9].includes(m % 12)) return;
+        const k = gbEl("div", "gb-kbk"); k.dataset.m = m + 1; k.style.left = ((i + 1) * 100 / nW - bw / 2) + "%"; k.style.width = bw + "%"; kb.append(k); keys.set(m + 1, k);
+      });
+      V.keys = keys;
+      touchPlay(kb, tr, el => el.closest("[data-m]"), (el, y) => { const r = el.getBoundingClientRect(); return clamp(0.35 + 0.65 * (y - r.top) / Math.max(1, r.height), 0.25, 1); });
+    }
+    // the pointer handling shared by the keyboard and the fretboard: each finger plays one note and glides
+    function touchPlay(surface, tr, keyOf, velOf) {
+      const act = new Map(), held = m => [...act.values()].some(x => x.m === m);
+      const at = e => { const el = document.elementFromPoint(e.clientX, e.clientY); const k = el && keyOf(el); return k && surface.contains(k) ? k : null; };
+      const on = (k, e) => { const m = +k.dataset.m; act.set(e.pointerId, { m, k }); k.classList.add("on"); liveOn(tr, m, velOf(k, e.clientY)); };
+      const off = id => { const a = act.get(id); if (!a) return; act.delete(id); if (!held(a.m)) { a.k.classList.remove("on"); liveOff(tr, a.m); } };
+      surface.addEventListener("pointerdown", e => { e.preventDefault(); try { surface.setPointerCapture(e.pointerId); } catch (x) {} const k = at(e); if (k) on(k, e); });
+      surface.addEventListener("pointermove", e => {
+        const a = act.get(e.pointerId); if (!a) return;
+        const k = at(e); if (k === a.k) return;
+        off(e.pointerId); if (k) on(k, e);
+      });
+      ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => surface.addEventListener(ev, e => off(e.pointerId)));
+    }
+    function padsUI(box, tr) {
+      const g = gbEl("div", "gb-pads"); box.append(g);
+      const keys = new Map(), labels = "QWERASDFZXCV";
+      kitPads((tr.snd || "kit:studio").slice(4)).forEach((p, i) => {
+        const d = gbEl("div", "gb-pad" + (p.id ? "" : " dim")); d.dataset.m = p.m; d.style.setProperty("--pc", PADCOL[p.m]);
+        d.append(gbEl("span", "", p.name)); if (KBD_LABELS) d.append(gbEl("i", "", labels[i]));
+        g.append(d); keys.set(p.m, d);
+      });
+      V.keys = keys;
+      g.addEventListener("pointerdown", e => {
+        const d = e.target.closest(".gb-pad"); if (!d) return; e.preventDefault();
+        const r = d.getBoundingClientRect(), dx = (e.clientX - r.left) / r.width - 0.5, dy = (e.clientY - r.top) / r.height - 0.5;
+        const m = +d.dataset.m; liveOn(tr, m, clamp(1 - Math.hypot(dx, dy) * 0.9, 0.35, 1)); lit(m, true);
+      });
+    }
+    // the chord strips of Smart Bass, Guitar and Strings
+    const CHP = new Map();   // finger (or key) -> the notes it holds
+    function chordNotes(tr, ci) { const ch = chordsOf()[ci]; return ch ? voicing(tr.kind, ch) : []; }
+    function chordDown(tr, ci, who, vel = 0.85) {
+      if ((tr.auto | 0) && tr.mode !== "notes") { apLatch(tr, ci); return; }
+      chordUp(who);
+      const vo = chordNotes(tr, ci).filter(m => m != null), notes = tr.kind === "bass" ? [vo[0]] : vo;
+      notes.forEach((m, j) => liveOn(tr, m, vel * (tr.kind === "guitar" ? 0.9 : 0.8), tr.kind === "guitar" ? j * 0.013 : 0));
+      CHP.set(who, { tr: tr.id, notes: new Set(notes), ci });
+      paintStrips();
+    }
+    function chordUp(who) {
+      const h = CHP.get(who); if (!h) return; CHP.delete(who);
+      const tr = trById(h.tr);
+      if (tr) h.notes.forEach(m => { if (![...CHP.values()].some(x => x.tr === h.tr && x.notes.has(m))) liveOff(tr, m); });
+      paintStrips();
+    }
+    function paintStrips() {
+      document.querySelectorAll("#gbIb .gb-chord").forEach(el => {
+        const ci = +el.dataset.ci;
+        el.classList.toggle("on", [...CHP.values()].some(h => h.ci === ci && h.chord));
+        el.classList.toggle("auto", AP.ci === ci && AP.tr === (curTr() || {}).id);
+      });
+    }
+    function stripsUI(box, tr) {
+      const g = gbEl("div", "gb-strips"); box.append(g);
+      const nseg = tr.kind === "guitar" ? 6 : 4, CH = chordsOf();
+      CH.forEach((ch, ci) => {
+        const col = gbEl("div", "gb-strip"), vo = voicing(tr.kind, ch);
+        const lab = gbEl("div", "gb-chord", ch.name); lab.dataset.ci = ci; col.append(lab);
+        for (let s = 0; s < nseg; s++) {
+          const j = tr.kind === "guitar" ? s : nseg - 1 - s, m = vo[j];
+          const sg = gbEl("div", "gb-seg" + (m == null ? " mute" : ""), m == null ? "×" : nname(m).replace(/-?\d+$/, "")); sg.dataset.ci = ci; sg.dataset.j = j;
+          col.append(sg);
+        }
+        g.append(col);
+      });
+      const segAt = e => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && g.contains(el) ? el.closest(".gb-seg, .gb-chord") : null; };
+      const fingers = new Map();
+      const segOn = (f, sg) => {
+        const ci = +sg.dataset.ci, m = chordNotes(tr, ci)[+sg.dataset.j]; if (m == null) return;
+        const keepRing = tr.kind === "guitar";
+        if (!keepRing) fingers.get(f).notes.forEach(n => { if (n !== m) liveOff(tr, n); });
+        if (!keepRing) fingers.get(f).notes.clear();
+        liveOn(tr, m, 0.8); fingers.get(f).notes.add(m); sg.classList.add("on"); setTimeout(() => sg.classList.remove("on"), 140);
+      };
+      g.addEventListener("pointerdown", e => {
+        const el = e.target.closest && e.target.closest(".gb-seg, .gb-chord"); if (!el) return; e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) {}
+        start();
+        if (el.classList.contains("gb-chord")) {
+          const ci = +el.dataset.ci;
+          chordDown(tr, ci, "p" + e.pointerId);
+          const h = CHP.get("p" + e.pointerId); if (h) h.chord = true;
+          paintStrips(); return;
+        }
+        if ((tr.auto | 0)) { apLatch(tr, +el.dataset.ci); return; }
+        fingers.set(e.pointerId, { notes: new Set(), last: el }); segOn(e.pointerId, el);
+      });
+      g.addEventListener("pointermove", e => {
+        const f = fingers.get(e.pointerId); if (!f) return;
+        const el = segAt(e); if (!el || el === f.last || !el.classList.contains("gb-seg")) return;
+        f.last = el; segOn(e.pointerId, el);   // (dragging across the strings strums them)
+      });
+      const up = e => {
+        chordUp("p" + e.pointerId);
+        const f = fingers.get(e.pointerId); if (!f) return; fingers.delete(e.pointerId);
+        f.notes.forEach(m => liveOff(tr, m));
+      };
+      ["pointerup", "pointercancel", "lostpointercapture"].forEach(ev => g.addEventListener(ev, up));
+      paintStrips();
+    }
+    // a fretboard for Smart Guitar and Smart Bass in Notes: thickest string at the top, as you look down at it
+    function fretUI(box, tr) {
+      const OPEN = tr.kind === "bass" ? B_OPEN : G_OPEN, nf = clamp(Math.floor((box.clientWidth || innerWidth) / (isPhone() ? 50 : 62)), 6, 15);
+      const fb = gbEl("div", "gb-fb"); fb.style.gridTemplateRows = "repeat(" + OPEN.length + ", 1fr)";
+      const keys = new Map(), mid = Math.floor(OPEN.length / 2);
+      OPEN.forEach((o, s) => {
+        const row = gbEl("div", "gb-fs"); row.style.gridTemplateColumns = "0.8fr repeat(" + (nf - 1) + ", 1fr)"; row.style.setProperty("--sw", (OPEN.length - s + 1) * 0.55 + 1 + "px");
+        for (let f = 0; f < nf; f++) {
+          const m = o + f + 12 * (tr.oct | 0), c = gbEl("div", "gb-fr" + ((s === mid && [3, 5, 7, 9, 12, 15].includes(f)) ? " dot" : ""), f === 0 || m % 12 === 0 ? nname(m) : "");
+          c.dataset.m = m; row.append(c); if (!keys.has(m)) keys.set(m, c);
+        }
+        fb.append(row);
+      });
+      box.append(fb); V.keys = keys;
+      touchPlay(fb, tr, el => el.closest(".gb-fr"), () => 0.8);
+    }
+    // the sampler: pick a slot, record or load a sound into it, play it across the keys
+    let SREC = null;
+    function samplerUI(box, tr) {
+      const slots = gbEl("div", "gb-slots"), cur = +(tr.snd || "smp:0").slice(4);
+      for (let i = 0; i < NSLOTS; i++) {
+        const b = btnE("S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : ""), () => { tr.snd = "smp:" + i; saveSong(); renderInst(); });
+        b.setAttribute("aria-pressed", String(cur === i)); b.title = sampBuf[i] ? baseName(state.samp.slots[i].name || "sample") : "empty"; slots.append(b);
+      }
+      box.append(slots);
+      const row = gbEl("div", "gb-row3");
+      const rec = btnE(SREC ? "■ Stop" : "● Record a sample", () => sampRec(tr, rec)); if (SREC) rec.classList.add("rec");
+      rec.title = "Record from the microphone into S" + (cur + 1) + " (up to 20 seconds)";
+      const load = btnE("Load a sound file…", () => {
+        const inp = document.createElement("input"); inp.type = "file"; inp.accept = "audio/*,.wav,.mp3,.m4a,.ogg,.flac,.aif,.aiff";
+        inp.onchange = async () => {
+          const f = inp.files && inp.files[0]; if (!f) return; start();
+          try { const ab = await f.arrayBuffer(), buf = await decode(ab.slice(0)); setSample(cur, buf, f.name); storeSample(cur, f.name, ab); gbSay(baseName(f.name) + " is in S" + (cur + 1)); renderInst(); }
+          catch (e) { gbSay("Couldn't open that file as audio"); }
+        };
+        inp.click();
+      });
+      row.append(rec, load); box.append(row);
+      box.append(gbEl("div", "gb-tip", sampBuf[cur] ? "S" + (cur + 1) + " plays across the keys: middle C is the sound as recorded." : "S" + (cur + 1) + " is empty: record or load a sound, then play it on the keys."));
+      keyboardUI(box, tr);
+    }
+    async function sampRec(tr, btn) {
+      if (SREC) { sampRecStop(); return; }
+      if (!(await micOpen())) return;
+      const i = +(tr.snd || "smp:0").slice(4), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
+      const chunks = [];
+      proc.onaudioprocess = e => { chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); if (chunks.length * 4096 > ctx.sampleRate * 20) sampRecStop(); };
+      MIC.src.connect(proc); proc.connect(mute).connect(ctx.destination);
+      SREC = { proc, mute, chunks, i };
+      if (btn) { btn.textContent = "■ Stop"; btn.classList.add("rec"); }
+    }
+    function sampRecStop() {
+      const R = SREC; SREC = null; if (!R) return;
+      try { MIC.src.disconnect(R.proc); } catch (e) {} try { R.proc.disconnect(); R.mute.disconnect(); } catch (e) {}
+      const n = R.chunks.reduce((a, c) => a + c.length, 0), all = new Float32Array(n); let o = 0; R.chunks.forEach(c => { all.set(c, o); o += c.length; });
+      let a = 0, b = n; while (a < n && Math.abs(all[a]) < 0.012) a++; while (b > a && Math.abs(all[b - 1]) < 0.008) b--;
+      a = Math.max(0, a - 256);
+      if (b - a < ctx.sampleRate * 0.05) { gbSay("Nothing was recorded: is the microphone on?"); if (V.open && S.view === "inst") renderInst(); return; }
+      const buf = ctx.createBuffer(1, b - a, ctx.sampleRate); buf.getChannelData(0).set(all.subarray(a, b));
+      const nm = "Garage recording";
+      setSample(R.i, buf, nm); storeSample(R.i, nm, bufferToWav(buf));
+      gbSay("Recorded " + buf.duration.toFixed(1) + " s into S" + (R.i + 1) + ": play it on the keys");
+      if (V.open && S.view === "inst") renderInst();
+    }
+    function audioUI(box, tr) {
+      const w = gbEl("div", "gb-audio");
+      w.append(gbEl("div", "big", MIC.src ? "Microphone on" : "Audio Recorder"));
+      w.append(gbEl("div", "gb-tip", "Press ● in the top bar to record. The take lands on this track at the playhead, lined up with what was playing. Use headphones, so the mic doesn't pick up the other tracks."));
+      const m = gbEl("div", "gb-meter"); m.innerHTML = "<i></i>"; w.append(m); V.meter = m.firstChild;
+      const row = gbEl("div", "gb-row3");
+      if (!MIC.src) row.append(btnE("Turn the microphone on", async () => { if (await micOpen()) renderInst(); }, "primary"));
+      const mon = btnE("Monitor", () => { tr.mon = !tr.mon; micMonitor(tr, tr.mon && !!MIC.src); mon.setAttribute("aria-pressed", String(!!tr.mon)); saveSong(); });
+      mon.setAttribute("aria-pressed", String(!!tr.mon)); mon.title = "Hear the microphone through this track (use headphones)";
+      row.append(mon); w.append(row);
+      const takes = tr.regions.length; w.append(gbEl("div", "gb-tip", takes ? takes + (takes === 1 ? " take" : " takes") + " on this track: see them in Tracks." : "No takes yet."));
+      box.append(w);
+      if (MIC.src) micMonitor(tr, !!tr.mon);
+    }
+    function meter() {
+      if (!V.meter) return;
+      if (!MIC.an) { V.meter.style.width = "0"; return; }
+      const a = V.mbuf || (V.mbuf = new Float32Array(MIC.an.fftSize)); MIC.an.getFloatTimeDomainData(a);
+      let pk = 0; for (let i = 0; i < a.length; i++) { const v = Math.abs(a[i]); if (v > pk) pk = v; }
+      const db = pk > 0 ? 20 * Math.log10(pk) : -60; V.meter.style.width = clamp((db + 54) / 54 * 100, 0, 100) + "%";
+    }
+    // ---------- Autoplay: patterns that play the chord you pick, in time with the song ----------
+    const AP = { ci: -1, tr: "", timer: 0, t0: 0, b0: 0, next: 0 };
+    function apPattern(tr, pat, kb) {
+      // events in one beat: o = offset (beats), n = which notes, d = length (beats), v = level, st = strum (s between strings)
+      const sig = S.sig;
+      if (tr.kind === "guitar") {
+        const D = (o, d, v) => ({ o, n: "D", d, v, st: 0.012 }), U = (o, d, v) => ({ o, n: "U", d, v, st: 0.01 });
+        if (pat === 1) return [D(0, 1, 0.8)];
+        if (pat === 2) return [D(0, 0.5, 0.85), U(0.5, 0.5, 0.58)];
+        if (pat === 3) return kb % 2 === 0 ? [{ o: 0, n: "b", d: 1.5, v: 0.8 }, { o: 0.5, n: "s3", d: 1, v: 0.6 }] : [{ o: 0, n: "s4", d: 1, v: 0.6 }, { o: 0.5, n: "s5", d: 1, v: 0.62 }];
+        return [D(0, 0.2, 0.9), U(0.25, 0.14, 0.45), D(0.5, 0.2, 0.72), U(0.75, 0.14, 0.52)];
+      }
+      if (tr.kind === "bass") {
+        const B = (o, n, d, v) => ({ o, n: [n], d, v });
+        if (pat === 1) return [B(0, 0, 0.9, 0.85)];
+        if (pat === 2) return [B(0, 0, 0.45, 0.85), B(0.5, 2, 0.45, 0.7)];
+        if (pat === 3) return [B(0, [0, 1, 2, 1][kb % 4], 0.9, 0.8)];
+        return [[B(0, 0, 0.7, 0.9), B(0.75, 0, 0.2, 0.6)], [B(0.5, 2, 0.4, 0.7)], [B(0, 1, 0.7, 0.8)], [B(0.5, 0, 0.25, 0.7), B(0.75, 3, 0.2, 0.6)]][kb % 4];
+      }
+      const A = (o, d, v) => ({ o, n: "all", d, v });
+      if (pat === 1) return kb === 0 ? [A(0, sig - 0.06, 0.7)] : [];
+      if (pat === 2) return kb % 2 === 0 ? [A(0, Math.min(2, sig - kb) - 0.06, 0.7)] : [];
+      if (pat === 3) return [A(0, 0.32, 0.66), A(0.5, 0.32, 0.55)];
+      return [{ o: 0, n: [(2 * kb) % 4], d: 0.5, v: 0.64 }, { o: 0.5, n: [(2 * kb + 1) % 4], d: 0.5, v: 0.6 }];
+    }
+    function apNotes(tr, vo, n) {
+      const pl = vo.filter(m => m != null);
+      if (n === "D" || n === "all") return pl;
+      if (n === "U") return pl.slice(-4).reverse();
+      if (n === "b") return pl.slice(0, 1);
+      if (/^s\d$/.test(n)) { const k = pl.length - (6 - +n[1]); return pl[clamp(k, 0, pl.length - 1)] != null ? [pl[clamp(k, 0, pl.length - 1)]] : []; }
+      return n.map(i => vo[i]).filter(m => m != null);
+    }
+    function apSched(b1, b2, toT) {
+      const tr = trById(AP.tr); if (!tr || AP.ci < 0 || !(tr.auto | 0)) return;
+      const vo = chordNotes(tr, AP.ci);
+      for (let k = Math.floor(b1 + 1e-9) - 1; k < b2; k++) {
+        if (k < 0) continue;
+        apPattern(tr, tr.auto | 0, ((k % S.sig) + S.sig) % S.sig).forEach(ev => {
+          const eb = k + ev.o; if (eb < b1 - 1e-9 || eb >= b2 - 1e-9) return;
+          apNotes(tr, vo, ev.n).forEach((m, j) => {
+            const dt = (ev.st || 0) * j;
+            if (tLevel(tr) > 0) playAt(tr, m, toT(eb) + dt, ev.d * spb(), ev.v);
+            if (TP.on) recNote(tr, m, eb + dt / spb(), ev.d, ev.v);
+          });
+        });
+      }
+    }
+    function apTick(b1, b2) {
+      if (AP.timer) { clearInterval(AP.timer); AP.timer = 0; }   // (the song's clock takes over)
+      if (AP.ci >= 0) apSched(b1, b2, timeAt);
+    }
+    function apFree() {
+      if (TP.on || !ctx) { if (AP.timer) { clearInterval(AP.timer); AP.timer = 0; } return; }
+      const horizon = ctx.currentTime + 0.12, bEnd = AP.b0 + (horizon - AP.t0) / spb();
+      if (bEnd > AP.next) { apSched(AP.next, bEnd, b => AP.t0 + (b - AP.b0) * spb()); AP.next = bEnd; }
+      releaseDue(horizon);
+    }
+    function apRun() { if (TP.on || AP.timer || !ctx) return; AP.t0 = ctx.currentTime + 0.03; AP.b0 = 0; AP.next = 0; AP.timer = setInterval(apFree, 25); apFree(); }
+    function apLatch(tr, ci) {
+      start(); if (!ctx) return;
+      if (AP.ci === ci && AP.tr === tr.id) { apStop(); return; }
+      AP.ci = ci; AP.tr = tr.id; apRun(); paintStrips();
+    }
+    function apStop() { AP.ci = -1; if (AP.timer) { clearInterval(AP.timer); AP.timer = 0; } paintStrips(); }
+    function apAfterStop() { if (AP.ci >= 0) apRun(); }
+
+    // ---------- Tracks: the song's timeline ----------
+    const ZOOM = [10, 14, 20, 28, 40, 56, 80];
+    const PXB = () => ZOOM[clamp(S.zoom | 0, 0, ZOOM.length - 1)];
+    const HEADW = () => isPhone() ? 104 : 176, ROWH = () => isPhone() ? 62 : 70;
+    const snapU = () => { const P = PXB(); return P >= 40 ? 0.25 : P >= 20 ? 1 : S.sig; };
+    const totalBeats = () => Math.max(S.bars * S.sig, Math.ceil(songEndBeat() / S.sig) * S.sig) + S.sig * 2;
+    function findRegion(id) { if (!id || !S) return null; for (const tr of S.tracks) { const r = tr.regions.find(x => x.id === id); if (r) return { tr, r }; } return null; }
+    const PEAKS = new Map();
+    function peaksOf(key) {
+      if (PEAKS.has(key)) return PEAKS.get(key);
+      const b = ABUF.get(key); if (!b) return null;
+      const d = b.getChannelData(0), step = 256, n = Math.ceil(d.length / step), pk = new Float32Array(n);
+      for (let i = 0; i < n; i++) { let m = 0; const e = Math.min(d.length, (i + 1) * step); for (let j = i * step; j < e; j++) { const v = d[j] < 0 ? -d[j] : d[j]; if (v > m) m = v; } pk[i] = m; }
+      const o = { pk, rate: b.sampleRate / step }; PEAKS.set(key, o); return o;
+    }
+    function drawPreview(cv, tr, r, w, h) {
+      const dpr = Math.min(2, devicePixelRatio || 1), cw = Math.min(w, 2400);
+      cv.width = Math.max(1, Math.round(cw * dpr)); cv.height = Math.max(1, Math.round(h * dpr));
+      const g = cv.getContext("2d"); g.scale(dpr * cw / w, dpr); g.fillStyle = "#0b0f0c99";
+      const reps = r.rep || 1, tot = r.len * reps;
+      if (r.key) {
+        const P = peaksOf(r.key); if (!P) return;
+        const secPerBeat = spb(), mid = h / 2;
+        for (let k = 0; k < reps; k++) for (let x = 0; x < (r.len / tot) * w; x += 2) {
+          const sec = (r.off || 0) + (x / w) * tot * secPerBeat, i = Math.floor(sec * P.rate); if (i >= P.pk.length) break;
+          const a = Math.min(1, P.pk[i] * 1.6) * (h / 2 - 1); g.fillRect(x + (k * r.len / tot) * w, mid - a, 1.6, a * 2 || 1);
+        }
+        return;
+      }
+      const ns = r.notes || []; if (!ns.length) return;
+      let lo = Math.min(...ns.map(n => n[1])), hi = Math.max(...ns.map(n => n[1]));
+      if (hi - lo < 12) { const c = (hi + lo) / 2; lo = c - 6; hi = c + 6; }
+      const rh = Math.max(1.5, h / (hi - lo + 1));
+      for (let k = 0; k < reps; k++) ns.forEach(n => {
+        const x = ((k * r.len + n[0]) / tot) * w, ww = Math.max(2, (n[2] / tot) * w), y = (hi - n[1]) / (hi - lo + 1) * h;
+        g.globalAlpha = k ? 0.5 : 1; g.fillRect(x, y, ww, Math.min(rh, 4));
+      });
+    }
+    function renderTracks(scrollToPh) {
+      const tl = $("gbTl"), inn = $("gbTlin"); if (!S) return;
+      const sx = tl.scrollLeft, sy = tl.scrollTop, P = PXB(), HW = HEADW(), RH = ROWH(), NB = totalBeats(), W = NB * P;
+      inn.replaceChildren(); inn.style.width = (HW + W) + "px";
+      // the ruler: bar numbers, the cycle, tap to move the playhead
+      const rr = gbEl("div", "gb-rulerow"), cn = gbEl("div", "gb-corner", "Bar"), ru = gbEl("div", "gb-ruler");
+      cn.style.width = HW + "px"; ru.style.width = W + "px";
+      const every = P * S.sig < 18 ? 4 : P * S.sig < 34 ? 2 : 1;
+      for (let bar = 0; bar * S.sig < NB; bar++) if (bar % every === 0) { const sp = gbEl("span", "", String(bar + 1)); sp.style.left = bar * S.sig * P + "px"; ru.append(sp); }
+      if (S.cyc.on) ru.append(cycleEl(P));
+      const pm = gbEl("div", "gb-phm"); pm.id = "gbPhm"; ru.append(pm);
+      ru.addEventListener("pointerdown", e => {
+        if (e.target.closest(".gb-cycbar")) return;
+        const seek = ev => { const x = ev.clientX - ru.getBoundingClientRect().left; gbSeek(Math.max(0, Math.round(x / P / snapU()) * snapU())); };
+        seek(e); try { ru.setPointerCapture(e.pointerId); } catch (x) {}
+        const mv = ev => { if (!TP.on) seek(ev); }, up = () => { ru.removeEventListener("pointermove", mv); ru.removeEventListener("pointerup", up); ru.removeEventListener("pointercancel", up); };
+        ru.addEventListener("pointermove", mv); ru.addEventListener("pointerup", up); ru.addEventListener("pointercancel", up);
+      });
+      rr.append(cn, ru); inn.append(rr);
+      const grid = "repeating-linear-gradient(90deg, #36314a 0 1px, transparent 1px " + (P * S.sig) + "px), repeating-linear-gradient(90deg, #1f1c2b 0 1px, transparent 1px " + P + "px)";
+      S.tracks.forEach((tr, i) => {
+        const row = gbEl("div", "gb-row"); row.style.height = RH + "px"; row.dataset.i = i;
+        const hd = gbEl("div", "gb-head" + (i === S.sel ? " sel" : "")); hd.style.width = HW + "px"; hd.style.setProperty("--kc", KIND[tr.kind].kc);
+        const ic = gbEl("i"); ic.innerHTML = ICON[tr.kind]; ic.title = "Play " + tr.name; hd.append(ic);
+        const hn = gbEl("div", "hn"); hn.append(gbEl("b", "", tr.name), gbEl("small", "", tr.kind === "audio" ? "audio" : soundName(tr.snd))); hd.append(hn);
+        const ms = gbEl("div", "ms"), mB = gbEl("button", "m", "M"), sB = gbEl("button", "s", "S");
+        mB.setAttribute("aria-pressed", String(!!tr.mute)); mB.setAttribute("aria-label", "Mute " + tr.name); mB.title = "Mute";
+        sB.setAttribute("aria-pressed", String(!!tr.solo)); sB.setAttribute("aria-label", "Solo " + tr.name); sB.title = "Solo: hear only the soloed tracks";
+        mB.addEventListener("click", e => { e.stopPropagation(); tr.mute = !tr.mute; mB.setAttribute("aria-pressed", String(tr.mute)); applyLevels(); saveSong(); });
+        sB.addEventListener("click", e => { e.stopPropagation(); tr.solo = !tr.solo; sB.setAttribute("aria-pressed", String(tr.solo)); applyLevels(); saveSong(); });
+        ms.append(mB, sB); hd.append(ms);
+        hd.addEventListener("click", e => {
+          if (e.target.closest(".ms")) return;
+          if (e.target.closest("i")) { S.sel = i; setView("inst"); return; }
+          if (i === S.sel) { trackSheet(tr); return; }
+          S.sel = i; hideMenu(); V.rsel = ""; renderTracks(); paintBar(); saveSong();
+        });
+        const ln = gbEl("div", "gb-lane" + (i === S.sel ? " sel" : "")); ln.style.width = W + "px"; ln.style.backgroundImage = grid; ln.dataset.i = i;
+        tr.regions.forEach(r => ln.append(regionEl(tr, r, P, RH)));
+        ln.addEventListener("pointerdown", e => {
+          if (e.target !== ln) return;
+          hideMenu(); V.rsel = "";
+          if (S.sel !== i) { S.sel = i; renderTracks(); paintBar(); saveSong(); }
+          else inn.querySelectorAll(".gb-reg.sel").forEach(x => x.classList.remove("sel"));
+          renderTbar();
+        });
+        row.append(hd, ln); inn.append(row);
+      });
+      const ar = gbEl("div", "gb-row gb-addrow"), ah = gbEl("button", "gb-head", "+ Add a track");
+      ah.style.width = HW + "px"; ah.style.height = Math.round(RH * 0.8) + "px"; ah.style.border = "0"; ah.addEventListener("click", () => setView("browse"));
+      ar.append(ah); inn.append(ar);
+      if (!S.tracks.length) inn.append(gbEl("div", "gb-empty", "No tracks yet. Tap + Add a track, choose an instrument, play it, and press ● to record."));
+      const ph = gbEl("div", "gb-ph"); ph.id = "gbPh"; inn.append(ph);
+      tl.scrollLeft = sx; tl.scrollTop = sy;
+      placePh(!!scrollToPh); renderTbar();
+      if (V.menu) showMenu();
+    }
+    function gbSeek(b) {
+      if (TP.on && TP.rec) return;
+      const was = TP.on; if (was) stop();
+      S.ph = b; placePh(); paintPos();
+      if (was) play(false);
+    }
+    function cycleEl(P) {
+      const cb = gbEl("div", "gb-cycbar"); cb.style.left = S.cyc.a * P + "px"; cb.style.width = (S.cyc.b - S.cyc.a) * P + "px"; cb.title = "Cycle: drag to move, drag an end to resize";
+      cb.addEventListener("pointerdown", e => {
+        e.stopPropagation(); e.preventDefault(); try { cb.setPointerCapture(e.pointerId); } catch (x) {}
+        const r = cb.getBoundingClientRect(), x = e.clientX - r.left, mode = x < 14 ? "a" : x > r.width - 14 ? "b" : "m";
+        const a0 = S.cyc.a, b0 = S.cyc.b, x0 = e.clientX, u = S.sig; let did = false;
+        const mv = ev => {
+          const d = Math.round((ev.clientX - x0) / P / u) * u; if (!d && !did) return;
+          if (!did) { did = true; gbDo(); }
+          if (mode === "a") S.cyc.a = clamp(a0 + d, 0, b0 - u);
+          else if (mode === "b") S.cyc.b = Math.max(a0 + u, b0 + d);
+          else { const dd = Math.max(-a0, d); S.cyc.a = a0 + dd; S.cyc.b = b0 + dd; }
+          cb.style.left = S.cyc.a * P + "px"; cb.style.width = (S.cyc.b - S.cyc.a) * P + "px";
+        };
+        const up = () => { cb.removeEventListener("pointermove", mv); cb.removeEventListener("pointerup", up); cb.removeEventListener("pointercancel", up); if (did) { saveSong(); renderTracks(); } };
+        cb.addEventListener("pointermove", mv); cb.addEventListener("pointerup", up); cb.addEventListener("pointercancel", up);
+      });
+      return cb;
+    }
+    function regionEl(tr, r, P, RH) {
+      const d = gbEl("div", "gb-reg" + (V.rsel === r.id ? " sel" : "")), tot = r.len * (r.rep || 1), w = Math.max(6, tot * P);
+      d.dataset.r = r.id; d.style.left = r.start * P + "px"; d.style.width = w + "px"; d.style.setProperty("--rc", KIND[tr.kind].rc);
+      d.append(gbEl("span", "rl", r.name || tr.name));
+      for (let k = 1; k < (r.rep || 1); k++) { const x = gbEl("i", "rr"); x.style.left = k * r.len * P + "px"; d.append(x); }
+      const cv = document.createElement("canvas"); d.append(cv); drawPreview(cv, tr, r, w, RH - 10 - 18);
+      d.append(gbEl("i", "rh"));
+      d.addEventListener("pointerdown", e => regionDown(e, d, tr, r));
+      d.addEventListener("dblclick", () => { if (!r.key) openEditor(tr, r); });
+      return d;
+    }
+    function regionDown(e, d, tr0, r) {
+      if (e.button > 0) return;
+      e.stopPropagation(); e.preventDefault();
+      const st = { x: e.clientX, y: e.clientY, moved: false, start: r.start, len: r.len, rep: r.rep || 1, trim: e.target.classList.contains("rh"), owner: tr0 };
+      const wasSel = V.rsel === r.id, i0 = S.tracks.indexOf(tr0);
+      V.rsel = r.id;
+      if (S.sel !== i0) { S.sel = i0; document.querySelectorAll("#gbTlin .gb-head, #gbTlin .gb-lane").forEach(x => x.classList.toggle("sel", +(x.closest(".gb-row") || {}).dataset?.i === i0)); paintBar(); }
+      document.querySelectorAll("#gbTlin .gb-reg.sel").forEach(x => x.classList.remove("sel")); d.classList.add("sel");
+      const P = PXB();
+      const mv = ev => {
+        if (ev.pointerId !== e.pointerId) return;
+        const dx = ev.clientX - st.x, dy = ev.clientY - st.y;
+        if (!st.moved && Math.hypot(dx, dy) < 7) return;
+        if (!st.moved) { st.moved = true; gbDo(); hideMenu(); }
+        const u = snapU();
+        if (st.trim) {
+          const tot = Math.max(u, Math.round((st.len * st.rep + dx / P) / u) * u);
+          if (st.rep > 1) r.rep = Math.max(1, Math.round(tot / st.len));
+          else { let L = tot; if (r.key) { const b = ABUF.get(r.key), dur = b ? b.duration : (r.dur || 0); L = Math.min(L, Math.max(u, (dur - (r.off || 0)) / spb())); } r.len = Math.max(u / 2, L); }
+          d.style.width = Math.max(6, r.len * (r.rep || 1) * P) + "px";
+        } else {
+          r.start = Math.max(0, Math.round((st.start + dx / P) / u) * u); d.style.left = r.start * P + "px";
+          const el = document.elementFromPoint(ev.clientX, ev.clientY), ln = el && el.closest && el.closest(".gb-lane");
+          if (ln && ln !== d.parentNode) {
+            const T = S.tracks[+ln.dataset.i];
+            if (T && (T.kind === "audio") === (st.owner.kind === "audio")) {
+              st.owner.regions = st.owner.regions.filter(x => x !== r); T.regions.push(r); st.owner = T;
+              ln.append(d); d.style.setProperty("--rc", KIND[T.kind].rc);
+            }
+          }
+        }
+      };
+      const up = ev => {
+        if (ev.pointerId !== e.pointerId) return;
+        removeEventListener("pointermove", mv); removeEventListener("pointerup", up); removeEventListener("pointercancel", up);
+        if (st.moved) {
+          const T = st.owner; T.regions = T.regions.filter(x => x !== r); placeRegion(T, r, false);
+          S.sel = S.tracks.indexOf(T); fitLen(); dirty(); saveSong(); V.menu = false; renderTracks();
+          return;
+        }
+        const now = Date.now();
+        if (V.lastTap && V.lastTap.id === r.id && now - V.lastTap.t < 350) { V.lastTap = null; if (!r.key) openEditor(st.owner, r); return; }
+        V.lastTap = { id: r.id, t: now };
+        if (wasSel && V.menu) hideMenu(); else showMenu();
+        renderTbar();
+      };
+      addEventListener("pointermove", mv); addEventListener("pointerup", up); addEventListener("pointercancel", up);
+    }
+    function hideMenu() { V.menu = false; const m = $("gbRmenu"); if (m) m.hidden = true; }
+    function showMenu() {
+      const f = findRegion(V.rsel), m = $("gbRmenu"); if (!f) { hideMenu(); return; }
+      const { tr, r } = f, el = document.querySelector('#gbTlin .gb-reg[data-r="' + r.id + '"]'); if (!el) { hideMenu(); return; }
+      V.menu = true; m.replaceChildren();
+      const add = (t, fn, title) => { const b = gbEl("button", "", t); if (title) b.title = title; b.addEventListener("click", e => { e.stopPropagation(); fn(); }); m.append(b); };
+      if (!r.key) add("Edit", () => openEditor(tr, r), "Edit the notes (or double-tap the region)");
+      add("Cut", () => { V.clip = { r: JSON.parse(JSON.stringify(r)), audio: !!r.key }; delRegion(tr, r); gbSay("Cut: tap Paste to put it at the playhead"); });
+      add("Copy", () => { V.clip = { r: JSON.parse(JSON.stringify(r)), audio: !!r.key }; hideMenu(); renderTbar(); gbSay("Copied: move the playhead and tap Paste"); });
+      if (V.clip) add("Paste", pasteClip, "Paste at the playhead on the selected track");
+      add("Duplicate", () => { gbDo(); const R = cloneRegion(r); R.start = rEnd(r); placeRegion(tr, R, false); V.rsel = R.id; fitLen(); dirty(); saveSong(); renderTracks(); });
+      add((r.rep || 1) > 1 ? "Unloop" : "Loop", () => loopRegion(tr, r), "Repeat the region up to the next one");
+      if (S.ph > r.start + 0.05 && S.ph < rEnd(r) - 0.05) add("Split", () => splitRegion(tr, r), "Cut the region in two at the playhead");
+      add("Delete", () => delRegion(tr, r));
+      m.hidden = false;
+      const B = $("gbTracks").getBoundingClientRect(), R = el.getBoundingClientRect();
+      let x = R.left - B.left, y = R.top - B.top - m.offsetHeight - 6;
+      x = clamp(x, 6, Math.max(6, B.width - m.offsetWidth - 6));
+      if (y < 32) y = R.bottom - B.top + 6;
+      m.style.left = x + "px"; m.style.top = y + "px";
+    }
+    const cloneRegion = r => Object.assign(JSON.parse(JSON.stringify(r)), { id: uid() });
+    function delRegion(tr, r) { gbDo(); tr.regions = tr.regions.filter(x => x !== r); if (V.rsel === r.id) V.rsel = ""; hideMenu(); fitLen(); dirty(); saveSong(); renderTracks(); }
+    function pasteClip() {
+      const tr = curTr(); if (!V.clip || !tr) return;
+      if (V.clip.audio !== (tr.kind === "audio")) { gbSay(V.clip.audio ? "Audio pastes onto an Audio Recorder track" : "Notes paste onto an instrument track, not audio"); return; }
+      gbDo(); const R = cloneRegion(V.clip.r); R.start = Math.max(0, Math.round(S.ph)); placeRegion(tr, R, false);
+      V.rsel = R.id; fitLen(); dirty(); saveSong(); hideMenu(); renderTracks();
+    }
+    function loopRegion(tr, r) {
+      gbDo();
+      if ((r.rep || 1) > 1) r.rep = 1;
+      else {
+        const next = tr.regions.filter(x => x !== r && x.start >= rEnd(r) - 1e-6).reduce((a, x) => Math.min(a, x.start), Infinity);
+        const lim = Number.isFinite(next) ? next : Math.max(S.bars * S.sig, rEnd(r) + 3 * r.len);
+        r.rep = Math.max(2, Math.floor((lim - r.start) / r.len + 1e-6));
+        placeRegion(tr, tr.regions.splice(tr.regions.indexOf(r), 1)[0], false);
+      }
+      fitLen(); dirty(); saveSong(); hideMenu(); renderTracks();
+    }
+    function splitRegion(tr, r) {
+      const b = Math.round(S.ph / 0.25) * 0.25; if (!(b > r.start && b < rEnd(r))) return;
+      gbDo();
+      const A = trimRegion(r, r.start, b), B = trimRegion(r, b, rEnd(r));
+      tr.regions = tr.regions.filter(x => x !== r).concat([A, B].filter(Boolean)).sort((x, y) => x.start - y.start);
+      V.rsel = B ? B.id : ""; dirty(); saveSong(); hideMenu(); renderTracks();
+    }
+    function renderTbar() {
+      const b = $("gbTbar"); if (!b || !S) return; b.replaceChildren();
+      b.append(btnE("+ Track", () => setView("browse")));
+      const cy = btnE("⟳ Cycle", () => {
+        gbDo(); S.cyc.on = !S.cyc.on;
+        if (S.cyc.on) { const f = findRegion(V.rsel); if (f) { S.cyc.a = Math.floor(f.r.start / S.sig) * S.sig; S.cyc.b = Math.max(S.cyc.a + S.sig, Math.ceil(rEnd(f.r) / S.sig - 1e-6) * S.sig); } else { S.cyc.a = Math.floor(S.ph / S.sig + 1e-9) * S.sig; S.cyc.b = S.cyc.a + 4 * S.sig; } }
+        saveSong(); renderTracks();
+      });
+      cy.setAttribute("aria-pressed", String(!!S.cyc.on)); cy.title = "Cycle: play the yellow bars over and over (record into them as many times as you like)"; b.append(cy);
+      const zo = btnE("−", () => { if (S.zoom > 0) { S.zoom--; saveSong(); renderTracks(); } }, "", "Zoom out"), zi = btnE("+", () => { if (S.zoom < ZOOM.length - 1) { S.zoom++; saveSong(); renderTracks(); } }, "", "Zoom in");
+      zo.disabled = S.zoom <= 0; zi.disabled = S.zoom >= ZOOM.length - 1; b.append(zo, zi);
+      if (V.clip) b.append(btnE("Paste", pasteClip, "", "Paste at the playhead"));
+      b.append(gbEl("span", "sp"));
+      const f = findRegion(V.rsel);
+      if (f && !f.r.key) b.append(btnE("Edit notes", () => openEditor(f.tr, f.r), "primary"));
+      else b.append(gbEl("span", "gb-tip", isPhone() ? "Tap a region for its menu" : "Tap a region for its menu, drag to move it, drag its right edge to resize"));
+    }
+    function placePh(follow) {
+      if (!V.open || !S) return;
+      const b = Math.max(0, beatNow());
+      if (S.view === "tracks") {
+        const ph = $("gbPh"), pm = $("gbPhm"), tl = $("gbTl");
+        if (ph) {
+          const P = PXB(), HW = HEADW(), x = b * P, vis0 = tl.scrollLeft, span = tl.clientWidth - HW;
+          ph.style.left = (HW + x) + "px"; ph.style.visibility = x < vis0 - 1 ? "hidden" : ""; if (pm) pm.style.left = x + "px";
+          if ((follow || TP.on) && span > 40 && (x < vis0 || x > vis0 + span - 24)) tl.scrollLeft = Math.max(0, x - span * 0.2);
+        }
+      }
+      if (ED.open) edDraw();
+    }
+
+    // ---------- the piano roll ----------
+    const ED = { open: false, tr: "", r: "", ox: 0, oy: 0, pxb: 64, grid: 0.25, sel: new Set(), nlen: 0.5, rows: null, drum: false, rh: 15, w: 0, h: 0, dragUndo: false };
+    const EDZ = [24, 32, 48, 64, 96, 128, 176];
+    const edFind = () => { const tr = trById(ED.tr), r = tr && tr.regions.find(x => x.id === ED.r); return r ? { tr, r } : null; };
+    const KWd = () => ED.drum ? (isPhone() ? 74 : 96) : 46, RUh = 20;
+    const rowCount = () => ED.drum ? ED.rows.length : 88;
+    const rowOf = m => ED.drum ? ED.rows.indexOf(m) : 108 - m;
+    const midiOf = i => ED.drum ? ED.rows[i] : 108 - i;
+    function openEditor(tr, r) {
+      if (!tr || !r || r.key) return;
+      hideMenu(); V.rsel = r.id;
+      ED.open = true; ED.tr = tr.id; ED.r = r.id; ED.sel.clear(); ED.drum = tr.kind === "drums";
+      if (ED.drum) { const used = [...new Set((r.notes || []).map(n => n[1]))].filter(m => !PADS.some(p => p[0] === m)).sort((a, b) => b - a); ED.rows = used.concat(PADS.map(p => p[0])); }
+      ED.grid = 0.25; ED.ox = 0;
+      $("gbEd").hidden = false; edHead(); edSize();
+      // the rows: every drum on screen if it fits; a zoom that shows the whole region when it's short
+      ED.rh = ED.drum ? clamp(Math.floor((ED.h - RUh) / ED.rows.length), 20, 30) : (isPhone() ? 18 : 15);
+      const fitZ = (ED.w - KWd() - 24) / Math.max(0.25, r.len); ED.pxb = EDZ.filter(z => z <= fitZ).pop() || EDZ[0]; if (ED.pxb > 128 && !ED.drum) ED.pxb = 128;
+      const ns = r.notes || [], mean = ns.length ? ns.reduce((a, n) => a + rowOf(n[1]), 0) / ns.length : rowOf(60);
+      ED.oy = ED.drum ? 0 : Math.max(0, mean * ED.rh - (ED.h - RUh) / 2);
+      edDraw(); renderTbar();
+    }
+    function edClose() { if (!ED.open) return; ED.open = false; $("gbEd").hidden = true; ED.sel.clear(); }
+    function edSize() {
+      const w = $("gbEdw"), cv = $("gbEdc"), dpr = Math.min(2, devicePixelRatio || 1);
+      ED.w = Math.max(100, w.clientWidth); ED.h = Math.max(60, w.clientHeight);
+      cv.width = Math.round(ED.w * dpr); cv.height = Math.round(ED.h * dpr); cv.style.width = ED.w + "px"; cv.style.height = ED.h + "px"; ED.dpr = dpr;
+    }
+    function edHead() {
+      const f = edFind(), h = $("gbEdh"); if (!f) return; h.replaceChildren();
+      h.append(gbEl("strong", "", f.tr.name + " · bar " + (Math.floor(f.r.start / S.sig) + 1)));
+      [[1, "1/4"], [0.5, "1/8"], [0.25, "1/16"], [0.125, "1/32"]].forEach(([g, t]) => { const b = btnE(t, () => { ED.grid = g; edHead(); edDraw(); }, "", "Grid " + t); b.setAttribute("aria-pressed", String(ED.grid === g)); h.append(b); });
+      h.append(btnE("Quantize", () => {
+        const L = ED.sel.size ? [...ED.sel] : f.r.notes; if (!L.length) return; gbDo();
+        L.forEach(n => { n[0] = clamp(Math.round(n[0] / ED.grid) * ED.grid, 0, Math.max(0, f.r.len - ED.grid)); });
+        edChanged(); gbSay("Quantized " + L.length + (L.length === 1 ? " note" : " notes") + " to the grid");
+      }, "", "Snap the notes (the selected ones, or all) to the grid"));
+      const vl = gbEl("label", "gb-tip", "Velocity "), vr = document.createElement("input"); vr.type = "range"; vr.min = "0.05"; vr.max = "1"; vr.step = "0.01";
+      const s0 = [...ED.sel][0]; vr.value = String(s0 ? s0[3] : 0.8); vr.disabled = !ED.sel.size; vr.setAttribute("aria-label", "Velocity of the selected notes");
+      vr.addEventListener("input", () => { if (!ED.dragUndo) { gbDo(); ED.dragUndo = true; } ED.sel.forEach(n => { n[3] = +vr.value; }); edDraw(); });
+      vr.addEventListener("change", () => { ED.dragUndo = false; edChanged(true); });
+      vl.append(vr); h.append(vl);
+      const del = btnE("Delete", () => edDelete(), "", "Delete the selected notes"); del.disabled = !ED.sel.size; h.append(del);
+      h.append(btnE("All", () => { ED.sel = new Set(f.r.notes); edHead(); edDraw(); }, "", "Select every note"));
+      h.append(btnE("−", () => { const i = EDZ.indexOf(ED.pxb); if (i > 0) { ED.pxb = EDZ[i - 1]; edDraw(); } }, "", "Zoom out"), btnE("+", () => { const i = EDZ.indexOf(ED.pxb); if (i < EDZ.length - 1) { ED.pxb = EDZ[i + 1]; edDraw(); } }, "", "Zoom in"));
+      h.append(gbEl("span", "sp"));
+      const x = btnE("Done", () => { edClose(); renderTbar(); }, "primary"); x.id = "gbEdX"; h.append(x);
+    }
+    function edChanged(keepHead) { dirty(); saveSong(); if (!keepHead) edHead(); edDraw(); renderTracks(); }
+    function edDelete() { const f = edFind(); if (!f || !ED.sel.size) return; gbDo(); f.r.notes = f.r.notes.filter(n => !ED.sel.has(n)); ED.sel.clear(); edChanged(); }
+    function edClampO(r) {
+      const KW = KWd(), maxX = Math.max(0, r.len * ED.pxb - (ED.w - KW) + 40), maxY = Math.max(0, rowCount() * ED.rh - (ED.h - RUh));
+      ED.ox = clamp(ED.ox, 0, maxX); ED.oy = clamp(ED.oy, 0, maxY);
+    }
+    function edDraw() {
+      if (!ED.open) return;
+      const f = edFind(); if (!f) { edClose(); return; }
+      const { tr, r } = f, cv = $("gbEdc"), g = cv.getContext("2d"), W = ED.w, H = ED.h, KW = KWd(), P = ED.pxb, RH = ED.rh;
+      edClampO(r);
+      g.setTransform(ED.dpr, 0, 0, ED.dpr, 0, 0);
+      g.fillStyle = "#15121e"; g.fillRect(0, 0, W, H);
+      const i0 = Math.max(0, Math.floor(ED.oy / RH)), i1 = Math.min(rowCount() - 1, Math.ceil((ED.oy + H) / RH));
+      for (let i = i0; i <= i1; i++) {
+        const m = midiOf(i), y = RUh + i * RH - ED.oy, blk = !ED.drum && [1, 3, 6, 8, 10].includes(m % 12);
+        g.fillStyle = blk ? "#141120" : (i % 2 && ED.drum ? "#1a1726" : "#1c1928"); g.fillRect(KW, y, W - KW, RH);
+        if (!ED.drum && m % 12 === 0) { g.fillStyle = "#2c2840"; g.fillRect(KW, y + RH - 1, W - KW, 1); }
+      }
+      const b0 = Math.floor(ED.ox / P / ED.grid) * ED.grid, b1 = (ED.ox + W) / P;
+      for (let b = b0; b <= b1; b += ED.grid) {
+        const x = KW + b * P - ED.ox; if (x < KW) continue;
+        const sb = r.start + b, bar = Math.abs(sb / S.sig - Math.round(sb / S.sig)) < 1e-6, beat = Math.abs(b - Math.round(b)) < 1e-6;
+        g.fillStyle = bar ? "#4a4466" : beat ? "#2e2a40" : "#211e2e"; g.fillRect(x, RUh, 1, H - RUh);
+      }
+      const xe = KW + r.len * P - ED.ox; if (xe < W) { g.fillStyle = "#000a"; g.fillRect(Math.max(KW, xe), RUh, W - Math.max(KW, xe), H - RUh); }
+      const col = KIND[tr.kind].rc;
+      (r.notes || []).forEach(n => {
+        const x = KW + n[0] * P - ED.ox, y = RUh + rowOf(n[1]) * RH - ED.oy, w = Math.max(ED.drum ? 9 : 5, n[2] * P - 1);
+        if (x + w < KW || x > W || y + RH < RUh || y > H) return;
+        g.globalAlpha = 0.45 + 0.55 * clamp(n[3], 0, 1); g.fillStyle = col; g.fillRect(x, y + 1, w, RH - 2); g.globalAlpha = 1;
+        if (ED.sel.has(n)) { g.strokeStyle = "#fff"; g.lineWidth = 2; g.strokeRect(x + 1, y + 2, w - 2, RH - 4); }
+      });
+      if (TP.on || S.ph > 0) {
+        const b = beatNow();
+        if (b >= r.start && b < rEnd(r)) { const x = KW + ((b - r.start) % r.len) * P - ED.ox; if (x >= KW) { g.fillStyle = "#fff"; g.fillRect(x - 1, 0, 2, H); } }
+      }
+      // the ruler and the keys (or drum names) stay put
+      g.fillStyle = "#1b1826"; g.fillRect(0, 0, W, RUh);
+      if (!ED.font) ED.font = "10px " + (getComputedStyle(document.body).getPropertyValue("--font-mono").trim() || "monospace"); g.font = ED.font; g.textBaseline = "middle";
+      for (let b = Math.ceil(ED.ox / P); b <= b1; b++) {
+        const sb = r.start + b; if (Math.abs(sb / S.sig - Math.round(sb / S.sig)) > 1e-6) continue;
+        const x = KW + b * P - ED.ox; if (x < KW) continue; g.fillStyle = "#8e86a6"; g.fillText(String(Math.round(sb / S.sig) + 1), x + 3, RUh / 2);
+      }
+      for (let i = i0; i <= i1; i++) {
+        const m = midiOf(i), y = RUh + i * RH - ED.oy; if (y + RH < RUh) continue;
+        if (ED.drum) { g.fillStyle = i % 2 ? "#221e31" : "#262236"; g.fillRect(0, y, KW, RH); g.fillStyle = PADCOL[m] || "#8e86a6"; g.fillRect(0, y, 4, RH); g.fillStyle = "#d8d2e6"; g.fillText(DRUMNAME(m), 8, y + RH / 2); }
+        else {
+          const blk = [1, 3, 6, 8, 10].includes(m % 12); g.fillStyle = blk ? "#2a2636" : "#e9e5f0"; g.fillRect(0, y, KW, RH - (blk ? 0 : 1));
+          if (m % 12 === 0) { g.fillStyle = "#4a4466"; g.fillText(nname(m), 4, y + RH / 2); }
+        }
+      }
+      g.fillStyle = "#1b1826"; g.fillRect(0, 0, KW, RUh);
+    }
+    function edHit(r, x, y) {
+      const KW = KWd(), P = ED.pxb, b = (x - KW + ED.ox) / P, row = Math.floor((y - RUh + ED.oy) / ED.rh), m = midiOf(row);
+      let hit = null;
+      for (let k = (r.notes || []).length - 1; k >= 0; k--) { const n = r.notes[k], w = Math.max(ED.drum ? 9 : 5, n[2] * P) / P; if (n[1] === m && b >= n[0] - 0.02 && b <= n[0] + w) { hit = n; break; } }
+      return { b, row, m, hit };
+    }
+    {
+      const cv = $("gbEdc"); let D = null, taps = null;
+      const local = e => { const R = cv.getBoundingClientRect(); return { x: e.clientX - R.left, y: e.clientY - R.top }; };
+      const pv = (tr, m, v) => { start(); if (ctx) playAt(tr, m, ctx.currentTime + 0.01, 0.3, v || 0.8); };
+      cv.addEventListener("pointerdown", e => {
+        const f = edFind(); if (!f) return; e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+        const { x, y } = local(e), KW = KWd();
+        if (y < RUh) { gbSeek(clamp(f.r.start + (x - KW + ED.ox) / ED.pxb, f.r.start, rEnd(f.r))); return; }
+        const H = edHit(f.r, x, y);
+        if (x < KW) { const m = midiOf(H.row); if (m != null && m >= 0) pv(f.tr, m); D = { mode: "pan", x0: e.clientX, y0: e.clientY, ox: ED.ox, oy: ED.oy, moved: false, keys: true }; return; }
+        D = { mode: "pan", x0: e.clientX, y0: e.clientY, ox: ED.ox, oy: ED.oy, moved: false, H, wasSel: H.hit && ED.sel.has(H.hit) };
+        if (H.hit) {
+          if (!ED.sel.has(H.hit)) { if (!e.shiftKey) ED.sel.clear(); ED.sel.add(H.hit); edHead(); }
+          const right = KW + (H.hit[0] + H.hit[2]) * ED.pxb - ED.ox;
+          D.mode = (x > right - 12 && H.hit[2] * ED.pxb > 18) ? "resize" : "move";
+          D.orig = new Map([...ED.sel].map(n => [n, n.slice()])); D.lastRow = H.row;
+          pv(f.tr, H.hit[1], H.hit[3]);
+        }
+        edDraw();
+      });
+      cv.addEventListener("pointermove", e => {
+        if (!D) return; const f = edFind(); if (!f) return;
+        const dx = e.clientX - D.x0, dy = e.clientY - D.y0;
+        if (!D.moved && Math.hypot(dx, dy) < 6) return;
+        if (!D.moved) { D.moved = true; if (D.mode !== "pan") gbDo(); }
+        if (D.mode === "pan") { ED.ox = D.ox - (D.keys ? 0 : dx); ED.oy = D.oy - dy; edDraw(); return; }
+        const r = f.r, h = D.orig.get(D.H.hit), G = ED.grid;
+        if (D.mode === "move") {
+          const ns = Math.round((h[0] + dx / ED.pxb) / G) * G, db = ns - h[0], dr = Math.round(dy / ED.rh);
+          D.orig.forEach((o, n) => {
+            n[0] = clamp(o[0] + db, 0, Math.max(0, r.len - Math.min(o[2], G)));
+            const row = clamp(rowOf(o[1]) + dr, 0, rowCount() - 1); n[1] = midiOf(row);
+          });
+          const row = rowOf(D.H.hit[1]); if (row !== D.lastRow) { D.lastRow = row; pv(f.tr, D.H.hit[1], D.H.hit[3]); }
+        } else {
+          const ne = Math.round((h[0] + h[2] + dx / ED.pxb) / G) * G, dd = Math.max(G, ne - h[0]) - h[2];
+          D.orig.forEach((o, n) => { n[2] = clamp(o[2] + dd, Math.min(G, o[2]), r.len - n[0]); });
+        }
+        edDraw();
+      });
+      const up = e => {
+        if (!D) return; const d = D; D = null; const f = edFind(); if (!f) return;
+        if (d.moved) { if (d.mode !== "pan") { if (d.mode === "resize" && d.H.hit) ED.nlen = d.H.hit[2]; edChanged(); } return; }
+        if (d.keys) return;
+        const now = Date.now();
+        if (d.H.hit) {
+          if (taps && taps.n === d.H.hit && now - taps.t < 350) { taps = null; gbDo(); f.r.notes = f.r.notes.filter(n => n !== d.H.hit); ED.sel.delete(d.H.hit); edChanged(); return; }
+          taps = { n: d.H.hit, t: now };
+          if (d.wasSel && !e.shiftKey && ED.sel.size > 1) { ED.sel = new Set([d.H.hit]); edHead(); edDraw(); }
+          return;
+        }
+        if (ED.sel.size) { ED.sel.clear(); edHead(); edDraw(); return; }   // (a tap on empty space lets go of the selection)
+        const b = Math.floor(d.H.b / ED.grid) * ED.grid; if (b < 0 || b >= f.r.len || d.H.m == null) return;
+        gbDo();
+        const n = [+b.toFixed(4), d.H.m, ED.drum ? ED.grid : Math.min(ED.nlen, f.r.len - b), 0.8];
+        f.r.notes.push(n); ED.sel = new Set([n]); pv(f.tr, n[1], 0.8); taps = null; edChanged();
+      };
+      cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+      cv.addEventListener("wheel", e => {
+        if (!ED.open) return; e.preventDefault();
+        if (e.ctrlKey) { const i = EDZ.indexOf(ED.pxb), j = clamp(i + (e.deltaY < 0 ? 1 : -1), 0, EDZ.length - 1); ED.pxb = EDZ[j]; }
+        else if (e.shiftKey) ED.ox += e.deltaY; else { ED.ox += e.deltaX; ED.oy += e.deltaY; }
+        edDraw();
+      }, { passive: false });
+    }
+
+    // ---------- sheets ----------
+    let SH = null;
+    function openSheet(title, info, build) {
+      SH = { title, info, build };
+      shT.textContent = title; shI.textContent = info || ""; shB.replaceChildren(); build(shB);
+      sheet.hidden = false;
+    }
+    function reSheet() { if (!SH || sheet.hidden) return; const card = shB.closest(".ed-card"), y = card ? card.scrollTop : 0; shT.textContent = SH.title; shI.textContent = SH.info || ""; shB.replaceChildren(); SH.build(shB); if (card) card.scrollTop = y; }
+    function closeSheet() { sheet.hidden = true; SH = null; if (V.open && S.view === "inst") renderInst(); else if (V.open && S.view === "tracks") renderTracks(); paintBar(); }
+    $("gbShDone").addEventListener("click", closeSheet);
+    const row2 = (box, title, sub, on) => { const r = gbEl("div", "gb-row2" + (on ? " on" : "")), g = gbEl("div", "grow"); g.append(gbEl("b", "", title)); if (sub) g.append(gbEl("small", "", sub)); r.append(g); box.append(r); return r; };
+    const groupH = (box, t) => box.append(gbEl("div", "gb-g", t));
+    const dbTxt = v => { const g = Math.pow(clamp(v, 0, 1.2), 2) * 1.25; return g < 0.0005 ? "−∞ dB" : (20 * Math.log10(g) >= 0 ? "+" : "") + (20 * Math.log10(g)).toFixed(1) + " dB"; };
+    const panTxt = p => Math.abs(p) < 0.02 ? "C" : (p < 0 ? "L" : "R") + Math.round(Math.abs(p) * 100);
+    function slider(r, label, min, max, step, val, txt, onIn) {
+      r.append(gbEl("span", "gb-lab", label));
+      const inp = document.createElement("input"); inp.type = "range"; inp.min = min; inp.max = max; inp.step = step; inp.value = val; inp.setAttribute("aria-label", label);
+      const v = gbEl("span", "gb-v", txt(val)); let u = false;
+      inp.addEventListener("input", () => { if (!u) { gbDo(); u = true; } onIn(+inp.value); v.textContent = txt(+inp.value); });
+      inp.addEventListener("change", () => { u = false; saveSong(); paintBar(); });
+      r.append(inp, v); return inp;
+    }
+    // choosing a sound: grouped like the library, ▶ to hear one first (picking one never plays a note by itself)
+    function phrase(tr) {
+      if (!ctx) return; const t = ctx.currentTime + 0.05, b = spb();
+      if (tr.kind === "drums") { [[0, 36], [0, 42], [0.5, 42], [1, 38], [1, 42], [1.5, 42], [1.75, 36], [2, 36], [2, 42], [2.5, 42], [3, 38], [3, 46]].forEach(([o, m]) => drumHit(tr, m, t + o * b * 0.6, 0.85)); return; }
+      const lo = tr.kind === "bass" ? 36 : tr.kind === "guitar" ? 52 : 60;
+      if (tr.kind === "bass") [[0, lo], [0.5, lo + 7], [1, lo + 12], [1.5, lo + 7]].forEach(([o, m]) => playAt(tr, m, t + o * b, 0.45 * b, 0.85));
+      else [lo, lo + 4, lo + 7, lo + 12].forEach((m, j) => playAt(tr, m, t + j * 0.02, 1.4, 0.75));
+      setTimeout(() => { if (ctx) releaseDue(ctx.currentTime + 3); }, 1600);
+    }
+    function preview(tr, ref) {
+      start(); if (!ctx) return;
+      const ph = { id: "gb-preview", kind: tr.kind, snd: ref, vol: tr.vol, pan: 0, solo: true, p: null, regions: [] };
+      if (AU.pvRef !== ref) { dropPlug(ph.id); AU.pvRef = ref; }
+      const P = prep(ph); if (ref.startsWith("wam:") || ref.startsWith("lib:")) gbSay("Loading " + soundName(ref) + "…");
+      Promise.resolve(P).then(() => setTimeout(() => phrase(ph), ref.startsWith("wam:") ? 150 : 0));
+    }
+    function setSound(tr, ref) {
+      if (tr.snd === ref) return;
+      gbDo(); if ((tr.snd || "").startsWith("wam:")) dropPlug(tr.id);
+      tr.snd = ref; tr.p = null; tr.pst = null; start(); prep(tr); dirty(); saveSong();
+    }
+    function soundSheet(tr) {
+      openSheet(tr.kind === "drums" ? "Choose a kit" : "Choose a sound", tr.name, box => {
+        const list = soundsFor(tr.kind); let g = null;
+        if (!list.length) box.append(gbEl("p", "gb-p", tr.kind === "plugin" ? "Plugins open on the Nate Bloom site and in the apps." : "There are no sounds for this instrument here yet."));
+        list.forEach(s => {
+          if (s.group !== g) { g = s.group; groupH(box, g); }
+          const r = row2(box, s.name, s.sub, s.ref === tr.snd); r.style.cursor = "pointer";
+          r.append(btnE("▶", e => { e.stopPropagation(); preview(tr, s.ref); }, "", "Hear " + s.name));
+          r.addEventListener("click", () => { setSound(tr, s.ref); reSheet(); });
+        });
+      });
+    }
+    // Smart Controls: the sound's own knobs, kept with the track
+    function ctlSheet(tr) {
+      const r = tr.snd || "";
+      if (r.startsWith("wam:")) {
+        start(); gbSay("Opening " + soundName(r) + "…");
+        Promise.resolve(plugFor(tr)).then(() => {
+          const P = AU.plug.get(tr.id); if (!P || !P.inst) { gbSay("Couldn't open the plugin"); return; }
+          V.guiTr = tr.id; __wam.openGui({ id: "gb:" + tr.id, inst: P.inst, node: P.node, name: (P.name || soundName(r)) + " · " + tr.name, vendor: "Garage" });
+        });
+        return;
+      }
+      openSheet("Smart Controls", tr.name + " · " + soundName(r), box => {
+        const groups = [];
+        if (r.startsWith("eng:")) { const id = r.slice(4); groups.push({ name: ENGINES[id].name, knobs: ENGINES[id].knobs, get: k => (tr.p && tr.p[k] != null ? tr.p[k] : engDefaults(id)[k]), set: (k, v) => { tr.p = Object.assign({}, tr.p, { [k]: v }); } }); }
+        else if (r.startsWith("pre:")) {
+          const P = NB_PRESETS[+r.slice(4)], ids = (Array.isArray(P[1]) ? P[1] : [P[1]]).filter(id => ENGINES[id]);
+          ids.forEach(id => groups.push({ name: ENGINES[id].name, knobs: ENGINES[id].knobs, get: k => { const o = tr.p && tr.p[id]; return o && o[k] != null ? o[k] : ((P[2] && P[2][id] && P[2][id][k] != null) ? P[2][id][k] : engDefaults(id)[k]); }, set: (k, v) => { tr.p = Object.assign({}, tr.p); tr.p[id] = Object.assign({}, tr.p[id], { [k]: v }); } }));
+        }
+        else if (r.startsWith("lib:")) groups.push({ name: "Sound", knobs: LIB_KNOBS, get: k => libP(tr)[k], set: (k, v) => { tr.p = Object.assign({}, tr.p, { [k]: v }); } });
+        if (!groups.length) { box.append(gbEl("p", "gb-p", "This sound has no controls of its own here.")); return; }
+        groups.forEach(G => {
+          if (groups.length > 1) groupH(box, G.name);
+          const kn = gbEl("div", "gb-knobs");
+          G.knobs.forEach(([k, label]) => {
+            const c = gbEl("div", "gb-knob"), sp = gbEl("span", "", label), v = gbEl("small", "", Math.round(G.get(k) * 100) + "%"); sp.append(v);
+            const inp = document.createElement("input"); inp.type = "range"; inp.min = "0"; inp.max = "1"; inp.step = "0.01"; inp.value = String(G.get(k)); inp.setAttribute("aria-label", label);
+            let u = false;
+            inp.addEventListener("input", () => { if (!u) { gbDo(); u = true; } G.set(k, +inp.value); v.textContent = Math.round(+inp.value * 100) + "%"; });
+            inp.addEventListener("change", () => { u = false; saveSong(); });
+            c.append(sp, inp); kn.append(c);
+          });
+          box.append(kn);
+        });
+        const rw = gbEl("div", "gb-chips");
+        rw.append(btnE("▶ Hear it", () => { start(); prep(tr).then(() => phrase(tr)); }), btnE("Reset", () => { gbDo(); tr.p = null; saveSong(); reSheet(); }));
+        box.append(rw);
+        box.append(gbEl("p", "gb-tip", "New notes use the knobs; they stay with this track and this song."));
+      });
+    }
+    // the plugin panel keeps its settings with the track too
+    new MutationObserver(() => {
+      const g = $("wamGui"); if (!g || !g.hidden || !V.guiTr) return;
+      const id = V.guiTr; V.guiTr = ""; const P = AU.plug.get(id), tr = trById(id); if (!P || !P.node || !tr) return;
+      P.node.getState().then(st => { try { const j = JSON.stringify(st); if (j.length < 400000) { tr.pst = JSON.parse(j); saveSong(); } } catch (e) {} }).catch(() => {});
+    }).observe($("wamGui") || document.body, { attributes: true, attributeFilter: ["hidden"] });
+    function trackSheet(tr) {
+      openSheet("Track", KIND[tr.kind].name, box => {
+        let r = row2(box, "Name", "");
+        const nm = document.createElement("input"); nm.className = "gb-in"; nm.value = tr.name; nm.maxLength = 40; nm.setAttribute("aria-label", "Track name");
+        nm.addEventListener("change", () => { const v = nm.value.trim(); if (v && v !== tr.name) { gbDo(); tr.name = v; saveSong(); } });
+        r.append(nm);
+        if (tr.kind !== "audio") { r = row2(box, soundName(tr.snd), tr.kind === "drums" ? "drum kit" : "sound"); r.append(btnE("Change", () => soundSheet(tr))); if (tr.kind !== "drums" && !(tr.snd || "").startsWith("smp:") && tr.snd !== "sf2") r.append(btnE("Controls", () => ctlSheet(tr))); }
+        r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); });
+        r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Pan", -1, 1, 0.01, tr.pan, panTxt, v => { tr.pan = v; applyLevels(); });
+        r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Reverb", 0, 1, 0.01, tRv(tr), v => Math.round(v * 100) + "%", v => { tr.rv = v; applyLevels(); });
+        const i = S.tracks.indexOf(tr), acts = gbEl("div", "gb-chips");
+        acts.append(btnE("Play it", () => { S.sel = i; closeSheet(); setView("inst"); }, "primary"));
+        acts.append(btnE("Duplicate track", () => {
+          if (S.tracks.length >= 32) { gbSay("A song holds 32 tracks"); return; }
+          gbDo(); const c = JSON.parse(JSON.stringify(tr)); c.id = uid(); c.name = tr.name + " copy"; c.regions.forEach(x => { x.id = uid(); });
+          S.tracks.splice(i + 1, 0, c); S.sel = i + 1; prep(c); dirty(); saveSong(); closeSheet(); setView("tracks");
+        }));
+        const upB = btnE("Move up", () => { gbDo(); S.tracks.splice(i, 1); S.tracks.splice(i - 1, 0, tr); S.sel = i - 1; saveSong(); reSheet(); }), dnB = btnE("Move down", () => { gbDo(); S.tracks.splice(i, 1); S.tracks.splice(i + 1, 0, tr); S.sel = i + 1; saveSong(); reSheet(); });
+        upB.disabled = i <= 0; dnB.disabled = i >= S.tracks.length - 1; acts.append(upB, dnB);
+        let sure = false; const del = btnE("Delete track", () => {
+          if (!sure) { sure = true; del.textContent = "Delete " + tr.name + "?"; setTimeout(() => { sure = false; del.textContent = "Delete track"; }, 3000); return; }
+          gbDo(); S.tracks.splice(i, 1); dropPlug(tr.id); const N = AU.trk.get(tr.id); if (N) { try { N.g.disconnect(); N.p.disconnect(); N.s.disconnect(); } catch (e) {} AU.trk.delete(tr.id); }
+          S.sel = clamp(S.sel, 0, Math.max(0, S.tracks.length - 1)); dirty(); fitLen(); saveSong(); closeSheet(); setView(S.tracks.length ? "tracks" : "browse");
+          gbSay(tr.name + " deleted: Undo brings it back");
+        });
+        acts.append(del); box.append(acts);
+      });
+    }
+    function mixSheet() {
+      openSheet("Mixer", S.tracks.length + (S.tracks.length === 1 ? " track" : " tracks"), box => {
+        if (!S.tracks.length) { box.append(gbEl("p", "gb-p", "No tracks yet: choose an instrument to make one.")); return; }
+        S.tracks.forEach(tr => {
+          groupH(box, tr.name + " · " + (tr.kind === "audio" ? "audio" : soundName(tr.snd)));
+          let r = row2(box, "", ""); r.firstChild.remove();
+          const m = btnE("M", () => { tr.mute = !tr.mute; m.setAttribute("aria-pressed", String(tr.mute)); applyLevels(); saveSong(); }, "", "Mute " + tr.name), so = btnE("S", () => { tr.solo = !tr.solo; so.setAttribute("aria-pressed", String(tr.solo)); applyLevels(); saveSong(); }, "", "Solo " + tr.name);
+          m.setAttribute("aria-pressed", String(!!tr.mute)); so.setAttribute("aria-pressed", String(!!tr.solo)); r.append(m, so);
+          slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); });
+          r = row2(box, "", ""); r.firstChild.remove();
+          slider(r, "Pan", -1, 1, 0.01, tr.pan, panTxt, v => { tr.pan = v; applyLevels(); });
+          slider(r, "Reverb", 0, 1, 0.01, tRv(tr), v => Math.round(v * 100) + "%", v => { tr.rv = v; applyLevels(); });
+        });
+        groupH(box, "The whole song");
+        const r = row2(box, "", ""); r.firstChild.remove();
+        slider(r, "Level", 0, 1.5, 0.01, S.mvol != null ? S.mvol : 1, v => (v < 0.001 ? "−∞" : (20 * Math.log10(v)).toFixed(1)) + " dB", v => { S.mvol = v; applyLevels(); });
+        box.append(gbEl("p", "gb-tip", "The song goes into Nate Bloom's master (its volume and limiter), past the effects panel: each track's Reverb sends it to the shared hall."));
+      });
+    }
+    function setSheet() {
+      openSheet("Song settings", S.name, box => {
+        let r = row2(box, "Tempo", "beats per minute");
+        const num = document.createElement("input"); num.type = "number"; num.className = "gb-in gb-num"; num.min = "40"; num.max = "240"; num.value = String(S.bpm); num.setAttribute("aria-label", "Tempo");
+        const setBpm = v => { v = clamp(Math.round(v), 40, 240); if (v === S.bpm) return; if (TP.on && ctx) { const now = ctx.currentTime, b = beatAt(now); TP.t0 = now; TP.b0 = b; } S.bpm = v; num.value = String(v); saveSong(); paintBar(); };
+        num.addEventListener("change", () => setBpm(+num.value || S.bpm));
+        const taps = []; const tap = btnE("Tap", () => { const t = performance.now(); if (taps.length && t - taps[taps.length - 1] > 2000) taps.length = 0; taps.push(t); if (taps.length > 6) taps.shift(); if (taps.length >= 3) setBpm(60000 / ((taps[taps.length - 1] - taps[0]) / (taps.length - 1))); }, "", "Tap the tempo");
+        r.append(btnE("−", () => setBpm(S.bpm - 1), "", "Slower"), num, btnE("+", () => setBpm(S.bpm + 1), "", "Faster"), tap);
+        groupH(box, "Key: the Smart chord strips follow it");
+        let ch = gbEl("div", "gb-chips");
+        NN.forEach((n, i) => { const b = btnE(n, () => { S.key = i; saveSong(); reSheet(); paintBar(); }); b.setAttribute("aria-pressed", String(S.key === i)); ch.append(b); });
+        box.append(ch); ch = gbEl("div", "gb-chips");
+        [[false, "Major"], [true, "Minor"]].forEach(([m, t]) => { const b = btnE(t, () => { S.minor = m; saveSong(); reSheet(); paintBar(); }); b.setAttribute("aria-pressed", String(S.minor === m)); ch.append(b); });
+        box.append(ch);
+        groupH(box, "Time signature"); ch = gbEl("div", "gb-chips");
+        [2, 3, 4, 5, 6, 7].forEach(n => { const b = btnE(n + "/4", () => { gbDo(); S.sig = n; fitLen(); saveSong(); reSheet(); paintBar(); }); b.setAttribute("aria-pressed", String(S.sig === n)); ch.append(b); });
+        box.append(ch);
+        groupH(box, "Song length");
+        r = row2(box, S.auto ? "Automatic" : S.bars + " bars", S.auto ? "grows as you record" : "fixed: playback stops here");
+        const au = btnE("Automatic", () => { S.auto = !S.auto; fitLen(); saveSong(); reSheet(); }); au.setAttribute("aria-pressed", String(!!S.auto));
+        r.append(au, btnE("−", () => { S.auto = false; S.bars = Math.max(1, S.bars - 1); saveSong(); reSheet(); }, "", "One bar shorter"), btnE("+", () => { S.auto = false; S.bars = Math.min(999, S.bars + 1); saveSong(); reSheet(); }, "", "One bar longer"));
+        groupH(box, "Recording");
+        const tog = (title, sub, key) => { const rr = row2(box, title, sub), b = btnE(S[key] ? "On" : "Off", () => { S[key] = !S[key]; saveSong(); reSheet(); paintBar(); }); b.setAttribute("aria-pressed", String(!!S[key])); rr.append(b); };
+        tog("Metronome", "clicks while you play and record (never in an export)", "metro");
+        tog("Count-in", "one bar of clicks before recording starts", "cin");
+        tog("Merge recordings", "a new take adds to the notes already there instead of replacing them (Cycle always merges)", "merge");
+      });
+    }
+    function loopNotes(i) {
+      const L = BEATS[i]; if (!L) return null;
+      const [, , , swing, P] = L, MAP = { kick: 36, snare: 38, clap: 39, ch: 42, oh: 46, rim: 37, tom: 45, cow: 56 };
+      let len = 16; const notes = [];
+      Object.keys(P).forEach(k => {
+        const m = MAP[k]; if (!m) return; len = Math.max(len, P[k].length);
+        [...P[k]].forEach((c, s) => { if (c === "." || c === " ") return; const v = c === "X" ? 1 : c === "x" ? 0.82 : 0.6; notes.push([+(s * 0.25 + (s % 2 ? (swing || 0) * 0.125 : 0)).toFixed(4), m, 0.25, v]); });
+      });
+      return { notes: notes.sort((a, b) => a[0] - b[0]), len: len * 0.25, bpm: L[2], name: L[0] };
+    }
+    function addLoop(i) {
+      const L = loopNotes(i); if (!L) return;
+      let tr = curTr(); if (!tr || tr.kind !== "drums") tr = S.tracks.find(t => t.kind === "drums") || addTrack("drums", { stay: true });
+      if (!tr) return;
+      gbDo();
+      if (!songEndBeat()) { S.bpm = L.bpm; gbSay("Tempo set to " + L.bpm + " to match " + L.name); }
+      const a = Math.floor(S.ph / S.sig + 1e-9) * S.sig, R = { id: uid(), start: a, len: L.len, rep: 4, notes: L.notes, name: L.name };
+      placeRegion(tr, R, false); S.sel = S.tracks.indexOf(tr); V.rsel = R.id; fitLen(); dirty(); saveSong(); closeSheet(); setView("tracks");
+    }
+    function loopsSheet() {
+      openSheet("Drum loops", "Nate Bloom's beats, ready to drop into a song", box => {
+        box.append(gbEl("p", "gb-tip", "Add puts four bars of the beat on a Drums track at the playhead (the first loop in an empty song sets the tempo). Edit it like any recording."));
+        let g = null;
+        BEATS.forEach((B, i) => {
+          if (B[1] !== g) { g = B[1]; groupH(box, g); }
+          const r = row2(box, B[0], B[2] + " bpm");
+          r.append(btnE("▶", () => {
+            start(); if (!ctx) return; const L = loopNotes(i), kit = (S.tracks.find(t => t.kind === "drums") || {}).snd || "kit:studio";
+            const ph = { id: "gb-preview", kind: "drums", snd: kit, vol: 0.8, pan: 0, solo: true, regions: [] }; prep(ph);
+            const t = ctx.currentTime + 0.08, b = 60 / L.bpm; L.notes.forEach(n => drumHit(ph, n[1], t + n[0] * b, n[3]));
+          }, "", "Hear " + B[0]), btnE("Add", () => addLoop(i), "primary"));
+        });
+      });
+    }
+    // songs and export
+    const fmtT = t => { if (!t) return ""; const d = new Date(t); return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); };
+    function dropAll() {
+      AU.plug.forEach((P, id) => dropPlug(id));
+      AU.trk.forEach(N => { try { N.g.disconnect(); N.p.disconnect(); N.s.disconnect(); } catch (e) {} }); AU.trk.clear();
+    }
+    function switchSong(s) {
+      if (TP.on) stop(); apStop(); liveAllOff(); edClose(); hideMenu(); saveNow();
+      dropAll(); S = s; UNDO.length = 0; V.rsel = ""; saveNow(); dirty();
+      start(); S.tracks.forEach(t => prep(t)); loadSongAudio();
+    }
+    function songKeys(s) { return (s && s.tracks || []).flatMap(t => t.regions.filter(r => r.key).map(r => r.key)); }
+    function songsSheet() {
+      openSheet("My Songs", "kept on this device, and in your projects", box => {
+        const top = gbEl("div", "gb-chips");
+        top.append(btnE("+ New song", () => { switchSong(newSong()); closeSheet(); setView("browse"); }, "primary"), btnE("Export " + S.name, exportSheet));
+        box.append(top);
+        IDX.songs.forEach(e => {
+          const cur = e.id === S.id, n = cur ? S.tracks.length : e.n;
+          const r = row2(box, e.name, (cur ? "open now · " : "") + (n != null ? n + (n === 1 ? " track · " : " tracks · ") : "") + fmtT(e.t), cur);
+          if (!cur) r.append(btnE("Open", () => { const s = readSong(e.id); if (!s) { gbSay("Couldn't open that song"); return; } switchSong(s); closeSheet(); setView(s.view || (s.tracks.length ? "tracks" : "browse")); }, "primary"));
+          r.append(btnE("Rename", () => {
+            const inp = document.createElement("input"); inp.className = "gb-in"; inp.value = e.name; inp.maxLength = 40; inp.setAttribute("aria-label", "Song name");
+            const g = r.querySelector(".grow"); g.replaceChildren(inp); inp.focus(); inp.select();
+            const done = () => { const v = inp.value.trim(); if (v) { e.name = v; if (cur) S.name = v; else { const s = readSong(e.id); if (s) { s.name = v; try { localStorage.setItem(GBP + e.id, JSON.stringify(s)); } catch (x) {} } } saveIdx(); if (cur) saveNow(); } reSheet(); };
+            inp.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); inp.blur(); } });
+            inp.addEventListener("blur", done, { once: true });
+          }));
+          r.append(btnE("Duplicate", () => {
+            const s = cur ? JSON.parse(JSON.stringify(S)) : readSong(e.id); if (!s) return; saveNow();
+            s.id = uid(); s.name = e.name + " copy"; try { localStorage.setItem(GBP + s.id, JSON.stringify(s)); } catch (x) { gbSay("No room for a copy on this device"); return; }
+            IDX.songs.unshift({ id: s.id, name: s.name, t: Date.now(), n: s.tracks.length }); saveIdx(); reSheet();
+          }));
+          let sure = false; const del = btnE("Delete", () => {
+            if (!sure) { sure = true; del.textContent = "Delete it?"; setTimeout(() => { sure = false; del.textContent = "Delete"; }, 3000); return; }
+            const s = cur ? S : readSong(e.id), keys = songKeys(s);
+            IDX.songs = IDX.songs.filter(x => x.id !== e.id); try { localStorage.removeItem(GBP + e.id); } catch (x) {}
+            const others = new Set(IDX.songs.flatMap(x => songKeys(x.id === S.id && !cur ? S : readSong(x.id)))); keys.forEach(k => { if (!others.has(k)) idbDel(k); });
+            if (cur) { const nx = IDX.songs[0] && readSong(IDX.songs[0].id); switchSong(nx || newSong()); setView(S.tracks.length ? "tracks" : "browse"); }
+            saveIdx(); reSheet();
+          });
+          r.append(del);
+        });
+      });
+    }
+    // export: the song plays once from the top and Nate Bloom records what comes out (the effects and master included)
+    const EXP = { st: "", t0: 0, timer: 0 };
+    let GBNAME = "";
+    { const tn = takeName; takeName = function () { return GBNAME || tn.apply(this, arguments); }; }
+    function expStart() {
+      if (take.rec) { gbSay("Nate Bloom's ● Rec is already recording: stop it first"); return; }
+      start(); if (!ctx) return;
+      if (TP.on) stop();
+      apStop(); liveAllOff();
+      TP.exp = { end: songEndBeat() + 2.2 / spb() }; EXP.st = "run"; EXP.t0 = ctx.currentTime;
+      S.ph = 0; startTake(); play(false);
+      clearInterval(EXP.timer); EXP.timer = setInterval(() => { if (EXP.st !== "run") { clearInterval(EXP.timer); return; } const el = $("gbExpT"); if (el) el.textContent = fmtClock(Math.max(0, ctx.currentTime - EXP.t0)) + " / " + fmtClock(TP.exp ? TP.exp.end * spb() : 0); }, 250);
+      reSheet();
+    }
+    function expDone() { TP.exp = null; stop(); stopTake(); EXP.st = take.done ? "ready" : ""; S.ph = 0; placePh(); paintBar(); reSheet(); }
+    function expCancel() { TP.exp = null; if (TP.on) stop(); if (take.rec) stopTake(); EXP.st = ""; reSheet(); }
+    const fileName = () => (S.name || "song").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() || "song";
+    function exportSheet() {
+      if (!songEndBeat()) { gbSay("Record something first: the song is empty"); return; }
+      openSheet("Export " + S.name, Math.round(songEndBeat() / S.sig) + " bars · " + fmtClock(songEndBeat() * spb()), box => {
+        if (EXP.st === "run") {
+          box.append(gbEl("p", "gb-p", "Playing the song through and recording it…"));
+          const t = gbEl("p", "gb-p"); t.id = "gbExpT"; t.textContent = "0:00"; box.append(t);
+          box.append(btnE("Cancel", expCancel));
+          return;
+        }
+        if (EXP.st === "ready" && take.done) {
+          box.append(gbEl("p", "gb-p", "Your song is ready (" + fmtClock(take.done.len / take.done.rate) + "). Save it:"));
+          const c = gbEl("div", "gb-chips");
+          const save = id => () => { GBNAME = fileName(); $(id).click(); setTimeout(() => { GBNAME = ""; }, 4000); };
+          c.append(btnE("Save WAV", save("takeExport"), "primary"), btnE("Save MP3", save("takeMp3")), btnE("Record it again", expStart));
+          box.append(c); return;
+        }
+        box.append(gbEl("p", "gb-p", "The song plays once from the start while Nate Bloom records it: everything you hear goes in, the reverb and master included, the metronome left out. Then save it as a WAV (full quality) or an MP3 (small, for messages)."));
+        box.append(btnE("Export now", expStart, "primary"));
+      });
+    }
+    function helpSheet() {
+      openSheet("How the Garage works", "a GarageBand-style studio", box => {
+        [["Instruments", "Each card makes a track: Keyboard (piano, organ, electric pianos), Drums (the kits from the Rhythm Creator), Smart Bass, Guitar and Strings (chord strips in the song's key, with Autoplay patterns), Synths (Nate Bloom's engines and presets), Your Plugins, the Sampler and the Audio Recorder. ◫ at the top left adds another."],
+         ["Recording", "Press ● to record the selected track: one bar of count-in, then play. Each take becomes a region on the track, starting on a bar; recording over a region replaces that part, unless Merge recordings (in Song settings) or Cycle is on. MIDI keyboards and the computer keyboard record too."],
+         ["Cycle", "In Tracks, ⟳ Cycle loops the yellow bars. Record in a cycle and each pass adds to the take, so you can build a drum part one sound at a time."],
+         ["Tracks", "Tap a region for Edit, Cut, Copy, Paste, Duplicate, Loop, Split and Delete. Drag it to move it (onto another track too), drag its right edge to make it longer or shorter. Tap a track's name to select it, tap it again for its settings; its icon opens the instrument. M mutes, S solos."],
+         ["Editing notes", "Edit (or double-tap a region) opens the piano roll: tap to add a note, drag a note to move it, drag its right end to change its length, double-tap to delete it. Drag empty space to scroll. Quantize snaps notes to the grid; Velocity sets how hard the selected notes play."],
+         ["Keys", "Space plays and stops. Shift+R records. Enter goes back to the start. Delete removes the selected region or notes. With Smart chords, 1–8 play the chord strips."],
+         ["Songs", "Songs stay on this device and go into your Nate Bloom projects. Songs (top left) makes, opens, renames and exports them: Export plays the song once and saves it as WAV or MP3."]].forEach(([h, t]) => { const p = gbEl("p", "gb-p"); p.append(gbEl("b", "", h + ": "), document.createTextNode(t)); box.append(p); });
+      });
+    }
+
+    // ---------- the bar ----------
+    $("gbPlay").addEventListener("click", () => { if (TP.exp) { expCancel(); return; } if (TP.on) stop(); else play(false); });
+    $("gbRec").addEventListener("click", () => { if (TP.exp) return; if (TP.on && TP.rec) stop(); else play(true); });
+    $("gbHome").addEventListener("click", () => { if (TP.exp) return; gbSeek(S.cyc.on ? S.cyc.a : 0); placePh(true); });
+    $("gbMetro").addEventListener("click", () => { S.metro = !S.metro; saveSong(); paintBar(); });
+    $("gbLcd").addEventListener("click", setSheet); $("gbSetBtn").addEventListener("click", setSheet);
+    $("gbSongsBtn").addEventListener("click", songsSheet); $("gbMixBtn").addEventListener("click", mixSheet);
+    $("gbLoopsBtn").addEventListener("click", loopsSheet); $("gbHelpBtn").addEventListener("click", helpSheet);
+    $("gbBrowseBtn").addEventListener("click", () => setView("browse"));
+    $("gbViewBtn").addEventListener("click", () => setView(S.view === "tracks" ? (curTr() ? "inst" : "browse") : "tracks"));
+    $("gbUndo").addEventListener("click", () => {
+      if (!UNDO.length) return;
+      const keep = { id: S.id, view: S.view, zoom: S.zoom, ph: S.ph }, ids = new Set(S.tracks.map(t => t.id));
+      S = Object.assign(fixSong(JSON.parse(UNDO.pop())), keep);
+      ids.forEach(id => { if (!S.tracks.some(t => t.id === id)) { dropPlug(id); const N = AU.trk.get(id); if (N) { try { N.g.disconnect(); N.p.disconnect(); N.s.disconnect(); } catch (e) {} AU.trk.delete(id); } } });
+      S.tracks.forEach(t => prep(t)); ED.sel.clear(); if (ED.open && !edFind()) edClose();
+      dirty(); applyLevels(); saveSong(); setView(S.view); if (ED.open) { edHead(); edDraw(); }
+    });
+
+    // ---------- the Garage tab ----------
+    let FR = 0, frLast = 0;
+    function frame() { if (!FR && V.open) FR = requestAnimationFrame(loop); }
+    function loop(ts) {
+      FR = 0; if (!V.open) return;
+      if (ts - frLast >= (window.NB_LITE ? 50 : 30)) { frLast = ts; paintPos(); if (TP.on) placePh(); meter(); if (!TP.on && $("gbPlay").classList.contains("on")) paintBar(); }
+      FR = requestAnimationFrame(loop);
+    }
+    function gbOpen() {
+      start(); ensureSong();
+      V.open = true; view.hidden = false;
+      S.tracks.forEach(t => prep(t)); loadSongAudio();
+      setView(S.view === "inst" && !curTr() ? "browse" : (S.view || (S.tracks.length ? "tracks" : "browse")));
+      frame();
+    }
+    function gbClose() {
+      if (TP.exp) expCancel();
+      if (TP.on) stop();
+      apStop(); liveAllOff(); sustainOff(); if (SREC) sampRecStop();
+      micMonitor(null, false); micClose(); edClose(); hideMenu();
+      if (!sheet.hidden) { sheet.hidden = true; SH = null; }
+      V.open = false; V.keys = null; view.hidden = true; saveNow();
+    }
+    $("gbDone").addEventListener("click", e => {
+      if (!e.isTrusted) {   // (Back or Escape: what's open inside the Garage closes first)
+        const g = $("wamGui"); if (g && !g.hidden) { __wam.closeGui(); return; }
+        if (ED.open) { edClose(); renderTbar(); return; }
+        if (V.menu) { hideMenu(); return; }
+      }
+      gbClose();
+    });
+    $("gbBtn").addEventListener("click", gbOpen);
+    $("stopAll").addEventListener("click", () => { if (TP.exp) expCancel(); else if (TP.on) stop(); apStop(); liveAllOff(); });
+    let rzT = 0;
+    addEventListener("resize", () => { if (!V.open) return; clearTimeout(rzT); rzT = setTimeout(() => { if (S.view === "inst") renderInst(); else if (S.view === "tracks") renderTracks(); if (ED.open) { edSize(); edDraw(); } if (V.menu) showMenu(); }, 160); });
+    // MIDI, the sustain pedal and the computer keyboard play the selected track while the Garage is open
+    const gbKeys = () => V.open && sheet.hidden && curTr() && curTr().kind !== "audio";
+    {
+      const n0 = noteOn, f0 = noteOff, ns0 = nbSustain;
+      noteOn = function (m) { if (gbKeys()) { liveOn(curTr(), m, clamp(NB_VEL, 0.05, 1)); lit(m, true); return; } return n0.apply(this, arguments); };
+      noteOff = function (m) { if (V.open && curTr()) { liveOff(curTr(), m); lit(m, false); return; } return f0.apply(this, arguments); };
+      nbSustain = function (on) { if (V.open) { if (on) sustain = true; else sustainOff(); if (V.susBtn) V.susBtn.setAttribute("aria-pressed", String(sustain)); } return ns0.apply(this, arguments); };
+    }
+    const KD = new Map();
+    window.addEventListener("keydown", e => {
+      if (!V.open || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target; if (t && t.closest && t.closest("input, textarea, select, [contenteditable]")) return;
+      if (!sheet.hidden) return;
+      const code = e.code || "", tr = curTr(), stopIt = () => { e.preventDefault(); e.stopImmediatePropagation(); };
+      if (code === "Space") { stopIt(); if (!e.repeat) $("gbPlay").click(); return; }
+      if (code === "KeyR" && e.shiftKey) { stopIt(); if (!e.repeat) $("gbRec").click(); return; }
+      if (code === "Enter" || code === "NumpadEnter" || code === "Home") { if (t && t.closest && t.closest("button")) return; stopIt(); $("gbHome").click(); return; }
+      if (code === "Delete" || code === "Backspace") {
+        if (ED.open && ED.sel.size) { stopIt(); edDelete(); return; }
+        const f = findRegion(V.rsel); if (f && S.view === "tracks") { stopIt(); delRegion(f.tr, f.r); }
+        return;
+      }
+      if (e.shiftKey || !tr || tr.kind === "audio") return;
+      if (SMART[tr.kind] && tr.mode !== "notes" && /^Digit[1-8]$/.test(code)) { stopIt(); if (e.repeat || KD.has(code)) return; KD.set(code, { chord: true }); chordDown(tr, +code.slice(5) - 1, "k" + code); return; }
+      let i, m;
+      if (tr.kind === "drums") { i = PADC.indexOf(code); if (i < 0 && !code) i = PADK.indexOf((e.key || "").toLowerCase()); if (i < 0) return; m = PADS[i][0]; }
+      else { i = KBC.indexOf(code); if (i < 0 && !code) i = KBKS.indexOf((e.key || "").toLowerCase()); if (i < 0) return; m = 48 + 12 * (tr.oct | 0) + i; }
+      stopIt(); if (e.repeat || KD.has(code)) return;
+      KD.set(code, { m, tr: tr.id }); liveOn(tr, m, 0.85); lit(m, true);
+    }, true);
+    window.addEventListener("keyup", e => {
+      const code = e.code || "", k = KD.get(code); if (!k) return; KD.delete(code); e.stopImmediatePropagation();
+      if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); lit(k.m, false); }
+    }, true);
+    addEventListener("blur", () => { KD.forEach((k, code) => { if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); } }); KD.clear(); });
+    window.__gb = { song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
+  }
+
+
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
   {
