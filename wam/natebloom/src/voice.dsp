@@ -12,4 +12,4 @@ vib   = hslider("[4]Vibrato [unit:%]", 40, 0, 100, 1) / 100 : si.smoo;
 level = hslider("[5]Level [unit:%]", 70, 0, 100, 1) / 100 : si.smoo;
 env = en.asr(att, 1, rel, gate) * (0.5 + gain * 0.5);
 f = freq * (1 + os.osc(5.2 + no.lfnoise(0.5) * 0.4) * vib * 0.012 * en.asr(0.8, 1, 0.2, gate));
-process = pm.SFFormantModelFofSmooth(vtype, vowel, f, env * 25) * level * 2.4;
+process = pm.SFFormantModelFofSmooth(vtype, vowel, f, env * 25) * level * (0.4 + gain * 0.6) * 2.4;

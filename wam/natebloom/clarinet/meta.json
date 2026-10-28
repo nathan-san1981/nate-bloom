@@ -8,8 +8,8 @@
  "blurb": "Reed stiffness and bell opening shape a woody, hollow tone.",
  "voices": 6,
  "poly": {
-  "freq": 270388,
-  "gain": 270404,
+  "freq": 270392,
+  "gain": 262144,
   "gate": 270416
  },
  "params": [
@@ -48,7 +48,7 @@
   {
    "id": "bell",
    "label": "Bell",
-   "index": 262156,
+   "index": 262160,
    "min": 0,
    "max": 100,
    "init": 50,

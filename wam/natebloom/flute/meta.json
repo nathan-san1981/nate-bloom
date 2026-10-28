@@ -8,8 +8,8 @@
  "blurb": "Breath, embouchure and vibrato: breathy and soft or bright and pure.",
  "voices": 6,
  "poly": {
-  "freq": 270368,
-  "gain": 286848,
+  "freq": 270372,
+  "gain": 262144,
   "gate": 286860
  },
  "params": [
@@ -48,7 +48,7 @@
   {
    "id": "embouchure",
    "label": "Embouchure",
-   "index": 270376,
+   "index": 270380,
    "min": 10,
    "max": 90,
    "init": 50,
@@ -58,7 +58,7 @@
   {
    "id": "vibrato",
    "label": "Vibrato",
-   "index": 286836,
+   "index": 286840,
    "min": 0,
    "max": 100,
    "init": 40,

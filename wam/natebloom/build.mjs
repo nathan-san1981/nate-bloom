@@ -62,8 +62,9 @@ console.log("Faust", faust.version());
 
 const idOf = label => label.toLowerCase().replace(/[^a-z0-9]+/g, "");
 const walk = (items, out) => { for (const it of items) { if (it.items) walk(it.items, out); else out.push(it); } return out; };
-const catalog = [];
+const catalog = [], ONLY = process.env.ONLY ? process.env.ONLY.split(",") : null;   // ONLY=violin,flute rebuilds just those
 for (const S of SPEC) {
+  if (ONLY && !ONLY.includes(S.id)) continue;
   const dsp = fs.readFileSync(path.join(HERE, "src", S.id + ".dsp"), "utf8");
   let r;
   try { r = faust.createDSPFactory(S.id, dsp, "-ftz 2", false); }
@@ -94,4 +95,4 @@ for (const S of SPEC) {
   catalog.push({ key: "natebloom/" + S.id, name, vendor: "Nate Bloom", kind: M2.kind, type: S.type, desc: S.blurb, url: "natebloom/" + S.id + "/index.js", site: "https://nathan-san1981.github.io/nate-bloom/" });
   console.log(S.id.padEnd(11), (bytes.length / 1024).toFixed(1).padStart(6), "KB wasm,", (J.size / 1024).toFixed(0).padStart(5), "KB state,", params.length, "controls" + (inst ? ", " + M2.voices + " voices" : ""));
 }
-fs.writeFileSync(path.join(HERE, "catalog-natebloom.json"), JSON.stringify(catalog, null, 1));
+if (!ONLY) fs.writeFileSync(path.join(HERE, "catalog-natebloom.json"), JSON.stringify(catalog, null, 1));

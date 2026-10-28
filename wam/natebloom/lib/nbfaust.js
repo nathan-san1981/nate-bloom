@@ -37,28 +37,39 @@ class NBFaustProcessor extends AudioWorkletProcessor {
     for (let v = 0; v < this.V; v++) { const ch = []; for (let c = 0; c < this.nOut; c++) { const a = this.outBuf[v] + c * B * 4; H32[(this.outPtrs[v] >> 2) + c] = a; ch.push(new Float32Array(buf, a, B)); } this.outV.push(ch); }
     for (const d of this.dsp) this.ex.init(d, sampleRate);
     this.last = new Float32Array(DESC.length).fill(NaN);
-    this.vs = Array.from({ length: this.V }, (_, i) => ({ i, note: -1, on: false, live: false, quiet: 0, age: 0, retrig: false, pan: 0 }));
+    this.vs = Array.from({ length: this.V }, (_, i) => ({ i, note: -1, on: false, live: false, quiet: 0, age: 0, retrig: false, pan: 0, f: 440, sus: false }));
     this.age = 0; this.q = []; this.dead = false;
+    // the wheels: bend (as a frequency ratio), mod (vibrato depth, 0..1), the sustain pedal
+    this.bend = 1; this.mod = 0; this.press = 0; this.vib = 0; this.sus = false; this.pitchMoved = false;
     this.port.onmessage = e => { const d = e.data; if (d.midi) { this.q.push(d); if (this.q.length > 1 && this.q[this.q.length - 2].time > d.time) this.q.sort((a, b) => a.time - b.time); }
-      else if (d.clear) { this.q.length = 0; this.allOff(true); } else if (d.destroy) this.dead = true; };
+      else if (d.bend != null) { this.bend = Math.pow(2, d.bend / 12); this.pitchMoved = true; }
+      else if (d.mod != null) { this.mod = d.mod; this.pitchMoved = true; }
+      else if (d.clear) { this.q.length = 0; if (this.poly) this.allOff(true); else for (const x of this.dsp) this.ex.instanceClear(x); }   // (an effect: its tail goes)
+      else if (d.destroy) this.dead = true; };
   }
   setAll(idx, v) { for (const d of this.dsp) this.ex.setParamValue(d, idx, v); }
   noteOn(n, vel) {
     const P = this.poly; if (!P) return;
     let v = this.vs.find(x => x.note === n && x.live) || this.vs.find(x => !x.live) || this.vs.filter(x => !x.on).sort((a, b) => a.age - b.age)[0] || this.vs.slice().sort((a, b) => a.age - b.age)[0];
     const d = this.dsp[v.i];
-    this.ex.setParamValue(d, P.freq, 440 * Math.pow(2, (n - 69) / 12));
+    v.f = 440 * Math.pow(2, (n - 69) / 12); v.sus = false;
+    this.ex.setParamValue(d, P.freq, v.f * this.bend);
     if (P.gain >= 0) this.ex.setParamValue(d, P.gain, Math.max(0.05, vel / 127));
     if (v.live) { this.ex.setParamValue(d, P.gate, 0); v.retrig = true; } else this.ex.setParamValue(d, P.gate, 1);
     v.note = n; v.on = true; v.live = true; v.quiet = 0; v.age = ++this.age; v.pan = Math.max(-0.6, Math.min(0.6, (n - 60) / 40));
   }
-  noteOff(n) { const P = this.poly; if (!P) return; for (const v of this.vs) if (v.on && v.note === n) { v.on = false; v.retrig = false; this.ex.setParamValue(this.dsp[v.i], P.gate, 0); } }
+  noteOff(n) { const P = this.poly; if (!P) return; for (const v of this.vs) if (v.on && v.note === n) { if (this.sus) { v.sus = true; continue; } v.on = false; v.retrig = false; this.ex.setParamValue(this.dsp[v.i], P.gate, 0); } }
+  sustain(on) { this.sus = on; if (!on) for (const v of this.vs) if (v.sus) { v.sus = false; if (v.on) { v.on = false; v.retrig = false; this.ex.setParamValue(this.dsp[v.i], this.poly.gate, 0); } } }
   allOff(hard) { const P = this.poly; if (!P) return; for (const v of this.vs) { v.on = false; v.retrig = false; this.ex.setParamValue(this.dsp[v.i], P.gate, 0); if (hard) { v.live = false; v.note = -1; this.ex.instanceClear(this.dsp[v.i]); } } }
   midi(b) {
     const st = b[0] & 0xf0;
     if (st === 0x90 && b[2] > 0) this.noteOn(b[1], b[2]);
     else if (st === 0x80 || (st === 0x90 && b[2] === 0)) this.noteOff(b[1]);
-    else if (st === 0xb0 && (b[1] === 123 || b[1] === 120)) this.allOff(b[1] === 120);
+    else if (st === 0xb0 && (b[1] === 123 || b[1] === 120)) { this.sustain(false); this.allOff(b[1] === 120); }
+    else if (st === 0xb0 && b[1] === 64) this.sustain(b[2] >= 64);
+    else if (st === 0xb0 && b[1] === 1) { this.mod = b[2] / 127; this.pitchMoved = true; }
+    else if (st === 0xd0) { this.press = b[1] / 127 * 0.8; this.pitchMoved = true; }
+    else if (st === 0xe0) { this.bend = Math.pow(2, (((b[2] << 7) | b[1]) / 8192 - 1) * 2 / 12); this.pitchMoved = true; }
   }
   process(inputs, outputs, params) {
     if (this.dead) return false;
@@ -66,6 +77,13 @@ class NBFaustProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < DESC.length; i++) { const v = params[DESC[i].name][0]; if (v !== this.last[i]) { this.last[i] = v; this.setAll(PIDX[i], v); } }
     if (this.poly) for (const v of this.vs) if (v.retrig) { v.retrig = false; ex.setParamValue(this.dsp[v.i], this.poly.gate, 1); }
     if (this.q.length) { const end = currentTime + B / sampleRate; let k = 0; while (k < this.q.length && this.q[k].time < end) this.midi(this.q[k++].midi); if (k) this.q.splice(0, k); }
+    // bend and vibrato (from the mod wheel or aftertouch) move every sounding voice, once per block
+    const depth = Math.max(this.mod, this.press);
+    if (this.poly && (depth > 0.001 || this.pitchMoved)) {
+      this.pitchMoved = false; this.vib += 2 * Math.PI * 5.6 * B / sampleRate; if (this.vib > 6.2832) this.vib -= 6.2832;
+      const r = this.bend * (1 + depth * 0.014 * Math.sin(this.vib));
+      for (const v of this.vs) if (v.live) ex.setParamValue(this.dsp[v.i], this.poly.freq, v.f * r);
+    }
     const out = outputs[0]; if (!out || !out.length) return true;
     if (!this.poly) {
       const inp = inputs[0] || [];
@@ -120,6 +138,8 @@ class NBFaustNode extends CompositeAudioNode {
     if (rest.length) return this._wamNode.scheduleEvents(...rest);
   }
   clearEvents() { this._faust.port.postMessage({ clear: true }); return this._wamNode.clearEvents(); }
+  setBend(semitones) { this._faust.port.postMessage({ bend: semitones }); }
+  setMod(v) { this._faust.port.postMessage({ mod: v }); }
   destroy() { try { this._faust.port.postMessage({ destroy: true }); this._faust.disconnect(); } catch (e) {} return super.destroy(); }
 }
 

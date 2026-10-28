@@ -24,6 +24,11 @@ self.addEventListener("fetch", e => {
       .catch(() => caches.match("./index.html")));
     return;
   }
+  // plugins: the network first, so plugin updates arrive; the kept copy when offline
+  if (sameOrigin && url.pathname.includes("/wam/")) {
+    e.respondWith(fetch(req).then(r => { if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return r; }).catch(() => caches.match(req)));
+    return;
+  }
   if (isLibrary || sameOrigin) {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
       if (r && (r.ok || r.type === "opaque")) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }

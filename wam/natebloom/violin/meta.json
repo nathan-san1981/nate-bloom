@@ -8,9 +8,9 @@
  "blurb": "A bowed string: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
  "voices": 6,
  "poly": {
-  "freq": 270368,
-  "gain": 278700,
-  "gate": 270428
+  "freq": 270372,
+  "gain": 262144,
+  "gate": 270432
  },
  "params": [
   {
@@ -48,7 +48,7 @@
   {
    "id": "bowposition",
    "label": "Bow position",
-   "index": 270460,
+   "index": 270464,
    "min": 5,
    "max": 95,
    "init": 70,
@@ -58,7 +58,7 @@
   {
    "id": "vibrato",
    "label": "Vibrato",
-   "index": 270408,
+   "index": 270412,
    "min": 0,
    "max": 100,
    "init": 45,
