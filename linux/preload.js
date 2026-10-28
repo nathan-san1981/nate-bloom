@@ -35,6 +35,23 @@ if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   choke: (group, exceptPad) => fp.choke(group, exceptPad),
   setDevice: name => fp.setDevice ? fp.setDevice(String(name || "")) : false,
   devices: () => { try { return JSON.parse(fp.devices ? fp.devices() : "[]"); } catch (e) { return []; } },
+  // Nathan's plugin instruments, native (see native/nbsynth)
+  synthList: () => fp.synthList ? fp.synthList() : "[]",
+  synthLoad: i => fp.synthLoad ? fp.synthLoad(i | 0) : false,
+  synthOff: i => fp.synthOff && fp.synthOff(i | 0),
+  synthMidi: (i, a, b, c) => fp.synthMidi && fp.synthMidi(i | 0, a | 0, b | 0, c | 0),
+  synthParam: (i, k, v) => fp.synthParam && fp.synthParam(i | 0, k | 0, +v),
+  synthTempo: (bpm, playing) => fp.synthTempo && fp.synthTempo(+bpm, playing ? 1 : 0),
+  synthGain: (i, g) => fp.synthGain && fp.synthGain(i | 0, +g),
+});
+
+// Link: this computer hosts; the tablet app finds it on the Wi-Fi (linux/link.js does the network part)
+contextBridge.exposeInMainWorld("NBLinkNative", {
+  hub: true,
+  send: s => { ipcRenderer.send("nb:link-out", String(s)); return true; },
+  status: () => ipcRenderer.invoke("nb:link-status"),
+  enable: on => ipcRenderer.invoke("nb:link-enable", !!on),
+  onMessage: cb => { ipcRenderer.on("nb:link-in", (e, s) => cb(String(s))); },
 });
 
 // a newer Nate Bloom came down from the website: offer to switch to it

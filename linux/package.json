@@ -21,7 +21,7 @@
   "build": {
     "appId": "com.natebloom.desktop",
     "productName": "Nate Bloom",
-    "files": ["main.js", "preload.js", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node"],
+    "files": ["main.js", "preload.js", "link.js", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node"],
     "asarUnpack": ["native/build/Release/nbfastpads.node"],
     "extraResources": [{ "from": "site", "to": "site" }],
     "linux": {

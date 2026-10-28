@@ -3,7 +3,7 @@ name: Android app
 on:
   push:
     branches: [main]
-    paths: ["android/**", ".github/workflows/android.yml"]
+    paths: ["android/**", "native/**", ".github/workflows/android.yml"]
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.14.3"
+
+      - name: Fetch SIMD Everywhere (for the native plugin instruments, native/nbsynth)
+        run: |
+          git clone -q --depth 1 --branch v0.8.2 https://github.com/simd-everywhere/simde.git /tmp/simde || git clone -q --depth 1 https://github.com/simd-everywhere/simde.git /tmp/simde
+          mkdir -p native/nbsynth/simde && cp -r /tmp/simde/simde native/nbsynth/simde/
 
       - name: Build the APK
         id: build

@@ -484,7 +484,7 @@ button.wlab { color: var(--lilac); cursor: pointer; }
 .mx-lab b { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mx-lab small { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mx-row input { width: 100%; accent-color: var(--lilac); height: 28px; }
-.mx-val { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
+.mx-val { min-width: 52px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; }
 .mx-row.muted .mx-lab b, .mx-row.muted .mx-val { color: var(--dim); }
 @media (max-width: 440px) { h1 { font-size: 0.92rem; } header { gap: 6px; } .hright { gap: 6px; } }
 
@@ -1907,6 +1907,19 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .arow .ahint { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--dim); font: 0.68rem var(--font-body); pointer-events: none; }
 .arow.off .tlane { opacity: 0.45; }
 .tb.rec.on { background: #e5484d; border-color: #e5484d; color: #fff; }
+.lk-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line); margin-left: 8px; display: inline-block; }
+.lk-dot.on { background: #7fd6c2; box-shadow: 0 0 8px #7fd6c2; }
+.lk-body { display: flex; flex-direction: column; gap: 8px; }
+.lk-row { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); }
+.lk-row b { font: 600 0.88rem var(--font-body); } .lk-row small { color: var(--dim); font: 0.7rem var(--font-mono); }
+.lk-row .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lk-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.lk-in { height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 0.9rem var(--font-body); padding: 0 10px; min-width: 0; flex: 1; }
+.lk-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; } .lk-bar i { display: block; height: 100%; background: var(--lilac); width: 0; }
+.lk-code { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; background: rgba(10,8,16,0.8); }
+.lk-code > div { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 34px; border-radius: 16px; background: var(--raised); border: 1px solid var(--lilac); }
+.lk-code b { font: 700 3.2rem var(--font-mono); letter-spacing: 0.18em; color: var(--ink); } .lk-code small, .lk-code span { color: var(--dim); font: 0.86rem var(--font-body); }
+#lkBtn.on { border-color: #7fd6c2; color: #7fd6c2; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -2106,6 +2119,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <span class="bsep" aria-hidden="true"></span>
     <button class="btn" id="exBtn">Export</button>
     <button class="btn" id="midiBtn">MIDI</button>
+    <button class="btn" id="lkBtn" hidden title="Link with the tablet or the computer on the same Wi-Fi">Link</button>
     <span class="bsep" id="installSep" aria-hidden="true"></span>
     <button class="btn" id="installBtn">Install</button>
     <span class="spacer"></span>
@@ -2780,7 +2794,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
 <div class="editor sheet" id="mixer" hidden>
   <div class="ed-card" role="dialog" aria-label="Mixer">
     <div class="ed-head"><strong>Mixer</strong></div>
-    <span class="ed-info" style="text-align:left">Drag to set each sound's volume. Double-tap a slider to reset it.</span>
+    <span class="ed-info" style="text-align:left">Drag to set each sound's volume; the number is how far it is from its usual level (0 dB). Double-tap a slider to put it back.</span>
     <div class="mx-meter" aria-label="Output level"><div><i id="mxMeterBar"></i></div><span id="mxMeterLab">Silent</span></div>
     <div class="mx-list" id="mxList"></div>
     <div class="ed-foot sheet-foot">
@@ -2892,6 +2906,16 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <div class="ed-foot sheet-foot"><button class="btn big primary" id="wlDone">Cancel</button></div>
   </div>
 </div>
+
+<div class="editor sheet" id="lkSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Link">
+    <div class="ed-head"><strong>Link</strong><span class="lk-dot" id="lkDot" aria-hidden="true"></span></div>
+    <span class="ed-info" id="lkInfo" style="text-align:left"></span>
+    <div class="lk-body" id="lkBody"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="lkDone">Done</button></div>
+  </div>
+</div>
+<div class="lk-code" id="lkCode" hidden role="alertdialog" aria-label="Link code"><div><small id="lkCodeWho"></small><b id="lkCodeNum"></b><span>Type this code on the tablet</span></div></div>
 
 <div class="editor sheet" id="hisSheet" hidden>
   <div class="ed-card" role="dialog" aria-label="History">
@@ -3035,6 +3059,8 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
+      <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
+      <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
       <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
       <p><b>Undo and redo</b>: ↶ and ↷ in the toolbar (at the top on a phone; or Ctrl+Z and Ctrl+Shift+Z) take back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (in the toolbar, or the ☰ menu on a phone) lists the changes, newest first; tap one to go back to just before it.</p>
@@ -5027,9 +5053,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     }
   }
   const playBtn = document.getElementById("play");
+  let NB_START_AT = null;   // (Link: when the first step should sound, in this AudioContext's time)
   function startSeq() {
     if (!ctx || playing) return;
-    playing = true; curStep = 0; nextTime = ctx.currentTime + 0.06;
+    playing = true; curStep = 0; nextTime = NB_START_AT != null && NB_START_AT > ctx.currentTime ? NB_START_AT : ctx.currentTime + 0.06;
     tick(); timer = setInterval(tick, 25);
     playBtn.setAttribute("aria-pressed", "true"); playBtn.textContent = "■ Pause";
   }
@@ -6844,8 +6871,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (!pt || !pt.on || !libInsts[i] || m < pt.lo || m > pt.hi) return;
       // sustaining sounds (pads, strings, organs) ignore the Decay slider
       const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p;
-      const v = makeInstVoice(m + 12 * (pt.oct || 0), when, scale * (pt.level ?? 0.8) * 1.25, libInsts[i], P);
-      if (v) out.push(v);
+      // (the note plays at the usual level; the layer's own bus carries its fader, so a move is heard at once)
+      const live = !!ctx, k0 = live ? LVK : null; if (live) LVK = "l:" + i;
+      try { const v = makeInstVoice(m + 12 * (pt.oct || 0), when, scale * (live ? 0.8 : (pt.level ?? 0.8)) * 1.25, libInsts[i], P); if (v) out.push(v); }
+      finally { if (live) LVK = k0; }
     });
     return out;
   }
@@ -7380,7 +7409,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         key: "lib" + i, name: pt.name, accepts: m => m >= pt.lo && m <= pt.hi,
         make: (m, when, scale = 1) => {
           const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p;
-          return makeInstVoice(m + 12 * (pt.oct || 0), when, scale * (pt.level ?? 0.8) * 1.25, libInsts[i], P);
+          if (!ctx) return makeInstVoice(m + 12 * (pt.oct || 0), when, scale * (pt.level ?? 0.8) * 1.25, libInsts[i], P);
+          const k0 = LVK; LVK = "l:" + i;   // (the layer's own bus carries its fader, live)
+          try { return makeInstVoice(m + 12 * (pt.oct || 0), when, scale * 0.8 * 1.25, libInsts[i], P); } finally { LVK = k0; }
         } }));
     }
     if (eng === "inst") return [{ key: "inst", name: curInst ? curInst.name : "Instrument", accepts: () => true, make: (m, when, scale = 1) => makeInstVoice(m, when, scale) }];
@@ -7525,6 +7556,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const ch = [];
     const add = (group, name, sub, get, set, dflt, live) => ch.push({ group, name, sub, get, set, dflt, live });
     add("Master", "Master volume", "everything you hear", () => state.fx.volume, v => { state.fx.volume = v; applyFx(); }, 0.7, true);
+    ch[ch.length - 1].law = 2;
     const synthNow = ENGINES[state.engine];
     for (const [id, e] of Object.entries(ENGINES)) {
       const on = synthNow && state.layers[id].on;
@@ -7538,6 +7570,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     for (let k = 0; k < NPADS; k++) if (padBuf[k]) add("Pads", "P" + (k + 1) + " · " + baseName(state.pads.names[k]), "sample pad", () => state.pads.p[k].level, v => { state.pads.p[k].level = v; }, 0.8, true);
     return ch;
   }
+  const mxLevel = (pos, law) => Math.pow(Math.max(0, Math.min(100, +pos)) / 100, 3 / (law || 1));
+  const mxPos = (lv, law) => Math.max(lv > 0 ? 1 : 0, Math.min(100, Math.round(100 * Math.pow(Math.max(0, +lv || 0), (law || 1) / 3))));
+  const mxDb = (lv, ref, law) => { if (!(lv > 0)) return "off"; const d = 20 * (law || 1) * Math.log10(lv / (ref || 0.8)); return Math.abs(d) < 0.5 ? "0 dB" : (d > 0 ? "+" : "−") + Math.abs(d).toFixed(Math.abs(d) < 9.5 ? 1 : 0) + " dB"; };
   function renderMixer() {
     mxList.innerHTML = "";
     let group = "";
@@ -7552,10 +7587,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const val = document.createElement("span"); val.className = "mx-val";
       const r = document.createElement("input"); r.type = "range"; r.min = 0; r.max = 100; r.id = "mx" + n;
       r.setAttribute("aria-label", c.name + " volume");
-      const show = () => { val.textContent = r.value == 0 ? "off" : r.value; row.classList.toggle("muted", r.value == 0); };
-      r.value = Math.round(c.get() * 100); show();
-      r.addEventListener("input", () => { c.set(r.value / 100); show(); save(); });
-      r.addEventListener("dblclick", () => { r.value = Math.round(c.dflt * 100); c.set(c.dflt); show(); save(); });
+      const show = () => { val.textContent = r.value == 0 ? "off" : mxDb(mxLevel(r.value, c.law), c.dflt, c.law); row.classList.toggle("muted", r.value == 0); r.setAttribute("aria-valuetext", val.textContent); };
+      r.value = mxPos(c.get(), c.law); show();
+      r.addEventListener("input", () => { c.set(mxLevel(r.value, c.law)); show(); save(); });
+      r.addEventListener("dblclick", () => { c.set(c.dflt); r.value = mxPos(c.dflt, c.law); show(); save(); });
       row.append(lab, r, val);
       mxList.appendChild(row);
     });
@@ -14311,6 +14346,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const mk = (name, sub, get, set, dflt) => add.push({ group: "DJ", name, sub, get, set, dflt, live: true });
       mk("DJ (both decks)", "the songs on the decks", () => DJ.busVol, v => { DJ.busVol = v; if (DJ.bus) DJ.bus.gain.setTargetAtTime(v, ctx.currentTime, 0.03); try { localStorage.setItem("nightbloom-djvol", String(v)); } catch (e) {} }, 0.85);
       DJ.decks.forEach(d => mk("Deck " + "AB"[d.i], d.name ? d.name.slice(0, 26) : "empty", () => d.eq.vol, v => { d.eq.vol = v; djApplyEq(d); try { djPaintDeck(d); } catch (e) {} }, 0.9));
+      add.forEach(c => { if (c.name.startsWith("Deck ")) c.law = 2; });
       ch.splice(at < 0 ? ch.length : at, 0, ...add);
       return ch;
     };
@@ -15743,6 +15779,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
       ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
       ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
+      ["lkBtn", "Link", "Send projects to the computer and play together"],
       ["installBtn", "Install", "Add Nate Bloom to the home screen"],
       ["hisBtn", "History", "Every change, newest first: go back to any of them"],
       ["helpBtn", "Help", "How it works · vibration · report a problem"],
@@ -16927,6 +16964,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     if (k.startsWith("e:")) return (state.layers[k.slice(2)] || {}).level;
     if (k.startsWith("s:")) { const sl = state.samp.slots[+k.slice(2)]; return sl && sl.p ? sl.p.level : 0.8; }
     if (k === "inst") return state.inst.p.level;
+    if (k.startsWith("l:")) { const pt = state.lib.parts[+k.slice(2)]; return pt ? (pt.level ?? 0.8) : 0.8; }
     return 0.8;
   }
   const lvGain = k => { const v = lvLevel(k); return Number.isFinite(v) ? Math.max(0, v) / 0.8 : 1; };
@@ -16955,6 +16993,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     }; }
   document.getElementById("mxList").addEventListener("input", () => setTimeout(lvApply, 0));
   setInterval(lvApply, 300);   // (the Sound panel's level knobs too)
+  window.__lv = { LV, lvLevel, lvApply, key: () => LVK };
 
   // ---------- time signatures: bar length in 16ths, where the beats fall, the backbeat ----------
   const RC_SIGS = {
@@ -19908,6 +19947,41 @@ registerProcessor("nb-verb", NBVerb);`;
     // follow Tracks' play and stop
     { let was = false; setInterval(() => { if (playing_t !== was) { was = playing_t; alRun(); if (!was) AL.lanes.forEach(L => { if (L._st) { clearTimeout(L._st); alSave(); } }); } }, 60); }
     window.__wl = { WL, AL, slots: wlSlots, holder: wlHolder, params: wlParams, set: wlSet, get: wlGet, pick: wlPick, at: alAt, run: alRun };
+    // ---------- ⚡ Fast plugins (the apps): Nathan's instruments on the app's own low-latency audio ----------
+    const FP = { on: false };
+    try { FP.on = localStorage.getItem("nightbloom-fastplug") === "1"; } catch (e) {}
+    const fpApi = () => !!(window.NBFastPads && typeof NBFastPads.synthLoad === "function");
+    const fpNodes = () => [...NBW.parts.values()].filter(W => W.ctx === ctx && W.node && W.node.setFast && W.node.fastAvailable && W.node.fastAvailable());
+    async function fpApply() { for (const W of fpNodes()) { try { await W.node.setFast(FP.on, W.gain.gain.value); } catch (e) {} } }
+    { const ni = nbwInstrument; nbwInstrument = function () {
+        return ni.apply(this, arguments).then(W => { if (FP.on && W && W.node && W.node.fastAvailable && W.node.fastAvailable() && !W.node.fast) W.node.setFast(true, W.gain.gain.value).catch(() => {}); return W; });
+      }; }
+    { const p0 = nbwPaint; nbwPaint = function () {
+        const r = p0.apply(this, arguments);
+        try {
+          if (!sheet.hidden && fpApi() && NBW_HERE) {
+            const live = fpNodes().filter(W => W.node.fast).map(W => W.name);
+            const r2 = row(FP.on ? "on" : "", "⚡ Fast plugins", FP.on
+              ? "Your plugins (YOURS) play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and Tracks don't hear them while this is on."
+              : "Your plugins (YOURS) can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
+            r2.append(btn(FP.on ? "On" : "Off", async () => { FP.on = !FP.on; try { localStorage.setItem("nightbloom-fastplug", FP.on ? "1" : "0"); } catch (e) {} start(); await fpApply(); nbwPaint(); }, FP.on, "Fast plugins"));
+            list.insertBefore(r2, list.firstChild);
+          }
+        } catch (e) {}
+        return r;
+      }; }
+    if (FP.on) setTimeout(() => { if (ctx) fpApply(); }, 2500);
+    // while they play natively, the app's fast audio stays awake (the fast pads let it sleep a minute after Beat Pads),
+    // and if it came back at another sample rate, the instruments start again at that rate
+    { let rate = 0; setInterval(() => {
+        if (!FP.on || !fpApi()) return;
+        const live = fpNodes().filter(W => W.node.fast); if (!live.length) return;
+        try { const N = window.__nfp && __nfp.NFP; if (N) N.idle = 0; NBFastPads.start(); } catch (e) {}
+        let r = 0; try { r = NBFastPads.rate(); } catch (e) {}
+        if (rate && r && r !== rate) live.forEach(async W => { try { await W.node.setFast(false); await W.node.setFast(true, W.gain.gain.value); } catch (e) {} });
+        if (r) rate = r;
+      }, 1500); }
+    window.__fp = { FP, apply: fpApply, nodes: fpNodes };
     window.__wam = { chainOf, stemTaps: () => nbwStemTaps(), wireTarget: nbwWireTarget, setSend: nbwSetSend, targets: nbwTargets, NBW, CAT: NBW_CAT, here: NBW_HERE, host: nbwHost, instrument: nbwInstrument, addFx: nbwAddFx, removeFx: nbwRemoveFx, wire: nbwWire, base: nbwBase, openGui: nbwOpenGui, closeGui: nbwCloseGui, allOff: nbwAllOff, paint: nbwPaint, st: () => state };
   }
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
@@ -21789,6 +21863,190 @@ registerProcessor("nb-wave", NBWave);
       const ba = buildAudio; buildAudio = function () { const r = ba.apply(this, arguments); setTimeout(() => apply(true), 0); return r; };
       if (ctx) apply(true);
     }
+  }
+  // ---------- Link: the tablet and the computer on the same Wi-Fi ----------
+  {
+    const LN = window.NBLinkNative || null;
+    const LK = { hub: !!(LN && LN.hub), on: false, peers: [], found: [], finding: false, me: null, off: new Map(), pings: new Map(), together: true, quiet: 0, inbox: new Map(), status: "", codeFor: null, lastSent: null };
+    const KEY = "nightbloom-link";
+    try { if (typeof KEEP_KEYS !== "undefined" && !KEEP_KEYS.includes(KEY)) KEEP_KEYS.push(KEY); } catch (e) {}   // (not part of a project)
+    try { Object.assign(LK, { me: JSON.parse(localStorage.getItem(KEY) || "null") }); } catch (e) {}
+    if (LK.me && LK.me.together === false) LK.together = false;
+    const keep = () => { try { localStorage.setItem(KEY, JSON.stringify(Object.assign({}, LK.me || {}, { together: LK.together }))); } catch (e) {} };
+    const now = () => performance.timeOrigin + performance.now();
+    const btn = document.getElementById("lkBtn"), sheet = document.getElementById("lkSheet"), body = document.getElementById("lkBody"), info = document.getElementById("lkInfo"), dot = document.getElementById("lkDot");
+    const devName = () => { const m = /Android[^;]*;\s*([^;)]+?)(?: Build|\))/.exec(navigator.userAgent), md = m && m[1].trim(); return md && md !== "K" ? "Tablet (" + md + ")" : "Tablet"; };
+    function send(m, to) {
+      if (!LN) return false;
+      const o = Object.assign({}, m); if (LK.hub) o.to = to == null ? "*" : to;
+      try { return LN.send(JSON.stringify(o)) !== false; } catch (e) { return false; }
+    }
+    const linked = () => LK.hub ? LK.peers.length > 0 : LK.on;
+    const peerName = id => LK.hub ? ((LK.peers.find(p => p.id === id) || LK.peers[0] || {}).name || "the tablet") : ((LK.me && LK.me.name) || "the computer");
+    // clocks: each side keeps how far the other's clock is from its own (the best of recent pings)
+    function ping(to) { send({ t: "ping", a: now() }, to); }
+    function offOf(from) { const s = LK.off.get(from == null ? 0 : from); return s ? s.off : 0; }
+    let pingT = 0;
+    function pinging(on) {
+      clearInterval(pingT); pingT = 0; if (!on) return;
+      let n = 0; const burst = setInterval(() => { ping(); if (++n >= 6) clearInterval(burst); }, 120);
+      pingT = setInterval(() => ping(), 4000);
+    }
+    // ---- messages in ----
+    function handle(m) {
+      const from = m.from == null ? 0 : m.from;
+      switch (m.t) {
+        case "found": if (!LK.found.some(f => f.host === m.host)) LK.found.push({ name: m.name, host: m.host, port: m.port }); paint(); break;
+        case "find-done": LK.finding = false; if (!LK.found.length) LK.status = "No computer answered. Is Nate Bloom open on it, with Let the tablet link on, and on the same Wi-Fi?"; paint(); break;
+        case "connected": LK.status = "Linking…"; send({ t: "hello", name: devName(), token: LK.me && LK.me.token }); paint(); break;
+        case "code?": LK.codeFor = m.name; LK.status = m.wrong ? "That code didn't match. Try again." : ""; paint(); break;
+        case "welcome": LK.on = true; LK.codeFor = null; LK.me = Object.assign({}, LK.me, { name: m.name, token: m.token }); keep(); LK.status = ""; pinging(true); paint(); noteMsg("Linked with " + m.name); break;
+        case "denied": LK.codeFor = null; LK.status = "The computer said no (three wrong codes). Find it again to retry."; paint(); break;
+        case "disconnected": if (LK.on) noteMsg("Link to " + peerName() + " ended"); LK.on = false; pinging(false); paint(); break;
+        case "link-error": LK.on = false; LK.status = "Couldn't reach it: " + (m.why || "no answer") + "."; paint(); break;
+        case "peers": LK.peers = m.peers || []; if (m.joined) noteMsg(m.joined + " linked"); if (m.left) noteMsg(m.left + " unlinked"); pinging(LK.peers.length > 0); paint(); break;
+        case "code": showCode(m.name, m.code); break;
+        case "code-done": showCode(null); break;
+        case "ping": send({ t: "pong", a: m.a, b: now() }, m.from); break;
+        case "pong": { const t1 = now(), rtt = t1 - m.a, off = m.b - (m.a + rtt / 2), cur = LK.off.get(from);
+          if (rtt < 2000 && (!cur || rtt <= cur.rtt * 1.5 || t1 - cur.at > 20000)) LK.off.set(from, { off, rtt, at: t1 });
+          break; }
+        case "tempo": if (LK.together && Number.isFinite(m.bpm)) { LK.quiet++; try { setBpm(m.bpm); } finally { LK.quiet--; } } break;
+        case "play": if (LK.together) remotePlay(m, from); break;
+        case "stop": if (LK.together) { LK.quiet++; try { if (playing) stopSeq(); } finally { LK.quiet--; } } break;
+        case "proj": recvChunk(m, from); break;
+        case "proj-get": sendProject(from); break;
+      }
+    }
+    if (LN) { window.__nbLinkIn = s => { try { handle(JSON.parse(s)); } catch (e) {} }; if (LN.onMessage) LN.onMessage(s => window.__nbLinkIn(s)); }
+    // ---- play together ----
+    const LEAD = 0.25;   // seconds between pressing Play and both starting
+    function ctxAt(epochMs) { const lat = (ctx && (ctx.outputLatency || ctx.baseLatency)) || 0; return ctx.currentTime + (epochMs - now()) / 1000 - lat; }
+    function remotePlay(m, from) {
+      if (!ctx) { start(); if (!ctx) return; }
+      LK.quiet++;
+      try {
+        if (Number.isFinite(m.bpm) && m.bpm !== state.seq.bpm) setBpm(m.bpm);
+        if (playing) stopSeq();
+        NB_START_AT = ctxAt(m.at - offOf(from)); LK.lastStart = now() + (NB_START_AT - ctx.currentTime) * 1000; startSeq();
+      } finally { NB_START_AT = null; LK.quiet--; }
+    }
+    { const s0 = startSeq; startSeq = function () {
+        if (LK.quiet || !linked() || !LK.together || !ctx || playing || NB_START_AT != null) return s0.apply(this, arguments);
+        const at = now() + LEAD * 1000;   // start here and there at the same moment, a beat of a breath from now
+        send({ t: "play", at, bpm: state.seq.bpm });
+        NB_START_AT = ctxAt(at); LK.lastStart = now() + (NB_START_AT - ctx.currentTime) * 1000;
+        try { return s0.apply(this, arguments); } finally { NB_START_AT = null; }
+      };
+      const p0 = stopSeq; stopSeq = function () { const was = playing, r = p0.apply(this, arguments); if (was && !LK.quiet && linked() && LK.together) send({ t: "stop" }); return r; };
+      const b0 = setBpm; let bt = 0; setBpm = function (b) { const r = b0.apply(this, arguments); if (!LK.quiet && linked() && LK.together) { clearTimeout(bt); bt = setTimeout(() => send({ t: "tempo", bpm: state.seq.bpm }), 120); } return r; }; }
+    // ---- projects ----
+    const CHUNK = 192 * 1024;
+    const b64 = u8 => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+    const unb64 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+    async function sendProject(to) {
+      if (!linked()) return;
+      const name = "From " + (LK.hub ? (LK.selfName || "the computer") : devName()) + " " + stamp();
+      LK.status = "Packing the project…"; paint();
+      try {
+        const p = await snapshotProject(name), u8 = packProject(p), id = Date.now().toString(36), n = Math.max(1, Math.ceil(u8.length / CHUNK));
+        for (let i = 0; i < n; i++) {
+          send({ t: "proj", id, name, i, n, size: u8.length, d: b64(u8.subarray(i * CHUNK, (i + 1) * CHUNK)) }, to);
+          if (i % 4 === 3) { LK.status = "Sending “" + name + "”… " + Math.round((i + 1) / n * 100) + "%"; paint(); await new Promise(r => setTimeout(r, 30)); }
+        }
+        LK.status = "Sent “" + name + "” (" + (u8.length / 1048576).toFixed(1) + " MB) to " + peerName(to) + "."; paint();
+      } catch (e) { LK.status = "Couldn't send it: " + (e && e.message || e); paint(); }
+    }
+    async function recvChunk(m, from) {
+      let box = LK.inbox.get(m.id);
+      if (!box) { box = { parts: new Array(m.n), got: 0, name: m.name, size: m.size, from }; LK.inbox.set(m.id, box); }
+      if (!box.parts[m.i]) { box.parts[m.i] = m.d; box.got++; }
+      LK.status = "Receiving “" + box.name + "” from " + peerName(from) + "… " + Math.round(box.got / m.n * 100) + "%"; paint();
+      if (box.got < m.n) return;
+      LK.inbox.delete(m.id);
+      try {
+        const parts = box.parts.map(unb64), u8 = new Uint8Array(parts.reduce((a, p) => a + p.length, 0)); let o = 0; parts.forEach(p => { u8.set(p, o); o += p.length; });
+        const p = unpackProject(u8); p.size = sizeOf(p);
+        const key = "p" + Date.now(), st = await projDB("readwrite"); st.put(p, key);
+        LK.got = { key, p, from: peerName(from) }; LK.status = ""; paint();
+        try { if (sheet.hidden) { sheet.hidden = false; } } catch (e) {}
+      } catch (e) { LK.status = "That project didn't arrive whole: " + (e && e.message || e); paint(); }
+    }
+    async function openGot() {
+      const g = LK.got; if (!g) return;
+      LK.status = "Keeping your current work in Projects first…"; paint();
+      try { const cur = await snapshotProject("Before " + g.p.name); cur.size = sizeOf(cur); const st = await projDB("readwrite"); st.put(cur, "p" + Date.now()); } catch (e) {}
+      loadProjectData(g.p);
+    }
+    // ---- the sheet ----
+    let codeT = 0;
+    function showCode(name, code) {
+      const box = document.getElementById("lkCode"); clearTimeout(codeT);
+      if (!name) { box.hidden = true; return; }
+      document.getElementById("lkCodeWho").textContent = name + " wants to link"; document.getElementById("lkCodeNum").textContent = code; box.hidden = false;
+      codeT = setTimeout(() => { box.hidden = true; }, 120000);
+    }
+    document.getElementById("lkCode").addEventListener("click", () => { document.getElementById("lkCode").hidden = true; });
+    const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+    const button = (txt, fn, primary) => { const b = el("button", "btn" + (primary ? " primary" : ""), txt); b.addEventListener("click", fn); return b; };
+    async function paint() {
+      if (!LN) return;
+      btn.classList.toggle("on", linked()); dot.classList.toggle("on", linked());
+      if (sheet.hidden) return;
+      body.innerHTML = "";
+      if (LK.hub) {
+        let st = null; try { st = await LN.status(); } catch (e) {}
+        const enabled = !!(st && st.enabled); if (st && st.name) LK.selfName = st.name;
+        info.textContent = enabled ? "This computer can be found by the Nate Bloom tablet app on the same Wi-Fi. On the tablet: ☰ → Link → Find computers." : "Let the Nate Bloom tablet app on your Wi-Fi find this computer, send projects both ways and play together.";
+        const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", "Let the tablet link"), el("small", "", enabled && st ? (st.name + " · " + (st.addresses || []).join(", ")) : "off"));
+        r.append(g, button(enabled ? "Turn off" : "Turn on", async () => { try { await LN.enable(!enabled); } catch (e) {} setTimeout(paint, 300); }, !enabled)); body.appendChild(r);
+        LK.peers.forEach(p => { const row = el("div", "lk-row"), gg = el("div", "grow"); gg.append(el("b", "", p.name), el("small", "", "linked")); row.append(gg, button("Send this project", () => sendProject(p.id)), button("Get theirs", () => send({ t: "proj-get" }, p.id))); body.appendChild(row); });
+        if (enabled && !LK.peers.length) body.appendChild(el("small", "", "Waiting for the tablet. The first time, it asks for a code that shows up here."));
+      } else {
+        info.textContent = linked() ? "Linked with " + peerName() + "." : "Link with the Nate Bloom app on your computer (Linux) on the same Wi-Fi: send projects both ways and play together.";
+        if (!linked()) {
+          if (LK.codeFor) {
+            const r = el("div", "lk-row"), inp = el("input", "lk-in"); inp.inputMode = "numeric"; inp.maxLength = 4; inp.placeholder = "Code on " + LK.codeFor; inp.setAttribute("aria-label", "Code shown on the computer");
+            const ok = button("Link", () => { send({ t: "code", code: inp.value.trim() }); LK.status = "Checking…"; paint(); }, true);
+            inp.addEventListener("keydown", e => { if (e.key === "Enter") ok.click(); });
+            r.append(inp, ok); body.appendChild(r); setTimeout(() => inp.focus(), 50);
+          } else {
+            body.appendChild(button(LK.finding ? "Looking…" : "Find computers", () => { LK.found = []; LK.finding = true; LK.status = ""; paint(); try { LN.find(); } catch (e) {} }, true));
+            LK.found.forEach(f => { const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", f.name), el("small", "", f.host)); r.append(g, button("Link", () => connect(f.host, f.port, f.name), true)); body.appendChild(r); });
+            if (LK.me && LK.me.host) { const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", LK.me.name || LK.me.host), el("small", "", "last time · " + LK.me.host)); r.append(g, button("Link again", () => connect(LK.me.host, LK.me.port, LK.me.name))); body.appendChild(r); }
+            const r = el("div", "lk-row"), inp = el("input", "lk-in"); inp.placeholder = "or its address, like 192.168.1.20"; inp.setAttribute("aria-label", "Computer's address");
+            r.append(inp, button("Link", () => { const v = inp.value.trim(); if (v) connect(v.split(":")[0], +(v.split(":")[1] || 47812), v); })); body.appendChild(r);
+          }
+        } else {
+          const acts = el("div", "lk-acts");
+          acts.append(button("Send this project", () => sendProject(), true), button("Get theirs", () => send({ t: "proj-get" })), button("Unlink", () => { try { LN.close(); } catch (e) {} LK.on = false; paint(); }));
+          body.appendChild(acts);
+        }
+      }
+      if (linked()) {
+        const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", "Play together"), el("small", "", LK.together ? "one tempo; Play and Stop on both" : "off: each plays on its own"));
+        const t = button(LK.together ? "On" : "Off", () => { LK.together = !LK.together; keep(); paint(); if (LK.together) send({ t: "tempo", bpm: state.seq.bpm }); }); t.setAttribute("aria-pressed", String(LK.together)); r.append(g, t); body.appendChild(r);
+      }
+      if (LK.got) {
+        const r = el("div", "lk-row"), g = el("div", "grow"); g.append(el("b", "", LK.got.p.name), el("small", "", "from " + LK.got.from + " · " + ((LK.got.p.size || 0) / 1048576).toFixed(1) + " MB · kept in Projects"));
+        r.append(g, button("Open it", openGot, true), button("Later", () => { LK.got = null; paint(); })); body.appendChild(r);
+      }
+      if (LK.status) body.appendChild(el("small", "", LK.status));
+    }
+    function connect(host, port, name) {
+      LK.me = Object.assign({}, LK.me, { host, port: port || 47812, name: name || host }); if (LK.me.host !== host) LK.me.token = null; keep();
+      LK.status = "Connecting to " + (name || host) + "…"; LK.found = []; paint();
+      try { LN.connect(host, port || 47812); } catch (e) {}
+    }
+    if (LN) {
+      btn.hidden = false;
+      btn.addEventListener("click", () => { start(); sheet.hidden = false; paint(); });
+      document.getElementById("lkDone").addEventListener("click", () => { sheet.hidden = true; });
+      // the tablet links again by itself when it knows the computer
+      if (!LK.hub && LK.me && LK.me.host && LK.me.token) setTimeout(() => { try { LN.connect(LK.me.host, LK.me.port || 47812); } catch (e) {} }, 1500);
+      if (LK.hub) setTimeout(async () => { try { const st = await LN.status(); LK.peers = (st && st.peers) || []; if (st && st.name) LK.selfName = st.name; if (LK.peers.length) pinging(true); } catch (e) {} paint(); }, 500);   // (after a reload, the tablet is still linked)
+    }
+    window.__lk = { LK, handle, send, paint, sendProject, ctxAt, offOf };
   }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };

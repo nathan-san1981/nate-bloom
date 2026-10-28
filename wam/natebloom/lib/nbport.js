@@ -63,6 +63,16 @@ class NBPortProcessor extends AudioWorkletProcessor {
 registerProcessor(NAME, NBPortProcessor);
 `;
 
+// ⚡ Fast (in the apps): the same DSP compiled into the app's own low-latency audio (native/nbsynth in the repo).
+// Notes and knob changes then go there; this worklet stays loaded (panel, presets, state) but plays nothing.
+const FAST = globalThis.__nbFast || (globalThis.__nbFast = { list: null, nodes: new Set() });
+const fastApi = () => { const n = globalThis.NBFastPads; return n && typeof n.synthLoad === "function" ? n : null; };
+function fastIndex(id) {
+  const n = fastApi(); if (!n) return -1;
+  if (!FAST.list) { try { FAST.list = JSON.parse(n.synthList()) || []; } catch (e) { FAST.list = []; } }
+  return FAST.list.indexOf(id);
+}
+
 const assets = new Map();
 function loadAssets(base) {
   if (!assets.has(base)) assets.set(base, (async () => {
@@ -83,18 +93,47 @@ async function ensureProcessor(ctx, M) {
   return done.get(procName(M));
 }
 class NBPortNode extends CompositeAudioNode {
-  setup(w, paramMgr) { this._w = w; this._wamNode = paramMgr; this._output = w; if (this._hasInput) this.connect(w, 0, 0); }
+  setup(w, paramMgr) { this._w = w; this._wamNode = paramMgr; this._output = w; if (this._hasInput) this.connect(w, 0, 0); FAST.nodes.add(this); }
+  // can this plugin play natively here? (the apps, an instrument the app was built with)
+  fastAvailable() { return !this._hasInput && fastIndex(this._M && this._M.id) >= 0; }
+  get fast() { return !!this._fast; }
+  async setFast(on, gain = 1) {
+    const n = fastApi(), i = this._M ? fastIndex(this._M.id) : -1;
+    if (!on || !n || i < 0 || this._hasInput) {
+      if (this._fast) { clearInterval(this._fast.poll); try { n.synthMidi(i, 0xB0, 123, 0); n.synthOff(this._fast.i); } catch (e) {} this._fast = null; }
+      return false;
+    }
+    if (this._fast) { n.synthGain(i, gain); return true; }
+    try { if (n.start) n.start(); } catch (e) {}
+    if (!n.synthLoad(i)) return false;
+    n.synthGain(i, gain);
+    if (this._tp) n.synthTempo(this._tp.tempo, this._tp.playing ? 1 : 0);
+    this._w.port.postMessage({ clear: true });   // (the worklet's own notes stop)
+    const F = this._fast = { i, last: {}, poll: 0 };
+    // every control's value, now and whenever it changes (the panel, presets, MIDI learn, automation)
+    const push = async () => {
+      if (this._fast !== F) return;
+      try { const v = await this._wamNode.getParameterValues(false); for (const id in v) { const x = v[id].value, k = this._pidx[id]; if (k != null && F.last[id] !== x) { F.last[id] = x; n.synthParam(i, k, x); } } } catch (e) {}
+    };
+    await push(); F.poll = setInterval(push, 100);
+    return true;
+  }
   scheduleEvents(...events) {
-    const rest = [];
+    const rest = [], F = this._fast, n = F && fastApi();
     for (const e of events) {
-      if (e && e.type === "wam-midi" && e.data && e.data.bytes) this._w.port.postMessage({ midi: Array.from(e.data.bytes), time: e.time || 0 });
-      else if (e && e.type === "wam-transport" && e.data) { const d = e.data; this._w.port.postMessage({ tempo: d.tempo || 120, playing: !!d.playing, barStarted: d.currentBarStarted, bar: d.currentBar || 0 }); }
+      if (e && e.type === "wam-midi" && e.data && e.data.bytes) {
+        if (n) {   // live notes go at once; notes the sequencer scheduled ahead wait for their time (and the browser's own output delay)
+          const b = Array.from(e.data.bytes), dt = (e.time || 0) - this.context.currentTime, go = () => { if (this._fast === F) n.synthMidi(F.i, b[0] | 0, b[1] | 0, b[2] | 0); };
+          if (dt > 0.008) setTimeout(go, dt * 1000 + Math.max(0, ((this.context.outputLatency || this.context.baseLatency || 0) * 1000) - 12)); else go();
+        } else this._w.port.postMessage({ midi: Array.from(e.data.bytes), time: e.time || 0 });
+      }
+      else if (e && e.type === "wam-transport" && e.data) { const d = e.data; this._tp = { tempo: d.tempo || 120, playing: !!d.playing }; this._w.port.postMessage({ tempo: d.tempo || 120, playing: !!d.playing, barStarted: d.currentBarStarted, bar: d.currentBar || 0 }); if (n) n.synthTempo(d.tempo || 120, d.playing ? 1 : 0); }
       else rest.push(e);
     }
     if (rest.length) return this._wamNode.scheduleEvents(...rest);
   }
-  clearEvents() { this._w.port.postMessage({ clear: true }); return this._wamNode.clearEvents(); }
-  destroy() { try { this._w.port.postMessage({ destroy: true }); this._w.disconnect(); } catch (e) {} return super.destroy(); }
+  clearEvents() { this._w.port.postMessage({ clear: true }); if (this._fast) { const n = fastApi(); try { n.synthMidi(this._fast.i, 0xB0, 64, 0); n.synthMidi(this._fast.i, 0xB0, 123, 0); } catch (e) {} } return this._wamNode.clearEvents(); }
+  destroy() { this.setFast(false); FAST.nodes.delete(this); try { this._w.port.postMessage({ destroy: true }); this._w.disconnect(); } catch (e) {} return super.destroy(); }
 }
 export function make(moduleUrl) {
   const base = new URL(".", moduleUrl).href;
@@ -112,7 +151,7 @@ export function make(moduleUrl) {
       await ensureProcessor(ctx, M);
       const w = new AudioWorkletNode(ctx, procName(M), { numberOfInputs: M.kind === "instrument" ? 0 : 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { module: A.module, kind: M.kind } });
       const pm = await ParamMgrFactory.create(this, { internalParamsConfig: Object.fromEntries(w.parameters) });
-      const node = new NBPortNode(ctx); node._hasInput = M.kind !== "instrument"; node.setup(w, pm);
+      const node = new NBPortNode(ctx); node._hasInput = M.kind !== "instrument"; node._M = M; node._pidx = Object.fromEntries(M.params.map(p => [p.id, p.index])); node.setup(w, pm);
       if (initialState) { try { await node.setState(initialState); } catch (e) {} }
       return node;
     }

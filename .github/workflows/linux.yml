@@ -3,7 +3,7 @@ name: Linux app
 on:
   push:
     branches: [main]
-    paths: ["linux/**", ".github/workflows/linux.yml"]
+    paths: ["linux/**", "native/**", ".github/workflows/linux.yml"]
   workflow_dispatch:
 
 permissions:
@@ -41,6 +41,11 @@ jobs:
 
       - name: Install
         run: cd linux && npm install --no-audit --no-fund 2>&1 | tail -20
+
+      - name: Fetch SIMD Everywhere (for the native plugin instruments, native/nbsynth)
+        run: |
+          git clone -q --depth 1 --branch v0.8.2 https://github.com/simd-everywhere/simde.git /tmp/simde || git clone -q --depth 1 https://github.com/simd-everywhere/simde.git /tmp/simde
+          mkdir -p native/nbsynth/simde && cp -r /tmp/simde/simde native/nbsynth/simde/
 
       - name: Build the fast-pad engine
         id: native

@@ -7,6 +7,7 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
+const { createLink } = require("./link");
 
 const SITE = "https://nathan-san1981.github.io/nate-bloom/";
 const REMOTE_WAF = "https://surikov.github.io/webaudiofontdata/sound/";
@@ -143,6 +144,18 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(t));
 }
 
+// Link: the tablet app finds this computer on the Wi-Fi (when Link is turned on in the page)
+let link = null;
+function linkUp() {
+  if (link) return link;
+  link = createLink({ userData: app.getPath("userData"), send: s => { if (win && !win.isDestroyed()) win.webContents.send("nb:link-in", s); }, log: m => { if (process.env.NB_DEBUG) console.log("[nb]", m); } });
+  return link;
+}
+ipcMain.on("nb:link-out", (e, s) => { if (link) link.out(String(s)); });
+ipcMain.handle("nb:link-status", () => linkUp().status());
+ipcMain.handle("nb:link-enable", (e, on) => { linkUp().enable(!!on); return linkUp().status(); });
+app.on("before-quit", () => { try { link && link.stop(); } catch (e) {} });
+
 app.on("second-instance", () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
 
 app.whenReady().then(async () => {
@@ -172,6 +185,7 @@ app.whenReady().then(async () => {
   });
   buildMenu();
   createWindow();
+  linkUp();   // (listens only if Link was turned on)
 });
 
 // while something plays, the computer doesn't sleep underneath it

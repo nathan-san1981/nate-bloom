@@ -14,6 +14,7 @@
 #include <thread>
 #include <time.h>
 #include <vector>
+#include "nbsynth_host.h"
 
 #define LOG(...) __android_log_print(ANDROID_LOG_INFO, "NateBloomFast", __VA_ARGS__)
 
@@ -40,6 +41,7 @@ struct Voice {
     bool active = false;
 };
 Voice gVoices[kVoices];
+nbsh::Host gSynth;   // Nathan's plugin instruments, played here when the page turns fast plugins on
 
 enum CmdType { PLAY = 1, STOP_ALL = 2, STOP_PAD = 3, CHOKE = 4 };
 struct Cmd {
@@ -145,6 +147,7 @@ aaudio_data_callback_result_t onAudio(AAudioStream* stream, void*, void* audioDa
         v.pos += n;
         if (v.pos >= s->frames || v.fadeLeft == 0) { v.active = false; v.s.reset(); }
     }
+    gSynth.process(out, numFrames);
     float m = gMaster.load(std::memory_order_relaxed);
     for (int32_t i = 0; i < 2 * numFrames; i++) out[i] = softClip(out[i] * m);
     // every so often: if the device missed a deadline, give it one more burst of room (at most 6)
@@ -307,3 +310,12 @@ JNIEXPORT jint JNICALL Java_com_natebloom_app_FastPads_nRate(JNIEnv*, jobject) {
 }
 
 }  // extern "C"
+
+// Nathan's plugin instruments (native/nbsynth)
+extern "C" JNIEXPORT jstring JNICALL Java_com_natebloom_app_FastPads_nSynthList(JNIEnv* env, jobject) { return env->NewStringUTF(gSynth.list().c_str()); }
+extern "C" JNIEXPORT jboolean JNICALL Java_com_natebloom_app_FastPads_nSynthLoad(JNIEnv*, jobject, jint i) { return gSynth.load(i, gRate.load()) ? JNI_TRUE : JNI_FALSE; }
+extern "C" JNIEXPORT void JNICALL Java_com_natebloom_app_FastPads_nSynthOff(JNIEnv*, jobject, jint i) { gSynth.off(i); }
+extern "C" JNIEXPORT void JNICALL Java_com_natebloom_app_FastPads_nSynthMidi(JNIEnv*, jobject, jint i, jint a, jint b, jint c) { gSynth.midi(i, a, b, c); }
+extern "C" JNIEXPORT void JNICALL Java_com_natebloom_app_FastPads_nSynthParam(JNIEnv*, jobject, jint i, jint k, jfloat v) { gSynth.param(i, k, v); }
+extern "C" JNIEXPORT void JNICALL Java_com_natebloom_app_FastPads_nSynthTempo(JNIEnv*, jobject, jdouble bpm, jint playing) { gSynth.tempo(bpm, playing); }
+extern "C" JNIEXPORT void JNICALL Java_com_natebloom_app_FastPads_nSynthGain(JNIEnv*, jobject, jint i, jfloat g) { gSynth.setGain(i, g); }

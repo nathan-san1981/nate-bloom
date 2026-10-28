@@ -57,6 +57,14 @@ async def main():
             for (let i = 0; i < 30; i++) { await new Promise(r => setTimeout(r, 25)); an.getFloatTimeDomainData(b); for (let k = 0; k < b.length; k++) pk = Math.max(pk, Math.abs(b[k])); }
             __wam.removeFx(F); return 'ok: ' + W.name + ' (peak ' + pk.toFixed(3) + '), ' + F.name + ' on the mix, from ' + __wam.base();
           } catch (e) { return 'error: ' + (e && e.message || e); } })()"""))
+        # Nathan's plugin instruments in the native engine, and Link turning on and off
+        print("fast plugins (native):", await pg.evaluate("""(async () => { if (!window.NBFastPads || !NBFastPads.synthList) return 'no synth';
+            const ids = JSON.parse(NBFastPads.synthList()), i = ids.indexOf('twin77'), ok = NBFastPads.synthLoad(i);
+            NBFastPads.synthMidi(i, 0x90, 60, 100); await new Promise(r => setTimeout(r, 600)); NBFastPads.synthMidi(i, 0x80, 60, 0); NBFastPads.synthOff(i);
+            return JSON.stringify({ ids: ids.length, twin77: ok, info: NBFastPads.info() }); })()"""))
+        print("link:", await pg.evaluate("""(async () => { if (!window.NBLinkNative) return 'no link';
+            const on = await NBLinkNative.enable(true), off = await NBLinkNative.enable(false);
+            return JSON.stringify({ on: on.enabled, name: on.name, addresses: on.addresses, off: off.enabled, button: !document.getElementById('lkBtn').hidden }); })()"""))
         # (saving is checked by save_check.mjs: Playwright takes over downloads while it's connected)
         # Lite
         await pg.goto("app://nate-bloom/lite/"); await pg.wait_for_timeout(2000)

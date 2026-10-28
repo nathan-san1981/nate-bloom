@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
         private set
     private lateinit var midi: MidiBridge
     private var fast: FastPads? = null
+    private lateinit var link: LinkBridge
     private var startScript = ""
     private var startScriptAtDocStart = false
     private var visible = false
@@ -101,6 +102,8 @@ class MainActivity : ComponentActivity() {
         midi = MidiBridge(this)
         web.addJavascriptInterface(bridge, "NBNativeBridge")
         web.addJavascriptInterface(midi, "NBMidiBridge")
+        link = LinkBridge(this)
+        web.addJavascriptInterface(link, "NBLinkNative")
         if (FastPads.available) fast = FastPads(this).also { web.addJavascriptInterface(it, "NBFastPads") }
 
         startScript = assets.open("nb-native.js").bufferedReader().use { it.readText() }

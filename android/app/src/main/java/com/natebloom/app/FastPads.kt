@@ -47,6 +47,15 @@ class FastPads(private val act: MainActivity) {
     @JavascriptInterface fun stopPad(pad: Int) = nStopPad(pad)
     @JavascriptInterface fun choke(group: Int, exceptPad: Int) = nChoke(group, exceptPad)
 
+    // Nathan's plugin instruments, native (native/nbsynth): the same DSP as the page, on this low-latency audio
+    @JavascriptInterface fun synthList(): String = nSynthList()
+    @JavascriptInterface fun synthLoad(i: Int): Boolean = trusted() && nSynthLoad(i)
+    @JavascriptInterface fun synthOff(i: Int) = nSynthOff(i)
+    @JavascriptInterface fun synthMidi(i: Int, a: Int, b: Int, c: Int) { if (trusted()) nSynthMidi(i, a, b, c) }
+    @JavascriptInterface fun synthParam(i: Int, k: Int, v: Double) { if (trusted()) nSynthParam(i, k, v.toFloat()) }
+    @JavascriptInterface fun synthTempo(bpm: Double, playing: Int) = nSynthTempo(bpm, playing)
+    @JavascriptInterface fun synthGain(i: Int, g: Double) = nSynthGain(i, g.toFloat())
+
     private external fun nStart(): Boolean
     private external fun nStop()
     private external fun nInfo(): String
@@ -58,4 +67,11 @@ class FastPads(private val act: MainActivity) {
     private external fun nStopPad(pad: Int)
     private external fun nChoke(group: Int, exceptPad: Int)
     private external fun nMaster(g: Float)
+    private external fun nSynthList(): String
+    private external fun nSynthLoad(i: Int): Boolean
+    private external fun nSynthOff(i: Int)
+    private external fun nSynthMidi(i: Int, a: Int, b: Int, c: Int)
+    private external fun nSynthParam(i: Int, k: Int, v: Float)
+    private external fun nSynthTempo(bpm: Double, playing: Int)
+    private external fun nSynthGain(i: Int, g: Float)
 }

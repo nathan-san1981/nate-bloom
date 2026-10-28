@@ -23,8 +23,11 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include "nbsynth_host.h"
 
 namespace {
+
+nbsh::Host gSynth;   // Nathan's plugin instruments, played here when the page turns fast plugins on
 
 struct Sample {
     std::vector<int16_t> data;   // interleaved stereo
@@ -137,6 +140,7 @@ void onAudio(ma_device*, void* output, const void*, ma_uint32 frameCount) {
         v.pos += n;
         if (v.pos >= s->frames || v.fadeLeft == 0) { v.active = false; v.s.reset(); }
     }
+    gSynth.process(out, numFrames);
     for (int32_t i = 0; i < 2 * numFrames; i++) out[i] = softClip(out[i]);
     gCallbacks.fetch_add(1, std::memory_order_relaxed);
 }
@@ -287,6 +291,15 @@ napi_value TestPull(napi_env env, napi_callback_info info) {
     napi_value r; napi_create_double(env, gRunning.load() ? -1 : buf[0], &r); return r;
 }
 
+// Nathan's plugin instruments
+napi_value SynthList(napi_env env, napi_callback_info) { const std::string s = gSynth.list(); napi_value r; napi_create_string_utf8(env, s.c_str(), NAPI_AUTO_LENGTH, &r); return r; }
+napi_value SynthLoad(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); return boolean(env, gSynth.load(argInt(env, a[0], -1), gRate.load())); }
+napi_value SynthOff(napi_env env, napi_callback_info info) { napi_value a[1]; args(env, info, a, 1); gSynth.off(argInt(env, a[0], -1)); return undef(env); }
+napi_value SynthMidi(napi_env env, napi_callback_info info) { napi_value a[4]; args(env, info, a, 4); gSynth.midi(argInt(env, a[0], -1), argInt(env, a[1]), argInt(env, a[2]), argInt(env, a[3])); return undef(env); }
+napi_value SynthParam(napi_env env, napi_callback_info info) { napi_value a[3]; args(env, info, a, 3); gSynth.param(argInt(env, a[0], -1), argInt(env, a[1], -1), (float) argNum(env, a[2])); return undef(env); }
+napi_value SynthTempo(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); gSynth.tempo(argNum(env, a[0], 120), argInt(env, a[1])); return undef(env); }
+napi_value SynthGain(napi_env env, napi_callback_info info) { napi_value a[2]; args(env, info, a, 2); gSynth.setGain(argInt(env, a[0], -1), (float) argNum(env, a[1], 1)); return undef(env); }
+
 napi_value Init(napi_env env, napi_value exports) {
     const napi_property_descriptor props[] = {
         { "start", nullptr, Start, nullptr, nullptr, nullptr, napi_default, nullptr },
@@ -302,6 +315,13 @@ napi_value Init(napi_env env, napi_value exports) {
         { "testPull", nullptr, TestPull, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "setDevice", nullptr, SetDevice, nullptr, nullptr, nullptr, napi_default, nullptr },
         { "devices", nullptr, Devices, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthList", nullptr, SynthList, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthLoad", nullptr, SynthLoad, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthOff", nullptr, SynthOff, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthMidi", nullptr, SynthMidi, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthParam", nullptr, SynthParam, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthTempo", nullptr, SynthTempo, nullptr, nullptr, nullptr, napi_default, nullptr },
+        { "synthGain", nullptr, SynthGain, nullptr, nullptr, nullptr, napi_default, nullptr },
     };
     napi_define_properties(env, exports, sizeof props / sizeof props[0], props);
     return exports;
