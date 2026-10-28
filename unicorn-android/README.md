@@ -18,7 +18,7 @@ falls back to the saved forecast.
    for **Silk Browser**.
 2. In Silk, open the download link above, then open the downloaded **UnicornClock.apk** and tap **Install**.
 3. Open **Unicorn Clock**. Allow the microphone (voice notes) and location (the weather's "Find this tablet")
-   if it asks.
+   if it asks. If Android shows its one-time "Viewing full screen" tip, tap **Got it**.
 4. Let it come back by itself and open at start-up: open grown-up settings (tap the moon bedtime button on the
    clock, or hold the clock for 3 seconds, then type your PIN if you set one). Under **Tablet app**, tap
    **Let it open by itself**, then turn on **Display over other apps** for Unicorn Clock and go back.

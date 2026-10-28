@@ -43,7 +43,7 @@ class Page:
                     pages = json.load(urllib.request.urlopen("http://127.0.0.1:9222/json", timeout=5))
                     for p in pages:
                         if p.get("type") == "page" and "unicorn-clock" in p.get("url", "") and p.get("webSocketDebuggerUrl"):
-                            self.ws = websocket.create_connection(p["webSocketDebuggerUrl"], timeout=90, suppress_origin=True)
+                            self.ws = websocket.create_connection(p["webSocketDebuggerUrl"], timeout=180, suppress_origin=True)
                             return True
                 except Exception:
                     pass
