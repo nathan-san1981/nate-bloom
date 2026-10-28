@@ -134,8 +134,10 @@ r = P.ev("""(async()=>{const w=t=>new Promise(r=>setTimeout(r,t));document.getEl
 check("jokes screen shows a joke", isinstance(r, str) and len(r) > 30 and not r.startswith("ERR"), r)
 
 # ---------- the recorded voice decodes on this web engine; sounds can start on their own ----------
-r = P.ev("""(async()=>{var el=document.getElementById('voicePack');if(!el||!el.textContent)return 'pack already loaded';
-  var C=JSON.parse(el.textContent).clips,k=Object.keys(C)[0],b=atob(C[k]),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);
+# the clock unpacks its voice clips at start-up, so read one straight from the app's copy of the page
+r = P.ev("""(async()=>{var t=await (await fetch(location.href.split('#')[0])).text();var i=t.indexOf('id="voicePack"');if(i<0)return 'no voice pack in the page';
+  var j=t.indexOf('</script>',i),C=JSON.parse(t.slice(t.indexOf('>',i)+1,j)).clips;t=null;
+  var k=Object.keys(C)[0],b=atob(C[k]),u=new Uint8Array(b.length);for(var i2=0;i2<b.length;i2++)u[i2]=b.charCodeAt(i2);
   var ac=new (window.AudioContext||window.webkitAudioContext)();var st=ac.state;
   var buf=await new Promise((res,rej)=>{var p=ac.decodeAudioData(u.buffer,res,rej);if(p&&p.catch)p.catch(rej)});
   return {clip:k,secs:Math.round(buf.duration*100)/100,state:st,clips:Object.keys(C).length}})()""")
@@ -154,12 +156,31 @@ check("microphone works in the page (voice notes)", isinstance(r, dict) and r.ge
 # ---------- Unicorn Music ----------
 r = P.ev("""(async()=>{const w=t=>new Promise(r=>setTimeout(r,t));document.getElementById('btnMusic').click();await w(2500);
   var d=document.getElementById('musicFrame').contentDocument,n=d?d.querySelectorAll('button').length:0;document.getElementById('btnBack13').click();await w(500);return n})()""")
-check("Unicorn Music opens", isinstance(r, int) and r > 5, r)
+check("Unicorn Music opens", isinstance(r, int) and r > 40, r)
 
 # ---------- Back key and rotation ----------
+P.ev("document.getElementById('btnJokes').click()")
+time.sleep(3)
+before = P.ev("(document.querySelector('.screen.on')||{}).id")
 adb("shell", "input", "keyevent", "KEYCODE_BACK")
 time.sleep(2)
-check("Back key stays on the clock", PKG in top(), top()[:120])
+after = P.ev("(document.querySelector('.screen.on')||{}).id")
+check("Back key closes the screen that's open (jokes -> clock)", before == "jokes" and after in ("day", "night", "morning"), {"before": before, "after": after})
+adb("shell", "input", "keyevent", "KEYCODE_BACK")
+time.sleep(2)
+check("Back key on the clock stays on the clock", PKG in top(), top()[:120])
+
+# ---------- older web engines: the flex-gap stand-in spaces buttons out ----------
+r = P.ev("""(function(){var shim=document.documentElement.className.indexOf('no-flex-gap')>=0,ok=0,bad=[],n=0;
+  var all=document.querySelectorAll('*');for(var i=0;i<all.length;i++){var e=all[i],cs=getComputedStyle(e);
+    if(cs.display!=='flex'||cs.flexDirection!=='row'||cs.flexWrap!=='nowrap')continue;var g=parseFloat(cs.columnGap);if(!(g>0))continue;
+    var k=[].filter.call(e.children,function(c){var r=c.getBoundingClientRect();return r.width>0&&getComputedStyle(c).position!=='absolute'});
+    if(k.length<2||!e.getClientRects().length)continue;n++;var d=k[1].getBoundingClientRect().left-k[0].getBoundingClientRect().right;
+    if(d>=g-1)ok++;else bad.push((e.id||e.className||e.tagName)+':'+Math.round(d)+'/'+g)}
+  return {shim:shim,rows:n,spaced:ok,bad:bad.slice(0,6)}})()""")
+info(f"flex gap stand-in: {r}")
+check("buttons in a row are spaced out on this web engine", isinstance(r, dict) and r.get("rows", 0) > 0 and r.get("spaced", 0) >= r.get("rows", 0) * 0.9, r)
+shot("11_clock_spacing")
 adb("shell", "settings", "put", "system", "accelerometer_rotation", "0")
 adb("shell", "settings", "put", "system", "user_rotation", "0")
 time.sleep(4)
@@ -201,14 +222,37 @@ drawn = P.ev("!!(document.getElementById('dTime')&&document.getElementById('dTim
 check("page renderer crash: clock rebuilt and drawn again", drawn is True and PKG in top(), {"top": top()[:100], "drawn": drawn})
 
 # ---------- app crash: restarts by itself ----------
+def app_pid():
+    return adb("shell", "pidof", PKG).strip().split(" ")[0]
+
+
+def crash_app():
+    pid = app_pid()
+    out = adb("shell", "am", "crash", pid)
+    return pid, out
+
+
 P.ev("localStorage.setItem('uc.deep.mark','kept')")
 time.sleep(12)
-out = adb("shell", "am", "crash", PKG)
+pid0, out = crash_app()
 if "Unknown command" in out or "Error" in out:
     info("am crash not available on this Android version: " + out.strip()[:80])
 else:
     time.sleep(12)
-    check("app crash: reopens by itself", wait_front(15), top()[:120])
+    back = wait_front(15)
+    pid1 = app_pid()
+    check("app crash: reopens by itself", back and pid1 and pid1 != pid0, {"top": top()[:100], "pid before": pid0, "pid after": pid1})
+
+# ---------- swiped away from Recents: the app's process is gone, and it still comes back ----------
+adb("shell", "input", "keyevent", "KEYCODE_HOME")
+time.sleep(1)
+pid = app_pid()
+adb("shell", "kill", "-9", pid)   # what clearing it from Recents does (the tests run as root)
+time.sleep(2)
+gone = app_pid() != pid
+time.sleep(14)
+check("cleared from Recents: comes back by itself", gone and wait_front(10), {"killed": gone, "top": top()[:100]})
+P.connect(20)
 
 # ---------- updating over an installed copy keeps her data and reopens ----------
 r = adb("install", "-r", "-g", APK, timeout=180)
@@ -220,4 +264,21 @@ check("her saved data survives the update", P.ev("localStorage.getItem('uc.deep.
 
 errs = [l for l in adb("logcat", "-d", "-s", "UnicornClock:W").splitlines() if "page:" in l]
 check("no page errors logged", not errs, errs[:5])
+
+# ---------- a clock that keeps crashing gives up after 3 tries in 10 minutes (never takes over the tablet) ----------
+pid, out = crash_app()
+if "Unknown command" in out or "Error" in out:
+    info("am crash not available: skipped the crash-loop check")
+else:
+    seen = []
+    for n in range(4):
+        time.sleep(11)
+        seen.append(PKG in top())
+        if n < 3:
+            crash_app()
+    # crashes 1-3 restart; the 4th (just above, n=2 crash -> 4th overall) must not
+    check("keeps crashing: stops reopening after 3 crashes in 10 minutes", seen[:2] == [True, True] and not seen[3],
+          {"in front after each crash": seen})
+    adb("shell", "am", "start", "-n", PKG + "/.MainActivity")
+    check("opening it by hand still works after that", wait_front(20), top()[:120])
 print("SUMMARY", sum(1 for _, ok in results if ok), "passed,", sum(1 for _, ok in results if not ok), "failed", flush=True)

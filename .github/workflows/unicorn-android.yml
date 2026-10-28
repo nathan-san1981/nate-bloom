@@ -30,11 +30,24 @@ jobs:
         with:
           gradle-version: "8.14.3"
       - name: Build the APK
+        env:
+          UC_KEY_PASS: ${{ secrets.UNICORN_KEY_PASS }}
         run: |
           mkdir -p /tmp/uc-logs
           set -o pipefail
+          # private signing key when the UNICORN_KEY_PASS secret is set (never falls back once it is)
+          if [ -n "$UC_KEY_PASS" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -in unicorn-android/keystore/release.jks.enc \
+              -out "$RUNNER_TEMP/release.jks" -pass env:UC_KEY_PASS
+            export UC_KEYSTORE="$RUNNER_TEMP/release.jks"
+            echo "private key" > /tmp/uc-logs/signing.txt
+          else
+            echo "public test key (add the UNICORN_KEY_PASS secret to sign with the private key)" > /tmp/uc-logs/signing.txt
+          fi
           gradle -p unicorn-android assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/uc-logs/build.log
           cp unicorn-android/app/build/outputs/apk/release/app-release.apk /tmp/uc-logs/UnicornClock.apk
+          rm -f "$RUNNER_TEMP/release.jks"
+          keytool -printcert -jarfile /tmp/uc-logs/UnicornClock.apk | grep -E "Owner|SHA256:" >> /tmp/uc-logs/signing.txt || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:

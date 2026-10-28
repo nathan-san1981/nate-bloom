@@ -8,6 +8,10 @@ import android.util.Log
 /** Opens the clock when the tablet starts (and again right after the app is updated). */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED, "android.intent.action.QUICKBOOT_POWERON" -> {}
+            else -> return
+        }
         val on = context.getSharedPreferences("unicorn", Context.MODE_PRIVATE).getBoolean("boot", true)
         if (!on) return
         try {

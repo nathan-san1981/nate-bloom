@@ -6,7 +6,9 @@ import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
+import android.app.ActivityOptions
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -14,7 +16,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.net.Uri
-import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +24,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.Gravity
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.ConsoleMessage
@@ -37,6 +39,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,6 +49,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.webkit.WebViewAssetLoader
 import org.json.JSONObject
+import java.io.File
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
@@ -61,6 +65,7 @@ class MainActivity : ComponentActivity() {
         const val TAG = "UnicornClock"
         const val HOST = "appassets.androidplatform.net"
         const val START_URL = "https://$HOST/assets/unicorn-clock.html"
+        const val EXTRA_CRASH = "fromCrash"
     }
 
     private lateinit var web: WebView
@@ -71,14 +76,18 @@ class MainActivity : ComponentActivity() {
     // kiosk: keep the clock in front (Home or Recents bring it straight back); after "Exit to the tablet" leave it
     // alone until it is opened again. Pinning is optional (Android asks to confirm it every time); as device owner
     // the clock is locked silently.
-    private var kioskOn = true
+    @Volatile private var kioskOn = true
     private var pinTried = false
     private var pinNow = false
     private var away = false          // a grown-up opened a system screen from the clock (file picker, settings...)
     private var inFront = false
+    private var webAlive = false      // false while the page is being rebuilt after its renderer died
+    private var needsWeb = false      // the renderer died while the clock was in the background: rebuild on return
+    private val rendererDeaths = ArrayList<Long>()
     // if a grown-up wanders off from one of those screens and forgets, the clock still comes back after 3 minutes
     private val awayTimeout = Runnable {
         away = false
+        backTries = 0
         if (!inFront) bringBack.run()
     }
     // Android holds back app starts for about 5 seconds after Home is pressed, so keep trying until we're back
@@ -95,13 +104,25 @@ class MainActivity : ComponentActivity() {
             if (++backTries < 40) ui.postDelayed(this, 1500)
         }
     }
-    private var brightness = -1f
+    @Volatile private var brightness = -1f
 
-    // the tablet's own text-to-speech, for words the clock has no recording of (names you type, reminders)
+    // the screen coming on (or being unlocked) while the clock isn't in front: bring it back
+    private val screenWatch = object : BroadcastReceiver() {
+        override fun onReceive(c: Context, i: Intent) {
+            if (kioskOn && !away && !inFront) {
+                backTries = 0
+                ui.removeCallbacks(bringBack)
+                ui.postDelayed(bringBack, 300)
+            }
+        }
+    }
+
+    // the tablet's own text-to-speech, for words the clock has no recording of (names you type, reminders).
+    // Everything touching it runs on the main thread.
     private var tts: TextToSpeech? = null
-    private var ttsReady = false
+    @Volatile private var ttsReady = false
     private var ttsPending: String? = null
-    private var ttsEngine = ""
+    @Volatile private var ttsEngine = ""
 
     // ---------- results from system screens ----------
     private var fileCallback: ValueCallback<Array<Uri>>? = null
@@ -110,17 +131,24 @@ class MainActivity : ComponentActivity() {
         fileCallback = null
         cb?.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(res.resultCode, res.data))
     }
-    private var saveText: String? = null
+    // the backup waiting for the save screen is also kept in a file, in case Android closes the app meanwhile
+    private val pendingSave by lazy { File(cacheDir, "pending-backup.json") }
     private val saveDoc = registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-        val text = saveText
-        saveText = null
+        val text = try { if (pendingSave.exists()) pendingSave.readText() else null } catch (e: Exception) { null }
+        pendingSave.delete()
         var ok = false
         if (uri != null && text != null) {
-            try {
-                contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray(Charsets.UTF_8)) }
-                ok = true
+            val bytes = text.toByteArray(Charsets.UTF_8)
+            ok = try {
+                // "wt" empties the file first, so saving over an older, longer backup can't leave stray bytes
+                contentResolver.openOutputStream(uri, "wt")?.use { it.write(bytes) } != null
             } catch (e: Exception) {
-                Log.w(TAG, "save failed", e)
+                try {
+                    contentResolver.openOutputStream(uri)?.use { it.write(bytes) } != null
+                } catch (x: Exception) {
+                    Log.w(TAG, "save failed", x)
+                    false
+                }
             }
         }
         js("window.unicornSaved&&unicornSaved(${if (ok) "true" else "false"})")
@@ -144,22 +172,31 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         restartAfterCrash()
+        // running fine for 2 minutes: forget earlier crashes
+        ui.postDelayed({ prefs.edit().remove("crashes").apply() }, 120_000)
+        // keeps the screen on while the clock shows; it never switches the screen on by itself
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= 27) {
             setShowWhenLocked(true)
-            setTurnScreenOn(true)
         } else {
             @Suppress("DEPRECATION")
-            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
         }
-        WebView.setWebContentsDebuggingEnabled(true)
+        // page debugging only while USB debugging is switched on (how the tests and a grown-up's computer connect)
+        try {
+            WebView.setWebContentsDebuggingEnabled(Settings.Global.getInt(contentResolver, Settings.Global.ADB_ENABLED, 0) == 1)
+        } catch (e: Exception) {
+        }
         assets = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
-        makeWebView()
-        web.loadUrl(START_URL)
+        startWeb()
         deviceOwnerSetup()
         fullScreen()
+        ContextCompat.registerReceiver(this, screenWatch, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_USER_PRESENT)
+        }, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             // the clock has its own back buttons; the tablet's Back key never leaves the clock
@@ -169,22 +206,61 @@ class MainActivity : ComponentActivity() {
         })
 
         tts = TextToSpeech(applicationContext) { status ->
-            ttsReady = status == TextToSpeech.SUCCESS
-            if (ttsReady) {
-                val t = tts!!
-                ttsEngine = t.defaultEngine ?: ""
-                try {
-                    if (t.isLanguageAvailable(Locale.US) >= TextToSpeech.LANG_AVAILABLE) t.language = Locale.US
-                } catch (e: Exception) {
-                }
-                t.setSpeechRate(0.95f)
-                ttsPending?.let { speak(it) }
-                ttsPending = null
-            }
+            ui.post { ttsInit(status) }
         }
     }
 
+    private fun ttsInit(status: Int) {
+        val t = tts ?: return
+        ttsReady = status == TextToSpeech.SUCCESS
+        if (!ttsReady) return
+        ttsEngine = t.defaultEngine ?: ""
+        try {
+            if (t.isLanguageAvailable(Locale.US) >= TextToSpeech.LANG_AVAILABLE) t.language = Locale.US
+        } catch (e: Exception) {
+        }
+        t.setSpeechRate(0.95f)
+        ttsPending?.let { speak(it) }
+        ttsPending = null
+    }
+
     // ---------- the web view ----------
+    private var webTries = 0
+
+    /** Builds the page. If the tablet's web engine can't start right now (it is being updated, say), shows a
+     *  "starting" screen and tries again instead of crashing. */
+    private fun startWeb() {
+        try {
+            makeWebView()
+            web.loadUrl(START_URL)
+            webAlive = true
+            webTries = 0
+        } catch (e: Throwable) {
+            Log.w(TAG, "web view could not start", e)
+            webAlive = false
+            setContentView(TextView(this).apply {
+                text = "The unicorn clock is waking up…"
+                textSize = 28f
+                gravity = Gravity.CENTER
+                setTextColor(0xFFE8DDFF.toInt())
+                setBackgroundColor(0xFF0B0A1F.toInt())
+            })
+            webTries++
+            ui.postDelayed({ if (!webAlive && !isFinishing) startWeb() }, if (webTries < 5) 5_000L else 30_000L)
+        }
+    }
+
+    /** The page's renderer died (usually low memory). Rebuild it, but back off if it keeps dying, and wait until
+     *  the clock is back in front if it happened in the background. */
+    private fun rebuildWeb() {
+        needsWeb = false
+        val now = System.currentTimeMillis()
+        rendererDeaths.removeAll { now - it > 10 * 60_000L }
+        rendererDeaths.add(now)
+        val wait = if (rendererDeaths.size <= 3) 0L else 30_000L
+        ui.postDelayed({ if (!webAlive && !isFinishing) startWeb() }, wait)
+    }
+
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     private fun makeWebView() {
         web = WebView(this)
@@ -226,10 +302,10 @@ class MainActivity : ComponentActivity() {
             // if the page's renderer ever dies (low memory), build a fresh one and carry on
             override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
                 Log.w(TAG, "renderer gone, crashed=${detail.didCrash()}")
-                (web.parent as? ViewGroup)?.removeView(web)
-                web.destroy()
-                makeWebView()
-                web.loadUrl(START_URL)
+                webAlive = false
+                (view.parent as? ViewGroup)?.removeView(view)
+                view.destroy()
+                if (inFront) rebuildWeb() else needsWeb = true
                 return true
             }
         }
@@ -242,7 +318,6 @@ class MainActivity : ComponentActivity() {
                         request.grant(arrayOf(PermissionRequest.RESOURCE_AUDIO_CAPTURE))
                     } else {
                         pendingMic = request
-                        away = true
                         askMic.launch(Manifest.permission.RECORD_AUDIO)
                     }
                 }
@@ -252,7 +327,6 @@ class MainActivity : ComponentActivity() {
                 if (has(Manifest.permission.ACCESS_COARSE_LOCATION)) callback.invoke(origin, true, false)
                 else {
                     pendingGeo = origin to callback
-                    away = true
                     askGeo.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                 }
             }
@@ -266,7 +340,7 @@ class MainActivity : ComponentActivity() {
                     type = "*/*"
                 }
                 return try {
-                    away = true
+                    beforeSystemScreen()
                     pickFile.launch(Intent.createChooser(pick, "Choose the backup file"))
                     true
                 } catch (e: ActivityNotFoundException) {
@@ -283,7 +357,24 @@ class MainActivity : ComponentActivity() {
         setContentView(web)
     }
 
-    private fun js(code: String) = ui.post { if (::web.isInitialized) web.evaluateJavascript(code, null) }
+    private fun js(code: String) = ui.post { if (::web.isInitialized && webAlive) web.evaluateJavascript(code, null) }
+
+    /** A grown-up is about to use a system screen from the clock (save or open a backup, settings). Don't pull the
+     *  clock back over it, and lift a pin or lockdown meanwhile, since those can block other screens; the clock
+     *  pins itself again when it comes back. */
+    private fun beforeSystemScreen() {
+        away = true
+        if (lockState() != ActivityManager.LOCK_TASK_MODE_NONE) {
+            if (!isOwner()) {
+                pinNow = true
+                pinTried = false
+            }
+            try {
+                stopLockTask()
+            } catch (e: Exception) {
+            }
+        }
+    }
     private fun has(p: String) = ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
 
     // ---------- full screen, kept on ----------
@@ -304,6 +395,15 @@ class MainActivity : ComponentActivity() {
         inFront = true
         ui.removeCallbacks(bringBack)
         ui.removeCallbacks(awayTimeout)
+        backupRelaunch(false)
+        if (needsWeb) rebuildWeb()
+    }
+
+    // reopened from Recents or the app icon after "Exit to the tablet": keep-in-front is on again
+    override fun onRestart() {
+        super.onRestart()
+        if (!kioskOn) pinTried = false
+        kioskOn = true
     }
 
     // left the clock without a grown-up's say-so (Home, Recents, another app): come straight back,
@@ -316,7 +416,38 @@ class MainActivity : ComponentActivity() {
         else if (screenOn()) {
             backTries = 0
             ui.postDelayed(bringBack, 700)
+            // if the clock is swiped away from Recents its process goes too, and the retries above with it;
+            // an alarm outlives that and reopens it a few seconds later (cancelled as soon as the clock is back)
+            backupRelaunch(true)
         }
+    }
+
+    private fun backupRelaunch(on: Boolean) {
+        val am = getSystemService(AlarmManager::class.java)
+        val pi = relaunchIntent(9, false)
+        try {
+            if (!on) {
+                am.cancel(pi)
+                return
+            }
+            val at = System.currentTimeMillis() + 5_000
+            if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) am.set(AlarmManager.RTC, at, pi)
+            else am.setExact(AlarmManager.RTC, at, pi)
+        } catch (e: Exception) {
+            Log.w(TAG, "backup relaunch", e)
+        }
+    }
+
+    /** Opens the clock later, from an alarm (after a crash, or after being swiped away). */
+    private fun relaunchIntent(code: Int, crash: Boolean): PendingIntent {
+        val i = Intent(applicationContext, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .putExtra(EXTRA_CRASH, crash)
+        val opts = if (Build.VERSION.SDK_INT >= 34) ActivityOptions.makeBasic()
+            .setPendingIntentCreatorBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            .toBundle() else null
+        return PendingIntent.getActivity(applicationContext, code, i,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT, opts)
     }
 
     private fun screenOn(): Boolean = getSystemService(PowerManager::class.java).isInteractive
@@ -325,7 +456,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         away = false
         fullScreen()
-        if (::web.isInitialized) web.onResume()
+        if (::web.isInitialized && webAlive) web.onResume()
         ui.postDelayed({ startKiosk() }, 800)
     }
 
@@ -337,6 +468,10 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        try {
+            unregisterReceiver(screenWatch)
+        } catch (e: Exception) {
+        }
         tts?.shutdown()
         super.onDestroy()
     }
@@ -404,10 +539,17 @@ class MainActivity : ComponentActivity() {
             }
             homeAlias(true)
             dpm.addPersistentPreferredActivity(admin, home, ComponentName(this, "$packageName.Home"))
-            val plugged = BatteryManager.BATTERY_PLUGGED_AC or BatteryManager.BATTERY_PLUGGED_USB or BatteryManager.BATTERY_PLUGGED_WIRELESS
-            dpm.setGlobalSetting(admin, Settings.Global.STAY_ON_WHILE_PLUGGED_IN, plugged.toString())
         } catch (e: Exception) {
             Log.w(TAG, "device owner setup", e)
+        }
+        // locked down, permission prompts may not be able to show: grant the microphone (voice notes) and
+        // location (the weather's "Find this tablet") up front
+        for (p in arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            try {
+                if (!has(p)) dpm.setPermissionGrantState(admin, packageName, p, DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED)
+            } catch (e: Exception) {
+                Log.w(TAG, "grant $p", e)
+            }
         }
     }
 
@@ -424,20 +566,26 @@ class MainActivity : ComponentActivity() {
     }
 
     // ---------- crash recovery ----------
+    /** After a crash, reopen the clock in 2 seconds; but after 3 crashes in 10 minutes stop trying, so a clock
+     *  that can't start never takes over the tablet. Two minutes without a crash resets the count. */
     private fun restartAfterCrash() {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
-            Log.e(TAG, "crash, restarting", e)
+            var restart = false
             try {
-                val pi = PendingIntent.getActivity(
-                    applicationContext, 7, Intent(applicationContext, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
-                )
-                getSystemService(AlarmManager::class.java).set(AlarmManager.RTC, System.currentTimeMillis() + 2000, pi)
+                val now = System.currentTimeMillis()
+                val recent = (prefs.getString("crashes", "") ?: "").split(',').mapNotNull { it.toLongOrNull() }
+                    .filter { now - it < 10 * 60_000L } + now
+                prefs.edit().putString("crashes", recent.joinToString(",")).commit()
+                restart = kioskOn && recent.size <= 3
+                Log.e(TAG, "crash ${recent.size} in 10 min, ${if (restart) "restarting" else "not restarting"}", e)
+                if (restart) getSystemService(AlarmManager::class.java)
+                    .set(AlarmManager.RTC, now + 2000, relaunchIntent(7, true))
+                backupRelaunch(false)
             } catch (x: Exception) {
-                previous?.uncaughtException(t, e)
+                restart = false
             }
-            exitProcess(2)
+            if (restart) exitProcess(2) else previous?.uncaughtException(t, e) ?: exitProcess(2)
         }
     }
 
@@ -473,18 +621,26 @@ class MainActivity : ComponentActivity() {
         fun getScreenBrightness(): Int = if (brightness < 0) -1 else (brightness * 255).roundToInt()
 
         @JavascriptInterface
-        fun textToSpeech(text: String) = speak(text)
+        fun textToSpeech(text: String) {
+            ui.post { speak(text) }
+        }
 
         @JavascriptInterface
-        fun textToSpeech(text: String, locale: String) = speak(text)
+        fun textToSpeech(text: String, locale: String) {
+            ui.post { speak(text) }
+        }
 
         @JavascriptInterface
-        fun textToSpeech(text: String, locale: String, engine: String) = speak(text)
+        fun textToSpeech(text: String, locale: String, engine: String) {
+            ui.post { speak(text) }
+        }
 
         @JavascriptInterface
         fun stopTextToSpeech() {
-            tts?.stop()
-            ttsPending = null
+            ui.post {
+                tts?.stop()
+                ttsPending = null
+            }
         }
 
         @JavascriptInterface
@@ -549,6 +705,7 @@ class MainActivity : ComponentActivity() {
         fun exitToTablet() {
             ui.post {
                 stopKiosk()
+                backupRelaunch(false)
                 leaveOwnerHome()
                 if (!moveTaskToBack(true)) finish()
             }
@@ -601,12 +758,13 @@ class MainActivity : ComponentActivity() {
         fun openStartAloneSettings() {
             ui.post {
                 try {
-                    away = true
+                    beforeSystemScreen()
                     startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
                 } catch (e: Exception) {
                     try {
                         startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")))
                     } catch (x: Exception) {
+                        away = false
                     }
                 }
             }
@@ -616,9 +774,10 @@ class MainActivity : ComponentActivity() {
         fun openVoiceSettings() {
             ui.post {
                 try {
-                    away = true
+                    beforeSystemScreen()
                     startActivity(Intent("com.android.settings.TTS_SETTINGS"))
                 } catch (e: Exception) {
+                    away = false
                 }
             }
         }
@@ -627,12 +786,13 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface
         fun saveText(name: String, text: String) {
             ui.post {
-                saveText = text
                 try {
-                    away = true
+                    pendingSave.writeText(text)
+                    beforeSystemScreen()
                     saveDoc.launch(name)
                 } catch (e: Exception) {
-                    saveText = null
+                    away = false
+                    pendingSave.delete()
                     js("window.unicornSaved&&unicornSaved(false)")
                 }
             }

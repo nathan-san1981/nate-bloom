@@ -7,6 +7,7 @@ falls back to the saved forecast.
 - Clock, bedtime and wake-up rainbow, weather and what to wear, alarms, timers, notes and voice notes, sun,
   moon and space screens, Unicorn Music, three games (Unicorn Run, Unicorn Run 2, Unicorn Dungeon)
 - Opens by itself when the tablet turns on, full screen, and comes straight back if Home or Recents is pressed
+  (or if it's swiped away in Recents); the Back key just closes whatever is open on the clock
 - Grown-up settings (behind the PIN) are the only way out
 - Real backlight dimming at bedtime; the tablet's own voice reads aloud anything you type (names, reminders)
 
@@ -19,9 +20,11 @@ falls back to the saved forecast.
 2. In Silk, open the download link above, then open the downloaded **UnicornClock.apk** and tap **Install**.
 3. Open **Unicorn Clock**. Allow the microphone (voice notes) and location (the weather's "Find this tablet")
    if it asks. If Android shows its one-time "Viewing full screen" tip, tap **Got it**.
-4. Let it come back by itself and open at start-up: open grown-up settings (tap the moon bedtime button on the
-   clock, or hold the clock for 3 seconds, then type your PIN if you set one). Under **Tablet app**, tap
-   **Let it open by itself**, then turn on **Display over other apps** for Unicorn Clock and go back.
+4. Open grown-up settings (tap the moon bedtime button on the clock, or hold the clock for 3 seconds) and set a
+   **Grown-up PIN** in the box at the top. The **Tablet app** buttons (Exit, Pin, Let it open by itself, Voice
+   settings) stay hidden until there is a PIN, so a little one can't tap her way out.
+5. Let it come back by itself and open at start-up: under **Tablet app**, tap **Let it open by itself**, then turn
+   on **Display over other apps** for Unicorn Clock and go back.
 
 That's it. The **Tablet app** box in grown-up settings shows what's working.
 
@@ -52,7 +55,8 @@ profiles or accounts, so it usually means a factory reset first.
 adb shell dpm set-device-owner com.unicornclock.app/.AdminReceiver
 ```
 
-Undo it any time from grown-up settings → Tablet app → **Undo full lockdown**.
+Undo it any time from grown-up settings → Tablet app → **Undo full lockdown** (tap it twice). In full lockdown the
+microphone and location are allowed up front, since permission prompts can't always show there.
 
 ## If something's off
 
@@ -60,14 +64,26 @@ Undo it any time from grown-up settings → Tablet app → **Undo full lockdown*
   and set as the default.
 - **Doesn't open at start-up or come back after Home:** Tablet app → **Let it open by itself** → turn on
   **Display over other apps**.
-- **The clock looks stuck:** it restarts itself after a crash. Holding the power button and choosing Restart
-  also works.
+- **The clock looks stuck:** it restarts itself after a crash. If it crashes 3 times within 10 minutes it stops
+  reopening by itself (so a broken update can never take over the tablet); open it from its icon, or hold the
+  power button and choose Restart.
+- **Tablet app buttons are missing:** set a Grown-up PIN first (top of grown-up settings).
 
 ## Building it
 
 `unicorn-android/` is a standard Android project (Kotlin, one screen with a WebView). The clock page is
 `app/src/main/assets/unicorn-clock.html`. GitHub Actions (`.github/workflows/unicorn-android.yml`) builds the APK
 and checks it on Fire-sized Android 9 and 11 emulators (what Fire OS 7 and 8 are built on).
+
+**Signing.** Every build is signed with the same key, so updates install over the old copy and keep her
+settings. CI uses the private key in `keystore/release.jks.enc` when the repository has the `UNICORN_KEY_PASS`
+Actions secret (Settings → Secrets and variables → Actions); without it, it uses the public test key in
+`keystore/unicornclock.jks`. `signing.txt` in each CI run says which key signed it. Pick one before installing on
+a tablet: switching keys later means uninstalling, which clears the app's data (save a backup first).
+
+Older Fire tablets run older web engines (Chrome 69 on Android 9). The clock page is built to
+use only syntax those engines read, with `inset` and `clamp()` written out longhand and a flex-gap stand-in that
+switches on where flex `gap` is missing.
 
 The page talks to the app through the same `fully.*` calls Fully Kiosk offers (`setScreenBrightness`,
 `textToSpeech`, `stopTextToSpeech`, `getAudioVolume`, `setAudioVolume`), plus `unicornApp.*` for the kiosk

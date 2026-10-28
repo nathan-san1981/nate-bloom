@@ -8,6 +8,9 @@ Install on a Fire: Settings → Security & Privacy → Apps from Unknown Sources
 Download UnicornClock.apk below in Silk, open it, Install, then open Unicorn Clock.
 Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn-android
 
+First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
+
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
-dimming, voice, volume, comes back after Home/Recents, pinning, offline, games, opening at start-up, and
-optional device-owner lockdown with undo.
+dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
+games, Unicorn Music, opening at start-up, crash recovery (and giving up after 3 crashes in 10 minutes), updates
+keeping her data, and optional device-owner lockdown with undo.

@@ -19,11 +19,22 @@ android {
 
     signingConfigs {
         create("release") {
-            // A fixed key so each new build updates the installed app and keeps its data.
-            storeFile = file("../keystore/unicornclock.jks")
-            storePassword = "unicorn-clock"
-            keyAlias = "unicornclock"
-            keyPassword = "unicorn-clock"
+            // A fixed key, so each new build updates the installed app and keeps its data.
+            // CI signs with the private key (keystore/release.jks.enc, unlocked by the UNICORN_KEY_PASS secret)
+            // when that secret is set; otherwise with the public test key in keystore/unicornclock.jks.
+            val privateStore = System.getenv("UC_KEYSTORE")
+            if (privateStore != null) {
+                storeFile = file(privateStore)
+                storeType = "pkcs12"
+                storePassword = System.getenv("UC_KEY_PASS")
+                keyAlias = "unicornclock"
+                keyPassword = System.getenv("UC_KEY_PASS")
+            } else {
+                storeFile = file("../keystore/unicornclock.jks")
+                storePassword = "unicorn-clock"
+                keyAlias = "unicornclock"
+                keyPassword = "unicorn-clock"
+            }
         }
     }
 
