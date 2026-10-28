@@ -508,6 +508,19 @@ button.wlab { color: var(--lilac); cursor: pointer; }
 .sc-scroll svg { display: block; touch-action: pan-x; user-select: none; -webkit-user-select: none; }
 .sc-clef { font-family: "Apple Symbols", "Noto Music", "Segoe UI Symbol", serif; }
 .app.notesmode .playrow { min-height: 120px; }
+:root { --pr-black: rgba(0,0,0,0.26); --pr-step: rgba(255,255,255,0.035); --pr-key-w: #2a2638; --pr-key-b: #0d0b13; }
+.pr-scroll { position: relative; height: clamp(200px, 27vh, 380px); overflow: auto; overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+.pr-scroll[hidden] { display: none; }
+.pr-top, .pr-mid, .pr-bot { display: flex; width: max-content; }
+.pr-top { position: sticky; top: 0; z-index: 3; background: var(--sc-ruler); }
+.pr-bot { position: sticky; bottom: 0; z-index: 3; background: var(--raised); border-top: 1px solid var(--line); }
+.pr-corner, .pr-vlab, #prKeys { position: sticky; left: 0; z-index: 2; flex: none; }
+.pr-corner { width: 36px; height: 16px; background: var(--sc-ruler); }
+.pr-vlab { width: 36px; height: 44px; background: var(--raised); color: var(--dim); font: 600 0.6rem var(--font-mono); display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--line); }
+.pr-scroll svg { display: block; flex: none; user-select: none; -webkit-user-select: none; }
+#prSvg, #prVel, #prRuler { touch-action: none; }
+#prKeys { background: var(--panel); border-right: 1px solid var(--line); }
+.notesarea.roll .sc-staff { display: none; }
 .seg button { padding: 6px 11px; }
 @media (max-width: 440px) { .seg button { padding: 6px 8px; font-size: 0.76rem; } .app.notesmode .panelbar .meter select { max-width: 21vw; } .sc-tools { gap: 4px; } .sc-tools .btn { min-width: 30px; padding: 0 6px; } .sc-tools .grp .btn { padding: 0 3px; } .sc-tools .bars { min-width: 40px; } }
 
@@ -1869,6 +1882,31 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .cm-wrap input[type=range] { width: 120px; accent-color: var(--lilac); }
 .cm-wrap input[type=range][hidden] { display: none; }
 #sinkRow select { height: 34px; max-width: 52%; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: 0.82rem var(--font-body); padding: 0 6px; }
+.his-b { min-width: 34px; padding: 0 8px; font-size: 1rem; }
+.his-p { display: none; min-width: 34px; padding: 0 6px; font-size: 1rem; }
+@media (max-width: 600px) { .his-p { display: inline-flex; } #hisUndoP { margin-left: auto; } #hisUndoP ~ #menuBtn { margin-left: 0; } #seqRedo { display: none !important; } }
+@media (max-width: 372px) { #hisRedoP { display: none !important; } }
+.his-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--raised); color: var(--ink); font: 0.84rem var(--font-body); }
+.his-row b { font-weight: 700; } .his-row small { margin-left: auto; color: var(--dim); font-family: var(--font-mono); font-size: 0.66rem; flex: none; }
+.his-row.undone { opacity: 0.5; border-style: dashed; } .his-row.now { border-color: var(--lilac); }
+.his-list { display: flex; flex-direction: column; gap: 5px; }
+.his-cut { font: 600 0.62rem var(--font-mono); color: var(--lilac); text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 4px; }
+.wl-list { display: flex; flex-direction: column; gap: 6px; }
+.wl-plug { border: 1px solid var(--line); border-radius: 10px; background: var(--raised); overflow: hidden; }
+.wl-plug > button { display: flex; width: 100%; align-items: center; gap: 8px; padding: 10px 12px; background: none; border: 0; color: var(--ink); font: 600 0.88rem var(--font-body); text-align: left; cursor: pointer; }
+.wl-plug > button small { color: var(--dim); font: 0.66rem var(--font-mono); margin-left: auto; }
+.wl-params { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 10px 10px; }
+.wl-params .btn { height: 30px; padding: 0 9px; font-size: 0.76rem; }
+.trow.arow { height: 54px; }
+.trow.arow .thead { display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 4px 6px; }
+.arow .an { font: 600 0.66rem var(--font-body); color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arow .ab { display: flex; gap: 3px; }
+.arow .tlane { touch-action: none; background: repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,0.025) 39px 40px); cursor: crosshair; }
+.arow svg.alane { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.arow svg.alane polyline { fill: none; stroke: var(--amber); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+.arow .ahint { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--dim); font: 0.68rem var(--font-body); pointer-events: none; }
+.arow.off .tlane { opacity: 0.45; }
+.tb.rec.on { background: #e5484d; border-color: #e5484d; color: #fff; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -2040,6 +2078,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <select class="rectarget" id="recTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
     <button class="btn stopall" id="stopAll" aria-label="Stop everything" title="Stop everything: sequencer, Rhythm Creator, DJ, Jam, Tracks, pads and held notes"><span class="lg">■ Stop all</span><span class="sm">■ All</span></button>
+    <button class="btn his-p" id="hisUndoP" disabled aria-label="Undo the last change">↶</button><button class="btn his-p" id="hisRedoP" disabled aria-label="Redo">↷</button>
     <button class="btn" id="menuBtn" aria-label="Menu" aria-haspopup="dialog">☰</button>
     <div class="modes" id="modes" role="group" aria-label="What to play">
       <button class="btn mode" id="mSynths" data-mode="synths" aria-pressed="true" title="Synths: the engines, the sound library and instruments, played on the keys"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M8.8 19V12.5M15.2 19V12.5"/><rect x="6.6" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/><rect x="13.8" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="stl">Synths</span></button>
@@ -2070,6 +2109,9 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <span class="bsep" id="installSep" aria-hidden="true"></span>
     <button class="btn" id="installBtn">Install</button>
     <span class="spacer"></span>
+    <button class="btn his-b" id="hisUndo" disabled aria-label="Undo" title="Undo the last change, wherever it was (Ctrl+Z)">↶</button>
+    <button class="btn his-b" id="hisRedo" disabled aria-label="Redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button class="btn" id="hisBtn" title="Every change you can undo">History</button>
     <button class="btn" id="helpBtn" aria-label="Help, settings and Report">?</button>
     <button class="btn exitbtn" id="exitBtn" title="Save your work and close">⏻ Exit</button>
   </div>
@@ -2269,7 +2311,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <button class="btn" id="play" aria-pressed="false" title="Play the beat (the pattern in Seq)" data-key="Space">▶ Play</button>
     <button class="btn" id="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go; tap again to release" data-key="⇧↵">Hold</button>
     <button class="btn" id="clear" hidden>Clear</button>
-    <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button>
+    <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button><button class="btn" id="seqRedo" hidden disabled aria-label="Redo" title="Redo">↷</button>
     <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
     <button class="btn" id="panic" data-key="Esc" title="Stop the beat and what you're playing here. Other parts keep going; the red ■ at the top stops everything">Stop</button>
   </div>
@@ -2292,17 +2334,23 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <button class="btn" id="scRest">Rest</button>
     </div>
     <div class="sc-tools">
+      <div class="grp" id="scView" role="group" aria-label="View"><button class="btn" data-v="staff" aria-pressed="true">Staff</button><button class="btn" data-v="roll" aria-pressed="false">Roll</button></div>
       <select id="scKey" aria-label="Key signature"></select>
       <button class="btn" id="scBarsDn" aria-label="Fewer bars">−</button><span class="bars" id="scBars">4 bars</span><button class="btn" id="scBarsUp" aria-label="More bars">+</button>
       <button class="btn" id="mlOpenNotes" aria-label="Choose a melody">♪</button>
       <button class="btn" id="scWrite" aria-pressed="false" aria-label="Write notes from the keys">✎ Keys</button>
-      <button class="btn" id="scUndo" aria-label="Undo">↶</button>
+      <button class="btn" id="scUndo" aria-label="Undo">↶</button><button class="btn" id="scRedo" disabled aria-label="Redo">↷</button>
       <button class="btn" id="scClear">Clear</button>
       <span class="sc-info" id="scInfo"></span>
     </div>
     <div class="sc-staff">
       <svg id="scHead" aria-hidden="true"></svg>
       <div class="sc-scroll" id="scScroll"><svg id="scSvg" aria-label="Staff: drag to place a note, tap a note to erase"></svg></div>
+    </div>
+    <div class="pr-scroll" id="prScroll" hidden>
+      <div class="pr-top"><div class="pr-corner"></div><svg id="prRuler" aria-label="Bars: tap to move the cursor"></svg></div>
+      <div class="pr-mid"><svg id="prKeys" aria-label="Keys: tap to hear a pitch"></svg><svg id="prSvg" aria-label="Piano roll: tap to add a note, drag a note to move it, drag its right end to change its length, tap a note to erase"></svg></div>
+      <div class="pr-bot"><div class="pr-vlab">Vel</div><svg id="prVel" aria-label="Velocity: drag a note's bar up or down"></svg></div>
     </div>
   </div>
   <button class="jumpbtn" id="jumpPlay" hidden>▼ Pads</button>
@@ -2531,7 +2579,8 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <button class="btn" id="trkSplit">Split</button>
     <button class="btn" id="trkDup">Copy</button>
     <button class="btn" id="trkDel">Delete</button>
-    <button class="btn" id="trkUndo">↶ Undo</button>
+    <button class="btn" id="trkAutoAdd" title="Automate a plugin's control along the timeline">+ Automation</button>
+    <button class="btn" id="trkUndo">↶ Undo</button><button class="btn" id="trkRedo" disabled aria-label="Redo">↷</button>
     <button class="btn" id="trkSnap">Snap: Beat</button>
     <button class="btn" id="trkZoomOut" aria-label="Zoom out">−</button>
     <button class="btn" id="trkZoomIn" aria-label="Zoom in">+</button>
@@ -2596,7 +2645,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <div class="rc-tool"><span class="lab2">Make a beat</span><select id="rcStyle" aria-label="Style"></select>
       <label class="rc-mini">Busy <input type="range" id="rcBusy" min="0" max="100" value="50"></label>
       <label class="rc-mini">Complex <input type="range" id="rcCplx" min="0" max="100" value="40"></label>
-      <button class="btn primary" id="rcMake">Make</button><button class="btn" id="rcVary">Vary</button><button class="btn" id="rcClear">Clear all</button><button class="btn" id="rcUndo" disabled title="Undo the last change">↶ Undo</button></div>
+      <button class="btn primary" id="rcMake">Make</button><button class="btn" id="rcVary">Vary</button><button class="btn" id="rcClear">Clear all</button><button class="btn" id="rcUndo" disabled title="Undo the last change">↶ Undo</button><button class="btn" id="rcRedo" disabled aria-label="Redo" title="Redo">↷</button></div>
     <div class="rc-tool"><span class="lab2">Morph</span><button class="btn" id="rcMorphA" title="Save the kit as it sounds now as A">Save A</button>
       <input type="range" id="rcMorph" min="0" max="100" value="0" aria-label="Morph between kit A and kit B" disabled>
       <button class="btn" id="rcMorphB" title="Save the kit as it sounds now as B">Save B</button>
@@ -2835,6 +2884,27 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
   </div>
 </div>
 
+<div class="editor sheet" id="wlSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugin controls">
+    <div class="ed-head"><strong id="wlTitle">Plugin controls</strong></div>
+    <span class="ed-info" id="wlInfo" style="text-align:left"></span>
+    <div class="mx-list wl-list" id="wlList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="wlDone">Cancel</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="hisSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="History">
+    <div class="ed-head"><strong>History</strong></div>
+    <span class="ed-info" id="hisInfo" style="text-align:left">Every change you can take back, newest first. Tap one to go back to just before it; tap a dimmed one to bring it back.</span>
+    <div class="mx-list his-list" id="hisList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn" id="hisSUndo">↶ Undo</button><button class="btn" id="hisSRedo">↷ Redo</button>
+      <button class="btn big primary" id="hisDone">Done</button>
+    </div>
+  </div>
+</div>
+
 <div class="editor sheet" id="mySounds" hidden>
   <div class="ed-card" role="dialog" aria-label="My sounds">
     <div class="ed-head"><strong>My sounds</strong></div>
@@ -2965,6 +3035,9 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
+      <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
+      <p><b>Undo and redo</b>: ↶ and ↷ in the toolbar (at the top on a phone; or Ctrl+Z and Ctrl+Shift+Z) take back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (in the toolbar, or the ☰ menu on a phone) lists the changes, newest first; tap one to go back to just before it.</p>
+      <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (in the toolbar): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
       <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Plugins, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
@@ -7549,7 +7622,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
   function pitchName(m, dia) {
     const a = m - diaMidi(dia);
-    return LET_NAME[letterOf(dia)] + (a === 1 ? "♯" : a === -1 ? "♭" : a === 2 ? "𝄪" : a === -2 ? "𝄫" : "") + (Math.floor(dia / 7) - 1);
+    return LET_NAME[letterOf(dia)] + (a === 1 ? "♯" : a === -1 ? "♭" : a === 2 ? "𝄪" : a === -2 ? "𝄫" : "") + Math.floor(dia / 7);
   }
 
   // ---------- geometry ----------
@@ -7578,6 +7651,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     });
   }
   const visibleNote = n => n.b < SC().bars && n.s < stepsNow();
+  const prVelGain = n => n.v == null ? 1 : Math.min(1.3, Math.pow(Math.max(1, n.v) / 100, 1.2));
+  const scSnapS = () => JSON.stringify({ notes: SC().notes, bars: SC().bars, key: SC().key, cursor: scEd.cursor });
+  function scPush(before) { const u = scEd.undo; if (u[u.length - 1] === before) return; u.push(before); if (u.length > 60) u.shift(); }
+  function scPut(snap) {
+    const o = JSON.parse(snap), S = SC();
+    S.notes = o.notes; S.bars = o.bars; if (o.key) S.key = o.key; scEd.cursor = Math.min(o.cursor || 0, S.bars * stepsNow() - 1); scEd.last.t = 0;
+    const ks = document.getElementById("scKey"); if (ks) ks.value = S.key;
+    save(); renderHead(); scRender(); scrollToCursor();
+  }
 
   // ---------- drawing ----------
   function glyph(x, cy, d, up, color, filledOverride) {
@@ -7694,6 +7776,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     scEd.cursor = abs;
   }
   function addAt(abs, ms, dias) {
+    const before = scSnapS();
     const S = SC(), st = stepsNow(), b = Math.floor(abs / st), s = abs % st;
     if (b >= 16) return null;
     if (b >= S.bars) S.bars = b + 1;
@@ -7703,7 +7786,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const n = { b, s, d, m, dia: dias ? dias[i] : spell(m) };
       S.notes.push(n); added.push(n);
     });
-    if (added.length) scEd.undo.push({ add: added, cursor: scEd.cursor });
+    if (added.length) scPush(before);
     moveCursor(abs + d);
     save();
     return d;
@@ -7711,8 +7794,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function removeNote(n) {
     const S = SC(), i = S.notes.indexOf(n);
     if (i < 0) return;
+    scPush(scSnapS());
     S.notes.splice(i, 1);
-    scEd.undo.push({ del: n, cursor: scEd.cursor });
     save();
   }
   function noteAt(b, s, dia) {
@@ -7815,51 +7898,38 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
   document.getElementById("scRest").addEventListener("click", () => {
     const st = stepsNow(), s = scEd.cursor % st;
-    scEd.undo.push({ cursor: scEd.cursor });
+    scPush(scSnapS());
     moveCursor(scEd.cursor + Math.max(1, Math.min(curDur(), st - s))); scEd.last.t = 0;
     scRender(); scrollToCursor(); save();
   });
   document.getElementById("scUndo").addEventListener("click", () => {
     const u = scEd.undo.pop(); if (!u) return;
-    const S = SC();
-    if (u.add) u.add.forEach(n => { const i = S.notes.indexOf(n); if (i >= 0) S.notes.splice(i, 1); });
-    if (u.del) S.notes.push(u.del);
-    scEd.cursor = u.cursor; scEd.last.t = 0;
-    save(); scRender(); scrollToCursor();
+    scPut(u);
   });
   const keySel = document.getElementById("scKey");
   SC_KEYS.forEach(([v, l]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; keySel.appendChild(o); });
   keySel.value = SC().key;
   keySel.addEventListener("change", () => {
-    SC().key = keySel.value;
+    scPush(scSnapS()); SC().key = keySel.value;
     SC().notes.forEach(n => { n.dia = spell(n.m); });
     save(); renderHead(); scRender();
   });
   document.getElementById("scBarsDn").addEventListener("click", () => {
-    const S = SC(); if (S.bars <= 1) return; S.bars--;
+    const S = SC(); if (S.bars <= 1) return; scPush(scSnapS()); S.bars--;
     if (scEd.cursor >= S.bars * stepsNow()) scEd.cursor = 0;
     save(); scRender();
   });
-  document.getElementById("scBarsUp").addEventListener("click", () => { const S = SC(); if (S.bars < 16) { S.bars++; save(); scRender(); } });
+  document.getElementById("scBarsUp").addEventListener("click", () => { const S = SC(); if (S.bars < 16) { scPush(scSnapS()); S.bars++; save(); scRender(); } });
   let scArm = 0;
   const scClear = document.getElementById("scClear");
   scClear.addEventListener("click", () => {
     if (!SC().notes.length) return;
     if (!scArm) { scClear.textContent = "Sure?"; scArm = setTimeout(() => { scArm = 0; scClear.textContent = "Clear"; }, 2500); return; }
     clearTimeout(scArm); scArm = 0; scClear.textContent = "Clear";
-    scEd.undo.push({ cursor: scEd.cursor, restore: SC().notes.slice() });
+    scPush(scSnapS());
     SC().notes = []; scEd.cursor = 0;
     save(); scRender(); scScroll.scrollLeft = 0;
   });
-  {
-    // undo after Clear brings the whole melody back
-    const origPop = scEd.undo.pop.bind(scEd.undo);
-    scEd.undo.pop = function () {
-      const u = origPop();
-      if (u && u.restore) { SC().notes = u.restore; return { cursor: u.cursor }; }
-      return u;
-    };
-  }
   meterSel.addEventListener("change", () => { scEd.cursor = Math.min(scEd.cursor, SC().bars * stepsNow() - 1); scRender(); });
 
   // ---------- playback: rides along with the sequencer clock ----------
@@ -7882,7 +7952,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const scale = S.level * 1.1 / Math.sqrt(Math.max(1, hits.length));
       for (const n of hits) {
         const len = Math.max(0.05, n.d * stepDur() * 0.95);
-        melodicVoices(n.m, tt, scale).forEach(v => v.stop(tt + len));
+        { const vg = prVelGain(n), kv = NB_VEL; NB_VEL = vg; try { melodicVoices(n.m, tt, scale * vg).forEach(v => v.stop(tt + len)); } finally { NB_VEL = kv; } }
       }
       scQueue.push({ b: scBar, s, t });
       if (scQueue.length > 48) scQueue.shift();
@@ -7916,6 +7986,204 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       return ch;
     };
   }
+
+  // ---------- piano roll: the same notes on a pitch-by-step grid, with a velocity lane ----------
+  const PR = { on: false, LO: 21, HI: 108, RH: 12, SW: 20, KW: 36, RUL: 16, VEL: 44, drag: null, sel: null, centred: false };
+  try { PR.on = localStorage.getItem("nightbloom-roll") === "1"; } catch (e) {}
+  try { if (matchMedia("(pointer: coarse)").matches) { PR.RH = 15; PR.SW = 24; } } catch (e) {}   // (bigger cells for fingers)
+  const prScroll = document.getElementById("prScroll"), prSvg = document.getElementById("prSvg"), prKeys = document.getElementById("prKeys"), prRuler = document.getElementById("prRuler"), prVel = document.getElementById("prVel");
+  const PR_BLACK = new Set([1, 3, 6, 8, 10]);
+  const prY = m => (PR.HI - m) * PR.RH;
+  const prVis = n => visibleNote(n) && n.m >= PR.LO && n.m <= PR.HI;
+  let prPlay = null;
+  function prKeysDraw() {
+    const H = (PR.HI - PR.LO + 1) * PR.RH; let k = "";
+    for (let m = PR.HI; m >= PR.LO; m--) {
+      const y = prY(m), blk = PR_BLACK.has(m % 12);
+      k += `<rect x="0" y="${y}" width="${blk ? 22 : PR.KW}" height="${PR.RH}" fill="${blk ? "var(--pr-key-b)" : "var(--pr-key-w)"}"/>`;
+      if (!blk && (m % 12 === 4 || m % 12 === 11)) k += `<line x1="0" x2="${PR.KW}" y1="${y}" y2="${y}" stroke="var(--panel)" stroke-width="1"/>`;
+      if (m % 12 === 0) k += `<text x="${PR.KW - 3}" y="${y + PR.RH - 3}" font-size="8.5" text-anchor="end" fill="var(--ink)" class="sc-num">C${m / 12 - 1}</text>`;
+    }
+    prKeys.setAttribute("width", PR.KW); prKeys.setAttribute("height", H); prKeys.setAttribute("viewBox", `0 0 ${PR.KW} ${H}`); prKeys.innerHTML = k;
+  }
+  function prRender() {
+    if (!PR.on) return;
+    const S = SC(), st = stepsNow(), beats = beatStarts(), W = S.bars * st * PR.SW, H = (PR.HI - PR.LO + 1) * PR.RH;
+    let g = "";
+    for (let m = PR.HI; m >= PR.LO; m--) {
+      const y = prY(m);
+      if (PR_BLACK.has(m % 12)) g += `<rect x="0" y="${y}" width="${W}" height="${PR.RH}" fill="var(--pr-black)"/>`;
+      if (m % 12 === 0) g += `<line x1="0" x2="${W}" y1="${y + PR.RH - 0.5}" y2="${y + PR.RH - 0.5}" stroke="var(--sc-beat)" stroke-width="1"/>`;
+    }
+    for (let b = 0; b < S.bars; b++) for (let i = 0; i < st; i++) {
+      const x = (b * st + i) * PR.SW + 0.5, bar = i === 0, beat = beats.has(i);
+      g += `<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${bar ? "var(--sc-line)" : beat ? "var(--sc-beat)" : "var(--pr-step)"}" stroke-width="${bar ? 1.3 : 1}"/>`;
+    }
+    const D = PR.drag, shown = S.notes.filter(prVis);
+    for (const n of shown) {
+      const live = D && D.n === n && D.moved && D.kind !== "pan" ? D.to : n;
+      const x = (live.b * st + live.s) * PR.SW, y = prY(live.m), w = Math.max(5, live.d * PR.SW - 2), v = n.v == null ? 100 : n.v, hot = D && D.n === n;
+      g += `<rect x="${x + 1}" y="${y + 1}" width="${w}" height="${PR.RH - 2}" rx="3" fill="var(--lilac)" fill-opacity="${(0.4 + 0.6 * v / 127).toFixed(2)}" stroke="${hot ? "var(--amber)" : "var(--lilac)"}" stroke-width="${hot ? 1.6 : 1}"/>`;
+      if (w > 12) g += `<rect x="${x + w - 3}" y="${y + 3}" width="2" height="${PR.RH - 6}" rx="1" fill="var(--panel)" opacity="0.65"/>`;
+      if (w > 30) g += `<text x="${x + 4}" y="${y + PR.RH - 3}" font-size="8" fill="var(--panel)" font-weight="700">${pitchName(live.m, live.dia == null ? spell(live.m) : live.dia)}</text>`;
+    }
+    if (D && D.kind === "add" && D.ghost) { const q = D.ghost, x = q.abs * PR.SW, y = prY(q.m); g += `<rect x="${x + 1}" y="${y + 1}" width="${Math.max(5, q.d * PR.SW - 2)}" height="${PR.RH - 2}" rx="3" fill="var(--amber)" opacity="0.55"/>`; }
+    const cx = scEd.cursor * PR.SW;
+    if (scEd.cursor < S.bars * st) g += `<rect x="${cx}" y="0" width="2" height="${H}" fill="var(--amber)" opacity="0.6"/>`;
+    g += `<line id="prPlay" x1="0" x2="0" y1="0" y2="${H}" stroke="var(--lilac)" stroke-width="2" opacity="0"/>`;
+    prSvg.setAttribute("width", W); prSvg.setAttribute("height", H); prSvg.setAttribute("viewBox", `0 0 ${W} ${H}`); prSvg.innerHTML = g;
+    prPlay = prSvg.querySelector("#prPlay");
+    // the ruler: bar numbers, beats and the cursor
+    let r = `<rect x="0" y="0" width="${W}" height="${PR.RUL}" fill="var(--sc-ruler)"/>`;
+    for (let b = 0; b < S.bars; b++) {
+      const x = b * st * PR.SW;
+      r += `<line x1="${x + 0.5}" x2="${x + 0.5}" y1="0" y2="${PR.RUL}" stroke="var(--sc-line)"/><text x="${x + 4}" y="${PR.RUL - 4}" font-size="10" fill="var(--dim)" class="sc-num">${b + 1}</text>`;
+      for (const bs of beats) if (bs > 0) r += `<line x1="${x + bs * PR.SW + 0.5}" x2="${x + bs * PR.SW + 0.5}" y1="${PR.RUL - 5}" y2="${PR.RUL}" stroke="var(--sc-beat)"/>`;
+    }
+    if (scEd.cursor < S.bars * st) r += `<path d="M${cx - 5} 0 h12 l-6 7 z" fill="var(--amber)"/>`;
+    prRuler.setAttribute("width", W); prRuler.setAttribute("height", PR.RUL); prRuler.setAttribute("viewBox", `0 0 ${W} ${PR.RUL}`); prRuler.innerHTML = r;
+    // velocity: one bar per note at its start
+    let vv = `<line x1="0" x2="${W}" y1="${PR.VEL - 4.5}" y2="${PR.VEL - 4.5}" stroke="var(--line)"/>`;
+    for (let b = 0; b < S.bars; b++) vv += `<line x1="${b * st * PR.SW + 0.5}" x2="${b * st * PR.SW + 0.5}" y1="0" y2="${PR.VEL}" stroke="var(--line)"/>`;
+    for (const n of shown) {
+      const x = absOf(n) * PR.SW + 4, v = n.v == null ? 100 : n.v, y = PR.VEL - 5 - (v / 127) * (PR.VEL - 12), hot = PR.sel === n || (D && D.n === n);
+      vv += `<line x1="${x}" x2="${x}" y1="${PR.VEL - 5}" y2="${y}" stroke="${hot ? "var(--amber)" : "var(--lilac)"}" stroke-width="2"/><circle cx="${x}" cy="${y}" r="3" fill="${hot ? "var(--amber)" : "var(--lilac)"}"/>`;
+    }
+    prVel.setAttribute("width", W); prVel.setAttribute("height", PR.VEL); prVel.setAttribute("viewBox", `0 0 ${W} ${PR.VEL}`); prVel.innerHTML = vv;
+    if (!PR.centred && prScroll.clientHeight) {   // open on the notes (or middle C)
+      PR.centred = true;
+      const ms = shown.map(n => n.m).sort((a, b) => a - b), mid = ms.length ? ms[ms.length >> 1] : 64;
+      prScroll.scrollTop = Math.max(0, prY(mid) + PR.RUL - prScroll.clientHeight / 2);
+    }
+  }
+  const prSnap = () => { let q = Math.min(scEd.dur, 4); if (q === 4 && meterOf(state.seq.meter)[1].includes(6)) q = 2; return q; };
+  function prPoint(ev) {
+    const r = prSvg.getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+    return { x, y, abs: Math.max(0, Math.floor(x / PR.SW)), m: Math.max(PR.LO, Math.min(PR.HI, PR.HI - Math.floor(y / PR.RH))) };
+  }
+  function prHit(p) {
+    const st = stepsNow();
+    for (const n of SC().notes) {
+      if (!prVis(n) || n.m !== p.m) continue;
+      const x0 = (n.b * st + n.s) * PR.SW, x1 = x0 + Math.max(5, n.d * PR.SW - 2);
+      if (p.x >= x0 && p.x <= x1 + 2) return { n, edge: p.x > x1 - Math.max(5, Math.min(10, (x1 - x0) * 0.35)) };
+    }
+    return null;
+  }
+  prSvg.addEventListener("pointerdown", ev => {
+    if (ev.button > 0) return;
+    start();
+    const p = prPoint(ev), h = prHit(p), S = SC(), st = stepsNow();
+    try { prSvg.setPointerCapture(ev.pointerId); } catch (e) {}
+    PR.drag = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, p0: p, sl: prScroll.scrollLeft, stp: prScroll.scrollTop, moved: false, before: scSnapS() };
+    if (h) {
+      const n = h.n; PR.sel = n;
+      Object.assign(PR.drag, { kind: h.edge ? "len" : "move", n, to: { b: n.b, s: n.s, d: n.d, m: n.m, dia: n.dia } });
+      preview(n.m); scInfo.textContent = pitchName(n.m, n.dia) + (h.edge ? " · drag for length" : " · drag to move · lift to erase");
+    } else {
+      let abs = Math.floor(p.abs / prSnap()) * prSnap(); abs = Math.min(abs, S.bars * st - 1);
+      const d = Math.max(1, Math.min(curDur(), st - (abs % st)));
+      Object.assign(PR.drag, { kind: "add", ghost: { abs, m: p.m, d } });
+      preview(p.m); scInfo.textContent = pitchName(p.m, spell(p.m)) + " · " + (DUR_NAMES[curDur()] || "") + " · lift to place";
+    }
+    prRender();
+  });
+  prSvg.addEventListener("pointermove", ev => {
+    const D = PR.drag; if (!D || ev.pointerId !== D.id) return;
+    const dx = ev.clientX - D.x0, dy = ev.clientY - D.y0;
+    if (!D.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    D.moved = true;
+    if (D.kind === "add") D.kind = "pan";   // dragging empty space scrolls
+    if (D.kind === "pan") { prScroll.scrollLeft = D.sl - dx; prScroll.scrollTop = D.stp - dy; return; }
+    const S = SC(), st = stepsNow(), n = D.n, end = S.bars * st;
+    if (D.kind === "move") {
+      const q = prSnap(), ds = Math.round(dx / PR.SW / q) * q, dm = -Math.round(dy / PR.RH);
+      const abs = Math.max(0, Math.min(end - 1, n.b * st + n.s + ds)), m = Math.max(PR.LO, Math.min(PR.HI, n.m + dm));
+      if (m !== D.to.m) preview(m);
+      D.to = { b: Math.floor(abs / st), s: abs % st, d: Math.max(1, Math.min(n.d, end - abs)), m, dia: m === n.m ? n.dia : spell(m) };
+      scInfo.textContent = pitchName(m, D.to.dia) + " · bar " + (D.to.b + 1) + " step " + (D.to.s + 1);
+    } else {
+      const abs = n.b * st + n.s, d = Math.max(1, Math.min(32, end - abs, Math.round((p => p.x)(prPoint(ev)) / PR.SW - abs)));
+      D.to = { b: n.b, s: n.s, d, m: n.m, dia: n.dia };
+      scInfo.textContent = pitchName(n.m, n.dia) + " · " + (DUR_NAMES[d] || d + " steps");
+    }
+    prRender();
+  });
+  function prEnd(ev, cancel) {
+    const D = PR.drag; if (!D || ev.pointerId !== D.id) return;
+    PR.drag = null;
+    if (!cancel) {
+      if (D.kind === "add" && D.ghost) addAt(D.ghost.abs, [D.ghost.m], [spell(D.ghost.m)]);
+      else if ((D.kind === "move" || D.kind === "len") && !D.moved) { removeNote(D.n); PR.sel = null; }
+      else if ((D.kind === "move" || D.kind === "len") && D.to) {
+        const n = D.n, t = D.to;
+        if (t.b !== n.b || t.s !== n.s || t.d !== n.d || t.m !== n.m) {
+          // (a note moved onto the same pitch at the same start replaces it)
+          const S = SC(), dup = S.notes.find(o => o !== n && o.b === t.b && o.s === t.s && o.m === t.m);
+          scPush(D.before); if (dup) S.notes.splice(S.notes.indexOf(dup), 1);
+          Object.assign(n, t); save();
+        }
+      }
+    }
+    scRender();
+  }
+  prSvg.addEventListener("pointerup", ev => prEnd(ev, false));
+  prSvg.addEventListener("pointercancel", ev => prEnd(ev, true));
+  // velocity lane: drag the bar of a note (every note starting there, for a chord)
+  let prVD = null;
+  const prVAt = ev => { const r = prVel.getBoundingClientRect(); return { x: ev.clientX - r.left, v: Math.max(1, Math.min(127, Math.round((PR.VEL - 5 - (ev.clientY - r.top)) / (PR.VEL - 12) * 127))) }; };
+  prVel.addEventListener("pointerdown", ev => {
+    if (ev.button > 0) return;
+    const p = prVAt(ev), shown = SC().notes.filter(prVis); if (!shown.length) return;
+    let best = null, bd = 1e9;
+    for (const n of shown) { const d = Math.abs(absOf(n) * PR.SW + 4 - p.x); if (d < bd || (d === bd && n === PR.sel)) { best = n; bd = d; } }
+    if (!best || bd > PR.SW * 0.75) return;
+    const at = absOf(best), group = PR.sel && absOf(PR.sel) === at ? [PR.sel] : shown.filter(n => absOf(n) === at);
+    prVD = { id: ev.pointerId, group, before: scSnapS(), changed: false };
+    try { prVel.setPointerCapture(ev.pointerId); } catch (e) {}
+    const set = v => { group.forEach(n => { n.v = v; }); prVD.changed = true; scInfo.textContent = "velocity " + v + (group.length > 1 ? " · " + group.length + " notes" : ""); prRender(); };
+    prVD.set = set; set(p.v);
+  });
+  prVel.addEventListener("pointermove", ev => { if (prVD && ev.pointerId === prVD.id) prVD.set(prVAt(ev).v); });
+  const prVEnd = ev => { if (!prVD || ev.pointerId !== prVD.id) return; const D = prVD; prVD = null; if (D.changed) { scPush(D.before); save(); } scRender(); };
+  prVel.addEventListener("pointerup", prVEnd); prVel.addEventListener("pointercancel", prVEnd);
+  prKeys.addEventListener("pointerdown", ev => { start(); const r = prKeys.getBoundingClientRect(), m = PR.HI - Math.floor((ev.clientY - r.top) / PR.RH); if (m >= PR.LO && m <= PR.HI) { preview(m); scInfo.textContent = pitchName(m, spell(m)); } });
+  prRuler.addEventListener("pointerdown", ev => {
+    const r = prRuler.getBoundingClientRect(), S = SC(), st = stepsNow();
+    let abs = Math.floor((ev.clientX - r.left) / PR.SW / prSnap()) * prSnap();
+    scEd.cursor = Math.max(0, Math.min(S.bars * st - 1, abs)); scEd.last.t = 0; scRender();
+  });
+  function prShow(on) {
+    PR.on = on; try { localStorage.setItem("nightbloom-roll", on ? "1" : "0"); } catch (e) {}
+    notesArea.classList.toggle("roll", on); prScroll.hidden = !on;
+    document.querySelectorAll("#scView button").forEach(b => b.setAttribute("aria-pressed", String((b.dataset.v === "roll") === on)));
+    if (on) { prKeysDraw(); prRender(); }
+  }
+  document.getElementById("scView").addEventListener("click", e => { const b = e.target.closest("button[data-v]"); if (b) { prShow(b.dataset.v === "roll"); scRender(); } });
+  { const r0 = scRender; scRender = function () { r0.apply(this, arguments); if (PR.on && !notesArea.hidden) prRender(); }; }
+  { const c0 = scrollToCursor; scrollToCursor = function () {
+      if (!PR.on) return c0.apply(this, arguments);
+      const x = scEd.cursor * PR.SW + PR.KW, v = prScroll;
+      if (x < v.scrollLeft + PR.KW + 20 || x > v.scrollLeft + v.clientWidth - 40) v.scrollLeft = Math.max(0, x - PR.KW - v.clientWidth / 3);
+    }; }
+  let prLastBar = -1;
+  (function prFrame() {
+    requestAnimationFrame(prFrame);
+    if (!PR.on || !playing || notesArea.hidden || !ctx || !prPlay) return;
+    const now = ctx.currentTime; let cur = null;
+    for (const q of scQueue) if (q.t <= now) cur = q;
+    if (!cur) return;
+    const st = stepsNow(), x = (cur.b * st + cur.s) * PR.SW + 1;
+    prPlay.setAttribute("x1", x); prPlay.setAttribute("x2", x); prPlay.setAttribute("opacity", "0.9");
+    if (cur.b !== prLastBar) {
+      prLastBar = cur.b;
+      const v = prScroll, bx = cur.b * st * PR.SW, bw = st * PR.SW;
+      if (bx < v.scrollLeft || bx + bw > v.scrollLeft + v.clientWidth - PR.KW) v.scrollLeft = Math.max(0, bx - 6);
+    }
+  })();
+  { const ss = stopSeq; stopSeq = function () { ss.apply(this, arguments); if (prPlay) prPlay.setAttribute("opacity", "0"); prLastBar = -1; }; }
+  if (PR.on) { notesArea.classList.add("roll"); prScroll.hidden = false; document.querySelectorAll("#scView button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === "roll"))); prKeysDraw(); }
+  window.__pr = { PR, show: prShow, render: prRender, snap: scSnapS, put: scPut };
 
   // ---------- the third view ----------
   setMode = function (mode) {
@@ -8448,7 +8716,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const TRK_COLORS = ["#c4a3ff", "#ffb65c", "#7fd6c2", "#ff8fa3", "#9ec1ff", "#e6d27a", "#b6e37f", "#f2a2e8"];
   const T = { tracks: [], clips: [], pps: 40, snap: "beat", playhead: 0, withBeat: false, sel: null, selTrack: null };
   const trkAudio = new Map(), trkPeaks = new Map();
-  let trkLoaded = false, trkUndo = [];
+  let trkLoaded = false, trkUndo = [], trkRedo = [];
   const trkUid = () => Math.random().toString(36).slice(2, 10);
   const trkEl = document.getElementById("tracks"), trkScroll = document.getElementById("trkScroll"), trkInner = document.getElementById("trkInner");
   const trkStatus = document.getElementById("trkStatus"), trkTime = document.getElementById("trkTime"), trkPlayBtn = document.getElementById("trkPlay");
@@ -8491,7 +8759,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const used = new Set(T.clips.map(c => c.audio));
       const db = await idb(), st = db.transaction("tracks", "readwrite").objectStore("tracks");
       const keys = await new Promise(res => { const r = st.getAllKeys(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
-      const undoUsed = new Set(); trkUndo.forEach(s => JSON.parse(s).clips.forEach(c => undoUsed.add(c.audio)));
+      const undoUsed = new Set(); trkUndo.concat(trkRedo).forEach(s => JSON.parse(s).clips.forEach(c => undoUsed.add(c.audio)));
       keys.forEach(k => { if (!used.has(k) && !undoUsed.has(k)) st.delete(k); });
     } catch (e) {}
   }
@@ -9023,7 +9291,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (trkEl.hidden || ev.target.closest && ev.target.closest("input")) return;
     if (ev.key === " ") { ev.preventDefault(); togglePlay(); }
     else if (ev.key === "Delete" || ev.key === "Backspace") { ev.preventDefault(); delSel(); }
-    else if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "z") { ev.preventDefault(); trkUndoFn(); }
+    else if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "z" && !ev.shiftKey) { ev.preventDefault(); trkUndoFn(); }
     else if (ev.key.toLowerCase() === "s" && !ev.ctrlKey && !ev.metaKey) splitAt();
   }, true);
   window.addEventListener("resize", () => { if (!trkEl.hidden) trkRender(); });
@@ -9762,6 +10030,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return { name, date: stamp(), engine: state.engine, layers: JSON.parse(JSON.stringify(state.layers)), params: JSON.parse(JSON.stringify(state.params)),
       lib: JSON.parse(JSON.stringify(state.lib)), fmSel, arp: JSON.parse(JSON.stringify(state.arp || {})), chord: chordType };
   }
+  let sndQuiet = false;   // (an undo puts a sound back without playing it)
   function applySound(s) {
     start();
     for (const id in s.layers) if (state.layers[id]) Object.assign(state.layers[id], s.layers[id]);
@@ -9775,8 +10044,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     state.engine = s.engine === "fm" && !betaOn ? "saw" : s.engine;
     state.cur = null;
     renderEngine(); save();
-    setTimeout(() => { if (ctx) { const t = ctx.currentTime + 0.02; melodicVoices(60, t, 0.9).forEach(v => v.stop(t + 0.7)); } }, state.engine === "lib" ? 900 : 30);
-    msInfo.textContent = "Loaded \"" + s.name + "\"";
+    if (!sndQuiet) setTimeout(() => { if (ctx) { const t = ctx.currentTime + 0.02; melodicVoices(60, t, 0.9).forEach(v => v.stop(t + 0.7)); } }, state.engine === "lib" ? 900 : 30);
+    if (!sndQuiet) msInfo.textContent = "Loaded \"" + s.name + "\"";
   }
   function renderMySounds() {
     msList.innerHTML = "";
@@ -10106,7 +10375,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const us = Math.round(60000000 / state.seq.bpm);
     const meta = track([[0, [0xff, 0x51, 3, (us >> 16) & 255, (us >> 8) & 255, us & 255]], [0, [0xff, 0x58, 4, num, Math.log2(den), 24, 8]]], "Nate Bloom");
     const mel = [];
-    S.notes.filter(n => n.b < S.bars && n.s < st).forEach(n => { const t = (n.b * st + n.s) * step; mel.push([t, [0x90, n.m, 96]], [t + Math.max(1, n.d * step - 10), [0x80, n.m, 0]]); });
+    S.notes.filter(n => n.b < S.bars && n.s < st).forEach(n => { const t = (n.b * st + n.s) * step; mel.push([t, [0x90, n.m, n.v || 96]], [t + Math.max(1, n.d * step - 10), [0x80, n.m, 0]]); });
     const sy = [], drums = [];
     const GM = { kick: 36, snare: 38, clap: 39, ch: 42, oh: 46, tom: 45, rim: 37, cow: 56 };
     for (let b = 0; b < bars; b++) for (let s = 0; s < st; s++) {
@@ -10240,7 +10509,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (md.opt.clockOut) for (let k = 0; k < 6; k++) send([0xf8], perfAt(t + k * dur / 6));
       if (md.opt.notesOut) {
         const S = SC();
-        if (!scMuted("notes")) S.notes.filter(n => n.b === scBar && n.s === s).forEach(n => { send([0x90 | ch, n.m, 100], perfAt(t)); send([0x80 | ch, n.m, 0], perfAt(t + Math.max(0.03, n.d * dur * 0.95))); });
+        if (!scMuted("notes")) S.notes.filter(n => n.b === scBar && n.s === s).forEach(n => { send([0x90 | ch, n.m, n.v || 100], perfAt(t)); send([0x80 | ch, n.m, 0], perfAt(t + Math.max(0.03, n.d * dur * 0.95))); });
         const d = state.seq.synth[s];
         if (d != null && !scMuted("synth")) { const m = BASE + degToSemis(d) + state.octave * 12; send([0x90 | ch, m, 100], perfAt(t)); send([0x80 | ch, m, 0], perfAt(t + dur * 0.9)); }
       }
@@ -15064,7 +15333,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   }
 
   // ---------- undo: a toast after big changes, and an Undo button ----------
-  const undoToast = (() => {
+  let undoToast = (() => {
     const el = document.createElement("div"); el.className = "undotoast"; el.hidden = true; el.setAttribute("role", "status");
     el.innerHTML = '<span></span><button class="btn">Undo</button>'; document.body.appendChild(el);
     let fn = null, t = 0;
@@ -15470,6 +15739,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
       ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
       ["installBtn", "Install", "Add Nate Bloom to the home screen"],
+      ["hisBtn", "History", "Every change, newest first: go back to any of them"],
       ["helpBtn", "Help", "How it works · vibration · report a problem"],
       ["exitBtn", "Exit", "Save your work and close"],
     ];
@@ -18305,7 +18575,7 @@ registerProcessor("nb-verb", NBVerb);`;
   const markPick = el => { if (pickEl) pickEl.classList.remove("learn-pick"); pickEl = el; if (el) el.classList.add("learn-pick"); };
   function learnStart() {
     LEARN.on = true; LEARN.pick = null; LEARN.xyStep = 0; document.body.classList.add("learn-on"); lbar.hidden = false; mdEl.hidden = true;
-    learnSay(md.access ? "MIDI learn: touch a knob or slider in the app" : "MIDI learn: connect first (MIDI → Connect), then touch a knob or slider");
+    learnSay(md.access ? "MIDI learn: touch a knob or slider in the app, or Plugin control… for a plugin's" : "MIDI learn: connect first (MIDI → Connect), then touch a knob or slider");
   }
   function learnStop() { LEARN.on = false; LEARN.pick = null; markPick(null); document.body.classList.remove("learn-on"); lbar.hidden = true; }
   lbar.querySelector("button").addEventListener("click", learnStop);
@@ -19446,6 +19716,187 @@ registerProcessor("nb-verb", NBVerb);`;
       if (lb) lb.appendChild(g);
       g.addEventListener("click", async () => { const u = usedParts(), p = (u.find(([x]) => x.on) || u[0] || [])[0]; if (p) { try { nbwOpenGui(await nbwInstrument(p.id)); } catch (e) {} } });
       const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); g.hidden = !(state.engine === "lib" && usedParts().length); return r; }; }
+    // ---------- plugin controls: MIDI learn and Tracks automation ----------
+    const WL = { info: new WeakMap(), keepT: new Map(), cb: null };
+    function wlSlots() {
+      const out = []; if (!ctx) return out;
+      NBW.parts.forEach(W => { if (W.ctx === ctx && W.node) out.push({ ref: { ch: "part", id: W.id }, name: W.name, where: "instrument", H: W }); });
+      const add = (tgt, arr) => { const seen = {}; (arr || []).forEach(F => { if (!F || !F.node || F.ctx !== ctx) return; const n = seen[F.key] = seen[F.key] == null ? 0 : seen[F.key] + 1; out.push({ ref: { ch: tgt, key: F.key, n }, name: F.name, where: nbwTargetName(tgt), H: F }); }); };
+      add("mix", NBW.fx); for (const t in NBW.chains) add(t, NBW.chains[t]);
+      return out;
+    }
+    function wlHolder(ref) {
+      if (!ctx || !ref) return null;
+      if (ref.ch === "part") { const W = NBW.parts.get(ref.id); return W && W.ctx === ctx && W.node ? W : null; }
+      const arr = ref.ch === "mix" ? NBW.fx : NBW.chains[ref.ch]; if (!arr) return null;
+      const F = arr.filter(x => x && x.key === ref.key)[ref.n || 0]; return F && F.ctx === ctx && F.node ? F : null;
+    }
+    const wlNice = t => { t = String(t || "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").trim(); return t ? t[0].toUpperCase() + t.slice(1) : t; };
+    function wlParams(H) {
+      const node = H.node; let p = WL.info.get(node);
+      if (!p) {
+        p = Promise.resolve(node.getParameterInfo()).then(o => {
+          const meta = H.inst && H.inst._A && H.inst._A.meta, by = {}; if (meta && meta.params) meta.params.forEach(q => { by[q.id] = q; });
+          return Object.values(o || {}).filter(i => i && i.id && !(by[i.id] && by[i.id].hidden)).map(i => Object.assign({}, i, { nice: (by[i.id] && (by[i.id].name || by[i.id].short)) || wlNice(i.label || String(i.id).split("/").pop()) }));
+        }).catch(() => []);
+        WL.info.set(node, p);
+      }
+      return p;
+    }
+    // values travel normalized (0–1): each plugin maps them onto its own range and curve
+    function wlSet(ref, pid, n) {
+      const H = wlHolder(ref); if (!H) return false;
+      try { H.node.setParameterValues({ [pid]: { id: pid, value: Math.max(0, Math.min(1, n)), normalized: true } }); } catch (e) { return false; }
+      clearTimeout(WL.keepT.get(H)); WL.keepT.set(H, setTimeout(() => nbwKeep(H), 900));
+      return true;
+    }
+    async function wlGet(ref, pid) {
+      const H = wlHolder(ref); if (!H) return null;
+      try { const o = await H.node.getParameterValues(true, pid), x = o && o[pid]; return x && Number.isFinite(x.value) ? x.value : null; } catch (e) { return null; }
+    }
+    // the picker: every loaded plugin, then its controls
+    const wlSheet = document.getElementById("wlSheet"), wlList = document.getElementById("wlList"), wlInfo = document.getElementById("wlInfo");
+    function wlPick(title, info, cb) {
+      WL.cb = cb; document.getElementById("wlTitle").textContent = title; wlInfo.textContent = info; wlList.innerHTML = "";
+      const slots = wlSlots();
+      if (!slots.length) { const d = document.createElement("div"); d.className = "pr-empty"; d.textContent = "No plugins are loaded yet. Add one under Plugins (an effect, or an instrument you then play once), and its controls show up here."; wlList.appendChild(d); }
+      slots.forEach(sl => {
+        const box = document.createElement("div"); box.className = "wl-plug";
+        const hd = document.createElement("button"); hd.innerHTML = "<span></span><small></small>"; hd.querySelector("span").textContent = sl.name; hd.querySelector("small").textContent = sl.where;
+        const ps = document.createElement("div"); ps.className = "wl-params"; ps.hidden = slots.length > 1;
+        hd.addEventListener("click", () => { ps.hidden = !ps.hidden; });
+        box.append(hd, ps); wlList.appendChild(box);
+        wlParams(sl.H).then(list => {
+          if (!list.length) { ps.textContent = "This plugin doesn't list its controls."; return; }
+          list.forEach(i => { const b = document.createElement("button"); b.className = "btn"; b.textContent = i.nice;
+            b.addEventListener("click", () => { wlSheet.hidden = true; const f = WL.cb; WL.cb = null; if (f) f({ ref: sl.ref, pid: i.id, name: sl.name + " · " + i.nice, plug: sl.name, param: i.nice }); });
+            ps.appendChild(b); });
+        });
+      });
+      wlSheet.hidden = false;
+    }
+    document.getElementById("wlDone").addEventListener("click", () => { wlSheet.hidden = true; WL.cb = null; });
+
+    // MIDI learn: "Plugin control…" in the learn bar
+    { const lb = document.getElementById("learnBar");
+      if (lb) {
+        const b = document.createElement("button"); b.className = "btn"; b.id = "learnPlug"; b.textContent = "Plugin control…";
+        lb.insertBefore(b, lb.querySelector("button"));
+        b.addEventListener("click", () => wlPick("Learn a plugin control", "Pick the control, then move a knob on your controller.", c => {
+          LEARN.pick = { t: { k: "wam", ref: c.ref, pid: c.pid }, name: c.name }; LEARN.xyStep = 0;
+          learnSay("Now move a knob on your controller for " + c.name);
+        }));
+      }
+      const la = learnApply;
+      learnApply = function (t, v) { if (t && t.k === "wam") return wlSet(t.ref, t.pid, v); return la.apply(this, arguments); };
+    }
+
+    // Tracks: automation lanes for plugin controls
+    const AL = { lanes: [], timer: 0, poll: 0, sent: new Map(), touch: new Map(), undo: [], red: [] };
+    try { const o = JSON.parse(localStorage.getItem("nightbloom-trklanes") || "[]"); if (Array.isArray(o)) AL.lanes = o.filter(l => l && l.ref && l.pid && Array.isArray(l.pts)); } catch (e) {}
+    const alSave = () => { try { localStorage.setItem("nightbloom-trklanes", JSON.stringify(AL.lanes)); } catch (e) {} };
+    const alSnap = () => JSON.stringify(AL.lanes);
+    const alPush = () => { const s = alSnap(); if (AL.undo[AL.undo.length - 1] === s) return; AL.undo.push(s); if (AL.undo.length > 40) AL.undo.shift(); if (window.__his) __his.noted("auto"); };
+    setTimeout(() => { if (window.__his) { __his.area("auto", "Automation", { stack: () => AL.undo, snap: alSnap, put: snap => { AL.lanes = JSON.parse(snap); alSave(); trkRender(); } }); __his.HIS.A.auto.red = AL.red; } }, 0);
+    function alAt(L, x) {
+      const P = L.pts; if (!P.length) return null;
+      if (x <= P[0][0]) return P[0][1];
+      for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const [t0, v0] = P[i - 1], [t1, v1] = P[i]; return t1 > t0 ? v0 + (v1 - v0) * (x - t0) / (t1 - t0) : v1; }
+      return P[P.length - 1][1];
+    }
+    const alPos = () => playFrom + Math.max(0, ctx.currentTime - playAt);
+    function alTick() {
+      if (!playing_t || !ctx) return;
+      const pos = alPos(), now = performance.now();
+      for (const L of AL.lanes) {
+        if (!L.on || L.rec || !L.pts.length) continue;
+        const v = alAt(L, pos); if (v == null) continue;
+        const last = AL.sent.get(L.id);
+        if (last == null || Math.abs(last - v) > 0.002) { if (wlSet(L.ref, L.pid, v)) AL.sent.set(L.id, v); }
+      }
+    }
+    // recording (● on a lane): while Tracks plays, the lane follows the control and overwrites what was there
+    async function alRec() {
+      if (!playing_t || !ctx) return;
+      for (const L of AL.lanes) {
+        if (!L.rec) continue;
+        const v = await wlGet(L.ref, L.pid); if (v == null || !playing_t) continue;
+        const pos = Math.round(alPos() * 1000) / 1000, vv = Math.round(v * 1000) / 1000;
+        if (L._lastRec == null) { alPush(); L._lastRec = pos - 0.001; L._lastPt = -9; L._lastV = null; L._prevPos = pos; }
+        L.pts = L.pts.filter(p => !(p[0] > L._lastRec && p[0] <= pos + 0.0005));
+        if (L._lastV == null || Math.abs(vv - L._lastV) > 0.003 || pos - L._lastPt > 1) {
+          if (L._lastV != null && L._prevPos > L._lastPt + 0.001) L.pts.push([L._prevPos, L._lastV]);   // (held until just before the turn)
+          L.pts.push([pos, vv]); L._lastPt = pos; L._lastV = vv;
+        }
+        L.pts.sort((a, b) => a[0] - b[0]); L._lastRec = pos; L._prevPos = pos;
+        alDraw(L);
+      }
+    }
+    function alRun() {
+      clearInterval(AL.timer); clearInterval(AL.poll); AL.timer = AL.poll = 0;
+      AL.lanes.forEach(L => { if (L.rec && L._lastRec != null) { if (L._lastV != null) L.pts.push([Math.round(L._lastRec * 1000) / 1000 + 0.001, L._lastV]); L._lastRec = null; alSave(); } });
+      if (!playing_t || !AL.lanes.length) return;
+      AL.sent.clear(); AL.timer = setInterval(alTick, 30); alTick();
+      if (AL.lanes.some(L => L.rec)) AL.poll = setInterval(alRec, 70);
+    }
+    function alDraw(L) {
+      const row = trkInner.querySelector(`.trow.arow[data-lane="${L.id}"]`); if (!row) return;
+      const lane = row.querySelector(".tlane"), svg = lane.querySelector("svg.alane"), hint = lane.querySelector(".ahint");
+      const w = Math.max(lane.scrollWidth, lane.clientWidth, 10), H = lane.clientHeight || 54, y = v => (1 - v) * (H - 10) + 5, P = L.pts;
+      svg.setAttribute("viewBox", `0 0 ${w} ${H}`); svg.setAttribute("preserveAspectRatio", "none");
+      hint.hidden = !!P.length;
+      svg.querySelector("polyline").setAttribute("points", P.length ? [[0, y(P[0][1])]].concat(P.map(([t, v]) => [t * T.pps, y(v)]), [[w, y(P[P.length - 1][1])]]).map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ") : "");
+    }
+    function alRow(L) {
+      const row = document.createElement("div"); row.className = "trow arow" + (L.on ? "" : " off"); row.dataset.lane = L.id;
+      row.innerHTML = '<div class="thead"><span class="an"></span><span class="ab"><button class="tb arec" aria-label="Record: turn the control while Tracks plays">●</button><button class="tb ta aon" aria-label="Automation on or off">A</button><button class="tb adel" aria-label="Remove this lane">✕</button></span></div><div class="tlane"><svg class="alane"><polyline/></svg><span class="ahint">drag here to draw, or ● and turn the control while Tracks plays</span></div>';
+      const an = row.querySelector(".an"); an.textContent = L.name; an.title = L.name;
+      const rec = row.querySelector(".arec"), on = row.querySelector(".aon");
+      rec.classList.toggle("on", !!L.rec); rec.classList.add("rec"); on.classList.toggle("on", !!L.on);
+      rec.addEventListener("click", ev => { ev.stopPropagation(); L.rec = !L.rec; rec.classList.toggle("on", L.rec); alSave(); alRun(); trkSay(L.rec ? "● " + L.name + ": while Tracks plays, the lane records the control (turn it in its panel or with a learned knob). It overwrites what's there." : L.name + ": plays back"); });
+      on.addEventListener("click", ev => { ev.stopPropagation(); L.on = !L.on; on.classList.toggle("on", L.on); row.classList.toggle("off", !L.on); alSave(); trkSay(L.name + (L.on ? ": automation on" : ": automation off (the curve is kept)")); });
+      row.querySelector(".adel").addEventListener("click", ev => { ev.stopPropagation(); alPush(); AL.lanes = AL.lanes.filter(x => x !== L); alSave(); trkRender(); trkSay("Removed " + L.name + " (↶ brings it back)"); });
+      // drawing with a finger or the mouse
+      const lane = row.querySelector(".tlane"); let d = null;
+      const at = e => { const r = lane.getBoundingClientRect(); return [Math.max(0, (e.clientX - r.left) / T.pps), Math.max(0, Math.min(1, 1 - (e.clientY - r.top - 5) / (r.height - 10)))]; };
+      lane.addEventListener("pointerdown", e => {
+        if (e.button > 0) return; e.preventDefault(); e.stopPropagation();
+        try { lane.setPointerCapture(e.pointerId); } catch (x) {}
+        alPush(); const [t, v] = at(e); d = { id: e.pointerId, t };
+        L.pts = L.pts.filter(p => Math.abs(p[0] - t) > 0.02); L.pts.push([Math.round(t * 1000) / 1000, Math.round(v * 1000) / 1000]); L.pts.sort((a, b) => a[0] - b[0]); alDraw(L);
+        if (!playing_t) wlSet(L.ref, L.pid, v);
+      });
+      lane.addEventListener("pointermove", e => {
+        if (!d || e.pointerId !== d.id) return;
+        const [t, v] = at(e), a = Math.min(d.t, t), b = Math.max(d.t, t);
+        if (Math.abs(t - d.t) < 0.03) { const p = L.pts.find(q => Math.abs(q[0] - d.t) < 0.0011); if (p) p[1] = Math.round(v * 1000) / 1000; alDraw(L); if (!playing_t) wlSet(L.ref, L.pid, v); return; }
+        L.pts = L.pts.filter(p => !(p[0] > a + 0.001 && p[0] < b - 0.001)); L.pts.push([Math.round(t * 1000) / 1000, Math.round(v * 1000) / 1000]); L.pts.sort((x, y) => x[0] - y[0]);
+        d.t = t; alDraw(L); if (!playing_t) wlSet(L.ref, L.pid, v);
+      });
+      const up = e => { if (!d || e.pointerId !== d.id) return; d = null; alSave(); };
+      lane.addEventListener("pointerup", up); lane.addEventListener("pointercancel", up);
+      return row;
+    }
+    { const tr = trkRender; trkRender = function () {
+        const r = tr.apply(this, arguments);
+        try {
+          const add = trkInner.querySelector(".trow.addrow");
+          AL.lanes.forEach(L => { const row = alRow(L); trkInner.insertBefore(row, add); });
+          requestAnimationFrame(() => AL.lanes.forEach(alDraw));
+        } catch (e) {}
+        return r;
+      }; }
+    document.getElementById("trkAutoAdd").addEventListener("click", () => {
+      start();
+      wlPick("Automate a plugin control", "Pick the control. Then draw its moves on the lane, or press ● on the lane and turn the control while Tracks plays.", async c => {
+        alPush();
+        const v = await wlGet(c.ref, c.pid), L = { id: "al" + Date.now().toString(36), ref: c.ref, pid: c.pid, name: c.name, on: true, rec: false, pts: v == null ? [] : [[0, Math.round(v * 1000) / 1000]] };
+        AL.lanes.push(L); alSave(); trkRender(); alRun(); trkSay("Added " + c.name + ": draw on its lane, or ● and turn it while Tracks plays");
+      });
+    });
+    // follow Tracks' play and stop
+    { let was = false; setInterval(() => { if (playing_t !== was) { was = playing_t; alRun(); if (!was) AL.lanes.forEach(L => { if (L._st) { clearTimeout(L._st); alSave(); } }); } }, 60); }
+    window.__wl = { WL, AL, slots: wlSlots, holder: wlHolder, params: wlParams, set: wlSet, get: wlGet, pick: wlPick, at: alAt, run: alRun };
     window.__wam = { chainOf, stemTaps: () => nbwStemTaps(), wireTarget: nbwWireTarget, setSend: nbwSetSend, targets: nbwTargets, NBW, CAT: NBW_CAT, here: NBW_HERE, host: nbwHost, instrument: nbwInstrument, addFx: nbwAddFx, removeFx: nbwRemoveFx, wire: nbwWire, base: nbwBase, openGui: nbwOpenGui, closeGui: nbwCloseGui, allOff: nbwAllOff, paint: nbwPaint, st: () => state };
   }
   // virtual Chromebook: each voice's sound sources are tagged with its engine, so the simulated sound load follows them
@@ -21327,6 +21778,166 @@ registerProcessor("nb-wave", NBWave);
       const ba = buildAudio; buildAudio = function () { const r = ba.apply(this, arguments); setTimeout(() => apply(true), 0); return r; };
       if (ctx) apply(true);
     }
+  }
+  // ---------- Undo and redo across the app ----------
+  const HIS = { A: {}, line: [], redo: [] };
+  {
+    const ago = t => { const s = Math.round((Date.now() - t) / 1000); return s < 5 ? "now" : s < 60 ? s + " s ago" : s < 3600 ? Math.round(s / 60) + " min ago" : Math.round(s / 3600) + " h ago"; };
+    const area = (id, name, o) => { HIS.A[id] = Object.assign({ id, name, red: [] }, o); };
+    // Notes (the melody: staff and roll)
+    area("notes", "Notes", { stack: () => scEd.undo, snap: scSnapS, put: scPut, btn: "scUndo", rbtn: "scRedo" });
+    // the Seq pattern
+    area("seq", "Pattern", { stack: () => seqUndo, snap: seqSnap, btn: "seqUndo", rbtn: "seqRedo",
+      put: snap => { const o = JSON.parse(snap); Object.keys(state.seq).forEach(k => { if (!(k in o.seq)) delete state.seq[k]; }); Object.assign(state.seq, o.seq); state.drum.swing = o.swing; setBpm(state.seq.bpm); if (seqBuilt) paintSeq(); save(); try { scRender(); } catch (e) {} },
+      paint: seqPaintUndo });
+    // Rhythm Creator
+    area("rc", "Rhythm Creator", { stack: () => rcUndo, snap: rcSnapP, btn: "rcUndo", rbtn: "rcRedo",
+      put: snap => { const o = JSON.parse(snap); RCP.tracks = o.tracks; RCP.steps = o.steps; RCP.swing = o.swing; if (o.bpm && o.bpm !== state.seq.bpm) setBpm(o.bpm); if (ctx) RCP.tracks.forEach((tr, i) => rcApplyTrack(i)); rcSave(); rcRender(); },
+      paint: rcPaintUndo });
+    // Tracks
+    area("trk", "Tracks", { stack: () => trkUndo, snap: () => JSON.stringify({ tracks: T.tracks, clips: T.clips }), btn: "trkUndo", rbtn: "trkRedo",
+      put: snap => { const o = JSON.parse(snap); T.tracks = o.tracks; T.clips = o.clips; T.sel = null; trkSave(); trkRender(); } });
+    HIS.A.trk.red = trkRedo;
+    // the sound: engines, knobs, presets, effects, Natewave, Morph (recorded when a gesture settles)
+    const SND = { u: [], last: null, t: 0 };
+    const sndSnap = () => { const o = captureSound(""); delete o.date; o.cur = state.cur || null; return JSON.stringify(o); };
+    area("sound", "Sound", { stack: () => SND.u, snap: sndSnap,
+      put: snap => { const o = JSON.parse(snap); sndQuiet = true; try { applySound(o); } finally { sndQuiet = false; } state.cur = o.cur || null; save(); try { paintTabs(); updateSoundBar(); refreshFxKnobs(); } catch (e) {} SND.last = sndSnap(); } });
+    function sndCheck() {
+      clearTimeout(SND.t); SND.t = 0;
+      let now; try { now = sndSnap(); } catch (e) { return; }
+      if (SND.last == null) { SND.last = now; return; }
+      if (now === SND.last) return;
+      SND.u.push(SND.last); if (SND.u.length > 40) SND.u.shift();
+      SND.last = now; noted("sound", "Sound · " + (SND.what ? SND.what + " · " : "") + (soundLabel() || "changed")); SND.what = "";
+    }
+    function sndSettle() { clearTimeout(SND.t); SND.t = setTimeout(sndCheck, 350); }
+    ["pointerup", "keyup", "change"].forEach(t => document.addEventListener(t, sndSettle, true));
+    document.addEventListener("pointerdown", e => {
+      if (SND.last == null) try { SND.last = sndSnap(); } catch (x) {}
+      if (!SND.t) { const k = e.target && e.target.closest && e.target.closest(".knob, .wvk, input[type=range], select"); SND.what = k ? (k.getAttribute("aria-label") || k.dataset.label || "").trim().slice(0, 28) : ""; }   // (names the step)
+    }, true);
+    setTimeout(() => { try { if (SND.last == null) SND.last = sndSnap(); } catch (e) {} }, 0);
+
+    // a new step in a place: it goes on the timeline, and that place's redo is gone
+    function noted(id, label) {
+      const A = HIS.A[id]; A.red.length = 0;
+      HIS.redo = HIS.redo.filter(e => e.id !== id);
+      HIS.line.push({ id, label: label || A.name, t: Date.now() }); if (HIS.line.length > 400) HIS.line.shift();
+      paint();
+    }
+    const pushed = (id, stack, fn, label) => function () {
+      const a = stack(), n = a.length, top = a[n - 1], r = fn.apply(this, arguments);
+      if (a.length !== n || a[a.length - 1] !== top) noted(id, typeof label === "function" ? label() : label);
+      return r;
+    };
+    scPush = pushed("notes", () => scEd.undo, scPush, () => PR.on ? "Notes · roll" : "Notes");
+    seqPushUndo = pushed("seq", () => seqUndo, seqPushUndo);
+    rcPushUndo = pushed("rc", () => rcUndo, rcPushUndo);
+    snapshot = pushed("trk", () => trkUndo, snapshot);
+    // a toast that names the change names its step too
+    { const ut = undoToast; undoToast = function (msg) { const e = HIS.line[HIS.line.length - 1]; if (e && Date.now() - e.t < 1500) e.label = HIS.A[e.id].name + " · " + msg; return ut.apply(this, arguments); }; }
+
+    function undo(id, quiet) {
+      const A = HIS.A[id], st = A.stack(); if (!st.length) return false;
+      A.red.push(A.snap()); if (A.red.length > 60) A.red.shift();
+      A.put(st.pop());
+      const i = HIS.line.map(e => e.id).lastIndexOf(id), e = i >= 0 ? HIS.line.splice(i, 1)[0] : { id, label: A.name, t: Date.now() };
+      HIS.redo.push(e);
+      paint(); if (!quiet) noteMsg("Undone: " + e.label);
+      return true;
+    }
+    function redo(id, quiet) {
+      const A = HIS.A[id]; if (!A.red.length) return false;
+      A.stack().push(A.snap()); A.put(A.red.pop());
+      const i = HIS.redo.map(e => e.id).lastIndexOf(id), e = i >= 0 ? HIS.redo.splice(i, 1)[0] : { id, label: A.name, t: Date.now() };
+      HIS.line.push(e);
+      paint(); if (!quiet) noteMsg("Redone: " + e.label);
+      return true;
+    }
+    // a place whose ↶ also covers related steps (Tracks: its clips and its automation lanes)
+    const GROUP = { trk: ["trk", "auto"] };
+    const grp = id => (GROUP[id] || [id]).filter(x => HIS.A[x]);
+    function undoIn(id, quiet) {
+      const g = grp(id);
+      for (let i = HIS.line.length - 1; i >= 0; i--) { const e = HIS.line[i]; if (g.includes(e.id) && HIS.A[e.id].stack().length) return undo(e.id, quiet); }
+      return g.some(x => HIS.A[x].stack().length) ? undo(g.find(x => HIS.A[x].stack().length), quiet) : false;
+    }
+    function redoIn(id, quiet) {
+      const g = grp(id);
+      for (let i = HIS.redo.length - 1; i >= 0; i--) { const e = HIS.redo[i]; if (g.includes(e.id) && HIS.A[e.id].red.length) return redo(e.id, quiet); }
+      return g.some(x => HIS.A[x].red.length) ? redo(g.find(x => HIS.A[x].red.length), quiet) : false;
+    }
+    function undoAny(quiet) {
+      if (SND.t) sndCheck();   // (a knob just let go of counts as a step)
+      while (HIS.line.length) { const e = HIS.line[HIS.line.length - 1]; if (HIS.A[e.id].stack().length) return undo(e.id, quiet); HIS.line.pop(); }
+      if (!quiet) noteMsg("Nothing to undo"); paint(); return false;
+    }
+    function redoAny(quiet) {
+      if (SND.t) sndCheck();
+      while (HIS.redo.length) { const e = HIS.redo[HIS.redo.length - 1]; if (HIS.A[e.id].red.length) return redo(e.id, quiet); HIS.redo.pop(); }
+      if (!quiet) noteMsg("Nothing to redo"); paint(); return false;
+    }
+    // each place's own ↶ goes through here (so it can be redone), and gets a ↷
+    seqDoUndo = () => undo("seq"); rcDoUndo = () => undo("rc"); trkUndoFn = () => { if (!undoIn("trk")) trkSay("Nothing to undo"); else trkSay("Undone"); };
+    const BTN = { scUndo: "notes", seqUndo: "seq", rcUndo: "rc", trkUndo: "trk" }, RBTN = { scRedo: "notes", seqRedo: "seq", rcRedo: "rc", trkRedo: "trk" };
+    document.addEventListener("click", e => {
+      const b = e.target.closest && e.target.closest("#scUndo, #seqUndo, #rcUndo, #trkUndo, #scRedo, #seqRedo, #rcRedo, #trkRedo, #hisUndo, #hisRedo, #hisSUndo, #hisSRedo, #hisUndoP, #hisRedoP");
+      if (!b) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      const id = b.id;
+      if (id === "hisUndo" || id === "hisSUndo" || id === "hisUndoP") undoAny(); else if (id === "hisRedo" || id === "hisSRedo" || id === "hisRedoP") redoAny();
+      else if (BTN[id]) { const ok = undoIn(BTN[id]); if (id === "trkUndo") trkSay(ok ? "Undone" : "Nothing to undo"); else if (!ok) noteMsg("Nothing to undo"); }
+      else if (RBTN[id]) { const ok = redoIn(RBTN[id]); if (id === "trkRedo") trkSay(ok ? "Redone" : "Nothing to redo"); else if (!ok) noteMsg("Nothing to redo"); }
+    }, true);
+    window.addEventListener("keydown", e => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      const k = e.key.toLowerCase(), isU = k === "z" && !e.shiftKey, isR = (k === "z" && e.shiftKey) || (k === "y" && !e.metaKey);
+      if (!isU && !isR) return;
+      const t = e.target; if (t && t.closest && t.closest("input:not([type=range]), textarea, select, [contenteditable]")) return;   // (text keeps its own undo)
+      const trk = !trkEl.hidden;
+      if (trk && isU) return;   // (Tracks' own keys undo Tracks)
+      e.preventDefault();
+      if (e.repeat) return;
+      if (isU) undoAny(); else if (trk) redoIn("trk"); else redoAny();
+    });
+    function paint() {
+      const u = document.getElementById("hisUndo"), r = document.getElementById("hisRedo");
+      const canU = HIS.line.some(e => HIS.A[e.id].stack().length), canR = HIS.redo.some(e => HIS.A[e.id].red.length);
+      { const a = document.getElementById("hisUndoP"), b = document.getElementById("hisRedoP"); if (a) a.disabled = !canU; if (b) b.disabled = !canR; }
+      if (u) { u.disabled = !canU; const e = HIS.line[HIS.line.length - 1]; u.title = canU && e ? "Undo: " + e.label + " (Ctrl+Z)" : "Nothing to undo"; }
+      if (r) { r.disabled = !canR; const e = HIS.redo[HIS.redo.length - 1]; r.title = canR && e ? "Redo: " + e.label + " (Ctrl+Shift+Z)" : "Nothing to redo"; }
+      for (const id in HIS.A) {
+        const A = HIS.A[id]; if (!A.rbtn) continue;
+        const rb = document.getElementById(A.rbtn), ub = document.getElementById(A.btn);
+        if (rb) { rb.disabled = !grp(id).some(x => HIS.A[x].red.length); if (ub) rb.hidden = ub.hidden; }
+        if (ub && id === "notes") ub.disabled = !A.stack().length;
+        if (A.paint) try { A.paint(); } catch (e) {}
+      }
+      if (!sheet.hidden) list();
+    }
+    // the per-place ↷ follows its ↶ when that one is shown or hidden
+    try { const mo = new MutationObserver(() => paint()); ["seqUndo", "rcUndo", "trkUndo", "scUndo"].forEach(id => { const b = document.getElementById(id); if (b) mo.observe(b, { attributes: true, attributeFilter: ["hidden"] }); }); } catch (e) {}
+    // History
+    const sheet = document.getElementById("hisSheet"), box = document.getElementById("hisList");
+    function list() {
+      box.innerHTML = "";
+      const row = (e, undone, k) => {
+        const b = document.createElement("button"); b.className = "his-row" + (undone ? " undone" : "");
+        b.innerHTML = "<b></b><span></span><small></small>";
+        b.querySelector("b").textContent = e.label.split(" · ")[0]; b.querySelector("span").textContent = e.label.includes(" · ") ? e.label.split(" · ").slice(1).join(" · ") : ""; b.querySelector("small").textContent = ago(e.t);
+        b.addEventListener("click", () => { for (let i = 0; i < k; i++) if (!(undone ? redoAny(true) : undoAny(true))) break; noteMsg(undone ? "Brought back " + k + (k === 1 ? " change" : " changes") : "Went back " + k + (k === 1 ? " change" : " changes")); list(); });
+        box.appendChild(b);
+      };
+      const R = HIS.redo.filter(e => HIS.A[e.id].red.length), L = HIS.line.filter(e => HIS.A[e.id].stack().length);
+      if (R.length) { R.forEach((e, i) => row(e, true, R.length - i)); const c = document.createElement("div"); c.className = "his-cut"; c.textContent = "▲ undone · now ▼"; box.appendChild(c); }
+      L.slice().reverse().slice(0, 120).forEach((e, i) => row(e, false, i + 1));
+      if (!R.length && !L.length) { const d = document.createElement("div"); d.className = "pr-empty"; d.textContent = "Nothing yet. Changes to the sound, the pattern, Notes, Rhythm Creator and Tracks show up here."; box.appendChild(d); }
+    }
+    document.getElementById("hisBtn").addEventListener("click", () => { sheet.hidden = false; list(); });
+    document.getElementById("hisDone").addEventListener("click", () => { sheet.hidden = true; });
+    setTimeout(paint, 0);
+    window.__his = { HIS, undo, redo, undoIn, redoIn, undoAny, redoAny, SND, sndSnap, settle: sndSettle, area, noted, paint };
   }
   function wake() {
     if (window.__nbClosed) return;
