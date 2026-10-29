@@ -2145,12 +2145,15 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   #gbLoopsBtn { margin-left: auto; }
   .gb-tp > * { order: 4; }
   #gbHome { margin-left: auto; }
-  #gbMetro, #gbSetBtn { order: 5; }
-  #gbSetBtn { margin-right: auto; }
+  #gbMetro, #gbTypeBtn { order: 5; }
+  #gbTypeBtn { margin-right: auto; }
+  #gbSetBtn { display: none; }   /* (the tempo display opens Song settings) */
   .gb-ib { height: 38px; min-width: 38px; padding: 0 6px; }
   .gb-ib.gb-songs span { display: none; }
   .gb-ib.gb-play { width: 48px; } .gb-ib.gb-rec { width: 44px; }
-  .gb-lcd { min-width: 96px; height: 38px; }
+  .gb-lcd { min-width: 88px; height: 38px; }
+  .gb-type .mt-k { width: 30px; height: 34px; }
+  .gb-type .mt-row.blk { padding-left: 16.5px; }
   .gb .btn.gb-done { height: 38px; padding: 0 12px; }
   /* track heads: icon and M S on top, the name below */
   .gb-head { flex-wrap: wrap; align-content: center; gap: 3px 4px; padding: 0 5px 0 7px; }
@@ -2234,6 +2237,29 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   .sp-syls { max-height: 100px; }
   .sp-pos { flex-basis: 100%; margin-left: 0; }
 }
+/* Garage: Musical Typing */
+.gb-type { flex: none; display: flex; align-items: center; gap: 14px; padding: 8px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: #181522; border-top: 1px solid #2e2a3d; overflow-x: auto; scrollbar-width: none; }
+.gb-type[hidden] { display: none; }
+.gb-type .mt-side { flex: none; display: flex; flex-direction: column; gap: 5px; font: 600 0.6rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+.gb-type .mt-side b { font: 600 0.82rem var(--font-body); color: var(--ink); letter-spacing: 0; text-transform: none; }
+.gb-type .mt-side span { display: flex; align-items: center; gap: 4px; }
+.gb-type .mt-side kbd { font: 700 0.7rem var(--font-mono); color: var(--ink); background: #262234; border: 1px solid #3a3550; border-radius: 4px; padding: 1px 5px; }
+.gb-type .mt-keys { flex: none; display: flex; flex-direction: column; gap: 3px; }
+.gb-type .mt-row { display: flex; gap: 3px; }
+.gb-type .mt-row.blk { padding-left: 21.5px; }
+.gb-type .mt-k { flex: none; width: 40px; height: 38px; border-radius: 7px; border: 1px solid #3a3550; background: #262234; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font: 700 0.8rem var(--font-mono); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; padding: 0; }
+.gb-type .mt-k small { font: 500 0.54rem var(--font-body); color: var(--dim); max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.gb-type .mt-k.mt-w { background: #e9e5f0; color: #15121e; border-color: #c9c1d6; }
+.gb-type .mt-k.mt-w small { color: #6d6585; }
+.gb-type .mt-k.mt-b { background: #110f18; }
+.gb-type .mt-k.mt-gap { visibility: hidden; }
+.gb-type .mt-k.on { background: var(--amber); border-color: var(--amber); color: #2a1d08; }
+.gb-type .mt-k.on small { color: #2a1d08; }
+.gb-type .mt-msg { font: 0.8rem var(--font-body); color: var(--dim); }
+.gb-kw .gb-kl, .gb-kbk .gb-kl { position: absolute; left: 50%; transform: translateX(-50%); font: 700 0.62rem var(--font-mono); border-radius: 4px; padding: 1px 4px; }
+.gb-kw .gb-kl { bottom: 28px; background: #d6cfe2; color: #3a3350; }
+.gb-kbk .gb-kl { bottom: 8px; background: #3a3350; color: #e9e5f0; }
+.gb-chord sup { font: 700 0.6rem var(--font-mono); color: var(--dim); margin-left: 3px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -3139,6 +3165,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
     <div class="gb-grp gb-right">
       <button class="gb-ib" id="gbLoopsBtn" aria-label="Loops" title="Drum loops"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg></button>
       <button class="gb-ib" id="gbMetro" aria-pressed="true" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 16l5-9"/></svg></button>
+      <button class="gb-ib" id="gbTypeBtn" aria-pressed="false" aria-label="Musical Typing" title="Musical Typing: play with the computer keyboard (A = C)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 15h6"/></svg></button>
       <button class="gb-ib" id="gbSetBtn" aria-label="Song settings" title="Tempo, key, time, count-in"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
       <button class="gb-ib" id="gbHelpBtn" aria-label="How the Garage works" title="How it works">?</button>
       <button class="btn primary gb-done" id="gbDone">Done</button>
@@ -23478,6 +23505,7 @@ registerProcessor("nb-wave", NBWave);
       el.classList.toggle("on", !!on);
     }
     function paintBar() {
+      if (typeof mtPaint === "function") try { mtPaint(); } catch (e) {}
       if (!S) return;
       const pb = $("gbPlay"), rb = $("gbRec");
       pb.classList.toggle("on", TP.on); pb.innerHTML = TP.on ? STOP_SVG : PLAY_SVG;
@@ -23503,6 +23531,58 @@ registerProcessor("nb-wave", NBWave);
       rb.classList.toggle("count", !!counting);
       if (p.textContent !== txt) p.textContent = txt;
     }
+    // ---------- Musical Typing: the computer keyboard as an instrument, as in GarageBand ----------
+    const MT_WHITE = ["KeyA", "KeyS", "KeyD", "KeyF", "KeyG", "KeyH", "KeyJ", "KeyK", "KeyL", "Semicolon", "Quote"], MT_WOFF = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17];
+    const MT_BLACK = { KeyW: 1, KeyE: 3, KeyT: 6, KeyY: 8, KeyU: 10, KeyO: 13, KeyP: 15 }, MT_BROW = ["KeyW", "KeyE", "", "KeyT", "KeyY", "KeyU", "", "KeyO", "KeyP"];
+    const MT_DRUM = { KeyA: 36, KeyS: 38, KeyD: 39, KeyF: 42, KeyG: 44, KeyH: 46, KeyJ: 41, KeyK: 45, KeyL: 48, Semicolon: 49, Quote: 51, KeyW: 37 };
+    const MT_CHAR = { Semicolon: ";", Quote: "'" }; MT_WHITE.concat(Object.keys(MT_BLACK)).forEach(c => { if (!MT_CHAR[c]) MT_CHAR[c] = c.slice(3); });
+    const MT_ALL = MT_WHITE.concat(Object.keys(MT_BLACK));
+    const MT = { on: IDX.typing != null ? !!IDX.typing : (typeof KBD_LABELS !== "undefined" && !!KBD_LABELS), vel: 0.8 };
+    const mtNote = (tr, code) => { if (!tr) return null; if (tr.kind === "drums") return MT_DRUM[code] ?? null; const w = MT_WHITE.indexOf(code); if (w >= 0) return 60 + 12 * (tr.oct | 0) + MT_WOFF[w]; return MT_BLACK[code] != null ? 60 + 12 * (tr.oct | 0) + MT_BLACK[code] : null; };
+    function mtOct(tr, d) { const o = clamp((tr.oct | 0) + d, -3, 3); if (o === (tr.oct | 0)) return; tr.oct = o; saveSong(); if (S.view === "inst") renderInst(); mtPaint(); gbSay("Octave " + (o > 0 ? "+" : "") + o + ": A plays " + nname(60 + 12 * o)); }
+    function mtVel(d) { MT.vel = Math.round(clamp(MT.vel + d, 0.2, 1) * 10) / 10; mtPaint(); }
+    function mtLit(code, on) { const el = document.querySelector('#gbType .mt-k[data-code="' + code + '"]'); if (el) el.classList.toggle("on", on); }
+    const mtEl = gbEl("div", "gb-type"); mtEl.id = "gbType"; mtEl.hidden = true; mtEl.setAttribute("aria-label", "Musical Typing: the computer keys and what they play"); view.append(mtEl);
+    function mtPaint() {
+      $("gbTypeBtn").setAttribute("aria-pressed", String(MT.on));
+      mtEl.hidden = !MT.on || !V.open; if (mtEl.hidden) { MT.sig = ""; return; }
+      const tr = curTr(), sig = [tr && tr.id, tr && tr.kind, tr && tr.mode, tr && tr.oct, MT.vel, S.key, S.minor].join();
+      if (sig === MT.sig) return; MT.sig = sig;   // (nothing changed: the strip stays, keys held on it keep sounding)
+      mtEl.replaceChildren();
+      const side = gbEl("div", "mt-side"); side.append(gbEl("b", "", "Musical Typing"));
+      const row = (k1, txt, k2) => { const r = gbEl("span"); r.append(gbEl("kbd", "", k1), document.createTextNode(" " + txt + " "), gbEl("kbd", "", k2)); return r; };
+      if (tr && tr.kind !== "drums" && tr.kind !== "audio") side.append(row("Z", "octave " + ((tr.oct | 0) > 0 ? "+" : "") + (tr.oct | 0), "X"));
+      side.append(row("C", "velocity " + Math.round(MT.vel * 100), "V"));
+      mtEl.append(side);
+      if (!tr) { mtEl.append(gbEl("span", "mt-msg", "Choose an instrument: the keys play it")); return; }
+      if (tr.kind === "audio") { mtEl.append(gbEl("span", "mt-msg", "R records the microphone · Space plays")); return; }
+      const keys = gbEl("div", "mt-keys"), key = (code, cls, label) => { const b = gbEl("button", "mt-k " + cls); b.dataset.code = code; b.append(document.createTextNode(MT_CHAR[code] || code)); if (label) b.append(gbEl("small", "", label)); return b; };
+      if (SMART[tr.kind] && tr.mode !== "notes") {
+        const cr = gbEl("div", "mt-row"); chordsOf().forEach((c, i) => { const b = key("Digit" + (i + 1), "", c.name); b.firstChild.textContent = String(i + 1); cr.append(b); }); keys.append(cr);
+      }
+      if (tr.kind === "drums") {
+        const r1 = gbEl("div", "mt-row"), r2 = gbEl("div", "mt-row");
+        r1.append(key("KeyW", "mt-b", DRUMNAME(37)));
+        MT_WHITE.forEach(c => r2.append(key(c, "mt-w", DRUMNAME(MT_DRUM[c]))));
+        keys.append(r1, r2);
+      } else {
+        const r1 = gbEl("div", "mt-row blk"), r2 = gbEl("div", "mt-row");
+        MT_BROW.forEach(c => r1.append(c ? key(c, "mt-b", nname(mtNote(tr, c))) : gbEl("span", "mt-k mt-gap")));
+        MT_WHITE.forEach(c => r2.append(key(c, "mt-w", nname(mtNote(tr, c)))));
+        keys.append(r1, r2);
+      }
+      mtEl.append(keys);
+      // (the strip plays too, by mouse or touch)
+      keys.addEventListener("pointerdown", e => {
+        const b = e.target.closest(".mt-k[data-code]"); if (!b) return; e.preventDefault(); const code = b.dataset.code, t2 = curTr(); if (!t2) return;
+        if (code.startsWith("Digit")) { chordDown(t2, +code.slice(5) - 1, "m" + e.pointerId, MT.vel); b.classList.add("on"); const up = () => { chordUp("m" + e.pointerId); b.classList.remove("on"); removeEventListener("pointerup", up); }; addEventListener("pointerup", up); return; }
+        const m = mtNote(t2, code); if (m == null) return;
+        liveOn(t2, m, MT.vel); lit(m, true); b.classList.add("on");
+        const up = () => { liveOff(t2, m); lit(m, false); b.classList.remove("on"); removeEventListener("pointerup", up); removeEventListener("pointercancel", up); };
+        addEventListener("pointerup", up); addEventListener("pointercancel", up);
+      });
+    }
+    $("gbTypeBtn").addEventListener("click", () => { MT.on = !MT.on; IDX.typing = MT.on; saveIdx(); mtPaint(); if (S && S.view === "inst") renderInst(); });
     function setView(v) {
       if (v === "inst" && !curTr()) v = "browse";
       if (S.view === "inst" && v !== "inst") { liveAllOff(); apStop(); micMonitor(null, false); if (SREC) sampRecStop(); }
@@ -23597,12 +23677,12 @@ registerProcessor("nb-wave", NBWave);
         b.title = "Smart Controls: shape this track's sound"; c.append(b);
       }
       const tip = t => ib.append(gbEl("div", "gb-tip", t));
-      if (tr.kind === "drums") { tip("Tap the pads: harder in the middle. On a computer keyboard: Q W E R · A S D F · Z X C V."); padsUI(ib, tr); }
+      if (tr.kind === "drums") { tip("Tap the pads: harder in the middle. Computer keyboard: A kick, S snare, D clap, F hat (⌨ shows the rest)."); padsUI(ib, tr); }
       else if (chords) { tip(tr.auto ? "Autoplay " + tr.auto + ": tap a chord to start the pattern in time, tap another to change, tap it again to stop. Keys 1–8 play the chords." : tr.kind === "guitar" ? "Tap a chord name to strum it, tap the strings one at a time, or drag across them to strum. Keys 1–8 play the chords." : "Touch a chord to play it, or the boxes below it for single notes. Keys 1–8 play the chords."); stripsUI(ib, tr); }
       else if (smart && tr.kind !== "strings") { tip("Tap a fret to play a note, slide along a string to glide. The left column is the open string."); fretUI(ib, tr); }
       else if (tr.kind === "sampler") samplerUI(ib, tr);
       else if (tr.kind === "audio") audioUI(ib, tr);
-      else { tip("Play lower on a key for a louder note, slide across the keys to glide. The computer keyboard plays too (Z to / for the low octave, Q to ] for the next)."); keyboardUI(ib, tr); }
+      else { tip("Play lower on a key for a louder note, slide across the keys to glide. Computer keyboard: A is middle C, the home row the white keys, W E T Y U O P the black ones, Z X change octave (⌨ shows them)."); keyboardUI(ib, tr); }
       paintBar();
     }
     // a keyboard: multi-touch, glide, velocity from where the key is struck
@@ -23618,6 +23698,7 @@ registerProcessor("nb-wave", NBWave);
         const k = gbEl("div", "gb-kbk"); k.dataset.m = m + 1; k.style.left = ((i + 1) * 100 / nW - bw / 2) + "%"; k.style.width = bw + "%"; kb.append(k); keys.set(m + 1, k);
       });
       V.keys = keys;
+      if (MT.on) MT_ALL.forEach(code => { const m = mtNote(tr, code), k = m != null && keys.get(m); if (k) k.append(gbEl("span", "gb-kl", MT_CHAR[code])); });
       touchPlay(kb, tr, el => el.closest("[data-m]"), (el, y) => { const r = el.getBoundingClientRect(); return clamp(0.35 + 0.65 * (y - r.top) / Math.max(1, r.height), 0.25, 1); });
     }
     // the pointer handling shared by the keyboard and the fretboard: each finger plays one note and glides
@@ -23636,10 +23717,10 @@ registerProcessor("nb-wave", NBWave);
     }
     function padsUI(box, tr) {
       const g = gbEl("div", "gb-pads"); box.append(g);
-      const keys = new Map(), labels = "QWERASDFZXCV";
+      const keys = new Map();
       kitPads((tr.snd || "kit:studio").slice(4)).forEach((p, i) => {
         const d = gbEl("div", "gb-pad" + (p.id ? "" : " dim")); d.dataset.m = p.m; d.style.setProperty("--pc", PADCOL[p.m]);
-        d.append(gbEl("span", "", p.name)); if (KBD_LABELS) d.append(gbEl("i", "", labels[i]));
+        d.append(gbEl("span", "", p.name)); { const code = Object.keys(MT_DRUM).find(c => MT_DRUM[c] === p.m); if (MT.on && code) d.append(gbEl("i", "", MT_CHAR[code])); }
         g.append(d); keys.set(p.m, d);
       });
       V.keys = keys;
@@ -23678,7 +23759,7 @@ registerProcessor("nb-wave", NBWave);
       const nseg = tr.kind === "guitar" ? 6 : 4, CH = chordsOf();
       CH.forEach((ch, ci) => {
         const col = gbEl("div", "gb-strip"), vo = voicing(tr.kind, ch);
-        const lab = gbEl("div", "gb-chord", ch.name); lab.dataset.ci = ci; col.append(lab);
+        const lab = gbEl("div", "gb-chord", ch.name); lab.dataset.ci = ci; if (MT.on) lab.append(gbEl("sup", "", String(ci + 1))); col.append(lab);
         for (let s = 0; s < nseg; s++) {
           const j = tr.kind === "guitar" ? s : nseg - 1 - s, m = vo[j];
           const sg = gbEl("div", "gb-seg" + (m == null ? " mute" : ""), m == null ? "×" : nname(m).replace(/-?\d+$/, "")); sg.dataset.ci = ci; sg.dataset.j = j;
@@ -24613,7 +24694,7 @@ registerProcessor("nb-wave", NBWave);
          ["Cycle", "In Tracks, ⟳ Cycle loops the yellow bars. Record in a cycle and each pass adds to the take, so you can build a drum part one sound at a time."],
          ["Tracks", "Tap a region for Edit, Cut, Copy, Paste, Duplicate, Loop, Split and Delete. Drag it to move it (onto another track too), drag its right edge to make it longer or shorter. Tap a track's name to select it, tap it again for its settings; its icon opens the instrument. M mutes, S solos."],
          ["Editing notes", "Edit (or double-tap a region) opens the piano roll: tap to add a note, drag a note to move it, drag its right end to change its length, double-tap to delete it. Drag empty space to scroll. Quantize snaps notes to the grid; Velocity sets how hard the selected notes play."],
-         ["Keys", "Space plays and stops. Shift+R records. Enter goes back to the start. Delete removes the selected region or notes. With Smart chords, 1–8 play the chord strips."],
+         ["Musical Typing", "⌨ in the bar shows the computer keyboard as an instrument, as in GarageBand: A is middle C and the home row (A S D F G H J K L ; ') the white keys, W E T Y U O P the black keys; Z and X move an octave, C and V set how hard. With Smart chords, 1–8 play the chord strips; on drums A is the kick, S the snare, D the clap, F G H the hats, J K L the toms, ; and ' the cymbals, W the rim. Space plays and stops, R records, Return goes back to the start, Delete removes the selected region or notes."],
          ["Songs", "Songs stay on this device and go into your Nate Bloom projects. Songs (top left) makes, opens, renames and exports them: Export plays the song once and saves it as WAV or MP3."]].forEach(([h, t]) => { const p = gbEl("p", "gb-p"); p.append(gbEl("b", "", h + ": "), document.createTextNode(t)); box.append(p); });
       });
     }
@@ -24687,7 +24768,7 @@ registerProcessor("nb-wave", NBWave);
       if (!sheet.hidden) return;
       const code = e.code || "", tr = curTr(), stopIt = () => { e.preventDefault(); e.stopImmediatePropagation(); };
       if (code === "Space") { stopIt(); if (!e.repeat) $("gbPlay").click(); return; }
-      if (code === "KeyR" && e.shiftKey) { stopIt(); if (!e.repeat) $("gbRec").click(); return; }
+      if (code === "KeyR") { stopIt(); if (!e.repeat) $("gbRec").click(); return; }   // (R records, as in GarageBand)
       if (code === "Enter" || code === "NumpadEnter" || code === "Home") { if (t && t.closest && t.closest("button")) return; stopIt(); $("gbHome").click(); return; }
       if (code === "Delete" || code === "Backspace") {
         if (ED.open && ED.sel.size) { stopIt(); edDelete(); return; }
@@ -24695,15 +24776,15 @@ registerProcessor("nb-wave", NBWave);
         return;
       }
       if (e.shiftKey || !tr || tr.kind === "audio") return;
-      if (SMART[tr.kind] && tr.mode !== "notes" && /^Digit[1-8]$/.test(code)) { stopIt(); if (e.repeat || KD.has(code)) return; KD.set(code, { chord: true }); chordDown(tr, +code.slice(5) - 1, "k" + code); return; }
-      let i, m;
-      if (tr.kind === "drums") { i = PADC.indexOf(code); if (i < 0 && !code) i = PADK.indexOf((e.key || "").toLowerCase()); if (i < 0) return; m = PADS[i][0]; }
-      else { i = KBC.indexOf(code); if (i < 0 && !code) i = KBKS.indexOf((e.key || "").toLowerCase()); if (i < 0) return; m = 48 + 12 * (tr.oct | 0) + i; }
+      if (code === "KeyZ" || code === "KeyX") { stopIt(); if (!e.repeat && tr.kind !== "drums") mtOct(tr, code === "KeyX" ? 1 : -1); return; }
+      if (code === "KeyC" || code === "KeyV") { stopIt(); if (!e.repeat) mtVel(code === "KeyV" ? 0.1 : -0.1); return; }
+      if (SMART[tr.kind] && tr.mode !== "notes" && /^Digit[1-8]$/.test(code)) { stopIt(); if (e.repeat || KD.has(code)) return; KD.set(code, { chord: true }); chordDown(tr, +code.slice(5) - 1, "k" + code, MT.vel); mtLit(code, true); return; }
+      const m = mtNote(tr, code); if (m == null) return;
       stopIt(); if (e.repeat || KD.has(code)) return;
-      KD.set(code, { m, tr: tr.id }); liveOn(tr, m, 0.85); lit(m, true);
+      KD.set(code, { m, tr: tr.id }); liveOn(tr, m, MT.vel); lit(m, true); mtLit(code, true);
     }, true);
     window.addEventListener("keyup", e => {
-      const code = e.code || "", k = KD.get(code); if (!k) return; KD.delete(code); e.stopImmediatePropagation();
+      const code = e.code || "", k = KD.get(code); if (!k) return; KD.delete(code); e.stopImmediatePropagation(); mtLit(code, false);
       if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); lit(k.m, false); }
     }, true);
     addEventListener("blur", () => { KD.forEach((k, code) => { if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); } }); KD.clear(); });
