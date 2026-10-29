@@ -2219,7 +2219,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .sp-acts .btn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
 .sp-acts select { height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font: 0.8rem var(--font-body); padding: 0 8px; max-width: 150px; }
 .sp-pos { margin-left: auto; font: 0.7rem var(--font-mono); color: var(--dim); }
-.sp-syls { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-height: 92px; overflow-y: auto; position: relative; padding: 2px; }
+.sp-syls { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; max-height: 136px; overflow-y: auto; position: relative; padding: 2px; }
 .sp-sy { flex: none; width: auto; appearance: none; border: 1px solid var(--line); background: var(--raised); color: var(--ink); border-radius: 7px; padding: 4px 8px; min-height: 28px; font: 600 0.82rem var(--font-body); cursor: pointer; }
 .sp-sy.w { margin-left: 6px; }
 .sp-sy.hold { color: var(--dim); min-width: 26px; }
@@ -2231,6 +2231,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 @media (max-width: 700px) {
   .sp-ch { width: 150px; height: 54px; }
   .sp-acts select { max-width: 120px; }
+  .sp-syls { max-height: 100px; }
   .sp-pos { flex-basis: 100%; margin-left: 0; }
 }
 /* ---------- Lite ---------- */
@@ -25746,12 +25747,15 @@ z: [z]=Z
       const P = spParsed(), take = spTake(P, SPC.pos, SPS.mode), from = SPC.pos >= P.syl.length ? 0 : SPC.pos, to = from + take.syls.length;
       syls.querySelectorAll(".sp-sy").forEach(b => { const i = +b.dataset.i; b.classList.toggle("on", i >= from && i < to); });
       const on = syls.querySelector(".sp-sy.on");
-      if (on && !card.hidden) { const r = on.offsetTop - syls.offsetTop; if (r < syls.scrollTop || r > syls.scrollTop + syls.clientHeight - on.offsetHeight) syls.scrollTop = Math.max(0, r - 6); }
+      if (on && !card.hidden) { const r = on.offsetParent === syls ? on.offsetTop : on.offsetTop - syls.offsetTop; if (r < syls.scrollTop || r > syls.scrollTop + syls.clientHeight - on.offsetHeight) syls.scrollTop = Math.max(0, r - 4); }
       const pc = $("spPos"); if (pc) pc.textContent = P.syl.length ? (from + 1) + " / " + P.syl.length : "";
     }
     function spPaintMode() { document.querySelectorAll("#spMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === SPS.mode))); $("spLoop").setAttribute("aria-pressed", String(SPS.loop)); }
     let spTT = 0;
     text.value = SPS.text;
+    // the box grows with the words (up to six lines, then it scrolls)
+    function spFitText() { if (card.hidden) return; text.style.height = "auto"; text.style.height = Math.min(text.scrollHeight + 2, 156) + "px"; }
+    text.addEventListener("input", spFitText);
     text.addEventListener("input", () => { SPS.text = text.value.slice(0, 4000); spSave(); clearTimeout(spTT); spTT = setTimeout(() => { SPC.pos = 0; SPC.last = null; spReparse(); }, 250); });
     text.addEventListener("focus", spWarm);
     // the computer keyboard plays notes, so typing in the box must not
@@ -25764,20 +25768,20 @@ z: [z]=Z
     SP_EXAMPLES.forEach(([n]) => { const o = document.createElement("option"); o.value = n; o.textContent = n; ex.append(o); });
     ex.addEventListener("change", () => {
       const e = SP_EXAMPLES.find(x => x[0] === ex.value); ex.value = ""; if (!e) return;
-      const keep = SPS.text; SPS.text = text.value = e[1]; spSave(); SPC.pos = 0; spReparse();
+      const keep = SPS.text; SPS.text = text.value = e[1]; spSave(); SPC.pos = 0; spReparse(); spFitText();
       if (typeof undoToast === "function") undoToast("Lyrics: " + e[0], () => { SPS.text = text.value = keep; spSave(); SPC.pos = 0; spReparse(); });
     });
     spPaintMode();
     // a mouse wheel scrolls the voices sideways
     chars.addEventListener("wheel", e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && chars.scrollWidth > chars.clientWidth) { chars.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
     const spSetVoice = id => { if (!SP_CHARS.some(c => c.id === id)) return; SPS.ch = id; spSave(); chars.querySelectorAll(".sp-ch").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.ch === id))); spPaintInfo(); };
-    const spSetText = t => { SPS.text = text.value = String(t || "").slice(0, 4000); spSave(); SPC.pos = 0; SPC.last = null; spReparse(); };
+    const spSetText = t => { SPS.text = text.value = String(t || "").slice(0, 4000); spSave(); SPC.pos = 0; SPC.last = null; spReparse(); spFitText(); };
     // the panel shows with the Speech sound
     { const re = renderEngine; renderEngine = function () {
         const r = re.apply(this, arguments);
         const on = state.engine === "speech", was = !card.hidden;
         card.hidden = !on;
-        if (on && !was) { if (!chars.children.length) spPaintChars(); else spPaintInfo(); spWarm(); spPaintSyl(); }
+        if (on && !was) { if (!chars.children.length) spPaintChars(); else spPaintInfo(); spWarm(); spPaintSyl(); spFitText(); }
         return r;
       }; }
     window.__sp = { SPS, SPC, SP_CHARS, setVoice: spSetVoice, setText: spSetText, parse: spParse, word: spWord, syls: spSylSegs, phrase: spPhraseSegs, restart: spRestart, say: spSay, dict: () => SPD, voice: spVoice, nodes: SPR };
