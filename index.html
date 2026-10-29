@@ -2338,6 +2338,31 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
 .st-pop { position: fixed; z-index: 60; min-width: 180px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.55); }
 .st-pop[hidden] { display: none; }
 .st-pop .btn { justify-content: flex-start; height: 38px; padding: 0 12px; font-size: 0.86rem; }
+/* ---------- simpler (126): Beats = Grid + Pads; Song in Seq ---------- */
+#rcBtn { display: none !important; }
+.studio.rclive::after { content: ""; position: absolute; top: 4px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: #5fd38d; box-shadow: 0 0 0 2px var(--panel); }
+@media (max-width: 600px) { .studio.rclive::after { top: 7px; right: calc(50% - 18px); } }
+.bt-sw { flex: none; }
+.bt-sw button { height: 30px; padding: 0 14px; font-size: 0.82rem; }
+.panelbar #songSeqBtn { flex: none; height: 32px; }
+/* ---------- simpler (127): the Garage is the timeline ---------- */
+#trkMini, #betaTracksBtn { display: none !important; }
+.gbmini { border-color: var(--lilac); z-index: 26; }
+.gbmini #gbMiniRec.on, .gbmini.rec #gbMiniRec { background: #ff5c7a; color: #fff; border-color: #ff5c7a; }
+@media (max-width: 600px) { .gbmini { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); } }
+.gb-insw { margin-bottom: 10px; }
+.gb-card.gb-import { background: var(--cg); }
+.gb-va { position: absolute; left: 0; top: 1px; pointer-events: none; overflow: visible; }
+.gb-va polyline { fill: none; stroke: #ffd54f; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.gb-arow .gb-head { cursor: default; }
+.gb-arow.off .gb-alane { opacity: 0.45; }
+.gb-alane { background: repeating-linear-gradient(90deg, #ffffff08 0 1px, transparent 1px 40px), #14121c; cursor: crosshair; touch-action: none; }
+.gb-alane svg { position: absolute; left: 0; top: 1px; overflow: visible; }
+.gb-alane polyline { fill: none; stroke: #7fd6c2; stroke-width: 1.8; vector-effect: non-scaling-stroke; }
+.gb-ahint { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font: 0.66rem var(--font-mono); color: var(--dim); pointer-events: none; white-space: nowrap; }
+.gb-head .ms button.r[aria-pressed="true"] { background: #ff5c7a; color: #fff; border-color: #ff5c7a; }
+.gb-head .ms button.a[aria-pressed="true"] { background: #7fd6c2; color: #0b1a17; border-color: #7fd6c2; }
+.gb-arow .gb-head .ms { flex-direction: row; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -2380,7 +2405,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
       <span class="msep" aria-hidden="true"></span>
       <button class="btn mode studio" id="djBtn" title="DJ: mix two songs and grab samples"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7.5"/><circle cx="10" cy="13.5" r="2"/><path d="M20 3v8l-4.5 3.5"/></svg><span class="stl">DJ</span></button>
       <button class="btn mode studio" id="rcBtn" title="Rhythm Creator: a 16-track drum machine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="3.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="3.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="16.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="stl">Rhythm</span></button>
-      <button class="btn mode studio" id="bpBtn" title="Beat Pads: play and record beats on 16 pads, chop samples"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8.5" height="8.5" rx="2" fill="currentColor"/></svg><span class="stl">Beats</span></button>
+      <button class="btn mode studio" id="bpBtn" title="Beats: the Rhythm Creator (Grid) and Beat Pads (Pads)"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8.5" height="8.5" rx="2" fill="currentColor"/></svg><span class="stl">Beats</span></button>
       <button class="btn mode studio" id="gbBtn" title="Garage: a GarageBand-style studio. Choose an instrument, play it, record tracks, arrange, mix and export a song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 3.4l-7.1 7.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M12.9 10.1c-1.8-1.2-4.3-.9-5.8.6-.8.9-1.2 2-1 3.1-1.4 0-2.7.6-3.4 1.7-1.1 1.7-.4 3.9 1.4 4.7 1.6.7 3.5.1 4.4-1.4.5-.8.6-1.7.4-2.5 1.2.2 2.4-.2 3.3-1.1 1.6-1.6 1.6-4 .7-5.1z" fill="currentColor"/><path d="M17.7 1.9l4.4 4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="stl">Garage</span></button>
     </div>
     </div>
@@ -2421,7 +2446,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
     <button class="btn" id="takeExport">Export WAV</button>
     <button class="btn" id="takeMp3" title="A small file for Messenger, iMessage or email">Export MP3</button>
     <button class="btn" id="takeToSlot">Send to sampler</button>
-    <button class="btn" id="takeToTracks" hidden>→ Tracks</button>
+    <button class="btn" id="takeToTracks" hidden title="Put the take on a new audio track in the Garage">→ Garage</button>
     <button class="btn" id="takeDiscard">Discard</button>
   </div>
 
@@ -2465,7 +2490,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
     <label class="meter" id="meterWrap" hidden><span class="mlab">Time</span>
       <select id="meter" aria-label="Time signature"></select>
     </label>
-    <button class="btn" id="beatsBtn" hidden>Beats</button>
+    <button class="btn" id="beatsBtn" hidden title="Pick a beat for the pattern">Beats…</button>
   </div>
 
   <div class="row" id="engineRow">
@@ -2778,7 +2803,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
       </div>
       <div class="dj-smartrow">
         <button class="btn" id="djSmart" title="Smart mix: reads both songs and plans where and how to mix into the next one">✦ Smart mix</button>
-        <button class="btn" id="djToTracks" title="Put both songs on Tracks, matched in tempo and key and lined up on the beat, to build a mashup">→ Tracks</button>
+        <button class="btn" id="djToTracks" title="Put both songs in the Garage, matched in tempo and key and lined up on the beat, to build a mashup">→ Garage</button>
       </div>
       <label class="dj-xf"><b>A</b><input type="range" id="djXf" min="0" max="1" step="0.01" value="0.5" aria-label="Crossfader"><b>B</b></label>
       <div class="dj-cap">Crossfader · double-tap to centre</div>
@@ -2916,6 +2941,13 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
   </div>
   <input type="file" id="trkFile" accept="audio/*,.wav,.mp3,.m4a,.aif,.aiff,.flac,.ogg" multiple hidden>
 </div>
+<div class="trkmini gbmini" id="gbMini" hidden role="group" aria-label="The Garage song">
+  <button class="btn" id="gbMiniPlay" aria-label="Play the song">▶</button>
+  <button class="btn" id="gbMiniRec" aria-label="Record" hidden>●</button>
+  <span class="time" id="gbMiniPos">1 . 1</span>
+  <button class="btn" id="gbMiniOpen">Garage</button>
+  <button class="btn" id="gbMiniX" aria-label="Stop and close">✕</button>
+</div>
 <div class="trkmini" id="trkMini" hidden>
   <button class="btn" id="trkMiniPlay" aria-label="Play or stop tracks">▶</button>
   <button class="btn" id="trkMiniRec" aria-label="Record">●</button>
@@ -3001,7 +3033,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
         <select id="bpL16p" aria-label="What 16 Levels changes"><option value="tune">Tune</option><option value="vel">Velocity</option><option value="decay">Decay</option><option value="filter">Filter</option></select>
         <span class="bp-l16tag" id="bpL16Tag"></span>
         <button class="btn" id="bpResamp" title="Render the sequence (or the song) into a new sample on a pad">Resample</button>
-        <button class="btn" id="bpToTrk" title="Put the sequence (or the song) on a new track in Tracks, as clips">→ Tracks</button></div>
+        <button class="btn" id="bpToTrk" title="Put the sequence (or the song) on a new audio track in the Garage, as regions">→ Garage</button></div>
       <div class="bp-row">
         <label class="rc-mini">Loop <select id="bpBars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></label>
         <label class="rc-mini">Quantize <select id="bpQ"><option value="0">Off</option><option value="2">1/8</option><option value="1.3333">1/8 T</option><option value="1">1/16</option><option value="0.6667">1/16 T</option><option value="0.5">1/32</option></select></label>
@@ -3324,7 +3356,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
     <div class="ex-list">
       <div class="ex-item"><div class="mx-lab"><b>Stems of everything playing</b><small>From the next bar: every part (each synth, samples, drums, Rhythm Creator, Beat Pads, DJ) to its own WAV, plus the reverb and the full mix, all the same length so they line up in Bitwig.</small>
         <span class="ex-opts"><label>Bars <select id="exStBars" aria-label="How many bars to record"><option>4</option><option selected>8</option><option>16</option><option>32</option></select></label></span></div><button class="btn primary" id="exStRec">Record</button></div>
-      <div class="ex-item"><div class="mx-lab"><b>Stems from Tracks</b><small>One WAV per track from Tracks, all starting at 0:00 so they line up.</small></div><button class="btn primary" id="exStems">Export</button></div>
+      <div class="ex-item"><div class="mx-lab"><b>Stems from the Garage</b><small>One WAV per audio track of the Garage song (recordings and imported files), all starting at 0:00 so they line up.</small></div><button class="btn primary" id="exStems">Export</button></div>
       <div class="ex-item"><div class="mx-lab"><b>MIDI file</b><small>Notes melody, SY row, drums, the Rhythm Creator (4 bars) and Beat Pads (the song or the sequence), drums as GM notes on ch 10, at your tempo and time signature.</small></div><button class="btn primary" id="exMidi">Export</button></div>
       <div class="ex-item"><div class="mx-lab"><b>Pads for the K.O. II</b><small>Your 12 pads as numbered mono WAVs. <label style="display:inline-flex;gap:4px;align-items:center"><input type="checkbox" id="exSlots"> include sampler slots</label></small></div><button class="btn primary" id="exPads">Export</button></div>
     </div>
@@ -3398,7 +3430,7 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
   <div class="ed-card" role="dialog" aria-label="Help">
     <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
-      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b>, <b>Rhythm</b>, <b>Beats</b> and <b>Garage</b> open full screens of their own (a green dot means one is playing). <b>Keys · Seq · Notes</b> switch what this page shows. On a phone the sections sit in the bar along the bottom; on a tablet or a computer they're in the top bar. The top bar also has <b>Mix</b>, <b>● Rec</b>, the red <b>■</b> that stops everything, <b>↶</b> (undo) and <b>☰</b>, which holds the rest: Tracks, Song, Projects, Plugins, My sounds, Export, MIDI, Install, History, this help and Exit. Controls that don't apply to what you're playing (Chord, octave, Arp and Hold on the drums and pads) are hidden. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> takes back the last change (see Undo); big changes (a new beat, Clear) also offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b>, <b>Beats</b> (Grid: the Rhythm Creator · Pads: Beat Pads) and <b>Garage</b> open full screens of their own (a green dot means one is playing). <b>Keys · Seq · Notes</b> switch what this page shows. On a phone the sections sit in the bar along the bottom; on a tablet or a computer they're in the top bar. The top bar also has <b>Mix</b>, <b>● Rec</b>, the red <b>■</b> that stops everything, <b>↶</b> (undo) and <b>☰</b>, which holds the rest: Projects, Plugins, My sounds, Export, MIDI, Install, History, this help and Exit. Controls that don't apply to what you're playing (Chord, octave, Arp and Hold on the drums and pads) are hidden. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> takes back the last change (see Undo); big changes (a new beat, Clear) also offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
@@ -3408,8 +3440,8 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
       <p hidden><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
-      <p><b>Garage:</b> the Garage tab is a GarageBand-style studio. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
-      <p><b>Rhythm Creator:</b> the Rhythm button in the top bar opens a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
+      <p><b>Garage:</b> the Garage tab is a GarageBand-style studio, and Nate Bloom's one timeline: audio tracks record the microphone or Nate Bloom itself (everything you play, while the song plays), Import audio adds files, audio regions have Gain & fades, + Automation draws or records a plugin's control, a track's volume can be automated, Play along keeps the song going in a small bar, and → Garage (the take bar, the DJ, Beat Pads) puts audio there. What was in Tracks is a Garage song called Tracks. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
+      <p><b>Beats</b> has two tabs at the top: <b>Grid</b> is the Rhythm Creator and <b>Pads</b> is Beat Pads (16 pads to play, record and chop samples onto; its <b>?</b> explains them). <b>Rhythm Creator</b> (Grid): a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
@@ -3425,13 +3457,13 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
       <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
-      <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
-      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, the Rhythm Creator, Beat Pads, the Garage and Tracks. The full screens (Rhythm, Beats, the Garage, Tracks) have the same ↶ in their top bar, for the changes you made there. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
+      <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In the Garage, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
+      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, the Rhythm Creator, Beat Pads and the Garage. The full screens (Beats and the Garage) have the same ↶ in their top bar, for the changes you made there. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
-      <p><b>☰</b> (top right) holds Tracks (a multitrack editor), Song, Projects, Plugins, My sounds, Export, MIDI, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
-      <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (☰) chains your own patterns A–D into an arrangement.</p>
+      <p><b>☰</b> (top right) holds Projects, Plugins, My sounds, Export, MIDI, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
+      <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
     </div>
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
     <div class="sp-lab"><span>Keyboard shortcuts</span></div>
@@ -9699,14 +9731,11 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // a Nate Bloom ● Rec take can go straight onto a new track
   document.getElementById("takeToTracks").addEventListener("click", async () => {
     if (!take.done) return;
-    await trkLoad();
     const d = take.done, buf = new AudioBuffer({ length: d.len, numberOfChannels: 2, sampleRate: d.rate });
     const L = buf.getChannelData(0), R = buf.getChannelData(1); let o = 0;
     for (let c = 0; c < d.L.length; c++) { const l = d.L[c], r = d.R[c]; for (let i = 0; i < l.length && o < d.len; i++, o++) { L[o] = l[i] / 32767; R[o] = r[i] / 32767; } }
-    snapshot(); const t = newTrack(false, "Take"); if (!t) return;
-    const id = addAudio(buf, "Take");
-    T.clips.push({ id: trkUid(), track: t.id, audio: id, name: "Take", start: 0, offset: 0, dur: buf.duration, gain: 1, fadeIn: 0, fadeOut: 0 });
-    trkSave(); takeInfo.textContent = "Added to Tracks as \"" + t.name + "\""; openTracks();
+    const res = window.__gbAudio && __gbAudio([{ buf, name: "Take", start: 0 }], { open: true });
+    takeInfo.textContent = res ? "Added to the Garage as a new track" : "Couldn't add it to the Garage";
   });
 
   // ---------- open / minimize ----------
@@ -10775,6 +10804,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // ---------- Exports ----------
   const exEl = document.getElementById("exports"), exInfo = document.getElementById("exInfo");
   async function exportStems() {
+    if (window.__gb && __gb.audioStems) {
+      exInfo.textContent = "Rendering the Garage's audio tracks…";
+      const st = await __gb.audioStems();
+      if (!st.length) { exInfo.textContent = "The Garage song has no audio tracks yet: record or import some first."; return; }
+      const files = st.map((x, i) => ({ name: String(i + 1).padStart(2, "0") + " " + safeName(x.name) + ".wav", data: new Uint8Array(wavOf(x.buf)) }));
+      exInfo.textContent = (await saveZip(takeName() + "-stems", zipMany(files))) + " · every stem starts at 0:00, so they line up in Bitwig";
+      return;
+    }
     await trkLoad();
     const used = T.tracks.filter(t => T.clips.some(c => c.track === t.id));
     if (!used.length) { exInfo.textContent = "Tracks is empty: record or import something there first."; return; }
@@ -11233,7 +11270,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const omc = mixChannels;
     mixChannels = function () {
       const ch = omc();
-      if (betaOn) ch.splice(1, 0, { group: "Tracks", name: "All tracks", sub: "overall volume of the Tracks editor", get: () => trkVol,
+      if (window.__nbTracksMix) ch.splice(1, 0, { group: "Tracks", name: "All tracks", sub: "overall volume of the Tracks editor", get: () => trkVol,
         set: v => { trkVol = v; try { localStorage.setItem("nightbloom-trackvol", v); } catch (e) {} applyTrkVol(); }, dflt: 0.8 });
       // what's sounding right now goes to the top, so the loud thing is easy to find
       const live = c => (c.group === "Synths" && c.sub === "playing now") || (c.group === "Library layers" && !/ · off$/.test(c.sub) && (state.engine === "lib" || !!(state.stack && state.stack.lib)))
@@ -14480,11 +14517,11 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     // where the recording goes: "take" (decide afterwards), a sampler slot "s0".."s7", or "trk" (a new track in Tracks)
     let recTo = "take"; try { const v = localStorage.getItem("nightbloom-recto"); if (v) recTo = v; } catch (e) {}
     const sels = ["recTo", "djRecTo", "recbTo"].map(id => document.getElementById(id)).filter(Boolean);
-    const label = v => v === "take" ? "→ Take" : v === "trk" ? "→ Tracks" : "→ S" + (+v.slice(1) + 1);
+    const label = v => v === "take" ? "→ Take" : v === "trk" ? "→ Garage" : "→ S" + (+v.slice(1) + 1);
     function fillSels() {
-      const opts = [["take", "→ Take", "Keep it as a take: export, sampler or Tracks afterwards"]];
+      const opts = [["take", "→ Take", "Keep it as a take: export, sampler or the Garage afterwards"]];
       for (let j = 0; j < NSLOTS; j++) opts.push(["s" + j, "→ S" + (j + 1), "Sampler slot S" + (j + 1) + (sampBuf[j] ? " (replaces " + baseName(state.samp.slots[j].name || "its sound").slice(0, 18) + ")" : " (empty)")]);
-      opts.push(["trk", "→ Tracks", "A new track in the Tracks editor"]);
+      opts.push(["trk", "→ Garage", "A new audio track in the Garage"]);
       sels.forEach(sel => { sel.innerHTML = ""; opts.forEach(([v, l, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = l; o.title = t; sel.appendChild(o); }); sel.value = recTo; sel.title = opts.find(o => o[0] === recTo)[2]; });
     }
     sels.forEach(sel => {
@@ -16163,8 +16200,6 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     // ---- phones: ☰ Menu instead of the sideways tool row ----
     const menu = document.getElementById("menuSheet"), grid = document.getElementById("menuGrid");
     const ITEMS = [
-      ["betaTracksBtn", "Tracks", "Record and arrange audio on a timeline"],
-      ["songBtn", "Song", "Chain patterns A–D into a song"],
       ["prBtn", "Projects", "Save, open and share everything"],
       ["wamBtn", "Plugins", "Plugin instruments and effects"],
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
@@ -16949,33 +16984,25 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
         let sL = L.semi || 0, sF = F.semi || 0, keyNote = "";
         if (!sL && !sF && DJ.stretchOK && L.cam && F.cam && djCompat(L.cam, F.cam) < 2) for (const st of [1, -1, 2, -2]) if (djCompat(L.cam, camShift(F.cam, st)) >= 2) { sF = st; keyNote = " · " + "AB"[F.i] + (st > 0 ? " up " : " down ") + Math.abs(st) + " semitone" + (Math.abs(st) > 1 ? "s" : "") + " so the keys fit (" + F.cam + " → " + camShift(F.cam, st) + ")"; break; }
         const posL = djPos(L), posF = djPos(F);
-        djMsg("Rendering " + "AB"[L.i] + " at " + bpm + " BPM for Tracks…", true);
+        djMsg("Rendering " + "AB"[L.i] + " at " + bpm + " BPM for the Garage…", true);
         const oL = await renderDeck(L, rL, sL);
-        djMsg("Rendering " + "AB"[F.i] + " at " + bpm + " BPM for Tracks…", true);
+        djMsg("Rendering " + "AB"[F.i] + " at " + bpm + " BPM for the Garage…", true);
         const oF = await renderDeck(F, rF, sF);
         // Tracks' grid follows the app's tempo
         setBpm(bpm);
-        await trkLoad();
         const barS = barSec(), anc = (d, r) => (d.phrase != null ? d.phrase : d.off) / r;
         let stL = Math.max(1, Math.ceil(anc(L, rL) / barS - 1e-6)) * barS - anc(L, rL), stF;
         if (live) stF = stL + posL / rL - posF / rF;            // exactly as they sound now
         else stF = stL + anc(L, rL) - anc(F, rF);              // first downbeats (or Phrase marks) on the same bar
         const low = Math.min(stL, stF); if (low < 0) { const k = Math.ceil(-low / barS - 1e-6) * barS; stL += k; stF += k; }
-        snapshot();
-        const add = (d, o, st) => {
-          const name = "AB"[d.i] + " · " + (d.name || "song"), t = newTrack(false, name); if (!t) return false;
-          const id = addAudio(o.buf, name);
-          T.clips.push({ id: trkUid(), track: t.id, audio: id, name, start: Math.max(0, st), offset: 0, dur: o.buf.duration, gain: 1, fadeIn: 0, fadeOut: 0 });
-          return true;
-        };
-        if (!add(L, oL, stL) || !add(F, oF, stF)) { djMsg("Tracks is full (" + TRK_MAX + " tracks)"); return; }
-        trkSave();
+        const nm = d => "AB"[d.i] + " · " + (d.name || "song");
+        const pitchNote0 = !oL.locked || !oF.locked ? " · without key lock here, the speed change moves the pitch" : "";
+        if (!window.__gbAudio || !__gbAudio([{ buf: oL.buf, name: nm(L), start: Math.max(0, stL) }, { buf: oF.buf, name: nm(F), start: Math.max(0, stF) }], { bpm, song: "DJ mashup", open: true,
+          say: "Both songs at " + bpm + " BPM, " + (live ? "lined up as they were playing" : "first downbeats on the same bar") + keyNote + ". Split, move and copy to build the mashup" + pitchNote0 })) { djMsg("Couldn't put the songs in the Garage"); return; }
         const pitchNote = !oL.locked || !oF.locked ? " · without key lock here, the speed change moves the pitch" : "";
-        djMsg("Both songs are on Tracks at " + bpm + " BPM" + keyNote + pitchNote, true);
-        openTracks();
-        setTimeout(() => trkSay("Both songs at " + bpm + " BPM, " + (live ? "lined up as they were playing" : "first downbeats on the same bar") + keyNote + ". Split, move and copy to build the mashup" + pitchNote), 400);
-      } catch (e) { djMsg("Couldn't put the songs on Tracks: " + (e && e.message || e)); }
-      finally { busy = false; btn.disabled = false; btn.textContent = "→ Tracks"; }
+        djMsg("Both songs are in the Garage at " + bpm + " BPM" + keyNote + pitchNote, true);
+      } catch (e) { djMsg("Couldn't put the songs in the Garage: " + (e && e.message || e)); }
+      finally { busy = false; btn.disabled = false; btn.textContent = "→ Garage"; }
     }
     btn.addEventListener("click", toTracks);
   }
@@ -18318,21 +18345,19 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     try {
       const r = await bpRenderSegs(segs, { gain: BPS.level, tail: 3 }); if (!r) return null;
       const buf = bpTrimTail(r.buf, Math.round(r.len * r.buf.sampleRate)), pk = bpPeak(buf); if (pk > 0.97) bpScale(buf, 0.97 / pk);
-      const bpm = rcBpm(); if (Math.abs(bpm - state.seq.bpm) >= 0.5) setBpm(Math.round(bpm));   // Tracks' grid follows the app's tempo
-      await trkLoad(); snapshot();
-      const name = song ? "Beat Pads · song" : "Beat Pads · Seq " + (BPS.cur + 1), tr = newTrack(false, name);
-      if (!tr) { noteMsg("Tracks is full (" + TRK_MAX + " tracks)", true); return null; }
-      const id = addAudio(buf, name); let at = 0;
+      const bpm = rcBpm();
+      const name = song ? "Beat Pads · song" : "Beat Pads · Seq " + (BPS.cur + 1), items = []; let at = 0;
       segs.forEach((sg, j) => {
         const len = sg.bars * 16 * r.sd, last = j === segs.length - 1;
-        T.clips.push({ id: trkUid(), track: tr.id, audio: id, name: "Seq " + (sg.n + 1), start: at, offset: at, dur: last ? Math.max(0.02, buf.duration - at) : len, gain: 1, fadeIn: 0, fadeOut: 0 });
+        items.push({ buf, name, track: name, label: "Seq " + (sg.n + 1), start: at, off: at, dur: last ? Math.max(0.02, buf.duration - at) : len });
         at += len;
       });
-      trkSave(); bpView.hidden = true; openTracks();
-      setTimeout(() => trkSay(segs.length + " clips on \"" + name + "\" at " + Math.round(bpm) + " BPM: move, copy or delete them to arrange"), 400);
-      return { track: tr.id, clips: segs.length };
-    } catch (e) { noteMsg("Couldn't put it on Tracks: " + (e && e.message || e), true); return null; }
-    finally { bpBusyBtn("bpToTrk", false, "→ Tracks"); }
+      bpView.hidden = true;
+      const res = window.__gbAudio && __gbAudio(items, { bpm, song: "Beat Pads", open: true, say: segs.length + " regions on \"" + name + "\" at " + Math.round(bpm) + " BPM: move, copy or delete them to arrange" });
+      if (!res) { noteMsg("Couldn't put it in the Garage", true); return null; }
+      return { track: res.tracks[0], clips: segs.length };
+    } catch (e) { noteMsg("Couldn't put it in the Garage: " + (e && e.message || e), true); return null; }
+    finally { bpBusyBtn("bpToTrk", false, "→ Garage"); }
   }
   document.getElementById("bpResamp").addEventListener("click", bpResample);
   document.getElementById("bpToTrk").addEventListener("click", bpToTracks);
@@ -20355,7 +20380,7 @@ registerProcessor("nb-verb", NBVerb);`;
           if (!sheet.hidden && fpApi() && NBW_HERE) {
             const live = fpNodes().filter(W => W.node.fast).map(W => W.name);
             const r2 = row(FP.on ? "on" : "", "⚡ Fast plugins", FP.on
-              ? "Your plugins (YOURS) play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and Tracks don't hear them while this is on."
+              ? "Your plugins (YOURS) play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and the Garage's Nate Bloom recordings don't hear them while this is on."
               : "Your plugins (YOURS) can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
             r2.append(btn(FP.on ? "On" : "Off", async () => { FP.on = !FP.on; try { localStorage.setItem("nightbloom-fastplug", FP.on ? "1" : "0"); } catch (e) {} start(); await fpApply(); nbwPaint(); }, FP.on, "Fast plugins"));
             list.insertBefore(r2, list.firstChild);
@@ -23215,14 +23240,14 @@ registerProcessor("nb-wave", NBWave);
       }
       if (!AU.master) { AU.master = ctx.createGain(); AU.master.gain.value = S && S.mvol != null ? S.mvol : 1; }
       // (straight into the master, after Nate Bloom's effects: each track has its own reverb send into the shared hall)
-      if (fx && fx.master && AU.dest !== fx.master) { try { AU.master.disconnect(); } catch (e) {} AU.master.connect(fx.master); AU.dest = fx.master; }
-      if (fx && fx.verbIn && AU.vin !== fx.verbIn) { AU.vin = fx.verbIn; AU.trk.forEach(N => { try { N.s.disconnect(); } catch (e) {} N.s.connect(AU.vin); }); }
+      { const D = AU.nb || (fx && fx.master); if (D && AU.dest !== D) { try { AU.master.disconnect(); } catch (e) {} AU.master.connect(D); AU.dest = D; } }
+      if (fx && fx.verbIn && AU.vin !== fx.verbIn && !AU.nb) { AU.vin = fx.verbIn; AU.trk.forEach(N => { try { N.s.disconnect(); } catch (e) {} N.s.connect(AU.vin); }); }
       return AU.master;
     }
     const soloOn = () => S.tracks.some(t => t.solo);
     const VERB = { keys: 0.22, drums: 0.1, bass: 0, guitar: 0.18, strings: 0.32, synth: 0.18, plugin: 0.14, sampler: 0.14, audio: 0.2 };
     const tRv = tr => tr.rv != null ? tr.rv : (VERB[tr.kind] ?? 0.15);
-    const tVerb = tr => tRv(tr) * 0.9;
+    const tVerb = tr => AU.nb ? 0 : tRv(tr) * 0.9;
     const tLevel = tr => (tr.mute || (soloOn() && !tr.solo)) ? 0 : Math.pow(clamp(tr.vol, 0, 1.2), 2) * 1.25;
     function tNode(tr) {
       const M = gbOut(); if (!M) return null;
@@ -23409,8 +23434,21 @@ registerProcessor("nb-wave", NBWave);
     function audioStart(tr, r, t, off) {
       const buf = ABUF.get(r.key); if (!buf || !ctx) return;
       const N = tNode(tr), o = (r.off || 0) + off, dur = Math.min(r.len * spb() - off, buf.duration - o); if (dur <= 0.01 || o < 0) return;
-      const src = ctx.createBufferSource(); src.buffer = buf; src.connect(N.g);
-      src.start(Math.max(t, ctx.currentTime), o, dur); TP.srcs.push(src);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const when = Math.max(t, ctx.currentTime), L = Math.min(r.len * spb(), buf.duration - (r.off || 0)), G = ctx.createGain();
+      clipEnv(G.gain, r, L, off, when, dur); src.connect(G).connect(N.g);
+      src.start(when, o, dur); TP.srcs.push(src);
+    }
+    // a region's level: its gain, and its fades (seconds, from the start and the end of each time it plays)
+    function clipEnvAt(r, L, lt) {
+      const g = r.g != null ? r.g : 1, fi = Math.min(r.fi || 0, L / 2), fo = Math.min(r.fo || 0, L / 2);
+      return g * (fi > 0 && lt < fi ? Math.max(0, lt / fi) : 1) * (fo > 0 && lt > L - fo ? Math.max(0, (L - lt) / fo) : 1);
+    }
+    function clipEnv(P, r, L, off, when, dur) {
+      const g = r.g != null ? r.g : 1, fi = Math.min(r.fi || 0, L / 2), fo = Math.min(r.fo || 0, L / 2);
+      P.setValueAtTime(clipEnvAt(r, L, off), when);
+      if (fi > 0 && off < fi) P.linearRampToValueAtTime(g, when + (fi - off));
+      if (fo > 0 && off + dur > L - fo - 1e-4) { const fs = L - fo; if (off < fs) P.setValueAtTime(g, when + (fs - off)); P.linearRampToValueAtTime(0, when + Math.max(0.001, L - off)); }
     }
     const audioReps = (r, fn) => { for (let k = 0; k < (r.rep || 1); k++) fn(r.start + k * r.len); };
     function startAudio(b, t) { S.tracks.forEach(tr => { if (tr.kind === "audio" && tLevel(tr) > 0) tr.regions.forEach(r => audioReps(r, s => { if (s < b - 1e-6 && s + r.len > b + 1e-6) audioStart(tr, r, t ?? timeAt(b), (b - s) * spb()); })); }); }
@@ -23436,7 +23474,7 @@ registerProcessor("nb-wave", NBWave);
         if (cyc && bEnd >= lim && TP.next >= lim - 1e-9) {   // the cycle starts over
           const tw = timeAt(lim);
           if (TP.rec) recWrap();
-          TP.t0 = tw; TP.b0 = S.cyc.a; TP.next = S.cyc.a; seekIdx(S.cyc.a); stopAudio(tw); startAudio(S.cyc.a, tw);
+          TP.t0 = tw; TP.b0 = S.cyc.a; TP.next = S.cyc.a; seekIdx(S.cyc.a); stopAudio(tw); startAudio(S.cyc.a, tw); vaSched(S.cyc.a, tw);
           continue;
         }
         break;
@@ -23452,7 +23490,7 @@ registerProcessor("nb-wave", NBWave);
       if (TP.on) stop();
       const tr = curTr();
       if (rec && !tr) { gbSay("Pick an instrument first: each one becomes a track you can record"); return; }
-      if (rec && tr.kind === "audio" && !MIC.src) { micOpen().then(ok => { if (ok) play(true); }); return; }
+      if (rec && tr.kind === "audio" && tr.input !== "nb" && !MIC.src) { micOpen().then(ok => { if (ok) play(true); }); return; }
       liveAllOff(); buildEv(); if (window.__sp) __sp.restart();
       let from = TP.exp ? 0 : S.ph;
       if (!TP.exp && S.cyc.on && (from < S.cyc.a - 1e-6 || from >= S.cyc.b - 1e-6)) from = S.cyc.a;
@@ -23463,6 +23501,7 @@ registerProcessor("nb-wave", NBWave);
       seekIdx(from); startAudio(from);
       S.tracks.forEach(t => { if ((t.snd || "").startsWith("wam:")) plugFor(t); });
       if (rec) recStart(tr, from);
+      vaSched(from, TP.t0); beatAlong(true);
       tick(); TP.timer = setInterval(tick, 25);
       paintBar(); frame();
     }
@@ -23472,7 +23511,7 @@ registerProcessor("nb-wave", NBWave);
       clearInterval(TP.timer); TP.on = false;
       AU.vs.forEach(x => { try { x.v.stop(now); } catch (e) {} }); AU.vs.clear();
       AU.plug.forEach(P => { if (P.node) plugMidi(P, now, [0xB0, 123, 0]); });
-      stopAudio(now); apAfterStop();
+      stopAudio(now); apAfterStop(); vaRest(); beatAlong(false);
       const wasRec = TP.rec; TP.rec = false;
       if (wasRec) recFinish(b);
       if (b >= TP.b0) S.ph = Math.max(0, b);
@@ -23483,7 +23522,7 @@ registerProcessor("nb-wave", NBWave);
     const recBeat = () => beatAt(ctx.currentTime - (ctx.outputLatency || ctx.baseLatency || 0));
     function recStart(tr, from) {
       REC.tr = tr.id; REC.b0 = from; REC.notes = []; REC.held.clear(); REC.cyc = S.cyc.on ? { a: S.cyc.a, b: S.cyc.b } : null;
-      if (tr.kind === "audio") audioRecStart(tr);
+      if (tr.kind === "audio") { if (tr.input === "nb") nbRecStart(tr); else audioRecStart(tr); }
     }
     const recking = tr => TP.on && TP.rec && tr && REC.tr === tr.id;
     function recOn(tr, m, vel, dt = 0) { if (!recking(tr)) return; REC.held.set(m, { b: Math.max(REC.b0, recBeat() + dt / spb()), v: vel }); }
@@ -23498,7 +23537,7 @@ registerProcessor("nb-wave", NBWave);
     function recWrap() { if (!REC.cyc) return; REC.held.forEach((h, m) => { REC.notes.push([h.b, m, Math.max(0.06, REC.cyc.b - h.b), h.v]); h.b = REC.cyc.a; }); }
     function trimRegion(r, a, b) {
       if (b - a < 0.02) return null;
-      if (r.key) return Object.assign({}, r, { id: uid(), start: a, len: b - a, rep: 1, off: (r.off || 0) + (a - r.start) * spb() });
+      if (r.key) return Object.assign({}, r, { id: uid(), start: a, len: b - a, rep: 1, off: (r.off || 0) + (a - r.start) * spb(), fi: a > r.start + 1e-6 ? 0 : r.fi, fo: b < r.start + r.len - 1e-6 ? 0 : r.fo });
       const notes = flatNotes(r).filter(n => n[0] >= a - 1e-6 && n[0] < b - 1e-6).map(n => [n[0] - a, n[1], Math.min(n[2], b - n[0]), n[3]]);
       return { id: uid(), start: a, len: b - a, rep: 1, notes, name: r.name };
     }
@@ -23515,7 +23554,7 @@ registerProcessor("nb-wave", NBWave);
     }
     function recFinish(bStop) {
       const tr = S.tracks.find(t => t.id === REC.tr); if (!tr) return;
-      if (tr.kind === "audio") { audioRecFinish(tr, bStop); return; }
+      if (tr.kind === "audio") { if (tr.input === "nb") nbRecFinish(tr, bStop); else audioRecFinish(tr, bStop); return; }
       const endB = REC.cyc ? Math.min(bStop, REC.cyc.b) : bStop;
       REC.held.forEach((h, m) => REC.notes.push([h.b, m, Math.max(0.06, endB - h.b), h.v])); REC.held.clear();
       const notes0 = REC.notes.filter(n => Number.isFinite(n[0])); if (!notes0.length) return;
@@ -23585,6 +23624,7 @@ registerProcessor("nb-wave", NBWave);
     async function idbDel(key) { try { const db = await idb(); db.transaction("samples", "readwrite").objectStore("samples").delete(key); } catch (e) {} }
     async function loadAudio(key) {
       if (ABUF.has(key)) return ABUF.get(key);
+      if (key.startsWith("trk:")) { const b = await getAudio(key.slice(4)); if (b) ABUF.set(key, b); return b; }
       const rec = await idbGet(key); if (!rec || !rec.data || !ctx) return null;
       try { const b = await decode(rec.data.slice(0)); ABUF.set(key, b); return b; } catch (e) { return null; }
     }
@@ -23658,7 +23698,7 @@ registerProcessor("nb-wave", NBWave);
       side.append(row("C", "velocity " + Math.round(MT.vel * 100), "V"));
       mtEl.append(side);
       if (!tr) { mtEl.append(gbEl("span", "mt-msg", "Choose an instrument: the keys play it")); return; }
-      if (tr.kind === "audio") { mtEl.append(gbEl("span", "mt-msg", "R records the microphone · Space plays")); return; }
+      if (tr.kind === "audio") { mtEl.append(gbEl("span", "mt-msg", tr.input === "nb" ? "R records Nate Bloom (the Garage steps into a small bar) · Space plays" : "R records the microphone · Space plays")); return; }
       const keys = gbEl("div", "mt-keys"), key = (code, cls, label) => { const b = gbEl("button", "mt-k " + cls); b.dataset.code = code; b.append(document.createTextNode(MT_CHAR[code] || code)); if (label) b.append(gbEl("small", "", label)); return b; };
       if (SMART[tr.kind] && tr.mode !== "notes") {
         const cr = gbEl("div", "mt-row"); chordsOf().forEach((c, i) => { const b = key("Digit" + (i + 1), "", c.name); b.firstChild.textContent = String(i + 1); cr.append(b); }); keys.append(cr);
@@ -23712,7 +23752,10 @@ registerProcessor("nb-wave", NBWave);
       });
       $("gbBrowseSub").textContent = S.tracks.length
         ? "Each one becomes a new track in " + S.name + " (it has " + S.tracks.length + (S.tracks.length === 1 ? " track" : " tracks") + "). Play it, press ● to record."
-        : "Each one becomes a track. Play it, press ● to record, then arrange it in Tracks.";
+        : "Each one becomes a track. Play it, press ● to record, then arrange it on the timeline.";
+      { const ib = gbEl("button", "gb-card gb-import"); ib.style.setProperty("--cg", "linear-gradient(150deg, #2e5d6b, #10232a)"); ib.dataset.kind = "import";
+        ib.innerHTML = '<span class="gi">' + ICON.audio + "</span>"; ib.append(gbEl("b", "", "Import audio"), gbEl("small", "", "WAV, MP3, M4A, AIFF or FLAC files onto new audio tracks, at the playhead"));
+        ib.addEventListener("click", () => importPick(null)); box.append(ib); }
     }
     function addTrack(kind, opt) {
       if (S.tracks.length >= 32) { gbSay("A song holds 32 tracks"); return null; }
@@ -23969,7 +24012,9 @@ registerProcessor("nb-wave", NBWave);
       if (V.open && S.view === "inst") renderInst();
     }
     function audioUI(box, tr) {
+      if (tr.input === "nb") { nbUI(box, tr); return; }
       const w = gbEl("div", "gb-audio");
+      w.append(inSw(tr));
       w.append(gbEl("div", "big", MIC.src ? "Microphone on" : "Audio Recorder"));
       w.append(gbEl("div", "gb-tip", "Press ● in the top bar to record. The take lands on this track at the playhead, lined up with what was playing. Use headphones, so the mic doesn't pick up the other tracks."));
       const m = gbEl("div", "gb-meter"); m.innerHTML = "<i></i>"; w.append(m); V.meter = m.firstChild;
@@ -23978,7 +24023,8 @@ registerProcessor("nb-wave", NBWave);
       const mon = btnE("Monitor", () => { tr.mon = !tr.mon; micMonitor(tr, tr.mon && !!MIC.src); mon.setAttribute("aria-pressed", String(!!tr.mon)); saveSong(); });
       mon.setAttribute("aria-pressed", String(!!tr.mon)); mon.title = "Hear the microphone through this track (use headphones)";
       row.append(mon); w.append(row);
-      const takes = tr.regions.length; w.append(gbEl("div", "gb-tip", takes ? takes + (takes === 1 ? " take" : " takes") + " on this track: see them in Tracks." : "No takes yet."));
+      const takes = tr.regions.length; w.append(gbEl("div", "gb-tip", takes ? takes + (takes === 1 ? " take" : " takes") + " on this track: see them on the timeline (◫ Tracks)." : "No takes yet."));
+      w.append(btnE("Import an audio file…", () => importPick(tr)));
       box.append(w);
       if (MIC.src) micMonitor(tr, !!tr.mon);
     }
@@ -24060,7 +24106,7 @@ registerProcessor("nb-wave", NBWave);
     const ZOOM = [10, 14, 20, 28, 40, 56, 80];
     const PXB = () => ZOOM[clamp(S.zoom | 0, 0, ZOOM.length - 1)];
     const HEADW = () => isPhone() ? 104 : 176, ROWH = () => isPhone() ? 62 : 70;
-    const snapU = () => { const P = PXB(); return P >= 40 ? 0.25 : P >= 20 ? 1 : S.sig; };
+    const snapU = () => { if (S && S.free) return 1 / 96; const P = PXB(); return P >= 40 ? 0.25 : P >= 20 ? 1 : S.sig; };
     const totalBeats = () => Math.max(S.bars * S.sig, Math.ceil(songEndBeat() / S.sig) * S.sig) + S.sig * 2;
     function findRegion(id) { if (!id || !S) return null; for (const tr of S.tracks) { const r = tr.regions.find(x => x.id === id); if (r) return { tr, r }; } return null; }
     const PEAKS = new Map();
@@ -24081,7 +24127,7 @@ registerProcessor("nb-wave", NBWave);
         const secPerBeat = spb(), mid = h / 2;
         for (let k = 0; k < reps; k++) for (let x = 0; x < (r.len / tot) * w; x += 2) {
           const sec = (r.off || 0) + (x / w) * tot * secPerBeat, i = Math.floor(sec * P.rate); if (i >= P.pk.length) break;
-          const a = Math.min(1, P.pk[i] * 1.6) * (h / 2 - 1); g.fillRect(x + (k * r.len / tot) * w, mid - a, 1.6, a * 2 || 1);
+          const a = Math.min(1, P.pk[i] * 1.6 * clipEnvAt(r, r.len * secPerBeat, (x / w) * tot * secPerBeat)) * (h / 2 - 1); g.fillRect(x + (k * r.len / tot) * w, mid - a, 1.6, a * 2 || 1);
         }
         return;
       }
@@ -24133,6 +24179,7 @@ registerProcessor("nb-wave", NBWave);
         });
         const ln = gbEl("div", "gb-lane" + (i === S.sel ? " sel" : "")); ln.style.width = W + "px"; ln.style.backgroundImage = grid; ln.dataset.i = i;
         tr.regions.forEach(r => ln.append(regionEl(tr, r, P, RH)));
+        vaDraw(ln, tr, P, RH, W);
         ln.addEventListener("pointerdown", e => {
           if (e.target !== ln) return;
           hideMenu(); V.rsel = "";
@@ -24142,6 +24189,7 @@ registerProcessor("nb-wave", NBWave);
         });
         row.append(hd, ln); inn.append(row);
       });
+      laneRows(inn, P, HW, W, RH);
       const ar = gbEl("div", "gb-row gb-addrow"), ah = gbEl("button", "gb-head", "+ Add a track");
       ah.style.width = HW + "px"; ah.style.height = Math.round(RH * 0.8) + "px"; ah.style.border = "0"; ah.addEventListener("click", () => setView("browse"));
       ar.append(ah); inn.append(ar);
@@ -24248,6 +24296,7 @@ registerProcessor("nb-wave", NBWave);
       add("Duplicate", () => { gbDo(); const R = cloneRegion(r); R.start = rEnd(r); placeRegion(tr, R, false); V.rsel = R.id; fitLen(); dirty(); saveSong(); renderTracks(); });
       add((r.rep || 1) > 1 ? "Unloop" : "Loop", () => loopRegion(tr, r), "Repeat the region up to the next one");
       if (S.ph > r.start + 0.05 && S.ph < rEnd(r) - 0.05) add("Split", () => splitRegion(tr, r), "Cut the region in two at the playhead");
+      if (r.key) add("Gain & fades", () => { hideMenu(); clipSheet(tr, r); }, "Level, fade in, fade out and Normalize");
       add("Delete", () => delRegion(tr, r));
       m.hidden = false;
       const B = $("gbTracks").getBoundingClientRect(), R = el.getBoundingClientRect();
@@ -24285,6 +24334,8 @@ registerProcessor("nb-wave", NBWave);
     function renderTbar() {
       const b = $("gbTbar"); if (!b || !S) return; b.replaceChildren();
       b.append(btnE("+ Track", () => setView("browse")));
+      b.append(btnE("Play along", playAlong, "", "Keep the song playing and go back to the keys (it stays in a small bar)"));
+      if (window.__wl && __wl.pick) b.append(btnE("+ Automation", laneAdd, "", "Automate a plugin's control along the song"));
       const cy = btnE("⟳ Cycle", () => {
         gbDo(); S.cyc.on = !S.cyc.on;
         if (S.cyc.on) { const f = findRegion(V.rsel); if (f) { S.cyc.a = Math.floor(f.r.start / S.sig) * S.sig; S.cyc.b = Math.max(S.cyc.a + S.sig, Math.ceil(rEnd(f.r) / S.sig - 1e-6) * S.sig); } else { S.cyc.a = Math.floor(S.ph / S.sig + 1e-9) * S.sig; S.cyc.b = S.cyc.a + 4 * S.sig; } }
@@ -24606,9 +24657,10 @@ registerProcessor("nb-wave", NBWave);
         nm.addEventListener("change", () => { const v = nm.value.trim(); if (v && v !== tr.name) { gbDo(); tr.name = v; saveSong(); } });
         r.append(nm);
         if (tr.kind !== "audio") { r = row2(box, soundName(tr.snd), tr.kind === "drums" ? "drum kit" : "sound"); r.append(btnE("Change", () => soundSheet(tr))); if (tr.kind !== "drums" && !(tr.snd || "").startsWith("smp:") && tr.snd !== "sf2") r.append(btnE("Controls", () => ctlSheet(tr))); }
-        r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); });
+        r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); vaTouch(tr, v); });
         r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Pan", -1, 1, 0.01, tr.pan, panTxt, v => { tr.pan = v; applyLevels(); });
         r = row2(box, "", ""); r.firstChild.remove(); slider(r, "Reverb", 0, 1, 0.01, tRv(tr), v => Math.round(v * 100) + "%", v => { tr.rv = v; applyLevels(); });
+        vaRow(box, tr);
         const i = S.tracks.indexOf(tr), acts = gbEl("div", "gb-chips");
         acts.append(btnE("Play it", () => { S.sel = i; closeSheet(); setView("inst"); }, "primary"));
         acts.append(btnE("Duplicate track", () => {
@@ -24635,7 +24687,7 @@ registerProcessor("nb-wave", NBWave);
           let r = row2(box, "", ""); r.firstChild.remove();
           const m = btnE("M", () => { tr.mute = !tr.mute; m.setAttribute("aria-pressed", String(tr.mute)); applyLevels(); saveSong(); }, "", "Mute " + tr.name), so = btnE("S", () => { tr.solo = !tr.solo; so.setAttribute("aria-pressed", String(tr.solo)); applyLevels(); saveSong(); }, "", "Solo " + tr.name);
           m.setAttribute("aria-pressed", String(!!tr.mute)); so.setAttribute("aria-pressed", String(!!tr.solo)); r.append(m, so);
-          slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); });
+          slider(r, "Volume", 0, 1.2, 0.01, tr.vol, dbTxt, v => { tr.vol = v; applyLevels(); vaTouch(tr, v); });
           r = row2(box, "", ""); r.firstChild.remove();
           slider(r, "Pan", -1, 1, 0.01, tr.pan, panTxt, v => { tr.pan = v; applyLevels(); });
           slider(r, "Reverb", 0, 1, 0.01, tRv(tr), v => Math.round(v * 100) + "%", v => { tr.rv = v; applyLevels(); });
@@ -24672,6 +24724,9 @@ registerProcessor("nb-wave", NBWave);
         tog("Metronome", "clicks while you play and record (never in an export)", "metro");
         tog("Count-in", "one bar of clicks before recording starts", "cin");
         tog("Merge recordings", "a new take adds to the notes already there instead of replacing them (Cycle always merges)", "merge");
+        groupH(box, "Playing");
+        tog("The Seq beat plays along", "the beat from Seq plays with the song, at the song's tempo", "beat");
+        tog("Free placement", "move and resize regions anywhere, without snapping to beats and bars", "free");
       });
     }
     function loopNotes(i) {
@@ -24783,7 +24838,7 @@ registerProcessor("nb-wave", NBWave);
           box.append(gbEl("p", "gb-p", "Your song is ready (" + fmtClock(take.done.len / take.done.rate) + "). Save it:"));
           const c = gbEl("div", "gb-chips");
           const save = id => () => { GBNAME = fileName(); $(id).click(); setTimeout(() => { GBNAME = ""; }, 4000); };
-          c.append(btnE("Save WAV", save("takeExport"), "primary"), btnE("Save MP3", save("takeMp3")), btnE("Record it again", expStart));
+          c.append(btnE("Save WAV", save("takeExport"), "primary"), btnE("Save MP3", save("takeMp3")), btnE("Bounce to a track", bounceTake, "", "Put the mix on a new audio track and mute the others"), btnE("Record it again", expStart));
           box.append(c); return;
         }
         box.append(gbEl("p", "gb-p", "The song plays once from the start while Nate Bloom records it: everything you hear goes in, the reverb and master included, the metronome left out. Then save it as a WAV (full quality) or an MP3 (small, for messages)."));
@@ -24792,7 +24847,7 @@ registerProcessor("nb-wave", NBWave);
     }
     function helpSheet() {
       openSheet("How the Garage works", "a GarageBand-style studio", box => {
-        [["Instruments", "Each card makes a track: Keyboard (piano, organ, electric pianos), Drums (the kits from the Rhythm Creator), Smart Bass, Guitar and Strings (chord strips in the song's key, with Autoplay patterns), Synths (Nate Bloom's engines and presets), Your Plugins, the Sampler and the Audio Recorder. ◫ at the top left adds another."],
+        [["Audio", "An audio track records the microphone, or Nate Bloom itself: pick Nate Bloom, press ●, and the Garage steps into a small bar so you can play the keys, pads, Beats or DJ while the song plays (it plays around the recording, not into it). Import audio adds WAV, MP3, M4A, AIFF or FLAC files. Tap an audio region for Gain & fades (and Normalize). Play along keeps the song going in the small bar while you play. + Automation adds a lane for a plugin's control: draw on it, or ● and turn the control. A track's Volume automation (in its sheet) records as you move its volume while the song plays. Bounce (after Export) puts the mix on a new track."], ["Instruments", "Each card makes a track: Keyboard (piano, organ, electric pianos), Drums (the kits from the Rhythm Creator), Smart Bass, Guitar and Strings (chord strips in the song's key, with Autoplay patterns), Synths (Nate Bloom's engines and presets), Your Plugins, the Sampler and the Audio Recorder. ◫ at the top left adds another."],
          ["Recording", "Press ● to record the selected track: one bar of count-in, then play. Each take becomes a region on the track, starting on a bar; recording over a region replaces that part, unless Merge recordings (in Song settings) or Cycle is on. MIDI keyboards and the computer keyboard record too."],
          ["Cycle", "In Tracks, ⟳ Cycle loops the yellow bars. Record in a cycle and each pass adds to the take, so you can build a drum part one sound at a time."],
          ["Tracks", "Tap a region for Edit, Cut, Copy, Paste, Duplicate, Loop, Split and Delete. Drag it to move it (onto another track too), drag its right edge to make it longer or shorter. Tap a track's name to select it, tap it again for its settings; its icon opens the instrument. M mutes, S solos."],
@@ -24832,7 +24887,7 @@ registerProcessor("nb-wave", NBWave);
     }
     function gbOpen() {
       start(); ensureSong();
-      V.open = true; view.hidden = false;
+      V.open = true; view.hidden = false; V.mini = false; { const mn = $("gbMini"); if (mn) mn.hidden = true; }
       S.tracks.forEach(t => prep(t)); loadSongAudio();
       setView(S.view === "inst" && !curTr() ? "browse" : (S.view || (S.tracks.length ? "tracks" : "browse")));
       frame();
@@ -24892,7 +24947,375 @@ registerProcessor("nb-wave", NBWave);
       if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); lit(k.m, false); }
     }, true);
     addEventListener("blur", () => { KD.forEach((k, code) => { if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); } }); KD.clear(); });
-    window.__gb = { put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
+    // ======================================================================
+    // 127: what Tracks did, in the Garage
+    // ======================================================================
+    // ---- the audio track's source: the microphone or Nate Bloom ----
+    function inSw(tr) {
+      const sw = gbEl("div", "gb-chips gb-insw");
+      [["mic", "Microphone"], ["nb", "Nate Bloom"]].forEach(([v, t]) => { const b = btnE(t, () => { if ((tr.input || "mic") === v) return; gbDo(); tr.input = v; if (v === "nb") { micMonitor(null, false); } saveSong(); renderInst(); }); b.setAttribute("aria-pressed", String((tr.input || "mic") === v)); sw.append(b); });
+      return sw;
+    }
+    function nbUI(box, tr) {
+      const w = gbEl("div", "gb-audio");
+      w.append(inSw(tr));
+      w.append(gbEl("div", "big", "Record Nate Bloom"));
+      w.append(gbEl("div", "gb-tip", "Press ● and play: the Garage steps into a small bar at the bottom so you can play the keys, pads, Beats or the DJ while the song plays. Everything you play goes onto this track, lined up with the song; the song itself plays around the recording, not into it. ■ in the small bar stops."));
+      const row = gbEl("div", "gb-row3");
+      row.append(btnE("● Record now", () => play(true), "primary"), btnE("Import an audio file…", () => importPick(tr)));
+      w.append(row);
+      const takes = tr.regions.length; w.append(gbEl("div", "gb-tip", takes ? takes + (takes === 1 ? " take" : " takes") + " on this track." : "No takes yet."));
+      box.append(w);
+    }
+    const NBR = { proc: null, mute: null, L: [], R: [], len: 0, t0: null };
+    function nbRecStart(tr) {
+      if (!B || !B.betaOut || !B.trackBus) { gbSay("Recording Nate Bloom isn't available here"); return; }
+      AU.nb = B.trackBus; gbOut(); applyLevels();
+      AU.trk.forEach(N => { try { N.s.disconnect(); } catch (e) {} }); AU.vin = null;   // (the shared hall would carry the song into the take)
+      const proc = ctx.createScriptProcessor(4096, 2, 2), mute = ctx.createGain(); mute.gain.value = 0;
+      NBR.L = []; NBR.R = []; NBR.len = 0; NBR.t0 = null;
+      proc.onaudioprocess = e => {
+        if (!TP.on || !TP.rec) return;
+        const ib = e.inputBuffer, n = ib.length, tEnd = ctx.currentTime, tStart = tEnd - n / ctx.sampleRate;
+        if (tEnd < TP.t0 - 0.05) return;   // (still counting in)
+        if (NBR.t0 == null) NBR.t0 = tStart;
+        NBR.L.push(new Float32Array(ib.getChannelData(0))); NBR.R.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); NBR.len += n;
+      };
+      B.betaOut.connect(proc); proc.connect(mute).connect(ctx.destination); NBR.proc = proc; NBR.mute = mute;
+      gbMini(true);
+      gbSay("Recording Nate Bloom into " + tr.name + ": play, then ■");
+    }
+    async function nbRecFinish(tr, bStop) {
+      try { B.betaOut.disconnect(NBR.proc); NBR.proc.disconnect(); NBR.mute.disconnect(); } catch (e) {}
+      NBR.proc = null; AU.nb = null; gbOut(); applyLevels();
+      const L = NBR.L, R = NBR.R, total = NBR.len, t0 = NBR.t0; NBR.L = []; NBR.R = []; NBR.len = 0; NBR.t0 = null;
+      if (!total || t0 == null) return;
+      const sr = ctx.sampleRate, buf = ctx.createBuffer(2, total, sr), dl = buf.getChannelData(0), dr = buf.getChannelData(1); let o = 0;
+      L.forEach((c, i) => { dl.set(c, o); dr.set(R[i], o); o += c.length; });
+      // you play to what you hear, which reaches you a little late: line the take up with the song
+      const lat = (ctx.outputLatency || ctx.baseLatency || 0.02) + 4096 / sr;
+      const a = REC.b0, off = Math.max(0, timeAt(a) - (t0 - lat));
+      if (buf.duration - off < 0.15) { gbSay("That take was too short to keep"); return; }
+      const endB = REC.cyc ? Math.min(bStop, REC.cyc.b) : bStop, len = Math.max(0.5, Math.min(endB - a, (buf.duration - off) / spb()));
+      const key = "gb:" + S.id + ":" + uid();
+      ABUF.set(key, buf); gbDo();
+      placeRegion(tr, { id: uid(), start: a, len: +len.toFixed(4), rep: 1, key, off: +off.toFixed(4), dur: buf.duration, name: "Nate Bloom take" }, false);
+      fitLen(); dirty(); saveSong();
+      gbSay("Recorded " + (buf.duration - off).toFixed(1) + " s of Nate Bloom into " + tr.name);
+      if (V.open && S.view === "tracks") renderTracks();
+      try { const wav = bufferToWav(buf); await idbPut(key, { name: tr.name + " take", data: wav instanceof Blob ? await wav.arrayBuffer() : wav }); } catch (e) { gbSay("Couldn't keep the recording: storage is full"); }
+    }
+
+    // ---- audio files ----
+    let impIn = null, impTr = null;
+    function importPick(tr) {
+      start(); impTr = tr ? tr.id : null;
+      if (!impIn) { impIn = document.createElement("input"); impIn.type = "file"; impIn.multiple = true; impIn.accept = "audio/*,.wav,.mp3,.m4a,.aif,.aiff,.flac,.ogg"; impIn.hidden = true; document.body.append(impIn);
+        impIn.addEventListener("change", () => { const fs = [...impIn.files]; impIn.value = ""; if (fs.length) importFiles(fs, impTr); }); }
+      impIn.click();
+    }
+    async function importFiles(files, trId) {
+      start(); if (!ctx) return 0; ensureSong();
+      let n = 0, first = trId ? trById(trId) : null; const at = Math.max(0, S.ph || 0);
+      for (const f of files) {
+        let data, buf; try { data = await f.arrayBuffer(); buf = await decode(data.slice(0)); } catch (e) { gbSay("Couldn't read " + f.name); continue; }
+        if (!buf) continue;
+        const name = (f.name || "Audio").replace(/\.[^.]+$/, "").slice(0, 40);
+        let tr = first && first.kind === "audio" ? first : null; first = null;
+        if (!tr) { tr = addTrack("audio", { stay: true }); if (!tr) break; tr.name = name; tr.input = "nb"; tr.rv = 0; } else gbDo();
+        const key = "gb:" + S.id + ":" + uid(); ABUF.set(key, buf);
+        placeRegion(tr, { id: uid(), start: at, len: +(buf.duration / spb()).toFixed(4), rep: 1, key, off: 0, dur: buf.duration, name }, false);
+        try { await idbPut(key, { name, data }); } catch (e) { gbSay("Couldn't keep " + name + ": storage is full"); }
+        n++;
+      }
+      if (n) { fitLen(); dirty(); saveSong(); if (!V.open && !V.mini) gbOpen(); setView("tracks"); gbSay("Imported " + n + (n > 1 ? " files" : " file") + " at the playhead"); }
+      return n;
+    }
+    // audio from elsewhere in Nate Bloom (a take, the DJ's mashup, Beat Pads): onto audio tracks
+    async function storeBuf(key, buf, name) { try { const wav = bufferToWav(buf); await idbPut(key, { name, data: wav instanceof Blob ? await wav.arrayBuffer() : wav }); } catch (e) { gbSay("Couldn't keep " + name + ": storage is full"); } }
+    function gbAudioIn(items, opt = {}) {
+      start(); if (!ctx || !items.length) return null;
+      if (V.open && TP.on) stop();
+      ensureSong();
+      if (opt.bpm) {
+        const bpm = clamp(Math.round(opt.bpm), 40, 240);
+        if (S.tracks.some(t => t.regions.length) && bpm !== S.bpm) { const ns = newSong(opt.song || "Song"); ns.bpm = bpm; switchSong(ns); }
+        else if (bpm !== S.bpm) { gbDo(); S.bpm = bpm; }
+      }
+      const keys = new Map(), byTrack = new Map();
+      for (const it of items) {
+        let key = keys.get(it.buf); if (!key) { key = "gb:" + S.id + ":" + uid(); keys.set(it.buf, key); ABUF.set(key, it.buf); storeBuf(key, it.buf, it.name); }
+        const tn = it.track || it.name; let tr = byTrack.get(tn);
+        if (!tr) { tr = addTrack("audio", { stay: true }); if (!tr) break; tr.name = tn.slice(0, 40); tr.input = "nb"; tr.rv = 0; byTrack.set(tn, tr); }
+        const off = it.off || 0, dur = it.dur != null ? it.dur : it.buf.duration - off;
+        tr.regions.push({ id: uid(), start: +(Math.max(0, it.start || 0) / spb()).toFixed(4), len: +(Math.max(0.05, dur) / spb()).toFixed(4), rep: 1, key, off: +off.toFixed(4), dur: it.buf.duration, name: it.label || it.name });
+      }
+      if (!byTrack.size) { gbSay("A song holds 32 tracks"); return null; }
+      byTrack.forEach(tr => tr.regions.sort((a, b) => a.start - b.start));
+      S.view = "tracks"; fitLen(); dirty(); saveNow();
+      if (opt.open !== false) { if (!V.open) gbOpen(); setView("tracks"); }
+      if (opt.say) setTimeout(() => gbSay(opt.say), 400);
+      return { song: S.id, tracks: [...byTrack.values()].map(t => t.id) };
+    }
+    function bounceTake() {
+      const d = take.done; if (!d) return;
+      const buf = new AudioBuffer({ length: d.len, numberOfChannels: 2, sampleRate: d.rate }), L = buf.getChannelData(0), R = buf.getChannelData(1); let o = 0;
+      for (let c = 0; c < d.L.length; c++) { const l = d.L[c], r = d.R[c]; for (let i = 0; i < l.length && o < d.len; i++, o++) { L[o] = l[i] / 32767; R[o] = r[i] / 32767; } }
+      const others = S.tracks.slice(), res = gbAudioIn([{ buf, name: "Bounce", start: 0 }], { open: false });
+      if (!res) return;
+      others.forEach(t => { t.mute = true; }); applyLevels(); saveSong(); closeSheet(); setView("tracks");
+      gbSay("Bounced to a new track; the others are muted");
+    }
+
+    // ---- Gain & fades ----
+    function clipSheet(tr, r) {
+      const buf = ABUF.get(r.key), L = () => Math.min(r.len * spb(), buf ? buf.duration - (r.off || 0) : r.len * spb());
+      openSheet("Gain & fades", (r.name || tr.name) + " · " + L().toFixed(1) + " s", box => {
+        const dB = g => (g < 0.0005 ? "−∞" : (20 * Math.log10(g) >= 0 ? "+" : "") + (20 * Math.log10(g)).toFixed(1)) + " dB";
+        let row = row2(box, "", ""); row.firstChild.remove();
+        slider(row, "Gain", -30, 12, 0.5, Math.round(20 * Math.log10(r.g != null ? r.g : 1) * 2) / 2, v => (v >= 0 ? "+" : "") + v.toFixed(1) + " dB", v => { r.g = Math.pow(10, v / 20); dirty(); });
+        const mx = () => Math.max(0.05, Math.min(10, L() / 2));
+        row = row2(box, "", ""); row.firstChild.remove();
+        slider(row, "Fade in", 0, mx(), 0.01, Math.min(r.fi || 0, mx()), v => v.toFixed(2) + " s", v => { r.fi = v; dirty(); });
+        row = row2(box, "", ""); row.firstChild.remove();
+        slider(row, "Fade out", 0, mx(), 0.01, Math.min(r.fo || 0, mx()), v => v.toFixed(2) + " s", v => { r.fo = v; dirty(); });
+        const acts = gbEl("div", "gb-chips");
+        acts.append(btnE("Normalize", () => {
+          if (!buf) return; const a = Math.floor((r.off || 0) * buf.sampleRate), b = Math.min(buf.length, a + Math.floor(L() * buf.sampleRate)); let pk = 0;
+          for (let c = 0; c < buf.numberOfChannels; c++) { const d = buf.getChannelData(c); for (let i = a; i < b; i++) { const v = d[i] < 0 ? -d[i] : d[i]; if (v > pk) pk = v; } }
+          if (pk < 1e-5) { gbSay("That region is silent"); return; }
+          gbDo(); r.g = Math.min(Math.pow(10, 1.2), 0.98 / pk); dirty(); saveSong(); reSheet(); gbSay("Normalized: the loudest moment now peaks just under 0 dB (" + dB(r.g) + ")");
+        }, "", "Turn it up or down so its loudest moment peaks just under 0 dB"));
+        acts.append(btnE("Reset", () => { gbDo(); r.g = 1; r.fi = 0; r.fo = 0; dirty(); saveSong(); reSheet(); }));
+        box.append(acts);
+        box.append(gbEl("p", "gb-tip", "The fades shape every time the region plays (each loop of a looped region too)."));
+      });
+    }
+
+    // ---- volume automation: a curve per track, recorded by moving its volume while the song plays ----
+    const VA = { touch: new Set(), last: new Map(), timers: new Map(), beat: false };
+    const vaLvl = (tr, v) => (tr.mute || (soloOn() && !tr.solo)) ? 0 : Math.pow(clamp(v, 0, 1.2), 2) * 1.25;
+    const vaOn = tr => !!(tr.va && tr.va.on && tr.va.pts && tr.va.pts.length);
+    function vaAt(tr, b) {
+      const P = tr.va.pts; if (b <= P[0][0]) return P[0][1];
+      for (let i = 1; i < P.length; i++) if (b <= P[i][0]) { const [b0, v0] = P[i - 1], [b1, v1] = P[i]; return b1 > b0 ? v0 + (v1 - v0) * (b - b0) / (b1 - b0) : v1; }
+      return P[P.length - 1][1];
+    }
+    function vaSchedOne(tr, b, t, P, sp) {
+      try { P.cancelScheduledValues(t); } catch (e) {}
+      P.setValueAtTime(vaLvl(tr, vaAt(tr, b)), t);
+      for (const [pb, v] of tr.va.pts) if (pb > b) P.linearRampToValueAtTime(vaLvl(tr, v), t + (pb - b) * sp);
+    }
+    function vaSched(b, t) {
+      if (!ctx || !S) return;
+      S.tracks.forEach(tr => { if (!vaOn(tr) || VA.touch.has(tr.id)) return; const N = tNode(tr); if (N) vaSchedOne(tr, b, Math.max(t, ctx.currentTime), N.g.gain, spb()); });
+    }
+    function vaRest() { if (!ctx || !S) return; const now = ctx.currentTime; S.tracks.forEach(tr => { const N = AU.trk.get(tr.id); if (N && vaOn(tr)) { try { N.g.gain.cancelScheduledValues(now); } catch (e) {} } }); applyLevels(); }
+    { const al = applyLevels; applyLevels = function () { const r = al.apply(this, arguments); try { if (TP.on && ctx) vaSched(beatAt(ctx.currentTime), ctx.currentTime); } catch (e) {} return r; }; }
+    function vaTouch(tr, v) {
+      if (!tr.va || !tr.va.on || !TP.on || !ctx) return;
+      const now = Math.round(beatAt(ctx.currentTime) * 1000) / 1000;
+      const P = tr.va.pts, from = VA.touch.has(tr.id) ? (VA.last.get(tr.id) ?? now) : now - 0.05;
+      if (!VA.touch.has(tr.id)) { VA.touch.add(tr.id); const N = AU.trk.get(tr.id); if (N) { try { N.g.gain.cancelScheduledValues(ctx.currentTime); } catch (e) {} N.g.gain.setTargetAtTime(vaLvl(tr, v), ctx.currentTime, 0.02); } }
+      for (let i = P.length - 1; i >= 0; i--) if (P[i][0] > from && P[i][0] <= now + 0.001) P.splice(i, 1);
+      P.push([now, Math.round(v * 1000) / 1000]); P.sort((a, b) => a[0] - b[0]); VA.last.set(tr.id, now);
+      clearTimeout(VA.timers.get(tr.id));
+      VA.timers.set(tr.id, setTimeout(() => { VA.touch.delete(tr.id); VA.last.delete(tr.id); if (TP.on && ctx) { const N = tNode(tr); if (N && vaOn(tr)) vaSchedOne(tr, beatAt(ctx.currentTime), ctx.currentTime, N.g.gain, spb()); } saveSong(); }, 450));
+    }
+    function vaRow(box, tr) {
+      const on = !!(tr.va && tr.va.on), n = tr.va && tr.va.pts ? tr.va.pts.length : 0;
+      const r = row2(box, "Volume automation", on ? (n ? n + " points · move Volume while the song plays to record over them" : "move Volume while the song plays to record it") : (n ? "off (the curve is kept)" : "off"));
+      const b = btnE(on ? "On" : "Off", () => { gbDo(); tr.va = tr.va || { on: false, pts: [] }; tr.va.on = !tr.va.on; if (tr.va.on && !tr.va.pts.length) tr.va.pts = [[0, tr.vol]]; saveSong(); applyLevels(); reSheet(); });
+      b.setAttribute("aria-pressed", String(on)); r.append(b);
+      if (n) r.append(btnE("Clear", () => { gbDo(); tr.va.pts = []; tr.va.on = false; saveSong(); applyLevels(); reSheet(); }));
+    }
+    function vaDraw(ln, tr, P, RH, W) {
+      if (!vaOn(tr)) return;
+      const H = RH - 2, y = v => (1 - clamp(v, 0, 1.2) / 1.2) * (H - 10) + 5, pts = tr.va.pts;
+      const NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg"), pl = document.createElementNS(NS, "polyline");
+      svg.setAttribute("class", "gb-va"); svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      pl.setAttribute("points", [[0, y(pts[0][1])]].concat(pts.map(([b, v]) => [b * P, y(v)]), [[W, y(pts[pts.length - 1][1])]]).map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" "));
+      svg.append(pl); ln.append(svg);
+    }
+
+    // ---- lanes for plugin controls ----
+    function laneAt(L, b) {
+      const P = L.pts; if (!P.length) return null; if (b <= P[0][0]) return P[0][1];
+      for (let i = 1; i < P.length; i++) if (b <= P[i][0]) { const [b0, v0] = P[i - 1], [b1, v1] = P[i]; return b1 > b0 ? v0 + (v1 - v0) * (b - b0) / (b1 - b0) : v1; }
+      return P[P.length - 1][1];
+    }
+    const LN = { timer: 0, poll: 0, sent: new Map() };
+    function laneTick() {
+      if (!TP.on || !ctx || !S || !window.__wl) return;
+      const b = beatAt(ctx.currentTime);
+      (S.lanes || []).forEach(L => { if (!L.on || L.rec || !L.pts.length) return; const v = laneAt(L, b); if (v == null) return; const last = LN.sent.get(L.id); if (last == null || Math.abs(last - v) > 0.002) { if (__wl.set(L.ref, L.pid, v)) LN.sent.set(L.id, v); } });
+    }
+    async function laneRec() {
+      if (!TP.on || !ctx || !S || !window.__wl) return;
+      for (const L of S.lanes || []) {
+        if (!L.rec) continue;
+        const v = await __wl.get(L.ref, L.pid); if (v == null || !TP.on) continue;
+        const pos = Math.round(beatAt(ctx.currentTime) * 1000) / 1000, vv = Math.round(v * 1000) / 1000;
+        if (L._lr == null) { gbDo(); L._lr = pos - 0.001; L._lp = -9; L._lv = null; L._pp = pos; }
+        L.pts = L.pts.filter(q => !(q[0] > L._lr && q[0] <= pos + 0.0005));
+        if (L._lv == null || Math.abs(vv - L._lv) > 0.003 || pos - L._lp > 2) { if (L._lv != null && L._pp > L._lp + 0.001) L.pts.push([L._pp, L._lv]); L.pts.push([pos, vv]); L._lp = pos; L._lv = vv; }
+        L.pts.sort((a, b) => a[0] - b[0]); L._lr = pos; L._pp = pos;
+        laneDraw(L);
+      }
+    }
+    function laneRun() {
+      clearInterval(LN.timer); clearInterval(LN.poll); LN.timer = LN.poll = 0;
+      (S && S.lanes || []).forEach(L => { if (L._lr != null) { if (L._lv != null) L.pts.push([Math.round(L._lr * 1000) / 1000 + 0.001, L._lv]); L._lr = null; saveSong(); } });
+      if (!TP.on || !S || !(S.lanes || []).length) return;
+      LN.sent.clear(); LN.timer = setInterval(laneTick, 30); laneTick();
+      if (S.lanes.some(L => L.rec)) LN.poll = setInterval(laneRec, 70);
+    }
+    { let was = false; setInterval(() => { if (TP.on !== was) { was = TP.on; laneRun(); } }, 60); }
+    function laneDraw(L) {
+      const svg = document.querySelector('#gbTlin .gb-alane[data-lane="' + L.id + '"] svg'); if (!svg) return;
+      const W = +svg.getAttribute("width"), H = +svg.getAttribute("height"), P = PXB(), y = v => (1 - v) * (H - 10) + 5, pts = L.pts;
+      svg.querySelector("polyline").setAttribute("points", pts.length ? [[0, y(pts[0][1])]].concat(pts.map(([b, v]) => [b * P, y(v)]), [[W, y(pts[pts.length - 1][1])]]).map(p => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ") : "");
+      const hint = svg.parentNode.querySelector(".gb-ahint"); if (hint) hint.hidden = !!pts.length;
+    }
+    function laneRows(inn, P, HW, W, RH) {
+      (S.lanes || []).forEach(L => {
+        const H = Math.round(RH * 0.8), row = gbEl("div", "gb-row gb-arow" + (L.on ? "" : " off")); row.style.height = H + "px";
+        const hd = gbEl("div", "gb-head gb-ahead"); hd.style.width = HW + "px";
+        const hn = gbEl("div", "hn"); hn.append(gbEl("b", "", L.name), gbEl("small", "", "automation")); hd.append(hn);
+        const ms = gbEl("div", "ms"), rB = gbEl("button", "r", "●"), aB = gbEl("button", "a", "A"), xB = gbEl("button", "x", "✕");
+        rB.setAttribute("aria-pressed", String(!!L.rec)); rB.title = "Record: turn the control while the song plays"; rB.setAttribute("aria-label", "Record " + L.name);
+        aB.setAttribute("aria-pressed", String(!!L.on)); aB.title = "Automation on or off"; aB.setAttribute("aria-label", "Automation on or off");
+        xB.title = "Remove this lane"; xB.setAttribute("aria-label", "Remove " + L.name);
+        rB.addEventListener("click", e => { e.stopPropagation(); L.rec = !L.rec; rB.setAttribute("aria-pressed", String(L.rec)); saveSong(); laneRun(); gbSay(L.rec ? "● " + L.name + ": play the song and turn the control; the lane records it" : L.name + ": recording off"); });
+        aB.addEventListener("click", e => { e.stopPropagation(); gbDo(); L.on = !L.on; aB.setAttribute("aria-pressed", String(L.on)); row.classList.toggle("off", !L.on); saveSong(); });
+        xB.addEventListener("click", e => { e.stopPropagation(); gbDo(); S.lanes = S.lanes.filter(x => x !== L); saveSong(); renderTracks(); gbSay("Removed " + L.name + " (Undo brings it back)"); });
+        ms.append(rB, aB, xB); hd.append(ms);
+        const ln = gbEl("div", "gb-lane gb-alane"); ln.style.width = W + "px"; ln.dataset.lane = L.id;
+        const NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", W); svg.setAttribute("height", H - 2); svg.setAttribute("viewBox", "0 0 " + W + " " + (H - 2)); svg.append(document.createElementNS(NS, "polyline"));
+        const hint = gbEl("span", "gb-ahint", "Draw " + L.name + "'s moves here, or ● and turn it while the song plays"); ln.append(svg, hint);
+        let d = null;
+        const at = e => { const r = ln.getBoundingClientRect(); return [Math.max(0, (e.clientX - r.left) / P), clamp(1 - (e.clientY - r.top - 5) / (r.height - 10), 0, 1)]; };
+        ln.addEventListener("pointerdown", e => {
+          if (e.button > 0) return; e.preventDefault(); e.stopPropagation(); try { ln.setPointerCapture(e.pointerId); } catch (x) {}
+          gbDo(); const [b, v] = at(e); d = { id: e.pointerId, b };
+          L.pts = L.pts.filter(q => Math.abs(q[0] - b) > 0.05); L.pts.push([Math.round(b * 1000) / 1000, Math.round(v * 1000) / 1000]); L.pts.sort((x, y) => x[0] - y[0]); laneDraw(L);
+          if (!TP.on && window.__wl) __wl.set(L.ref, L.pid, v);
+        });
+        ln.addEventListener("pointermove", e => {
+          if (!d || e.pointerId !== d.id) return;
+          const [b, v] = at(e), a0 = Math.min(d.b, b), b0 = Math.max(d.b, b);
+          L.pts = L.pts.filter(q => !(q[0] > a0 + 0.002 && q[0] < b0 - 0.002) && Math.abs(q[0] - b) > 0.002); L.pts.push([Math.round(b * 1000) / 1000, Math.round(v * 1000) / 1000]); L.pts.sort((x, y) => x[0] - y[0]);
+          d.b = b; laneDraw(L); if (!TP.on && window.__wl) __wl.set(L.ref, L.pid, v);
+        });
+        const up = e => { if (!d || e.pointerId !== d.id) return; d = null; saveSong(); };
+        ln.addEventListener("pointerup", up); ln.addEventListener("pointercancel", up);
+        row.append(hd, ln); inn.append(row);
+        requestAnimationFrame(() => laneDraw(L));
+      });
+    }
+    function laneAdd() {
+      start(); if (!window.__wl || !__wl.pick) return;
+      __wl.pick("Automate a plugin control", "Pick the control. Then draw its moves on the lane, or press ● on the lane and turn the control while the song plays.", async c => {
+        const v = await __wl.get(c.ref, c.pid);
+        gbDo(); S.lanes = S.lanes || [];
+        S.lanes.push({ id: "al" + uid(), ref: c.ref, pid: c.pid, name: c.name, on: true, rec: false, pts: v == null ? [] : [[0, Math.round(v * 1000) / 1000]] });
+        saveSong(); if (V.open) setView("tracks"); laneRun(); gbSay("Added " + c.name + ": draw on its lane, or ● and turn it while the song plays");
+      });
+    }
+
+    // ---- the Seq beat along with the song ----
+    function beatAlong(on) {
+      if (on) { if (S && S.beat && !playing && !TP.exp) { setBpm(S.bpm); startSeq(); VA.beat = true; } }
+      else if (VA.beat) { VA.beat = false; if (playing) stopSeq(); }
+    }
+
+    // ---- Play along: the song keeps going in a small bar ----
+    const mini = $("gbMini");
+    function gbMini(on) {
+      if (!mini) return;
+      if (on) {
+        if (TP.exp) return;
+        if (!sheet.hidden) { sheet.hidden = true; SH = null; }
+        edClose(); hideMenu(); liveAllOff(); apStop();
+        V.open = false; V.keys = null; view.hidden = true; V.mini = true; mini.hidden = false; miniPaint();
+      } else { V.mini = false; mini.hidden = true; }
+    }
+    function playAlong() { start(); if (!TP.on) play(false); gbMini(true); }
+    function miniPaint() {
+      if (!mini || mini.hidden || !S) return;
+      const p = $("gbMiniPlay"), r = $("gbMiniRec"), t = $("gbMiniPos"), tr = curTr();
+      p.textContent = TP.on && !TP.rec ? "■" : "▶"; p.setAttribute("aria-label", TP.on ? "Stop the song" : "Play the song");
+      r.hidden = !(tr && tr.kind === "audio" && tr.input === "nb"); r.classList.toggle("on", !!TP.rec); r.textContent = TP.rec ? "■ Stop" : "●";
+      const b = Math.max(0, beatNow()); t.textContent = (Math.floor(b / S.sig) + 1) + " . " + (Math.floor(b % S.sig) + 1);
+      mini.classList.toggle("rec", !!TP.rec);
+    }
+    if (mini) {
+      $("gbMiniPlay").addEventListener("click", () => { start(); if (TP.on) stop(); else play(false); miniPaint(); });
+      $("gbMiniRec").addEventListener("click", () => { start(); if (TP.rec) stop(); else play(true); miniPaint(); });
+      $("gbMiniOpen").addEventListener("click", () => gbOpen());
+      $("gbMiniX").addEventListener("click", () => { if (TP.on) stop(); gbMini(false); });
+      setInterval(() => { if (V.mini) miniPaint(); }, 200);
+    }
+
+    // ---- stems: one WAV per audio track, rendered offline ----
+    async function audioStems() {
+      ensureSong();
+      const trs = S.tracks.filter(t => t.kind === "audio" && t.regions.length); if (!trs.length) return [];
+      await Promise.all(trs.flatMap(t => t.regions.map(r => loadAudio(r.key))));
+      const rate = (ctx && ctx.sampleRate) || 44100, sp = spb(), end = songEndBeat() * sp + 0.5, out = [];
+      for (const tr of trs) {
+        const oc = new OfflineAudioContext(2, Math.ceil(end * rate), rate), g = oc.createGain(), p = oc.createStereoPanner();
+        g.gain.value = Math.pow(clamp(tr.vol, 0, 1.2), 2) * 1.25; p.pan.value = clamp(tr.pan, -1, 1); g.connect(p).connect(oc.destination);
+        if (vaOn(tr)) vaSchedOne(Object.assign({}, tr, { mute: false, solo: true }), 0, 0, g.gain, sp);
+        tr.regions.forEach(r => { const buf = ABUF.get(r.key); if (!buf) return; for (let k = 0; k < (r.rep || 1); k++) {
+          const t0 = (r.start + k * r.len) * sp, L = Math.min(r.len * sp, buf.duration - (r.off || 0)); if (L <= 0.01) continue;
+          const s = oc.createBufferSource(); s.buffer = buf; const G = oc.createGain(); clipEnv(G.gain, r, L, 0, t0, L); s.connect(G).connect(g); s.start(t0, r.off || 0, L);
+        } });
+        out.push({ name: tr.name, buf: await oc.startRendering() });
+      }
+      return out;
+    }
+
+    // ---- what was in Tracks becomes a Garage song (once) ----
+    function migrateTracks() {
+      let flag = null; try { flag = localStorage.getItem("nightbloom-trk2gb"); } catch (e) {}
+      if (flag) return null;
+      let o = null, lanes = [];
+      try { o = JSON.parse(localStorage.getItem("nightbloom-tracks") || "null"); } catch (e) {}
+      try { lanes = JSON.parse(localStorage.getItem("nightbloom-trklanes") || "[]") || []; } catch (e) {}
+      const clips = o && Array.isArray(o.clips) ? o.clips.filter(c => c && c.audio && c.dur > 0) : [];
+      lanes = Array.isArray(lanes) ? lanes.filter(L => L && L.ref && L.pid && Array.isArray(L.pts)) : [];
+      if (!clips.length && !lanes.length) { try { localStorage.setItem("nightbloom-trk2gb", "none"); } catch (e) {} return null; }
+      const bpm = clamp(Math.round((state && state.seq && state.seq.bpm) || 100), 40, 240), sp = 60 / bpm, gv = v => Math.sqrt(clamp(+v || 0, 0, 1.8) / 1.25);
+      const song = newSong("Tracks"); song.bpm = bpm; song.view = "tracks";
+      (o && o.tracks || []).forEach(t => {
+        const cs = clips.filter(c => c.track === t.id).sort((a, b) => a.start - b.start);
+        const hasAuto = t.auto && Array.isArray(t.auto.pts) && t.auto.pts.length;
+        if (!cs.length && !hasAuto) return;
+        const rows = [];   // (clips that overlap go on a second track, so each still plays as before)
+        cs.forEach(c => { let R = rows.find(x => x.end <= c.start + 1e-6); if (!R) { R = { end: 0, cs: [] }; rows.push(R); } R.cs.push(c); R.end = c.start + c.dur; });
+        if (!rows.length) rows.push({ cs: [] });
+        rows.forEach((R, k) => {
+          if (song.tracks.length >= 32) return;
+          const tr = { id: uid(), kind: "audio", name: ((t.name || "Track") + (k ? " (" + (k + 1) + ")" : "")).slice(0, 40), snd: defaultSound("audio"), vol: gv(t.vol != null ? t.vol : 0.8), pan: clamp(+t.pan || 0, -1, 1), mute: !!t.mute, solo: !!t.solo, oct: 0, auto: 0, p: null, mode: "", rv: 0, input: t.input === "mic" ? "mic" : "nb", regions: [] };
+          R.cs.forEach(c => tr.regions.push({ id: uid(), start: +(c.start / sp).toFixed(4), len: +(c.dur / sp).toFixed(4), rep: 1, key: "trk:" + c.audio, off: +(c.offset || 0), dur: +(c.offset || 0) + c.dur, name: c.name || tr.name, g: c.gain != null ? c.gain : 1, fi: c.fadeIn || 0, fo: c.fadeOut || 0 }));
+          if (hasAuto && !k) tr.va = { on: !!t.auto.on, pts: t.auto.pts.map(([tt, v]) => [+(tt / sp).toFixed(4), +gv(v).toFixed(3)]) };
+          song.tracks.push(tr);
+        });
+      });
+      song.lanes = lanes.map(L => ({ id: L.id || "al" + uid(), ref: L.ref, pid: L.pid, name: L.name || "Plugin control", on: L.on !== false, rec: false, pts: L.pts.map(([tt, v]) => [+(tt / sp).toFixed(4), v]) }));
+      let e = 0; song.tracks.forEach(t => t.regions.forEach(r => { e = Math.max(e, r.start + r.len); }));
+      song.bars = Math.max(8, Math.ceil(e / song.sig / 4 - 1e-6) * 4);
+      try {
+        localStorage.setItem(GBP + song.id, JSON.stringify(song));
+        IDX.songs.unshift({ id: song.id, name: song.name, t: Date.now(), n: song.tracks.length }); if (!IDX.cur || !readSong(IDX.cur)) IDX.cur = song.id; saveIdx();
+        localStorage.setItem("nightbloom-trk2gb", song.id);
+      } catch (e2) { return null; }
+      return song.id;
+    }
+    { const mid = migrateTracks(); if (mid) setTimeout(() => gbSay("What was in Tracks is now a song in the Garage, called Tracks"), 2500); }
+    window.__gbAudio = gbAudioIn; window.__gbSay = gbSay;
+    window.__gb = { exportSheet, importFiles, audioStems, mini: gbMini, playAlong, clipSheet, vaSched, laneAdd, laneRun, migrateTracks, NBR, VA, put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
   }
 
 
@@ -25939,7 +26362,7 @@ z: [z]=Z
         ["speech", "Speech", /^Speech/],
         ["rec", "Recording", /^Keep 90s/],
         ["garage", "Garage", /^Garage/],
-        ["beats", "Rhythm & Beats", /^Rhythm Creator/],
+        ["beats", "Beats", /^(Rhythm Creator|Beats has two tabs)/],
         ["dj", "DJ", /^DJ/],
         ["link", "MIDI, Link & sound out", /^(Link |Ableton Link|Sound out)/],
         ["undo", "Undo", /^Undo and redo/],
@@ -26041,6 +26464,44 @@ z: [z]=Z
     if (set) addKb(set);
     else { const hs = $("helpSheet"); if (hs) new MutationObserver(() => addKb(document.querySelector(".help-set"))).observe(hs, { attributes: true, attributeFilter: ["hidden"] }); }
     window.__kb = { layout: () => KB_LAYOUT, use: l => { kbUse(l); kbLabel(); }, vel: () => kbVel };
+  }
+  // ======================================================================
+  // Simpler (126): one Beats screen with Grid (the Rhythm Creator) and Pads (Beat Pads); Song in Seq
+  // ======================================================================
+  {
+    const $ = id => document.getElementById(id);
+    const rcB = $("rcBtn"), bpB = $("bpBtn"), rcV = $("rcView"), bpV = $("bpView");
+    if (rcB && bpB && rcV && bpV) {
+      let last = "grid"; try { last = localStorage.getItem("nightbloom-beatsview") === "pads" ? "pads" : "grid"; } catch (e) {}
+      const remember = v => { last = v; try { localStorage.setItem("nightbloom-beatsview", v); } catch (e) {} };
+      let passing = false;
+      bpB.addEventListener("click", e => { if (passing || last !== "grid") return; e.stopImmediatePropagation(); rcB.click(); }, true);
+      const go = v => {
+        if (v === "grid" && !rcV.hidden) return; if (v === "pads" && !bpV.hidden) return;
+        if (v === "grid") { $("bpDone").click(); rcB.click(); } else { $("rcDone").click(); passing = true; try { bpB.click(); } finally { passing = false; } }
+      };
+      [["rcView", "grid"], ["bpView", "pads"]].forEach(([vid, cur]) => {
+        const v = $(vid), top = v.querySelector(".dj-top"), title = top && top.querySelector("strong"); if (!top || !title) return;
+        title.textContent = "Beats";
+        const sw = document.createElement("div"); sw.className = "seg small bt-sw"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Grid or Pads");
+        sw.innerHTML = '<button data-v="grid" title="The Rhythm Creator: a 16-track step grid">Grid</button><button data-v="pads" title="Beat Pads: 16 pads to play, record and chop samples">Pads</button>';
+        sw.querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.v === cur)); b.addEventListener("click", () => go(b.dataset.v)); });
+        sw.style.order = title.style.order || "1"; title.after(sw);
+        new MutationObserver(() => { if (!v.hidden) remember(cur); }).observe(v, { attributes: true, attributeFilter: ["hidden"] });
+      });
+      // Beats lights while either one plays
+      const lit = () => bpB.classList.toggle("rclive", rcB.classList.contains("live") && !bpB.classList.contains("live"));
+      new MutationObserver(lit).observe(rcB, { attributes: true, attributeFilter: ["class"] });
+      new MutationObserver(lit).observe(bpB, { attributes: true, attributeFilter: ["class"] }); lit();
+      window.__beats = { view: () => last, go };
+    }
+    // Song: next to Beats… in Seq
+    const bb = $("beatsBtn"), sb = $("songBtn");
+    if (bb && sb) {
+      const b = document.createElement("button"); b.className = "btn"; b.id = "songSeqBtn"; b.textContent = "Song"; b.title = "Chain patterns A–D into a song";
+      b.addEventListener("click", () => sb.click()); bb.after(b);
+      const sync = () => { b.hidden = bb.hidden; }; new MutationObserver(sync).observe(bb, { attributes: true, attributeFilter: ["hidden"] }); sync();
+    }
   }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
