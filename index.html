@@ -2260,6 +2260,75 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .gb-kw .gb-kl { bottom: 28px; background: #d6cfe2; color: #3a3350; }
 .gb-kbk .gb-kl { bottom: 8px; background: #3a3350; color: #e9e5f0; }
 .gb-chord sup { font: 700 0.6rem var(--font-mono); color: var(--dim); margin-left: 3px; }
+/* ---------- simpler (124): one top bar, more room for the keys ---------- */
+header #recTo, #hisRedoP, #pLab, #betaBar, .an-bar #anMore, #blendRow { display: none !important; }
+#menuBtn { display: inline-flex; }
+#hisUndoP { display: inline-flex; }
+#hisUndoP:not(:disabled) { color: var(--ink); }
+@media (min-width: 601px) {
+  header .hright { flex: 1; justify-content: flex-end; }
+  #hisUndoP { margin-left: 0; }
+}
+@media (min-width: 1100px) {
+  #toolRow { display: none; }
+  header .hright > .views { order: -1; width: auto; margin: 0 auto 0 6px; }
+  header .views button { height: 34px; padding: 0 14px; font-size: 0.84rem; }
+  header #modes { order: 4; }
+  header #hisUndoP { order: 5; margin-left: 0; }
+  header #menuBtn { order: 6; margin-left: 0; }
+}
+@media (min-width: 1100px) { header h1 { display: none; } header .hright > .views { margin-left: 0; } }
+@media (min-width: 1100px) and (max-width: 1260px) {
+  header .hright { gap: 6px; }
+  header .views button { padding: 0 10px; }
+  .modes .btn.mode { padding: 0 8px; }
+  #stopAll .lg { display: none; } #stopAll .sm { display: inline; }
+}
+/* doesn't apply here: hidden */
+.na { display: none !important; }
+/* the Playing row: only when sounds play together */
+.stk.solo .stk-row, .stk.solo .stk-help { display: none !important; }
+/* Chord · Scale · Blend */
+.playopts { height: 32px; padding: 0 12px; font-size: 0.82rem; font-weight: 600; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; flex: none; }
+.playopts[hidden] { display: none !important; }
+.ps-body { display: flex; flex-direction: column; gap: 18px; padding: 2px 0 12px; }
+.ps-sec { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.ps-sec[hidden] { display: none; }
+.ps-h { flex: 1 1 100%; display: flex; flex-direction: column; gap: 2px; }
+.ps-h b { font-size: 0.95rem; }
+.ps-h small { font-family: var(--font-mono); font-size: 11px; color: var(--dim); }
+.ps-sec .meter .mlab { display: none; }
+.ps-sec .btn { height: 36px; padding: 0 14px; }
+.ps-sec #blendAmt { flex: 1 1 140px; min-width: 120px; accent-color: var(--lilac); height: 30px; }
+.ps-sec #blendVal { font-family: var(--font-mono); font-size: 0.72rem; color: var(--dim); min-width: 38px; text-align: right; }
+.ps-sec #blendBtn[aria-pressed="false"] ~ #blendAmt, .ps-sec #blendBtn[aria-pressed="false"] ~ #blendVal { opacity: 0.45; }
+/* Effects · FX Lab, at the top of the FX tab */
+.fxsw { flex: none; margin-right: 10px; }
+.fxsw button { height: 26px; padding: 0 10px; font-size: 0.74rem; }
+.fxsw button[hidden] { display: none; }
+#fxRow .row-label > .fxsw + span, #labRow .row-label > .fxsw + span { margin-right: auto; }
+#fxRow .row-label, #labRow .row-label { align-items: center; }
+/* Analog, next to Demo */
+#anBar:not(.open) { display: none !important; }
+#sndMore[aria-expanded="true"] { border-color: var(--amber); color: var(--amber); }
+#sndMore.on::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); margin-right: 6px; vertical-align: middle; }
+/* the one-line instructions: in Help, or back under the controls with Hints */
+body:not(.hints) .hintline, body:not(.hints) .hint-on, body:not(.hints) #stkHelp > span { display: none !important; }
+body:not(.hints) .fxlive:not(.live):not(.clean) > span { display: none; }
+body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; margin: 0 0 4px; }
+/* tips along the bottom, clear of the top bar */
+.uitoast { top: auto; bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) + 10px)); }
+@media (max-width: 600px) { .uitoast, .nbtoast { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); } }
+/* Help: a contents row, and topics in groups */
+.help-toc { position: sticky; top: -12px; z-index: 2; margin: 0 -12px; padding: 8px 12px; background: var(--panel); border-bottom: 1px solid var(--line);
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: none; }
+.help-toc::-webkit-scrollbar { display: none; }
+.help-toc button { flex: none; height: 30px; padding: 0 11px; border-radius: 15px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font: 600 0.78rem var(--font-body); cursor: pointer; }
+.help-toc button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
+.help-list .help-h { margin: 10px 0 0; font: 600 0.66rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.12em; scroll-margin-top: 56px; }
+.help-list .help-h:first-child { margin-top: 0; }
+.help-set { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--dim); }
+.help-set .btn { height: 32px; padding: 0 12px; font-size: 0.8rem; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -2378,7 +2447,7 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
       <button id="pLab" aria-pressed="false" hidden>Lab</button>
       <button id="pArp" aria-pressed="false">Arp</button>
       <button id="pJam" aria-pressed="false" title="Loops that record what you play, and a band that follows your chords">Jam</button>
-      <button id="pHide" aria-pressed="false">Hide</button>
+      <button id="pHide" aria-pressed="false" aria-label="Hide the sliders" title="Hide the sliders (tap a tab to show them again)">▾</button>
     </div>
     <span class="hint2" id="panelHint" hidden></span>
     <label class="meter" id="chordWrap"><span class="mlab">Chord</span>
@@ -3320,40 +3389,40 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
   <div class="ed-card" role="dialog" aria-label="Help">
     <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
     <div class="help-list">
-      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b> and <b>Rhythm</b> open full screens of their own (a green dot means one is playing). Things that don't apply to the pads (Chord, octave, Arp, Hold) are dimmed; tap one to see why. <b>Keys · Seq · Notes</b> switch what this page shows. On a computer or a tablet in landscape these are at the top right, with Keys · Seq · Notes under DJ and Rhythm; on a phone the five sit in the bar along the bottom and Keys · Seq · Notes under the title, and the tools (Tracks, Song, Projects, FX Lab, Motion, My sounds, Export, MIDI and this help) are under <b>☰</b> at the top right. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> undoes changes to a pattern in Seq and the Rhythm Creator, and big changes (a new beat, Clear) offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b>, <b>Rhythm</b>, <b>Beats</b> and <b>Garage</b> open full screens of their own (a green dot means one is playing). <b>Keys · Seq · Notes</b> switch what this page shows. On a phone the sections sit in the bar along the bottom; on a tablet or a computer they're in the top bar. The top bar also has <b>Mix</b>, <b>● Rec</b>, the red <b>■</b> that stops everything, <b>↶</b> (undo) and <b>☰</b>, which holds the rest: Tracks, Song, Projects, Plugins, My sounds, Export, MIDI, Install, History, this help and Exit. Controls that don't apply to what you're playing (Chord, octave, Arp and Hold on the drums and pads) are hidden. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> takes back the last change (see Undo); big changes (a new beat, Clear) also offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
       <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
-      <p><b>Analog (Sound tab):</b> the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
+      <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
-      <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the FX Lab, applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
+      <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
       <p hidden><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
       <p><b>Garage:</b> the Garage tab is a GarageBand-style studio. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
       <p><b>Rhythm Creator:</b> the Rhythm button in the top bar opens a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
-      <p><b>Something not working?</b> Tap <b>Report</b> in the toolbar right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
+      <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
       <p><b>Playing from a keyboard</b> (Bluetooth or USB): three octaves from the left edge of the keys. The bottom letter row, <b>Z X C V B N M , . /</b>, plays the white keys, with <b>S D G H J L ;</b> above it as the black keys; the top letter row, <b>Q W E R T Y U I O P [ ]</b>, carries on from there, with the number keys <b>2 3 4 6 7 9 0 −</b> as its black keys. Every key shows its letter. <b>↓</b> / <b>↑</b> move an octave down or up. With Drums or Pads, <b>Q W E R / A S D F / Z X C V</b> play the pads in the same grid as on screen. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
       <p><b>Playing from a controller:</b> how hard you hit a key sets the level (MIDI → Velocity: Off, Light touch, Normal or Firm); the pitch-bend and mod wheels move the ±2 and Vib wheels, aftertouch adds vibrato as you lean on a key, and the sustain pedal holds notes until you lift it. Plugin instruments get all of it. <b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
-      <p><b>Blend</b> softens and overlaps notes. <b>Scale</b> locks the keyboard to a key so nothing sounds wrong. <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
+      <p>The button next to the tabs (it reads <b>Single notes · Scale off</b> to start) holds <b>Chord</b> (each key plays a chord), <b>Scale</b> (locks the keyboard to a key so nothing sounds wrong) and <b>Blend</b> (softens and overlaps notes). <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Speech</b> (the Speech tab) talks and sings, after Plogue's Chipspeech: thirteen voices from the machines that first spoke, from Bell Labs' Voder (1939) and the IBM 704 that sang Daisy Bell (1961) to the Speak &amp; Spell, the Votrax and TI chips, SAM, DECtalk, MacInTalk and the Atari ST, each made the way its machine made it. Type the words; each note sings the next syllable (or the next word or line). A dash on its own holds a vowel over another note; [HH AH0 L OW1] gives exact phonemes. Speed shortens the consonants, Formant changes the size of the voice, Grit brings out the chip (past halfway it circuit-bends the Speak &amp; Spell). Words come from the CMU Pronouncing Dictionary.</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
-      <p><b>Playing sounds together</b>: the <b>Playing</b> row under the toolbar (Synths) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
+      <p><b>Playing sounds together</b>: the <b>Playing</b> row (Synths; it appears once two or more sounds play together) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
       <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
       <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
       <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
-      <p><b>Undo and redo</b>: ↶ and ↷ in the toolbar (at the top on a phone; or Ctrl+Z and Ctrl+Shift+Z) take back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (in the toolbar, or the ☰ menu on a phone) lists the changes, newest first; tap one to go back to just before it.</p>
+      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
-      <p><b>Plugins</b> (in the toolbar): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
-      <p>The <b>toolbar</b> under the title holds Tracks (a multitrack editor), FX Lab, Plugins, Song mode, MIDI, Export, Install, Motion, My sounds and Projects.</p>
-      <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (toolbar) chains your own patterns A–D into an arrangement.</p>
+      <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
+      <p><b>☰</b> (top right) holds Tracks (a multitrack editor), Song, Projects, Plugins, My sounds, Export, MIDI, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
+      <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (☰) chains your own patterns A–D into an arrangement.</p>
     </div>
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
     <div class="sp-lab"><span>Keyboard shortcuts</span></div>
@@ -3505,6 +3574,14 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
     <div class="ed-head"><strong>Menu</strong></div>
     <div class="menu-grid" id="menuGrid"></div>
     <div class="ed-foot sheet-foot"><button class="btn big primary" id="menuDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="playSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="How the keys play">
+    <div class="ed-head"><strong>How the keys play</strong></div>
+    <div class="ps-body" id="psBody"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="psDone">Done</button></div>
   </div>
 </div>
 
@@ -12140,7 +12217,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         for (const k in state.layers) state.layers[k].on = k === id;
         if (!hinted) {
           hinted = true; try { localStorage.setItem("nightbloom-stackhint", "1"); } catch (er) {}
-          setTimeout(() => tabToast((wasStack ? "Switched to " + ENGINES[id].short + " alone. " : "") + "To play engines together, tap the + on a tab (or long-press it)."), 50);
+          setTimeout(() => tabToast((wasStack ? "Switched to " + ENGINES[id].short + " alone. " : "") + "To play sounds together, tap the + on a Quick sound."), 50);
         }
       }
       if (state.cur && !state.cur.id.startsWith("w:")) state.cur = null;
@@ -16062,9 +16139,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["betaTracksBtn", "Tracks", "Record and arrange audio on a timeline"],
       ["songBtn", "Song", "Chain patterns A–D into a song"],
       ["prBtn", "Projects", "Save, open and share everything"],
-      ["betaFxBtn", "FX Lab", "Extra effects on the whole mix"],
       ["wamBtn", "Plugins", "Plugin instruments and effects"],
-      ["moBtn", "Motion", "LFOs, XY pad and drift"],
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
       ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
       ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
@@ -20046,7 +20121,7 @@ registerProcessor("nb-verb", NBVerb);`;
         if (brCat === "plugins" && !brSearch.value.trim()) {
           if (!NBW_HERE) brList.innerHTML = "";
           const p = document.createElement("p"); p.className = "br-credit";
-          p.textContent = NBW_HERE ? "Plugin instruments (Web Audio Modules): Nate Bloom's physical models (marimba, nylon guitar, violin, flute, clarinet, voice) and the community synths. Plugin effects are under Plugins in the toolbar; ⚙ Plugin in the sound panel opens a plugin's controls."
+          p.textContent = NBW_HERE ? "Plugin instruments (Web Audio Modules): Nate Bloom's physical models (marimba, nylon guitar, violin, flute, clarinet, voice) and the community synths. Plugin effects are under ☰ → Plugins; ⚙ Plugin in the sound panel opens a plugin's controls."
             : "Plugin instruments load on the Nate Bloom site and in the apps (nathan-san1981.github.io/nate-bloom), not in this copy.";
           brList.appendChild(p);
         }
@@ -25727,6 +25802,163 @@ z: [z]=Z
   }
   }
 
+  // ======================================================================
+  // Simpler (124): one top bar, the controls you use most nearer the keys
+  // ======================================================================
+  {
+    const $ = id => document.getElementById(id);
+    // ---- Keys · Seq · Notes in the top bar on wide screens ----
+    const views = $("views"), toolRow = $("toolRow"), hright = document.querySelector("header .hright");
+    const wideV = matchMedia("(min-width: 1100px)");
+    const placeViews = () => { if (!views || !hright) return; if (wideV.matches) { if (views.parentElement !== hright) hright.prepend(views); } else if (views.parentElement !== toolRow) toolRow.appendChild(views); };
+    placeViews(); try { wideV.addEventListener("change", placeViews); } catch (e) { wideV.addListener(placeViews); }
+    { const u = $("hisUndoP"); if (u) u.title = "Undo the last change (Ctrl+Z). Redo is in ☰ → History"; }
+
+    // ---- the Playing row only when sounds play together ----
+    const stk = $("stk"), stkRow = $("stkRow");
+    if (stk && stkRow) { const solo = () => stk.classList.toggle("solo", stkRow.querySelectorAll(".stk-chip").length <= 1); new MutationObserver(solo).observe(stkRow, { childList: true }); solo(); }
+
+    // ---- Effects · FX Lab: one tab ----
+    const sws = [];
+    [["fxRow", "fx"], ["labRow", "lab"]].forEach(([rid, cur]) => {
+      const lab = document.querySelector("#" + rid + " .row-label"); if (!lab) return;
+      const sw = document.createElement("div"); sw.className = "seg small fxsw"; sw.setAttribute("role", "group"); sw.setAttribute("aria-label", "Effects or FX Lab");
+      sw.innerHTML = '<button data-p="fx">Effects</button><button data-p="lab">FX Lab</button>';
+      sw.querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.p === cur)); b.addEventListener("click", () => { start(); setPanel(b.dataset.p); }); });
+      lab.prepend(sw); sws.push(sw);
+    });
+    const paintSw = () => {
+      const keys = state.mode === "keys";
+      sws.forEach(sw => { const lb = sw.querySelector('[data-p="lab"]'); if (lb) lb.hidden = !keys; sw.hidden = !keys; });
+      const pFx = $("pFx"); if (pFx) pFx.setAttribute("aria-pressed", String(state.panel === "fx" || state.panel === "lab"));
+    };
+    { const sp = setPanel; setPanel = function (which) { const r = sp.apply(this, arguments); try { paintSw(); } catch (e) {} return r; }; }
+    { const sm = setMode; setMode = function (m) { const r = sm.apply(this, arguments); try { if (state.mode !== "keys" && state.panel === "lab") setPanel("fx"); paintSw(); } catch (e) {} return r; }; }
+    paintSw();
+
+    // ---- Motion: the Morph tab, with the LFOs and XY pad a tap away ----
+    { const pM = $("pMorph"); if (pM) { pM.textContent = "Motion"; pM.title = "Morph between snapshots, Mutate and macros; the LFOs and XY pad"; } }
+    { const rt = document.querySelector("#morphRow .rtools"), mb = $("moBtn");
+      if (rt && mb) { const b = document.createElement("button"); b.className = "btn"; b.id = "moLfoBtn"; b.textContent = "LFOs · XY"; b.title = "Two LFOs, the XY pad and drift"; b.addEventListener("click", () => mb.click()); rt.prepend(b); } }
+
+    // ---- Analog: a button next to Demo opens its bar ----
+    { const rt = document.querySelector("#engineRow .row-label .rtools"), bar = $("anBar");
+      if (rt && bar && typeof anPaint === "function") {
+        const b = document.createElement("button"); b.className = "btn demo"; b.id = "sndMore"; b.setAttribute("aria-expanded", "false"); b.title = "Analog: modelled filters, drive and drift";
+        b.addEventListener("click", () => { const o = bar.classList.toggle("open"); b.setAttribute("aria-expanded", String(o)); });
+        const demo = rt.querySelector(".demo"); if (demo) demo.before(b); else rt.appendChild(b);
+        const paint = () => { b.hidden = bar.hidden; b.textContent = "Analog " + (NBAN.on ? "On" : "Off") + (bar.classList.contains("open") ? " ▴" : " ▾"); b.classList.toggle("on", !!NBAN.on); };
+        const ap = anPaint; anPaint = function () { const r = ap.apply(this, arguments); try { paint(); } catch (e) {} return r; };
+        b.addEventListener("click", paint);
+        paint();
+      } }
+
+    // ---- Chord · Scale · Blend: one button and a sheet ----
+    { const cw = $("chordWrap"), chord = $("chord"), sb = $("scaleBtn"), bb = $("blendBtn"), row = $("blendRow"), sheet = $("playSheet"), body = $("psBody");
+      if (cw && chord && sb && bb && row && sheet && body) {
+        const chip = document.createElement("button"); chip.className = "btn playopts"; chip.id = "playOpts"; chip.setAttribute("aria-haspopup", "dialog");
+        cw.before(chip);
+        const sec = (title, sub) => { const d = document.createElement("div"); d.className = "ps-sec"; d.innerHTML = "<div class='ps-h'><b></b><small></small></div>"; d.querySelector("b").textContent = title; d.querySelector("small").textContent = sub; body.appendChild(d); return d; };
+        const sC = sec("Chord", "Each key plays this chord"); sC.appendChild(cw);
+        const sS = sec("Scale", "Lock the keys to a key, so nothing sounds wrong"); sS.appendChild(sb);
+        const sB = sec("Blend", "Soften and overlap the notes you play"); ["blendBtn", "blendAmt", "blendVal"].forEach(id => { const e = $(id); if (e) sB.appendChild(e); });
+        const label = () => {
+          const naC = cw.hidden || cw.classList.contains("na"), naB = row.hidden;
+          sC.hidden = naC; sS.hidden = naB || sb.hidden; sB.hidden = naB;
+          chip.hidden = naC && naB;
+          const parts = [];
+          if (!naC) { const o = chord.options[chord.selectedIndex]; parts.push(o ? o.text : "Chord"); }
+          if (!naB) { const t = sb.textContent.trim(); parts.push(/off/i.test(t) ? "Scale off" : t); if (bb.getAttribute("aria-pressed") === "true") parts.push("Blend"); }
+          chip.textContent = parts.join(" · ") + " ▾";
+          chip.title = "How the keys play: " + parts.join(", ");
+        };
+        chip.addEventListener("click", () => { start(); label(); sheet.hidden = false; });
+        $("psDone").addEventListener("click", () => { sheet.hidden = true; });
+        sheet.addEventListener("click", e => { if (e.target === sheet) sheet.hidden = true; });
+        sb.addEventListener("click", () => { sheet.hidden = true; }, true);   // the Scale sheet opens in its place
+        chord.addEventListener("change", label);
+        const mo = new MutationObserver(label);
+        mo.observe(sb, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ["hidden", "aria-pressed"] });
+        mo.observe(bb, { attributes: true, attributeFilter: ["aria-pressed"] });
+        mo.observe(cw, { attributes: true, attributeFilter: ["hidden", "class"] });
+        mo.observe(row, { attributes: true, attributeFilter: ["hidden"] });
+        label();
+      } }
+
+    // ---- the one-line instructions: in Help, or back under the controls with Hints ----
+    let hints = false; try { hints = localStorage.getItem("nightbloom-hints") === "1"; } catch (e) {}
+    const paintHints = () => { document.body.classList.toggle("hints", hints); const b = $("hintsBtn"); if (b) { b.textContent = "Hints: " + (hints ? "On" : "Off"); b.setAttribute("aria-pressed", String(hints)); } };
+    [".sp-hint", ".gridbar .hint", ".dj-cap", "#gbBrowseSub", "#stepHint"].forEach(q => document.querySelectorAll(q).forEach(e => e.classList.add("hintline")));
+    document.querySelectorAll(".dj-lab").forEach(e => { if (/^up to 4 · tap one/.test(e.textContent.trim())) e.classList.add("hintline"); });
+    [["engineAfter", /^Pick a sound, then/], ["drummerNow", /changes by itself/], ["scInfo", /^drag on the staff/], ["trkStatus", /^Import audio, or arm/], ["djMsg", /^Load a song on each deck/], ["brMode", /^Tap a sound to/]].forEach(([id, re]) => {
+      const e = $(id); if (!e) return;
+      const t = () => e.classList.toggle("hint-on", re.test(e.textContent.trim()));
+      new MutationObserver(t).observe(e, { childList: true, characterData: true, subtree: true }); t();
+    });
+
+    // ---- Help: topics in groups, a contents row, and it opens at the screen you're on ----
+    const helpEl = $("helpSheet"), list = helpEl && helpEl.querySelector(".help-list");
+    if (helpEl && list) {
+      const TOPICS = [
+        ["around", "Getting around", /^(Getting around|Keys · Seq · Notes are|☰ \(top right\))/],
+        ["sounds", "Sounds", /^(Tabs |In Lib|Analog|Natewave|Your plugins|Studio |Plugins |⚡ Fast plugins)/],
+        ["together", "Playing together", /^(Playing engines together|Playing sounds together)/],
+        ["keys", "Keys & controllers", /^(The button next to the tabs|Playing from a keyboard|Playing from a controller|Plugin controls)/],
+        ["fx", "Effects & Motion", /^Effects/],
+        ["seq", "Seq, Notes & Jam", /^(Jam |Piano roll|Tap the bpm readout)/],
+        ["samp", "Sampler", /^(Record input|Fit a sample)/],
+        ["speech", "Speech", /^Speech/],
+        ["rec", "Recording", /^Keep 90s/],
+        ["garage", "Garage", /^Garage/],
+        ["beats", "Rhythm & Beats", /^Rhythm Creator/],
+        ["dj", "DJ", /^DJ/],
+        ["link", "MIDI, Link & sound out", /^(Link |Ableton Link|Sound out)/],
+        ["undo", "Undo", /^Undo and redo/],
+        ["fix", "Problems & settings", /^Something not working/],
+      ];
+      let built = false; const heads = {};
+      const build = () => {
+        if (built) return; built = true;
+        const groups = {}; TOPICS.forEach(t => groups[t[0]] = []);
+        let last = "around";
+        [...list.children].forEach(el => {
+          if (el.tagName !== "P") return;
+          const txt = el.textContent.trim(); const hit = TOPICS.find(t => t[2].test(txt));
+          if (hit) last = hit[0]; groups[last].push(el);
+        });
+        const set = document.createElement("p"); set.className = "help-set";
+        set.innerHTML = '<span>One-line tips under the controls:</span><button class="btn" id="hintsBtn" aria-pressed="false">Hints: Off</button>';
+        groups.fix.push(set);
+        const toc = document.createElement("nav"); toc.className = "help-toc"; toc.setAttribute("aria-label", "Help topics");
+        TOPICS.forEach(([id, name]) => {
+          if (!groups[id].length) return;
+          const h = document.createElement("h4"); h.className = "help-h"; h.textContent = name; h.dataset.topic = id; heads[id] = h;
+          list.append(h, ...groups[id]);
+          const b = document.createElement("button"); b.textContent = name; b.dataset.topic = id; b.setAttribute("aria-pressed", "false");
+          b.addEventListener("click", () => go(id, true)); toc.appendChild(b);
+        });
+        list.before(toc);
+        $("hintsBtn").addEventListener("click", () => { hints = !hints; try { localStorage.setItem("nightbloom-hints", hints ? "1" : "0"); } catch (e) {} paintHints(); });
+        paintHints();
+      };
+      const go = (id, smooth) => {
+        const h = heads[id]; if (!h) return;
+        helpEl.querySelectorAll(".help-toc button").forEach(b => { const on = b.dataset.topic === id; b.setAttribute("aria-pressed", String(on)); if (on) b.scrollIntoView({ block: "nearest", inline: "center" }); });
+        const card = helpEl.querySelector(".ed-card");
+        if (id === "around" && card) card.scrollTop = 0; else h.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" });
+      };
+      const here = () => {
+        if (state.mode === "notes" || state.mode === "seq" || state.panel === "jam") return "seq";
+        if (state.engine === "speech") return "speech";
+        if (["samp", "pads"].includes(state.engine)) return "samp";
+        if (["fx", "lab", "morph"].includes(state.panel)) return "fx";
+        if (state.panel === "arp") return "seq";
+        return "around";
+      };
+      new MutationObserver(() => { if (!helpEl.hidden) { build(); requestAnimationFrame(() => go(here(), false)); } }).observe(helpEl, { attributes: true, attributeFilter: ["hidden"] });
+    }
+    paintHints();
+  }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
   {
