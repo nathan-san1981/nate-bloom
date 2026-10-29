@@ -2329,6 +2329,15 @@ body:not(.hints) .fxlive:not(.live):not(.clean) { border: none; padding: 0; marg
 .help-list .help-h:first-child { margin-top: 0; }
 .help-set { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--dim); }
 .help-set .btn { height: 32px; padding: 0 12px; font-size: 0.8rem; }
+/* ---------- simpler (125): one ↶ per screen, one + for together, one top-bar order ---------- */
+#seqUndo, #seqRedo, #scUndo, #scRedo, #rcRedo, .stk-add, header #djRecTo, .dj-top #djRecTo { display: none !important; }
+.dj-top .st-undo, .gb-bar .st-undo { min-width: 34px; padding: 0 8px; font-size: 1rem; }
+@media (min-width: 701px) { .dj-top > #djMsg { order: 2; } }
+.st-pop .btn[aria-pressed="true"] { border-color: #7fd6c2; color: #7fd6c2; background: rgba(127,214,194,0.12); }
+.st-more { position: relative; }
+.st-pop { position: fixed; z-index: 60; min-width: 180px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.55); }
+.st-pop[hidden] { display: none; }
+.st-pop .btn { justify-content: flex-start; height: 38px; padding: 0 12px; font-size: 0.86rem; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -2869,7 +2878,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
   <div class="dj-top">
     <strong>DJ</strong>
     <span class="dj-msg" id="djMsg">Load a song on each deck, then press Auto sync</span>
-    <button class="btn" id="djKeep" title="Keep the last 90 seconds you heard, after the fact">Keep</button>
+    <button class="btn" id="djKeep" title="Keep the last 90 seconds you heard, after the fact">Keep the last 90 s</button>
     <button class="btn" id="djKeyLock" aria-pressed="true" title="Speed changes keep the song's pitch">Key lock</button>
     <select class="rectarget" id="djRecTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
     <button class="btn takebtn" id="djRec" aria-label="Record the mix" title="Record everything you hear">● Rec</button>
@@ -3105,7 +3114,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <button class="btn bp-rec" id="bpRec" aria-pressed="false" title="Record what you play into the loop (adds to what's there)">● Rec</button>
     <span class="bp-bpm" id="bpBpm">120 bpm</span>
     <button class="btn" id="bpUndo" disabled title="Take back the last recording pass">↶ Undo</button>
-    <button class="btn" id="bpClear" title="Clear every hit in the loop">Clear</button>
+    <button class="btn" id="bpClear" title="Clear every hit in the loop">Clear the loop</button>
     <button class="btn" id="bpFx" aria-pressed="false" title="Send Beat Pads through the effects and FX Lab">FX</button>
     <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
     <button class="btn" id="bpHelpBtn" aria-label="How Beat Pads works">?</button>
@@ -3545,19 +3554,19 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
-      <p><b>Playing from a keyboard</b> (Bluetooth or USB): three octaves from the left edge of the keys. The bottom letter row, <b>Z X C V B N M , . /</b>, plays the white keys, with <b>S D G H J L ;</b> above it as the black keys; the top letter row, <b>Q W E R T Y U I O P [ ]</b>, carries on from there, with the number keys <b>2 3 4 6 7 9 0 −</b> as its black keys. Every key shows its letter. <b>↓</b> / <b>↑</b> move an octave down or up. With Drums or Pads, <b>Q W E R / A S D F / Z X C V</b> play the pads in the same grid as on screen. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
+      <p><b>Playing from a keyboard</b> (Bluetooth or USB) works like GarageBand's Musical Typing, here and in the Garage: <b>A</b> is C at the left edge of the keys, the home row <b>A S D F G H J K L ; '</b> plays the white keys and <b>W E T Y U O P</b> the black keys. <b>Z</b> / <b>X</b> (or <b>↓</b> / <b>↑</b>) move an octave down or up, <b>C</b> / <b>V</b> play softer or harder. On the drums <b>A</b> is the kick, <b>S</b> the snare, <b>D</b> the clap, <b>F</b> the hi-hat, <b>H</b> the open hat, <b>J</b> the tom, <b>W</b> the rim and <b>E</b> the cowbell; the 12 Pads and Beat Pads use the grid of keys that matches the pads on screen. Every key shows its letter. <b>Two rows</b> (the setting at the bottom of this help) gives the older layout instead: three octaves, the Z row and the Q row as the white keys. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
       <p><b>Playing from a controller:</b> how hard you hit a key sets the level (MIDI → Velocity: Off, Light touch, Normal or Firm); the pitch-bend and mod wheels move the ±2 and Vib wheels, aftertouch adds vibrato as you lean on a key, and the sustain pedal holds notes until you lift it. Plugin instruments get all of it. <b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
       <p>The button next to the tabs (it reads <b>Single notes · Scale off</b> to start) holds <b>Chord</b> (each key plays a chord), <b>Scale</b> (locks the keyboard to a key so nothing sounds wrong) and <b>Blend</b> (softens and overlaps notes). <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
       <p><b>Speech</b> (the Speech tab) talks and sings, after Plogue's Chipspeech: thirteen voices from the machines that first spoke, from Bell Labs' Voder (1939) and the IBM 704 that sang Daisy Bell (1961) to the Speak &amp; Spell, the Votrax and TI chips, SAM, DECtalk, MacInTalk and the Atari ST, each made the way its machine made it. Type the words; each note sings the next syllable (or the next word or line). A dash on its own holds a vowel over another note; [HH AH0 L OW1] gives exact phonemes. Speed shortens the consonants, Formant changes the size of the voice, Grit brings out the chip (past halfway it circuit-bends the Speak &amp; Spell). Words come from the CMU Pronouncing Dictionary.</p>
       <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
       <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
-      <p><b>Playing sounds together</b>: the <b>Playing</b> row (Synths; it appears once two or more sounds play together) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). <b>+ Add</b> there, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
+      <p><b>Playing sounds together</b>: the <b>Playing</b> row (Synths; it appears once two or more sounds play together) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). The <b>+</b> on a Quick sound, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
       <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
       <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
       <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
       <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
       <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In Tracks, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
-      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, Rhythm Creator and Tracks. Each of those also has its own ↶ ↷. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
+      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, the Rhythm Creator, Beat Pads, the Garage and Tracks. The full screens (Rhythm, Beats, the Garage, Tracks) have the same ↶ in their top bar, for the changes you made there. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
@@ -3567,7 +3576,9 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
     <div class="sp-lab"><span>Keyboard shortcuts</span></div>
     <div class="help-grid">
-      <kbd>Z X C V … / Q W E R …</kbd><span>play notes: bottom letter row and top letter row (the rows above them are the black keys)</span>
+      <kbd>A S D F … / W E T …</kbd><span>play notes (Musical Typing): the home row is the white keys, the row above the black keys</span>
+      <kbd>Z / X</kbd><span>octave down / up</span>
+      <kbd>C / V</kbd><span>softer / harder</span>
       <kbd>Space</kbd><span>play / pause</span>
       <kbd>Esc</kbd><span>stop everything, or close a sheet</span>
       <kbd>↓ / ↑</kbd><span>octave down / up</span>
@@ -5326,7 +5337,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     ["Comma",",",","],["KeyL","L","l"],["Period",".","."],["Semicolon",";",";"],["Slash","/","/"],
     ["KeyQ","Q","q"],["Digit2","2","2"],["KeyW","W","w"],["Digit3","3","3"],["KeyE","E","e"],["Digit4","4","4"],["KeyR","R","r"],["KeyT","T","t"],["Digit6","6","6"],["KeyY","Y","y"],["Digit7","7","7"],["KeyU","U","u"],
     ["KeyI","I","i"],["Digit9","9","9"],["KeyO","O","o"],["Digit0","0","0"],["KeyP","P","p"],["Minus","−","-"],["BracketLeft","[","["],["BracketRight","]","]"]];
-  const KBC = KB_MAP.map(x => x[0]), KBL = KB_MAP.map(x => x[1]), KBKS = KB_MAP.map(x => x[2]);
+  // Musical Typing, as in GarageBand: A is C, the home row the white keys, W E T Y U O P the black keys
+  const KB_MT = [["KeyA","A","a"],["KeyW","W","w"],["KeyS","S","s"],["KeyE","E","e"],["KeyD","D","d"],["KeyF","F","f"],["KeyT","T","t"],["KeyG","G","g"],["KeyY","Y","y"],["KeyH","H","h"],["KeyU","U","u"],["KeyJ","J","j"],
+    ["KeyK","K","k"],["KeyO","O","o"],["KeyL","L","l"],["KeyP","P","p"],["Semicolon",";",";"],["Quote","'","'"]];
+  // and the drums: A kick, S snare, D clap, F hat, H open hat, J tom, W rim, E cowbell (the Garage's keys)
+  const DRC_MT = ["KeyA", "KeyS", "KeyD", "KeyF", "KeyH", "KeyJ", "KeyW", "KeyE"], DRL_MT = "ASDFHJWE".split(""), DRK_MT = "asdfhjwe".split("");
+  let KB_LAYOUT = "mt"; try { KB_LAYOUT = localStorage.getItem("nightbloom-kblayout") === "two" ? "two" : "mt"; } catch (e) {}
+  let KBC, KBL, KBKS, kbVel = 0.8;
+  function kbUse(l) { KB_LAYOUT = l === "two" ? "two" : "mt"; const M = KB_LAYOUT === "two" ? KB_MAP : KB_MT; KBC = M.map(x => x[0]); KBL = M.map(x => x[1]); KBKS = M.map(x => x[2]); }
+  kbUse(KB_LAYOUT);
   // drum machine and Pads: the left-hand block, in the same grid as the pads on screen
   const PADC = ["KeyQ", "KeyW", "KeyE", "KeyR", "KeyA", "KeyS", "KeyD", "KeyF", "KeyZ", "KeyX", "KeyC", "KeyV"], PADL = "QWERASDFZXCV".split(""), PADK = "qwerasdfzxcv".split("");
   const kbDown = new Map();   // key -> the note it started (null for a drum or pad hit)
@@ -5334,7 +5353,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   if (KBD_LABELS === null) { try { if (matchMedia("(any-pointer: fine)").matches) KBD_LABELS = true; } catch (e) {} }   // a mouse or touchpad: likely a keyboard too
   const kbPadMode = () => state.engine === "drum" || state.engine === "pads";
   const kbIdx = e => {
-    const [C, K] = kbPadMode() ? [PADC, PADK] : [KBC, KBKS];
+    const [C, K] = state.engine === "drum" && KB_LAYOUT === "mt" ? [DRC_MT, DRK_MT] : kbPadMode() ? [PADC, PADK] : [KBC, KBKS];
     const i = C.indexOf(e.code); return i >= 0 ? i : (e.code ? -1 : K.indexOf((e.key || "").toLowerCase()));
   };
   const kbBusy = e => {
@@ -5347,20 +5366,28 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (!KBD_LABELS) return;
     const tag = (el, i) => { if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = KBL[i]; el.appendChild(sp); };
     const tagP = (el, i) => { if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = PADL[i]; el.appendChild(sp); };
-    if (state.engine === "drum") { DRUMS.forEach(([id], i) => { if (i < PADL.length) tagP(padEls.get(id), i); }); return; }
+    if (state.engine === "drum") { const L = KB_LAYOUT === "mt" ? DRL_MT : PADL; DRUMS.forEach(([id], i) => { if (i < L.length) { const el = padEls.get(id); if (!el) return; const sp = document.createElement("span"); sp.className = "kl"; sp.textContent = L[i]; el.appendChild(sp); } }); return; }
     if (state.engine === "pads") { keysEl.querySelectorAll(".pad").forEach((el, i) => { if (i < PADL.length) tagP(el, i); }); return; }
     const start = BASE + state.octave * 12; for (let i = 0; i < KBL.length; i++) tag(keyEls.get(start + i), i);
   }
+  // Musical Typing's other keys: Z X an octave down or up, C V softer or harder
+  function kbMtExtra(code) {
+    if (code === "KeyZ" || code === "KeyX") { if (state.engine === "drum") return; document.getElementById(code === "KeyZ" ? "octDown" : "octUp").click(); return; }
+    kbVel = Math.round(Math.min(1, Math.max(0.2, kbVel + (code === "KeyV" ? 0.2 : -0.2))) * 10) / 10;
+    noteMsg("Velocity " + Math.round(kbVel * 127) + " (C softer · V harder)");
+  }
+  const kbAt = fn => { const v = NB_VEL, v7 = NB_VEL7; NB_VEL = kbVel / 0.8; NB_VEL7 = Math.round(kbVel * 127); try { fn(); } finally { NB_VEL = v; NB_VEL7 = v7; } };
   window.addEventListener("keydown", e => {
     if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+    if (KB_LAYOUT === "mt" && state.engine !== "pads" && /^Key[ZXCV]$/.test(e.code || "") && !kbBusy(e)) { e.preventDefault(); if (e.repeat) return; kbSeen(); kbMtExtra(e.code); return; }
     const i = kbIdx(e); if (i < 0 || kbBusy(e)) return;
     e.preventDefault();
     const key = e.code || e.key; if (e.repeat || kbDown.has(key)) return;
     kbSeen();
-    if (state.engine === "drum") { kbDown.set(key, null); if (i < DRUMS.length && ctx) playDrum(DRUMS[i][0], ctx.currentTime); return; }
+    if (state.engine === "drum") { kbDown.set(key, null); if (i < DRUMS.length && ctx) kbAt(() => playDrum(DRUMS[i][0], ctx.currentTime)); return; }
     if (state.engine === "pads") { kbDown.set(key, null); if (i < NPADS) kitPadDown(i); return; }
     const m = BASE + state.octave * 12 + i;
-    kbDown.set(key, m); press(m);
+    kbDown.set(key, m); kbAt(() => press(m));
   });
   window.addEventListener("keyup", e => {
     const key = e.code || e.key; if (!kbDown.has(key)) return;
@@ -15892,7 +15919,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   const rcUndo = [];
   const rcSnapP = () => JSON.stringify({ tracks: RCP.tracks, steps: RCP.steps, swing: RCP.swing, bpm: state.seq.bpm });
   const rcUndoBtn = document.getElementById("rcUndo");
-  const rcPaintUndo = () => { rcUndoBtn.disabled = !rcUndo.length; rcUndoBtn.textContent = rcUndo.length ? "↶ Undo" : "↶ Undo"; };
+  const rcPaintUndo = () => { rcUndoBtn.disabled = !rcUndo.length; rcUndoBtn.textContent = "↶"; };
   function rcPushUndo() { const s = rcSnapP(); if (rcUndo[rcUndo.length - 1] === s) return; rcUndo.push(s); if (rcUndo.length > 20) rcUndo.shift(); rcPaintUndo(); }
   function rcDoUndo() {
     const s = rcUndo.pop(); if (!s) return; const o = JSON.parse(s);
@@ -17937,6 +17964,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     if (!BP.rec && !BP.armed && BPS.songOn) { BPS.songOn = false; BP.queued = null; bpSave(); noteMsg("Song is off while you record into Seq " + (BPS.cur + 1)); }
     if (BP.rec || BP.armed) { BP.rec = false; BP.armed = false; BPS.ev.forEach(e => { delete e.cyc; }); bpSave(); bpPaintTop(); return; }
     BP.pass++;
+    try { window.__nbStep && __nbStep("bp", "Beat Pads · recording"); } catch (e) {}
     if (BP.playing) { BP.rec = true; }
     else { BP.armed = true; bpTransport(true); }
     bpPaintTop();
@@ -18052,8 +18080,8 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     bpPlayBtn.textContent = BP.playing ? "■ Stop" : "▶ Play"; bpPlayBtn.setAttribute("aria-pressed", String(BP.playing));
     bpRecBtn.setAttribute("aria-pressed", String(BP.rec)); bpRecBtn.classList.toggle("armed", !!BP.armed); bpRecBtn.textContent = BP.armed ? "● Count-in…" : BP.rec ? "● Recording" : "● Rec";
     document.getElementById("bpBpm").textContent = (Math.round(rcBpm() * 10) / 10) + " bpm" + (rcFollow() ? " · DJ" : "");
-    const on = !!(FXC.by.bp && FXC.by.bp.on), fb = document.getElementById("bpFx"); fb.setAttribute("aria-pressed", String(on)); fb.textContent = on ? "FX ✓" : "FX";
-    document.getElementById("bpUndo").disabled = !BPS.ev.length;
+    const on = !!(FXC.by.bp && FXC.by.bp.on), fb = document.getElementById("bpFx"); fb.setAttribute("aria-pressed", String(on)); fb.textContent = on ? "Effects on Beat Pads: On" : "Effects on Beat Pads: Off";
+    { const u = document.getElementById("bpUndo"); if (u && window.__nbCanUndo) u.disabled = !__nbCanUndo("bp"); }
     bpBtn.classList.toggle("live", BP.playing); bpBtn.setAttribute("aria-label", BP.playing ? "Beats (playing)" : "Beats");
     ["bpBars", "bpQ", "bpRate"].forEach(id => { const el = document.getElementById(id), v = { bpBars: BPS.bars, bpQ: BPS.q, bpRate: BPS.rate }[id]; const o = [...el.options].find(x => Math.abs(+x.value - +v) < 0.01); if (o) el.value = o.value; });
     document.getElementById("bpQs").value = Math.round(BPS.qs * 100); document.getElementById("bpQsV").textContent = Math.round(BPS.qs * 100) + "%";
@@ -18126,7 +18154,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     BPS.ev = BPS.ev.filter(e => (e.pass || 0) !== last); bpSave(); bpPaintGrid(); bpPaintTop(); noteMsg("Took back the last pass (" + (n0 - BPS.ev.length) + " hits)");
   });
   document.getElementById("bpClear").addEventListener("click", () => {
-    if (!BPS.ev.length) return; const keep = BPS.ev; BPS.ev = []; bpSave(); bpPaintGrid(); bpPaintTop();
+    if (!BPS.ev.length) return; try { window.__nbStep && __nbStep("bp", "Beat Pads · Clear"); } catch (e) {} const keep = BPS.ev; BPS.ev = []; bpSave(); bpPaintGrid(); bpPaintTop();
     undoToast("Cleared " + keep.length + " hits", () => { BPS.ev = keep; bpSave(); bpPaintGrid(); bpPaintTop(); });
   });
   document.getElementById("bpFx").addEventListener("click", () => { start(); const p = fxcParams("bp"); p.on = !p.on; fxcSave(); if (ctx) { fxcGet("bp"); applyFx(); bpBus(); } bpPaintTop(); });
@@ -23238,7 +23266,7 @@ registerProcessor("nb-wave", NBWave);
     }
     // undo: the song as it was before each change
     const UNDO = [];
-    function gbDo() { if (!S) return; UNDO.push(JSON.stringify(S)); if (UNDO.length > 50) UNDO.shift(); }
+    function gbDo() { if (!S) return; UNDO.push(JSON.stringify(S)); if (UNDO.length > 50) UNDO.shift(); try { window.__nbNoted && __nbNoted("gb"); } catch (e) {} }
     // ---------- time ----------
     const spb = () => 60 / S.bpm;
     const rEnd = r => r.start + r.len * (r.rep || 1);
@@ -24927,14 +24955,15 @@ registerProcessor("nb-wave", NBWave);
     $("gbLoopsBtn").addEventListener("click", loopsSheet); $("gbHelpBtn").addEventListener("click", helpSheet);
     $("gbBrowseBtn").addEventListener("click", () => setView("browse"));
     $("gbViewBtn").addEventListener("click", () => setView(S.view === "tracks" ? (curTr() ? "inst" : "browse") : "tracks"));
-    $("gbUndo").addEventListener("click", () => {
-      if (!UNDO.length) return;
+    function gbPut(json) {
       const keep = { id: S.id, view: S.view, zoom: S.zoom, ph: S.ph }, ids = new Set(S.tracks.map(t => t.id));
-      S = Object.assign(fixSong(JSON.parse(UNDO.pop())), keep);
+      S = Object.assign(fixSong(JSON.parse(json)), keep);
       ids.forEach(id => { if (!S.tracks.some(t => t.id === id)) { dropPlug(id); const N = AU.trk.get(id); if (N) { try { N.g.disconnect(); N.p.disconnect(); N.s.disconnect(); } catch (e) {} AU.trk.delete(id); } } });
       S.tracks.forEach(t => prep(t)); ED.sel.clear(); if (ED.open && !edFind()) edClose();
       dirty(); applyLevels(); saveSong(); setView(S.view); if (ED.open) { edHead(); edDraw(); }
-    });
+      $("gbUndo").disabled = !UNDO.length;
+    }
+    $("gbUndo").addEventListener("click", () => { if (UNDO.length) gbPut(UNDO.pop()); });
 
     // ---------- the Garage tab ----------
     let FR = 0, frLast = 0;
@@ -25006,7 +25035,7 @@ registerProcessor("nb-wave", NBWave);
       if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); lit(k.m, false); }
     }, true);
     addEventListener("blur", () => { KD.forEach((k, code) => { if (k.chord) chordUp("k" + code); else { const tr = trById(k.tr); if (tr) liveOff(tr, k.m); } }); KD.clear(); });
-    window.__gb = { song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
+    window.__gb = { put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
   }
 
 
@@ -26102,6 +26131,60 @@ z: [z]=Z
     }
     paintHints();
   }
+  // ======================================================================
+  // Simpler (125): every full screen's top bar in one order, a ⋯ for what you rarely need, and the keyboard setting
+  // ======================================================================
+  {
+    const $ = id => document.getElementById(id);
+    // Done · title · ▶ ● ■ · tempo · its own buttons · ↶ · ⋯ · ?
+    const bar = (top, parts) => {
+      if (!top) return;
+      const more = parts.more.filter(Boolean);
+      let pop = null, mb = null;
+      if (more.length) {
+        mb = document.createElement("button"); mb.className = "btn st-more"; mb.textContent = "⋯"; mb.setAttribute("aria-label", "More"); mb.setAttribute("aria-haspopup", "true");
+        pop = document.createElement("div"); pop.className = "st-pop"; pop.hidden = true; pop.setAttribute("role", "menu");
+        more.forEach(el => { el.classList.add("st-in"); pop.appendChild(el); el.addEventListener("click", () => { if (el.tagName === "BUTTON") setTimeout(() => { pop.hidden = true; }, 120); }); });
+        document.body.appendChild(pop);
+        const place = () => { const r = mb.getBoundingClientRect(), w = pop.offsetWidth; pop.style.top = Math.round(r.bottom + 6) + "px"; pop.style.left = Math.round(Math.min(innerWidth - w - 8, Math.max(8, r.right - w))) + "px"; };
+        mb.addEventListener("click", e => { e.stopPropagation(); pop.hidden = !pop.hidden; if (!pop.hidden) place(); });
+        document.addEventListener("pointerdown", e => { if (!pop.hidden && !pop.contains(e.target) && e.target !== mb) pop.hidden = true; }, true);
+        top.appendChild(mb);
+      }
+      const order = [parts.done, parts.title, ...parts.play, ...parts.rec, ...parts.stop, parts.tempo, ...parts.own, parts.undo, mb, parts.help];
+      order.forEach((el, i) => { if (el) { el.style.order = String(i); if (el.parentElement !== top) top.appendChild(el); } });
+      if (parts.done) parts.done.classList.add("st-done");
+      if (parts.undo) parts.undo.classList.add("st-undo");
+      return pop;
+    };
+    const djTop = document.querySelector("#djView .dj-top");
+    if (djTop) bar(djTop, { done: $("djDone"), title: djTop.querySelector("strong"), play: [], rec: [$("djRec")], stop: [$("djStop"), djTop.querySelector("[data-stopall]")], tempo: null,
+      own: [$("djRhythm")], undo: null, more: [$("djKeep"), $("djKeyLock")], help: $("djHelpBtn") });
+    const rcTop = document.querySelector("#rcView .rc-top");
+    if (rcTop) { const u = $("rcUndo"); if (u) { u.textContent = "↶"; u.title = "Undo the last change here (Ctrl+Z)"; u.setAttribute("aria-label", "Undo"); }
+      bar(rcTop, { done: $("rcDone"), title: rcTop.querySelector("strong"), play: [$("rcPlay")], rec: [$("rcRec")], stop: [rcTop.querySelector("[data-stopall]")], tempo: rcTop.querySelector(".rc-tempo"),
+        own: [$("rcFill")], undo: u, more: [], help: $("rcHelpBtn") }); }
+    const bpTop = document.querySelector("#bpView .bp-top");
+    if (bpTop) { const u = $("bpUndo"); if (u) { u.textContent = "↶"; u.title = "Undo the last change here (Ctrl+Z)"; u.setAttribute("aria-label", "Undo"); delete u.dataset.key; }
+      bar(bpTop, { done: $("bpDone"), title: bpTop.querySelector("strong"), play: [$("bpPlay")], rec: [$("bpRec")], stop: [bpTop.querySelector("[data-stopall]")], tempo: $("bpBpm"),
+        own: [...bpTop.querySelectorAll(".bp-fast")], undo: u, more: [$("bpClear"), $("bpFx")], help: $("bpHelpBtn") }); }
+    // the Garage: Done to the front, ↶ next to ?
+    { const d = $("gbDone"), l = document.querySelector("#gbBar .gb-left"), u = $("gbUndo"), h = $("gbHelpBtn");
+      if (d && l) l.prepend(d); if (u && h) { h.before(u); u.classList.add("st-undo"); u.title = "Undo the last change here (Ctrl+Z)"; } }
+
+    // the keyboard: Musical Typing, or the older two rows
+    const set = document.querySelector(".help-set");
+    const addKb = host => {
+      if (!host || $("kbLayoutBtn")) return;
+      const b = document.createElement("button"); b.className = "btn"; b.id = "kbLayoutBtn";
+      const paint = () => { b.textContent = "Keyboard: " + (KB_LAYOUT === "two" ? "Two rows" : "Musical Typing"); b.setAttribute("aria-pressed", String(KB_LAYOUT === "two")); };
+      b.addEventListener("click", () => { kbUse(KB_LAYOUT === "two" ? "mt" : "two"); try { localStorage.setItem("nightbloom-kblayout", KB_LAYOUT); } catch (e) {} paint(); kbLabel(); });
+      paint(); host.append(document.createTextNode(" Computer keyboard:"), b);
+    };
+    if (set) addKb(set);
+    else { const hs = $("helpSheet"); if (hs) new MutationObserver(() => addKb(document.querySelector(".help-set"))).observe(hs, { attributes: true, attributeFilter: ["hidden"] }); }
+    window.__kb = { layout: () => KB_LAYOUT, use: l => { kbUse(l); kbLabel(); }, vel: () => kbVel };
+  }
   // ---------- Undo and redo across the app ----------
   const HIS = { A: {}, line: [], redo: [] };
   {
@@ -26121,6 +26204,11 @@ z: [z]=Z
     area("trk", "Tracks", { stack: () => trkUndo, snap: () => JSON.stringify({ tracks: T.tracks, clips: T.clips }), btn: "trkUndo", rbtn: "trkRedo",
       put: snap => { const o = JSON.parse(snap); T.tracks = o.tracks; T.clips = o.clips; T.sel = null; trkSave(); trkRender(); } });
     HIS.A.trk.red = trkRedo;
+    // Beat Pads (each recording pass, and Clear) and the Garage (its every edit)
+    const BPU = [];
+    area("bp", "Beat Pads", { stack: () => BPU, snap: () => JSON.stringify({ cur: BPS.cur, ev: BPS.ev }), btn: "bpUndo",
+      put: snap => { const o = JSON.parse(snap); if (o.cur === BPS.cur) BPS.ev = o.ev; else if (BPS.seqs && BPS.seqs[o.cur]) BPS.seqs[o.cur].ev = o.ev; bpSave(); bpPaintGrid(); bpPaintTop(); } });
+    if (window.__gb && __gb.put) area("gb", "Garage", { stack: () => __gb.UNDO, snap: () => __gb.snapSong(), btn: "gbUndo", put: snap => __gb.put(snap) });
     // the sound: engines, knobs, presets, effects, Natewave, Morph (recorded when a gesture settles)
     const SND = { u: [], last: null, t: 0 };
     const sndSnap = () => { const o = captureSound(""); delete o.date; o.cur = state.cur || null; return JSON.stringify(o); };
@@ -26202,10 +26290,13 @@ z: [z]=Z
       if (!quiet) noteMsg("Nothing to redo"); paint(); return false;
     }
     // each place's own ↶ goes through here (so it can be redone), and gets a ↷
+    window.__nbNoted = (id, label) => { if (HIS.A[id]) noted(id, label); };
+    window.__nbCanUndo = id => !!(HIS.A[id] && HIS.A[id].stack().length);
+    window.__nbStep = (id, label) => { const A = HIS.A[id]; if (!A) return; const st = A.stack(); st.push(A.snap()); if (st.length > 40) st.shift(); noted(id, label); };
     seqDoUndo = () => undo("seq"); rcDoUndo = () => undo("rc"); trkUndoFn = () => { if (!undoIn("trk")) trkSay("Nothing to undo"); else trkSay("Undone"); };
-    const BTN = { scUndo: "notes", seqUndo: "seq", rcUndo: "rc", trkUndo: "trk" }, RBTN = { scRedo: "notes", seqRedo: "seq", rcRedo: "rc", trkRedo: "trk" };
+    const BTN = { scUndo: "notes", seqUndo: "seq", rcUndo: "rc", trkUndo: "trk", bpUndo: "bp", gbUndo: "gb" }, RBTN = { scRedo: "notes", seqRedo: "seq", rcRedo: "rc", trkRedo: "trk" };
     document.addEventListener("click", e => {
-      const b = e.target.closest && e.target.closest("#scUndo, #seqUndo, #rcUndo, #trkUndo, #scRedo, #seqRedo, #rcRedo, #trkRedo, #hisUndo, #hisRedo, #hisSUndo, #hisSRedo, #hisUndoP, #hisRedoP");
+      const b = e.target.closest && e.target.closest("#scUndo, #seqUndo, #rcUndo, #trkUndo, #bpUndo, #gbUndo, #scRedo, #seqRedo, #rcRedo, #trkRedo, #hisUndo, #hisRedo, #hisSUndo, #hisSRedo, #hisUndoP, #hisRedoP");
       if (!b) return;
       e.stopImmediatePropagation(); e.preventDefault();
       const id = b.id;
@@ -26231,10 +26322,12 @@ z: [z]=Z
       if (u) { u.disabled = !canU; const e = HIS.line[HIS.line.length - 1]; u.title = canU && e ? "Undo: " + e.label + " (Ctrl+Z)" : "Nothing to undo"; }
       if (r) { r.disabled = !canR; const e = HIS.redo[HIS.redo.length - 1]; r.title = canR && e ? "Redo: " + e.label + " (Ctrl+Shift+Z)" : "Nothing to redo"; }
       for (const id in HIS.A) {
-        const A = HIS.A[id]; if (!A.rbtn) continue;
+        const A = HIS.A[id];
+        if (!A.rbtn) { const ub = A.btn && document.getElementById(A.btn); if (ub) ub.disabled = !A.stack().length; continue; }
         const rb = document.getElementById(A.rbtn), ub = document.getElementById(A.btn);
         if (rb) { rb.disabled = !grp(id).some(x => HIS.A[x].red.length); if (ub) rb.hidden = ub.hidden; }
         if (ub && id === "notes") ub.disabled = !A.stack().length;
+        if (ub && (id === "bp" || id === "rc" || id === "gb")) ub.disabled = !A.stack().length;
         if (A.paint) try { A.paint(); } catch (e) {}
       }
       if (!sheet.hidden) list();
