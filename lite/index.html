@@ -2502,6 +2502,183 @@ body.mls-nopads .mls-p { display: none; }
 body.mls-picking .app, body.mls-picking .dj { cursor: crosshair; }
 @media (max-width: 1000px) { .mls-name { width: 60px; padding: 0 5px; } .mls-c { display: flex; flex-direction: column; justify-content: center; padding: 2px 2px 5px; }
   .mls-c b { position: absolute; top: 1px; left: 3px; font-size: 0.5rem; padding: 0; } .mls-c span { font-size: 0.62rem; text-align: center; padding-top: 7px; } .mls-c em { display: none; } .mls-pad b { display: none; } .mls-pad span { font-size: 0.6rem; } }
+/* Live: big knobs, faders and pads for playing out (the MiniLab's layout) */
+.livebtn { height: 32px; padding: 0 11px 0 9px; flex: none; display: inline-flex; align-items: center; gap: 6px; border-color: #ff5c7a; color: #ff8a9f; font-weight: 700; }
+.livebtn i { width: 9px; height: 9px; border-radius: 50%; background: #ff5c7a; box-shadow: 0 0 0 3px #ff5c7a33; }
+body.live-on .mini-tab { display: none; }
+body.live-on .browser { z-index: 29; }
+.dj.live { gap: 10px; overflow-x: hidden; }
+.dj.live .btn { height: 42px; padding: 0 13px; font-size: 0.9rem; border-radius: 10px; }
+.lv-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; min-width: 0; }
+.lv-title { font: 700 0.95rem var(--font-display); display: inline-flex; align-items: center; gap: 7px; margin: 0 4px; }
+.lv-title::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #ff5c7a; box-shadow: 0 0 10px #ff5c7a; }
+.lv-snd { display: flex; gap: 4px; flex: 1 1 200px; min-width: 150px; }
+.dj.live .lv-snd .btn { width: 38px; padding: 0; font-size: 1.2rem; flex: none; }
+.lv-sname { flex: 1; min-width: 0; height: 42px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1px; padding: 0 12px; border-radius: 10px;
+  background: var(--raised); border: 1px solid var(--line); color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
+.lv-sname b { font-size: 0.9rem; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-sname small { font-size: 0.68rem; color: var(--dim); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-tempo { display: flex; align-items: center; gap: 3px; }
+.dj.live .lv-tempo .btn { width: 38px; padding: 0; font-size: 1.1rem; }
+#lvBpm { font: 600 0.92rem var(--font-mono); min-width: 70px; text-align: center; }
+.lv-play { height: 42px; }
+.lv-play button { height: 100%; padding: 0 12px; font-size: 0.86rem; position: relative; }
+.lv-play button.live::after { content: ""; position: absolute; top: 6px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #7fd6c2; box-shadow: 0 0 6px #7fd6c2; }
+.dj.live .lv-go { width: 62px; padding: 0; font-size: 1.15rem; font-weight: 700; background: #7fd6c2; border-color: #7fd6c2; color: #0d1a16; }
+.dj.live .lv-go.on { background: #ff6b6b; border-color: #ff6b6b; color: #1c0909; }
+.dj.live .lv-rec.on { background: #ff5c7a; border-color: #ff5c7a; color: #1c0910; }
+.dj.live .lv-ko.on, .dj.live .lv-dev.on { border-color: #7fd6c2; color: #7fd6c2; }
+.dj.live .lv-fxb { min-width: 96px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: none; color: #1a1226;
+  background: linear-gradient(135deg, #c4a3ff, #ff8ac6); box-shadow: 0 4px 16px #c4a3ff40; }
+.lv-fxb b { font: 800 1rem var(--font-display); letter-spacing: 0.04em; }
+.lv-fxb small { font-size: 0.7rem; font-weight: 700; opacity: 0.8; }
+.dj.live .lv-fxb[aria-pressed="true"] { box-shadow: inset 0 0 0 2px #1a1226, 0 0 0 2px #ff8ac6; }
+.dj.live .lv-fxb.off { background: linear-gradient(135deg, #6b6080, #7a6074); }
+.dj.live .lv-fxb.off small::after { content: " · off"; }
+.lv-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.lv-ml { flex: none; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); grid-template-rows: auto auto; gap: 8px 12px;
+  background: #0e0c15; border: 1px solid var(--line); border-radius: 16px; padding: 8px 12px 10px; --kz: clamp(62px, min(12.5vh, 8.4vw), 112px); }
+.lv-pages, .lv-psets { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.lv-pages::-webkit-scrollbar, .lv-psets::-webkit-scrollbar { display: none; }
+.lv-pages { grid-column: 1 / -1; }
+.lv-pages button, .lv-psets button { flex: none; height: 36px; padding: 0 15px; border-radius: 18px; border: 1px solid var(--line); background: var(--raised); color: var(--ink);
+  font: 600 0.84rem var(--font-body); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.lv-pages button[aria-pressed="true"], .lv-psets button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
+.lv-psets button small { font-size: 0.68rem; font-weight: 500; opacity: 0.75; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lv-knobs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 10px; align-content: start; }
+.lv-faders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding-left: 12px; border-left: 1px solid var(--line); }
+.lv-k, .lv-f { position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.lv-k { gap: 0; }
+.lv-ksurf { width: var(--kz); max-width: 100%; aspect-ratio: 1; touch-action: none; cursor: ns-resize; border-radius: 50%; outline-offset: 2px; }
+.lv-ksurf svg { width: 100%; height: 100%; display: block; }
+.lv-arc0 { fill: none; stroke: #272236; stroke-width: 8; stroke-linecap: round; }
+.lv-arc1 { fill: none; stroke: var(--lilac); stroke-width: 8; stroke-linecap: round; }
+.lv-cap { fill: #241f31; stroke: #3b3450; stroke-width: 2; }
+.lv-tick { stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
+.lv-k em, .lv-f em { font: normal 0.72rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.3; min-height: 1.3em; }
+.lv-name { display: flex; align-items: center; gap: 5px; max-width: 100%; min-width: 0; min-height: 30px; padding: 0 8px; border-radius: 8px; border: 1px dashed transparent;
+  background: none; color: var(--ink); font: 600 0.8rem var(--font-body); cursor: pointer; }
+.lv-name b { font: 700 0.6rem var(--font-mono); color: var(--lilac); flex: none; }
+.lv-name span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-name:hover, .lv-name:focus-visible { border-color: #4a4262; }
+.lv-k.yours .lv-name span, .lv-f.yours .lv-name span { color: var(--amber); }
+.lv-k.none, .lv-f.none { opacity: 0.42; }
+.lv-k.none .lv-name { border-color: #4a4262; }
+.lv-k.picking .lv-name, .lv-f.picking .lv-name { border-color: var(--lilac); border-style: solid; }
+.lv-ksurf.on .lv-arc1, .lv-k.hot .lv-arc1 { stroke: #e6d8ff; }
+.lv-ksurf.on .lv-cap, .lv-k.hot .lv-cap { stroke: var(--lilac); }
+.lv-f { gap: 3px; }
+.lv-f .lv-name b { color: var(--amber); }
+.lv-ftrack { position: relative; flex: 1 1 auto; width: 44px; max-width: 80%; min-height: 110px; border-radius: 12px; background: #1a1625; border: 1px solid var(--line); touch-action: none; cursor: ns-resize; }
+.lv-ffill { position: absolute; left: 3px; right: 3px; bottom: 3px; max-height: calc(100% - 6px); border-radius: 9px; background: linear-gradient(to top, #ffb65c30, #ffb65caa); }
+.lv-fcap { position: absolute; left: -7px; right: -7px; height: 16px; border-radius: 5px; background: #ece7f7; box-shadow: 0 2px 8px #000b; }
+.lv-fcap::after { content: ""; position: absolute; left: 6px; right: 6px; top: 7px; height: 2px; background: #1a1625; border-radius: 1px; }
+.lv-ftrack.on, .lv-f.hot .lv-ftrack { border-color: var(--amber); }
+.lv-padarea { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.lv-sets { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.lv-psets { flex: 1; }
+.dj.live #lvKit { height: 36px; flex: none; }
+.lv-pads { flex: 1 1 auto; min-height: 190px; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 8px;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.lv-pad { --pc: transparent; order: var(--ol); position: relative; min-width: 0; min-height: 0; border-radius: 14px; overflow: hidden; cursor: pointer;
+  background: color-mix(in srgb, var(--pc) 18%, #18151f); border: 1.5px solid color-mix(in srgb, var(--pc) 72%, transparent);
+  display: flex; align-items: flex-end; padding: 10px 11px; box-sizing: border-box; transition: background 0.05s, transform 0.05s; }
+.lv-pad b { position: absolute; top: 8px; left: 10px; font: 600 0.66rem var(--font-mono); color: var(--dim); }
+.lv-pad span { font: 600 0.9rem var(--font-body); color: var(--ink); line-height: 1.15; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+.lv-pad.none { opacity: 0.32; }
+.lv-pad.hit, .lv-pad.held { background: var(--pc); transform: scale(0.97); }
+.lv-pad.hit span, .lv-pad.hit b, .lv-pad.held span, .lv-pad.held b { color: #120e1a; }
+.lv-pad[data-p="8"], .lv-pad[data-p="9"], .lv-pad[data-p="10"], .lv-pad[data-p="11"], .lv-pad[data-p="12"], .lv-pad[data-p="13"], .lv-pad[data-p="14"], .lv-pad[data-p="15"] { box-shadow: inset 0 3px 0 color-mix(in srgb, var(--pc) 40%, transparent); }
+/* the effects drawer */
+.lv-fxp { position: fixed; z-index: 3; top: 0; right: 0; bottom: 0; width: min(430px, 100vw); box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain;
+  padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) 14px;
+  background: #15121e; border-left: 1px solid #c4a3ff55; box-shadow: -18px 0 40px #000b; display: flex; flex-direction: column; gap: 12px; }
+.lv-fxp[hidden] { display: none; }
+.lv-fxh { display: flex; align-items: center; gap: 8px; }
+.lv-fxh strong { font: 700 1rem var(--font-display); flex: 1; }
+.dj.live .lv-fxh .btn:last-child { width: 42px; padding: 0; }
+.dj.live .lv-fxon[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); font-weight: 700; }
+.lv-fxq { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--dim); }
+.dj.live .lv-fxq .btn { height: 34px; }
+.dj.live .lv-fxq .btn[aria-pressed="true"] { border-color: var(--lilac); color: var(--lilac); }
+.lv-fxsec h4 { margin: 0 0 6px; font: 600 0.7rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); }
+.lv-fxk { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: flex-start; }
+.lv-mk { width: 74px; display: flex; flex-direction: column; align-items: center; min-width: 0; --kz: 58px; }
+.lv-mk span { font-size: 0.72rem; font-weight: 600; text-align: center; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lv-mk em { font: normal 0.64rem var(--font-mono); color: var(--dim); white-space: nowrap; }
+.lv-sel { display: flex; flex-direction: column; gap: 3px; font-size: 0.72rem; font-weight: 600; min-width: 112px; flex: 1 1 112px; }
+.lv-sel select { height: 36px; border-radius: 8px; background: var(--raised); color: var(--ink); border: 1px solid var(--line); font: inherit; font-weight: 500; padding: 0 6px; }
+.lv-labs { display: flex; flex-direction: column; gap: 8px; }
+.lv-lab { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; background: #1b1726; display: flex; flex-direction: column; gap: 6px; }
+.lv-lab.on { border-color: #c4a3ff88; background: #201a2e; }
+.lv-labh { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.dj.live .lv-labh .btn { height: 36px; flex: none; display: inline-flex; align-items: center; gap: 7px; }
+.lv-labh .btn i { width: 8px; height: 8px; border-radius: 50%; background: #4a4262; }
+.lv-labh .btn[aria-pressed="true"] { border-color: var(--lilac); color: var(--ink); }
+.lv-labh .btn[aria-pressed="true"] i { background: #7fd6c2; box-shadow: 0 0 6px #7fd6c2; }
+.lv-labh small { font-size: 0.72rem; color: var(--dim); line-height: 1.25; min-width: 0; }
+.lv-labk { display: flex; flex-wrap: wrap; gap: 4px; }
+.lv-lab:not(.on) .lv-labk { opacity: 0.55; }
+/* giving a control another job */
+.lv-pick { position: fixed; z-index: 4; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; padding: 10px 12px 12px; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--lilac); border-radius: 14px; box-shadow: 0 18px 44px #000d; }
+.lv-pick[hidden] { display: none; }
+.lv-pkh { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.lv-pkh strong { display: block; font-size: 0.95rem; }
+.lv-pkh small { display: block; font-size: 0.74rem; color: var(--dim); margin-top: 2px; }
+.dj.live .lv-pkh .btn { width: 40px; height: 40px; padding: 0; flex: none; }
+.lv-pkb { display: flex; gap: 6px; flex-wrap: wrap; }
+.dj.live .lv-pkb .btn { height: 38px; }
+.lv-pkl { overflow-y: auto; overscroll-behavior: contain; min-height: 0; display: flex; flex-direction: column; gap: 4px; }
+.lv-pkg { font: 600 0.66rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); margin-top: 6px; }
+.lv-pkr { display: flex; flex-wrap: wrap; gap: 5px; }
+.dj.live .lv-pkr .btn { height: 38px; padding: 0 11px; font-size: 0.82rem; }
+.dj.live .lv-pkr .btn.cur { border-color: var(--lilac); color: var(--lilac); }
+/* standing up: pads 4 × 4 (1–4 along the bottom, as on Beat Pads), the effects from the bottom */
+@media (orientation: portrait) {
+  .lv-ml { --kz: clamp(56px, min(10vh, 15vw), 104px); }
+  .lv-pads { grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 300px; }
+  .lv-pad { order: var(--op); }
+  .lv-fxp { top: auto; left: 0; width: auto; height: min(68vh, 640px); border-left: 0; border-top: 1px solid #c4a3ff55; border-radius: 16px 16px 0 0; box-shadow: 0 -18px 40px #000b; }
+}
+/* a phone: everything stacks and scrolls; the button lives in the menu */
+@media (max-width: 600px) {
+  .livebtn { display: none; }
+  .dj.live .btn { height: 40px; padding: 0 10px; font-size: 0.84rem; }
+  .lv-title { display: none; }
+  .lv-snd { flex-basis: 100%; order: 5; }
+  .lv-ml { grid-template-columns: 1fr; padding: 8px; --kz: 64px; }
+  .lv-faders { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 8px; }
+  .lv-ftrack { min-height: 96px; }
+  .lv-pads { min-height: 340px; gap: 6px; }
+  .lv-pad span { font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) { .lv-pad { transition: none; } }
+/* the keys use the tablet's width (133) */
+@media (min-width: 900px) and (max-width: 1099px) {
+  .app { max-width: 1180px; }
+  .knobs { max-width: 820px; width: 100%; margin: 0 auto; }
+}
+@media (min-width: 601px) { body.perf .app > .playrow { max-height: none; } }
+@media (min-width: 1100px) and (max-width: 1440px) {
+  header .hright { gap: 6px; }
+  header .views button { padding: 0 10px; }
+  .modes .btn.mode { padding: 0 8px; }
+}
+@media (min-width: 1100px) and (max-width: 1260px) {
+  .livebtn { padding: 0 9px; } .livebtn span { display: none; }
+  .modes .btn.mode { padding: 0 6px; gap: 5px; }
+}
+/* a control on one of the MiniLab's knobs looks like one (134) */
+.knob.ml-b[data-ml^="K"] .fader { width: 46px; height: 46px; flex: none; margin: 2px 0; border: none; border-radius: 50%; overflow: visible;
+  background: conic-gradient(from 225deg, var(--lilac) 0 calc(var(--v, 0) * 270deg), #2a2538 0 270deg, transparent 0); }
+.fx .knob.ml-b[data-ml^="K"] .fader { background: conic-gradient(from 225deg, var(--amber) 0 calc(var(--v, 0) * 270deg), #2a2538 0 270deg, transparent 0); }
+.knob.ml-b[data-ml^="K"] .fader .fill, .knob.ml-b[data-ml^="K"] .fader .ticks, .knob.ml-b[data-ml^="K"] .fader .thumb { display: none; }
+.knob.ml-b[data-ml^="K"] .fader::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: #241f31; box-shadow: inset 0 0 0 1px #3b3450; }
+.knob.ml-b[data-ml^="K"] .fader::after { content: ""; position: absolute; left: calc(50% - 1.5px); top: 50%; width: 3px; height: 15px; border-radius: 2px; background: var(--ink);
+  transform-origin: 50% 0; transform: rotate(calc(45deg + var(--v, 0) * 270deg)); }
+.knob.ml-b[data-ml^="K"].active .fader::before { box-shadow: inset 0 0 0 2px var(--lilac); }
+.knobs.lab .knob.ml-b[data-ml^="K"] .fader { width: 40px; height: 40px; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -3717,6 +3894,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays.</p>
+      <p><b>Live (top bar, or the menu on a phone):</b> a screen for playing out, with no keys on it (the MiniLab has them). Eight knobs and four faders sit as they do on the MiniLab and move with it; drag one up or down to move it by touch. Knob pages: <b>Sound</b> (the sound's own knobs), <b>FX</b>, <b>FX Lab</b> (turning an effect up switches it on, all the way down switches it off), <b>Mix</b> and <b>Mine</b> (empty until you fill it). The faders stay put across pages: the sound's filter, Echo, Space and the master. Tap any knob's or fader's name to give it another job; Back to undoes it. Pad sets: Beat Pads banks A to D (Kit… loads a kit onto the bank), Notes and Chords in the key you've set, <b>FX moves</b> (hold a pad and the effect comes in, let go and it's back as it was), Samples and the Rhythm Creator's 16 tracks. On the MiniLab the big knob turns the knob pages and Shift + turn the pad sets; a click plays or stops what ▶ is set to (Seq, Rhythm or Pads), Shift + click records. <b>FX</b> opens every effect and the FX Lab at once. <b>K.O. II</b> sends it the clock and start/stop, so it plays in time.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
@@ -5201,6 +5379,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   }
   function fmtTime(s) { return s < 1 ? Math.round(s * 1000) + "ms" : s.toFixed(1) + "s"; }
 
+  // a control on one of the MiniLab's knobs is drawn as a knob (134): turned by dragging, not jumped to where you touch
+  function KROT(el) { return el.classList.contains("ml-b") && /^K/.test(el.getAttribute("data-ml") || ""); }
   function makeKnob(container, key, label, getObj, onChange) {
     const el = document.createElement("div");
     el.className = "knob"; el.tabIndex = 0; el.setAttribute("role", "slider");
@@ -5211,7 +5391,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const fader = el.querySelector(".fader"), fill = el.querySelector(".fill"), thumb = el.querySelector(".thumb"), val = el.querySelector(".k-val");
     function render() {
       const v = getObj()[key];
-      fill.style.height = (v * 100) + "%";
+      fill.style.height = (v * 100) + "%"; el.style.setProperty("--v", (+v || 0).toFixed(3));
       thumb.style.bottom = `calc(${v * 100}% * 0.9 + 5%)`;
       val.textContent = display(key, v, getObj());
       el.setAttribute("aria-valuenow", Math.round(v * 100));
@@ -5228,13 +5408,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       el.classList.add("active"); moved = false;
       startY = e.clientY; startV = getObj()[key];
       // tapping on the fader jumps there; grabbing the label area nudges relatively
-      if (e.target.closest(".fader")) set(fromY(e.clientY)), startV = getObj()[key];
+      if (e.target.closest(".fader") && !KROT(el)) set(fromY(e.clientY)), startV = getObj()[key];
     });
     el.addEventListener("pointermove", e => {
       if (e.pointerId !== pid) return;
       moved = true;
       const r = fader.getBoundingClientRect();
-      set(startV + (startY - e.clientY) / (r.height * 0.9));
+      set(startV + (startY - e.clientY) / (KROT(el) ? 160 : r.height * 0.9));
     });
     const end = e => { if (e.pointerId === pid) { pid = null; el.classList.remove("active"); } };
     el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
@@ -5419,7 +5599,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       padTimers.set(id, setTimeout(() => el.classList.remove("down"), 110));
     }, delay));
   }
-  const kbKeyCount = () => window.innerWidth >= 1100 ? 37 : 25;   // phones: two octaves, tablets: three
+  // the keys use the tablet's width (133): as many octaves as fit at 40 px or more a white key, two to five
+  // (phones: two octaves)
+  const kbKeyCount = () => {
+    if (window.innerWidth <= 600) return 25;
+    const w = keysEl.getBoundingClientRect().width;
+    if (!(w > 0)) return window.innerWidth >= 1100 ? 37 : 25;
+    return Math.max(2, Math.min(5, Math.floor((w / 40 - 1) / 7))) * 12 + 1;
+  };
   function buildKeys() {
     document.getElementById("wheels").hidden = state.engine === "drum" || state.engine === "pads";
     if (state.engine === "drum") return buildPads();
@@ -11841,14 +12028,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     el.innerHTML = `<div class="k-val"></div><div class="fader"><div class="ticks"></div><div class="fill"></div><div class="thumb"></div></div><div class="k-name"></div>`;
     el.lastChild.textContent = label; container.appendChild(el);
     const fader = el.querySelector(".fader"), fill = el.querySelector(".fill"), thumb = el.querySelector(".thumb"), val = el.querySelector(".k-val");
-    const render = () => { const v = get(); fill.style.height = (v * 100) + "%"; thumb.style.bottom = `calc(${v * 100}% * 0.9 + 5%)`; val.textContent = fmt ? fmt(v) : Math.round(v * 100); el.setAttribute("aria-valuenow", Math.round(v * 100)); };
+    const render = () => { const v = get(); fill.style.height = (v * 100) + "%"; el.style.setProperty("--v", (+v || 0).toFixed(3)); thumb.style.bottom = `calc(${v * 100}% * 0.9 + 5%)`; val.textContent = fmt ? fmt(v) : Math.round(v * 100); el.setAttribute("aria-valuenow", Math.round(v * 100)); };
     const set = v => { put(Math.min(1, Math.max(0, v))); render(); };
     let pid = null, startY = 0, startV = 0;
     el.addEventListener("pointerdown", e => {
       pid = e.pointerId; el.setPointerCapture(pid); e.preventDefault(); el.classList.add("active"); startY = e.clientY; startV = get();
-      if (e.target.closest(".fader")) { const r = fader.getBoundingClientRect(); set(1 - (e.clientY - r.top - r.height * 0.05) / (r.height * 0.9)); startV = get(); }
+      if (e.target.closest(".fader") && !KROT(el)) { const r = fader.getBoundingClientRect(); set(1 - (e.clientY - r.top - r.height * 0.05) / (r.height * 0.9)); startV = get(); }
     });
-    el.addEventListener("pointermove", e => { if (e.pointerId !== pid) return; const r = fader.getBoundingClientRect(); set(startV + (startY - e.clientY) / (r.height * 0.9)); });
+    el.addEventListener("pointermove", e => { if (e.pointerId !== pid) return; const r = fader.getBoundingClientRect(); set(startV + (startY - e.clientY) / (KROT(el) ? 160 : r.height * 0.9)); });
     const end = e => { if (e.pointerId === pid) { pid = null; el.classList.remove("active"); } };
     el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
     el.addEventListener("keydown", e => {
@@ -12013,6 +12200,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       clearTimeout(rt);
       rt = setTimeout(() => { if (kbKeyCount() !== lastCount) { lastCount = kbKeyCount(); buildKeys(); } }, 150);
     });
+    // (and when the keyboard itself changes width: the strip, the wheels, a sheet beside it)
+    try { new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(() => { if (keysEl.classList.contains("pads") || keysEl.classList.contains("kit")) return; if (kbKeyCount() !== lastCount) { lastCount = kbKeyCount(); buildKeys(); } }, 150); }).observe(keysEl); } catch (e) {}
   }
 
   // ---------- Drummer: the beat changes by itself ----------
@@ -16068,7 +16257,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
 
   // ---------- Back closes what's on top (Android's back gesture, the browser's Back, Escape) ----------
   {
-    const isLayer = el => el.matches && el.matches(".editor, .dj, .trk, .browser, .rc-pop");
+    const isLayer = el => el.matches && el.matches(".editor, .dj, .trk, .browser, .rc-pop, .lv-fxp, .lv-pick");
     const stack = []; let ignorePop = 0, popBudget = 0;
     const closeBtnOf = el => [...el.querySelectorAll("button")].find(b => /(Done|Cancel|Close)$/.test(b.id) && !b.closest("[hidden]"))
       || [...el.querySelectorAll("button")].find(b => /^(Done|Cancel|Close|Back)$/i.test(b.textContent.trim()) && !b.closest("[hidden]"));
@@ -16505,6 +16694,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     // ---- phones: ☰ Menu instead of the sideways tool row ----
     const menu = document.getElementById("menuSheet"), grid = document.getElementById("menuGrid");
     const ITEMS = [
+      ["liveBtn", "Live", "Big knobs, faders and pads for playing out"],
       ["prBtn", "Projects", "Save, open and share everything"],
       ["wamBtn", "Plugins", "Plugin instruments and effects"],
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
@@ -27846,7 +28036,7 @@ z: [z]=Z
       if (tab.hidden === live) tab.hidden = !live;
       if (!live && !map.hidden) { map.hidden = true; document.body.classList.remove("mini-open"); }
       if (document.body.classList.contains("mini-live") !== live) document.body.classList.toggle("mini-live", live);
-      if (!live) { ML.page = ""; ML.wasLive = false; return; }
+      if (!live) { if (ML.wasLive) mlBadges(); ML.page = ""; ML.wasLive = false; return; }
       if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(); mlHud("MiniLab 3 connected", PAGE_NAME[pg0] || "", null, HINT[pg0]); }, 500); }
       const pg = mlPage();
       if (force || pg !== ML.page) {
@@ -27958,7 +28148,7 @@ z: [z]=Z
     for (let i = 0; i < 4; i++) { const c = document.createElement("div"); c.className = "mls-c mls-fc"; c.dataset.c = "F" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsF").appendChild(c); sF.push(c); }
     for (let i = 0; i < 16; i++) { const c = document.createElement("div"); c.className = "mls-pad" + (i === 8 ? " mls-b" : ""); c.dataset.p = i; c.innerHTML = `<b>${i + 1}</b><span></span>`; $id("mlsP").appendChild(c); sP.push(c); }
     const tablet = () => { try { return matchMedia("(min-width: 760px)").matches; } catch (e) { return innerWidth >= 760; } };
-    const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive());
+    const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive()) && !document.body.classList.contains("live-on");
     // what a knob or fader does on this screen: what you gave it, or the layout's
     function eff(kind, i, lay) {
       const pg = lay.page, id = kind + i;
@@ -28152,6 +28342,443 @@ z: [z]=Z
     function regMix(id) { const nm = id.slice(6); return mixFn("n:" + nm, ch => ch.find(c => c.name === nm), nm); }
     LEARN.map.forEach(m => { if (m.t && m.t.k === "fn" && /^mix:n:/.test(m.t.id) && !FNS[m.t.id]) regMix(m.t.id); });
     paintStrip(true);
+    // ======================================================================
+    // Live: a screen for playing out with the MiniLab and the K.O. II, by touch. No keys (the MiniLab has them):
+    // eight big knobs and four faders laid out like the MiniLab's, a page of knobs for each job (Sound, FX, FX Lab,
+    // Mix, Mine), sixteen big pads with sets to flip between (Beat Pads banks, notes, chords, FX moves, samples,
+    // the Rhythm Creator's tracks), the transport, the K.O. II's clock, and the effects one tap away. Tap a knob's
+    // or fader's name to give it another job; the MiniLab follows whatever is on screen.
+    // ======================================================================
+    const LV = { kpage: "sound", pages: {}, F: [null, null, null, null], pset: "bp0", play: "rc", fx: false };
+    try { const o = JSON.parse(localStorage.getItem("nightbloom-live") || "{}"); Object.assign(LV, o, { fx: false }); } catch (e) {}
+    if (!Array.isArray(LV.F) || LV.F.length !== 4) LV.F = [null, null, null, null];
+    if (!LV.pages || typeof LV.pages !== "object") LV.pages = {};
+    const lvSave = () => { try { localStorage.setItem("nightbloom-live", JSON.stringify({ kpage: LV.kpage, pages: LV.pages, F: LV.F, pset: LV.pset, play: LV.play })); } catch (e) {} };
+    // ---------- what the knobs and faders can be ----------
+    const fxK = i => Q("#fxKnobs .knob", i);
+    const HALL_IR = new Set(["hdecay", "hsize", "hdamp", "hwidth"]);   // (these rebuild the hall's reverb)
+    const labSet = (k, v) => { bfx[k] = v; saveBfx(); applyBfx(HALL_IR.has(k)); };
+    // FX Lab as knobs: turning an effect's main knob up switches it on, all the way down switches it off
+    function labKnob(id, name, key, onKey, inv) {
+      return FN("lab:" + id, {
+        name,
+        get: () => { const v = inv ? 1 - bfx[key] : bfx[key]; return onKey && !bfx[onKey] ? 0 : v; },
+        set: v => {
+          if (onKey) { const on = v > 0.02; if (on !== !!bfx[onKey]) { bfx[onKey] = on; if (!on) { saveBfx(); applyBfx(false); return; } } }
+          labSet(key, inv ? 1 - v : v);
+        },
+        text: () => (onKey && !bfx[onKey]) ? "off" : Math.round((inv ? 1 - bfx[key] : bfx[key]) * 100) + "%",
+      });
+    }
+    const LAB_K = [labKnob("dens", "Density", "dens", "densOn"), labKnob("crush", "Lo-fi crush", "bits", "lofiOn", true), labKnob("ltone", "Lo-fi tone", "tone"), labKnob("hall", "Hall+", "hmix", "hallOn"),
+      labKnob("hdecay", "Hall decay", "hdecay"), labKnob("frz", "Freeze", "frzMix", "frzOn"), labKnob("shim", "Shimmer", "shim", "shimOn"), labKnob("shimfb", "Shimmer climb", "shimFb")];
+    // every FX Lab setting on its own, as the FX Lab sheet has them
+    const LABP = {};
+    BFX_ROWS.forEach(([onKey, title, sub, sliders]) => sliders.forEach(([k, label]) => {
+      LABP[k] = FN("labp:" + k, { name: title + " " + label.toLowerCase(), get: () => bfx[k], set: v => labSet(k, v), text: () => Math.round(bfx[k] * 100) + "%" });
+    }));
+    // the sound's filter (whichever of its knobs that is), for a fader and the FX moves
+    const F_FILTER = FN("live:filter", {
+      el() { const ks = [...document.querySelectorAll("#engineKnobs .knob")]; return ks.find(k => /cutoff|filter|bright|tone|colou?r/i.test(k.getAttribute("aria-label") || "")) || null; },
+      name() { const k = this.el(); return k ? (k.getAttribute("aria-label") || "Filter").split(/[:,(]/)[0].trim() : "Filter"; },
+      get() { const k = this.el(); return k && k.__nbGet ? k.__nbGet() : null; },
+      set(v) { const k = this.el(); if (k && k.__nbSet) k.__nbSet(v); },
+      text() { const k = this.el(), kv = k && k.querySelector(".k-val"); return kv ? kv.textContent : "—"; },
+    });
+    const mixCh = (id, name) => mixFn("lv:" + id, ch => ch.find(c => c.name === name), name);
+    const F_DRUMS = mixCh("drums", "All drums"), F_DECKA = mixCh("deckA", "Deck A"), F_DECKB = mixCh("deckB", "Deck B");
+    // a saved choice can name a control made on demand: make it again
+    function lvFix(t) {
+      if (!t || t.k !== "fn" || FNS[t.id]) return t;
+      const m = /^mix:lv:p:(.+)$/.exec(t.id); if (m) mixCh("p:" + m[1], m[1]);
+      return t;
+    }
+    const KPAGES = [["sound", "Sound"], ["fx", "FX"], ["lab", "FX Lab"], ["mix", "Mix"], ["mine", "Mine"]];
+    const KDEF = {
+      sound: () => { const n = document.querySelectorAll("#engineKnobs .knob").length, T = []; for (let i = 0; i < Math.min(n, 6); i++) T.push(Q("#engineKnobs .knob", i)); [0, 1, 3, 2, 5].forEach(j => { if (T.length < 8) T.push(fxK(j)); }); return T; },
+      fx: () => [fxK(0), fxK(1), fxK(2), fxK(3), Q("#fxEchoSync", 0, "Echo time"), Q("#fxVerb", 0, "Reverb"), F_FX, Q("#fxDuck", 0, "Duck on the kick")],
+      lab: () => LAB_K.slice(),
+      mix: () => [F_NOW, F_DRUMS, F_RC, F_BP, F_DECKA, F_DECKB, F_FX, F_MASTER],
+      mine: () => [],
+    };
+    const FDEF = () => [F_FILTER, fxK(2), fxK(3), F_MASTER];
+    const kpName = k => (KPAGES.find(x => x[0] === k) || KPAGES[0])[1];
+    const slotT = (o, d) => o ? (o.none ? null : lvFix(o.t)) : d || null;
+    function lvK() { const d = (KDEF[LV.kpage] || KDEF.sound)(), o = LV.pages[LV.kpage] || []; const out = []; for (let i = 0; i < 8; i++) out.push(slotT(o[i], d[i])); return out; }
+    function lvF() { const d = FDEF(); return d.map((t, i) => slotT(LV.F[i], t)); }
+    const lvOwn = (kind, i) => kind === "F" ? LV.F[i] : (LV.pages[LV.kpage] || [])[i];
+    // what a knob or fader really does here: something learned on Live (MIDI learn) wins, as it does for the MiniLab
+    function lvEff(kind, i) {
+      const e = eff(kind, i, { page: "live", K: lvK(), F: lvF() });
+      if (e.yours) return e;
+      const o = lvOwn(kind, i);
+      return { t: e.t, name: o && !o.none ? o.name : null, yours: !!o };
+    }
+    // ---------- the pad sets ----------
+    const PSETS = [["bp0", "A"], ["bp1", "B"], ["bp2", "C"], ["bp3", "D"], ["notes", "Notes"], ["chords", "Chords"], ["fxm", "FX moves"], ["samples", "Samples"], ["rhythm", "Rhythm"]];
+    const isBank = s => /^bp\d$/.test(s);
+    function bankName(b) {
+      try { const K = window.__bpkits; if (K) for (const [, kits] of K.KITS) for (const kit of kits) if (K.on(kit[0], b)) return kit[1]; } catch (e) {}
+      const n = (BPS.banks[b] || []).filter(p => p && p.src).length; return n ? n + " pads" : "empty";
+    }
+    const bpVel = vel => BPS.full ? 1 : Math.max(0.12, Math.min(1, vel / 127));
+    function lvBeatPad(b, i) {
+      const k = b * 16 + i, P = BPS.banks[b] && BPS.banks[b][i];
+      return { n: P && P.src ? bpName(P).slice(0, 16) : "", c: P && P.src ? BP_BANK_COL[b] : null, down(vel) { bpDown(k, bpVel(vel), "lv" + i); }, up() { bpUp("lv" + i); } };
+    }
+    const scaleIv = () => { const sc = SCALES.find(x => x[0] === scl.scale); return sc && sc[2] && sc[2].length ? sc[2] : [0, 2, 4, 5, 7, 9, 11]; };
+    function notePad(i) {
+      const iv = scaleIv(), n = iv.length, m = 48 + scl.key + iv[i % n] + 12 * Math.floor(i / n);
+      return { n: NN[m % 12] + (Math.floor(m / 12) - 1), c: i % n === 0 ? "#ffb65c" : "#c4a3ff", down(vel) { start(); if (ctx) padVoices("lvn" + i, [m], vel); }, up() { padStop("lvn" + i); } };
+    }
+    function seventhPad(i) {
+      const iv0 = scaleIv(), iv = iv0.length === 7 ? iv0 : [0, 2, 4, 5, 7, 9, 11];
+      const deg = d => iv[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7), tones = [0, 2, 4, 6].map(j => 48 + scl.key + deg(i + j));
+      const third = tones[1] - tones[0], fifth = tones[2] - tones[0], sev = tones[3] - tones[0];
+      const q = third === 3 ? (fifth === 6 ? "ø7" : "m7") : sev === 11 ? "maj7" : "7";
+      return { n: NN[tones[0] % 12] + q, c: "#7fd6c2", down(vel) { start(); if (ctx) padVoices("lv7" + i, tones, vel); }, up() { padStop("lv7" + i); } };
+    }
+    // FX moves: hold a pad and the effect comes in, let go and it's back as it was
+    const LVH = {};
+    const lvPadEls = [];
+    function hold(id, apply, fx) {
+      const at = () => lvPadEls[+id.slice(2)];
+      return {
+        down() {
+          start(); if (!ctx) return; if (LVH[id]) LVH[id]();
+          const undo = [];
+          if (fx && state.fx.on === false) { setFxOn(true); undo.push(() => setFxOn(false)); }   // (a move needs the effects on)
+          const r = apply(); if (r) undo.push(r);
+          LVH[id] = () => undo.reverse().forEach(f => { try { f(); } catch (e) {} });
+          const el = at(); if (el) el.classList.add("held");
+        },
+        up() { const r = LVH[id]; delete LVH[id]; if (r) r(); const el = at(); if (el) el.classList.remove("held"); },
+      };
+    }
+    const lvRelease = () => Object.keys(LVH).forEach(id => { const r = LVH[id]; delete LVH[id]; try { r(); } catch (e) {} const el = lvPadEls[+id.slice(2)]; if (el) el.classList.remove("held"); });
+    const tweakT = (t, v) => () => { const was = mlGet(t); if (was == null) return null; learnApply(t, v); return () => learnApply(t, was); };
+    const tweakLab = o => () => {
+      const was = {}; Object.keys(o).forEach(k => { was[k] = bfx[k]; bfx[k] = o[k]; }); applyBfx(false);
+      return () => { Object.assign(bfx, was); applyBfx(false); };
+    };
+    const both = (...fs) => () => { const rs = fs.map(f => f()).filter(Boolean); return () => rs.reverse().forEach(r => r()); };
+    const FXM = [
+      ["Echo throw", "#5cc8ff", tweakT(fxK(2), 0.95), 1], ["Hall wash", "#c4a3ff", tweakLab({ hallOn: true, hmix: 0.85 }), 1], ["Freeze", "#7fd6c2", tweakLab({ frzOn: true, frzMix: 0.8 }), 1], ["Lo-fi", "#ffb65c", tweakLab({ lofiOn: true, bits: 0.12 }), 1],
+      ["Shimmer", "#ff8ac6", tweakLab({ shimOn: true, shim: 0.85 }), 1], ["Filter dip", "#ffd54f", tweakT(F_FILTER, 0.12)], ["Drive", "#ff6b6b", tweakT(fxK(0), 0.9), 1], ["Wobble", "#b8e986", tweakT(fxK(1), 0.9), 1],
+      ["Drums out", "#8e86a6", both(tweakT(F_DRUMS, 0), tweakT(F_RC, 0), tweakT(F_BP, 0))], ["Synth out", "#8e86a6", tweakT(F_NOW, 0)], ["Fill", "#ffb65c", () => { tap("rcFill"); return null; }], ["FX off", "#8e86a6", tweakT(F_FX, 0)],
+      ["Space max", "#c4a3ff", tweakT(fxK(3), 1), 1], ["Echo + Space", "#5cc8ff", both(tweakT(fxK(2), 0.9), tweakT(fxK(3), 0.9)), 1], ["Filter open", "#ffd54f", tweakT(F_FILTER, 1)], ["Crush hard", "#ff6b6b", tweakLab({ lofiOn: true, bits: 0, tone: 0.3 }), 1],
+    ];
+    const FXM_PADS = FXM.map(([n, c, f, fx], i) => Object.assign({ n, c }, hold("fx" + i, f, !!fx)));
+    function lvPads() {
+      const s = LV.pset;
+      if (isBank(s)) { const b = +s[2]; return Array.from({ length: 16 }, (_, i) => lvBeatPad(b, i)); }
+      if (s === "notes") return Array.from({ length: 16 }, (_, i) => notePad(i));
+      if (s === "chords") return [0, 1, 2, 3, 4, 5, 6, 7].map(chordPad).concat([0, 1, 2, 3, 4, 5, 6, 7].map(seventhPad));
+      if (s === "fxm") return FXM_PADS;
+      if (s === "samples") { const P = []; for (let k = 0; k < 12; k++) P.push(samplePad(k)); for (let i = 0; i < 4; i++) P.push(slotPad(i)); return P; }
+      if (s === "rhythm") return Array.from({ length: 16 }, (_, i) => gridPad(i));
+      return new Array(16).fill(null);
+    }
+    const psetName = s => { const p = PSETS.find(x => x[0] === s); if (!p) return ""; return isBank(s) ? "Beat Pads " + p[1] + " · " + bankName(+s[2]) : p[1]; };
+    // ---------- the MiniLab on Live: knobs and faders as on screen, pads the set on screen ----------
+    const lvPlayName = () => ({ seq: "the Seq", rc: "the Rhythm Creator", bp: "Beat Pads" })[LV.play] || "";
+    function lvTransport() { start(); if (LV.play === "seq") tap("play"); else if (LV.play === "bp") bpTransport(!BP.playing); else rcPlay(!RC.playing); lvPaintTop(); }
+    function lvRec() { if (LV.play === "bp") bpStartRec(); else tap("takeBtn"); lvPaintTop(); }
+    const step = (arr, cur, d) => { const i = arr.findIndex(x => x[0] === cur); return arr[((i < 0 ? 0 : i) + d + arr.length) % arr.length][0]; };
+    L.live = () => ({ K: lvK(), F: lvF(), P: lvPads(), kfor: kpName(LV.kpage) + " page", pa: psetName(LV.pset) + " (1–8)", pb: psetName(LV.pset) + " (9–16)",
+      M: { turn: ["Knob page (Sound, FX, FX Lab, Mix, Mine)", d => setKPage(step(KPAGES, LV.kpage, d))], click: ["▶ / ■ " + lvPlayName(), lvTransport], sturn: ["Pad set", d => setPset(step(PSETS, LV.pset, d))], sclick: ["● Rec", lvRec] },
+      keys: "Play the sound" });
+    { const mp = mlPage; mlPage = function () { if (shown("mixer")) return "mix"; if (shown("liveView")) return "live"; return mp.apply(this, arguments); }; }
+    PAGE_NAME.live = "Live"; HINT.live = "pads: the set on screen · knobs and faders: as on screen · big knob: knob pages, Shift: pad sets";
+    // ---------- the screen ----------
+    const lv = document.createElement("div"); lv.className = "dj live"; lv.id = "liveView"; lv.hidden = true; lv.setAttribute("role", "dialog"); lv.setAttribute("aria-label", "Live");
+    lv.innerHTML = `<div class="lv-top">
+        <button class="btn primary" id="lvDone">Done</button><strong class="lv-title">Live</strong>
+        <div class="lv-snd"><button class="btn" id="lvPrev" aria-label="Previous sound">‹</button><button class="lv-sname" id="lvSnd" title="Choose a sound"><b></b><small></small></button><button class="btn" id="lvNext" aria-label="Next sound">›</button></div>
+        <div class="lv-tempo"><button class="btn" id="lvBpmD" aria-label="Slower">−</button><span id="lvBpm"></span><button class="btn" id="lvBpmU" aria-label="Faster">+</button></div>
+        <div class="seg lv-play" role="group" aria-label="What ▶ plays"><button data-p="seq">Seq</button><button data-p="rc">Rhythm</button><button data-p="bp">Pads</button></div>
+        <button class="btn lv-go" id="lvGo">▶</button><button class="btn lv-rec" id="lvRec">● Rec</button>
+        <button class="btn lv-ko" id="lvKo" title="Send clock and start/stop to the K.O. II (and other gear on MIDI out)"></button>
+        <button class="btn lv-dev" id="lvDev"></button>
+        <button class="btn lv-fxb" id="lvFx" aria-pressed="false" title="Effects and FX Lab"><b>FX</b><small>+ Lab</small></button>
+        <button class="btn stopall" id="lvStop" aria-label="Stop everything" title="Stop everything">■</button>
+      </div>
+      <div class="lv-body">
+        <section class="lv-ml" aria-label="Knobs and faders">
+          <div class="lv-pages" id="lvPages" role="group" aria-label="Knob pages"></div>
+          <div class="lv-knobs" id="lvKnobs"></div><div class="lv-faders" id="lvFaders"></div>
+        </section>
+        <section class="lv-padarea" aria-label="Pads">
+          <div class="lv-sets"><div class="lv-psets" id="lvPsets" role="group" aria-label="Pad sets"></div><button class="btn" id="lvKit">Kit…</button></div>
+          <div class="lv-pads" id="lvPads"></div>
+        </section>
+      </div>
+      <aside class="lv-fxp" id="lvFxp" hidden aria-label="Effects"></aside>
+      <div class="lv-pick" id="lvPick" hidden role="dialog" aria-label="Give it another job"></div>`;
+    document.body.appendChild(lv);
+    // a knob you turn by dragging up and down, drawn like the MiniLab's; a fader you slide
+    const ARC = (a0, a1, r) => { const p = a => [50 + r * Math.cos(a), 50 + r * Math.sin(a)], [x0, y0] = p(a0), [x1, y1] = p(a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; };
+    const A0 = Math.PI * 0.75, A1 = Math.PI * 2.25;
+    const KNOB_SVG = `<svg viewBox="0 0 100 100" aria-hidden="true"><path class="lv-arc0" d="${ARC(A0, A1, 41)}"/><path class="lv-arc1" d=""/><circle class="lv-cap" cx="50" cy="50" r="29"/><line class="lv-tick" x1="50" y1="50" x2="50" y2="26"/></svg>`;
+    function paintArc(host, x) {
+      const a = A0 + (A1 - A0) * x; host.querySelector(".lv-arc1").setAttribute("d", x > 0.004 ? ARC(A0, Math.max(a, A0 + 0.001), 41) : "");
+      const tk = host.querySelector(".lv-tick"); tk.setAttribute("x2", (50 + 24 * Math.cos(a)).toFixed(2)); tk.setAttribute("y2", (50 + 24 * Math.sin(a)).toFixed(2));
+    }
+    // drag to move a target: up is more; the drag is relative, so nothing jumps where you touch
+    function dragTo(surf, getT, span, onMove, onEmpty) {
+      let pid = null, y0 = 0, v0 = 0;
+      surf.addEventListener("pointerdown", e => {
+        const t = getT(); if (!t) { if (onEmpty) onEmpty(); return; }
+        const v = mlGet(t); if (v == null) return; e.preventDefault();
+        pid = e.pointerId; try { surf.setPointerCapture(pid); } catch (x) {} y0 = e.clientY; v0 = v; surf.classList.add("on");
+      });
+      surf.addEventListener("pointermove", e => {
+        if (e.pointerId !== pid) return; const t = getT(); if (!t) return;
+        const v = Math.max(0, Math.min(1, v0 + (y0 - e.clientY) / span())); start(); learnApply(t, v);
+        const tk = JSON.stringify(t); ML.virt.set(tk, v); ML.fad.delete(tk); onMove();
+      });
+      const end = e => { if (e.pointerId === pid) { pid = null; surf.classList.remove("on"); } };
+      surf.addEventListener("pointerup", end); surf.addEventListener("pointercancel", end);
+    }
+    const lvKnobEls = [], lvFaderEls = [];
+    function ctlUI(box, i, kind) {
+      const el = document.createElement("div"); el.className = kind === "F" ? "lv-f" : "lv-k";
+      el.innerHTML = kind === "F"
+        ? `<em></em><div class="lv-ftrack" role="slider" tabindex="0"><div class="lv-ffill"></div><div class="lv-fcap"></div></div><button class="lv-name" data-edit><b>F${i + 1}</b><span></span></button>`
+        : `<div class="lv-ksurf" role="slider" tabindex="0">${KNOB_SVG}</div><em></em><button class="lv-name" data-edit><b>${i + 1}</b><span></span></button>`;
+      box.appendChild(el);
+      const T = () => lvEff(kind, i).t, surf = el.querySelector(kind === "F" ? ".lv-ftrack" : ".lv-ksurf");
+      dragTo(surf, T, () => kind === "F" ? Math.max(80, surf.getBoundingClientRect().height - 14) : 200, () => paintOne(el, kind, i), () => openPick(kind, i, el));
+      surf.addEventListener("keydown", e => {
+        const t = T(); if (!t) return; const v = mlGet(t); if (v == null) return;
+        const d = e.key === "ArrowUp" || e.key === "ArrowRight" ? 0.02 : e.key === "ArrowDown" || e.key === "ArrowLeft" ? -0.02 : 0;
+        if (d) { e.preventDefault(); learnApply(t, Math.max(0, Math.min(1, v + d))); paintOne(el, kind, i); }
+      });
+      el.querySelector("[data-edit]").addEventListener("click", () => openPick(kind, i, el));
+      return el;
+    }
+    function paintOne(el, kind, i) {
+      const E = lvEff(kind, i), t = E.t, v = t ? mlGet(t) : null;
+      const nm = t ? (E.name || mlName(t, "")) || "—" : "tap to choose", tx = t ? mlText(t) : "";
+      el.classList.toggle("none", !t); el.classList.toggle("yours", E.yours);
+      if (el.__nm !== nm) { el.__nm = nm; el.querySelector(".lv-name span").textContent = nm; el.querySelector("[role=slider]").setAttribute("aria-label", (kind === "F" ? "Fader " : "Knob ") + (i + 1) + ": " + nm); }
+      if (el.__tx !== tx) { el.__tx = tx; el.querySelector("em").textContent = tx; el.querySelector("[role=slider]").setAttribute("aria-valuetext", tx); }
+      const x = v == null ? 0 : Math.max(0, Math.min(1, v)), xr = Math.round(x * 1000);
+      if (el.__x === xr) return; el.__x = xr;
+      if (kind === "F") { el.querySelector(".lv-ffill").style.height = (x * 100) + "%"; el.querySelector(".lv-fcap").style.bottom = `calc(${x * 100}% - 8px)`; }
+      else paintArc(el, x);
+      el.querySelector("[role=slider]").setAttribute("aria-valuenow", Math.round(x * 100));
+    }
+    for (let i = 0; i < 8; i++) lvKnobEls.push(ctlUI($id("lvKnobs"), i, "K"));
+    for (let i = 0; i < 4; i++) lvFaderEls.push(ctlUI($id("lvFaders"), i, "F"));
+    // pads: landscape, 9–16 on top and 1–8 below, the MiniLab's two banks; standing up, 4 × 4 with 1–4 along the bottom
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement("div"); el.className = "lv-pad"; el.dataset.p = i;
+      el.style.setProperty("--ol", i >= 8 ? i - 8 : i + 8); el.style.setProperty("--op", (3 - Math.floor(i / 4)) * 4 + (i % 4));
+      el.innerHTML = `<b>${i + 1}</b><span></span>`; $id("lvPads").appendChild(el); lvPadEls[i] = el;
+    }
+    const lvHeld = new Map();
+    $id("lvPads").addEventListener("pointerdown", e => {
+      const el = e.target.closest(".lv-pad"); if (!el) return; e.preventDefault();
+      const i = +el.dataset.p, p = lvPads()[i]; if (!p || !p.down) return;
+      try { el.setPointerCapture(e.pointerId); } catch (x) {}
+      const r = el.getBoundingClientRect(), rel = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+      const vel = BPS.full ? 127 : Math.round(127 * (0.35 + 0.65 * (1 - rel)));   // (as on Beat Pads: harder towards the top)
+      start(); try { p.down(vel); } catch (x) {}
+      lvHeld.set(e.pointerId, { p, i }); el.classList.add("hit"); mlLight(i, true);
+    });
+    const lvLift = e => { const h = lvHeld.get(e.pointerId); if (!h) return; lvHeld.delete(e.pointerId); lvPadEls[h.i].classList.remove("hit"); mlLight(h.i, false); if (h.p.up) { try { h.p.up(); } catch (x) {} } };
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(n => $id("lvPads").addEventListener(n, lvLift));
+    $id("lvPads").addEventListener("contextmenu", e => e.preventDefault());
+    function lvPaintPads(names) {
+      const P = lvPads();
+      lvPadEls.forEach((el, i) => {
+        const p = P[i], n = p ? p.n || "" : "", c = p && p.c ? p.c : "";
+        el.classList.toggle("none", !c); if (el.__c !== c) { el.__c = c; el.style.setProperty("--pc", c || "transparent"); }
+        if (el.__n !== n) { el.__n = n; el.querySelector("span").textContent = n; }
+      });
+      $id("lvPsets").querySelectorAll("button").forEach(b => {
+        b.setAttribute("aria-pressed", String(b.dataset.s === LV.pset));
+        if (names && isBank(b.dataset.s)) { const nm = bankName(+b.dataset.s[2]); b.querySelector("small").textContent = nm; b.title = "Beat Pads bank " + "ABCD"[+b.dataset.s[2]] + " · " + nm; }
+      });
+      $id("lvKit").hidden = !isBank(LV.pset);
+    }
+    function lvPaintKnobs() {
+      lvKnobEls.forEach((el, i) => paintOne(el, "K", i)); lvFaderEls.forEach((el, i) => paintOne(el, "F", i));
+      $id("lvPages").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === LV.kpage)));
+    }
+    KPAGES.forEach(([k, n]) => { const b = document.createElement("button"); b.dataset.k = k; b.textContent = n; b.addEventListener("click", () => setKPage(k)); $id("lvPages").appendChild(b); });
+    PSETS.forEach(([s, n]) => { const b = document.createElement("button"); b.dataset.s = s; b.innerHTML = isBank(s) ? `<b>${n}</b><small></small>` : `<b>${n}</b>`; b.addEventListener("click", () => setPset(s)); $id("lvPsets").appendChild(b); });
+    function setKPage(k) { if (!KDEF[k]) return; LV.kpage = k; lvSave(); ML.lay = null; closePick(); lvPaintKnobs(); if (!lv.hidden) mlScreen("Knob page", kpName(k)); }
+    function setPset(s) { if (!PSETS.some(x => x[0] === s)) return; lvRelease(); LV.pset = s; lvSave(); ML.lay = null; ML.sent.clear(); lvPaintPads(); mlLightAll(); if (!lv.hidden) mlScreen("Pads", psetName(s)); }
+    $id("lvKit").addEventListener("click", () => {
+      if (!isBank(LV.pset)) return; const b = +LV.pset[2];
+      BPS.bank = b; BPS.sel = b * 16; try { bpPaintGrid(); } catch (e) {}
+      const k = document.querySelector("#bpBanks button[data-kit]"); if (k) k.click();
+    });
+    { const ks = $id("bpKitSheet"); if (ks) new MutationObserver(() => { if (ks.hidden && !lv.hidden) lvPaintPads(true); }).observe(ks, { attributes: true, attributeFilter: ["hidden"] }); }
+    // ---------- the top bar ----------
+    const koOut = () => md.access ? [...md.access.outputs.values()].find(o => /k\.?\s?o\.?\s?ii|ep-?133/i.test(o.name || "")) : null;
+    function lvPaintTop() {
+      const sn = $id("sndName"), ss = $id("sndSub");
+      $id("lvSnd").querySelector("b").textContent = sn ? sn.textContent : ""; $id("lvSnd").querySelector("small").textContent = ss ? ss.textContent : "";
+      $id("lvBpm").textContent = Math.round(rcBpm()) + " bpm";
+      const on = { seq: playing, rc: RC.playing, bp: BP.playing };
+      lv.querySelectorAll(".lv-play button").forEach(b => { b.setAttribute("aria-pressed", String(b.dataset.p === LV.play)); b.classList.toggle("live", !!on[b.dataset.p]); });
+      const go = $id("lvGo"), now = !!on[LV.play]; go.textContent = now ? "■" : "▶"; go.classList.toggle("on", now); go.setAttribute("aria-label", (now ? "Stop " : "Play ") + lvPlayName());
+      const rec = $id("lvRec"), bpRec = LV.play === "bp", tb = $id("takeBtn");
+      rec.textContent = bpRec ? (BP.armed ? "● Count-in" : BP.rec ? "● Looping" : "● Loop") : (tb ? tb.textContent : "● Rec");
+      rec.classList.toggle("on", bpRec ? !!(BP.rec || BP.armed) : !!(tb && tb.classList.contains("live")));
+      rec.title = bpRec ? "Record what you play on the pads into the loop (Beat Pads)" : "Record everything you hear";
+      const ko = koOut(), kb = $id("lvKo"), sync = !!(md.access && md.opt.clockOut && outPorts().length);
+      kb.textContent = (ko ? "K.O. II" : "Clock") + (sync ? " · sync" : " · off"); kb.classList.toggle("on", sync); kb.setAttribute("aria-pressed", String(!!md.opt.clockOut));
+      const ml = mlLive(), dv = $id("lvDev"); dv.textContent = ml ? "MiniLab 3" : md.access ? "MIDI" : "Connect MIDI"; dv.classList.toggle("on", ml);
+      dv.title = ml ? "The MiniLab is playing this screen (tap for the MIDI sheet)" : "Connect the MiniLab (and the K.O. II)";
+      const fx = $id("lvFx"); fx.classList.toggle("off", state.fx.on === false); fx.setAttribute("aria-pressed", String(LV.fx));
+    }
+    lv.querySelectorAll(".lv-play button").forEach(b => b.addEventListener("click", () => { LV.play = b.dataset.p; lvSave(); ML.lay = null; lvPaintTop(); }));
+    $id("lvGo").addEventListener("click", lvTransport);
+    $id("lvRec").addEventListener("click", lvRec);
+    $id("lvBpmD").addEventListener("click", () => { tap("bpmDown"); lvPaintTop(); });
+    $id("lvBpmU").addEventListener("click", () => { tap("bpmUp"); lvPaintTop(); });
+    const afterSound = () => setTimeout(() => { ML.lay = null; lvPaintTop(); lvPaintKnobs(); }, 80);
+    $id("lvPrev").addEventListener("click", () => { start(); nextSound(-1); afterSound(); });
+    $id("lvNext").addEventListener("click", () => { start(); nextSound(1); afterSound(); });
+    $id("lvSnd").addEventListener("click", () => { start(); tap("sndOpen"); });
+    $id("lvStop").addEventListener("click", () => { lvRelease(); tap("stopAll"); lvPaintTop(); });
+    $id("lvDev").addEventListener("click", async () => { if (!md.access || !mlLive()) { try { await connectMidi(); } catch (e) {} } else tap("midiBtn"); lvPaintTop(); mlRefresh(true); });
+    $id("lvKo").addEventListener("click", async () => {
+      if (!md.access) { try { await connectMidi(); } catch (e) {} }
+      const want = !md.opt.clockOut, ko = koOut();
+      if (want && ko && !md.outs.has(ko.id)) { md.outs.add(ko.id); try { mdRemember("out", ko, true); renderMidi(); } catch (e) {} }
+      md.opt.clockOut = want; saveMd(); try { paintMdOpts(); } catch (e) {} lvPaintTop();
+      const sync = !!(md.access && md.opt.clockOut && outPorts().length);
+      mlHud(want ? "Clock out on" : "Clock out off", want ? (sync ? (ko ? "the K.O. II follows the tempo, ▶ and ■" : "gear on MIDI out follows the tempo, ▶ and ■") : "nothing on MIDI out yet: plug the K.O. II in") : "", null);
+    });
+    // ---------- the effects, one tap away: the FX knobs and every FX Lab effect ----------
+    const fxp = $id("lvFxp");
+    function knobMini(w, t, name) {
+      w.innerHTML = `<div class="lv-ksurf" role="slider" tabindex="0">${KNOB_SVG}</div><em></em><span></span>`;
+      const surf = w.querySelector(".lv-ksurf");
+      const paint = () => { const v = mlGet(t); paintArc(w, v == null ? 0 : Math.max(0, Math.min(1, v))); const nm = name || mlName(t, ""); w.querySelector("span").textContent = nm; w.querySelector("em").textContent = mlText(t); surf.setAttribute("aria-label", nm); };
+      dragTo(surf, () => t, () => 200, paint);
+      w.__paint = paint; paint(); return w;
+    }
+    function lvPaintFx() {
+      const on = state.fx.on !== false;
+      fxp.innerHTML = `<div class="lv-fxh"><strong>Effects</strong><button class="btn lv-fxon" id="lvFxOn" aria-pressed="${on}">${on ? "FX: On" : "FX: Off"}</button><button class="btn" id="lvFxClose" aria-label="Close the effects">✕</button></div>
+        <div class="lv-fxq"><span>On the knobs:</span><button class="btn" data-kp="fx">FX</button><button class="btn" data-kp="lab">FX Lab</button></div>
+        <div class="lv-fxsec"><h4>FX</h4><div class="lv-fxk" id="lvFxK"></div></div>
+        <div class="lv-fxsec"><h4>FX Lab</h4><div class="lv-labs" id="lvLab"></div></div>`;
+      $id("lvFxOn").addEventListener("click", () => { start(); setFxOn(state.fx.on === false); lvPaintFx(); lvPaintTop(); });
+      $id("lvFxClose").addEventListener("click", () => setFx(false));
+      fxp.querySelectorAll("[data-kp]").forEach(b => { b.setAttribute("aria-pressed", String(LV.kpage === b.dataset.kp)); b.addEventListener("click", () => { setKPage(b.dataset.kp); lvPaintFx(); }); });
+      const mini = (box, t, name) => { const w = document.createElement("div"); w.className = "lv-mk"; box.appendChild(w); knobMini(w, t, name); };
+      [0, 1, 2, 3].forEach(i => mini($id("lvFxK"), fxK(i))); mini($id("lvFxK"), F_FX, "Amount");
+      [["#fxEchoSync", "Echo time"], ["#fxVerb", "Reverb"], ["#fxDuck", "Duck"]].forEach(([sel, nm]) => {
+        const s = document.querySelector(sel); if (!s) return;
+        const l = document.createElement("label"); l.className = "lv-sel"; l.innerHTML = "<span></span>"; l.firstChild.textContent = nm;
+        const c = s.cloneNode(true); c.removeAttribute("id"); c.value = s.value;
+        c.addEventListener("change", () => { start(); s.value = c.value; s.dispatchEvent(new Event("change", { bubbles: true })); ML.lay = null; });
+        l.appendChild(c); $id("lvFxK").appendChild(l);
+      });
+      BFX_ROWS.forEach(([onKey, title, sub, sliders]) => {
+        const card = document.createElement("div"); card.className = "lv-lab" + (bfx[onKey] ? " on" : "");
+        card.innerHTML = `<div class="lv-labh"><button class="btn" aria-pressed="${!!bfx[onKey]}"><i></i><b></b></button><small></small></div><div class="lv-labk"></div>`;
+        card.querySelector("b").textContent = title; card.querySelector("small").textContent = sub;
+        card.querySelector("button").addEventListener("click", () => { start(); bfx[onKey] = !bfx[onKey]; if (bfx[onKey] && state.fx.on === false) setFxOn(true); saveBfx(); applyBfx(onKey === "hallOn"); lvPaintFx(); lvPaintKnobs(); });
+        sliders.forEach(([k, label]) => mini(card.querySelector(".lv-labk"), LABP[k], label));
+        $id("lvLab").appendChild(card);
+      });
+    }
+    function setFx(on) { LV.fx = on; fxp.hidden = !on; lv.classList.toggle("fxopen", on); if (on) lvPaintFx(); lvPaintTop(); }
+    $id("lvFx").addEventListener("click", () => { start(); setFx(!LV.fx); });
+    // ---------- giving a knob or fader another job, live: one tap on its name ----------
+    const pick = $id("lvPick");
+    function pickGroups() {
+      const G = [], add = (name, items) => { items = items.filter(x => x && x.t && mlGet(x.t) != null); if (items.length) G.push([name, items]); };
+      add("Sound", [...document.querySelectorAll("#engineKnobs .knob")].map((k, i) => ({ t: Q("#engineKnobs .knob", i) })));
+      add("FX", [0, 1, 2, 3].map(i => ({ t: fxK(i) })).concat([{ t: F_FX, n: "Effects amount" }, { t: Q("#fxEchoSync", 0, "Echo time") }, { t: Q("#fxVerb", 0, "Reverb") }, { t: Q("#fxDuck", 0, "Duck on the kick") }]));
+      add("FX Lab", LAB_K.map(t => ({ t })).concat(Object.keys(LABP).filter(k => !["dens", "bits", "tone", "hmix", "hdecay", "frzMix", "shim", "shimFb"].includes(k)).map(k => ({ t: LABP[k] }))));
+      add("Motion", [...document.querySelectorAll("#moMacs .knob")].map((k, i) => ({ t: Q("#moMacs .knob", i) })).concat([{ t: { k: "xy", axis: "x" }, n: "XY left–right" }, { t: { k: "xy", axis: "y" }, n: "XY up–down" }]));
+      let chs = []; try { chs = mixChannels(); } catch (e) {}
+      add("Mix", [{ t: F_NOW, n: "This sound" }].concat(chs.map(c => ({ t: mixCh("p:" + c.name, c.name), n: c.name.replace(/ volume$/, "") }))));
+      add("Rhythm Creator", [["#rcSwing", "Swing"], ["#rcFeel", "Feel"], ["#rcRoom", "Room"], ["#rcBusy", "Busy"], ["#rcCplx", "Complexity"], ["#rcMorph", "Morph"], ["#rcLevel", "Level"]].map(([s, n]) => ({ t: Q(s, 0, "Rhythm " + n.toLowerCase()), n })));
+      add("Beat Pads", [["#bpSw", "Swing"], ["#bpQs", "Quantize strength"], ["#bpRate", "Repeat rate"]].map(([s, n]) => ({ t: Q(s, 0, "Beat Pads " + n.toLowerCase()), n })));
+      add("Arp", [["#arpGate", "Gate"], ["#arpRate", "Rate"], ["#arpMode", "Pattern"]].map(([s, n]) => ({ t: Q(s, 0, "Arp " + n.toLowerCase()), n })));
+      return G;
+    }
+    function closePick() { pick.hidden = true; lv.querySelectorAll(".lv-k.picking, .lv-f.picking").forEach(x => x.classList.remove("picking")); }
+    function openPick(kind, i, anchor) {
+      closePick();
+      const own = lvOwn(kind, i), E = lvEff(kind, i), where = kind === "F" ? "Fader " + (i + 1) : "Knob " + (i + 1) + " · " + kpName(LV.kpage) + " page";
+      const def = (kind === "F" ? FDEF() : (KDEF[LV.kpage] || KDEF.sound)())[i] || null;
+      pick.innerHTML = `<div class="lv-pkh"><div><strong></strong><small></small></div><button class="btn" id="lvPickClose" data-x aria-label="Close">✕</button></div>
+        <div class="lv-pkb"><button class="btn" data-def></button><button class="btn" data-none>Nothing</button></div><div class="lv-pkl"></div>`;
+      pick.querySelector("strong").textContent = where;
+      pick.querySelector("small").textContent = E.yours && !own ? "set by MIDI learn on Live: change it in the MIDI sheet" : "now: " + (E.t ? E.name || mlName(E.t, "") : "nothing");
+      const db = pick.querySelector("[data-def]"); db.textContent = "Back to " + (def ? mlName(def, "the page's") : "nothing"); db.disabled = !own;
+      const list = pick.querySelector(".lv-pkl"), curK = E.t ? JSON.stringify(E.t) : "";
+      pickGroups().forEach(([g, items]) => {
+        const h = document.createElement("div"); h.className = "lv-pkg"; h.textContent = g; list.appendChild(h);
+        const row = document.createElement("div"); row.className = "lv-pkr"; list.appendChild(row);
+        items.forEach(it => {
+          const b = document.createElement("button"); b.className = "btn" + (JSON.stringify(it.t) === curK ? " cur" : ""); const nm = it.n || mlName(it.t, "");
+          b.textContent = nm; b.addEventListener("click", () => setSlot(kind, i, { t: it.t, name: nm })); row.appendChild(b);
+        });
+      });
+      pick.querySelector("[data-x]").addEventListener("click", closePick);
+      db.addEventListener("click", () => setSlot(kind, i, null));
+      pick.querySelector("[data-none]").addEventListener("click", () => setSlot(kind, i, { none: true, name: "Nothing" }));
+      pick.hidden = false; anchor.classList.add("picking");
+      // next to the control, kept on screen; on a phone, a sheet from the bottom
+      const r = anchor.getBoundingClientRect(), W = innerWidth, H = innerHeight, w = Math.min(480, W - 20);
+      if (W < 600) { pick.style.cssText = `left:10px;right:10px;bottom:10px;top:auto;width:auto;max-height:${Math.round(H * 0.7)}px`; return; }
+      const below = H - r.bottom - 16, above = r.top - 16, maxH = Math.min(560, Math.max(below, above));
+      let left = r.left + r.width / 2 - w / 2; left = Math.max(10, Math.min(W - w - 10, left));
+      pick.style.cssText = `width:${w}px;left:${left}px;max-height:${maxH}px;` + (below >= above ? `top:${r.bottom + 6}px` : `bottom:${H - r.top + 6}px`);
+    }
+    function setSlot(kind, i, v) {
+      if (kind === "F") LV.F[i] = v;
+      else { const a = (LV.pages[LV.kpage] || []).slice(0, 8); while (a.length < 8) a.push(null); a[i] = v; LV.pages[LV.kpage] = a; }
+      lvSave(); ML.lay = null; closePick(); lvPaintKnobs();
+      const E = lvEff(kind, i); mlHud((kind === "F" ? "Fader " : "Knob ") + (i + 1), E.t ? E.name || mlName(E.t, "") : "nothing", null);
+    }
+    lv.addEventListener("pointerdown", e => { if (!pick.hidden && !e.target.closest(".lv-pick, [data-edit]")) closePick(); }, true);
+    // ---------- the MiniLab while Live is open: the screen lights up instead of the pop-up ----------
+    { const mf = mlFlash; mlFlash = function (i, on) { mf.apply(this, arguments); if (!lv.hidden && lvPadEls[i]) lvPadEls[i].classList.toggle("hit", !!on); }; }
+    { const ms = mlShow; mlShow = function (c, t, name) {
+        if (lv.hidden || !c || (c.kind !== "K" && c.kind !== "F")) return ms.apply(this, arguments);
+        const el = (c.kind === "K" ? lvKnobEls : lvFaderEls)[c.i];
+        if (el) { paintOne(el, c.kind, c.i); el.classList.add("hot"); clearTimeout(el.__hot); el.__hot = setTimeout(() => el.classList.remove("hot"), 450); }
+        mlScreen(name || mlName(t, ""), mlText(t));
+      }; }
+    { const mh = mlHud; mlHud = function (a, b) { if (!lv.hidden && /^Pad \d/.test(a || "") && !/^nothing/.test(b || "")) return; return mh.apply(this, arguments); }; }
+    // ---------- open and close ----------
+    let lvT = 0, lvTick = 0;
+    function lvOpen() {
+      start(); lv.hidden = false; document.body.classList.add("live-on"); ML.lay = null; ML.sent.clear();
+      lvPaintTop(); lvPaintKnobs(); lvPaintPads(true); setFx(false);
+      clearInterval(lvT); lvT = setInterval(() => {
+        if (lv.hidden) { clearInterval(lvT); return; }
+        lvPaintKnobs(); lvPaintTop(); if (++lvTick % 5 === 0) lvPaintPads();
+        if (LV.fx) fxp.querySelectorAll(".lv-mk").forEach(w => w.__paint && w.__paint());
+      }, 200);
+      try { paintStrip(true); } catch (e) {} mlRefresh(true);
+    }
+    function lvClose() {
+      lvRelease(); lv.hidden = true; closePick(); setFx(false); document.body.classList.remove("live-on"); clearInterval(lvT); ML.lay = null;
+      try { paintStrip(true); } catch (e) {} mlRefresh(true);
+    }
+    $id("lvDone").addEventListener("click", lvClose);
+    // (Back and Esc close the choices, then the effects, then Live: they're layers like any sheet)
+    // the Live button in the top bar (and in the menu)
+    const lb = document.createElement("button"); lb.className = "btn livebtn"; lb.id = "liveBtn"; lb.setAttribute("aria-label", "Live");
+    lb.title = "Live: big knobs, faders and pads for playing out with the MiniLab and the K.O. II";
+    lb.innerHTML = '<i aria-hidden="true"></i><span>Live</span>';
+    { const mix = $id("mixBtn"); if (mix && mix.parentNode) mix.parentNode.insertBefore(lb, mix); }
+    lb.addEventListener("click", lvOpen);
+    window.__live = { LV, open: lvOpen, close: lvClose, pads: lvPads, K: lvK, F: lvF, eff: lvEff, setKPage, setPset, setSlot, FXM, LVH, pickGroups };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
