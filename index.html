@@ -10001,6 +10001,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
 
   // ---------- recording (overdub) ----------
   const trec = { on: false, node: null, mute: null, L: [], R: [], len: 0, mic: null, micNode: null, mL: [], mR: [], mlen: 0, at: 0, from: 0, targets: [] };
+  // one take is held in memory as it records (and once more while it becomes a clip): past this a phone's
+  // browser would run out of memory and lose the lot, so the take stops here and is kept
+  const MAX_TRK_REC_SEC = 10 * 60;
+  const trecFull = () => { if (!trec.on || trec.full) return; trec.full = true; setTimeout(() => { stopRec(); trkSay("Recording stopped at 10:00, the longest one take can be. It's kept."); }, 0); };
   async function startRec() {
     start();
     if (trec.on) return;
@@ -10012,7 +10016,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch (e) {}
         const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
         trec.mic = stream; const src = ctx.createMediaStreamSource(stream), n = ctx.createScriptProcessor(4096, 2, 2), mute = ctx.createGain(); mute.gain.value = 0;
-        n.onaudioprocess = ev => { if (!trec.on) return; const ib = ev.inputBuffer; trec.mL.push(new Float32Array(ib.getChannelData(0))); trec.mR.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); trec.mlen += ib.length; };
+        n.onaudioprocess = ev => { if (!trec.on) return; const ib = ev.inputBuffer; trec.mL.push(new Float32Array(ib.getChannelData(0))); trec.mR.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); trec.mlen += ib.length; if (trec.mlen >= ctx.sampleRate * MAX_TRK_REC_SEC) trecFull(); };
         src.connect(n); n.connect(mute).connect(ctx.destination); trec.micNode = { src, n, mute };
       } catch (e) {
         try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e2) {}
@@ -10021,9 +10025,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       }
     }
     const n = ctx.createScriptProcessor(4096, 2, 2), mute = ctx.createGain(); mute.gain.value = 0;
-    n.onaudioprocess = ev => { if (!trec.on) return; const ib = ev.inputBuffer; trec.L.push(new Float32Array(ib.getChannelData(0))); trec.R.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); trec.len += ib.length; };
+    n.onaudioprocess = ev => { if (!trec.on) return; const ib = ev.inputBuffer; trec.L.push(new Float32Array(ib.getChannelData(0))); trec.R.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); trec.len += ib.length; if (trec.len >= ctx.sampleRate * MAX_TRK_REC_SEC) trecFull(); };
     B.betaOut.connect(n); n.connect(mute).connect(ctx.destination);
-    Object.assign(trec, { node: n, mute, L: [], R: [], len: 0, mL: [], mR: [], mlen: 0, targets: targets.map(t => t.id), from: T.playhead });
+    Object.assign(trec, { node: n, mute, L: [], R: [], len: 0, mL: [], mR: [], mlen: 0, full: false, targets: targets.map(t => t.id), from: T.playhead });
     trec.on = true; trec.at = ctx.currentTime;
     trkRecBtn.classList.add("live"); trkMini.classList.add("rec");
     playTracks(true);
@@ -10047,7 +10051,17 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const skip = Math.min(len - 1, Math.floor((lead + lat + (mic ? 0.01 : 0)) * ctx.sampleRate));
       const n = len - skip; if (n < ctx.sampleRate * 0.15) return null;
       const buf = new AudioBuffer({ length: n, numberOfChannels: 2, sampleRate: ctx.sampleRate });
-      buf.getChannelData(0).set(joinChunks(L, len).subarray(skip)); buf.getChannelData(1).set(joinChunks(R, len).subarray(skip));
+      // straight from the recorded chunks into the clip (no second full-length copy, which on a long take
+      // could be what runs a phone out of memory), letting each chunk go once it's in
+      [[L, buf.getChannelData(0)], [R, buf.getChannelData(1)]].forEach(([chunks, out]) => {
+        let pos = 0;   // position in the recording
+        for (let c = 0; c < chunks.length; c++) {
+          const ch = chunks[c]; chunks[c] = null;
+          const a = Math.max(0, skip - pos), b = Math.min(ch.length, len - pos);
+          if (b > a) out.set(ch.subarray(a, b), pos + a - skip);
+          pos += ch.length; if (pos >= len) break;
+        }
+      });
       return addAudio(buf, name);
     };
     snapshot();
@@ -24038,16 +24052,21 @@ registerProcessor("nb-wave", NBWave);
       if (MIC.mon) { try { MIC.mon.disconnect(); } catch (e) {} MIC.mon = null; }
       if (on && MIC.src) { MIC.mon = ctx.createGain(); MIC.src.connect(MIC.mon); MIC.mon.connect(tNode(tr).g); }
     }
+    // A take is held in memory while it records (and copied once more as it becomes a region): past this
+    // a phone's browser can run out of memory and lose it all, so recording stops here and the take is kept
+    const GB_MAX_REC_SEC = 10 * 60;
+    const recFull = () => setTimeout(() => { if (TP.on && TP.rec) { stop(); gbSay("Recording stopped at 10:00, the longest one take can be. The take is kept."); } }, 0);
     function audioRecStart() {
       if (!MIC.src) return;
       const proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
-      MIC.chunks = []; MIC.t0 = null;
+      MIC.chunks = []; MIC.t0 = null; MIC.len = 0; MIC.full = false;
       proc.onaudioprocess = e => {
         if (!TP.on || !TP.rec) return;
         const n = e.inputBuffer.length, tEnd = ctx.currentTime, tStart = tEnd - n / ctx.sampleRate;
         if (tEnd < TP.t0 - 0.05) return;   // (still counting in)
         if (MIC.t0 == null) MIC.t0 = tStart;
         MIC.chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+        MIC.len += n; if (MIC.len >= ctx.sampleRate * GB_MAX_REC_SEC && !MIC.full) { MIC.full = true; recFull(); }
       };
       MIC.src.connect(proc); proc.connect(mute).connect(ctx.destination); MIC.proc = proc; MIC.mute = mute;
     }
@@ -24056,6 +24075,7 @@ registerProcessor("nb-wave", NBWave);
       const chunks = MIC.chunks; MIC.chunks = [];
       const total = chunks.reduce((a, c) => a + c.length, 0); if (!total || MIC.t0 == null) return;
       const sr = ctx.sampleRate, buf = ctx.createBuffer(1, total, sr), d = buf.getChannelData(0); let o = 0; chunks.forEach(c => { d.set(c, o); o += c.length; });
+      chunks.length = 0;   // (the take is in the buffer now: let the pieces go before the WAV copy is made)
       // the take is late by the trip out to the speakers and back in: line it up with what was playing
       const lat = (ctx.outputLatency || ctx.baseLatency || 0.02) + 4096 / sr;
       const a = REC.b0, startT = MIC.t0 - lat, off = Math.max(0, timeAt(a) - startT);
@@ -25428,13 +25448,14 @@ registerProcessor("nb-wave", NBWave);
       AU.nb = B.trackBus; gbOut(); applyLevels();
       AU.trk.forEach(N => { try { N.s.disconnect(); } catch (e) {} }); AU.vin = null;   // (the shared hall would carry the song into the take)
       const proc = ctx.createScriptProcessor(4096, 2, 2), mute = ctx.createGain(); mute.gain.value = 0;
-      NBR.L = []; NBR.R = []; NBR.len = 0; NBR.t0 = null;
+      NBR.L = []; NBR.R = []; NBR.len = 0; NBR.t0 = null; NBR.full = false;
       proc.onaudioprocess = e => {
         if (!TP.on || !TP.rec) return;
         const ib = e.inputBuffer, n = ib.length, tEnd = ctx.currentTime, tStart = tEnd - n / ctx.sampleRate;
         if (tEnd < TP.t0 - 0.05) return;   // (still counting in)
         if (NBR.t0 == null) NBR.t0 = tStart;
         NBR.L.push(new Float32Array(ib.getChannelData(0))); NBR.R.push(new Float32Array(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); NBR.len += n;
+        if (NBR.len >= ctx.sampleRate * GB_MAX_REC_SEC && !NBR.full) { NBR.full = true; recFull(); }
       };
       B.betaOut.connect(proc); proc.connect(mute).connect(ctx.destination); NBR.proc = proc; NBR.mute = mute;
       gbMini(true);
@@ -25447,6 +25468,7 @@ registerProcessor("nb-wave", NBWave);
       if (!total || t0 == null) return;
       const sr = ctx.sampleRate, buf = ctx.createBuffer(2, total, sr), dl = buf.getChannelData(0), dr = buf.getChannelData(1); let o = 0;
       L.forEach((c, i) => { dl.set(c, o); dr.set(R[i], o); o += c.length; });
+      L.length = 0; R.length = 0;   // (the take is in the buffer now: let the pieces go before the WAV copy is made)
       // you play to what you hear, which reaches you a little late: line the take up with the song
       const lat = (ctx.outputLatency || ctx.baseLatency || 0.02) + 4096 / sr;
       const a = REC.b0, off = Math.max(0, timeAt(a) - (t0 - lat));
