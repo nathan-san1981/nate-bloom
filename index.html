@@ -3510,6 +3510,7 @@ body.mls-picking .app, body.mls-picking .dj { cursor: crosshair; }
     <span class="ed-info" id="mdInfo" style="text-align:left"></span>
     <button class="btn primary" id="mdConnect" style="height:40px">Connect</button>
     <div class="md-opts">
+      <label><input type="checkbox" data-mo="auto"><span>Connect by itself when Nate Bloom opens<small>and each device comes back on or off as you left it</small></span></label>
       <label><input type="checkbox" data-mo="noteIn"><span>Play Nate Bloom from MIDI keyboards<small>notes in on any channel</small></span></label>
       <label><input type="checkbox" data-mo="clockOut"><span>Send clock and start/stop<small>the K.O. II follows Nate Bloom's tempo</small></span></label>
       <label><input type="checkbox" data-mo="clockIn"><span>Follow incoming clock<small>Nate Bloom follows the K.O. II or Bitwig</small></span></label>
@@ -11078,7 +11079,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         const row = document.createElement("label"); row.className = "md-row";
         row.innerHTML = '<input type="checkbox"><span></span>'; row.querySelector("span").textContent = p.name + (p.manufacturer ? " · " + p.manufacturer : "");
         const cb = row.querySelector("input"); cb.checked = set.has(p.id);
-        cb.addEventListener("change", () => { cb.checked ? set.add(p.id) : set.delete(p.id); });
+        cb.addEventListener("change", () => { cb.checked ? set.add(p.id) : set.delete(p.id); mdRemember(kind, p, cb.checked); });
         mdPorts.appendChild(row);
       });
     };
@@ -11093,6 +11094,12 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   document.querySelectorAll("#midiSheet [data-mo]").forEach(cb => cb.addEventListener("change", () => { md.opt[cb.dataset.mo] = cb.checked; saveMd(); }));
   document.getElementById("mdCh").addEventListener("change", e => { md.opt.ch = +e.target.value; saveMd(); });
   document.getElementById("mdVel").addEventListener("change", e => { md.opt.vel = e.target.value; saveMd(); });
+  function mdKey(kind, p) {
+    const all = md.access ? [...(kind === "in" ? md.access.inputs : md.access.outputs).values()] : [];
+    const same = all.filter(x => (x.name || "") === (p.name || "") && (x.manufacturer || "") === (p.manufacturer || ""));
+    return kind + ":" + (p.name || "") + "|" + (p.manufacturer || "") + "#" + Math.max(0, same.indexOf(p));
+  }
+  function mdRemember(kind, p, on) { md.opt.ports = Object.assign({}, md.opt.ports, { [mdKey(kind, p)]: !!on }); saveMd(); }
   async function connectMidi() {
     if (!navigator.requestMIDIAccess) { mdInfo.textContent = "This browser has no MIDI. Use Chrome (Android tablet or computer) with the hosted version; Safari on iPhone/iPad doesn't support it."; return; }
     try {
@@ -11104,18 +11111,28 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const old = md.access; if (old && old !== na) { old.inputs.forEach(i => { i.onmidimessage = null; }); old.onstatechange = null; }
       md.access = na; md.sysex = sx;
       const hook = () => {
-        md.access.inputs.forEach(i => { i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) md.ins.add(i.id); });
-        md.access.outputs.forEach(o => { if ((!md.seen || !md.seen.has(o.id)) && !(md.isCtl && md.isCtl(o))) md.outs.add(o.id); });
+        const mem = md.opt.ports || {};
+        md.access.inputs.forEach(i => { i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) { if (mem[mdKey("in", i)] === false) md.ins.delete(i.id); else md.ins.add(i.id); } });
+        md.access.outputs.forEach(o => { if (!md.seen || !md.seen.has(o.id)) { const r = mem[mdKey("out", o)]; if (r === true || (r == null && !(md.isCtl && md.isCtl(o)))) md.outs.add(o.id); else md.outs.delete(o.id); } });
         md.seen = new Set([...md.access.inputs.keys(), ...md.access.outputs.keys()]);
         renderMidi();
         if (md.onPorts) md.onPorts();
       };
       md.access.onstatechange = hook; hook();
-      mdInfo.textContent = "Connected. New devices are switched on automatically.";
+      mdInfo.textContent = "Connected. Devices come back on or off as you left them; new ones are switched on.";
+      if (md.opt.auto === undefined) { md.opt.auto = true; saveMd(); paintMdOpts(); }
       document.getElementById("mdConnect").textContent = "Rescan";
     } catch (e) { mdInfo.textContent = "MIDI was blocked here (" + (e && e.name ? e.name : "not allowed") + "). The hosted version in Chrome can use it."; }
   }
   document.getElementById("mdConnect").addEventListener("click", connectMidi);
+  {
+    const can = () => !!navigator.requestMIDIAccess && !location.hostname.endsWith("claude.ai") && !(window.claude && window.claude.use);
+    let tried = false;
+    if (md.opt.auto === undefined && window.NB_NATIVE) md.opt.auto = true;   // (the Android app asks no permission: on from the start)
+    const auto = () => { if (tried || md.access || !md.opt.auto || !can()) return; tried = true; connectMidi(); };
+    document.getElementById("startBtn").addEventListener("click", auto);
+    document.addEventListener("pointerdown", auto, { capture: true, once: true });
+  }
   document.getElementById("midiBtn").addEventListener("click", () => { mdEl.hidden = false; paintMdOpts(); renderMidi(); if (!md.access) mdInfo.textContent = "Tap Connect. Works in Chrome on Android, Windows, Mac and Linux (hosted version)."; });
   document.getElementById("mdDone").addEventListener("click", () => { mdEl.hidden = true; });
   // clock, notes and drums out ride on the sequencer clock
@@ -27687,7 +27704,8 @@ z: [z]=Z
       if (tab.hidden === live) tab.hidden = !live;
       if (!live && !map.hidden) { map.hidden = true; document.body.classList.remove("mini-open"); }
       if (document.body.classList.contains("mini-live") !== live) document.body.classList.toggle("mini-live", live);
-      if (!live) { ML.page = ""; return; }
+      if (!live) { ML.page = ""; ML.wasLive = false; return; }
+      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(); mlHud("MiniLab 3 connected", PAGE_NAME[pg0] || "", null, HINT[pg0]); }, 500); }
       const pg = mlPage();
       if (force || pg !== ML.page) {
         const was = ML.page; ML.page = pg; ML.lay = null;
