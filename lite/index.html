@@ -2440,6 +2440,69 @@ body.mini-live .bp-grid::after { content: "MiniLab bank B ↑  ·  bank A ↓"; 
 .mini-mon span { color: var(--ink); }
 .mini-sec > .btn { height: 36px; align-self: flex-start; }
 .mini-sec .btn[hidden] { display: none; }
+
+/* the MiniLab strip at the top (tablet) */
+body.mls-on { --mls-h: calc(88px + env(safe-area-inset-top, 0px)); }
+body.mls-on.mls-nopads { --mls-h: calc(50px + env(safe-area-inset-top, 0px)); }
+body.mls-on .app { padding-top: calc(10px + var(--mls-h)); }
+body.mls-on .dj, body.mls-on .trk, body.mls-on .browser { top: var(--mls-h); }
+body.mls-on .mini-tab { display: none; }
+body.mls-on .mini-hud { top: calc(var(--mls-h) + 66px); }
+.mls { position: fixed; left: 0; right: 0; top: 0; z-index: 28; height: var(--mls-h); box-sizing: border-box; display: flex; flex-direction: column; gap: 5px;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) 6px max(10px, env(safe-area-inset-left, 0px));
+  background: #120f1b; border-bottom: 1px solid var(--line); }
+.mls[hidden] { display: none; }
+.mls-row { display: flex; gap: 6px; height: 38px; align-items: stretch; min-width: 0; }
+.mls-name { flex: none; width: 86px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 1px; padding: 0 8px; border-radius: 8px; border: 1px solid #c4a3ff55; background: #1c1729; color: var(--ink); cursor: pointer; min-width: 0; }
+.mls-name b { font: 700 0.6rem var(--font-mono); color: var(--lilac); letter-spacing: 0.06em; text-transform: uppercase; }
+.mls-name span { font-size: 0.74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.mls-k { flex: 8; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; min-width: 0; }
+.mls-f { flex: 4; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; min-width: 0; padding-left: 6px; border-left: 1px solid var(--line); }
+.mls-c { position: relative; min-width: 0; background: var(--raised); border-radius: 7px; padding: 3px 6px 6px; display: grid; grid-template-columns: auto 1fr; grid-template-rows: 1fr auto; column-gap: 5px; align-items: center;
+  border: 1px solid transparent; touch-action: none; cursor: ew-resize; transition: border-color 0.15s; }
+.mls-c b { grid-row: 1 / 3; font: 700 0.62rem var(--font-mono); color: var(--lilac); align-self: start; padding-top: 2px; }
+.mls-fc b { color: var(--amber); }
+.mls-c span { font-size: 0.7rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.15; }
+.mls-c em { font: normal 0.6rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+.mls-c i { position: absolute; left: 6px; right: 6px; bottom: 3px; height: 2px; border-radius: 1px; background: #ffffff16; overflow: hidden; }
+.mls-c i s { display: block; height: 100%; width: 0; background: var(--lilac); text-decoration: none; }
+.mls-fc i s { background: var(--amber); }
+.mls-c.none { opacity: 0.45; }
+.mls-c.yours { border-color: #ffb65c77; }
+.mls-c.hot { border-color: var(--lilac); }
+.mls-tools { flex: none; display: flex; gap: 4px; }
+.mls-tools .btn { width: 34px; height: 100%; padding: 0; font-size: 0.9rem; }
+.mls-tools #mlsEdit[aria-pressed="true"] { background: var(--amber); color: #1a1408; border-color: var(--amber); }
+.mls-p { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 4px; height: 33px; }
+body.mls-nopads .mls-p { display: none; }
+.mls-pad { --pc: transparent; position: relative; min-width: 0; border-radius: 6px; padding: 2px 5px; display: flex; align-items: center; gap: 4px; overflow: hidden; touch-action: none; cursor: pointer;
+  background: color-mix(in srgb, var(--pc) 22%, var(--raised)); border: 1px solid color-mix(in srgb, var(--pc) 60%, transparent); transition: background 0.06s; }
+.mls-pad.mls-b { margin-left: 6px; }
+.mls-pad b { font: 600 0.56rem var(--font-mono); color: var(--dim); flex: none; }
+.mls-pad span { font-size: 0.64rem; line-height: 1.05; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; }
+.mls-pad.none { opacity: 0.35; }
+.mls-pad.yours { box-shadow: inset 0 -2px 0 var(--amber); }
+.mls-pad.hit { background: var(--pc); }
+.mls-pad.hit span, .mls-pad.hit b { color: #120e1a; }
+.mls.editing .mls-c, .mls.editing .mls-pad { outline: 1px dashed var(--amber); outline-offset: -2px; cursor: pointer; }
+.mls-ed { position: fixed; z-index: 37; max-height: min(64vh, 520px); display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; padding: 10px 12px 12px;
+  background: var(--panel); border: 1px solid var(--lilac); border-radius: 12px; box-shadow: 0 16px 40px #000c; }
+.mls-ed[hidden] { display: none; }
+.mls-eh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mls-eh strong { font-size: 0.92rem; }
+.mls-eh .btn { width: 32px; height: 32px; padding: 0; }
+.mls-now { margin: 0; font-size: 0.78rem; color: var(--dim); }
+.mls-eb { display: flex; flex-wrap: wrap; gap: 6px; }
+.mls-eb .btn { height: 34px; font-size: 0.8rem; }
+.mls-lab { margin: 2px 0 0; font-size: 0.7rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.mls-list { overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 3px; min-height: 0; }
+.mls-it { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; text-align: left; padding: 7px 9px; border-radius: 7px; border: 1px solid transparent; background: var(--raised); color: var(--ink); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.mls-it small { font: 0.66rem var(--font-mono); color: var(--dim); white-space: nowrap; }
+.mls-it.cur { border-color: var(--lilac); }
+.mls-foot { margin: 0; font-size: 0.7rem; color: var(--dim); }
+body.mls-picking .app, body.mls-picking .dj { cursor: crosshair; }
+@media (max-width: 1000px) { .mls-name { width: 60px; padding: 0 5px; } .mls-c { display: flex; flex-direction: column; justify-content: center; padding: 2px 2px 5px; }
+  .mls-c b { position: absolute; top: 1px; left: 3px; font-size: 0.5rem; padding: 0; } .mls-c span { font-size: 0.62rem; text-align: center; padding-top: 7px; } .mls-c em { display: none; } .mls-pad b { display: none; } .mls-pad span { font-size: 0.6rem; } }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -3653,7 +3716,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
-      <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Beats · Grid; the pad you hit on Beats · Pads; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats · Pads the MiniLab's keys play the last pad you hit, in tune; on Beats · Grid, Shift + click the big knob and the pads write their hits into the grid while it plays.</p>
+      <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Beats · Grid; the pad you hit on Beats · Pads; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats · Pads the MiniLab's keys play the last pad you hit, in tune; on Beats · Grid, Shift + click the big knob and the pads write their hits into the grid while it plays.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
@@ -19293,7 +19356,7 @@ registerProcessor("nb-verb", NBVerb);`;
     LEARN.map.forEach((m, i) => {
       const r = document.createElement("div"); r.className = "ml-row";
       r.innerHTML = '<b></b><span></span><button class="btn" aria-label="Remove this mapping">✕</button>';
-      r.querySelector("b").textContent = "CC " + m.cc + " · ch " + (m.ch + 1); r.querySelector("span").textContent = m.name + (m.pg ? " · " + (({ synths: "Synths", samples: "Samples", drums: "Drums", dj: "DJ", grid: "Beats · Grid", pads: "Beats · Pads", garage: "Garage", mix: "Mixer", all: "every screen" })[m.pg] || m.pg) : "");
+      r.querySelector("b").textContent = m.ml ? "MiniLab " + (m.ml[0] === "K" ? "knob " : "fader ") + (+m.ml.slice(1) + 1) : "CC " + m.cc + " · ch " + (m.ch + 1); r.querySelector("span").textContent = m.name + (m.pg ? " · " + (({ synths: "Synths", samples: "Samples", drums: "Drums", dj: "DJ", grid: "Beats · Grid", pads: "Beats · Pads", garage: "Garage", mix: "Mixer", all: "every screen" })[m.pg] || m.pg) : "");
       r.querySelector("button").addEventListener("click", () => { LEARN.map.splice(i, 1); saveLearn(); renderLearn(); });
       box.appendChild(r);
     });
@@ -27011,7 +27074,7 @@ z: [z]=Z
     const ML = { mode: "auto", lights: false, badges: true, padCh: 9, hw: new Map(), encRel: new Set(), encRun: new Map(), virt: new Map(), fad: new Map(), mainAbs: new Set(), mainRun: new Map(),
       page: "", pgNow: "", pgAt: 0, keyWay: new Map(), lay: null, layAt: 0, layPage: "", shift: false, held: new Map(), mon: "", seen: false, writeGrid: false, sent: new Map(), hudT: 0, gbDo: 0, src: false };
     try { const o = JSON.parse(localStorage.getItem("nightbloom-minilab") || "{}"); if (["auto", "off", "any"].includes(o.mode)) ML.mode = o.mode; ML.lights = !!o.lights; if (o.badges === false) ML.badges = false; if (o.padCh >= 0 && o.padCh < 16) ML.padCh = o.padCh | 0; } catch (e) {}
-    const mlSave = () => { try { localStorage.setItem("nightbloom-minilab", JSON.stringify({ mode: ML.mode, lights: ML.lights, badges: ML.badges, padCh: ML.padCh })); } catch (e) {} };
+    const mlSave = () => { try { localStorage.setItem("nightbloom-minilab", JSON.stringify({ mode: ML.mode, lights: ML.lights, badges: ML.badges, padCh: ML.padCh, strip: ML.strip, stripPads: ML.stripPads })); } catch (e) {} };
     const isML = p => !!p && /mini\s*lab\s*(3|iii|mk\s*3)|minilab3/i.test((p.name || "") + " " + (p.manufacturer || ""));
     const mlPortOn = p => ML.mode === "any" ? true : ML.mode === "off" ? false : isML(p);
     // is a MiniLab (or, with "any controller", anything) plugged in and switched on in the MIDI sheet?
@@ -27478,7 +27541,7 @@ z: [z]=Z
       const pg = force ? mlPage() : pageNow(), now = performance.now();
       if (!force && ML.lay && ML.layPage === pg && now - ML.layAt < 400) return ML.lay;
       let lay = null; try { lay = (L[pg] || L.synths)(); } catch (e) { lay = { K: [], F: [], P: [], M: {} }; }
-      lay.page = pg; ML.lay = lay; ML.layPage = pg; ML.layAt = now; return lay;
+      lay.page = pg; try { padOverrides(lay, pg); } catch (e) {} ML.lay = lay; ML.layPage = pg; ML.layAt = now; return lay;
     }
     // learned mappings belong to a screen (old ones are sorted onto the screen their control lives on)
     function learnPage(t) {
@@ -27491,17 +27554,21 @@ z: [z]=Z
       return "all";   // (the mixer, the effects, the XY pad, plugins: they worked everywhere and still do)
     }
     { let changed = false; LEARN.map.forEach(m => { if (!m.pg) { m.pg = learnPage(m.t); changed = true; } }); if (changed) saveLearn(); }
-    function learnedFor(pg, ch, cc) { return LEARN.map.find(m => m.cc === cc && m.ch === ch && m.pg === pg) || LEARN.map.find(m => m.cc === cc && m.ch === ch && m.pg === "all"); }
+    function learnedFor(pg, ch, cc) {
+      const id = ML.src ? mlId(cc) : null, hit = m => (m.ml && id && m.ml === id) || (m.cc != null && m.cc === cc && m.ch === ch);
+      return LEARN.map.find(m => hit(m) && m.pg === pg) || LEARN.map.find(m => hit(m) && m.pg === "all");
+    }
     // MIDI learn and every learned mapping go through here: a mapping only works on its own screen
     nbCC = function (ch, cc, val) {
       const learning = LEARN.on && LEARN.pick;
-      if (!learning && !LEARN.map.some(m => m.cc === cc && m.ch === ch)) return false;   // (nothing learned for it: no need to look at the screen)
+      if (!learning && !LEARN.map.some(m => (m.ml && ML.src && m.ml === mlId(cc)) || (m.cc != null && m.cc === cc && m.ch === ch))) return false;   // (nothing learned for it: no need to look at the screen)
       const pg = learning ? mlPage() : pageNow();
       if (learning) {
         let t = LEARN.pick.t, name = LEARN.pick.name;
         if (t.k === "xy") { t = { k: "xy", axis: LEARN.xyStep ? "y" : "x" }; name = "XY pad " + (LEARN.xyStep ? "up–down" : "left–right"); }
-        LEARN.map = LEARN.map.filter(m => !((m.pg || "synths") === pg && ((m.cc === cc && m.ch === ch) || JSON.stringify(m.t) === JSON.stringify(t))));
-        LEARN.map.push({ ch, cc, t, name, pg }); saveLearn(); renderLearn(); ML.lay = null; mlRefresh(true);
+        const mid = ML.src ? mlId(cc) : null;
+        LEARN.map = LEARN.map.filter(m => !((m.pg || "synths") === pg && ((m.cc === cc && m.ch === ch) || (mid && m.ml === mid) || JSON.stringify(m.t) === JSON.stringify(t))));
+        LEARN.map.push(Object.assign({ ch, cc, t, name, pg }, mid ? { ml: mid } : {})); saveLearn(); renderLearn(); ML.lay = null; mlRefresh(true);
         const what = ML.src ? mlCtlName(cc) : "CC " + cc;
         if (LEARN.pick.t.k === "xy" && !LEARN.xyStep) { LEARN.xyStep = 1; learnSay(what + " is left–right. Now the knob for up–down"); return true; }
         learnSay(what + " → " + name + " on " + PAGE_NAME[pg] + " only. Touch another control, or Done"); LEARN.pick = null; markPick(null);
@@ -27659,7 +27726,7 @@ z: [z]=Z
       if (!ML.badges || !mlLive()) return;
       const lay = mlLayout(), pg = lay.page, used = new Set();
       const put = (t, tag) => { if (!t || t.k === "xy" || t.k === "wam" || t.k === "wv") return; const el = t.k === "fn" ? (FNS[t.id] && FNS[t.id].el ? FNS[t.id].el() : null) : learnFind(t), b = badgeBox(el); if (!b || used.has(b)) return; used.add(b); b.setAttribute("data-ml", tag); b.classList.add("ml-b"); badged.push(b); };
-      const learned = new Map(); LEARN.map.forEach(m => { if (m.pg === pg || m.pg === "all") { const c = ctlOf(m.cc); if (c && (c.kind === "K" || c.kind === "F")) learned.set(c.kind + c.i, m.t); } });
+      const learned = new Map(); LEARN.map.forEach(m => { if (m.pg === pg || m.pg === "all") { const c = ctlOfMap(m); if (c && (c.kind === "K" || c.kind === "F")) learned.set(c.kind + c.i, m.t); } });
       (lay.K || []).forEach((t, i) => put(learned.get("K" + i) || t, "K" + (i + 1)));
       (lay.F || []).forEach((t, i) => put(learned.get("F" + i) || t, "F" + (i + 1)));
     }
@@ -27686,6 +27753,7 @@ z: [z]=Z
     for (let i = 0; i < 16; i++) { const c = document.createElement("div"); c.className = "mm-pad"; c.innerHTML = `<b>${i + 1}</b><span></span>`; $id(i < 8 ? "miniPA" : "miniPB").appendChild(c); cellsP.push(c); }
     let mapRaf = 0;
     function mlPaintCell(c, t) {
+      stripHot(c);
       if (map.hidden || !c) return;
       const cell = (c.kind === "K" ? cellsK : cellsF)[c.i]; if (!cell) return;
       cell.classList.add("hot"); clearTimeout(cell.__t); cell.__t = setTimeout(() => cell.classList.remove("hot"), 500);
@@ -27694,7 +27762,7 @@ z: [z]=Z
     function paintMapValues() {
       if (map.hidden) return;
       const lay = mlLayout(), pg = lay.page;
-      const learned = new Map(); LEARN.map.forEach(m => { if (m.pg === pg || m.pg === "all") { const c = ctlOf(m.cc); if (c && (c.kind === "K" || c.kind === "F")) learned.set(c.kind + c.i, m); } });
+      const learned = new Map(); LEARN.map.forEach(m => { if (m.pg === pg || m.pg === "all") { const c = ctlOfMap(m); if (c && (c.kind === "K" || c.kind === "F")) learned.set(c.kind + c.i, m); } });
       const fill = (cells, T, kind) => cells.forEach((cell, i) => {
         const m = learned.get(kind + i), t = m ? m.t : T[i], v = t ? mlGet(t) : null;
         cell.classList.toggle("none", !t); cell.classList.toggle("learned", !!m);
@@ -27720,6 +27788,7 @@ z: [z]=Z
     }
     function mlFlash(i, on) {
       const cell = cellsP[i]; if (cell) cell.classList.toggle("hit", on);
+      stripFlash(i, on);
       mlLight(i, on);
     }
     tab.addEventListener("click", () => { map.hidden = !map.hidden; document.body.classList.toggle("mini-open", !map.hidden); paintMap(); });
@@ -27816,6 +27885,256 @@ z: [z]=Z
     md.onPorts = () => { ML.hw.clear(); ML.encRel.clear(); ML.encRun.clear(); ML.mainAbs.clear(); ML.mainRun.clear(); paintSec(); ML.sent.clear(); mlRefresh(true); };
     // the MiniLab isn't an output for clock and notes (its knobs would get the sequencer's notes)
     md.isCtl = p => isML(p) && ML.mode !== "off";
+    // ======================================================================
+    // The strip (tablet): the MiniLab's 8 knobs, 4 faders and 16 pads across the top of every screen, each named
+    // for what it does there. Drag a knob or fader in the strip to move it by touch, tap a pad to play it. Hold a
+    // knob or fader (or ✎, then tap anything in the strip) to give it another job on this screen.
+    // ======================================================================
+    ML.strip = window.NB_LITE ? "ml" : "always"; ML.stripPads = true; ML.padMap = []; ML.edit = false; ML.pick = null;
+    try { const o = JSON.parse(localStorage.getItem("nightbloom-minilab") || "{}"); if (["always", "ml", "off"].includes(o.strip)) ML.strip = o.strip; if (o.stripPads === false) ML.stripPads = false; } catch (e) {}
+    try { const a = JSON.parse(localStorage.getItem("nightbloom-minilab-pads") || "[]"); if (Array.isArray(a)) ML.padMap = a.filter(m => m && m.pg && m.i >= 0 && m.i < 16 && m.t); } catch (e) {}
+    const padSave = () => { try { localStorage.setItem("nightbloom-minilab-pads", JSON.stringify(ML.padMap)); } catch (e) {} };
+    const mlId = cc => { const c = ctlOf(cc); return c && (c.kind === "K" || c.kind === "F") ? c.kind + c.i : null; };
+    const ctlOfMap = m => m.ml ? { kind: m.ml[0], i: +m.ml.slice(1) } : ctlOf(m.cc);
+    { const la = learnApply; learnApply = function (t) { if (t && t.k === "none") return true; return la.apply(this, arguments); }; }
+    // ---------- what a pad does when you've given it another job ----------
+    const ELSEL = "button, [role=button], .pad, .bp-pad, .gb-pad, .gb-chord, .rc-lab";
+    function elRef(el) {
+      if (el.id) return { k: "el", id: el.id };
+      const box = el.parentElement && el.parentElement.closest("[id]"), all = box ? [...box.querySelectorAll(ELSEL)] : [];
+      return { k: "el", box: box ? box.id : "", text: (el.textContent || "").trim().slice(0, 40), al: el.getAttribute("aria-label") || "", i: all.indexOf(el) };
+    }
+    function findEl(t) {
+      if (t.id) return document.getElementById(t.id);
+      const box = t.box ? document.getElementById(t.box) : null; if (!box) return null;
+      const all = [...box.querySelectorAll(ELSEL)];
+      return all.find(b => (b.textContent || "").trim().slice(0, 40) === t.text && (b.getAttribute("aria-label") || "") === t.al) || all[t.i] || null;
+    }
+    const elName = el => { const a = (el.getAttribute("aria-label") || el.getAttribute("title") || "").split(/[:(]/)[0].trim(), x = (el.textContent || "").replace(/\s+/g, " ").trim(); return (x && x.length <= 24 ? x : a || x).slice(0, 24) || "a button"; };
+    function tapEl(el) {   // what a finger does: down, up, click (some controls listen to one, some to another)
+      const r = el.getBoundingClientRect(), o = { bubbles: true, cancelable: true, pointerId: 4343, isPrimary: true, pointerType: "touch", clientX: r.left + r.width / 2, clientY: r.top + r.height * 0.6 };
+      el.dispatchEvent(new PointerEvent("pointerdown", o)); el.dispatchEvent(new PointerEvent("pointerup", o));
+      el.dispatchEvent(new MouseEvent("click", o));
+    }
+    function padOverrides(lay, pg) {
+      lay.P0 = (lay.P || []).slice(); lay.Pyours = new Set();
+      ML.padMap.forEach(m => {
+        if (m.pg !== pg) return;
+        lay.Pyours.add(m.i);
+        if (m.t.k === "none") lay.P[m.i] = null;
+        else if (m.t.k === "role") lay.P[m.i] = lay.P0[m.t.j] ? Object.assign({}, lay.P0[m.t.j]) : null;
+        else if (m.t.k === "el") lay.P[m.i] = { n: m.name, c: "#9a8cc4", down() { const el = findEl(m.t); if (el) tapEl(el); else mlHud("Pad " + (m.i + 1), "can't find " + m.name + " here"); } };
+      });
+    }
+    // ---------- the strip ----------
+    const strip = document.createElement("div"); strip.className = "mls"; strip.id = "miniStrip"; strip.hidden = true;
+    strip.setAttribute("role", "toolbar"); strip.setAttribute("aria-label", "MiniLab 3: knobs, faders and pads on this screen");
+    strip.innerHTML = `<div class="mls-row">
+        <button class="mls-name" id="mlsName" title="The MiniLab's map of this screen"><b>MiniLab</b><span id="mlsPg"></span></button>
+        <div class="mls-k" id="mlsK"></div><div class="mls-f" id="mlsF"></div>
+        <div class="mls-tools"><button class="btn" id="mlsEdit" aria-pressed="false" title="Change what a knob, fader or pad does here">✎</button><button class="btn" id="mlsPads" title="Show or hide the pads row" aria-label="Show or hide the pads row">▴</button></div>
+      </div>
+      <div class="mls-p" id="mlsP"></div>`;
+    document.body.appendChild(strip);
+    const sK = [], sF = [], sP = [];
+    for (let i = 0; i < 8; i++) { const c = document.createElement("div"); c.className = "mls-c"; c.dataset.c = "K" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsK").appendChild(c); sK.push(c); }
+    for (let i = 0; i < 4; i++) { const c = document.createElement("div"); c.className = "mls-c mls-fc"; c.dataset.c = "F" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsF").appendChild(c); sF.push(c); }
+    for (let i = 0; i < 16; i++) { const c = document.createElement("div"); c.className = "mls-pad" + (i === 8 ? " mls-b" : ""); c.dataset.p = i; c.innerHTML = `<b>${i + 1}</b><span></span>`; $id("mlsP").appendChild(c); sP.push(c); }
+    const tablet = () => { try { return matchMedia("(min-width: 760px)").matches; } catch (e) { return innerWidth >= 760; } };
+    const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive());
+    // what a knob or fader does on this screen: what you gave it, or the layout's
+    function eff(kind, i, lay) {
+      const pg = lay.page, id = kind + i;
+      const m = LEARN.map.find(x => x.pg === pg && ((x.ml && x.ml === id) || (!x.ml && (() => { const c = ctlOf(x.cc); return c && c.kind === kind && c.i === i; })())))
+        || LEARN.map.find(x => x.pg === "all" && !x.ml && (() => { const c = ctlOf(x.cc); return c && c.kind === kind && c.i === i; })());
+      return m ? { t: m.t, name: m.name.replace(/ \(.*\)$/, ""), yours: true, m } : { t: (kind === "K" ? lay.K : lay.F)[i] || null, name: null, yours: false };
+    }
+    let stripPage = "", stripOnNow = false;
+    function paintStrip(full) {
+      const on = stripOn();
+      if (on !== stripOnNow) {
+        stripOnNow = on; strip.hidden = !on; document.body.classList.toggle("mls-on", on);
+        if (!on) { closeEd(); setPick(null); }
+        full = true;
+      }
+      if (!on) return;
+      const lay = mlLayout(full), pg = lay.page;
+      if (pg !== stripPage) { stripPage = pg; full = true; closeEd(); }
+      document.body.classList.toggle("mls-nopads", !ML.stripPads);
+      if (full) {
+        $id("mlsPg").textContent = PAGE_NAME[pg] || "";
+        $id("mlsPads").textContent = ML.stripPads ? "▴" : "▾";
+      }
+      const sig = (lay.P || []).map(p => p ? (p.n || "") + "|" + (p.c || "") : "-").join(",") + [...(lay.Pyours || [])].join(",");
+      if (full || sig !== strip.__sig) {
+        strip.__sig = sig;
+        sP.forEach((cell, i) => { const p = lay.P && lay.P[i]; cell.classList.toggle("none", !p); cell.classList.toggle("yours", !!(lay.Pyours && lay.Pyours.has(i))); cell.style.setProperty("--pc", p && p.c ? p.c : "transparent"); cell.querySelector("span").textContent = p ? p.n || "(empty)" : "—"; cell.title = "Pad " + (i + 1) + ": " + (p ? p.n || "empty" : "nothing here"); });
+      }
+      const fill = (cells, kind) => cells.forEach((cell, i) => {
+        const e = eff(kind, i, lay), t = e.t && e.t.k !== "none" ? e.t : null, v = t ? mlGet(t) : null;
+        cell.classList.toggle("none", !t); cell.classList.toggle("yours", e.yours);
+        const nm = t ? (e.name || mlName(t, "")) : e.yours ? "Nothing" : "—";
+        if (cell.__nm !== nm) { cell.__nm = nm; cell.querySelector("span").textContent = nm; cell.title = (kind === "K" ? "Knob " : "Fader ") + (i + 1) + ": " + nm + (e.yours ? " (yours)" : ""); }
+        const tx = t ? mlText(t) : ""; if (cell.__tx !== tx) { cell.__tx = tx; cell.querySelector("em").textContent = tx; }
+        cell.querySelector("s").style.width = v == null ? "0" : Math.round(Math.max(0, Math.min(1, v)) * 100) + "%";
+      });
+      fill(sK, "K"); fill(sF, "F");
+    }
+    function stripFlash(i, on) { const c = sP[i]; if (c) c.classList.toggle("hit", on); }
+    function stripHot(c) { if (!c || !stripOnNow) return; const cell = (c.kind === "K" ? sK : sF)[c.i]; if (!cell) return; cell.classList.add("hot"); clearTimeout(cell.__h); cell.__h = setTimeout(() => cell.classList.remove("hot"), 450); }
+    setInterval(() => { if (stripOnNow || ML.strip !== "off") paintStrip(false); }, 300);
+    setInterval(() => { if (stripOnNow) paintStrip(true); }, 1500);
+    addEventListener("resize", () => paintStrip(true));
+    // ---------- touch: drag a knob or fader across, tap a pad; hold (or ✎) to change it ----------
+    function stripCtl(cell) { const k = cell.dataset.c; return { kind: k[0], i: +k.slice(1) }; }
+    ["mlsK", "mlsF"].forEach(id => $id(id).addEventListener("pointerdown", e => {
+      const cell = e.target.closest(".mls-c"); if (!cell) return; e.preventDefault();
+      const c = stripCtl(cell);
+      if (ML.edit) { openEd(c.kind, c.i, cell); return; }
+      const lay = mlLayout(), ef = eff(c.kind, c.i, lay), t = ef.t && ef.t.k !== "none" ? ef.t : null;
+      try { cell.setPointerCapture(e.pointerId); } catch (x) {}
+      const x0 = e.clientX, w = cell.getBoundingClientRect().width, v0 = t ? mlGet(t) : null; let moved = false;
+      const hold = setTimeout(() => { if (!moved) openEd(c.kind, c.i, cell); }, 550);
+      const mv = ev => {
+        if (Math.abs(ev.clientX - x0) > 4) moved = true;
+        if (!moved || !t || v0 == null) return;
+        const v = Math.max(0, Math.min(1, v0 + (ev.clientX - x0) / Math.max(180, w * 2)));
+        start(); learnApply(t, v); const tk = JSON.stringify(t); ML.virt.set(tk, v); ML.fad.delete(tk);
+        mlHud((c.kind === "K" ? "Knob " : "Fader ") + (c.i + 1) + " · " + (ef.name || mlName(t, "")), mlText(t), v);
+        paintStrip(false);
+      };
+      const up = () => { clearTimeout(hold); cell.removeEventListener("pointermove", mv); cell.removeEventListener("pointerup", up); cell.removeEventListener("pointercancel", up); if (!moved && !t && !$id("mlsEd")) mlHud((c.kind === "K" ? "Knob " : "Fader ") + (c.i + 1), "nothing here: hold it to give it a job"); };
+      cell.addEventListener("pointermove", mv); cell.addEventListener("pointerup", up); cell.addEventListener("pointercancel", up);
+    }));
+    const stripHeld = new Map();
+    $id("mlsP").addEventListener("pointerdown", e => {
+      const cell = e.target.closest(".mls-pad"); if (!cell) return; e.preventDefault();
+      const i = +cell.dataset.p;
+      if (ML.edit) { openEd("P", i, cell); return; }
+      try { cell.setPointerCapture(e.pointerId); } catch (x) {}
+      const lay = mlLayout(), p = lay.P && lay.P[i]; if (!p || !p.down) { mlHud("Pad " + (i + 1), "nothing here: ✎ then tap it to give it a job"); return; }
+      start(); const r = cell.getBoundingClientRect(), vel = Math.round(40 + 87 * Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)));
+      try { p.down(vel); } catch (x) {}
+      stripHeld.set(e.pointerId, { p, i }); stripFlash(i, true); mlLight(i, true);
+    });
+    const padLift = e => { const h = stripHeld.get(e.pointerId); if (!h) return; stripHeld.delete(e.pointerId); stripFlash(h.i, false); mlLight(h.i, false); if (h.p.up) { try { h.p.up(); } catch (x) {} } };
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(n => $id("mlsP").addEventListener(n, padLift));
+    $id("mlsName").addEventListener("click", () => { map.hidden = !map.hidden; document.body.classList.toggle("mini-open", !map.hidden); paintMap(); });
+    $id("mlsPads").addEventListener("click", () => { ML.stripPads = !ML.stripPads; mlSave(); paintStrip(true); });
+    function setEdit(on) { ML.edit = on; strip.classList.toggle("editing", on); $id("mlsEdit").setAttribute("aria-pressed", String(on)); if (!on) closeEd(); }
+    $id("mlsEdit").addEventListener("click", () => { setEdit(!ML.edit); if (ML.edit) mlHud("Change one", "tap a knob, fader or pad in the strip"); });
+    // ---------- giving a knob, fader or pad another job on this screen ----------
+    const ROOT = { synths: ".app", samples: ".app", drums: ".app", dj: "#djView", grid: "#rcView", pads: "#bpView", garage: "#gbView", mix: "#mixer" };
+    function screenControls(pg) {   // the knobs and sliders on this screen, named
+      const root = document.querySelector(ROOT[pg] || ".app"); if (!root) return [];
+      const vis = el => el.getClientRects().length > 0 && !el.closest("[hidden]") && !el.closest("#miniStrip, #miniMap, #mlsEd");
+      const out = [], seen = new Set();
+      // Synths, Samples and Drums: every panel's controls (Sound, FX, Arp, Motion, Jam), open or not
+      const PANELS = [["#engineRow", "Sound"], ["#fxRow", "FX"], ["#arpRow", "Arp"], ["#morphRow", "Motion"], ["#jamRow", "Jam"]];
+      const groupOf = el => { for (const [sel, n] of PANELS) if (el.closest(sel)) return n; return ""; };
+      const main = ROOT[pg] === ".app";
+      // the open panel: what you can see in it; the others: their own controls
+      const KNOWN = { "#engineRow": "#engineKnobs .knob", "#fxRow": "#fxKnobs .knob, #fxVerb, #fxEchoSync, #fxDuck", "#arpRow": "#arpMode, #arpRate, #arpGate", "#morphRow": "#moX, #moY, #moMacs .knob", "#jamRow": "#jamRow input[type=range], #jamRow select" };
+      const els = main ? PANELS.flatMap(([sel]) => {
+          const row = document.querySelector(sel); if (!row) return [];
+          const open = row.getClientRects().length > 0 && !row.closest("[hidden]");
+          return open ? [...row.querySelectorAll(".knob, input[type=range], select")].filter(vis) : [...document.querySelectorAll(KNOWN[sel])];
+        }) : [...root.querySelectorAll(".knob, input[type=range], select")].filter(vis);
+      els.forEach(el => {
+        let t = null;
+        if (el.classList.contains("knob")) { const d = learnDesc(el); if (d) t = d.t; }
+        else if (el.id) t = el.tagName === "SELECT" ? Q("#" + CSS.escape(el.id)) : { k: "range", id: el.id };
+        else { const box = el.closest("[id]"), sel = el.tagName === "SELECT" ? "select" : "input[type=range]"; if (box) { const all = [...box.querySelectorAll(sel)]; t = Q("#" + CSS.escape(box.id) + " " + sel, all.indexOf(el)); } }
+        if (!t) return; const key = JSON.stringify(t); if (seen.has(key)) return; seen.add(key);
+        out.push({ t, name: mlName(t, el.getAttribute("aria-label") || ""), group: main ? groupOf(el) : "" });
+      });
+      return out;
+    }
+    function setKnob(kind, i, pg, t, name) {
+      const id = kind + i, ccs = (kind === "K" ? ENC : FAD).map(s => s[i]);
+      LEARN.map = LEARN.map.filter(m => !(m.pg === pg && (m.ml === id || (!m.ml && ccs.includes(m.cc)))));
+      if (t) LEARN.map.push({ ml: id, t, name, pg });
+      saveLearn(); renderLearn(); ML.lay = null; mlRefresh(true); paintStrip(true); if (!map.hidden) paintMap();
+    }
+    function setPad(i, pg, t, name) {
+      ML.padMap = ML.padMap.filter(m => !(m.pg === pg && m.i === i));
+      if (t) ML.padMap.push({ pg, i, t, name });
+      padSave(); ML.lay = null; ML.sent.clear(); mlRefresh(true); paintStrip(true); if (!map.hidden) paintMap();
+    }
+    const ed = document.createElement("div"); ed.className = "mls-ed"; ed.hidden = true; ed.setAttribute("role", "dialog");
+    document.body.appendChild(ed);
+    function closeEd() { ed.hidden = true; ed.innerHTML = ""; ed.removeAttribute("id"); }
+    function openEd(kind, i, cell) {
+      const lay = mlLayout(true), pg = lay.page, isPad = kind === "P", label = (isPad ? "Pad " : kind === "K" ? "Knob " : "Fader ") + (i + 1);
+      ed.id = "mlsEd"; ed.setAttribute("aria-label", label); hud.hidden = true; clearTimeout(ML.hudT);
+      let now, yours, dflt;
+      if (isPad) { const p = lay.P[i]; now = p ? p.n || "(empty)" : "nothing"; yours = !!(lay.Pyours && lay.Pyours.has(i)); dflt = lay.P0[i] ? lay.P0[i].n || "(empty)" : "nothing"; }
+      else { const e = eff(kind, i, lay); now = e.t && e.t.k !== "none" ? (e.name || mlName(e.t, "")) : "nothing"; yours = e.yours; const d = (kind === "K" ? lay.K : lay.F)[i]; dflt = d ? mlName(d, "") : "nothing"; }
+      ed.innerHTML = `<div class="mls-eh"><strong></strong><button class="btn" data-x aria-label="Close">✕</button></div>
+        <p class="mls-now"></p>
+        <div class="mls-eb"><button class="btn primary" data-pick></button><button class="btn" data-def></button><button class="btn" data-none>Nothing</button></div>
+        <p class="mls-lab"></p><div class="mls-list"></div><p class="mls-foot">Only on ${PAGE_NAME[pg]}: the other screens keep theirs.</p>`;
+      ed.querySelector("strong").textContent = label + " on " + PAGE_NAME[pg];
+      ed.querySelector(".mls-now").textContent = "Now: " + now + (yours ? " (yours)" : " (the layout's)");
+      ed.querySelector("[data-pick]").textContent = isPad ? "Tap a button on the screen" : "Tap a control on the screen";
+      const db = ed.querySelector("[data-def]"); db.textContent = "Back to: " + dflt; db.disabled = !yours;
+      const list = ed.querySelector(".mls-list"), lab = ed.querySelector(".mls-lab");
+      const item = (txt, sub, fn, cur) => { const b = document.createElement("button"); b.className = "mls-it" + (cur ? " cur" : ""); b.innerHTML = "<span></span><small></small>"; b.firstChild.textContent = txt; b.lastChild.textContent = sub || ""; b.addEventListener("click", fn); list.appendChild(b); };
+      if (isPad) {
+        lab.textContent = "Or one of this screen's pads:";
+        (lay.P0 || []).forEach((p, j) => { if (p && p.down) item(p.n || "(empty)", "pad " + (j + 1) + " of the layout", () => { setPad(i, pg, j === i ? null : { k: "role", j }, p.n || ""); closeEd(); }, lay.P[i] && lay.P[i].n === p.n); });
+      } else {
+        lab.textContent = "Or one of this screen's controls:";
+        const cur = eff(kind, i, lay), curK = cur.t ? JSON.stringify(cur.t) : "";
+        screenControls(pg).forEach(o => item(o.name, (o.group ? o.group + " · " : "") + mlText(o.t), () => { setKnob(kind, i, pg, o.t, o.name); closeEd(); }, JSON.stringify(o.t) === curK));
+        if (kind === "F") {
+          let chs = []; try { chs = mixChannels(); } catch (e) {}
+          chs.forEach(ch => { const nm = ch.name.replace(/ volume$/, ""), tt = mixFn("n:" + nm, list2 => list2.find(c => c.name === ch.name), nm); item(nm, "Mixer", () => { setKnob(kind, i, pg, tt, nm + " (Mixer)"); closeEd(); }); });
+        }
+      }
+      ed.querySelector("[data-x]").addEventListener("click", closeEd);
+      ed.querySelector("[data-none]").addEventListener("click", () => { if (isPad) setPad(i, pg, { k: "none" }, "Nothing"); else setKnob(kind, i, pg, { k: "none" }, "Nothing"); closeEd(); });
+      db.addEventListener("click", () => { if (isPad) setPad(i, pg, null); else setKnob(kind, i, pg, null); closeEd(); });
+      ed.querySelector("[data-pick]").addEventListener("click", () => { closeEd(); setPick({ kind, i, pg }); });
+      ed.hidden = false;
+      const r = cell.getBoundingClientRect(), w = Math.min(340, innerWidth - 16);
+      ed.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + "px"; ed.style.top = (r.bottom + 6) + "px"; ed.style.width = w + "px";
+    }
+    // "tap a control on the screen": the next touch picks it (a knob or slider for a knob or fader, anything you can press for a pad)
+    const pickBar = document.createElement("div"); pickBar.className = "learnbar mls-pick"; pickBar.hidden = true; pickBar.setAttribute("role", "status");
+    pickBar.innerHTML = '<span></span><button class="btn">Cancel</button>'; document.body.appendChild(pickBar);
+    pickBar.querySelector("button").addEventListener("click", () => setPick(null));
+    function setPick(p) {
+      ML.pick = p; pickBar.hidden = !p; document.body.classList.toggle("mls-picking", !!p);
+      if (p) pickBar.querySelector("span").textContent = (p.kind === "P" ? "Tap the button or pad for Pad " : "Tap the knob or slider for " + (p.kind === "K" ? "Knob " : "Fader ")) + (p.i + 1) + " on " + PAGE_NAME[p.pg];
+    }
+    document.addEventListener("pointerdown", e => {
+      const p = ML.pick; if (!p || (e.target.closest && e.target.closest(".mls-pick"))) return;
+      if (e.target.closest && e.target.closest("#miniStrip, #miniMap")) return;
+      let done = false;
+      if (p.kind === "P") {
+        const el = e.target.closest && e.target.closest(ELSEL);
+        if (el) { setPad(p.i, p.pg, elRef(el), elName(el)); done = true; mlHud("Pad " + (p.i + 1), elName(el)); }
+      } else {
+        const d = learnDesc(e.target);
+        if (d) { const nm = (d.name || "").replace(/ \(.*\)$/, ""); setKnob(p.kind, p.i, p.pg, d.t, nm); done = true; mlHud((p.kind === "K" ? "Knob " : "Fader ") + (p.i + 1), nm); }
+        else if (e.target.closest && e.target.closest("select")) { const s = e.target.closest("select"), t = s.id ? Q("#" + CSS.escape(s.id)) : null; if (t) { const nm = mlName(t, ""); setKnob(p.kind, p.i, p.pg, t, nm); done = true; mlHud((p.kind === "K" ? "Knob " : "Fader ") + (p.i + 1), nm); } }
+      }
+      if (done) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); setPick(null); setEdit(false); ML.eatClick = performance.now(); }
+    }, true);
+    // (the tap that picked something doesn't also press it)
+    ["click", "pointerup", "mousedown", "mouseup"].forEach(n => document.addEventListener(n, e => { if (ML.eatClick && performance.now() - ML.eatClick < 700) { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); if (n === "click") ML.eatClick = 0; } }, true));
+    document.addEventListener("pointerdown", e => { if (!ed.hidden && !e.target.closest("#mlsEd, #miniStrip")) closeEd(); }, true);
+    window.addEventListener("keydown", e => { if (e.key === "Escape" && (!ed.hidden || ML.pick)) { e.preventDefault(); e.stopImmediatePropagation(); closeEd(); setPick(null); } }, true);
+    // ---------- its setting, in the MiniLab's section of the MIDI sheet ----------
+    { const opts = document.querySelector("#miniSec .md-opts");
+      if (opts) { const l = document.createElement("label"); l.innerHTML = 'Strip at the top <select id="miniStrip2" aria-label="The MiniLab strip at the top (tablet)"><option value="always">Always (tablet)</option><option value="ml">With the MiniLab</option><option value="off">Off</option></select>'; opts.insertBefore(l, opts.firstChild.nextSibling); }
+      const s = $id("miniStrip2"); if (s) { s.value = ML.strip; s.addEventListener("change", () => { ML.strip = s.value; mlSave(); paintStrip(true); }); $id("midiBtn").addEventListener("click", () => { s.value = ML.strip; }); }
+    }
+    // a fader given a Mixer channel keeps it after a reload
+    function regMix(id) { const nm = id.slice(6); return mixFn("n:" + nm, ch => ch.find(c => c.name === nm), nm); }
+    LEARN.map.forEach(m => { if (m.t && m.t.k === "fn" && /^mix:n:/.test(m.t.id) && !FNS[m.t.id]) regMix(m.t.id); });
+    paintStrip(true);
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
