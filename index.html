@@ -16200,36 +16200,48 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   // ---------- Back closes what's on top (Android's back gesture, the browser's Back, Escape) ----------
   {
     const isLayer = el => el.matches && el.matches(".editor, .dj, .trk, .browser, .rc-pop, .lv-fxp, .lv-pick");
-    const stack = []; let ignorePop = 0, popBudget = 0;
+    const stack = []; let ignorePop = 0;
     const closeBtnOf = el => [...el.querySelectorAll("button")].find(b => /(Done|Cancel|Close)$/.test(b.id) && !b.closest("[hidden]"))
       || [...el.querySelectorAll("button")].find(b => /^(Done|Cancel|Close|Back)$/i.test(b.textContent.trim()) && !b.closest("[hidden]"));
     const closeLayer = el => { const b = closeBtnOf(el); if (b) b.click(); else el.hidden = true; };
-    // every sheet, overlay and pop-up that opens gets a history entry; closing it any way takes the entry back
+    // Every open sheet, overlay and pop-up has one history entry above the page's own, so Back closes
+    // what's on top. sync() keeps the entries in step with the open layers, one traversal at a time:
+    // history.back() lands later, and a pushState made before it lands is thrown away by it. Doing both
+    // at once (a pop-up closing as another opens) used to leave fewer entries than layers, until a later
+    // close stepped back past the page itself: out of the app, or closing the installed app.
+    let depth = 0, travelGen = 0, backClosing = 0;   // depth: our entries above the page's, where we are
+    if (history.state && history.state.nbLayer) { try { history.replaceState(null, ""); } catch (e) {} }   // reloaded with a sheet open
+    const sync = () => {
+      for (let i = stack.length - 1; i >= 0; i--) if (!stack[i].isConnected || stack[i].hidden) stack.splice(i, 1);
+      if (ignorePop || backClosing) return;            // a traversal or a Back-close is under way: finish after it
+      while (depth < stack.length) { try { history.pushState({ nbLayer: depth + 1 }, ""); depth++; } catch (e) { break; } }
+      if (depth > stack.length) {
+        const n = depth - stack.length, gen = ++travelGen;
+        ignorePop++; depth -= n;
+        try { history.go(-n); } catch (e) { ignorePop--; depth += n; return; }
+        // a traversal that never reports back must not freeze the bookkeeping
+        setTimeout(() => { if (gen === travelGen && ignorePop) { ignorePop = 0; sync(); } }, 1500);
+      }
+    };
     new MutationObserver(recs => {
-      let closed = 0; const opened = [];
       recs.forEach(r => {
         const el = r.target; if (!isLayer(el)) return;
-        if (!el.hidden && !stack.includes(el)) { if (!opened.includes(el)) opened.push(el); }
-        else if (el.hidden && stack.includes(el)) {
-          stack.splice(stack.indexOf(el), 1);
-          if (popBudget > 0) { popBudget--; return; }   // closed by Back: its history entry is already gone
-          closed++;
-        }
+        if (!el.hidden && !stack.includes(el)) stack.push(el);
+        else if (el.hidden && stack.includes(el)) stack.splice(stack.indexOf(el), 1);
       });
-      opened.forEach(el => {
-        if (el.hidden) return;
-        stack.push(el);
-        if (closed > 0) { closed--; try { history.replaceState({ nbLayer: stack.length }, ""); } catch (e) {} }   // took over the closed sheet's entry
-        else { try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} }
-      });
-      for (; closed > 0; closed--) { ignorePop++; try { history.back(); } catch (e) { ignorePop--; } }
+      sync();
     }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["hidden"] });
-    window.addEventListener("popstate", () => {
-      if (ignorePop) { ignorePop--; return; }
-      const el = stack[stack.length - 1]; if (!el) return;
-      popBudget = 1; closeLayer(el);
-      // a layer that refused to close keeps its place in history
-      setTimeout(() => { if (popBudget && !el.hidden) { try { history.pushState({ nbLayer: stack.length }, ""); } catch (e) {} } popBudget = 0; }, 50);
+    window.addEventListener("popstate", e => {
+      if (ignorePop) { ignorePop--; travelGen++; sync(); return; }
+      const at = e.state && typeof e.state.nbLayer === "number" ? e.state.nbLayer : 0;
+      if (at > depth) { ignorePop++; try { history.go(depth - at); } catch (er) { ignorePop--; } return; }   // Forward into an old entry
+      // the user's Back: the browser has already left our top entry
+      depth = at;
+      const el = stack[stack.length - 1];
+      if (!el) { sync(); return; }
+      backClosing++; closeLayer(el);
+      // a moment for the layer to close (some animate); one that refused gets its entry back
+      setTimeout(() => { backClosing--; sync(); }, 60);
     });
     window.addEventListener("keydown", e => {
       if (e.key !== "Escape" || !stack.length) return;

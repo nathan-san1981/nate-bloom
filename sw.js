@@ -20,8 +20,12 @@ self.addEventListener("fetch", e => {
   const isAppPage = sameOrigin && /\/(index\.html)?$/.test(url.pathname);
   if (req.mode === "navigate" && !isAppPage) return;   // other pages on the site (the clocks) must not replace the cached app
   if (isAppPage) {
-    e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", copy)); return r; })
-      .catch(() => caches.match("./index.html")));
+    // only a good copy replaces the offline one, and a server error falls back to it too: an error page
+    // must never become the app
+    e.respondWith(fetch(req).then(r => {
+      if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", copy)); return r; }
+      return caches.match("./index.html").then(hit => hit || r);
+    }).catch(() => caches.match("./index.html")));
     return;
   }
   // plugins: the network first, so plugin updates arrive; the kept copy when offline
