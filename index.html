@@ -2600,7 +2600,8 @@ body.live-on .browser { z-index: 29; }
 .dj.live .lv-fxon[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); font-weight: 700; }
 .lv-fxq { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--dim); }
 .dj.live .lv-fxq .btn { height: 34px; }
-.dj.live .lv-fxq .btn[aria-pressed="true"] { border-color: var(--lilac); color: var(--lilac); }
+.dj.live .lv-fxq .btn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
+.dj.live .lv-ko[aria-pressed="true"] { background: #12302a; border-color: #7fd6c2; color: #7fd6c2; }
 .lv-fxsec h4 { margin: 0 0 6px; font: 600 0.7rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); }
 .lv-fxk { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: flex-start; }
 .lv-mk { width: 74px; display: flex; flex-direction: column; align-items: center; min-width: 0; --kz: 58px; }
@@ -2614,7 +2615,7 @@ body.live-on .browser { z-index: 29; }
 .lv-labh { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .dj.live .lv-labh .btn { height: 36px; flex: none; display: inline-flex; align-items: center; gap: 7px; }
 .lv-labh .btn i { width: 8px; height: 8px; border-radius: 50%; background: #4a4262; }
-.lv-labh .btn[aria-pressed="true"] { border-color: var(--lilac); color: var(--ink); }
+.dj.live .lv-labh .btn[aria-pressed="true"] { background: #2b2340; border-color: var(--lilac); color: var(--ink); }
 .lv-labh .btn[aria-pressed="true"] i { background: #7fd6c2; box-shadow: 0 0 6px #7fd6c2; }
 .lv-labh small { font-size: 0.72rem; color: var(--dim); line-height: 1.25; min-width: 0; }
 .lv-labk { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -2636,7 +2637,9 @@ body.live-on .browser { z-index: 29; }
 .dj.live .lv-pkr .btn.cur { border-color: var(--lilac); color: var(--lilac); }
 /* standing up: pads 4 × 4 (1–4 along the bottom, as on Beat Pads), the effects from the bottom */
 @media (orientation: portrait) {
-  .lv-ml { --kz: clamp(56px, min(10vh, 15vw), 104px); }
+  .lv-ml { --kz: clamp(56px, min(10vh, 15vw), 104px); grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+  .lv-faders { gap: 6px; padding-left: 10px; }
+  .lv-f .lv-name { padding: 0 2px; gap: 3px; font-size: 0.74rem; }
   .lv-pads { grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 300px; }
   .lv-pad { order: var(--op); }
   .lv-fxp { top: auto; left: 0; width: auto; height: min(68vh, 640px); border-left: 0; border-top: 1px solid #c4a3ff55; border-radius: 16px 16px 0 0; box-shadow: 0 -18px 40px #000b; }
