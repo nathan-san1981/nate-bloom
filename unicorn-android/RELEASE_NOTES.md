@@ -10,11 +10,11 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: real gravity in Space. Drag a planet in the solar system and every planet, the Sun and
-the black hole pull on each other (in 3D, with a Planet weight slider from real up to 100x heavier): move Jupiter in next to Mars and watch the inner planets'
-orbits change, shown live as dashed paths, with the info box saying whose gravity did it. A black hole pulls the
-Sun in. Also: Unicorn Meadow with the Uh-oh button (monsters, earthquake, tornado, meteor shower), and jobs ticked
-on the star chart earn Meadow gems.
+New in this version: Unicornauts, a space game where unicorn astronauts build rockets and fly to the planets,
+under Games, with Pluto shown as a dwarf planet and a who-found-it fact for every planet (the home button on its
+title screen goes back to the clock, and it counts toward the daily game time).
+Also real gravity in Space: drag a planet and every planet, the Sun and the black hole pull on each other, with a
+Planet weight slider from real up to 100x heavier; Unicorn Meadow's Uh-oh button; and jobs earn Meadow gems.
 
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
 dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
