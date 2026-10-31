@@ -3050,6 +3050,14 @@ body.dj-on > .app { visibility: hidden; }
   addEventListener("unhandledrejection", e => add("reject", e.reason && (e.reason.stack || e.reason.message) || e.reason));
   document.addEventListener("pointerdown", e => { const t = e.target && e.target.closest && e.target.closest("button, select, input, a, .w, .b, .kpad, .pad, canvas, .dj-song, .slot, [data-engine]"); add("tap", t ? desc(t) : String(e.target && e.target.tagName)); }, true);
   document.addEventListener("change", e => { const t = e.target; add("set", (t.id || t.getAttribute("aria-label") || t.tagName) + " = " + (t.type === "checkbox" ? t.checked : t.value)); }, true);
+  // (146) some Android keyboards repeat a held key as fresh presses (repeat = false): a key already down is a repeat
+  // (a key that's been quiet for 0.7 s counts as pressed again, in case its release went missing)
+  { const down = new Map();
+    window.addEventListener("keydown", e => { const c = e.code; if (!c) return; const now = performance.now(), last = down.get(c);
+      if (!e.repeat && last != null && now - last < 700) { try { Object.defineProperty(e, "repeat", { value: true }); } catch (x) {} }
+      down.set(c, now); }, true);
+    window.addEventListener("keyup", e => { down.delete(e.code); }, true);
+    window.addEventListener("blur", () => down.clear()); document.addEventListener("visibilitychange", () => { if (document.hidden) down.clear(); }); }
   document.addEventListener("keydown", e => { if (!e.repeat) add("key", e.key); }, true);
   document.addEventListener("visibilitychange", () => add("visible", !document.hidden));
   addEventListener("pagehide", () => add("pagehide", "")); addEventListener("pageshow", e => add("pageshow", e.persisted ? "from cache" : ""));
@@ -9662,7 +9670,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const lofiTone = ctx.createBiquadFilter(); lofiTone.type = "lowpass"; lofiTone.frequency.value = 20000; lofiWet.gain.value = 0;
       const hallIn = ctx.createGain(), hall = ctx.createConvolver(), hallWet = ctx.createGain(); hallWet.gain.value = 0;
       const betaOut = ctx.createGain();
-      m.connect(densIn); densIn.connect(densDry).connect(lofiIn); densIn.connect(densShaper).connect(densWet).connect(lofiIn);
+      const dcB = ctx.createBiquadFilter(); dcB.type = "highpass"; dcB.frequency.value = 10; dcB.Q.value = 0.707; m.connect(dcB).connect(densIn); densIn.connect(densDry).connect(lofiIn);   // (146: no DC offset into Density and the crush) densIn.connect(densShaper).connect(densWet).connect(lofiIn);
       lofiIn.connect(lofiDry).connect(hallIn); lofiIn.connect(bitShaper).connect(lofiTone).connect(lofiWet).connect(hallIn);
       const hallDry = ctx.createGain(); hallIn.connect(hallDry).connect(betaOut); hallIn.connect(hall).connect(hallWet).connect(betaOut);
       betaOut.connect(comp);
@@ -20627,7 +20635,7 @@ registerProcessor("nb-verb", NBVerb);`;
       if (nbwLoading.has(id)) return nbwLoading.get(id);
       const pr = (async () => {
         const sp = nbwSpec(id.slice(4)), inst = await nbwCreate(sp);
-        const gain = ctx.createGain(); gain.gain.value = sp.trim || 1; inst.audioNode.connect(gain);
+        const gain = ctx.createGain(); gain.gain.value = sp.trim || 1; const dc = ctx.createBiquadFilter(); dc.type = "highpass"; dc.frequency.value = 10; dc.Q.value = 0.707; inst.audioNode.connect(dc).connect(gain);   // (146: a plugin's DC offset stops here)
         const post = ctx.createGain(), out = ctx.createGain(); gain.connect(post); post.connect(out);
         const W = { id, key: sp.key, inst, node: inst.audioNode, gain, post, out, dest: null, ctx, held: new Set(), name: (inst.descriptor && inst.descriptor.name) || sp.name, vendor: (inst.descriptor && inst.descriptor.vendor) || sp.vendor || "" };
         NBW.parts.set(id, W); nbwWireTarget("plug:" + id); nbwTaps("plug:" + id);
@@ -24112,7 +24120,7 @@ registerProcessor("nb-wave", NBWave);
       P.pr = __wam.create(key).then(async r => {
         if (AU.plug.get(tr.id) !== P || !ctx) { try { r.inst.audioNode.disconnect(); } catch (e) {} return; }
         const g = ctx.createGain(); g.gain.value = (r.sp && r.sp.trim) || 1;
-        r.inst.audioNode.connect(g); g.connect(tNode(tr).g);
+        const dc = ctx.createBiquadFilter(); dc.type = "highpass"; dc.frequency.value = 10; dc.Q.value = 0.707; r.inst.audioNode.connect(dc).connect(g); g.connect(tNode(tr).g);
         P.inst = r.inst; P.node = r.inst.audioNode; P.g = g; P.name = (r.inst.descriptor && r.inst.descriptor.name) || (r.sp && r.sp.name) || "Plugin";
         const st = tr.pst || (__wam.NBW && __wam.NBW.saved && __wam.NBW.saved["gb:" + tr.id]);
         if (st) { try { await P.node.setState(st); } catch (e) {} }
@@ -29849,7 +29857,7 @@ z: [z]=Z
       try { const s = ctx.playoutStats || ctx.playbackStats; if (s) po = [s.fallbackFramesEvents, Math.round((s.fallbackFramesDuration || 0) * 1000), s.underrunEvents, Math.round((s.underrunDuration || 0) * 1000)].filter(x => x != null).join("/"); } catch (e) {}
       const its = num(() => __stk.items(), []);
       TL.push([Math.round(now - TLS.since), ctx.state, behind, tsd == null ? "" : Math.round(tsd), po, Math.round(TLS.longMs), TLS.longN, TLS.frames, TLS.midi,
-        num(() => Math.round(performance.memory.usedJSHeapSize / 1048576), ""), num(() => voices.size, ""), num(() => BP.voices.length, ""), num(() => heldVoices.size, ""),
+        num(() => Math.round(performance.memory.usedJSHeapSize / 1048576), ""), num(() => voices.size, ""), num(() => BP.voices.filter(v => v.end > ctx.currentTime).length, ""), num(() => heldVoices.size, ""),
         its.length, num(() => arpLive() ? 1 : 0, ""), state.hold ? 1 : 0, fxOnStr(), num(() => Math.round(window.__analog.la() * 1000), ""), num(() => window.__analog.NBAN.stalls, ""),
         LV.kpage + (LV.shift ? "^" + lvSPage() : ""), LV.pset, (LV.play === "bp" ? BP.playing : LV.play === "rc" ? RC.playing : playing) ? 1 : 0, Math.round(rcBpm()),
         String((document.getElementById("sndName") || {}).textContent || "").slice(0, 28)]);
@@ -30059,7 +30067,7 @@ z: [z]=Z
     const HEAVY = [["shimOn", "Shimmer", "a reverb inside a feedback loop"], ["hallOn", "Hall+", "a long reverb"], ["frzOn", "Freeze", "four delays held in a loop"], ["densOn", "Density", "oversampled saturation"], ["lofiOn", "Lo-fi", ""]];
     function cpuHTML() {
       const fell = CPU.hist.filter(x => x > 25), worst = fell.length ? Math.max(...fell) : 0, on = HEAVY.filter(([k]) => bfx[k]);
-      const its = num(() => __stk.items().length, 0), vs = num(() => voices.size, 0) + num(() => BP.voices.length, 0) + num(() => heldVoices.size, 0);
+      const its = num(() => __stk.items().length, 0), vs = num(() => voices.size, 0) + num(() => BP.voices.filter(v => v.end > ctx.currentTime).length, 0) + num(() => heldVoices.size, 0);
       const audio = CPU.audio != null ? CPU.audio + "% of what it can do" + (CPU.peak != null ? " (peaks " + CPU.peak + "%)" : "") : fell.length ? "fell behind " + fell.length + (fell.length === 1 ? " time" : " times") + " in the last minute (worst " + worst + " ms)" : cpuDrops(60) ? "not keeping up: see the dropouts" : "keeping up";
       return `<div class="lv-pkh"><div><strong>CPU ${CPU.pct}%</strong><small>Measured once a second from what Live already watches</small></div><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
         <div class="lv-pkl lc-wrap">
