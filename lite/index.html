@@ -3032,6 +3032,10 @@ body.dj-on > .app { visibility: hidden; }
 /* 144: Hold with notes still ringing */
 .lv-cpu.drops .bar { display: none; }
 .lp-hold.ring { border-color: #ffb65c; box-shadow: inset 0 0 0 1px #ffb65c66; } .lp-hold.ring .lp-held, .lp-hold.ring small { color: #ffcf8a; }
+/* 145: the sound buffer */
+.lc-buf { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .lc-buf button { display: flex; flex-direction: column; align-items: center; gap: 1px; height: auto; min-height: 46px; padding: 6px; }
+.lc-buf button small { font-size: 0.64rem; color: var(--dim); font-weight: 500; } .lc-buf button[aria-pressed="true"] small { color: inherit; opacity: 0.8; }
+#lcReload { display: block; margin-top: 8px; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -5018,7 +5022,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function buildAudio() {
     // "interactive" keeps Android on its fast audio path (asking for a bigger buffer switched it to the slow one: ~250 ms of lag)
     try { localStorage.removeItem("nightbloom-latency"); } catch (e) {}
-    ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });
+    let nbSteady = false; try { nbSteady = !window.NB_LITE && JSON.parse(localStorage.getItem("nightbloom-buffer") || "null") === "steady"; } catch (e) {}
+    if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
+    else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });
+    ctx.__nbBuf = nbSteady ? "steady" : "fast";
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
     analyser.connect(ctx.destination);
     const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -30205,6 +30212,7 @@ z: [z]=Z
           <div class="lv-pkg">Playing</div>
           <p class="lv-note">${its} ${its === 1 ? "sound" : "sounds layered"} · ${vs} ${vs === 1 ? "voice" : "voices"} sounding · FX Lab: ${on.length ? on.map(x => x[1]).join(", ") : "nothing on"}${state.fx && state.fx.space > 0.01 ? " · Space " + Math.round(state.fx.space * 100) : ""}</p>
           ${on.length ? `<div class="lv-pkg">Lighten it</div><div class="lc-off">${on.map(([k, n, why]) => `<button class="btn" data-k="${k}">${esc3(n)} off<small>${esc3(why)}</small></button>`).join("")}</div>` : ""}
+          ${bufHTML()}
         </div>`;
     }
     function paintCpu() {
@@ -30673,6 +30681,28 @@ registerProcessor("nb-rec", NBRec);`;
       TL_HEAD.push("dropouts");
     }
     window.__live10 = { arpFollow, arpSay, holdTap, letGo, stillHeld, DROP, dropTick, cpuDrops };
+    // ======================================================================
+    // 145: the sound buffer, in Live's CPU panel. Fast is the tablet's quickest audio path (about 4 ms of slack: any
+    // hiccup longer than that is a dropout); Steady asks for the bigger buffer Lite uses, which on Android means its
+    // slower output path: far fewer dropouts, more delay from a key to its sound. It takes effect after a reload.
+    // ======================================================================
+    const bufWant = () => lsGet("nightbloom-buffer", "fast") === "steady" ? "steady" : "fast";
+    const bufNow = () => (ctx && ctx.__nbBuf) || "fast";
+    const bufMs = () => num(() => Math.round(((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000), null);
+    function bufHTML() {
+      if (window.NB_LITE || !ctx) return "";
+      const want = bufWant(), now = bufNow(), ms = bufMs();
+      return `<div class="lv-pkg">Sound buffer</div><div class="seg lc-buf" role="group" aria-label="Sound buffer">
+          <button data-b="fast" aria-pressed="${want === "fast"}">Fast<small>quickest response</small></button><button data-b="steady" aria-pressed="${want === "steady"}">Steady<small>fewer dropouts</small></button></div>
+        <p class="lv-note">Now ${now === "steady" ? "Steady" : "Fast"}${ms != null ? ": " + ms + " ms from a key to its sound" : ""}. Fast leaves the sound about 4 ms of slack, so any hiccup longer than that is a dropout. Steady gives it much more, as Lite does, but Android then uses its slower output path, so a key can sound noticeably late (up to about a quarter of a second). That's fine for the DJ and for loops, but hard for playing the keys.${want !== now ? ' <button class="btn" id="lcReload">Reload now to switch</button>' : ""}</p>`;
+    }
+    { const pc = paintCpu; paintCpu = function () {
+        const r = pc.apply(this, arguments);
+        pick.querySelectorAll(".lc-buf button").forEach(b => b.addEventListener("click", () => { lsSet("nightbloom-buffer", b.dataset.b); add139("live", "sound buffer → " + b.dataset.b + " (after a reload)"); paintCpu(); }));
+        const rl = pick.querySelector("#lcReload"); if (rl) rl.addEventListener("click", () => { add139("live", "reload for the sound buffer"); location.reload(); });
+        return r; }; }
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ soundBuffer: { now: bufNow(), chosen: bufWant(), keyToSoundMs: bufMs() } }));
+    window.__live11 = { bufHTML, bufWant, bufNow };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
