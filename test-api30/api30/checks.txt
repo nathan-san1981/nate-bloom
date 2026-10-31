@@ -1,0 +1,28 @@
+PASS debugger reached the clock page: ""
+PASS clock drawn: "Unicorn Weather Clock | https://appassets.androidplatform.net/assets/unicorn-clock.html"
+PASS viewport is the Fire 7 screen: "1024x600 dpr 1"
+PASS fully bridge present: ""
+PASS app bridge status: {"version": "1.0.13", "pinned": false, "lockMode": "none", "owner": false, "lockPermitted": false, "opensAtStart": true, "bootPref": true, "pinEachStart": false, "keepsFront": true, "canOpenAlone": true, "ttsReady": false, "ttsEngine": "", "mic": false, "brightness": 13, "device": "Google sdk_gphone_x86_64", "android": 30}
+PASS not pinned by default (no Android pin box at start-up): "none"
+INFO web engine: Mozilla/5.0 (Linux; Android 11; sdk_gphone_x86_64 Build/RSR1.240422.006; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Safari/537.36
+PASS Home brings the clock straight back: {"secs": 4.2, "top": "mResumedActivity: ActivityRecord{e0ae094 u0 com.unicornclock.app/.MainActivity t9}"}
+PASS Recents brings the clock straight back: {"secs": 1.1, "top": "mResumedActivity: ActivityRecord{e0ae094 u0 com.unicornclock.app/.MainActivity t9}"}
+PASS Pin the clock (after Android's confirmation): {"tapped": "tap 672,498", "status": "pinned", "dumpsys": "PINNED"}
+PASS brightness 30/255 reaches the screen: ["0.11764706"]
+PASS media volume set and read back: 40
+INFO tablet voice: this emulator image has no text-to-speech engine installed (Fire tablets ship one)
+PASS speaks typed words: "ok"
+PASS remembers after the app restarts: ""
+PASS clock opens with no network: false
+PASS Unicorn Run 2 plays offline: "game2"
+PASS Unicorn Dungeon opens offline: "title"
+PASS Unicorn Dungeon game starts: true
+PASS Exit to the tablet leaves the clock (and it stays out): "mResumedActivity: ActivityRecord{ee9c1af u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t8}"
+PASS opens by itself at start-up: "mResumedActivity: ActivityRecord{c795058 u0 com.unicornclock.app/.MainActivity t11}"
+dpm: Success: Device owner set to package ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+Active admin set to component {com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+PASS device owner: locked to the clock: {"version": "1.0.13", "pinned": true, "lockMode": "locked", "owner": true, "lockPermitted": true, "opensAtStart": true, "bootPref": true, "pinEachStart": false, "keepsFront": true, "canOpenAlone": true, "ttsReady": false, "ttsEngine": "", "mic": false, "brightness": 13, "device": "Google sdk_gphone_x86_64", "android": 30}
+PASS device owner: Home stays on the clock: "mResumedActivity: ActivityRecord{c795058 u0 com.unicornclock.app/.MainActivity t11}"
+PASS Undo full lockdown from grown-up settings: {"version": "1.0.13", "pinned": false, "lockMode": "none", "owner": false, "lockPermitted": false, "opensAtStart": true, "bootPref": true, "pinEachStart": false, "keepsFront": false, "canOpenAlone": true, "ttsReady": false, "ttsEngine": "", "mic": false, "brightness": 13, "device": "Google sdk_gphone_x86_64", "android": 30}
+PASS no page errors logged: []
+SUMMARY 23 passed, 0 failed

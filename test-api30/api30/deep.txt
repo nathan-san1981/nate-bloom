@@ -1,0 +1,30 @@
+PASS clock opens: ""
+PASS live weather loads inside the app: {"age": 15, "days": 7, "hours": 156, "place": "Chesterfield"}
+PASS weather shown on the clock: "65\u00b0"
+PASS jokes screen shows a joke: "Jokes\nBack to clock\nWhat is the least spoken language in the world?\nTap for the answer!\nJoke from JokeAPI\nAnother joke!"
+PASS recorded voice clips decode here: {"clip": "0", "secs": 0.68, "state": "running", "clips": 2423}
+PASS sound can start without a tap (bedtime sounds, alarms): {"clip": "0", "secs": 0.68, "state": "running", "clips": 2423}
+PASS read-aloud button runs without errors: "ok"
+INFO microphone permission granted at install: True
+PASS microphone works in the page (voice notes): {"tracks": 1, "rec": "function"}
+PASS Unicorn Music opens: 90
+PASS Back key closes the screen that's open (jokes -> clock): {"before": "jokes", "after": "night"}
+PASS Back key on the clock stays on the clock: "mResumedActivity: ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}"
+INFO flex gap stand-in: {'shim': True, 'rows': 1, 'spaced': 1, 'bad': []}
+PASS buttons in a row are spaced out on this web engine: {"shim": true, "rows": 1, "spaced": 1, "bad": []}
+PASS stays landscape when the tablet is turned: "1024x600"
+PASS backup 'save as' screen opens and stays open: "mResumedActivity: ActivityRecord{4e603b5 u0 com.google.android.documentsui/com.android.documentsui.picker.PickActivity t12}"
+PASS back from the save screen returns to the clock: "mResumedActivity: ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}"
+PASS screen turned off stays off (no relaunch waking it): "asleep"
+PASS screen on again shows the clock: "mResumedActivity: ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}"
+PASS memory use reasonable for a 2 GB Fire (under 600 MB): "85 MB"
+PASS page renderer crash: clock rebuilt and drawn again: {"top": "mResumedActivity: ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}", "drawn": true}
+PASS app crash: reopens by itself: {"top": "mResumedActivity: ActivityRecord{cf61cc8 u0 com.unicornclock.app/.MainActivity t13}", "pid before": "7137", "pid after": "7617"}
+PASS cleared from Recents: comes back by itself: {"killed": true, "top": "mResumedActivity: ActivityRecord{cf61cc8 u0 com.unicornclock.app/.MainActivity t13}"}
+PASS update installs over the current copy: "Performing Streamed Install\nSuccess"
+PASS opens again by itself after an update: "mResumedActivity: ActivityRecord{7d8d419 u0 com.unicornclock.app/.MainActivity t14}"
+PASS her saved data survives the update: ""
+PASS no page errors logged: []
+PASS keeps crashing: stops reopening after 3 crashes in 10 minutes: {"in front after each crash": [true, true, false, false]}
+PASS opening it by hand still works after that: "mResumedActivity: ActivityRecord{5dfe3f6 u0 com.unicornclock.app/.MainActivity t17}"
+SUMMARY 27 passed, 0 failed

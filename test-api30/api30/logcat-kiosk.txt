@@ -1,0 +1,324 @@
+10-31 02:03:00.930  1373  2423 W MDM     : 	at android.app.admin.IDevicePolicyManager$Stub$Proxy.setActiveAdmin(IDevicePolicyManager.java:8320)
+10-31 02:03:00.930  1373  2423 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6329)
+10-31 02:03:00.930  1373  2423 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6341)
+10-31 02:03:00.930  1373  2423 W MDM     : 	at com.android.server.devicepolicy.DevicePolicyManagerService.setActiveAdmin(DevicePolicyManagerService.java:4378)
+10-31 02:03:00.930  1373  2423 W MDM     : 	at com.android.server.devicepolicy.DevicePolicyManagerService.setActiveAdmin(DevicePolicyManagerService.java:4373)
+10-31 02:03:00.930  1373  2423 W MDM     : 	at android.app.admin.IDevicePolicyManager$Stub.onTransact(IDevicePolicyManager.java:3388)
+10-31 02:03:02.932   422   430 V installd: DexInv: --- END '/data/app/~~hUGG5aYVvhavnfHR_hcsww==/com.unicornclock.app-AtjxlOKDWUzFndg9ONeZ1Q==/base.apk' (success) ---
+10-31 02:03:02.936   493   549 V BackupManagerService: [UserID:0] restoreAtInstall pkg=com.unicornclock.app token=1 restoreSet=0
+10-31 02:03:03.169  1617  1617 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.unicornclock.app. Reason: package android.intent.action.PACKAGE_ADDED
+10-31 02:03:03.170  1661  1661 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) }
+10-31 02:03:03.173   687   687 D AvrcpMediaPlayerList: Name of package changed: com.unicornclock.app
+10-31 02:03:03.364   493  1512 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:03:03.530   493   533 I ActivityManager: Start proc 3930:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:03:03.982  3930  3930 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:03:04.070  3930  3930 E chromium: [ERROR:filesystem_posix.cc(62)] mkdir /data/user/0/com.unicornclock.app/cache/WebView/Crashpad: No such file or directory (2)
+10-31 02:03:04.071   493   533 I ActivityManager: Start proc 3975:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:03:04.167   493  1919 D ConnectivityService: requestNetwork for uid/pid:10167/3930 NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:03:04.168  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:03:04.168   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:03:04.168   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:03:04.829  1373  2300 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+10-31 02:03:04.830  1373  3432 I FontsPackageChangeOp: Package com.unicornclock.app has no metadata
+10-31 02:03:04.876  1165  3234 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-31 02:03:04.878  1165  2229 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+10-31 02:03:04.886  1373  2300 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://JU50IfS0P1cC3HOq0xzcNnFZL5-3b488gASuO62bITEEAePr-Xxfl3bERFzTkq3K2ukCb1msnJwDL9tM1P2Njw==@com.unicornclock.app/ was not found. Marking affiliation data as stale...
+10-31 02:03:05.848   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:03:05.849   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +1s153ms
+10-31 02:03:09.341  3930  4251 D ProfileInstaller: Installing profile for com.unicornclock.app
+10-31 02:03:09.871   423  3925 I iorapd  : Perfetto TraceBuffer saved to file: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/raw_traces/1793412189837540551.perfetto_trace.pb
+10-31 02:03:19.263  1373  4352 W MDM     : 	at android.app.admin.IDevicePolicyManager$Stub$Proxy.setActiveAdmin(IDevicePolicyManager.java:8320)
+10-31 02:03:19.263  1373  4352 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6329)
+10-31 02:03:19.263  1373  4352 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6341)
+10-31 02:03:25.389   493  1910 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+10-31 02:03:25.390   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-31 02:03:25.390   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+10-31 02:03:25.390   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-31 02:03:25.390   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-31 02:03:25.390   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+10-31 02:03:33.347  1373  4348 W MDM     : 	at android.app.admin.IDevicePolicyManager$Stub$Proxy.setActiveAdmin(IDevicePolicyManager.java:8320)
+10-31 02:03:33.347  1373  4348 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6329)
+10-31 02:03:33.347  1373  4348 W MDM     : 	at android.app.admin.DevicePolicyManager.setActiveAdmin(DevicePolicyManager.java:6341)
+10-31 02:03:33.347  1373  4348 W MDM     : 	at com.android.server.devicepolicy.DevicePolicyManagerService.setActiveAdmin(DevicePolicyManagerService.java:4378)
+10-31 02:03:33.347  1373  4348 W MDM     : 	at com.android.server.devicepolicy.DevicePolicyManagerService.setActiveAdmin(DevicePolicyManagerService.java:4373)
+10-31 02:03:33.347  1373  4348 W MDM     : 	at android.app.admin.IDevicePolicyManager$Stub.onTransact(IDevicePolicyManager.java:3388)
+10-31 02:03:37.587   493  1840 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:37.587   493  1840 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:39.130   493  3351 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:39.131   493  3351 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:41.067   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:03:44.537   493  1836 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:44.537   493  1836 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:45.020   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:03:47.634  3930  3930 I UnicornClock: startLockTask owner=false permitted=false
+10-31 02:03:58.044   493  3352 I ActivityTaskManager: moveTaskToBack: Task{14b05da #9 visible=true type=standard mode=fullscreen translucent=false A=10167:com.unicornclock.app U=0 StackId=9 sz=1}
+10-31 02:04:00.994   493  3351 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:04:01.165   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:04:42.383   493  1917 I ActivityManager: Force stopping com.unicornclock.app appid=10167 user=0: from pid 6143
+10-31 02:04:42.384   493  1917 I ActivityManager: Killing 3930:com.unicornclock.app/u0a167 (adj 0): stop com.unicornclock.app due to from pid 6143
+10-31 02:04:42.385   493  1917 W ActivityTaskManager: Force removing ActivityRecord{e0ae094 u0 com.unicornclock.app/.MainActivity t9 f}}: app died, no saved state
+10-31 02:04:42.415   493  3247 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@66a7ad6)
+10-31 02:04:42.415   493  3247 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=32, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@447b157)
+10-31 02:04:42.416   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=31, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:04:44.418   493  1805 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:04:44.456   493   533 I ActivityManager: Start proc 6157:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:04:44.797  6157  6157 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:04:44.818   493   533 I ActivityManager: Start proc 6188:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i1 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:04:44.858   493  1325 D ConnectivityService: requestNetwork for uid/pid:10167/6157 NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:04:44.859   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:04:44.859   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:04:44.859  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:04:45.126   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:04:45.126   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +706ms
+10-31 02:04:50.235  6157  6246 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:05:07.261   493  3352 I ActivityManager: Force stopping com.unicornclock.app appid=10167 user=0: from pid 6331
+10-31 02:05:07.262   493  3352 I ActivityManager: Killing 6157:com.unicornclock.app/u0a167 (adj 0): stop com.unicornclock.app due to from pid 6331
+10-31 02:05:07.265   493  3352 W ActivityTaskManager: Force removing ActivityRecord{318e710 u0 com.unicornclock.app/.MainActivity t10 f}}: app died, no saved state
+10-31 02:05:07.305   493  1839 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@aeb4b62)
+10-31 02:05:07.305   493  1839 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=43, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@6f324f3)
+10-31 02:05:07.306   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=42, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:05:09.300   493  1743 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:05:09.331   493   533 I ActivityManager: Start proc 6346:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:05:09.400  6346  6346 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:05:09.456   493   533 I ActivityManager: Start proc 6378:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i2 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:05:09.494   493  1840 D ConnectivityService: requestNetwork for uid/pid:10167/6346 NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:05:09.495   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 0 and providerId 0
+10-31 02:05:09.495   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 0 and providerId 0
+10-31 02:05:09.496  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 0 and providerId 0
+10-31 02:05:09.713   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:05:09.773   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +382ms
+10-31 02:05:15.486  6346  6434 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:05:45.794   493  1838 I ActivityTaskManager: moveTaskToBack: Task{23235b1 #11 visible=true type=standard mode=fullscreen translucent=false A=10167:com.unicornclock.app U=0 StackId=11 sz=1}
+10-31 02:05:55.139   493   520 I ActivityTaskManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:05:55.139   493   520 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:05:55.319   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:06:05.905   493  3141 W DevicePolicyManager: Cannot change existing ro.organization_owned to true
+10-31 02:06:05.913   493  3141 I DevicePolicyManager: Device owner set: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} on user 0
+10-31 02:06:06.509   493   633 W ActivityManager: Ignoring request to force stop protected package com.unicornclock.app u0
+10-31 02:06:08.753   493  1791 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:06:09.665  6346  6346 I UnicornClock: device owner: lock task permitted=true
+10-31 02:06:09.727  6346  6346 I UnicornClock: startLockTask owner=true permitted=true
+10-31 02:06:10.754  6471  6471 D AvrcpMediaPlayerList: Name of package changed: com.unicornclock.app
+10-31 02:06:10.815  1165  6940 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.unicornclock.app flg=0x45000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+10-31 02:06:30.296   493   524 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.unicornclock.app/.Home (has extras)} from uid 0
+10-31 02:06:34.400   493  1836 I DevicePolicyManager: Device owner removed: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+10-31 02:06:34.428   493   493 I DevicePolicyManager: Device admin ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} removed from user 0
+10-31 02:06:35.366  6471  6471 D AvrcpMediaPlayerList: Name of package changed: com.unicornclock.app
+10-31 02:06:35.441  1165  7006 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.unicornclock.app flg=0x45000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+10-31 02:06:35.446   725  7004 W Role    : com.unicornclock.app not qualified for android.app.role.HOME due to missing RequiredComponent{mIntentFilterData=IntentFilterData{mAction='android.intent.action.MAIN', mCategories='[android.intent.category.HOME]', mDataScheme='null', mDataType='null'}, mPermission='null'}
+10-31 02:06:35.446   725  7004 I RoleControllerServiceImpl: Removing package that no longer qualifies for the role, package: com.unicornclock.app, role: android.app.role.HOME
+10-31 02:06:38.294   493   633 I ActivityManager: Force stopping com.unicornclock.app appid=10167 user=0: from pid 7072
+10-31 02:06:38.295   493   633 I ActivityManager: Killing 6346:com.unicornclock.app/u0a167 (adj 0): stop com.unicornclock.app due to from pid 7072
+10-31 02:06:38.300   493   633 W ActivityTaskManager: Force removing ActivityRecord{c795058 u0 com.unicornclock.app/.MainActivity t11 f}}: app died, no saved state
+10-31 02:06:38.328   493  1836 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=45, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@878c176)
+10-31 02:06:38.329   493  1513 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@da08377)
+10-31 02:06:38.329   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=44, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:06:40.329   493   962 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:06:40.369   493   533 I ActivityManager: Start proc 7137:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:06:40.550  7137  7137 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:06:40.570   493   533 I ActivityManager: Start proc 7167:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i3 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:06:40.600   493   962 D ConnectivityService: requestNetwork for uid/pid:10167/7137 NetworkRequest [ TRACK_DEFAULT id=48, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:06:40.600   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=48, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:06:40.600   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=48, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:06:40.601  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=48, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:06:40.810   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:06:40.811   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +481ms
+10-31 02:06:45.965  7137  7223 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:07:24.713  7312  7312 D Documents: shouldRestrictStorageAccessFramework = true, packageName = com.unicornclock.app
+10-31 02:07:48.528   493   532 W BroadcastQueue: Permission Denial: broadcasting Intent { act=android.intent.action.USER_PRESENT flg=0x24200010 } from com.android.systemui (pid=695, uid=10157) requires com.unicornclock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION due to registered receiver BroadcastFilter{865c61 10167/u0 ReceiverList{86023c8 7137 com.unicornclock.app/10167/u0 remote:6c65c6b}}
+10-31 02:07:51.995   493   561 W ActivityManager: Scheduling restart of crashed service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0 in 1000ms for connection
+10-31 02:07:52.002  7137  7137 W UnicornClock: renderer gone, crashed=true
+10-31 02:07:52.004   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=48, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:07:52.016   493  3247 D ConnectivityService: requestNetwork for uid/pid:10167/7137 NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:07:52.016   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:07:52.016   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:07:52.016  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:07:52.041   493   533 I ActivityManager: Start proc 7547:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:1/u0i4 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:1}
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: Process: com.unicornclock.app, PID: 7137
+10-31 02:08:16.338  7137  7137 E UnicornClock: crash 1 in 10 min, restarting
+10-31 02:08:16.338  7137  7137 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:08:16.351   493   588 W InputDispatcher: channel '7a53699 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+10-31 02:08:16.361   493   588 E InputDispatcher: channel '7a53699 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+10-31 02:08:16.361   493  1840 I ActivityManager: Process com.unicornclock.app (pid 7137) has died: fg  TOP 
+10-31 02:08:16.362   493  1840 W ActivityTaskManager: Force removing ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}: app died, no saved state
+10-31 02:08:16.367   493  1840 W InputDispatcher: Attempted to unregister already unregistered input channel '7a53699 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+10-31 02:08:16.368   493  1801 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=52, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@5cc838f)
+10-31 02:08:16.369   493  1791 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@7c3c61c)
+10-31 02:08:16.369   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=51, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:08:18.337   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:08:18.337   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:18.388   493   533 I ActivityManager: Start proc 7617:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:08:18.542  7617  7617 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:08:18.590   493   533 I ActivityManager: Start proc 7648:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i5 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:08:18.630   493  1840 D ConnectivityService: requestNetwork for uid/pid:10167/7617 NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:08:18.630   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:18.630   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:18.630  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:19.091   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:08:19.091   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +753ms
+10-31 02:08:23.950  7617  7703 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:08:29.760   493   790 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=54, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@5c9bd9)
+10-31 02:08:29.761   493  1808 I ActivityManager: Process com.unicornclock.app (pid 7617) has died: prev LAST
+10-31 02:08:29.761   493   521 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@1c0a99e)
+10-31 02:08:29.761   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=53, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:08:29.761   493  1132 I WindowManager: WIN DEATH: Window{e8a75ce u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:08:29.761   493  1132 W InputDispatcher: Attempted to unregister already unregistered input channel 'e8a75ce com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+10-31 02:08:29.765   493  1808 W ActivityManager: Exception when unbinding service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0
+10-31 02:08:34.563   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:08:34.563   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:34.572   493   533 I ActivityManager: Start proc 7752:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:08:34.709  7752  7752 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:08:34.724   493   533 I ActivityManager: Start proc 7783:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i6 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:08:34.754   493  1808 D ConnectivityService: requestNetwork for uid/pid:10167/7752 NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:08:34.754   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:34.754   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:34.754  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:34.974   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:08:35.014   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +410ms
+10-31 02:08:39.587   423  7748 I iorapd  : Perfetto TraceBuffer saved to file: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/raw_traces/1793412519572426198.perfetto_trace.pb
+10-31 02:08:40.744  7752  7840 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:08:46.577   493   532 I ActivityManager: Force stopping com.unicornclock.app appid=10167 user=-1: installPackageLI
+10-31 02:08:46.578   493   532 I ActivityManager: Killing 7752:com.unicornclock.app/u0a167 (adj 0): stop com.unicornclock.app due to installPackageLI
+10-31 02:08:46.578   493   532 W ActivityTaskManager: Force removing ActivityRecord{cf61cc8 u0 com.unicornclock.app/.MainActivity t13 f}}: app died, no saved state
+10-31 02:08:46.590   493   549 I PackageManager: Update package com.unicornclock.app code path from /data/app/~~hUGG5aYVvhavnfHR_hcsww==/com.unicornclock.app-AtjxlOKDWUzFndg9ONeZ1Q== to /data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==; Retain data and using new
+10-31 02:08:46.590   493   549 I PackageManager: Update package com.unicornclock.app resource path from /data/app/~~hUGG5aYVvhavnfHR_hcsww==/com.unicornclock.app-AtjxlOKDWUzFndg9ONeZ1Q== to /data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==; Retain data and using new
+10-31 02:08:46.617   493  1839 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@8759a7e)
+10-31 02:08:46.617   493  1839 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=56, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@a995bdf)
+10-31 02:08:46.618   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=55, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:08:46.630   493   549 I PackageDexOptimizer: Running dexopt (dexoptNeeded=1) on: /data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==/base.apk pkg=com.unicornclock.app isa=x86_64 dexoptFlags=boot_complete,profile_guided,public,enable_hidden_api_checks targetFilter=speed-profile oatDir=/data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==/oat classLoaderContext=PCL[]{}
+10-31 02:08:46.640   422   430 V installd: DexInv: --- BEGIN '/data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==/base.apk' ---
+10-31 02:08:46.861  7869  7869 I dex2oat32: /apex/com.android.art/bin/dex2oat32 --input-vdex-fd=-1 --output-vdex-fd=9 --updatable-bcp-packages-file=/system/etc/updatable-bcp-packages.txt --resolve-startup-const-strings=true --max-image-block-size=524288 --compiler-filter=speed-profile --classpath-dir=/data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw== --class-loader-context=PCL[]{} --generate-mini-debug-info --compact-dex-level=none --compilation-reason=install
+10-31 02:08:47.169   422   430 V installd: DexInv: --- END '/data/app/~~S5ko5rbr_9sR4RFMi1gAVA==/com.unicornclock.app-2nWNr1ppMGWZLAECavAejw==/base.apk' (success) ---
+10-31 02:08:47.175   493   549 I ActivityManager: Force stopping com.unicornclock.app appid=10167 user=0: pkg removed
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-31 02:08:47.179   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+10-31 02:08:47.179  1617  1617 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.unicornclock.app. Reason: package android.intent.action.PACKAGE_REMOVED
+10-31 02:08:47.180  1661  1661 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) }
+10-31 02:08:47.180  1661  1661 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) }
+10-31 02:08:47.187  6471  6471 D AvrcpMediaPlayerList: Name of package changed: com.unicornclock.app
+10-31 02:08:47.189  1617  1617 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.unicornclock.app. Reason: package android.intent.action.PACKAGE_ADDED
+10-31 02:08:47.213   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+10-31 02:08:47.213   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+10-31 02:08:47.213   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+10-31 02:08:47.213   493   532 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+10-31 02:08:47.215  1661  1661 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) }
+10-31 02:08:47.255  1373  7886 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+10-31 02:08:47.264  1373  7885 I FontsPackageChangeOp: Package com.unicornclock.app has no metadata
+10-31 02:08:47.285  1373  7886 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://JU50IfS0P1cC3HOq0xzcNnFZL5-3b488gASuO62bITEEAePr-Xxfl3bERFzTkq3K2ukCb1msnJwDL9tM1P2Njw==@com.unicornclock.app/ was not found. Marking affiliation data as stale...
+10-31 02:08:47.297  1373  7878 W SQLiteLog: (28) double-quoted string literal: "com.unicornclock.app"
+10-31 02:08:47.304   493   533 I ActivityManager: Start proc 7960:com.unicornclock.app/u0a167 for broadcast {com.unicornclock.app/com.unicornclock.app.BootReceiver}
+10-31 02:08:47.337   493  1836 I ActivityTaskManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:08:47.337   493  1836 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:47.455  7960  7960 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:08:47.511   493   533 I ActivityManager: Start proc 8019:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i7 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:08:47.563   493  1325 D ConnectivityService: requestNetwork for uid/pid:10167/7960 NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:08:47.563   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:47.563   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:47.567  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:08:47.810   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:08:47.877   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +473ms
+10-31 02:08:52.452  7960  8074 D ProfileInstaller: Installing profile for com.unicornclock.app
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: Process: com.unicornclock.app, PID: 7960
+10-31 02:09:03.006  7960  7960 E UnicornClock: crash 2 in 10 min, restarting
+10-31 02:09:03.006  7960  7960 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:03.019   493   588 W InputDispatcher: channel '3845177 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+10-31 02:09:03.019   493   588 E InputDispatcher: channel '3845177 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+10-31 02:09:03.020   493  1836 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@d515743)
+10-31 02:09:03.020   493  1836 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=58, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@50ac1c0)
+10-31 02:09:03.020   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=57, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:09:03.021   493  1325 I ActivityManager: Process com.unicornclock.app (pid 7960) has died: fg  TOP 
+10-31 02:09:03.021   493   520 I WindowManager: WIN DEATH: Window{3845177 u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:09:03.021   493   520 W InputDispatcher: Attempted to unregister already unregistered input channel '3845177 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+10-31 02:09:03.025   493  1325 W ActivityTaskManager: Force removing ActivityRecord{7d8d419 u0 com.unicornclock.app/.MainActivity t14}: app died, no saved state
+10-31 02:09:05.000   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:09:05.001   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:09:05.034   493   533 I ActivityManager: Start proc 8102:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:09:05.177  8102  8102 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:09:05.202   493   533 I ActivityManager: Start proc 8134:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i8 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:09:05.256   493   520 D ConnectivityService: requestNetwork for uid/pid:10167/8102 NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:09:05.256   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:05.256   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:05.256  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:05.471   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:09:05.545   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +450ms
+10-31 02:09:10.018   423  8098 I iorapd  : Perfetto TraceBuffer saved to file: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/raw_traces/1793412550018269251.perfetto_trace.pb
+10-31 02:09:10.881  8102  8188 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: Process: com.unicornclock.app, PID: 8102
+10-31 02:09:14.133  8102  8102 E UnicornClock: crash 3 in 10 min, restarting
+10-31 02:09:14.133  8102  8102 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:14.156   493   588 W InputDispatcher: channel 'f172dee com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+10-31 02:09:14.156   493   588 E InputDispatcher: channel 'f172dee com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+10-31 02:09:14.163   493  3352 I ActivityManager: Process com.unicornclock.app (pid 8102) has died: fg  TOP 
+10-31 02:09:14.164   493  3352 W ActivityTaskManager: Force removing ActivityRecord{fb1b2ac u0 com.unicornclock.app/.MainActivity t15}: app died, no saved state
+10-31 02:09:14.178   493  1907 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@57d486b)
+10-31 02:09:14.178   493  1840 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=60, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@2a9fc8)
+10-31 02:09:14.179   493  3352 W InputDispatcher: Attempted to unregister already unregistered input channel 'f172dee com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+10-31 02:09:14.180   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=59, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:09:16.133   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:09:16.133   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:09:16.178   493   533 I ActivityManager: Start proc 8207:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:09:16.300  8207  8207 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:09:16.328   493   533 I ActivityManager: Start proc 8238:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i9 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:09:16.378   493   520 D ConnectivityService: requestNetwork for uid/pid:10167/8207 NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:09:16.378   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:16.378   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:16.379  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:16.627   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:09:16.684   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +492ms
+10-31 02:09:21.759  8207  8294 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: Process: com.unicornclock.app, PID: 8207
+10-31 02:09:25.291  8207  8207 E UnicornClock: crash 4 in 10 min, not restarting
+10-31 02:09:25.291  8207  8207 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:25.292   493  1799 W ActivityTaskManager:   Force finishing activity com.unicornclock.app/.MainActivity
+10-31 02:09:25.355   493  1799 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@3ceb750)
+10-31 02:09:25.355   493  1799 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(NetworkRequest [ LISTEN id=62, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ], android.os.BinderProxy@2be9d49)
+10-31 02:09:25.356   493   644 D ConnectivityService: releasing NetworkRequest [ TRACK_DEFAULT id=61, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] (release request)
+10-31 02:09:25.358   493   521 I ActivityManager: Process com.unicornclock.app (pid 8207) has died: prcp TOP 
+10-31 02:09:25.358   493   520 I WindowManager: WIN DEATH: Window{acda963 u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:09:25.358   493   520 W InputDispatcher: Attempted to unregister already unregistered input channel 'acda963 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+10-31 02:09:25.793   493   526 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{7d8836e u0 com.unicornclock.app/.MainActivity t-1 f}}
+10-31 02:09:47.286   493  1132 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:09:47.347   493   533 I ActivityManager: Start proc 8374:com.unicornclock.app/u0a167 for pre-top-activity {com.unicornclock.app/com.unicornclock.app.MainActivity}
+10-31 02:09:47.504  8374  8374 I TetheringManager: registerTetheringEventCallback:com.unicornclock.app
+10-31 02:09:47.513   493   533 I ActivityManager: Start proc 8407:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0i10 for  {com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0:0}
+10-31 02:09:47.557   493  1132 D ConnectivityService: requestNetwork for uid/pid:10167/8374 NetworkRequest [ TRACK_DEFAULT id=63, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ]
+10-31 02:09:47.558   493   640 D WifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=63, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:47.558   493   640 D UntrustedWifiNetworkFactory: got request NetworkRequest [ TRACK_DEFAULT id=63, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:47.558  1042  1042 D PhoneSwitcherNetworkRequstListener: got request NetworkRequest [ TRACK_DEFAULT id=63, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10167 AdministratorUids: [] RequestorUid: 10167 RequestorPackageName: com.unicornclock.app] ] with score 60 and providerId 3
+10-31 02:09:47.787   493   531 D ArtManagerInternalImpl: /data/misc/iorapd/com.unicornclock.app/13/com.unicornclock.app.MainActivity/compiled_traces/compiled_trace.pb doesn't exist
+10-31 02:09:47.787   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +480ms

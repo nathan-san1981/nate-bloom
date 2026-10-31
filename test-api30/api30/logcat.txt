@@ -1,0 +1,161 @@
+--------- beginning of main
+--------- beginning of system
+--------- beginning of kernel
+10-31 02:03:03.364   493  1512 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:03:04.070  3930  3930 E chromium: [ERROR:filesystem_posix.cc(62)] mkdir /data/user/0/com.unicornclock.app/cache/WebView/Crashpad: No such file or directory (2)
+10-31 02:03:05.849   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +1s153ms
+10-31 02:03:35.563   493   524 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} from uid 0
+10-31 02:03:37.587   493  1840 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:37.587   493  1840 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:37.587   493  1840 W ActivityTaskManager: Activity start request from 10167 stopped
+10-31 02:03:39.130   493  3351 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:39.131   493  3351 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:39.131   493  3351 W ActivityTaskManager: Activity start request from 10167 stopped
+10-31 02:03:42.480   493  1836 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000000 pkg=com.google.android.apps.nexuslauncher cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} from uid 10153
+10-31 02:03:44.537   493  1836 I ActivityTaskManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:03:44.537   493  1836 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:03:47.634  3930  3930 I UnicornClock: startLockTask owner=false permitted=false
+10-31 02:03:58.044   493  3352 I ActivityTaskManager: moveTaskToBack: Task{14b05da #9 visible=true type=standard mode=fullscreen translucent=false A=10167:com.unicornclock.app U=0 StackId=9 sz=1}
+10-31 02:04:00.994   493  3351 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:04:42.385   493  1917 W ActivityTaskManager: Force removing ActivityRecord{e0ae094 u0 com.unicornclock.app/.MainActivity t9 f}}: app died, no saved state
+10-31 02:04:44.418   493  1805 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:04:45.126   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +706ms
+10-31 02:05:07.265   493  3352 W ActivityTaskManager: Force removing ActivityRecord{318e710 u0 com.unicornclock.app/.MainActivity t10 f}}: app died, no saved state
+10-31 02:05:09.300   493  1743 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+10-31 02:05:09.486  6346  6401 W chromium: [WARNING:dns_config_service_posix.cc(341)] Failed to read DnsConfig.
+10-31 02:05:09.773   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +382ms
+10-31 02:05:28.135  6346  6346 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:05:30.116  6346  6346 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:05:32.975  6346  6346 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:05:45.794   493  1838 I ActivityTaskManager: moveTaskToBack: Task{23235b1 #11 visible=true type=standard mode=fullscreen translucent=false A=10167:com.unicornclock.app U=0 StackId=11 sz=1}
+10-31 02:05:55.139   493   520 I ActivityTaskManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:05:55.139   493   520 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:06:05.905   493  3141 W DevicePolicyManager: Cannot change existing ro.organization_owned to true
+10-31 02:06:05.913   493  3141 I DevicePolicyManager: Device owner set: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} on user 0
+10-31 02:06:08.753   493  1791 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:06:09.665  6346  6346 I UnicornClock: device owner: lock task permitted=true
+10-31 02:06:09.727  6346  6346 I UnicornClock: startLockTask owner=true permitted=true
+10-31 02:06:30.296   493   524 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.unicornclock.app/.Home (has extras)} from uid 0
+10-31 02:06:34.400   493  1836 I DevicePolicyManager: Device owner removed: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+10-31 02:06:34.428   493   493 I DevicePolicyManager: Device admin ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} removed from user 0
+10-31 02:06:38.300   493   633 W ActivityTaskManager: Force removing ActivityRecord{c795058 u0 com.unicornclock.app/.MainActivity t11 f}}: app died, no saved state
+10-31 02:06:40.329   493   962 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:06:40.811   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +481ms
+10-31 02:06:57.953  7137  7137 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:07:04.888  7137  7137 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:07:07.529  7137  7137 E chromium: [ERROR:web_contents_delegate.cc(218)] WebContentsDelegate::CheckMediaAccessPermission: Not supported.
+10-31 02:07:10.901  7137  7137 W TextToSpeech: stop failed: not bound to TTS engine
+10-31 02:07:23.971   493  1837 I ActivityTaskManager: START u0 {act=android.intent.action.CREATE_DOCUMENT typ=application/json cmp=com.google.android.documentsui/com.android.documentsui.picker.PickActivity (has extras)} from uid 10167
+10-31 02:07:24.766   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w1024dp h528dp 160dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1024, 600) mAppBounds=Rect(0, 0 - 1024, 552) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.119} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:24.767   493   526 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw600dp w600dp h952dp 160dpi lrg port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 600, 1024) mAppBounds=Rect(0, 0 - 600, 976) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.166}
+10-31 02:07:24.785   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w1024dp h528dp 160dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1024, 600) mAppBounds=Rect(0, 0 - 1024, 552) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.119} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:24.793   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w600dp h952dp 160dpi lrg port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 600, 1024) mAppBounds=Rect(0, 0 - 600, 976) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.166} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:26.148   493   531 I ActivityTaskManager: Displayed com.google.android.documentsui/com.android.documentsui.picker.PickActivity: +2s171ms
+10-31 02:07:29.432   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w600dp h952dp 160dpi lrg port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 600, 1024) mAppBounds=Rect(0, 0 - 600, 976) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.166} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:29.433   493   526 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw600dp w1024dp h528dp 160dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1024, 600) mAppBounds=Rect(0, 0 - 1024, 552) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.205}
+10-31 02:07:29.434   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w600dp h952dp 160dpi lrg port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 600, 1024) mAppBounds=Rect(0, 0 - 600, 976) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.166} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:29.453   493   526 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw600dp w1024dp h528dp 160dpi lrg land finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1024, 600) mAppBounds=Rect(0, 0 - 1024, 552) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.205} unchanged for IME proc com.google.android.inputmethod.latin
+10-31 02:07:38.743   493   526 W ActivityTaskManager: Sleep timeout!  Sleeping now.
+--------- beginning of crash
+10-31 02:07:52.002  7137  7137 E chromium: [ERROR:aw_browser_terminator.cc(125)] Renderer process (7167) crash detected (code 5).
+10-31 02:07:52.002  7137  7137 W UnicornClock: renderer gone, crashed=true
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: FATAL EXCEPTION: main
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: Process: com.unicornclock.app, PID: 7137
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:08:16.336  7137  7137 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:08:16.338  7137  7137 E UnicornClock: crash 1 in 10 min, restarting
+10-31 02:08:16.338  7137  7137 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:08:16.338  7137  7137 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:08:16.362   493  1840 W ActivityTaskManager: Force removing ActivityRecord{17eee93 u0 com.unicornclock.app/.MainActivity t12}: app died, no saved state
+10-31 02:08:18.337   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:08:18.337   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:19.091   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +753ms
+10-31 02:08:28.708   493   524 I ActivityTaskManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10000100 cmp=com.google.android.apps.nexuslauncher/.NexusLauncherActivity (has extras)} from uid 0
+10-31 02:08:34.563   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:08:34.563   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:35.014   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +410ms
+10-31 02:08:46.578   493   532 W ActivityTaskManager: Force removing ActivityRecord{cf61cc8 u0 com.unicornclock.app/.MainActivity t13 f}}: app died, no saved state
+10-31 02:08:47.337   493  1836 I ActivityTaskManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10167
+10-31 02:08:47.337   493  1836 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:08:47.877   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +473ms
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: FATAL EXCEPTION: main
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: Process: com.unicornclock.app, PID: 7960
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:02.999  7960  7960 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:03.006  7960  7960 E UnicornClock: crash 2 in 10 min, restarting
+10-31 02:09:03.006  7960  7960 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:03.006  7960  7960 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:03.025   493  1325 W ActivityTaskManager: Force removing ActivityRecord{7d8d419 u0 com.unicornclock.app/.MainActivity t14}: app died, no saved state
+10-31 02:09:05.000   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:09:05.001   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:09:05.545   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +450ms
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: FATAL EXCEPTION: main
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: Process: com.unicornclock.app, PID: 8102
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:14.131  8102  8102 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:14.133  8102  8102 E UnicornClock: crash 3 in 10 min, restarting
+10-31 02:09:14.133  8102  8102 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:14.133  8102  8102 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:14.164   493  3352 W ActivityTaskManager: Force removing ActivityRecord{fb1b2ac u0 com.unicornclock.app/.MainActivity t15}: app died, no saved state
+10-31 02:09:16.133   493   587 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10167
+10-31 02:09:16.133   493   587 W ActivityTaskManager: Background activity start for com.unicornclock.app allowed because SYSTEM_ALERT_WINDOW permission is granted.
+10-31 02:09:16.684   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +492ms
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: FATAL EXCEPTION: main
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: Process: com.unicornclock.app, PID: 8207
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:25.285  8207  8207 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:25.291  8207  8207 E UnicornClock: crash 4 in 10 min, not restarting
+10-31 02:09:25.291  8207  8207 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2005)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.os.Looper.loop(Looper.java:223)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:7656)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:592)
+10-31 02:09:25.291  8207  8207 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:947)
+10-31 02:09:25.292   493  1799 W ActivityTaskManager:   Force finishing activity com.unicornclock.app/.MainActivity
+10-31 02:09:25.793   493   526 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{7d8836e u0 com.unicornclock.app/.MainActivity t-1 f}}
+10-31 02:09:47.286   493  1132 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+10-31 02:09:47.787   493   531 I ActivityTaskManager: Displayed com.unicornclock.app/.MainActivity: +480ms
