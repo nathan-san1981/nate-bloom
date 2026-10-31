@@ -12,6 +12,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- so a report can say whether Purist (the hi-fi player) is installed, and which version -->
+    <queries>
+        <package android:name="com.purist.player" />
+        <package android:name="com.purist" />
+        <package android:name="com.purist.app" />
+    </queries>
+
     <uses-feature android:name="android.software.midi" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />

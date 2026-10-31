@@ -14,6 +14,7 @@ import java.io.OutputStream
  * window.NBNativeBridge in the page. Called on the WebView's bridge thread.
  * - files the app saves (backups, WAVs, stems, MIDI) go to Downloads/Nate Bloom
  * - the page says when sound is playing, so the app can keep going in the background
+ * - diag(): what Android sees on USB, where the sound goes, MIDI devices, Purist (for Gear and the reports)
  */
 class NativeBridge(private val act: MainActivity) {
 
@@ -88,6 +89,10 @@ class NativeBridge(private val act: MainActivity) {
             ""
         }
     }
+
+    /** The tablet's own view of USB, sound, MIDI and Purist, as JSON (see Diag). */
+    @JavascriptInterface
+    fun diag(): String = if (!trusted()) "{}" else Diag.json(act)
 
     @JavascriptInterface
     fun toast(msg: String) {
