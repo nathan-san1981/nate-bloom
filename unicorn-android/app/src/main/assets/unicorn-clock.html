@@ -215,6 +215,7 @@ button{font-family:inherit;cursor:pointer}
 .sp-card h3{margin:0 0 4px;font-size:16px;font-weight:600;color:#C9B8F2;text-transform:uppercase;letter-spacing:.05em}
 .sp-big{font-size:28px;font-weight:700;line-height:1.1;color:#fff}
 .sp-txt{font-size:18px;font-weight:500;line-height:1.3;color:#E3DAF8}
+.sp-info .sp-txt{max-height:168px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .sp-info{flex:1;min-height:0;align-items:flex-start}
 .sp-ctl{display:flex;gap:12px}
 .sp-btn{flex:1;height:60px;border:none;border-radius:20px;background:#4B3FA8;color:#fff;font-size:20px;font-weight:600;box-shadow:0 4px 0 #2E2670;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -2490,7 +2491,9 @@ function auXY(x,y){return [SCX+auToPx(Math.hypot(x,y))*Math.cos(Math.atan2(y,x))
 function xyAu(px,py){var r=pxToAu(Math.hypot(px-SCX,py-SCY)),a=Math.atan2(SCY-py,px-SCX);return [r*Math.cos(a),r*Math.sin(a)];}
 var PL_LOOK={mercury:{col:'#9C9188',hi:'#D9D0C6',lo:'#2E2724'},venus:{col:'#E3C98F',hi:'#FBF1D2',lo:'#5A4420'},earth:{col:'#2F6FD6',hi:'#8FC3FF',lo:'#0B1F4A'},mars:{col:'#C4582B',hi:'#F0A47C',lo:'#3F1708'},
   jupiter:{col:'#D6B48A',hi:'#F6E4C8',lo:'#4A3218'},saturn:{col:'#E2CC98',hi:'#FBF0CF',lo:'#574318'},uranus:{col:'#9ED9E2',hi:'#DDF7FA',lo:'#1F5A66'},neptune:{col:'#3E5FD9',hi:'#9FB4FF',lo:'#0F1E5E'}};
-var PL_MASS={mercury:1.66e-7,venus:2.45e-6,earth:3.0e-6,mars:3.2e-7,jupiter:9.55e-4,saturn:2.86e-4,uranus:4.37e-5,neptune:5.15e-5};
+var PL_MASS={mercury:1.6601e-7,venus:2.4478e-6,earth:3.0404e-6,mars:3.2272e-7,jupiter:9.5479e-4,saturn:2.8589e-4,uranus:4.3662e-5,neptune:5.1514e-5};
+var PL_RAD={mercury:1.63e-5,venus:4.05e-5,earth:4.26e-5,mars:2.27e-5,jupiter:4.78e-4,saturn:4.03e-4,uranus:1.71e-4,neptune:1.65e-4}; // AU
+var PL_HEAVY={mercury:'',venus:'',earth:'',mars:'',jupiter:'318',saturn:'95',uranus:'15',neptune:'17'};
 function planetGrad(n,x,y){var a=Math.atan2(SCY-y,SCX-x),fx=50-Math.cos(a)*28,fy=50+Math.sin(a)*28,L=PL_LOOK[n];
   return '<radialGradient id="pg_'+n+'" cx="50%" cy="50%" r="62%" fx="'+fx.toFixed(1)+'%" fy="'+fy.toFixed(1)+'%"><stop offset="0" stop-color="'+L.hi+'"/><stop offset=".42" stop-color="'+L.col+'"/><stop offset="1" stop-color="'+L.lo+'"/></radialGradient>';}
 function planetBody(n,sz){
@@ -2511,21 +2514,39 @@ function planetBody(n,sz){
   if(n==='saturn')o+='<g transform="rotate(-18)"><path d="M'+(-sz*2.15)+' 0 A'+(sz*2.15)+' '+(sz*0.62)+' 0 0 0 '+(sz*2.15)+' 0" fill="none" stroke="#E6D3A8" stroke-width="'+(sz*0.42)+'" opacity=".95"/><path d="M'+(-sz*1.55)+' 0 A'+(sz*1.55)+' '+(sz*0.45)+' 0 0 0 '+(sz*1.55)+' 0" fill="none" stroke="#5A4A2A" stroke-width="1.2" opacity=".7"/></g>';
   return o;
 }
-var sim={on:false,raf:null,bodies:[],sun:{alive:true},bh:null,fast:false,last:0,held:null,msgT:0};
-function simState(d){ // today's real positions and velocities (AU, AU/yr)
-  var d2=new Date(d.getTime()+86400000);
-  return ORDER.map(function(n){var h=helio(n,d),h2=helio(n,d2);return {n:n,m:PL_MASS[n],x:h.x,y:h.y,vx:(h2.x-h.x)*365.25,vy:(h2.y-h.y)*365.25,a0:Math.hypot(h.x,h.y),v0:Math.hypot(h2.x-h.x,h2.y-h.y)*365.25,alive:true,trail:[]};});
+var sim={on:false,raf:null,bodies:[],sun:{alive:true},bh:null,fast:false,last:0,held:null,msgT:0,F:[0,0,0],t:0,tdyn:0,frames:0,events:[],tugT:0,sunPull:false};
+var G4=39.4784176; // G in AU^3 per solar mass per year^2 (4 pi^2)
+function helioV(name,date){ // position and exact orbital velocity (AU, AU/yr) from the same orbit tables as helio()
+ var k=PLANETS[name],T=(date.getTime()/86400000+2440587.5-2451545)/36525;
+ var a=k[0]+k[1]*T,e=k[2]+k[3]*T,I=(k[4]+k[5]*T)*RAD,L=k[6]+k[7]*T,wb=k[8]+k[9]*T,O=k[10]+k[11]*T;
+ var M=((L-wb)%360+540)%360-180;M*=RAD;var w=(wb-O)*RAD;O*=RAD;
+ var E=M+e*Math.sin(M);for(var i=0;i<12;i++)E=E-(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));
+ var nn=Math.sqrt(G4*(1+PL_MASS[name])/(a*a*a)),Ed=nn/(1-e*Math.cos(E)),sq=Math.sqrt(1-e*e);
+ var xp=a*(Math.cos(E)-e),yp=a*sq*Math.sin(E),vxp=-a*Math.sin(E)*Ed,vyp=a*sq*Math.cos(E)*Ed;
+ var cw=Math.cos(w),sw=Math.sin(w),cO=Math.cos(O),sO=Math.sin(O),cI=Math.cos(I),sI=Math.sin(I);
+ var Px=cw*cO-sw*sO*cI,Qx=-sw*cO-cw*sO*cI,Py=cw*sO+sw*cO*cI,Qy=-sw*sO+cw*cO*cI,Pz=sw*sI,Qz=cw*sI;
+ return {x:Px*xp+Qx*yp,y:Py*xp+Qy*yp,z:Pz*xp+Qz*yp,vx:Px*vxp+Qx*vyp,vy:Py*vxp+Qy*vyp,vz:Pz*vxp+Qz*vyp};
+}
+function simState(d){ // today's real positions and velocities (AU, AU/yr), centre of mass at rest at the origin
+  var bodies=ORDER.map(function(n){var h=helioV(n,d),vx=h.vx,vy=h.vy,vz=h.vz;
+    return {n:n,m:PL_MASS[n],x:h.x,y:h.y,z:h.z,vx:vx,vy:vy,vz:vz,a0:Math.hypot(h.x,h.y),v0:Math.sqrt(vx*vx+vy*vy+vz*vz),alive:true,trail:[],tug:{}};});
+  var sun={n:'sun',m:1,x:0,y:0,z:0,vx:0,vy:0,vz:0,alive:true},M=1,c=[0,0,0,0,0,0];
+  bodies.forEach(function(b){M+=b.m;c[0]+=b.m*b.x;c[1]+=b.m*b.y;c[2]+=b.m*b.z;c[3]+=b.m*b.vx;c[4]+=b.m*b.vy;c[5]+=b.m*b.vz;});
+  bodies.concat([sun]).forEach(function(b){b.x-=c[0]/M;b.y-=c[1]/M;b.z-=c[2]/M;b.vx-=c[3]/M;b.vy-=c[4]/M;b.vz-=c[5]/M;});
+  return {bodies:bodies,sun:sun};
 }
 function bhPx(m){return 7+3.2*Math.sqrt(m);}
 function lvSolar(d){
-  var bodies=sim.on?sim.bodies:simState(d),o='<defs><radialGradient id="sunCore"><stop offset="0" stop-color="#FFFBE6"/><stop offset=".5" stop-color="#FFE27A"/><stop offset=".85" stop-color="#FFB63A"/><stop offset="1" stop-color="#FF8F2A"/></radialGradient><radialGradient id="sunGlow"><stop offset="0" stop-color="#FFD37A" stop-opacity=".9"/><stop offset=".35" stop-color="#FFB040" stop-opacity=".45"/><stop offset="1" stop-color="#FF9A2E" stop-opacity="0"/></radialGradient><radialGradient id="milk"><stop offset="0" stop-color="#8E86D6" stop-opacity=".16"/><stop offset="1" stop-color="#8E86D6" stop-opacity="0"/></radialGradient><radialGradient id="bhDiskS"><stop offset=".48" stop-color="#000"/><stop offset=".6" stop-color="#FF8A3D"/><stop offset=".78" stop-color="#FFD45C"/><stop offset="1" stop-color="#B9A4F2" stop-opacity="0"/></radialGradient>';
-  bodies.forEach(function(b){var p=auXY(b.x,b.y);o+=planetGrad(b.n,p[0],p[1]);});
+  var st=sim.on?null:simState(d),bodies=sim.on?sim.bodies:st.bodies,F=sim.on?simOrigin():[st.sun.x,st.sun.y,st.sun.z];
+  function XY(b){return auXY(b.x-F[0],b.y-F[1]);}
+  var o='<defs><radialGradient id="sunCore"><stop offset="0" stop-color="#FFFBE6"/><stop offset=".5" stop-color="#FFE27A"/><stop offset=".85" stop-color="#FFB63A"/><stop offset="1" stop-color="#FF8F2A"/></radialGradient><radialGradient id="sunGlow"><stop offset="0" stop-color="#FFD37A" stop-opacity=".9"/><stop offset=".35" stop-color="#FFB040" stop-opacity=".45"/><stop offset="1" stop-color="#FF9A2E" stop-opacity="0"/></radialGradient><radialGradient id="milk"><stop offset="0" stop-color="#8E86D6" stop-opacity=".16"/><stop offset="1" stop-color="#8E86D6" stop-opacity="0"/></radialGradient><radialGradient id="bhDiskS"><stop offset=".48" stop-color="#000"/><stop offset=".6" stop-color="#FF8A3D"/><stop offset=".78" stop-color="#FFD45C"/><stop offset="1" stop-color="#B9A4F2" stop-opacity="0"/></radialGradient>';
+  bodies.forEach(function(b){var p=XY(b);o+=planetGrad(b.n,p[0],p[1]);});
   o+='</defs><ellipse cx="300" cy="200" rx="420" ry="120" fill="url(#milk)" transform="rotate(-28 300 200)"/>'+gStarsR(7,110);
   ORDER.forEach(function(n){o+='<circle class="orb" data-p="orbit_'+n+'" cx="'+SCX+'" cy="'+SCY+'" r="'+auToPx(PLANETS[n][0]).toFixed(1)+'" fill="none" stroke="#2C2860" stroke-width="1"/>';});
-  if(sim.on)bodies.forEach(function(b){o+='<polyline id="trail_'+b.n+'" points="" fill="none" stroke="'+PL_LOOK[b.n].col+'" stroke-width="1.4" opacity=".55" stroke-linejoin="round"/>';});
+  if(sim.on)bodies.forEach(function(b){o+='<polyline id="osc_'+b.n+'" points="" fill="none" stroke="'+PL_LOOK[b.n].hi+'" stroke-width="1.2" opacity=".55" stroke-dasharray="3 4" stroke-linejoin="round"/><polyline id="trail_'+b.n+'" points="" fill="none" stroke="'+PL_LOOK[b.n].col+'" stroke-width="1.4" opacity=".55" stroke-linejoin="round"/>';});
   if(!sim.on||sim.sun.alive)o+=gObj('sun',SCX,SCY,'<circle r="46" fill="url(#sunGlow)"/><circle r="17" fill="url(#sunCore)"/><circle r="24" fill="transparent"/>');
   var earthXY=null;
-  bodies.forEach(function(b){var n=b.n;if(!b.alive)return;var p=auXY(b.x,b.y),sz=PL_SIZE[n],inner='';
+  bodies.forEach(function(b){var n=b.n;if(!b.alive)return;var p=XY(b),sz=PL_SIZE[n],inner='';
     if(n==='earth')earthXY=p;
     if(gxSel===n)inner+='<circle r="'+(sz+9)+'" fill="none" stroke="#F58BB8" stroke-width="2.5" opacity=".9"/>';
     inner+=planetBody(n,sz)+'<circle r="'+Math.max(20,sz+10)+'" fill="transparent"/>'+gLabel(PL_INFO[n].name,sz+16,'#B9B0D9');
@@ -2533,13 +2554,69 @@ function lvSolar(d){
   if(earthXY){var ml=moonLon(d),mx=earthXY[0]+14*Math.cos(ml*RAD),my=earthXY[1]-14*Math.sin(ml*RAD);
     o+='<circle data-p="orbit_moon" cx="'+earthXY[0].toFixed(1)+'" cy="'+earthXY[1].toFixed(1)+'" r="14" fill="none" stroke="#4A4488" stroke-width=".8" stroke-dasharray="2 3"/>';
     o+=gObj('moon',mx,my,'<circle r="3" fill="#D8D2C4"/><circle r="3" fill="none" stroke="rgba(0,0,0,.4)" stroke-width=".6"/><circle r="11" fill="transparent"/>');}
-  if(sim.on&&sim.bh){var q=auXY(sim.bh.x,sim.bh.y),R=bhPx(sim.bh.m);
+  if(sim.on&&sim.bh){var q=XY(sim.bh),R=bhPx(sim.bh.m);
     o+=gObj('bh',q[0],q[1],'<g id="bhSpin"><ellipse rx="'+(R*2.3)+'" ry="'+(R*0.8)+'" fill="url(#bhDiskS)" opacity=".95"/><ellipse rx="'+(R*2.3)+'" ry="'+(R*0.8)+'" fill="none" stroke="#fff" stroke-width="1" stroke-opacity=".45" stroke-dasharray="8 14"/></g><circle r="'+R+'" fill="#000"/><circle r="'+(R+2)+'" fill="none" stroke="#FFB070" stroke-width="2" opacity=".9"/><circle r="'+Math.max(26,R*2.3)+'" fill="transparent"/>'+gLabel('Black hole',R*0.8+24,'#FFB070'));}
   return o;
 }
 function gStarsR(seed,n){var r=mulberry32(seed),o='',cols=['#FFFFFF','#FFF3D6','#D6E6FF','#FFE0E0'];for(var i=0;i<n;i++){var s=r();o+='<circle class="obj" transform="translate('+(r()*520).toFixed(0)+' '+(r()*464).toFixed(0)+')" r="'+(0.5+s*s*1.6).toFixed(2)+'" fill="'+cols[i%4]+'" opacity="'+(0.25+r()*0.65).toFixed(2)+'"/>';}return o;}
-/* sandbox */
-function simStart(){if(sim.on)return;stopFast();sim.on=true;sim.bodies=simState(sNow());sim.sun={alive:true};sim.bh=null;sim.fast=false;sim.held=null;sim.last=0;
+/* sandbox: every body pulls on every other one */
+function simCentral(){return sim.sun.alive?sim.sun:(sim.bh||null);}
+function simOrigin(){var c=simCentral();if(c&&!c.held)sim.F=[c.x,c.y,c.z];return sim.F;}   // the view follows the Sun (or the black hole)
+function simXY(b){return auXY(b.x-sim.F[0],b.y-sim.F[1]);}
+function simAll(){var a=[];if(sim.sun.alive)a.push(sim.sun);sim.bodies.forEach(function(b){if(b.alive)a.push(b);});if(sim.bh)a.push(sim.bh);return a;}
+var EPS2=4e-8; // softening, (0.0002 AU)^2: about a third of Jupiter's width
+// accelerations of every body from every other one; returns the shortest pair timescale sqrt(r^3/G(m1+m2)).
+// With tugH, also adds up how hard each other body (not the one in the middle) pulled on each planet.
+function simForces(A,tugH){
+  var n=A.length,i,j,t2=1e30,c=tugH?simCentral():null;
+  for(i=0;i<n;i++){A[i].ax=0;A[i].ay=0;A[i].az=0;}
+  for(i=0;i<n;i++){var p=A[i];for(j=i+1;j<n;j++){var q=A[j],dx=q.x-p.x,dy=q.y-p.y,dz=q.z-p.z,r2=dx*dx+dy*dy+dz*dz+EPS2,r=Math.sqrt(r2),ir3=1/(r2*r),fp=G4*q.m*ir3,fq=G4*p.m*ir3;
+    p.ax+=fp*dx;p.ay+=fp*dy;p.az+=fp*dz;q.ax-=fq*dx;q.ay-=fq*dy;q.az-=fq*dz;
+    var tt=r2*r/(G4*(p.m+q.m));if(tt<t2)t2=tt;
+    if(tugH){if(p.tug&&q!==c)p.tug[q.n]=(p.tug[q.n]||0)+fp*r*tugH;if(q.tug&&p!==c)q.tug[p.n]=(q.tug[p.n]||0)+fq*r*tugH;}}}
+  return Math.sqrt(t2);
+}
+// Yoshida 4th-order symplectic step, size set by the closest pair; stops early (slow motion) if it needs too many steps
+var YC=[0.6756035959798289,-0.17560359597982877,-0.17560359597982877,0.6756035959798289],YD=[1.3512071919596578,-1.7024143839193153,1.3512071919596578];
+function simAdvance(dt){
+  var done=0,steps=0,A=simAll(),s,k,b;
+  if(!sim.tdyn)sim.tdyn=simForces(A,0);
+  while(done<dt-1e-12&&steps<400){
+    var h=Math.min(dt-done,0.03*sim.tdyn);
+    for(s=0;s<4;s++){
+      for(k=0;k<A.length;k++){b=A[k];if(b.held)continue;b.x+=YC[s]*h*b.vx;b.y+=YC[s]*h*b.vy;b.z+=YC[s]*h*b.vz;}
+      if(s<3){sim.tdyn=simForces(A,s===0?h:0);for(k=0;k<A.length;k++){b=A[k];if(b.held)continue;b.vx+=YD[s]*h*b.ax;b.vy+=YD[s]*h*b.ay;b.vz+=YD[s]*h*b.az;}}
+    }
+    done+=h;steps++;sim.t+=h;
+    if(simCollide())A=simAll();
+  }
+  return done;
+}
+function simDist(a,b){var dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z;return Math.sqrt(dx*dx+dy*dy+dz*dz);}
+function simMerge(big,small){var M=big.m+small.m;['vx','vy','vz'].forEach(function(k){big[k]=(big[k]*big.m+small[k]*small.m)/M;});
+  if(!big.held&&big!==sim.bh)['x','y','z'].forEach(function(k){big[k]=(big[k]*big.m+small[k]*small.m)/M;});big.m=M;small.alive=false;}
+function simCollide(){ // touching bodies squish together, keeping their momentum
+  var hit=false,B=sim.bodies,i,j;
+  for(i=0;i<B.length;i++){var p=B[i];if(!p.alive||p.held)continue;
+    if(sim.sun.alive&&simDist(p,sim.sun)<0.09){simMerge(sim.sun,p);sim.events.push([p,'sun']);hit=true;continue;}
+    for(j=0;j<B.length;j++){var q=B[j];if(j===i||!q.alive||q.held)continue;
+      if(simDist(p,q)<PL_RAD[p.n]+PL_RAD[q.n]){var big=p.m>=q.m?p:q,small=big===p?q:p;simMerge(big,small);sim.events.push([small,'crash',big]);hit=true;break;}}}
+  return hit;
+}
+// the path a body would follow around the one in the middle if nothing else pulled on it (osculating orbit)
+function simOsc(b,c){
+  var rx=b.x-c.x,ry=b.y-c.y,rz=b.z-c.z,vx=b.vx-c.vx,vy=b.vy-c.vy,vz=b.vz-c.vz,mu=G4*(c.m+b.m);
+  var r=Math.sqrt(rx*rx+ry*ry+rz*rz)||1e-9,v2=vx*vx+vy*vy+vz*vz,rv=rx*vx+ry*vy+rz*vz,inv=2/r-v2/mu;
+  if(inv<=1e-9)return {a:Infinity,e:1,esc:true,T:Infinity};
+  var a=1/inv,k=v2-mu/r,ex=(k*rx-rv*vx)/mu,ey=(k*ry-rv*vy)/mu,ez=(k*rz-rv*vz)/mu,e=Math.sqrt(ex*ex+ey*ey+ez*ez);
+  var hx=ry*vz-rz*vy,hy=rz*vx-rx*vz,hz=rx*vy-ry*vx,hm=Math.sqrt(hx*hx+hy*hy+hz*hz)||1e-12;
+  var Pv=e>1e-7?[ex/e,ey/e,ez/e]:[rx/r,ry/r,rz/r],Qv=[(hy*Pv[2]-hz*Pv[1])/hm,(hz*Pv[0]-hx*Pv[2])/hm,(hx*Pv[1]-hy*Pv[0])/hm];
+  return {a:a,e:e,P:Pv,Q:Qv,esc:e>=1,T:Math.pow(a,1.5)/Math.sqrt(c.m+b.m)};
+}
+function simYear(T,n){return T<1.5?Math.round(T*365)+' days':T.toFixed(1)+(n==='earth'?' years':' Earth years');}
+function simMark(b){var c=simCentral();b.tug={};if(c){var o=simOsc(b,c);b.ref={a:o.a,e:o.e,esc:o.esc};}else b.ref=null;}
+function simStart(){if(sim.on)return;stopFast();var st=simState(sNow());sim.on=true;sim.bodies=st.bodies;sim.sun=st.sun;sim.bh=null;sim.fast=false;sim.held=null;sim.last=0;
+  sim.t=0;sim.tdyn=0;sim.frames=0;sim.events=[];sim.tugT=0;sim.sunPull=false;sim.F=[sim.sun.x,sim.sun.y,sim.sun.z];sim.bodies.forEach(simMark);
   $('spReset').hidden=false;$('spFast').textContent='Speed up time';$('spFast').classList.remove('on');$('spToday').textContent='Put it back';
   gxRender(1);if(!sim.raf)sim.raf=requestAnimationFrame(simFrame);viewUntil=Date.now()+300000;}
 function simReset(silent){
@@ -2547,52 +2624,69 @@ function simReset(silent){
   $('bhCtl').hidden=true;if(gxLevel===1){$('spReset').hidden=true;$('spBH').disabled=false;$('spToday').textContent='Today';$('spFast').textContent='Speed up time';$('spFast').classList.remove('on');}
   if(was){gxSel=null;gxRender(1);renderSpaceInfo();if(!silent){blip(300,900,.3,'triangle');var el=gxEl(1);el.classList.remove('pop');void el.getBoundingClientRect();el.classList.add('pop');}}
 }
-function simAccel(b){var ax=0,ay=0,GM=39.478;
-  if(sim.sun.alive){var r2=b.x*b.x+b.y*b.y,r=Math.sqrt(r2),f=-GM/(r2*r);ax+=f*b.x;ay+=f*b.y;}
-  sim.bodies.forEach(function(o){if(o===b||!o.alive||o.held)return;var dx=o.x-b.x,dy=o.y-b.y,r2=dx*dx+dy*dy+4e-4,r=Math.sqrt(r2),f=GM*o.m/(r2*r);ax+=f*dx;ay+=f*dy;});
-  if(sim.bh){var dx=sim.bh.x-b.x,dy=sim.bh.y-b.y,r2=dx*dx+dy*dy+1e-3,r=Math.sqrt(r2),f=GM*sim.bh.m/(r2*r);ax+=f*dx;ay+=f*dy;}
-  return [ax,ay];}
-function simStep(dt){
-  var rmin=1;sim.bodies.forEach(function(b){if(!b.alive||b.held)return;var r=Math.hypot(b.x,b.y);if(r<rmin)rmin=r;if(sim.bh){var rb=Math.hypot(b.x-sim.bh.x,b.y-sim.bh.y);if(rb<rmin)rmin=rb;}});
-  var n=Math.min(300,Math.max(1,Math.ceil(dt/(0.004*Math.pow(Math.max(rmin,0.02),1.5))))),h=dt/n;
-  for(var k=0;k<n;k++){
-    sim.bodies.forEach(function(b){if(!b.alive||b.held)return;var a=simAccel(b);b.vx+=a[0]*h/2;b.vy+=a[1]*h/2;b.x+=b.vx*h;b.y+=b.vy*h;});
-    sim.bodies.forEach(function(b){if(!b.alive||b.held)return;var a=simAccel(b);b.vx+=a[0]*h/2;b.vy+=a[1]*h/2;});
-  }
-}
 function simSay(head,name,text){$('spInfoHead').textContent=head;$('spInfoName').innerHTML=name?'<span class="sp-dot" style="background:'+(PL_INFO[name]?PL_INFO[name].color:'#000')+'"></span>'+esc(PL_INFO[name]?PL_INFO[name].name:'Black hole'):'';$('spInfoTxt').textContent=text;$('spInfoSay').setAttribute('data-say-text',text);say(text);}
 function simRelease(b){
-  var r=Math.hypot(b.x,b.y),GM=39.478,v2=b.vx*b.vx+b.vy*b.vy,nm=PL_INFO[b.n].name,t;
-  b.trail=[];
-  if(!sim.sun.alive){t=nm+' has no Sun to hold it now, so it just drifts.';}
-  else if(v2>=2*GM/r){t='You put '+nm+' so far out that it is moving too fast for the Sun to hold it. Watch it fly away into deep space!';}
-  else{var a=1/(2/r-v2/GM),T=Math.pow(a,1.5),yr=T<1.5?Math.round(T*365)+' days':T.toFixed(1)+' Earth years';
-    if(r<b.a0*0.8)t='You moved '+nm+' closer to the Sun. It is hotter there, and '+nm+' zooms around faster: its year is now about '+yr+' long.';
-    else if(r>b.a0*1.25)t='You moved '+nm+' farther from the Sun. It is colder out there, and its year is now about '+yr+' long.';
-    else t=nm+' is back near its old path. Its year is about '+yr+' long.';}
-  simSay('What happens?',b.n,t);
+  var c=simCentral(),nm=PL_INFO[b.n].name,t,boss=sim.sun.alive?'the Sun':'the black hole';
+  b.trail=[];simMark(b);
+  if(!c){t=nm+' has nothing big to hold it now, so it just drifts.';}
+  else{var o=simOsc(b,c),r=simDist(b,c);
+    if(o.esc)t='You put '+nm+' so far out that it is moving too fast for '+boss+' to hold it. Watch it fly away into deep space!';
+    else if(r<b.a0*0.8)t='You moved '+nm+' closer to '+boss+'. '+(sim.sun.alive?'It is hotter there, and ':'')+nm+' zooms around faster: its year is now about '+simYear(o.T,b.n)+' long.';
+    else if(r>b.a0*1.25)t='You moved '+nm+' farther from '+boss+'. '+(sim.sun.alive?'It is colder out there, and its':'Its')+' year is now about '+simYear(o.T,b.n)+' long.';
+    else t=nm+' is back near its old path. Its year is about '+simYear(o.T,b.n)+' long.';}
+  var hv=PL_HEAVY[b.n];
+  if(hv==='318'||hv==='95')t+=' It is '+hv+' times heavier than Earth, so it tugs the other planets too. Watch their paths!';
+  else if(hv)t+=' It is '+hv+' times heavier than Earth, so it tugs nearby planets a little.';
+  else t+=' It is small, so it barely tugs the other planets.';
+  simSay('What happens?',b.n,t);sim.tugT=Date.now();
 }
-function simEvent(b,kind){b.alive=false;var p=auXY(b.x,b.y),nm=PL_INFO[b.n].name,svg=gxEl(1).querySelector('svg'),el=svg.querySelector('[data-p="'+b.n+'"]');
-  if(el){var ring=document.createElementNS('http://www.w3.org/2000/svg','circle');ring.setAttribute('cx',p[0]);ring.setAttribute('cy',p[1]);ring.setAttribute('r',6);ring.setAttribute('fill','none');ring.setAttribute('stroke',kind==='sun'?'#FFD45C':kind==='bh'?'#FFB070':'#B9A4F2');ring.setAttribute('stroke-width','3');ring.setAttribute('class','sim-pop');svg.appendChild(ring);setTimeout(function(){ring.remove();},900);el.remove();}
-  var tr=svg.querySelector('#trail_'+b.n);if(tr)tr.setAttribute('opacity','.2');
+// when one body's gravity changes a planet's path, say who did it
+function simTugCheck(){
+  var c=simCentral();if(!c||Date.now()-sim.tugT<6000)return;
+  for(var i=0;i<sim.bodies.length;i++){var b=sim.bodies[i];if(!b.alive||b.held||!b.ref)continue;
+    var o=simOsc(b,c),R=b.ref,ch=o.esc?!R.esc:(!R.esc&&(Math.abs(o.a-R.a)/R.a>0.12||Math.abs(o.e-R.e)>0.08));
+    if(!ch)continue;
+    var who=null,bv=0;for(var k in b.tug)if(b.tug[k]>bv){bv=b.tug[k];who=k;}
+    var nm=PL_INFO[b.n].name,by=who==='bh'?'The black hole\'s':who&&PL_INFO[who]?PL_INFO[who].name+'\'s':'Gravity',boss=sim.sun.alive?'the Sun':'the black hole',t;
+    if(o.esc)t=by+(who?' gravity':'')+' flung '+nm+' so hard that '+boss+' can\'t hold on to it any more!';
+    else t=by+(who?' gravity':'')+' pulled '+nm+' into a new path! Now '+nm+' takes about '+simYear(o.T,b.n)+' to go around '+boss+'.';
+    simSay('A gravity tug!',who&&PL_INFO[who]?who:b.n,t);sim.tugT=Date.now();simMark(b);return;}
+}
+function simEvent(b,kind,other){b.alive=false;var p=simXY(b),nm=PL_INFO[b.n].name,svg=gxEl(1).querySelector('svg'),el=svg.querySelector('[data-p="'+b.n+'"]');
+  if(el){var ring=document.createElementNS('http://www.w3.org/2000/svg','circle');ring.setAttribute('cx',p[0]);ring.setAttribute('cy',p[1]);ring.setAttribute('r',6);ring.setAttribute('fill','none');ring.setAttribute('stroke',kind==='sun'?'#FFD45C':kind==='bh'?'#FFB070':kind==='crash'?'#FF8A8A':'#B9A4F2');ring.setAttribute('stroke-width','3');ring.setAttribute('class','sim-pop');svg.appendChild(ring);setTimeout(function(){ring.remove();},900);el.remove();}
+  var tr=svg.querySelector('#trail_'+b.n);if(tr)tr.setAttribute('opacity','.2');var oc=svg.querySelector('#osc_'+b.n);if(oc)oc.setAttribute('points','');
   if(kind==='sun'){simSay('Oh no!',b.n,nm+' fell into the Sun! Whoa, that is hot.');blip(900,80,.6,'sawtooth');}
   else if(kind==='bh'){simSay('Gulp!',b.n,'The black hole swallowed '+nm+'! Nothing can get out of a black hole, not even light.');whoosh();}
-  else{simSay('Bye bye!',b.n,nm+' flew away into deep space. It is too far from the Sun to come back.');blip(600,1500,.4);}
+  else if(kind==='crash'){var on=PL_INFO[other.n].name;simSay('Crash!',other.n,nm+' crashed into '+on+', and they squished together into one bigger planet.');blip(500,60,.5,'sawtooth');}
+  else{simSay('Bye bye!',b.n,nm+' flew away into deep space. It is too far away to come back.');blip(600,1500,.4);}
 }
+function simOrbits(svg){var c=simCentral();
+  sim.bodies.forEach(function(b){var pl=svg.querySelector('#osc_'+b.n);if(!pl)return;
+    if(!c||!b.alive||b.held){pl.setAttribute('points','');return;}
+    var o=simOsc(b,c);if(o.esc||o.a*(1+o.e)>95){pl.setAttribute('points','');return;}
+    var bb=o.a*Math.sqrt(Math.max(0,1-o.e*o.e)),ox=c.x-sim.F[0],oy=c.y-sim.F[1],pts=[],N=72;
+    for(var k=0;k<=N;k++){var E=k/N*6.283185307,u=o.a*(Math.cos(E)-o.e),w=bb*Math.sin(E),q=auXY(ox+u*o.P[0]+w*o.Q[0],oy+u*o.P[1]+w*o.Q[1]);pts.push(q[0].toFixed(1)+','+q[1].toFixed(1));}
+    pl.setAttribute('points',pts.join(' '));});}
 function simFrame(ts){
   if(!sim.on){sim.raf=null;return;}
   if(view!=='space'){simReset(true);return;}
-  var real=sim.last?Math.min(0.05,(ts-sim.last)/1000):0;sim.last=ts;
+  var real=sim.last?Math.min(0.05,(ts-sim.last)/1000):0;sim.last=ts;sim.frames++;
   var dt=real*(sim.fast?0.35:0.07);
-  if(dt>0)simStep(dt);
+  if(dt>0)simAdvance(dt);
+  simOrigin();
   var svg=gxEl(1).querySelector('svg');if(!svg){sim.raf=requestAnimationFrame(simFrame);return;}
-  var bhP=sim.bh?auXY(sim.bh.x,sim.bh.y):null,R=sim.bh?bhPx(sim.bh.m):0;
-  if(sim.bh&&sim.sun.alive&&Math.hypot(bhP[0]-SCX,bhP[1]-SCY)<R+12){sim.sun.alive=false;sim.bh.m+=1;var se=svg.querySelector('[data-p="sun"]');if(se)se.remove();simSay('WHOA!',null,'The black hole swallowed the Sun! Now nothing holds the planets in place, so they drift off into space.');whoosh();$('bhSize').value=Math.min(40,sim.bh.m);}
+  var bhP=sim.bh?simXY(sim.bh):null,R=sim.bh?bhPx(sim.bh.m):0;
+  if(sim.bh&&sim.sun.alive&&Math.hypot(bhP[0]-SCX,bhP[1]-SCY)<R+12){
+    simMerge(sim.bh,sim.sun);sim.sun.alive=false;var se=svg.querySelector('[data-p="sun"]');if(se)se.remove();
+    simSay('WHOA!',null,'The black hole swallowed the Sun! Now the black hole is in the middle, and it pulls even harder than the Sun did.');whoosh();$('bhSize').value=Math.min(40,Math.round(sim.bh.m));
+    sim.bodies.forEach(simMark);sim.tugT=Date.now();simOrigin();bhP=simXY(sim.bh);}
+  if(sim.bh&&sim.sun.alive&&!sim.sunPull&&Math.hypot(sim.sun.vx,sim.sun.vy)>1.2){sim.sunPull=true;sim.tugT=Date.now();
+    simSay('Look!',null,'The black hole is pulling on the Sun, and the planets get pulled along with it!');}
+  while(sim.events.length){var ev=sim.events.shift();simEvent(ev[0],ev[1],ev[2]);}
   sim.bodies.forEach(function(b){if(!b.alive)return;
-    var p=auXY(b.x,b.y),el=svg.querySelector('[data-p="'+b.n+'"]');
-    if(!b.held){var r=Math.hypot(b.x,b.y);
-      if(sim.sun.alive&&r<0.09){simEvent(b,'sun');return;}
-      if(bhP&&Math.hypot(p[0]-bhP[0],p[1]-bhP[1])<R+PL_SIZE[b.n]*0.6){simEvent(b,'bh');return;}
+    var p=simXY(b),el=svg.querySelector('[data-p="'+b.n+'"]');
+    if(!b.held){var c=simCentral(),r=simDist(b,{x:sim.F[0],y:sim.F[1],z:sim.F[2]});
+      if(bhP&&Math.hypot(p[0]-bhP[0],p[1]-bhP[1])<R+PL_SIZE[b.n]*0.6){simMerge(sim.bh,b);simEvent(b,'bh');return;}
       if(r>90){simEvent(b,'gone');return;}
       b.trail.push(p[0].toFixed(1)+','+p[1].toFixed(1));if(b.trail.length>110)b.trail.shift();
       var tr=svg.querySelector('#trail_'+b.n);if(tr&&(b.trail.length&1))tr.setAttribute('points',b.trail.join(' '));}
@@ -2600,21 +2694,24 @@ function simFrame(ts){
     var g=svg.querySelector('#pg_'+b.n);if(g&&sim.sun.alive){var a=Math.atan2(SCY-p[1],SCX-p[0]);g.setAttribute('fx',(50-Math.cos(a)*28).toFixed(1)+'%');g.setAttribute('fy',(50+Math.sin(a)*28).toFixed(1)+'%');}
     if(b.n==='earth'){var mo=svg.querySelector('[data-p="moon"]'),mob=svg.querySelector('[data-p="orbit_moon"]');if(mo){var ml=(ts/400)%(Math.PI*2);mo.setAttribute('transform','translate('+(p[0]+14*Math.cos(ml)).toFixed(1)+' '+(p[1]-14*Math.sin(ml)).toFixed(1)+')');}if(mob){mob.setAttribute('cx',p[0].toFixed(1));mob.setAttribute('cy',p[1].toFixed(1));}}
   });
+  var ea=sim.bodies.filter(function(b){return b.n==='earth';})[0];if(ea&&!ea.alive){var mo2=svg.querySelector('[data-p="moon"]'),mob2=svg.querySelector('[data-p="orbit_moon"]');if(mo2)mo2.remove();if(mob2)mob2.remove();}
+  if(sim.frames%3===0)simOrbits(svg);
+  if(sim.frames%15===0)simTugCheck();
   if(sim.bh){var be=svg.querySelector('[data-p="bh"]');if(be)be.setAttribute('transform','translate('+bhP[0].toFixed(1)+' '+bhP[1].toFixed(1)+')');var sp=svg.querySelector('#bhSpin');if(sp)sp.setAttribute('transform','rotate('+((ts/12)%360).toFixed(0)+')');}
   sim.raf=requestAnimationFrame(simFrame);
 }
 function simAddBH(){
   if(!sim.on)simStart();
-  var m=+$('bhSize').value||8,q=xyAu(96,96);sim.bh={x:q[0],y:q[1],m:m};
+  var m=+$('bhSize').value||8,q=xyAu(96,96),S0=sim.sun;sim.bh={n:'bh',x:sim.F[0]+q[0],y:sim.F[1]+q[1],z:sim.F[2],vx:S0.vx,vy:S0.vy,vz:S0.vz,m:m,held:false,alive:true};sim.tdyn=0;sim.sunPull=false;
   $('bhCtl').hidden=false;$('spBH').disabled=true;gxRender(1);whoosh();
-  simSay('A black hole!',null,'Drag the black hole around, and use the slider to make it bigger. A bigger black hole pulls harder, from farther away.');
+  simSay('A black hole!',null,'Drag the black hole around, and use the slider to make it bigger. A bigger black hole pulls harder, from farther away. It pulls on the Sun too!');
 }
 function bhSizeTxt(m){return m<4?'tiny':m<10?'small':m<20?'big':m<32?'huge':'MONSTER';}
 $('bhSize').addEventListener('input',function(){var m=+this.value;$('bhSizeTxt').textContent=bhSizeTxt(m);
-  if(sim.on&&sim.bh){sim.bh.m=m;gxRender(1);}
+  if(sim.on&&sim.bh){sim.bh.m=m;sim.tdyn=0;gxRender(1);}
   if(bh.active){bh.m=m;}
   viewUntil=Date.now()+240000;});
-/* dragging planets and the black hole */
+/* dragging planets and the black hole (a planet you hold still pulls on the others) */
 (function(){var w=$('gxWrap'),drag=null;
   function svgPt(e){var svg=gxEl(1).querySelector('svg'),pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;var m=svg.getScreenCTM();if(!m)return null;var q=pt.matrixTransform(m.inverse());return [q.x,q.y];}
   w.addEventListener('pointerdown',function(e){
@@ -2626,22 +2723,27 @@ $('bhSize').addEventListener('input',function(){var m=+this.value;$('bhSizeTxt')
     if(!drag||e.pointerId!==drag.pid)return;
     if(!drag.moved){if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<7)return;drag.moved=true;
       if(!sim.on)simStart();
-      if(drag.id!=='bh'){var b=sim.bodies.filter(function(x){return x.n===drag.id;})[0];if(!b||!b.alive){drag=null;return;}b.held=true;sim.held=b;b.trail=[];}}
+      if(drag.id!=='bh'){var b=sim.bodies.filter(function(x){return x.n===drag.id;})[0];if(!b||!b.alive){drag=null;return;}b.held=true;sim.held=b;b.trail=[];}
+      else if(sim.bh)sim.bh.held=true;
+      sim.tdyn=0;}
     var p=svgPt(e);if(!p)return;var q=xyAu(Math.max(4,Math.min(516,p[0])),Math.max(4,Math.min(460,p[1])));
-    if(drag.id==='bh'){if(sim.bh){sim.bh.x=q[0];sim.bh.y=q[1];}}
-    else{var bb=sim.held;if(bb){bb.x=q[0];bb.y=q[1];}}
+    var hb=drag.id==='bh'?sim.bh:sim.held;if(hb){hb.x=sim.F[0]+q[0];hb.y=sim.F[1]+q[1];hb.z=sim.F[2];sim.tdyn=0;}
     viewUntil=Date.now()+300000;
   });
   function end(e){
     if(!drag||e.pointerId!==drag.pid)return;
-    if(drag.moved){
-      if(drag.id!=='bh'&&sim.held){var b=sim.held;b.held=false;sim.held=null;
-        var r=Math.hypot(b.x,b.y)||0.05,ang=Math.atan2(b.y,b.x);b.vx=-Math.sin(ang)*b.v0;b.vy=Math.cos(ang)*b.v0;simRelease(b);}
+    if(drag.moved){var c=simCentral();
+      if(drag.id==='bh'&&sim.bh){var B=sim.bh;B.held=false;var S1=sim.sun.alive?sim.sun:null;B.vx=S1?S1.vx:0;B.vy=S1?S1.vy:0;B.vz=S1?S1.vz:0;sim.tdyn=0;}
+      else if(sim.held){var b=sim.held;b.held=false;sim.held=null;c=simCentral();
+        var cx=c?c.x:sim.F[0],cy=c?c.y:sim.F[1],ang=Math.atan2(b.y-cy,b.x-cx);
+        b.vx=(c?c.vx:0)-Math.sin(ang)*b.v0;b.vy=(c?c.vy:0)+Math.cos(ang)*b.v0;b.vz=c?c.vz:0;sim.tdyn=0;simRelease(b);}
       gxDragMoved=true;setTimeout(function(){gxDragMoved=false;},50);}
     drag=null;
   }
   w.addEventListener('pointerup',end);w.addEventListener('pointercancel',end);
 })();
+if(TEST)window.__SIM={sim:function(){return sim;},now:function(){return sNow().getTime();},tug:function(){simTugCheck();},start:simStart,reset:simReset,advance:simAdvance,osc:simOsc,state:simState,helio:helio,central:simCentral,all:simAll,
+  addBH:simAddBH,release:function(n){var b=sim.bodies.filter(function(x){return x.n===n;})[0],c=simCentral(),ang=Math.atan2(b.y-c.y,b.x-c.x);b.held=false;sim.held=null;b.vx=c.vx-Math.sin(ang)*b.v0;b.vy=c.vy+Math.cos(ang)*b.v0;b.vz=c.vz;b.z=c.z;sim.tdyn=0;simRelease(b);}};
 var gxDragMoved=false;
 var NEAR=[['alphacen',4.4,14.7,'#FFE08A',7],['barnard',6,17.9,'#E0703A',3],['sirius',8.6,6.75,'#D9EEFF',10],['procyon',11.5,7.6,'#FFF4D6',7],['altair',17,19.8,'#EAF2FF',7],['vega',25,18.6,'#CFE3FF',8],['fomalhaut',25,23,'#E6F0FF',6],['pollux',34,7.75,'#FFC46B',8],['arcturus',37,14.3,'#FFB070',11]];
 function lvNear(){
