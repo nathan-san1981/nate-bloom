@@ -3029,6 +3029,9 @@ body.dj-on > .app { visibility: hidden; }
 #djView .dj-keys .lk-row { display: flex; align-items: center; gap: 12px; padding: 5px 2px; font-size: 0.84rem; border-bottom: 1px solid #ffffff0d; } #djView .dj-keys .lk-k { flex: none; width: 110px; display: flex; flex-wrap: wrap; gap: 4px; }
 #djView .dj-keys .lv-note { font-size: 0.78rem; line-height: 1.45; color: var(--dim); }
 @media (max-width: 1100px) { #djView .dj-log span { display: none; } #djView .dj-cpu .bar { display: none; } }
+/* 144: Hold with notes still ringing */
+.lv-cpu.drops .bar { display: none; }
+.lp-hold.ring { border-color: #ffb65c; box-shadow: inset 0 0 0 1px #ffb65c66; } .lp-hold.ring .lp-held, .lp-hold.ring small { color: #ffcf8a; }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -20768,6 +20771,28 @@ registerProcessor("nb-verb", NBVerb);`;
       nbwLoading.set(id, pr);
       return pr;
     }
+    // (144) a plugin instrument keeps running its sound engine, silent or not, as long as it's loaded: once it's no
+    // longer a layer and nothing of it is sounding, its settings are kept and it's unloaded after 15 s. Picking it
+    // again loads it again.
+    setInterval(() => {
+      if (!ctx || !NBW.parts.size) return;
+      const now = Date.now(), inUse = id => state.lib.parts.some(p => p && p.id === id);
+      NBW.parts.forEach((W, id) => {
+        if (W.unloading) return;
+        if (inUse(id) || W.held.size) { W.idleSince = 0; return; }
+        if (!W.idleSince) { W.idleSince = now; return; }
+        if (now - W.idleSince < 15000) return;
+        W.unloading = true;
+        nbwKeep(W).catch(() => {}).then(() => {
+          if (NBW.parts.get(id) !== W) return;
+          if (inUse(id) || W.held.size) { W.unloading = false; W.idleSince = 0; return; }   // (picked again meanwhile)
+          NBW.parts.delete(id);
+          ["tap_a", "tap_b"].forEach(k => { try { if (W[k]) W[k].disconnect(); } catch (e) {} });
+          try { W.out.disconnect(); } catch (e) {} try { W.gain.disconnect(); } catch (e) {} try { W.node.disconnect(); } catch (e) {} try { W.node.destroy && W.node.destroy(); } catch (e) {}
+          try { window.__nbAdd && window.__nbAdd("plugin", "unloaded " + W.name + ": no longer a layer"); } catch (e) {}
+        });
+      });
+    }, 5000);
     { const lw = loadWaf; loadWaf = function (stem) {
         if (typeof stem !== "string" || !stem.startsWith("wam:")) return lw.apply(this, arguments);
         return nbwInstrument(stem).then(W => { const regions = []; regions.wam = W; return { regions }; });
@@ -29559,9 +29584,9 @@ z: [z]=Z
     // you hold) with its octaves, and the pad split: pads 1–8 on the computer keyboard's number keys, 9–16 on the
     // MiniLab's pads.
     // ======================================================================
-    const L3 = Object.assign({ split: true, arpKeys: null, recent: [] }, lsGet("nightbloom-live3", {}));
+    const L3 = Object.assign({ split: true, arpOut: [], recent: [] }, lsGet("nightbloom-live3", {})); delete L3.arpKeys; if (!Array.isArray(L3.arpOut)) L3.arpOut = [];
     if (!Array.isArray(L3.recent)) L3.recent = [];
-    const l3Save = () => lsSet("nightbloom-live3", { split: !!L3.split, arpKeys: L3.arpKeys, recent: L3.recent.slice(0, 12) });
+    const l3Save = () => lsSet("nightbloom-live3", { split: !!L3.split, arpOut: L3.arpOut.slice(-24), recent: L3.recent.slice(0, 12) });
     const esc3 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     // ---------- the column ----------
     const perf = document.createElement("section"); perf.className = "lv-perf"; perf.setAttribute("aria-label", "Play");
@@ -29577,30 +29602,35 @@ z: [z]=Z
     const compsNow = () => { try { return voiceComponents(); } catch (e) { return []; } };
     const stkItems = () => { try { return window.__stk ? __stk.items() : []; } catch (e) { return []; } };
     const itKey = it => it.t === "syn" ? it.id : it.t === "lib" ? "lib" + it.i : it.t === "inst" ? "inst" : "samp";
-    const armed = k => !Array.isArray(L3.arpKeys) || L3.arpKeys.includes(k);
+    const armed = k => !L3.arpOut.includes(k);
     const arpLive = () => compsNow().some(c => arpOn(c.key));
     function arpSet(on) {
-      for (const c of compsNow()) getArp(c.key).on = !!on && armed(c.key);
-      try { save(); } catch (e) {} arpClock(); try { renderArpPanel(); } catch (e) {} paintPerf();
+      const cs = compsNow();
+      if (on && cs.length && !cs.some(c => armed(c.key))) { L3.arpOut = L3.arpOut.filter(k => !cs.some(c => c.key === k)); l3Save(); }   // (every layer left out: Arp puts them back in)
+      arpApply(on);
     }
+    function arpApply(on) {
+      for (const c of compsNow()) getArp(c.key).on = !!on && armed(c.key);
+      try { save(); } catch (e) {} arpClock(); arpPanelSoon(); paintPerf();
+    }
+    let arpPanelDirty = false;
+    function arpPanelSoon() { if (document.body.classList.contains("live-on")) { arpPanelDirty = true; return; } try { renderArpPanel(); } catch (e) {} }
     function arpArm(k, inArp) {
-      const keys = compsNow().map(c => c.key), wasLive = arpLive();
-      let a = Array.isArray(L3.arpKeys) ? L3.arpKeys.filter(x => keys.includes(x)) : keys.slice();
-      if (inArp) { if (!a.includes(k)) a.push(k); } else a = a.filter(x => x !== k);
-      L3.arpKeys = keys.every(x => a.includes(x)) ? null : a; l3Save();
-      if (wasLive) arpSet(true); else paintPerf();
+      const wasLive = arpLive();
+      L3.arpOut = L3.arpOut.filter(x => x !== k); if (!inArp) L3.arpOut.push(k); l3Save();
+      if (wasLive) arpApply(true); else paintPerf();
     }
     const arpOctNow = () => { const c = compsNow().find(c => armed(c.key)); return c ? getArp(c.key).oct || 1 : 1; };
-    function arpOct(n) { for (const c of compsNow()) if (armed(c.key)) getArp(c.key).oct = n; try { save(); } catch (e) {} arpClock(); try { renderArpPanel(); } catch (e) {} paintPerf(); mlHud("Arp", n + (n > 1 ? " octaves" : " octave"), null); }
+    function arpOct(n) { for (const c of compsNow()) if (armed(c.key)) getArp(c.key).oct = n; try { save(); } catch (e) {} arpClock(); arpPanelSoon(); paintPerf(); mlHud("Arp", n + (n > 1 ? " octaves" : " octave"), null); }
     // ---------- Hold ----------
     const holdOn = () => !!state.hold;
-    $id("lvHold").addEventListener("click", () => { start(); tap("hold"); paintPerf(); mlHud(holdOn() ? "Hold on" : "Hold off", holdOn() ? "notes keep sounding until you tap Hold again" : "", null); });
+    $id("lvHold").addEventListener("click", () => { start(); holdTap(); });
     // ---------- Arp: a tap switches it; held, it plays only while you hold it ----------
     { const b = $id("lvArp"); let down = 0, was = false, mom = false, t = 0;
       b.addEventListener("pointerdown", e => { e.preventDefault(); start(); try { b.setPointerCapture(e.pointerId); } catch (x) {} down = performance.now(); was = arpLive(); mom = false; clearTimeout(t);
         t = setTimeout(() => { mom = true; b.classList.add("mom"); if (!was) arpSet(true); }, 280); });
       const up = () => { if (!down) return; down = 0; clearTimeout(t); b.classList.remove("mom");
-        if (mom) { if (!was) arpSet(false); } else { arpSet(!was); mlHud(!was ? "Arp on" : "Arp off", !was ? "hold notes (or tap Hold) and it plays" : "", null); } };
+        if (mom) { if (!was) arpSet(false); } else { arpSet(!was); arpSay(!was); } };
       b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up);
       b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); arpSet(!arpLive()); } });
       b.addEventListener("click", e => e.preventDefault()); }
@@ -29619,7 +29649,7 @@ z: [z]=Z
       pick.querySelector("#lvPickClose").addEventListener("click", closePick);
       pick.querySelectorAll(".lp-lay").forEach(b => b.addEventListener("click", () => { arpArm(b.dataset.k, b.getAttribute("aria-pressed") !== "true"); openArp(); }));
       pick.querySelectorAll(".lp-opts").forEach(g => g.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-        const f = g.dataset.f; for (const c of compsNow()) if (armed(c.key)) getArp(c.key)[f] = b.dataset.v; try { save(); } catch (e) {} arpClock(); try { renderArpPanel(); } catch (e) {} openArp();
+        const f = g.dataset.f; for (const c of compsNow()) if (armed(c.key)) getArp(c.key)[f] = b.dataset.v; try { save(); } catch (e) {} arpClock(); arpPanelSoon(); openArp();
       })));
       const gi = pick.querySelector("#lvArpGate");
       if (gi) gi.addEventListener("input", () => { for (const c of compsNow()) if (armed(c.key)) getArp(c.key).gate = gi.value / 100; gi.nextElementSibling.textContent = gi.value + "%"; try { save(); } catch (e) {} });
@@ -29699,7 +29729,7 @@ z: [z]=Z
     function paintPerf() {
       const hb = $id("lvHold"), ab = $id("lvArp"), on = arpLive(), n = stkItems().length;
       { const sm = $id("lvSnd").querySelector("small"); const t = sm.textContent.replace(/\s*·\s*tap.*$/i, ""); if (t !== sm.textContent) nbT(sm, t); }
-      nbA(hb, "aria-pressed", String(holdOn())); nbT(hb.querySelector("small"), holdOn() ? "on · tap to let go" : "notes keep sounding");
+      nbA(hb, "aria-pressed", String(holdOn())); nbT(hb.querySelector("small"), holdOn() ? "on · tap to let go" : stillHeld() ? "tap to let go" : "notes keep sounding");
       nbA(ab, "aria-pressed", String(on));
       const comps = compsNow(), inArp = comps.filter(c => armed(c.key)).length;
       nbT(ab.querySelector("small"), comps.length > 1 ? (inArp === comps.length ? "all " + comps.length + " layers" : inArp + " of " + comps.length + " layers") : on ? "on · tap or hold" : "tap · or hold");
@@ -29840,7 +29870,7 @@ z: [z]=Z
     }
     // ---------- what each key does in Live ----------
     const kHeld = new Map();
-    const stopKey = e => { e.preventDefault(); e.stopImmediatePropagation(); };
+    const stopKey = e => { e.preventDefault(); e.stopImmediatePropagation(); if (e.type === "keydown" && !e.repeat) { try { window.__nbAdd && window.__nbAdd("key", (e.shiftKey && e.key && e.key.length > 1 ? "Shift+" : "") + e.key); } catch (x) {} } };
     const sheetUp = () => [...document.querySelectorAll(".editor, .browser")].some(x => !x.hidden && x.getClientRects().length);
     const soundsOpen = () => !pick.hidden && !!pick.querySelector(".lp-tiles");
     let arpK = null;
@@ -29915,7 +29945,7 @@ z: [z]=Z
       if (kUp(e.code)) { stopKey(e); return; }
       if (arpK && e.code === arpK.code) {
         const a = arpK; arpK = null; clearTimeout(a.t); $id("lvArp").classList.remove("mom"); stopKey(e);
-        if (a.mom) { if (!a.was) arpSet(false); } else { arpSet(!a.was); mlHud(!a.was ? "Arp on" : "Arp off", "", null); }
+        if (a.mom) { if (!a.was) arpSet(false); } else { arpSet(!a.was); arpSay(!a.was); }
         return;
       }
       if (!lv.hidden && e.code === "Space" && !typing(e.target)) stopKey(e);   // (a focused button would click too)
@@ -29947,7 +29977,8 @@ z: [z]=Z
       const lag = (now - TLS.base.w) - (ct - TLS.base.c), dLag = lag - TLS.lag; TLS.lag = lag;
       let tsd = null;
       try { const o = ctx.getOutputTimestamp && ctx.getOutputTimestamp(); if (o && o.performanceTime) { const off = o.performanceTime - o.contextTime * 1000; tsd = TLS.ts == null ? 0 : off - TLS.ts; TLS.ts = off; } } catch (e) {}
-      const behind = ctx.state === "running" ? Math.max(0, Math.round(dLag * 1000)) : 0;
+      const drift = TLS.drift || 0, behind = ctx.state === "running" ? Math.max(0, Math.round((dLag - drift) * 1000)) : 0;
+      if (ctx.state === "running" && dLag - drift < 0.025) TLS.drift = drift * 0.8 + dLag * 0.2;   // (some tablets' audio clock runs a few % fast)
       if (behind > 25) { TLS.stutters++; TLS.seenLag++; logB.classList.add("warn"); logB.title = "The sound fell behind " + TLS.seenLag + (TLS.seenLag === 1 ? " time" : " times") + " since the last log: tap Log to save it"; }
       if (behind > TLS.worst) TLS.worst = behind;
       let po = "";
@@ -29987,7 +30018,7 @@ z: [z]=Z
           hold: !!state.hold, fxLab: num(() => Object.assign({}, bfx), {}), fx: state.fx, hallSeconds: hallSec, mobile: !!window.__nbMobile,
           midi: { in: ins, out: outs, miniLab: num(() => mlLive(), false), sync: num(() => syncMode(), ""), clockTo: num(() => md.opt.clockTo, "") },
           setList: { songs: SL.songs.length, current: SL.cur }, keyboard: { seenLately: num(() => kbRecent(), false), keysShown: num(() => capsOn(), false) },
-          sinceOpen: TL.length ? TL[TL.length - 1][0] + " s" : "", audioFellBehind: { times: TLS.stutters, worstMs: TLS.worst, totalMs: Math.round(TLS.lag * 1000) }, marks: TLS.marks.slice(-20) },
+          sinceOpen: TL.length ? TL[TL.length - 1][0] + " s" : "", audioFellBehind: { times: TLS.stutters, worstMs: TLS.worst }, audioClock: { aheadOfPageMs: Math.round(-TLS.lag * 1000), runsFastMsPerSec: Math.round(-(TLS.drift || 0) * 10000) / 10 }, dropouts: { api: DROP.api || "not reported", lastMinute: cpuDrops(60), sinceOpen: DROP.total, ms: Math.round(DROP.totalMs) }, marks: TLS.marks.slice(-20) },
         liveTimeline: { columns: TL_HEAD, rows: TL.slice() },
       };
     });
@@ -30149,11 +30180,11 @@ z: [z]=Z
         CPU.hist.push(behind); if (CPU.hist.length > 60) CPU.hist.shift();
         const raw = Math.max(screen, CPU.audio || 0);
         CPU.pct = Math.round(CPU.pct ? CPU.pct * 0.5 + raw * 0.5 : raw);
-        const recent = CPU.hist.slice(-10).filter(x => x > 25).length;
+        const recent = CPU.hist.slice(-10).filter(x => x > 25).length + cpuDrops(10);
         const lvl = CPU.pct >= 80 || CPU.press === "critical" || recent >= 2 ? "hot" : CPU.pct >= 50 || CPU.press === "serious" || recent >= 1 ? "warm" : "";
-        nbT(cpuB.querySelector(".v"), CPU.pct + "%"); cpuB.querySelector("u").style.width = Math.min(100, CPU.pct) + "%";
+        nbT(cpuB.querySelector(".v"), cpuDrops(10) ? "drops" : CPU.pct + "%"); cpuB.classList.toggle("drops", cpuDrops(10) > 0); cpuB.querySelector("u").style.width = Math.min(100, CPU.pct) + "%";
         cpuB.classList.toggle("warm", lvl === "warm"); cpuB.classList.toggle("hot", lvl === "hot");
-        nbA(cpuB, "title", "CPU " + CPU.pct + "% · screen " + CPU.screen + "%" + (CPU.audio != null ? " · audio " + CPU.audio + "%" : "") + (CPU.press ? " · tablet " + (CPU_WORD[CPU.press] || CPU.press) : "") + (recent ? " · the sound fell behind lately" : "") + " · tap for the breakdown");
+        nbA(cpuB, "title", "CPU " + CPU.pct + "% · screen " + CPU.screen + "%" + (CPU.audio != null ? " · audio " + CPU.audio + "%" : "") + (CPU.press ? " · tablet " + (CPU_WORD[CPU.press] || CPU.press) : "") + (cpuDrops(10) ? " · the sound dropped out " + cpuDrops(10) + "× in the last 10 s" : recent ? " · the sound fell behind lately" : "") + " · tap for the breakdown");
         row.push(CPU.pct, CPU.screen, CPU.audio == null ? "" : CPU.audio, CPU.press);
         if (!pick.hidden && pick.querySelector(".lc-wrap")) paintCpu();
         return r;
@@ -30165,12 +30196,12 @@ z: [z]=Z
     function cpuHTML() {
       const fell = CPU.hist.filter(x => x > 25), worst = fell.length ? Math.max(...fell) : 0, on = HEAVY.filter(([k]) => bfx[k]);
       const its = num(() => __stk.items().length, 0), vs = num(() => voices.size, 0) + num(() => BP.voices.length, 0) + num(() => heldVoices.size, 0);
-      const audio = CPU.audio != null ? CPU.audio + "% of what it can do" + (CPU.peak != null ? " (peaks " + CPU.peak + "%)" : "") : fell.length ? "fell behind " + fell.length + (fell.length === 1 ? " time" : " times") + " in the last minute (worst " + worst + " ms)" : "keeping up";
+      const audio = CPU.audio != null ? CPU.audio + "% of what it can do" + (CPU.peak != null ? " (peaks " + CPU.peak + "%)" : "") : fell.length ? "fell behind " + fell.length + (fell.length === 1 ? " time" : " times") + " in the last minute (worst " + worst + " ms)" : cpuDrops(60) ? "not keeping up: see the dropouts" : "keeping up";
       return `<div class="lv-pkh"><div><strong>CPU ${CPU.pct}%</strong><small>Measured once a second from what Live already watches</small></div><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
         <div class="lv-pkl lc-wrap">
           <div class="lc-row"><span>Screen</span><b>${CPU.screen}%</b><i class="bar"><u style="width:${CPU.screen}%"></u></i><small>the app's own work · ${CPU.fps} frames a second</small></div>
-          <div class="lc-row${fell.length && CPU.audio == null ? " bad" : ""}"><span>Audio</span><b>${CPU.audio != null ? CPU.audio + "%" : fell.length ? "!" : "OK"}</b>${CPU.audio != null ? `<i class="bar"><u style="width:${CPU.audio}%"></u></i>` : '<i class="bar off"></i>'}<small>${audio}</small></div>
-          <div class="lc-row"><span>Tablet</span><b>${CPU.press ? esc3(CPU_WORD[CPU.press] || CPU.press) : "—"}</b><i class="bar off"></i><small>${CPU.press ? "the whole tablet's CPU, as Android reports it" : "this tablet doesn't report its CPU to web pages"}</small></div>
+          <div class="lc-row${(fell.length || cpuDrops(60)) && CPU.audio == null ? " bad" : ""}"><span>Audio</span><b>${CPU.audio != null ? CPU.audio + "%" : fell.length || cpuDrops(60) ? "!" : "OK"}</b>${CPU.audio != null ? `<i class="bar"><u style="width:${CPU.audio}%"></u></i>` : '<i class="bar off"></i>'}<small>${audio}</small></div>
+          ${dropRow()}<div class="lc-row"><span>Tablet</span><b>${CPU.press ? esc3(CPU_WORD[CPU.press] || CPU.press) : "—"}</b><i class="bar off"></i><small>${CPU.press ? "the whole tablet's CPU, as Android reports it" : "this tablet doesn't report its CPU to web pages"}</small></div>
           <div class="lv-pkg">Playing</div>
           <p class="lv-note">${its} ${its === 1 ? "sound" : "sounds layered"} · ${vs} ${vs === 1 ? "voice" : "voices"} sounding · FX Lab: ${on.length ? on.map(x => x[1]).join(", ") : "nothing on"}${state.fx && state.fx.space > 0.01 ? " · Space " + Math.round(state.fx.space * 100) : ""}</p>
           ${on.length ? `<div class="lv-pkg">Lighten it</div><div class="lc-off">${on.map(([k, n, why]) => `<button class="btn" data-k="${k}">${esc3(n)} off<small>${esc3(why)}</small></button>`).join("")}</div>` : ""}
@@ -30476,10 +30507,10 @@ registerProcessor("nb-rec", NBRec);`;
       tlTick = function () {
         const r = t0.apply(this, arguments);
         const row = TL[TL.length - 1];
-        if (djv.hidden) { if (row && row.length === TL_HEAD.length - 1) row.push(""); return r; }   // (Live's rows keep the DJ's column, empty)
-        if (row && row.length < TL_HEAD.length) while (row.length < TL_HEAD.length - 1) row.push("");
+        if (djv.hidden) { if (row) while (row.length <= TL_HEAD.indexOf("dj")) row.push(""); return r; }   // (Live's rows keep the DJ's column, empty)
+        if (row) while (row.length < TL_HEAD.indexOf("dj")) row.push("");
         if (row) row.push(num(() => "A " + (DJ.decks[0].playing ? "▶" : "■") + " · B " + (DJ.decks[1].playing ? "▶" : "■") + " · xf " + (+DJ.xf).toFixed(2) + (DJ.sync ? " · sync" : "") + (DJ.trans ? " · mixing" : ""), ""));
-        nbT(djCpu.querySelector(".v"), CPU.pct + "%"); djCpu.querySelector("u").style.width = Math.min(100, CPU.pct) + "%";
+        nbT(djCpu.querySelector(".v"), cpuDrops(10) ? "drops" : CPU.pct + "%"); djCpu.classList.toggle("drops", cpuDrops(10) > 0); djCpu.querySelector("u").style.width = Math.min(100, CPU.pct) + "%";
         djCpu.classList.toggle("warm", cpuB.classList.contains("warm")); djCpu.classList.toggle("hot", cpuB.classList.contains("hot"));
         if (logB.classList.contains("warn")) djLog.classList.add("warn");
         return r;
@@ -30542,6 +30573,106 @@ registerProcessor("nb-rec", NBRec);`;
       djKeys.hidden = false;
     }
     window.__live9 = { SM, grabBars, smpRecStart, smpRecStop, openSample, smpPut, djLockState: () => djLocked, djXf, djKeysToggle };
+    // ======================================================================
+    // 144: the Arp always does something when it's switched on, Hold lets go when it's switched off, and the CPU
+    // readout counts the sound's actual dropouts (Chrome's playback stats), which is what a crackle is.
+    // ======================================================================
+    // ---------- the Arp follows what Live asked for when the layers change ----------
+    // (a new sound comes into the arp, and arpeggiates if the Arp was on; "left out" only lasts while that layer plays)
+    let arpSig = null, arpWant = null;
+    function arpFollow() {
+      const cs = compsNow(); if (!cs.length) return;
+      const keys = cs.map(c => c.key), sig = keys.join(",");
+      if (arpSig === null) { arpSig = sig; arpWant = arpLive(); return; }
+      if (sig === arpSig) { arpWant = arpLive(); return; }
+      arpSig = sig;
+      const out = L3.arpOut.filter(k => keys.includes(k)); if (out.length !== L3.arpOut.length) { L3.arpOut = out; l3Save(); }
+      if (arpWant ? cs.some(c => armed(c.key) && !arpOn(c.key)) || cs.some(c => !armed(c.key) && arpOn(c.key)) : arpLive()) arpApply(!!arpWant);
+    }
+    { const p0 = paintPerf; paintPerf = function () { try { arpFollow(); } catch (e) {} return p0.apply(this, arguments); }; }
+    function arpSay(want) {
+      if (!want) { mlHud("Arp off", "", null); return; }
+      const cs = compsNow(), n = cs.filter(c => arpOn(c.key)).length;
+      if (n) mlHud("Arp on", (cs.length > 1 ? n + " of " + cs.length + " layers · " : "") + "hold notes (or tap Hold) and it plays", null);
+      else mlHud("Arp", cs.length ? "this sound doesn't arpeggiate" : "pick a sound to arpeggiate", null);
+    }
+    // the app's own Arp panel (under Live) is brought up to date when Live closes, not on every tap
+    new MutationObserver(() => { if (lv.hidden && arpPanelDirty) { arpPanelDirty = false; try { renderArpPanel(); } catch (e) {} } }).observe(lv, { attributes: true, attributeFilter: ["hidden"] });
+    // ---------- Hold ----------
+    // In Live, Hold off lets go of everything held: latched notes, and an arp still playing from a sound you left.
+    // With Hold already off, notes still ringing (latched in the app, or carried over) show, and a tap lets them go.
+    const partsN = () => { try { return PARTS.length; } catch (e) { return 0; } };
+    function stillHeld() { try { return heldVoices.size + partsN() > 0; } catch (e) { return false; } }
+    function letGo() {
+      const n = num(() => heldCount(), 0), p = partsN();
+      try { releaseHeld(); } catch (e) {}
+      try { PARTS.slice().forEach(x => dropPart(x, true)); } catch (e) {}
+      try { updateHoldBtn(); } catch (e) {}
+      return [n, p];
+    }
+    function holdTap() {
+      let say;
+      if (holdOn()) { tap("hold"); const [n, p] = letGo(); say = ["Hold off", n || p ? "let go of " + (n ? n + (n === 1 ? " note" : " notes") : "") + (n && p ? " and " : "") + (p ? (p === 1 ? "an arp" : p + " arps") : "") : ""]; }
+      else if (stillHeld()) { const [n, p] = letGo(); say = ["Let go", (n ? n + (n === 1 ? " note" : " notes") : "") + (n && p ? " and " : "") + (p ? (p === 1 ? "an arp" : p + " arps") : "") + " stopped · tap Hold again to hold"]; }
+      else { tap("hold"); say = ["Hold on", "notes keep sounding until you tap Hold again"]; }
+      add139("live", "hold " + (holdOn() ? "on" : "off") + (say[0] !== "Hold on" && say[1] ? " · " + say[1] : ""));
+      paintPerf(); try { paintHeld(); } catch (e) {}
+      mlHud(say[0], say[1], null);
+    }
+    paintHeld = function () {
+      let txt = "", ring = false;
+      try {
+        const ms = [...new Set([...heldVoices.values()].flatMap(v => v.tones || []))].sort((a, b) => a - b);
+        const nm = ms.slice(0, 8).map(noteName).join(" ") + (ms.length > 8 ? " +" + (ms.length - 8) : ""), p = partsN();
+        if (state.hold && ms.length) txt = "Holding " + nm;
+        else if (ms.length) { txt = "Still ringing " + nm; ring = true; }
+        else if (p) { txt = (p === 1 ? "An arp" : p + " arps") + " still playing"; ring = true; }
+        else if (SUS.on) txt = "Sustain (MiniLab Hold)" + (SUS.held.size ? " · " + SUS.held.size + (SUS.held.size === 1 ? " note" : " notes") : "");
+      } catch (e) {}
+      const hb = $id("lvHold"); nbT($id("lvHeld"), txt);
+      hb.classList.toggle("sus", !!txt && !ring && !txt.startsWith("Holding")); hb.classList.toggle("ring", ring);
+    };
+    // ---------- dropouts: the sound itself missing its deadline ----------
+    const DROP = { api: "", n0: null, ms0: null, hist: [], total: 0, totalMs: 0 };
+    function dropRead() {
+      try { const s = ctx.playbackStats; if (s && s.underrunEvents != null) return { api: "playbackStats", n: s.underrunEvents, ms: (s.underrunDuration || 0) * 1000 }; } catch (e) {}
+      try { const s = ctx.playoutStats; if (s && s.fallbackFramesEvents != null) return { api: "playoutStats", n: s.fallbackFramesEvents, ms: s.fallbackFramesDuration || 0 }; } catch (e) {}
+      return null;
+    }
+    function dropTick() {
+      const r = dropRead(); let d = 0, ms = 0;
+      if (r) {
+        DROP.api = r.api;
+        if (DROP.n0 != null && r.n >= DROP.n0) d = r.n - DROP.n0;
+        if (DROP.ms0 != null && r.ms >= DROP.ms0) ms = r.ms - DROP.ms0;
+        DROP.n0 = r.n; DROP.ms0 = r.ms;
+      }
+      DROP.hist.push(d); if (DROP.hist.length > 60) DROP.hist.shift();
+      if (d) {
+        DROP.total += d; DROP.totalMs += ms; TLS.seenLag += d;
+        logB.classList.add("warn"); logB.title = "The sound dropped out " + TLS.seenLag + (TLS.seenLag === 1 ? " time" : " times") + " since the last log: tap Log to save it";
+        add139("dropout", d + (d === 1 ? " dropout" : " dropouts") + " (" + Math.round(ms) + " ms) · FX Lab " + fxOnStr() + " · " + num(() => __stk.items().length, 0) + " layers");
+      }
+      return d;
+    }
+    function cpuDrops(n) { const h = DROP.hist; let s = 0; for (let i = Math.max(0, h.length - n); i < h.length; i++) s += h[i]; return s; }
+    function dropRow() {
+      if (!DROP.api) return "";
+      const m = cpuDrops(60);
+      return `<div class="lc-row${m ? " bad" : ""}"><span>Dropouts</span><b>${m}</b><i class="bar off"></i><small>${m ? "the sound missed its deadline " + m + (m === 1 ? " time" : " times") + " in the last minute: that's the crackle (lighten it below)" : "none in the last minute"}</small></div>`;
+    }
+    {
+      const t0 = tlTick;
+      tlTick = function () {
+        const on = !((lv.hidden && $id("djView").hidden) || !ctx), d = on ? dropTick() : 0, last0 = TL[TL.length - 1];
+        const r = t0.apply(this, arguments);
+        const row = TL[TL.length - 1];
+        if (on && row && row !== last0) { const i = TL_HEAD.indexOf("dropouts"); while (row.length < i) row.push(""); row.push(d); }
+        return r;
+      };
+      TL_HEAD.push("dropouts");
+    }
+    window.__live10 = { arpFollow, arpSay, holdTap, letGo, stillHeld, DROP, dropTick, cpuDrops };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
