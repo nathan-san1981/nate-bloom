@@ -10,9 +10,10 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: Unicorn Meadow (a cozy game where unicorn friends build their meadow), and a kid-sized
-Unicorn Dungeon: a Kid's play button that starts one of 60 gentle dungeons, a big Pack button with pictures of each item, arrows you can hold to keep walking, a life bar,
-Yes / No questions you can hear, tap-the-words-to-hear messages in the clock's natural voice, and calm music.
+New in this version: jobs earn gems. Each of today's jobs she ticks on the star chart (or the morning and
+bedtime checklists) puts gems in Unicorn Meadow, 3 a job by default (set it in Edit jobs, or turn it off), plus
+5 more when she finishes them all. Meadow collects them with a cheer. Also Unicorn Meadow's latest version, with
+grown-up settings for its space-rock questions (how often, math or spelling, level).
 
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
 dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
