@@ -377,6 +377,10 @@ button{font-family:inherit;cursor:pointer}
 .gx-reset[hidden]{display:none}
 .bh-ctl{position:absolute;left:14px;bottom:72px;z-index:6;display:flex;align-items:center;gap:10px;background:rgba(26,23,64,.92);border-radius:16px;padding:8px 14px;color:#F3EEFF;font-size:15px;font-weight:600;box-shadow:0 4px 0 #090818}
 .bh-ctl[hidden]{display:none}
+.pw-ctl{position:absolute;left:14px;top:66px;z-index:6;display:flex;align-items:center;gap:10px;background:rgba(26,23,64,.92);border-radius:16px;padding:8px 14px;color:#F3EEFF;font-size:15px;font-weight:600;box-shadow:0 4px 0 #090818}
+.pw-ctl[hidden]{display:none}
+.pw-ctl input{width:120px;accent-color:#9ED9E2}
+.pw-ctl span{min-width:92px}
 .bh-ctl input{width:150px;accent-color:#FFB070}
 .bh-ctl span{min-width:66px;color:#FFB070}
 .sim-pop{animation:simpop .9s ease-out forwards}
@@ -839,7 +843,7 @@ body.no-say .say-btn{display:none}
           <div class="gx-zoom"><button id="gxIn" aria-label="Zoom in">+</button><button id="gxOut" aria-label="Zoom out">&minus;</button></div>
           <button class="gx-bh" id="spBH"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="#000"/><ellipse cx="11" cy="11" rx="10" ry="3.5" fill="none" stroke="#FFB070" stroke-width="2"/></svg>Black hole!</button>
           <button class="gx-reset" id="spReset" hidden>Reset</button>
-          <div class="bh-ctl" id="bhCtl" hidden><label for="bhSize">Black hole size</label><input type="range" id="bhSize" min="1" max="40" step="1" value="8"><span id="bhSizeTxt">small</span></div>
+          <div class="pw-ctl" id="pwCtl"><label for="pwSize">Planet weight</label><input type="range" id="pwSize" min="0" max="4" step="1" value="3"><span id="pwTxt">30&times; heavier</span></div><div class="bh-ctl" id="bhCtl" hidden><label for="bhSize">Black hole size</label><input type="range" id="bhSize" min="1" max="40" step="1" value="8"><span id="bhSizeTxt">small</span></div>
         </div>
         <div class="sp-date" id="spDate" style="top:auto;bottom:14px;left:auto;right:16px;font-size:14px;text-align:right;max-width:260px"></div>
       </div>
@@ -2516,23 +2520,28 @@ function planetBody(n,sz){
 }
 var sim={on:false,raf:null,bodies:[],sun:{alive:true},bh:null,fast:false,last:0,held:null,msgT:0,F:[0,0,0],t:0,tdyn:0,frames:0,events:[],tugT:0,sunPull:false};
 var G4=39.4784176; // G in AU^3 per solar mass per year^2 (4 pi^2)
-function helioV(name,date){ // position and exact orbital velocity (AU, AU/yr) from the same orbit tables as helio()
+var SIMW=[1,3,10,30,100],SIMW_TXT=['real','3\u00d7 heavier','10\u00d7 heavier','30\u00d7 heavier','100\u00d7 heavier'];
+function simBoost(){var e=$('pwSize');return SIMW[e?+e.value:0]||1;}
+function helioV(name,date,Mc){ // position and exact orbital velocity (AU, AU/yr) from the same orbit tables as helio()
  var k=PLANETS[name],T=(date.getTime()/86400000+2440587.5-2451545)/36525;
  var a=k[0]+k[1]*T,e=k[2]+k[3]*T,I=(k[4]+k[5]*T)*RAD,L=k[6]+k[7]*T,wb=k[8]+k[9]*T,O=k[10]+k[11]*T;
  var M=((L-wb)%360+540)%360-180;M*=RAD;var w=(wb-O)*RAD;O*=RAD;
  var E=M+e*Math.sin(M);for(var i=0;i<12;i++)E=E-(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));
- var nn=Math.sqrt(G4*(1+PL_MASS[name])/(a*a*a)),Ed=nn/(1-e*Math.cos(E)),sq=Math.sqrt(1-e*e);
+ var nn=Math.sqrt(G4*(Mc||1)/(a*a*a)),Ed=nn/(1-e*Math.cos(E)),sq=Math.sqrt(1-e*e);
  var xp=a*(Math.cos(E)-e),yp=a*sq*Math.sin(E),vxp=-a*Math.sin(E)*Ed,vyp=a*sq*Math.cos(E)*Ed;
  var cw=Math.cos(w),sw=Math.sin(w),cO=Math.cos(O),sO=Math.sin(O),cI=Math.cos(I),sI=Math.sin(I);
  var Px=cw*cO-sw*sO*cI,Qx=-sw*cO-cw*sO*cI,Py=cw*sO+sw*cO*cI,Qy=-sw*sO+cw*cO*cI,Pz=sw*sI,Qz=cw*sI;
  return {x:Px*xp+Qx*yp,y:Py*xp+Qy*yp,z:Pz*xp+Qz*yp,vx:Px*vxp+Qx*vyp,vy:Py*vxp+Qy*vyp,vz:Pz*vxp+Qz*vyp};
 }
-function simState(d){ // today's real positions and velocities (AU, AU/yr), centre of mass at rest at the origin
-  var bodies=ORDER.map(function(n){var h=helioV(n,d),vx=h.vx,vy=h.vy,vz=h.vz;
-    return {n:n,m:PL_MASS[n],x:h.x,y:h.y,z:h.z,vx:vx,vy:vy,vz:vz,a0:Math.hypot(h.x,h.y),v0:Math.sqrt(vx*vx+vy*vy+vz*vz),alive:true,trail:[],tug:{}};});
-  var sun={n:'sun',m:1,x:0,y:0,z:0,vx:0,vy:0,vz:0,alive:true},M=1,c=[0,0,0,0,0,0];
-  bodies.forEach(function(b){M+=b.m;c[0]+=b.m*b.x;c[1]+=b.m*b.y;c[2]+=b.m*b.z;c[3]+=b.m*b.vx;c[4]+=b.m*b.vy;c[5]+=b.m*b.vz;});
-  bodies.concat([sun]).forEach(function(b){b.x-=c[0]/M;b.y-=c[1]/M;b.z-=c[2]/M;b.vx-=c[3]/M;b.vy-=c[4]/M;b.vz-=c[5]/M;});
+function simState(d){ // today's real orbits, each planet set going around everything inside it (Jacobi), centre of mass at rest
+  var K=simBoost(),ord=ORDER.slice().sort(function(a,b){return PLANETS[a][0]-PLANETS[b][0];});
+  var sun={n:'sun',m:1,x:0,y:0,z:0,vx:0,vy:0,vz:0,alive:true},M=1,R=[0,0,0,0,0,0],byN={};
+  ord.forEach(function(n){var m=PL_MASS[n]*K,h=helioV(n,d,M+m);
+    var b={n:n,m:m,m0:PL_MASS[n],x:R[0]+h.x,y:R[1]+h.y,z:R[2]+h.z,vx:R[3]+h.vx,vy:R[4]+h.vy,vz:R[5]+h.vz,a0:Math.hypot(h.x,h.y),alive:true,trail:[],tug:{}};
+    b.v0=Math.sqrt(h.vx*h.vx+h.vy*h.vy+h.vz*h.vz);
+    R=[(M*R[0]+m*b.x)/(M+m),(M*R[1]+m*b.y)/(M+m),(M*R[2]+m*b.z)/(M+m),(M*R[3]+m*b.vx)/(M+m),(M*R[4]+m*b.vy)/(M+m),(M*R[5]+m*b.vz)/(M+m)];M+=m;byN[n]=b;});
+  var bodies=ORDER.map(function(n){return byN[n];});
+  bodies.concat([sun]).forEach(function(b){b.x-=R[0];b.y-=R[1];b.z-=R[2];b.vx-=R[3];b.vy-=R[4];b.vz-=R[5];});
   return {bodies:bodies,sun:sun};
 }
 function bhPx(m){return 7+3.2*Math.sqrt(m);}
@@ -2593,7 +2602,7 @@ function simAdvance(dt){
   return done;
 }
 function simDist(a,b){var dx=a.x-b.x,dy=a.y-b.y,dz=a.z-b.z;return Math.sqrt(dx*dx+dy*dy+dz*dz);}
-function simMerge(big,small){var M=big.m+small.m;['vx','vy','vz'].forEach(function(k){big[k]=(big[k]*big.m+small[k]*small.m)/M;});
+function simMerge(big,small){var M=big.m+small.m;if(big.m0!=null&&small.m0!=null)big.m0+=small.m0;['vx','vy','vz'].forEach(function(k){big[k]=(big[k]*big.m+small[k]*small.m)/M;});
   if(!big.held&&big!==sim.bh)['x','y','z'].forEach(function(k){big[k]=(big[k]*big.m+small[k]*small.m)/M;});big.m=M;small.alive=false;}
 function simCollide(){ // touching bodies squish together, keeping their momentum
   var hit=false,B=sim.bodies,i,j;
@@ -2613,8 +2622,18 @@ function simOsc(b,c){
   var Pv=e>1e-7?[ex/e,ey/e,ez/e]:[rx/r,ry/r,rz/r],Qv=[(hy*Pv[2]-hz*Pv[1])/hm,(hz*Pv[0]-hx*Pv[2])/hm,(hx*Pv[1]-hy*Pv[0])/hm];
   return {a:a,e:e,P:Pv,Q:Qv,esc:e>=1,T:Math.pow(a,1.5)/Math.sqrt(c.m+b.m)};
 }
+function simCircular(b){ // a planet let go orbits where you put it: the speed of a round orbit there, around the Sun (or the black hole)
+  var c=simCenter(b);sim.tdyn=0;if(!c){b.vx=b.vy=b.vz=0;return;}
+  var dx=b.x-c.x,dy=b.y-c.y,r=Math.max(0.05,Math.hypot(dx,dy)),v=Math.sqrt(G4*(c.m+b.m)/r),ang=Math.atan2(dy,dx);
+  b.z=c.z;b.vx=c.vx-Math.sin(ang)*v;b.vy=c.vy+Math.cos(ang)*v;b.vz=c.vz;}
+function simCenter(b){ // what a planet really goes around: the Sun (or black hole) plus everything closer in, as one point
+  var c=simCentral();if(!c)return null;var r=simDist(b,c),M=c.m,X=c.m*c.x,Y=c.m*c.y,Z=c.m*c.z,VX=c.m*c.vx,VY=c.m*c.vy,VZ=c.m*c.vz;
+  simAll().forEach(function(q){if(q===b||q===c||simDist(q,c)>=r)return;M+=q.m;X+=q.m*q.x;Y+=q.m*q.y;Z+=q.m*q.z;VX+=q.m*q.vx;VY+=q.m*q.vy;VZ+=q.m*q.vz;});
+  return {m:M,x:X/M,y:Y/M,z:Z/M,vx:VX/M,vy:VY/M,vz:VZ/M};}
+function simKeepMomentum(b){var c=simCentral();if(!c||!b.p0)return;
+  c.vx-=(b.m*b.vx-b.p0[0])/c.m;c.vy-=(b.m*b.vy-b.p0[1])/c.m;c.vz-=(b.m*b.vz-b.p0[2])/c.m;b.p0=null;sim.bodies.forEach(function(q){if(q!==b&&q.alive)simMark(q);});}
 function simYear(T,n){return T<1.5?Math.round(T*365)+' days':T.toFixed(1)+(n==='earth'?' years':' Earth years');}
-function simMark(b){var c=simCentral();b.tug={};if(c){var o=simOsc(b,c);b.ref={a:o.a,e:o.e,esc:o.esc};}else b.ref=null;}
+function simMark(b){var c=simCenter(b);b.tug={};if(c){var o=simOsc(b,c);b.ref={a:o.a,e:o.e,esc:o.esc};}else b.ref=null;}
 function simStart(){if(sim.on)return;stopFast();var st=simState(sNow());sim.on=true;sim.bodies=st.bodies;sim.sun=st.sun;sim.bh=null;sim.fast=false;sim.held=null;sim.last=0;
   sim.t=0;sim.tdyn=0;sim.frames=0;sim.events=[];sim.tugT=0;sim.sunPull=false;sim.F=[sim.sun.x,sim.sun.y,sim.sun.z];sim.bodies.forEach(simMark);
   $('spReset').hidden=false;$('spFast').textContent='Speed up time';$('spFast').classList.remove('on');$('spToday').textContent='Put it back';
@@ -2626,25 +2645,25 @@ function simReset(silent){
 }
 function simSay(head,name,text){$('spInfoHead').textContent=head;$('spInfoName').innerHTML=name?'<span class="sp-dot" style="background:'+(PL_INFO[name]?PL_INFO[name].color:'#000')+'"></span>'+esc(PL_INFO[name]?PL_INFO[name].name:'Black hole'):'';$('spInfoTxt').textContent=text;$('spInfoSay').setAttribute('data-say-text',text);say(text);}
 function simRelease(b){
-  var c=simCentral(),nm=PL_INFO[b.n].name,t,boss=sim.sun.alive?'the Sun':'the black hole';
+  var c=simCenter(b),nm=PL_INFO[b.n].name,t,boss=sim.sun.alive?'the Sun':'the black hole';
   b.trail=[];simMark(b);
   if(!c){t=nm+' has nothing big to hold it now, so it just drifts.';}
   else{var o=simOsc(b,c),r=simDist(b,c);
-    if(o.esc)t='You put '+nm+' so far out that it is moving too fast for '+boss+' to hold it. Watch it fly away into deep space!';
+    if(o.esc)t=nm+' is moving too fast for '+boss+' to hold it. Watch it fly away into deep space!';
     else if(r<b.a0*0.8)t='You moved '+nm+' closer to '+boss+'. '+(sim.sun.alive?'It is hotter there, and ':'')+nm+' zooms around faster: its year is now about '+simYear(o.T,b.n)+' long.';
     else if(r>b.a0*1.25)t='You moved '+nm+' farther from '+boss+'. '+(sim.sun.alive?'It is colder out there, and its':'Its')+' year is now about '+simYear(o.T,b.n)+' long.';
     else t=nm+' is back near its old path. Its year is about '+simYear(o.T,b.n)+' long.';}
-  var hv=PL_HEAVY[b.n];
-  if(hv==='318'||hv==='95')t+=' It is '+hv+' times heavier than Earth, so it tugs the other planets too. Watch their paths!';
+  var hv=PL_HEAVY[b.n],K=simBoost();
+  if(hv==='318'||hv==='95')t+=' It is '+(K>1?'super heavy':hv+' times heavier than Earth')+', so it tugs on the planets near it. Watch their paths!';
   else if(hv)t+=' It is '+hv+' times heavier than Earth, so it tugs nearby planets a little.';
   else t+=' It is small, so it barely tugs the other planets.';
   simSay('What happens?',b.n,t);sim.tugT=Date.now();
 }
 // when one body's gravity changes a planet's path, say who did it
 function simTugCheck(){
-  var c=simCentral();if(!c||Date.now()-sim.tugT<6000)return;
+  if(!simCentral()||Date.now()-sim.tugT<6000)return;
   for(var i=0;i<sim.bodies.length;i++){var b=sim.bodies[i];if(!b.alive||b.held||!b.ref)continue;
-    var o=simOsc(b,c),R=b.ref,ch=o.esc?!R.esc:(!R.esc&&(Math.abs(o.a-R.a)/R.a>0.12||Math.abs(o.e-R.e)>0.08));
+    var o=simOsc(b,simCenter(b)),R=b.ref,ch=o.esc?!R.esc:(!R.esc&&(Math.abs(o.a-R.a)/R.a>0.12||Math.abs(o.e-R.e)>0.08));
     if(!ch)continue;
     var who=null,bv=0;for(var k in b.tug)if(b.tug[k]>bv){bv=b.tug[k];who=k;}
     var nm=PL_INFO[b.n].name,by=who==='bh'?'The black hole\'s':who&&PL_INFO[who]?PL_INFO[who].name+'\'s':'Gravity',boss=sim.sun.alive?'the Sun':'the black hole',t;
@@ -2660,8 +2679,8 @@ function simEvent(b,kind,other){b.alive=false;var p=simXY(b),nm=PL_INFO[b.n].nam
   else if(kind==='crash'){var on=PL_INFO[other.n].name;simSay('Crash!',other.n,nm+' crashed into '+on+', and they squished together into one bigger planet.');blip(500,60,.5,'sawtooth');}
   else{simSay('Bye bye!',b.n,nm+' flew away into deep space. It is too far away to come back.');blip(600,1500,.4);}
 }
-function simOrbits(svg){var c=simCentral();
-  sim.bodies.forEach(function(b){var pl=svg.querySelector('#osc_'+b.n);if(!pl)return;
+function simOrbits(svg){
+  sim.bodies.forEach(function(b){var pl=svg.querySelector('#osc_'+b.n);if(!pl)return;var c=b.alive?simCenter(b):null;
     if(!c||!b.alive||b.held){pl.setAttribute('points','');return;}
     var o=simOsc(b,c);if(o.esc||o.a*(1+o.e)>95){pl.setAttribute('points','');return;}
     var bb=o.a*Math.sqrt(Math.max(0,1-o.e*o.e)),ox=c.x-sim.F[0],oy=c.y-sim.F[1],pts=[],N=72;
@@ -2706,6 +2725,9 @@ function simAddBH(){
   $('bhCtl').hidden=false;$('spBH').disabled=true;gxRender(1);whoosh();
   simSay('A black hole!',null,'Drag the black hole around, and use the slider to make it bigger. A bigger black hole pulls harder, from farther away. It pulls on the Sun too!');
 }
+$('pwSize').addEventListener('input',function(){var K=simBoost(),i=+this.value;$('pwTxt').textContent=SIMW_TXT[i];viewUntil=Date.now()+240000;
+  if(sim.on){sim.bodies.forEach(function(b){if(b.m0!=null)b.m=b.m0*K;});sim.tdyn=0;sim.bodies.forEach(simMark);sim.tugT=Date.now();}
+  simSay('Planet weight',null,K===1?'Real planet weights. The Sun is so much heavier than the planets that they hardly push each other around.':'Now the planets are '+K+' times heavier than real ones, so they pull on each other much harder. Put a big planet near the others and watch!');});
 function bhSizeTxt(m){return m<4?'tiny':m<10?'small':m<20?'big':m<32?'huge':'MONSTER';}
 $('bhSize').addEventListener('input',function(){var m=+this.value;$('bhSizeTxt').textContent=bhSizeTxt(m);
   if(sim.on&&sim.bh){sim.bh.m=m;sim.tdyn=0;gxRender(1);}
@@ -2723,7 +2745,7 @@ $('bhSize').addEventListener('input',function(){var m=+this.value;$('bhSizeTxt')
     if(!drag||e.pointerId!==drag.pid)return;
     if(!drag.moved){if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<7)return;drag.moved=true;
       if(!sim.on)simStart();
-      if(drag.id!=='bh'){var b=sim.bodies.filter(function(x){return x.n===drag.id;})[0];if(!b||!b.alive){drag=null;return;}b.held=true;sim.held=b;b.trail=[];}
+      if(drag.id!=='bh'){var b=sim.bodies.filter(function(x){return x.n===drag.id;})[0];if(!b||!b.alive){drag=null;return;}b.held=true;sim.held=b;b.trail=[];b.p0=[b.m*b.vx,b.m*b.vy,b.m*b.vz];}
       else if(sim.bh)sim.bh.held=true;
       sim.tdyn=0;}
     var p=svgPt(e);if(!p)return;var q=xyAu(Math.max(4,Math.min(516,p[0])),Math.max(4,Math.min(460,p[1])));
@@ -2734,16 +2756,14 @@ $('bhSize').addEventListener('input',function(){var m=+this.value;$('bhSizeTxt')
     if(!drag||e.pointerId!==drag.pid)return;
     if(drag.moved){var c=simCentral();
       if(drag.id==='bh'&&sim.bh){var B=sim.bh;B.held=false;var S1=sim.sun.alive?sim.sun:null;B.vx=S1?S1.vx:0;B.vy=S1?S1.vy:0;B.vz=S1?S1.vz:0;sim.tdyn=0;}
-      else if(sim.held){var b=sim.held;b.held=false;sim.held=null;c=simCentral();
-        var cx=c?c.x:sim.F[0],cy=c?c.y:sim.F[1],ang=Math.atan2(b.y-cy,b.x-cx);
-        b.vx=(c?c.vx:0)-Math.sin(ang)*b.v0;b.vy=(c?c.vy:0)+Math.cos(ang)*b.v0;b.vz=c?c.vz:0;sim.tdyn=0;simRelease(b);}
+      else if(sim.held){var b=sim.held;b.held=false;sim.held=null;simCircular(b);simKeepMomentum(b);simCircular(b);simRelease(b);}
       gxDragMoved=true;setTimeout(function(){gxDragMoved=false;},50);}
     drag=null;
   }
   w.addEventListener('pointerup',end);w.addEventListener('pointercancel',end);
 })();
-if(TEST)window.__SIM={sim:function(){return sim;},now:function(){return sNow().getTime();},tug:function(){simTugCheck();},start:simStart,reset:simReset,advance:simAdvance,osc:simOsc,state:simState,helio:helio,central:simCentral,all:simAll,
-  addBH:simAddBH,release:function(n){var b=sim.bodies.filter(function(x){return x.n===n;})[0],c=simCentral(),ang=Math.atan2(b.y-c.y,b.x-c.x);b.held=false;sim.held=null;b.vx=c.vx-Math.sin(ang)*b.v0;b.vy=c.vy+Math.cos(ang)*b.v0;b.vz=c.vz;b.z=c.z;sim.tdyn=0;simRelease(b);}};
+if(TEST)window.__SIM={sim:function(){return sim;},center:simCenter,now:function(){return sNow().getTime();},tug:function(){simTugCheck();},start:simStart,reset:simReset,advance:simAdvance,osc:simOsc,state:simState,helio:helio,central:simCentral,all:simAll,
+  addBH:simAddBH,pick:function(n){var b=sim.bodies.filter(function(x){return x.n===n;})[0];b.held=true;sim.held=b;b.p0=[b.m*b.vx,b.m*b.vy,b.m*b.vz];},release:function(n){var b=sim.bodies.filter(function(x){return x.n===n;})[0];b.held=false;sim.held=null;simCircular(b);simKeepMomentum(b);simCircular(b);simRelease(b);}};
 var gxDragMoved=false;
 var NEAR=[['alphacen',4.4,14.7,'#FFE08A',7],['barnard',6,17.9,'#E0703A',3],['sirius',8.6,6.75,'#D9EEFF',10],['procyon',11.5,7.6,'#FFF4D6',7],['altair',17,19.8,'#EAF2FF',7],['vega',25,18.6,'#CFE3FF',8],['fomalhaut',25,23,'#E6F0FF',6],['pollux',34,7.75,'#FFC46B',8],['arcturus',37,14.3,'#FFB070',11]];
 function lvNear(){
@@ -2789,7 +2809,7 @@ function gxSetLevel(n,instant){
     else el.classList.add(i<n?'in':'out');}
   $('gxName').textContent=GX_NAMES[n];$('gxHint').textContent=GX_HINT[n];
   $('gxIn').disabled=n===0;$('gxOut').disabled=n===4;
-  $('spFast').classList.toggle('hide',n!==1);$('spToday').classList.toggle('hide',n!==1);
+  $('spFast').classList.toggle('hide',n!==1);$('spToday').classList.toggle('hide',n!==1);$('pwCtl').hidden=n!==1;
   if(n!==1)stopFast();
   if(gxSel&&!(gxSel in (n===1?PL_INFO:GX_INFO))){gxSel=null;}
   renderSpaceInfo();
