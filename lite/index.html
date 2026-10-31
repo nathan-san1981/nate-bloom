@@ -2881,6 +2881,120 @@ body.mini-live .dj.live .lv-pages button.sp[aria-pressed="true"]::before { color
 .lk-sw input { width: 18px; height: 18px; accent-color: var(--lilac); }
 .lp-tile .lp-tm:focus-visible { outline: 2px solid var(--lilac); outline-offset: -2px; border-radius: 9px; }
 @media (max-width: 600px) { .lp-keys { grid-column: 1 / -1; } .lv-pkl.lk .lk-k { width: 104px; } }
+/* Live's Log (139) */
+.dj.live .lv-log { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+.lv-log i { flex: none; width: 12px; height: 15px; border: 1.6px solid currentColor; border-radius: 2.5px; box-sizing: border-box; opacity: 0.85;
+  background: linear-gradient(currentColor, currentColor) 2px 3px / 5px 1.5px no-repeat, linear-gradient(currentColor, currentColor) 2px 6.5px / 5px 1.5px no-repeat, linear-gradient(currentColor, currentColor) 2px 10px / 3px 1.5px no-repeat; }
+.lv-log.warn { border-color: #ff6b6b; }
+.lv-log.warn::before { content: ""; position: absolute; top: 4px; left: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ff5d5d; box-shadow: 0 0 8px #ff5d5d; }
+@media (max-width: 1100px) { .dj.live .lv-log span { display: none; } }
+/* Live: Now playing (140) */
+.dj.live .lv-body { grid-template-columns: 300px minmax(0, 1fr); }
+@media (max-width: 1150px) and (orientation: landscape) { .dj.live .lv-body { grid-template-columns: 268px minmax(0, 1fr); } }
+@media (orientation: portrait) { .dj.live .lv-body { grid-template-columns: 250px minmax(0, 1fr); } }
+.dj.live .lv-perf { gap: 8px; }
+.lp-hide { display: none !important; }
+.lp-now { flex: none; display: flex; flex-direction: column; gap: 6px; }
+.lp-nowh { display: flex; align-items: center; gap: 4px; height: 34px; }
+.lp-nowh .lp-sp { flex: 1; }
+.dj.live .lp-nowh .lp-layers { flex: none; height: 26px; padding: 0 9px; border-style: solid; border-color: var(--line); border-radius: 13px; color: var(--ink); font-size: 0.7rem; }
+.dj.live .lp-nowh .btn { width: 34px; height: 34px; padding: 0; font-size: 1.15rem; flex: none; }
+.lp-cards { display: flex; flex-direction: column; gap: 6px; max-height: 248px; overflow-y: auto; overscroll-behavior: contain; }
+.lp-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "n a x" "l l l"; align-items: center; gap: 2px 6px; padding: 7px 8px 6px 10px; border-radius: 12px;
+  background: var(--raised); border: 1.5px solid transparent; }
+.lp-card.cur { border-color: var(--lilac); background: #221b31; }
+.lp-card.arping { box-shadow: inset 4px 0 0 var(--lilac); }
+.lp-card.browsing { border-style: dashed; }
+.lp-cname { grid-area: n; min-width: 0; display: flex; flex-direction: column; gap: 1px; padding: 2px 0; background: none; border: 0; color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
+.lp-cname b { font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-cname small { font-size: 0.64rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-card.cur .lp-cname small { color: var(--lilac); }
+.lp-carp { grid-area: a; height: 28px; padding: 0 10px; border-radius: 14px; border: 1px solid var(--line); background: none; color: var(--dim); font: 700 0.68rem var(--font-body);
+  letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+.lp-carp[data-st="ready"] { border-color: #c4a3ff99; color: var(--lilac); }
+.lp-carp[data-st="on"] { background: var(--lilac); border-color: var(--lilac); color: #160f24; box-shadow: 0 0 12px #c4a3ff55; }
+.lp-carp[data-st="out"] { opacity: 0.75; text-transform: none; letter-spacing: 0; font-weight: 600; }
+.lp-cx { grid-area: x; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; font-size: 0.8rem; }
+.lp-clev { grid-area: l; height: 16px; cursor: ew-resize; touch-action: none; display: flex; align-items: center; background: linear-gradient(#ffffff17, #ffffff17) center / 100% 5px no-repeat; border-radius: 3px; }
+.lp-clev i { display: block; height: 5px; border-radius: 3px; background: linear-gradient(90deg, #7fd6c2, #c4a3ff); pointer-events: none; }
+.lp-clev:focus-visible { outline: 2px solid var(--lilac); outline-offset: 2px; }
+.lp-addl { flex: none; height: 34px; border-radius: 10px; border: 1px dashed #c4a3ff77; background: none; color: var(--lilac); font: 600 0.78rem var(--font-body); cursor: pointer; }
+/* Hold and the Arp, compact, with what's held */
+.dj.live .lp-hold { flex: none; min-height: 54px; max-height: none; padding: 6px 10px; }
+.dj.live .lp-hold b { font-size: 1.05rem; }
+.lp-held { display: block; max-width: 100%; font: 600 0.66rem var(--font-mono); color: #ffcf8a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-held:empty { display: none; }
+.lp-hold[aria-pressed="true"] .lp-held { color: #3a2a10; }
+.lp-hold.sus .lp-held { color: #7fd6c2; }
+.dj.live .lp-arpbox { flex: none; max-height: none; gap: 5px; }
+.dj.live .lp-arprow { flex: none; height: 50px; min-height: 50px; }
+.lp-octw { flex: none; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+.lp-octw .lp-lab { font-size: 0.56rem; text-align: center; }
+.dj.live .lp-octw .lp-oct { height: 30px; }
+.dj.live .lp-octw .lp-oct button { width: 24px; font-size: 0.8rem; }
+.dj.live.lv-kbd .lp-octw[data-kc]::after { top: -6px; right: -4px; }
+.dj.live .lp-arp b { font-size: 1.05rem; }
+/* the sounds, always in view */
+.lp-snds { flex: 1 1 150px; min-height: 130px; display: flex; flex-direction: column; gap: 6px; }
+.lp-sndh { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.lp-src { height: 28px; flex: none; }
+.lp-src button { padding: 0 8px; font-size: 0.68rem; }
+.lp-grid { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; align-content: start; }
+.lp-grid .lp-tile { min-height: 42px; }
+.lp-grid .lp-tm { padding: 4px 8px; }
+.lp-grid .lp-tm b { font-size: 0.78rem; }
+.lp-grid .lp-tm small { font-size: 0.58rem; }
+.lp-grid .lp-tp { width: 32px; font-size: 1.05rem; }
+.lp-grid .lv-note { grid-column: 1 / -1; font-size: 0.74rem; }
+.lp-all { flex: none; height: 32px; border-radius: 9px; border: 1px solid var(--line); background: none; color: var(--ink); font: 600 0.74rem var(--font-body); cursor: pointer; }
+.dj.live .lp-split, .dj.live .lp-keys { padding: 7px 10px; }
+@media (orientation: portrait) { .lp-grid .lp-tm small { display: none; } }
+/* a phone: the cards and the controls; the sounds are a tap away (Sounds) */
+@media (max-width: 600px) { .lp-now { grid-column: 1 / -1; } .lp-snds { display: none; } .dj.live .lp-hold, .dj.live .lp-arpbox { min-height: 54px; } }
+/* Live's CPU readout (141) */
+.dj.live .lv-cpu { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; min-width: 92px; font-variant-numeric: tabular-nums; }
+.lv-cpu b { font: 700 0.62rem var(--font-mono); letter-spacing: 0.08em; color: var(--dim); }
+.lv-cpu .v { font: 700 0.9rem var(--font-mono); min-width: 2.6em; text-align: right; }
+.lv-cpu .bar, .lc-row .bar { flex: none; width: 26px; height: 6px; border-radius: 3px; background: #ffffff17; overflow: hidden; }
+.lv-cpu .bar u, .lc-row .bar u { display: block; height: 100%; width: 0; background: #7fd6c2; border-radius: 3px; transition: width 0.4s; }
+.lv-cpu.warm { border-color: #ffb65c99; } .lv-cpu.warm .v { color: #ffcf8a; } .lv-cpu.warm .bar u { background: #ffb65c; }
+.lv-cpu.hot { border-color: #ff6b6b; background: #ff5d5d1f; } .lv-cpu.hot .v { color: #ff8a8a; } .lv-cpu.hot .bar u { background: #ff5d5d; }
+.lc-row { display: grid; grid-template-columns: 64px 64px 1fr; grid-template-areas: "n v b" "s s s"; align-items: center; gap: 2px 8px; padding: 8px 2px; border-bottom: 1px solid #ffffff0f; }
+.lc-row span { grid-area: n; font-weight: 600; font-size: 0.84rem; }
+.lc-row b { grid-area: v; font: 700 1rem var(--font-mono); }
+.lc-row .bar { grid-area: b; width: 100%; height: 7px; }
+.lc-row .bar.off { background: none; }
+.lc-row small { grid-area: s; font-size: 0.7rem; color: var(--dim); }
+.lc-row.bad b, .lc-row.bad small { color: #ff8a8a; }
+.lc-off { display: flex; flex-direction: column; gap: 6px; }
+.lc-off .btn { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; height: auto; padding: 8px 12px; text-align: left; }
+.lc-off .btn small { font-size: 0.66rem; color: var(--dim); font-weight: 500; }
+@media (max-width: 1100px) { .dj.live .lv-cpu { min-width: 0; padding: 0 8px; } .dj.live .lv-cpu .bar { display: none; } }
+@media (max-width: 600px) { .dj.live .lv-cpu b { display: none; } }
+/* Live's recorder (142) */
+.dj.live:not(.play-bp) #lvRec { display: none; }
+.dj.live .lv-take { display: inline-flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; }
+.lv-take i { width: 11px; height: 11px; border-radius: 50%; background: #ff5d5d; flex: none; }
+.lv-take.on { background: #ff5d5d; border-color: #ff5d5d; color: #1a0808; font-weight: 700; }
+.lv-take.on i { background: #1a0808; border-radius: 2px; animation: lvRecBlink 1s steps(2, start) infinite; }
+@keyframes lvRecBlink { to { opacity: 0.25; } }
+.dj.live .lv-takes { min-width: 0; padding: 0 9px; font-size: 0.78rem; }
+.dj.live .lv-takes[hidden] { display: none; }
+.dj.live.recording .lv-top { box-shadow: inset 0 -2px 0 #ff5d5d; }
+.lr-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: "n w m x" "s s s s"; align-items: center; gap: 4px 6px; padding: 9px 4px; border-bottom: 1px solid #ffffff0f; }
+.lr-row.fresh { background: #c4a3ff14; border-radius: 10px; }
+.lr-n { grid-area: n; min-width: 0; display: flex; flex-direction: column; }
+.lr-n b { font-size: 0.86rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-n small { font-size: 0.68rem; color: var(--dim); }
+.lr-row .btn { height: 34px; padding: 0 12px; }
+.lr-row [data-a="del"] { min-width: 34px; padding: 0 8px; }
+.lr-st { grid-area: s; font-size: 0.72rem; color: var(--lilac); }
+.lr-st:empty { display: none; }
+@media (max-width: 1400px) { .dj.live .lv-log span { display: none; } .dj.live .lv-cpu .bar { display: none; } .dj.live .lv-cpu { min-width: 0; padding: 0 9px; } }
+.dj.live.lv-kbd .lp-nowh [data-kc]::after { top: -6px; right: -6px; }
+@media (max-width: 1260px) and (min-width: 601px) { .dj.live .lv-top { gap: 6px; } .dj.live .lv-top > .btn { padding-left: 9px; padding-right: 9px; }
+  .dj.live .lv-cap { font-size: 0; gap: 0; } .dj.live .lv-cap svg { width: 18px; height: 18px; } .dj.live .lv-gear span, .dj.live .lv-cpu b, .dj.live .lv-fxb small { display: none; } }
+@media (prefers-reduced-motion: reduce) { .lv-take.on i { animation: none; } }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -4097,7 +4211,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays.</p>
       <p><b>Live (top bar, or the menu on a phone):</b> a screen for playing out, with no keys on it (the MiniLab has them). Eight knobs and four faders sit as they do on the MiniLab and move with it; drag one up or down to move it by touch. Knob pages: <b>Sound</b> (the sound's own knobs), <b>FX</b>, <b>FX Lab</b> (turning an effect up switches it on, all the way down switches it off), <b>Mix</b> and <b>Mine</b> (empty until you fill it). The faders stay put across pages: the sound's filter, Echo, Space and the master. Tap any knob's or fader's name to give it another job; Back to undoes it. Pad sets: Beat Pads banks A to D (Kit… loads a kit onto the bank), Notes and Chords in the key you've set, <b>FX moves</b> (hold a pad and the effect comes in, let go and it's back as it was), Samples and the Rhythm Creator's 16 tracks. On the MiniLab the big knob turns the knob pages and Shift + turn steps through the sounds (it plays the one you stop on); hold <b>Shift</b> and the knobs and faders switch to their Shift layer (the knobs: FX, or the page you tap while holding Shift; the faders: each sound that's playing and the beat); a click plays or stops what ▶ is set to (Seq, Rhythm or Pads), Shift + click records. <b>FX</b> opens every effect and the FX Lab at once. <b>K.O. II</b> sends it the clock and start/stop, so it plays in time.</p>
-      <p><b>Live on stage:</b> the lock (next to Done) means Back, Esc or a stray tap can't close Live; hold Done to leave. The screen stays on while Live is open, and the thin meter by ■ lights when the safety limiter is catching peaks (nothing clips). <b>Gear</b> shows what's plugged in and who keeps time: <b>K.O. II follows</b> (Nate Bloom sends tempo, start and stop), <b>K.O. II leads</b> (its clock drives Nate Bloom and Live's ▶ target) or <b>No sync</b>; the clock goes only to the K.O. II when it's plugged in (the MIDI sheet's Clock buttons choose otherwise), so other gear never starts by surprise. Sample… records the K.O. II's USB audio (its firmware 2.5 or later) into the sampler. The <b>set list</b> (right of the knob pages) saves songs: the sound, tempo, FX and FX Lab, the Rhythm pattern, the Beat Pads bank and sequence and this screen's pages; ‹ › change song, on the next bar while something plays. With the MiniLab's big knob set to Songs, turning it cues a song and a click loads it. The <b>column on the left</b> holds what you reach for while playing: the sound (‹ › step through, a tap on its name opens <b>Sounds</b>: what's playing, each layer in or out of the arp, Quick sounds, favourites and the ones played lately; tap a sound to play it alone, + to layer it), <b>Hold</b>, the <b>Arp</b> (tap to switch it on or off; hold it and it plays only while you hold) with its octaves, ⋯ for which layers arpeggiate, the pattern, speed and gate, and <b>Split pads</b>: the number keys 1–8 (top row or number pad) play pads 1–8 and the MiniLab's pads play 9–16. A <b>computer keyboard</b> runs Live too: number keys play pads, H is Hold, A the Arp (hold it down for only while held), Space ▶ / ■, and <b>?</b> lists the rest; once a keyboard is used, each control shows its key. <b>Capture</b> turns what you just played on the keys or the Notes and Chords pads (the last phrase, lined up to the bar of what's playing) into a new Garage track with that sound.</p>
+      <p><b>Live on stage:</b> the lock (next to Done) means Back, Esc or a stray tap can't close Live; hold Done to leave. The screen stays on while Live is open, and the thin meter by ■ lights when the safety limiter is catching peaks (nothing clips). <b>Gear</b> shows what's plugged in and who keeps time: <b>K.O. II follows</b> (Nate Bloom sends tempo, start and stop), <b>K.O. II leads</b> (its clock drives Nate Bloom and Live's ▶ target) or <b>No sync</b>; the clock goes only to the K.O. II when it's plugged in (the MIDI sheet's Clock buttons choose otherwise), so other gear never starts by surprise. Sample… records the K.O. II's USB audio (its firmware 2.5 or later) into the sampler. The <b>set list</b> (right of the knob pages) saves songs: the sound, tempo, FX and FX Lab, the Rhythm pattern, the Beat Pads bank and sequence and this screen's pages; ‹ › change song, on the next bar while something plays. With the MiniLab's big knob set to Songs, turning it cues a song and a click loads it. The <b>column on the left</b> shows what's playing, all the time: a card for each layer (lit: the one the knobs play; its Arp tag says whether it's arpeggiating, in the arp or left out, and a tap on it changes that; drag its bar for its level; ✕ stops it), Hold with the notes it's holding, the Arp, and the sounds themselves (Quick, Favourites or Lately: tap one to play it alone, + to layer it). Above them: the sound (‹ › step through, the layer count or + Layer a sound opens <b>Sounds</b>: what's playing, each layer in or out of the arp, Quick sounds, favourites and the ones played lately; tap a sound to play it alone, + to layer it), <b>Hold</b>, the <b>Arp</b> (tap to switch it on or off; hold it and it plays only while you hold) with its octaves, ⋯ for which layers arpeggiate, the pattern, speed and gate, and <b>Split pads</b>: the number keys 1–8 (top row or number pad) play pads 1–8 and the MiniLab's pads play 9–16. A <b>computer keyboard</b> runs Live too: number keys play pads, H is Hold, A the Arp (hold it down for only while held), Space ▶ / ■, and <b>?</b> lists the rest; once a keyboard is used, each control shows its key. <b>● Rec</b> records everything you hear, up to an hour, into this device's storage (a reload doesn't lose it); ▾ lists your recordings to save as WAV or MP3. ● Loop records into Beat Pads when ▶ plays Pads. <b>CPU</b> by the level meter shows how hard the tablet is working (the app's own work, whether the sound keeps up, and the audio engine's and the tablet's load where the browser reports them); a tap shows the breakdown and switches for the heaviest effects that are on. <b>Log</b> (or G) saves what Live was doing, the last minute of sound and every setting in one zip to send for a fix; its dot means the sound has fallen behind since the last log. <b>Capture</b> turns what you just played on the keys or the Notes and Chords pads (the last phrase, lined up to the bar of what's playing) into a new Garage track with that sound.</p>
       <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
       <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
       <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
@@ -15306,7 +15420,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     { const ns = noteMsg; noteMsg = function (m, err) { add(err ? "msg!" : "msg", m); return ns(m, err); }; }
 
     const brief = b => b ? { sec: +(b.duration).toFixed(2), ch: b.numberOfChannels, rate: b.sampleRate } : null;
-    let REPORT_NOTE = "";
+    let REPORT_NOTE = "", PRE = null;   // (139: PRE: the sound grabbed the moment the Log was tapped)
     async function snapshot() {
       const r = { app: "Nate Bloom Lite", made: new Date().toString(), page: location.href.split("?")[0], whatWentWrong: REPORT_NOTE };
       r.device = { ua: navigator.userAgent, screen: screen.width + "x" + screen.height, window: innerWidth + "x" + innerHeight, dpr: devicePixelRatio, cores: navigator.hardwareConcurrency, memoryGB: navigator.deviceMemory,
@@ -15327,6 +15441,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       try { r.rc = window.__rcSnap ? window.__rcSnap() : null; } catch (e) { r.rc = "error " + e.message; }
       r.settings = {};
       try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith("nightbloom")) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
+      (window.__nbReportExtras || []).forEach(f => { try { Object.assign(r, f()); } catch (e) { r.extrasError = String(e && e.message || e); } });
       r.log = (window.__nbLog || []).map(([t, k, d]) => (t / 1000).toFixed(2) + "s  " + k.padEnd(13) + " " + d);
       return r;
     }
@@ -15345,13 +15460,16 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
         let soundNote = ctx ? "no sound captured: " + (CAP.lastErr || "unknown") + " · capture " + (CAP.kind || "off") + (CAP.pingMs != null ? " · ping " + CAP.pingMs + " ms" : " · no ping") : "no sound captured (audio wasn't started)";
         try {
           if (ctx && CAP.node) {
-            const got = await capGrab(30);
-            if (got && got.L.length) { const keep = Math.min(got.L.length, got.rate * 30), a = got.L.length - keep; files.push({ name: "last-30-seconds.wav", data: wav16(got.L.subarray(a), got.R.subarray(a), got.rate) }); soundNote = "last " + (keep / got.rate).toFixed(1) + " s of sound in last-30-seconds.wav"; }
+            const pre = PRE && Date.now() - PRE.at < 600000 ? PRE : null, secs = pre ? pre.secs : 30; PRE = null;
+            let got = pre ? await pre.p : null; if (!got || !got.L) got = await capGrab(secs);
+            if (got && got.L && got.L.length) { const keep = Math.min(got.L.length, got.rate * secs), a = got.L.length - keep, nm = "last-" + secs + "-seconds.wav"; files.push({ name: nm, data: wav16(got.L.subarray(a), got.R.subarray(a), got.rate) }); soundNote = "last " + (keep / got.rate).toFixed(1) + " s of sound in " + nm + (pre ? " (grabbed when the Log was tapped)" : ""); }
           }
         } catch (e) { soundNote = "sound capture failed: " + (e && e.message || e); }
         snap.sound = soundNote;
         files.unshift({ name: "report.json", data: new TextEncoder().encode(JSON.stringify(snap, null, 2)) });
         files.splice(1, 0, { name: "log.txt", data: new TextEncoder().encode(snap.log.join("\n")) });
+        if (snap.liveTimeline && snap.liveTimeline.rows.length) { const q = x => /[",\n]/.test(String(x)) ? '"' + String(x).replace(/"/g, '""') + '"' : String(x);
+          files.push({ name: "live-timeline.csv", data: new TextEncoder().encode([snap.liveTimeline.columns.join(",")].concat(snap.liveTimeline.rows.map(r => r.map(q).join(","))).join("\n")) }); }
         const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "").replace(/^(\d{8})(\d{4})$/, "$1-$2");
         const msg = await saveZip("nate-bloom-report-" + stamp, zipMany(files));
         noteMsg(msg ? msg + " · attach it in the chat with Claude" : "Report not saved");
@@ -15361,6 +15479,13 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     const rSheet = document.getElementById("reportSheet"), rNote = document.getElementById("reportNote");
     document.getElementById("reportBtn").addEventListener("click", () => { start(); capInit(); rSheet.hidden = false; setTimeout(() => { try { rNote.focus(); } catch (e) {} }, 50); });
     document.getElementById("reportCancel").addEventListener("click", () => { rSheet.hidden = true; });
+    { const ph0 = rNote.placeholder;
+      window.__nbReport = { open(secs, hint) {
+        start(); capInit(); PRE = null;
+        try { if (ctx && CAP.node) PRE = { at: Date.now(), secs: secs || 30, p: capGrab(secs || 30).catch(() => null) }; } catch (e) {}
+        rNote.placeholder = hint || ph0; rSheet.hidden = false; setTimeout(() => { try { rNote.focus(); } catch (e) {} }, 50);
+      } };
+      document.getElementById("reportCancel").addEventListener("click", () => { PRE = null; rNote.placeholder = ph0; }); }
     document.getElementById("reportGo").addEventListener("click", () => { rSheet.hidden = true; REPORT_NOTE = rNote.value.trim(); add("note", REPORT_NOTE); capInit().then(makeReport, makeReport); rNote.value = ""; });
   }
   // ---------- one place decides how a sound's effects chain is wired ----------
@@ -19298,7 +19423,7 @@ registerProcessor("nb-vcf", NBVcf);`;
     let last = performance.now(), calm = 0; const T0 = performance.now();
     const raise = ms => { const want = Math.min(0.4, ms / 1000 + 0.08); if (want > NB_LA) NB_LA = want; calm = 0; NBAN.stalls++; NBAN.lastStall = Math.round(ms); };
     setInterval(() => {
-      const now = performance.now(), gap = now - last; last = now;
+      const now = performance.now(), gap = now - last; last = now; window.__nbLagMs = (window.__nbLagMs || 0) + Math.max(0, gap - 25);
       if (document.hidden || now - T0 < 4000) { calm = 0; return; }
       if (gap > 75) raise(gap);
       else if (NB_LA > NBLA_BASE && ++calm > 120) { NB_LA = Math.max(NBLA_BASE, NB_LA - 0.03); calm = 100; }
@@ -28781,7 +28906,7 @@ z: [z]=Z
     // ---------- the MiniLab on Live: knobs and faders as on screen, pads the set on screen ----------
     const lvPlayName = () => ({ seq: "the Seq", rc: "the Rhythm Creator", bp: "Beat Pads" })[LV.play] || "";
     function lvTransport() { start(); if (LV.play === "seq") tap("play"); else if (LV.play === "bp") bpTransport(!BP.playing); else rcPlay(!RC.playing); lvPaintTop(); }
-    function lvRec() { if (LV.play === "bp") bpStartRec(); else tap("takeBtn"); lvPaintTop(); }
+    function lvRec() { if (LV.play === "bp") bpStartRec(); else recToggle(); lvPaintTop(); }   // (142: Live records with its own recorder)
     const step = (arr, cur, d) => { const i = arr.findIndex(x => x[0] === cur); return arr[((i < 0 ? 0 : i) + d + arr.length) % arr.length][0]; };
     L.live = () => ({ K: lvK(), F: lvF(), P: lvPads(), kfor: kpName(LV.kpage) + " page", pa: psetName(LV.pset) + " (1–8)", pb: psetName(LV.pset) + " (9–16)",
       M: { turn: ["Knob page (Sound, FX, FX Lab, Mix, Mine)", d => setKPage(step(KPAGES, LV.kpage, d))], click: ["▶ / ■ " + lvPlayName(), lvTransport], sturn: ["Sound (plays the one you stop on)", d => browse(d)], sclick: ["● Rec", lvRec] },
@@ -29545,7 +29670,7 @@ z: [z]=Z
       const comps = compsNow(), inArp = comps.filter(c => armed(c.key)).length;
       nbT(ab.querySelector("small"), comps.length > 1 ? (inArp === comps.length ? "all " + comps.length + " layers" : inArp + " of " + comps.length + " layers") : on ? "on · tap or hold" : "tap · or hold");
       const o = arpOctNow(); $id("lvArpOct").querySelectorAll("button").forEach(b => nbA(b, "aria-pressed", String(+b.dataset.o === o)));
-      nbT($id("lvLayers"), n > 1 ? n + " layers" : "Sounds"); nbA($id("lvLayers"), "title", n > 1 ? n + " sounds play together: change them, layer another, or pick each one's arp" : "Change the sound or layer another");
+      nbT($id("lvLayers"), n > 1 ? n + " layers" : n === 1 ? "1 sound" : "none"); nbA($id("lvLayers"), "title", n > 1 ? n + " sounds play together: change them, layer another, or pick each one's arp" : "Change the sound or layer another");
       const sp = $id("lvSplit"); nbA(sp, "aria-pressed", String(!!L3.split));
       $id("lvPads").classList.toggle("split", !!L3.split);
       const id = state.cur && state.cur.id;
@@ -29670,7 +29795,7 @@ z: [z]=Z
           ${row(["←", "→"], "the previous or next sound")}${row(["S"], "Sounds: arrows to move, Enter plays it alone, + or Shift Enter layers it")}
           ${row(["K"], "the next knob page (Shift K: back)")}${row(["P"], "the next pad set (Shift P: back)")}${row(["F"], "the effects")}
           <div class="lv-pkg">Transport</div>
-          ${row(["Space"], "▶ / ■")}${row(["L"], "record a loop or a take")}${row(["C"], "Capture what you just played")}${row(["−", "="], "tempo down or up (with Shift: by 5)")}${row(["N"], "the next song in the set list (Shift N: back)")}${row(["Esc"], "close a panel")}${row(["?"], "this list")}
+          ${row(["Space"], "▶ / ■")}${row(["R"], "● Rec: record everything you hear (save it as WAV or MP3)")}${row(["L"], "● Loop: record into Beat Pads (when ▶ plays Pads)")}${row(["C"], "Capture what you just played")}${row(["−", "="], "tempo down or up (with Shift: by 5)")}${row(["N"], "the next song in the set list (Shift N: back)")}${row(["Esc"], "close a panel")}${row(["G"], "Log: save what just happened, to send for a fix")}${row(["?"], "this list")}
           <div class="lv-pkg">MiniLab</div>
           <p class="lv-note">Hold <b>Shift</b>: the knobs play the <b>${esc3(kpName(lvSPage()))}</b> page (hold Shift and tap another page to change it) and the faders mix what's playing: each layer and the beat. Shift + turning the big knob steps through the sounds and plays the one you stop on.</p>
           <label class="lk-sw"><input type="checkbox" id="lvCapsOn"${L4.caps !== false ? " checked" : ""}> Show the keys on the controls</label>
@@ -29743,8 +29868,10 @@ z: [z]=Z
         if (low === "k") { setKPage(step(KPAGES, LV.kpage, sh ? -1 : 1)); mlHud("Knobs", kpName(LV.kpage) + " page", null); return; }
         if (low === "p") { setPset(step(PSETS, LV.pset, sh ? -1 : 1)); mlHud("Pads", psetName(LV.pset), null); return; }
         if (low === "c") { $id("lvCap").click(); return; }
-        if (low === "l") { lvRec(); return; }
+        if (low === "l") { if (LV.play === "bp") lvRec(); else mlHud("● Loop", "records into Beat Pads: set ▶ to Pads · R records everything you hear", null); return; }
+        if (low === "r") { recToggle(); return; }
         if (low === "f") { $id("lvFx").click(); return; }
+        if (low === "g") { const b = $id("lvLog"); if (b) b.click(); return; }
         if (low === "n") { const b = $id(sh ? "lvSongPrev" : "lvSongNext"); if (b && !b.disabled) b.click(); else mlHud("Set list", "save a song first (tap the set list box)", null); return; }
         return;
       }
@@ -29762,6 +29889,429 @@ z: [z]=Z
     new MutationObserver(() => { if (!lv.hidden) paintCaps(); }).observe(lv, { attributes: true, attributeFilter: ["hidden"] });
     paintCaps(); paintShift();
     window.__live4 = { shiftSet, lvSPage, lvKP, browse, brGo, openKeys, paintCaps, capsOn, kbRecent, SFDEF, L4 };
+    // ======================================================================
+    // Live's Log (139): a button in the top bar that saves the Report straight from Live, with what Live was doing.
+    // While Live is open a line a second is kept (the last 15 minutes): how far the sound fell behind the clock
+    // (a crackle or a dropout), how long the screen was stuck, frames drawn, MIDI messages, memory, what was playing
+    // and which effects were on. A tap on Log marks the moment and grabs the last 60 seconds of sound right away,
+    // before the note is typed; the dot on the button means the sound has fallen behind since the last log.
+    // ======================================================================
+    const logB = mkBtn("lvLog", "lv-log", '<i aria-hidden="true"></i><span>Log</span>', "Log: save what Live is doing, the last minute of sound and every setting, to send for a fix");
+    $id("lvStop").before(logB); logB.dataset.kc = "G";
+    const TL = [];   // one row a second while Live is open
+    const TLS = { since: 0, base: null, lag: 0, ts: null, longMs: 0, longN: 0, midi: 0, frames: 0, raf: 0, worst: 0, stutters: 0, seenLag: 0, marks: [] };
+    try { new PerformanceObserver(l => { for (const e of l.getEntries()) { TLS.longMs += e.duration; TLS.longN++; } }).observe({ type: "longtask" }); } catch (e) {}
+    { const mm = mlMon; mlMon = function () { TLS.midi++; return mm.apply(this, arguments); }; }
+    const fxOnStr = () => { try { return ["densOn:dens", "lofiOn:lofi", "hallOn:hall", "frzOn:frz", "shimOn:shim"].filter(x => bfx[x.split(":")[0]]).map(x => x.split(":")[1]).join("+") || "-"; } catch (e) { return "?"; } };
+    const num = (f, d) => { try { const v = f(); return v == null || Number.isNaN(v) ? d : v; } catch (e) { return d; } };
+    function tlFrame() { TLS.frames++; if (!lv.hidden) TLS.raf = requestAnimationFrame(tlFrame); else TLS.raf = 0; }
+    function tlTick() {
+      if (lv.hidden || !ctx) return;
+      const now = performance.now() / 1000, ct = ctx.currentTime;
+      if (!TLS.base) TLS.base = { w: now, c: ct };
+      const lag = (now - TLS.base.w) - (ct - TLS.base.c), dLag = lag - TLS.lag; TLS.lag = lag;
+      let tsd = null;
+      try { const o = ctx.getOutputTimestamp && ctx.getOutputTimestamp(); if (o && o.performanceTime) { const off = o.performanceTime - o.contextTime * 1000; tsd = TLS.ts == null ? 0 : off - TLS.ts; TLS.ts = off; } } catch (e) {}
+      const behind = ctx.state === "running" ? Math.max(0, Math.round(dLag * 1000)) : 0;
+      if (behind > 25) { TLS.stutters++; TLS.seenLag++; logB.classList.add("warn"); logB.title = "The sound fell behind " + TLS.seenLag + (TLS.seenLag === 1 ? " time" : " times") + " since the last log: tap Log to save it"; }
+      if (behind > TLS.worst) TLS.worst = behind;
+      let po = "";
+      try { const s = ctx.playoutStats || ctx.playbackStats; if (s) po = [s.fallbackFramesEvents, Math.round((s.fallbackFramesDuration || 0) * 1000), s.underrunEvents, Math.round((s.underrunDuration || 0) * 1000)].filter(x => x != null).join("/"); } catch (e) {}
+      const its = num(() => __stk.items(), []);
+      TL.push([Math.round(now - TLS.since), ctx.state, behind, tsd == null ? "" : Math.round(tsd), po, Math.round(TLS.longMs), TLS.longN, TLS.frames, TLS.midi,
+        num(() => Math.round(performance.memory.usedJSHeapSize / 1048576), ""), num(() => voices.size, ""), num(() => BP.voices.length, ""), num(() => heldVoices.size, ""),
+        its.length, num(() => arpLive() ? 1 : 0, ""), state.hold ? 1 : 0, fxOnStr(), num(() => Math.round(window.__analog.la() * 1000), ""), num(() => window.__analog.NBAN.stalls, ""),
+        LV.kpage + (LV.shift ? "^" + lvSPage() : ""), LV.pset, (LV.play === "bp" ? BP.playing : LV.play === "rc" ? RC.playing : playing) ? 1 : 0, Math.round(rcBpm()),
+        String((document.getElementById("sndName") || {}).textContent || "").slice(0, 28)]);
+      if (TL.length > 900) TL.splice(0, 60);
+      TLS.longMs = 0; TLS.longN = 0; TLS.frames = 0; TLS.midi = 0;
+    }
+    const TL_HEAD = ["sec", "audio", "behind_ms", "outTs_ms", "playout", "stuck_ms", "stuck_n", "frames", "midi_msgs", "heap_MB", "voices", "pad_voices", "held", "layers", "arp", "hold", "fxlab", "lookahead_ms", "timing_stalls", "knobs", "pads", "playing", "bpm", "sound"];
+    let tlT = 0;
+    new MutationObserver(() => {
+      if (!lv.hidden) { TLS.since = performance.now() / 1000; TLS.base = null; TLS.lag = 0; TLS.ts = null; clearInterval(tlT); tlT = setInterval(tlTick, 1000); if (!TLS.raf) TLS.raf = requestAnimationFrame(tlFrame); add139("live", "open · " + innerWidth + "x" + innerHeight + " · " + fxOnStr()); }
+      else { clearInterval(tlT); add139("live", "closed"); }
+    }).observe(lv, { attributes: true, attributeFilter: ["hidden"] });
+    function add139(k, d) { try { window.__nbAdd && window.__nbAdd(k, d); } catch (e) {} }
+    // what Live did, in the app's log (taps and keys are logged already; these come from the MiniLab or the code)
+    { const s0 = shiftSet; shiftSet = function (on) { const was = !!LV.shift, r = s0.apply(this, arguments); if (was !== !!LV.shift) add139("live", "Shift " + (LV.shift ? "held · knobs " + lvSPage() : "let go")); return r; }; window.__nbShift = shiftSet; }
+    { const k0 = setKPage; setKPage = function (k) { const r = k0.apply(this, arguments); add139("live", "knob page " + LV.kpage); return r; }; }
+    { const p0 = setPset; setPset = function (s) { const r = p0.apply(this, arguments); add139("live", "pad set " + LV.pset); return r; }; }
+    { const a0 = arpSet; arpSet = function (on) { const r = a0.apply(this, arguments); add139("live", "arp " + (on ? "on" : "off") + " · " + num(() => compsNow().filter(c => arpOn(c.key)).map(c => c.key).join("+"), "")); return r; }; }
+    { const b0 = brGo; brGo = function () { const r = b0.apply(this, arguments); add139("live", "sound (big knob) → " + String((document.getElementById("sndName") || {}).textContent || "")); return r; }; }
+    { const ab = applyBfx; let last = ""; applyBfx = function () { const r = ab.apply(this, arguments); const f = fxOnStr(); if (f !== last) { last = f; add139("fxlab", f); } return r; }; }
+    // the Live part of the report
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => {
+      const ins = [], outs = [];
+      try { if (md.access) { md.access.inputs.forEach(p => ins.push(p.name + (md.ins.has(p.id) ? "" : " (off)"))); md.access.outputs.forEach(p => outs.push(p.name + (md.outs.has(p.id) ? "" : " (off)"))); } } catch (e) {}
+      let hallSec = null; try { hallSec = B && B.hall && B.hall.buffer ? +B.hall.buffer.duration.toFixed(2) : null; } catch (e) {}
+      return {
+        live: { open: !lv.hidden, knobs: LV.kpage, shiftPage: lvSPage(), shiftHeld: !!LV.shift, pads: LV.pset, play: LV.play, split: !!L3.split, fxDrawer: !!LV.fx,
+          layers: num(() => __stk.items().map(i => i.name + " (" + i.kind + ")"), []),
+          arp: num(() => Object.fromEntries(compsNow().map(c => { const a = getArp(c.key); return [c.key, { on: arpOn(c.key), oct: a.oct, mode: a.mode, rate: a.rate, inArp: armed(c.key) }]; })), {}),
+          hold: !!state.hold, fxLab: num(() => Object.assign({}, bfx), {}), fx: state.fx, hallSeconds: hallSec, mobile: !!window.__nbMobile,
+          midi: { in: ins, out: outs, miniLab: num(() => mlLive(), false), sync: num(() => syncMode(), ""), clockTo: num(() => md.opt.clockTo, "") },
+          setList: { songs: SL.songs.length, current: SL.cur }, keyboard: { seenLately: num(() => kbRecent(), false), keysShown: num(() => capsOn(), false) },
+          sinceOpen: TL.length ? TL[TL.length - 1][0] + " s" : "", audioFellBehind: { times: TLS.stutters, worstMs: TLS.worst, totalMs: Math.round(TLS.lag * 1000) }, marks: TLS.marks.slice(-20) },
+        liveTimeline: { columns: TL_HEAD, rows: TL.slice() },
+      };
+    });
+    // the button: mark the moment, grab the sound now, then the note
+    logB.addEventListener("click", () => {
+      const at = TL.length ? TL[TL.length - 1][0] : 0; TLS.marks.push(at + " s"); add139("mark", "Log tapped in Live at " + at + " s · fell behind " + TLS.seenLag + "x since the last log");
+      TLS.seenLag = 0; logB.classList.remove("warn"); logB.title = "Log: save what Live is doing, the last minute of sound and every setting, to send for a fix";
+      try { window.__nbReport && window.__nbReport.open(60, "Live: what went wrong just now? (optional)"); } catch (e) { noteMsg("Couldn't open the log (" + (e && e.message || e) + ")", true); }
+    });
+    window.__live5 = { TL, TLS, TL_HEAD, tick: tlTick };
+    // ======================================================================
+    // Live: Now playing (140). The column shows everything that's sounding, all the time: a card for each layer
+    // (its name, whether it's arpeggiating, in the arp or left out, its level, and ✕), the one the knobs edit lit up;
+    // Hold with the notes it's holding (and the MiniLab's sustain); the Arp; and the sounds themselves, always in
+    // view: Quick, Favourites or Lately, tap for alone, + to layer.
+    // ======================================================================
+    const L6 = Object.assign({ src: "quick" }, lsGet("nightbloom-live6", {}));
+    const l6Save = () => lsSet("nightbloom-live6", { src: L6.src });
+    {
+      const now = document.createElement("div"); now.className = "lp-now";
+      now.innerHTML = `<div class="lp-nowh"><span class="lp-lab">Now playing</span><span class="lp-sp"></span></div><div class="lp-cards" id="lvCards" role="list" aria-label="What's playing"></div><button class="lp-addl" id="lvAddL">+ Layer a sound</button>`;
+      const old = perf.querySelector(".lp-snd"), head = now.querySelector(".lp-nowh");
+      const lay = $id("lvLayers"), pv = $id("lvPrev"), nx = $id("lvNext"), sn = $id("lvSnd");   // (taken before they move: a detached element can't be found by id)
+      head.insertBefore(lay, head.querySelector(".lp-sp")); head.append(pv, nx);
+      now.appendChild(sn); sn.classList.add("lp-hide");   // (the knobs' sound now shows lit in its card)
+      perf.insertBefore(now, old); old.remove();
+      const held = document.createElement("span"); held.className = "lp-held"; held.id = "lvHeld"; $id("lvHold").appendChild(held);
+      const snds = document.createElement("div"); snds.className = "lp-snds";
+      snds.innerHTML = `<div class="lp-sndh"><span class="lp-lab">Sounds</span><div class="seg lp-src" id="lvSrc" role="group" aria-label="Which sounds">${[["quick", "Quick"], ["fav", "Favourites"], ["recent", "Lately"]].map(([k, n]) => `<button data-s="${k}">${n}</button>`).join("")}</div></div>
+        <div class="lp-grid" id="lvGrid"></div><button class="lp-all" id="lvAllSnd2">All sounds…</button>`;
+      perf.insertBefore(snds, $id("lvSplit"));
+      // the octaves sit on the Arp's row (the room goes to the sounds)
+      const row = perf.querySelector(".lp-arprow"), oc = $id("lvArpOct"), w = document.createElement("div"); w.className = "lp-octw"; w.dataset.kc = "Z X";
+      w.innerHTML = '<span class="lp-lab">Octaves</span>'; w.appendChild(oc); row.insertBefore(w, $id("lvArpMore"));
+      const lab = perf.querySelector(".lp-arpbox > .lp-lab"); if (lab) lab.remove();
+    }
+    $id("lvAddL").addEventListener("click", () => { start(); openSounds(); });
+    $id("lvAllSnd2").addEventListener("click", () => { start(); tap("sndOpen"); });
+    $id("lvSrc").addEventListener("click", e => { const b = e.target.closest("button[data-s]"); if (!b) return; L6.src = b.dataset.s; l6Save(); paintGrid(true); });
+    // ---------- the layer cards ----------
+    const isFocus = it => it.t === "syn" ? state.engine === it.id : it.t === "lib" ? state.engine === "lib" && it.i === num(() => __stk.libSel(), -1) : it.t === "inst" ? state.engine === "inst" : false;
+    function chanOf(it) {
+      try { const ch = mixChannels().filter(c => c.group === "Playing now"); const nm = String(it.name || "");
+        return ch.find(c => c.name.replace(/ volume$/, "") === nm) || ch.find(c => c.name.startsWith(nm + " ")) || null; } catch (e) { return null; }
+    }
+    const levOf = c => { try { return Math.max(0, Math.min(1, mxPos(c.get(), c.law) / 100)); } catch (e) { return null; } };
+    let cardSig = "";
+    function paintCards(force) {
+      const its = stkItems(), n = its.length, br = $id("lvSnd").classList.contains("browsing");
+      const rows = its.map((it, i) => { const k = itKey(it); return { it, i, k, cur: isFocus(it), on: num(() => arpOn(k), false), inArp: armed(k), ch: chanOf(it) }; });
+      if (n && !rows.some(r => r.cur)) rows[0].cur = true;
+      const sig = JSON.stringify([rows.map(r => [r.it.name, r.it.kind, r.it.wait, r.k, r.cur, r.on, r.inArp, !!r.ch]), br && $id("lvSnd").querySelector("b").textContent]);
+      if (!force && sig === cardSig) { paintLevels(rows); return; }
+      cardSig = sig;
+      $id("lvCards").innerHTML = rows.map(r => {
+        const nm = r.cur && br ? $id("lvSnd").querySelector("b").textContent : r.it.name;
+        const arpTxt = r.on ? "Arp" : r.inArp ? "Arp" : "No arp", arpSt = r.on ? "on" : r.inArp ? "ready" : "out";
+        return `<div class="lp-card${r.cur ? " cur" : ""}${r.on ? " arping" : ""}${r.cur && br ? " browsing" : ""}" role="listitem" data-i="${r.i}" data-k="${esc3(r.k)}">
+          <button class="lp-cname" data-a="focus" title="${r.cur ? "The knobs play this one (‹ › and Shift + the big knob change it)" : "Tap: the knobs play this one"}"><b>${esc3(nm)}</b><small>${esc3(r.cur && br ? "plays when you stop turning" : (r.it.kind || "") + (r.it.wait ? " · loading" : "") + (r.cur ? " · on the knobs" : ""))}</small></button>
+          <button class="lp-carp" data-a="arp" data-st="${arpSt}" aria-pressed="${r.inArp}" title="${r.on ? "Arpeggiating · tap to leave it out of the arp" : r.inArp ? "In the arp: it arpeggiates when the Arp is on · tap to leave it out" : "Left out of the arp: it plays what you hold · tap to put it in"}">${arpTxt}</button>
+          ${n > 1 ? `<button class="lp-cx" data-a="drop" aria-label="Stop ${esc3(r.it.name)}" title="Stop this layer">✕</button>` : ""}
+          ${r.ch ? `<div class="lp-clev" data-a="lev" role="slider" aria-label="${esc3(r.it.name)} level" tabindex="0"><i></i></div>` : ""}
+        </div>`; }).join("") || '<p class="lv-note">Nothing on the keys yet: pick a sound below.</p>';
+      paintLevels(rows);
+    }
+    function paintLevels(rows) {
+      rows.forEach(r => { if (!r.ch) return; const el = $id("lvCards").querySelector(`.lp-card[data-i="${r.i}"] .lp-clev`); if (!el || el.__drag) return;
+        const v = levOf(r.ch); if (v == null) return; const w = (v * 100).toFixed(1) + "%"; if (el.firstChild.style.width !== w) { el.firstChild.style.width = w; el.setAttribute("aria-valuenow", Math.round(v * 100)); } });
+    }
+    $id("lvCards").addEventListener("click", e => {
+      const b = e.target.closest("button[data-a]"), card = e.target.closest(".lp-card"); if (!b || !card) return;
+      const it = stkItems()[+card.dataset.i]; if (!it) return; start();
+      if (b.dataset.a === "focus") { try { __stk.focusOn(it); } catch (x) {} ML.lay = null; setTimeout(() => { lvPaintTop(); lvPaintKnobs(); paintCards(true); }, 60); }
+      else if (b.dataset.a === "arp") { arpArm(card.dataset.k, !armed(card.dataset.k)); paintCards(true); }
+      else if (b.dataset.a === "drop") { try { __stk.drop(it); } catch (x) {} ML.lay = null; setTimeout(() => { lvPaintTop(); lvPaintKnobs(); paintCards(true); paintGrid(true); }, 120); }
+    });
+    // a layer's level: drag along its bar
+    $id("lvCards").addEventListener("pointerdown", e => {
+      const el = e.target.closest(".lp-clev"), card = el && el.closest(".lp-card"); if (!el) return;
+      const it = stkItems()[+card.dataset.i], c = it && chanOf(it); if (!c) return;
+      e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (x) {} el.__drag = true;
+      const set = ev => { const r = el.getBoundingClientRect(), v = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)); try { c.set(mxLevel(v * 100, c.law)); saveSoon(); } catch (x) {} el.firstChild.style.width = (v * 100).toFixed(1) + "%"; el.setAttribute("aria-valuenow", Math.round(v * 100)); };
+      set(e);
+      const mv = ev => set(ev), up = () => { el.__drag = false; el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up); };
+      el.addEventListener("pointermove", mv); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    });
+    $id("lvCards").addEventListener("keydown", e => {
+      const el = e.target.closest(".lp-clev"); if (!el || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
+      const it = stkItems()[+el.closest(".lp-card").dataset.i], c = it && chanOf(it); if (!c) return; e.preventDefault(); e.stopPropagation();
+      const v = Math.max(0, Math.min(1, (levOf(c) || 0) + (e.key === "ArrowRight" ? 0.05 : -0.05))); try { c.set(mxLevel(v * 100, c.law)); saveSoon(); } catch (x) {}
+      el.firstChild.style.width = (v * 100).toFixed(1) + "%";
+    });
+    // ---------- what's being held ----------
+    function paintHeld() {
+      let txt = "";
+      try {
+        if (state.hold && heldVoices.size) { const ms = [...new Set([...heldVoices.values()].flatMap(v => v.tones || []))].sort((a, b) => a - b); txt = "Holding " + ms.slice(0, 8).map(noteName).join(" ") + (ms.length > 8 ? " +" + (ms.length - 8) : ""); }
+        else if (SUS.on) txt = "Sustain (MiniLab Hold)" + (SUS.held.size ? " · " + SUS.held.size + (SUS.held.size === 1 ? " note" : " notes") : "");
+      } catch (e) {}
+      nbT($id("lvHeld"), txt); $id("lvHold").classList.toggle("sus", !txt.startsWith("Holding") && !!txt);
+    }
+    // ---------- the sounds, always in view ----------
+    let gridSig = "";
+    function gridIds() {
+      const Q = qk();
+      if (L6.src === "fav") return (typeof favs !== "undefined" ? favs : []).filter(id => entryOf(id)).slice(0, 24).map(id => { const e = entryOf(id); return [id, e.name, e.sub]; });
+      if (L6.src === "recent") return L3.recent.filter(id => entryOf(id)).slice(0, 12).map(id => { const e = entryOf(id); return [id, e.name, e.sub]; });
+      return Q ? Q.items().map(q => [q.id, q.name, q.sub]) : [];
+    }
+    function paintGrid(force) {
+      const ids = gridIds(), cur = state.cur && state.cur.id;
+      const sig = JSON.stringify([L6.src, ids.map(x => [x[0], x[1], playingId(x[0])]), cur]);
+      if (!force && sig === gridSig) return; gridSig = sig;
+      $id("lvSrc").querySelectorAll("button").forEach(b => nbA(b, "aria-pressed", String(b.dataset.s === L6.src)));
+      $id("lvGrid").innerHTML = ids.length ? ids.map(([id, nm, sub]) => tileHTML(id, nm, sub)).join("") : `<p class="lv-note">${L6.src === "fav" ? "No favourites yet: ☆ a sound in All sounds." : "Nothing played lately."}</p>`;
+    }
+    $id("lvGrid").addEventListener("click", async e => {
+      const b = e.target.closest("button[data-a]"), t = e.target.closest(".lp-tile"); if (!b || !t) return;
+      const id = t.dataset.id;
+      if (b.dataset.a === "alone") await soundAlone(id); else await soundToggle(id);
+      ML.lay = null; setTimeout(() => { lvPaintTop(); lvPaintKnobs(); paintCards(true); paintGrid(true); }, 250);
+    });
+    function paintNow() { try { paintCards(); paintHeld(); paintGrid(); } catch (e) {} }
+    { const pp = paintPerf; paintPerf = function () { const r = pp.apply(this, arguments); paintNow(); return r; }; }
+    paintNow();
+    window.__live6 = { L6, paintCards, paintGrid, paintHeld, chanOf };
+    // ======================================================================
+    // Live's CPU readout (141). A page can't read the tablet's processor directly, so the readout puts together what
+    // it can measure cheaply, once a second, from what Live already watches: how busy the app's own work keeps the
+    // screen (long tasks and timers running late), whether the sound keeps up with the clock, the audio engine's load
+    // where Chrome reports it, and the tablet's CPU pressure where Android reports it. A tap shows the breakdown and
+    // switches for the heaviest effects that are on.
+    // ======================================================================
+    const cpuB = mkBtn("lvCpu", "lv-cpu", '<b>CPU</b><span class="v">—</span><i class="bar"><u></u></i>', "CPU: how hard the tablet is working · tap for the breakdown");
+    $id("lvMeter").before(cpuB);
+    const CPU = { pct: 0, screen: 0, fps: 0, audio: null, peak: null, under: null, press: "", hist: [], tip: "" };
+    let pressObs = null;
+    function cpuWatch(on) {
+      try {
+        if (on && !pressObs && "PressureObserver" in window) { pressObs = new PressureObserver(r => { const x = r[r.length - 1]; if (x) CPU.press = x.state; }); pressObs.observe("cpu", { sampleInterval: 2000 }).catch(() => { pressObs = null; }); }
+        else if (!on && pressObs) { pressObs.disconnect(); pressObs = null; }
+      } catch (e) { pressObs = null; }
+      try {
+        const rc = ctx && ctx.renderCapacity;
+        if (rc) { if (on) { rc.onupdate = e => { CPU.audio = Math.round((e.averageLoad || 0) * 100); CPU.peak = Math.round((e.peakLoad || 0) * 100); CPU.under = e.underrunRatio; }; rc.start({ updateInterval: 1 }); } else rc.stop(); }
+      } catch (e) {}
+    }
+    new MutationObserver(() => cpuWatch(!lv.hidden)).observe(lv, { attributes: true, attributeFilter: ["hidden"] });
+    const CPU_WORD = { nominal: "relaxed", fair: "fair", serious: "busy", critical: "overloaded" };
+    {
+      const t0 = tlTick;
+      tlTick = function () {
+        const longMs = TLS.longMs, frames = TLS.frames, lag = window.__nbLagMs || 0; window.__nbLagMs = 0;
+        const r = t0.apply(this, arguments);
+        if (lv.hidden || !ctx) return r;
+        const row = TL[TL.length - 1] || [];
+        const screen = Math.min(100, Math.max(longMs, lag) / 10), behind = +row[2] || 0;
+        CPU.screen = Math.round(screen); CPU.fps = frames;
+        CPU.hist.push(behind); if (CPU.hist.length > 60) CPU.hist.shift();
+        const raw = Math.max(screen, CPU.audio || 0);
+        CPU.pct = Math.round(CPU.pct ? CPU.pct * 0.5 + raw * 0.5 : raw);
+        const recent = CPU.hist.slice(-10).filter(x => x > 25).length;
+        const lvl = CPU.pct >= 80 || CPU.press === "critical" || recent >= 2 ? "hot" : CPU.pct >= 50 || CPU.press === "serious" || recent >= 1 ? "warm" : "";
+        nbT(cpuB.querySelector(".v"), CPU.pct + "%"); cpuB.querySelector("u").style.width = Math.min(100, CPU.pct) + "%";
+        cpuB.classList.toggle("warm", lvl === "warm"); cpuB.classList.toggle("hot", lvl === "hot");
+        nbA(cpuB, "title", "CPU " + CPU.pct + "% · screen " + CPU.screen + "%" + (CPU.audio != null ? " · audio " + CPU.audio + "%" : "") + (CPU.press ? " · tablet " + (CPU_WORD[CPU.press] || CPU.press) : "") + (recent ? " · the sound fell behind lately" : "") + " · tap for the breakdown");
+        row.push(CPU.pct, CPU.screen, CPU.audio == null ? "" : CPU.audio, CPU.press);
+        if (!pick.hidden && pick.querySelector(".lc-wrap")) paintCpu();
+        return r;
+      };
+      TL_HEAD.push("cpu_pct", "screen_pct", "audio_load_pct", "tablet_pressure");
+    }
+    // the breakdown, and switches for the heaviest effects that are on
+    const HEAVY = [["shimOn", "Shimmer", "a reverb inside a feedback loop"], ["hallOn", "Hall+", "a long reverb"], ["frzOn", "Freeze", "four delays held in a loop"], ["densOn", "Density", "oversampled saturation"], ["lofiOn", "Lo-fi", ""]];
+    function cpuHTML() {
+      const fell = CPU.hist.filter(x => x > 25), worst = fell.length ? Math.max(...fell) : 0, on = HEAVY.filter(([k]) => bfx[k]);
+      const its = num(() => __stk.items().length, 0), vs = num(() => voices.size, 0) + num(() => BP.voices.length, 0) + num(() => heldVoices.size, 0);
+      const audio = CPU.audio != null ? CPU.audio + "% of what it can do" + (CPU.peak != null ? " (peaks " + CPU.peak + "%)" : "") : fell.length ? "fell behind " + fell.length + (fell.length === 1 ? " time" : " times") + " in the last minute (worst " + worst + " ms)" : "keeping up";
+      return `<div class="lv-pkh"><div><strong>CPU ${CPU.pct}%</strong><small>Measured once a second from what Live already watches</small></div><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
+        <div class="lv-pkl lc-wrap">
+          <div class="lc-row"><span>Screen</span><b>${CPU.screen}%</b><i class="bar"><u style="width:${CPU.screen}%"></u></i><small>the app's own work · ${CPU.fps} frames a second</small></div>
+          <div class="lc-row${fell.length && CPU.audio == null ? " bad" : ""}"><span>Audio</span><b>${CPU.audio != null ? CPU.audio + "%" : fell.length ? "!" : "OK"}</b>${CPU.audio != null ? `<i class="bar"><u style="width:${CPU.audio}%"></u></i>` : '<i class="bar off"></i>'}<small>${audio}</small></div>
+          <div class="lc-row"><span>Tablet</span><b>${CPU.press ? esc3(CPU_WORD[CPU.press] || CPU.press) : "—"}</b><i class="bar off"></i><small>${CPU.press ? "the whole tablet's CPU, as Android reports it" : "this tablet doesn't report its CPU to web pages"}</small></div>
+          <div class="lv-pkg">Playing</div>
+          <p class="lv-note">${its} ${its === 1 ? "sound" : "sounds layered"} · ${vs} ${vs === 1 ? "voice" : "voices"} sounding · FX Lab: ${on.length ? on.map(x => x[1]).join(", ") : "nothing on"}${state.fx && state.fx.space > 0.01 ? " · Space " + Math.round(state.fx.space * 100) : ""}</p>
+          ${on.length ? `<div class="lv-pkg">Lighten it</div><div class="lc-off">${on.map(([k, n, why]) => `<button class="btn" data-k="${k}">${esc3(n)} off<small>${esc3(why)}</small></button>`).join("")}</div>` : ""}
+        </div>`;
+    }
+    function paintCpu() {
+      const keep = pick.querySelector(".lv-pkl") ? pick.querySelector(".lv-pkl").scrollTop : 0;
+      pick.innerHTML = cpuHTML(); const l = pick.querySelector(".lv-pkl"); if (l) l.scrollTop = keep;
+      pick.querySelector("#lvPickClose").addEventListener("click", closePick);
+      pick.querySelectorAll(".lc-off button").forEach(b => b.addEventListener("click", () => { bfx[b.dataset.k] = false; saveBfx(); applyBfx(false); lvPaintKnobs(); mlHud(b.textContent.replace(/ off.*/, "") + " off", "lighter on the tablet", null); paintCpu(); }));
+    }
+    cpuB.addEventListener("click", () => { start(); if (!pick.hidden && pick.querySelector(".lc-wrap")) { closePick(); return; } popAt(cpuB, 400, cpuHTML()); paintCpu(); });
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ cpu: { pct: CPU.pct, screen: CPU.screen, fps: CPU.fps, audioLoad: CPU.audio, audioPeak: CPU.peak, underrunRatio: CPU.under, tablet: CPU.press || "not reported", pressureApi: "PressureObserver" in window, renderCapacityApi: !!(ctx && ctx.renderCapacity), fellBehindLastMinute: CPU.hist.filter(x => x > 25).length } }));
+    window.__live7 = { CPU, cpuHTML };
+    // ======================================================================
+    // Live's recorder (142). ● Rec records everything you hear, for as long as a set lasts (up to an hour), without
+    // weighing on the screen: a recorder on the audio thread hands over 16-bit pieces, and every 10 seconds they go into
+    // the browser's own storage, so a long take doesn't fill the memory and a crash or a reload doesn't lose it. Each
+    // take saves as a WAV, or as an MP3 made in the background a piece at a time. (● Loop stays for Beat Pads.)
+    // ======================================================================
+    const REC_SRC = `class NBRec extends AudioWorkletProcessor {
+  constructor() { super(); this.on = false; this.n = 16384; this.b = new Int16Array(this.n * 2); this.w = 0;
+    this.port.onmessage = e => { if (e.data === "start") { this.on = true; this.w = 0; } else if (e.data === "stop") { this.send(); this.on = false; this.port.postMessage({ done: true }); } }; }
+  send() { if (!this.w) return; const o = this.b.slice(0, this.w * 2); this.port.postMessage({ pcm: o }, [o.buffer]); this.w = 0; }
+  process(inputs) { const i = inputs[0];
+    if (this.on && i && i[0]) { const l = i[0], r = i[1] || i[0], b = this.b;
+      for (let k = 0; k < l.length; k++) { let x = l[k], y = r[k]; x = x < -1 ? -1 : x > 1 ? 1 : x; y = y < -1 ? -1 : y > 1 ? 1 : y; b[this.w * 2] = x * 32767; b[this.w * 2 + 1] = y * 32767; if (++this.w >= this.n) this.send(); } }
+    return true; }
+}
+registerProcessor("nb-rec", NBRec);`;
+    const RC8 = { on: false, node: null, kind: "", mute: null, meta: null, chunks: [], cf: 0, parts: [], timer: 0, stopWait: null, mem: {}, idbOk: true, maxSec: 3600 };
+    // ---- the browser's storage for takes (IndexedDB: kept across reloads) ----
+    let rdbP = null;
+    const rq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    function rdb() {
+      return rdbP || (rdbP = new Promise((res, rej) => { const q = indexedDB.open("nightbloom-recordings", 1);
+        q.onupgradeneeded = () => { const d = q.result; if (!d.objectStoreNames.contains("recs")) d.createObjectStore("recs", { keyPath: "id" }); if (!d.objectStoreNames.contains("parts")) d.createObjectStore("parts", { keyPath: ["id", "i"] }); };
+        q.onsuccess = () => res(q.result); q.onerror = () => { rdbP = null; rej(q.error); }; }));
+    }
+    const rPut = async (st, v) => { const d = await rdb(); return rq(d.transaction(st, "readwrite").objectStore(st).put(v)); };
+    const rAll = async () => { const d = await rdb(); return rq(d.transaction("recs").objectStore("recs").getAll()); };
+    const rParts = async id => { const d = await rdb(); return (await rq(d.transaction("parts").objectStore("parts").getAll(IDBKeyRange.bound([id, 0], [id, 1e9])))).sort((a, b) => a.i - b.i).map(p => p.blob); };
+    async function rDel(id) { const d = await rdb(), t = d.transaction(["recs", "parts"], "readwrite"); t.objectStore("recs").delete(id); t.objectStore("parts").delete(IDBKeyRange.bound([id, 0], [id, 1e9])); await new Promise(r => { t.oncomplete = r; t.onerror = r; t.onabort = r; }); }
+    // ---- recording ----
+    async function recNode() {
+      if (RC8.node && RC8.node.context === ctx) return RC8.node;
+      RC8.node = null;
+      if (ctx.audioWorklet && typeof AudioWorkletNode !== "undefined") {
+        for (const url of [() => URL.createObjectURL(new Blob([REC_SRC], { type: "text/javascript" })), () => "data:text/javascript;charset=utf-8," + encodeURIComponent(REC_SRC)]) {
+          try { await ctx.audioWorklet.addModule(url()); const n = new AudioWorkletNode(ctx, "nb-rec", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 2, channelCountMode: "explicit" });
+            n.port.onmessage = e => { if (e.data.pcm) recPiece(e.data.pcm); else if (e.data.done && RC8.stopWait) RC8.stopWait(); }; RC8.node = n; RC8.kind = "worklet"; return n; } catch (e) {}
+        }
+      }
+      // (no audio worklets: the main thread does it)
+      const sp = ctx.createScriptProcessor(4096, 2, 1);
+      sp.onaudioprocess = ev => { if (!RC8.on) return; const ib = ev.inputBuffer, l = ib.getChannelData(0), r = ib.numberOfChannels > 1 ? ib.getChannelData(1) : l, o = new Int16Array(l.length * 2);
+        for (let k = 0; k < l.length; k++) { const x = Math.max(-1, Math.min(1, l[k])), y = Math.max(-1, Math.min(1, r[k])); o[2 * k] = x * 32767; o[2 * k + 1] = y * 32767; } recPiece(o); };
+      sp.port = { postMessage: m => { if (m === "stop" && RC8.stopWait) setTimeout(RC8.stopWait, 0); } };
+      RC8.node = sp; RC8.kind = "main thread"; return sp;
+    }
+    function recPiece(pcm) {
+      if (!RC8.meta) return;
+      RC8.chunks.push(pcm); RC8.cf += pcm.length / 2;
+      if (RC8.cf >= RC8.meta.rate * 10) recFlush();
+      if ((RC8.meta.frames + RC8.cf) / RC8.meta.rate >= RC8.maxSec && RC8.on) recStop();
+    }
+    function recFlush() {
+      const m = RC8.meta; if (!m || !RC8.chunks.length) return;
+      const blob = new Blob(RC8.chunks), i = m.parts; RC8.chunks = []; m.frames += RC8.cf; RC8.cf = 0; m.parts++;
+      (RC8.mem[m.id] = RC8.mem[m.id] || []).push(blob);
+      if (RC8.idbOk) rPut("parts", { id: m.id, i, blob }).then(() => rPut("recs", Object.assign({}, m))).catch(() => { RC8.idbOk = false; add139("rec", "storage full or blocked: this take is kept until the page closes"); });
+    }
+    const stamp = () => { const d = new Date(), p = x => String(x).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + "." + p(d.getMinutes()); };
+    async function recStart() {
+      start(); if (RC8.on || !ctx || !analyser) return;
+      const n = await recNode(); if (!n || RC8.on) return;
+      RC8.meta = { id: "rec-" + Date.now(), name: "Nate Bloom live " + stamp(), rate: ctx.sampleRate, frames: 0, parts: 0, made: Date.now(), done: false };
+      RC8.chunks = []; RC8.cf = 0; RC8.idbOk = true; RC8.on = true;
+      try { await rPut("recs", Object.assign({}, RC8.meta)); } catch (e) { RC8.idbOk = false; }
+      RC8.mute = ctx.createGain(); RC8.mute.gain.value = 0;
+      analyser.connect(n); n.connect(RC8.mute).connect(ctx.destination); n.port.postMessage("start");
+      RC8.t0 = ctx.currentTime; clearInterval(RC8.timer); RC8.timer = setInterval(recPaint, 250); recPaint();
+      add139("rec", "started · " + RC8.kind + (RC8.idbOk ? "" : " · not stored (memory only)"));
+    }
+    async function recStop() {
+      if (!RC8.on) return; RC8.on = false; clearInterval(RC8.timer);
+      await new Promise(res => { RC8.stopWait = res; try { RC8.node.port.postMessage("stop"); } catch (e) { res(); } setTimeout(res, 1500); });
+      RC8.stopWait = null;
+      try { analyser.disconnect(RC8.node); RC8.node.disconnect(); RC8.mute.disconnect(); } catch (e) {}
+      recFlush(); const m = RC8.meta; RC8.meta = null; recPaint();
+      if (!m || m.frames < m.rate * 0.3) { if (m) { delete RC8.mem[m.id]; try { await rDel(m.id); } catch (e) {} } mlHud("Recording", "too short to keep", null); return; }
+      m.done = true; if (RC8.idbOk) { try { await rPut("recs", Object.assign({}, m)); } catch (e) {} } else RC8.memMeta = Object.assign(RC8.memMeta || {}, { [m.id]: m });
+      add139("rec", "stopped · " + fmtLen(m.frames / m.rate) + " · " + (RC8.idbOk ? "stored" : "memory only"));
+      openTakes(m.id);
+    }
+    function recToggle() { if (RC8.on) recStop(); else recStart(); }
+    const fmtLen = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+    const mbOf = frames => (44 + frames * 4) / 1048576;
+    // ---- the button ----
+    const recB = mkBtn("lvTake", "lv-take", '<i aria-hidden="true"></i><span>Rec</span>', "Record everything you hear · save it as a WAV or an MP3");
+    $id("lvGo").after(recB); recB.dataset.kc = "R";
+    const takesB = mkBtn("lvTakes", "lv-takes", "▾", "Your recordings: save them as WAV or MP3"); recB.after(takesB); takesB.hidden = true;
+    recB.addEventListener("click", recToggle);
+    takesB.addEventListener("click", () => { start(); if (!pick.hidden && pick.querySelector(".lr-wrap")) closePick(); else openTakes(); });
+    function recPaint() {
+      const on = RC8.on, s = on && ctx ? ctx.currentTime - RC8.t0 : 0;
+      recB.classList.toggle("on", on); lv.classList.toggle("recording", on);
+      nbT(recB.querySelector("span"), on ? fmtLen(s) : "Rec");
+      nbA(recB, "aria-label", on ? "Stop recording (" + fmtLen(s) + ")" : "Record everything you hear");
+      if (on && s > RC8.maxSec - 300 && !RC8.warned) { RC8.warned = true; noteMsg("Recording: 5 minutes left of the hour (it stops by itself at 60:00)"); }
+      if (!on) RC8.warned = false;
+    }
+    // Rec is the audio recorder now; ● Loop (Beat Pads) shows only when ▶ plays the pads
+    { const pt = lvPaintTop; lvPaintTop = function () { const r = pt.apply(this, arguments); lv.classList.toggle("play-bp", LV.play === "bp"); return r; }; }
+    // ---- your recordings ----
+    async function takesList() {
+      let list = []; try { list = await rAll(); } catch (e) {}
+      Object.values(RC8.memMeta || {}).forEach(m => { if (!list.some(x => x.id === m.id)) list.push(m); });
+      return list.filter(m => m.frames > 0 && (m.done || !RC8.meta || m.id !== RC8.meta.id)).sort((a, b) => b.made - a.made);
+    }
+    async function paintTakesBtn() { const n = (await takesList()).length; takesB.hidden = !n; nbT(takesB, n ? "▾ " + n : "▾"); }
+    async function openTakes(fresh) {
+      const list = await takesList(); paintTakesBtn();
+      const row = m => `<div class="lr-row${m.id === fresh ? " fresh" : ""}" data-id="${esc3(m.id)}"><div class="lr-n"><b>${esc3(m.name)}</b><small>${fmtLen(m.frames / m.rate)} · ${mbOf(m.frames).toFixed(1)} MB as WAV${m.done ? "" : " · recovered after the page closed"}</small></div>
+        <button class="btn primary" data-a="wav">WAV</button><button class="btn" data-a="mp3">MP3</button><button class="btn" data-a="del" aria-label="Delete">✕</button><div class="lr-st"></div></div>`;
+      popAt(recB, 470, `<div class="lv-pkh"><div><strong>Recordings</strong><small>Kept on this ${matchMedia("(pointer: coarse)").matches ? "tablet" : "computer"} until you delete them · WAV for the full sound, MP3 (320 kbps) to send</small></div><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
+        <div class="lv-pkl lr-wrap">${list.length ? list.map(row).join("") : '<p class="lv-note">Nothing recorded yet: tap ● Rec (or R) and play.</p>'}</div>`);
+      pick.querySelector("#lvPickClose").addEventListener("click", closePick);
+      pick.querySelectorAll(".lr-row").forEach(r => r.addEventListener("click", async e => {
+        const b = e.target.closest("button[data-a]"); if (!b) return; const m = list.find(x => x.id === r.dataset.id); if (!m) return; const st = r.querySelector(".lr-st");
+        if (b.dataset.a === "del") { if (!b.dataset.arm) { b.dataset.arm = "1"; b.textContent = "Sure?"; setTimeout(() => { if (b.isConnected) { delete b.dataset.arm; b.textContent = "✕"; } }, 2500); return; }
+          delete RC8.mem[m.id]; if (RC8.memMeta) delete RC8.memMeta[m.id]; try { await rDel(m.id); } catch (x) {} openTakes(); return; }
+        b.disabled = true;
+        try {
+          const parts = RC8.mem[m.id] || await rParts(m.id);
+          if (b.dataset.a === "wav") { st.textContent = "Saving the WAV…"; const msg = await saveAudio(m.name + ".wav", new Blob([wavHead(m.frames, m.rate), ...parts], { type: "audio/wav" }), "audio/wav"); st.textContent = msg || ""; }
+          else { st.textContent = "Making the MP3… 0%"; const blob = await mp3Parts(parts, m.rate, 320, p => { st.textContent = "Making the MP3… " + Math.round(p * 100) + "%"; }); st.textContent = "Saving the MP3…"; const msg = await saveAudio(m.name + ".mp3", blob, "audio/mpeg"); st.textContent = msg || ""; }
+        } catch (x) { st.textContent = "Couldn't save it (" + (x && x.message || x) + ")"; }
+        b.disabled = false;
+      }));
+    }
+    function wavHead(frames, rate) {
+      const v = new DataView(new ArrayBuffer(44)), w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }, n = frames * 4;
+      w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, n, true);
+      return v.buffer;
+    }
+    // the MP3: a worker reads the stored pieces one at a time and encodes them (the screen stays free)
+    function mp3Parts(parts, rate, kbps, onP) {
+      const src = (document.getElementById("lameSrc") || {}).textContent || "";
+      const code = src + `\nonmessage = async e => { try { const { parts, rate, kbps, total } = e.data, enc = new lamejs.Mp3Encoder(2, rate, kbps), out = []; let done = 0;
+  const keep = d => { if (d.length) out.push(new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.length))); };
+  for (const b of parts) { const a = new Int16Array(await b.arrayBuffer()), n = a.length >> 1, L = new Int16Array(n), R = new Int16Array(n); for (let i = 0; i < n; i++) { L[i] = a[2 * i]; R[i] = a[2 * i + 1]; }
+    for (let i = 0; i < n; i += 1152) keep(enc.encodeBuffer(L.subarray(i, i + 1152), R.subarray(i, i + 1152))); done += n; postMessage({ p: done / total }); }
+  keep(enc.flush()); postMessage({ blob: new Blob(out, { type: "audio/mpeg" }) }); } catch (err) { postMessage({ err: String(err && err.message || err) }); } };`;
+      return new Promise((res, rej) => {
+        let w; try { w = new Worker(URL.createObjectURL(new Blob([code], { type: "text/javascript" }))); } catch (e) { rej(new Error("this browser can't make MP3s in the background")); return; }
+        w.onmessage = e => { if (e.data.p != null) { if (onP) onP(e.data.p); } else { w.terminate(); if (e.data.err) rej(new Error(e.data.err)); else res(e.data.blob); } };
+        w.onerror = e => { w.terminate(); rej(new Error(e.message || "the MP3 maker stopped")); };
+        w.postMessage({ parts, rate, kbps, total: Math.max(1, parts.reduce((s, b) => s + b.size / 4, 0)) });
+      });
+    }
+    async function saveAudio(fname, blob, mime) {
+      let dl = null; try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) { dl = null; }
+      if (dl) {
+        const zname = fname.replace(/\.\w+$/, "") + ".zip";
+        try { await dl.save({ filename: zname, data: zipOne(fname, new Uint8Array(await blob.arrayBuffer())) }); return "Saved " + zname + " (the " + fname.split(".").pop().toUpperCase() + " is inside)"; }
+        catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here: use the site or the app" : "Couldn't save here: try again"; }
+      }
+      const file = new File([blob], fname, { type: mime });
+      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: fname }); return "Shared " + fname; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+      const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 120000);
+      return "Saved " + fname;
+    }
+    paintTakesBtn();
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ liveRecorder: { recording: RC8.on, kind: RC8.kind, stored: RC8.idbOk } }));
+    window.__live8 = { RC8, recStart, recStop, recToggle, openTakes, takesList, rParts, wavHead, mp3Parts };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
