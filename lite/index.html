@@ -3088,6 +3088,10 @@ body.dj-on > .app { visibility: hidden; }
 .lv-st.look, .lv-st.warn { background: #ffb65c; box-shadow: 0 0 6px #ffb65c88; }
 .lk-code { gap: 10px; } .lk-code b { font: 700 1.25rem var(--font-mono); letter-spacing: 0.08em; color: #ffcf8a; }
 .lk-sw { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--ink); }
+/* 149: Log on every screen */
+.nb-log { display: inline-flex; align-items: center; gap: 7px; position: relative; }
+@media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
+@media (max-width: 1500px) { header #hdrLog span { display: none; } header #hdrLog { padding: 0 11px; } }
 /* ---------- Lite ---------- */
 .lite-tag { font: 600 0.6rem/1 var(--font-mono); color: var(--panel); background: var(--lilac); border-radius: 5px; padding: 3px 5px; vertical-align: 3px; margin-left: 4px; letter-spacing: 0.04em; }
 body.lite *, body.lite *::before, body.lite *::after { transition-duration: 0s !important; }
@@ -30043,7 +30047,7 @@ z: [z]=Z
     const num = (f, d) => { try { const v = f(); return v == null || Number.isNaN(v) ? d : v; } catch (e) { return d; } };
     function tlFrame() { TLS.frames++; if (!lv.hidden) TLS.raf = requestAnimationFrame(tlFrame); else TLS.raf = 0; }
     function tlTick() {
-      if ((lv.hidden && $id("djView").hidden) || !ctx) return;
+      if (!ctx || document.hidden) return;   // (149: on every screen, not only Live and the DJ)
       const now = performance.now() / 1000, ct = ctx.currentTime;
       if (!TLS.base) TLS.base = { w: now, c: ct };
       const lag = (now - TLS.base.w) - (ct - TLS.base.c), dLag = lag - TLS.lag; TLS.lag = lag;
@@ -30068,7 +30072,7 @@ z: [z]=Z
     let tlT = 0;
     new MutationObserver(() => {
       if (!lv.hidden) { TLS.since = performance.now() / 1000; TLS.base = null; TLS.lag = 0; TLS.ts = null; clearInterval(tlT); tlT = setInterval(tlTick, 1000); if (!TLS.raf) TLS.raf = requestAnimationFrame(tlFrame); add139("live", "open · " + innerWidth + "x" + innerHeight + " · " + fxOnStr()); }
-      else { clearInterval(tlT); add139("live", "closed"); }
+      else { add139("live", "closed"); }   // (149: the per-second record keeps going)
     }).observe(lv, { attributes: true, attributeFilter: ["hidden"] });
     function add139(k, d) { try { window.__nbAdd && window.__nbAdd(k, d); } catch (e) {} }
     // what Live did, in the app's log (taps and keys are logged already; these come from the MiniLab or the code)
@@ -30245,7 +30249,7 @@ z: [z]=Z
       tlTick = function () {
         const longMs = TLS.longMs, frames = TLS.frames, lag = window.__nbLagMs || 0; window.__nbLagMs = 0;
         const r = t0.apply(this, arguments);
-        if ((lv.hidden && $id("djView").hidden) || !ctx) return r;
+        if (!ctx || document.hidden) return r;
         const row = TL[TL.length - 1] || [];
         const screen = Math.min(100, Math.max(longMs, lag) / 10), behind = +row[2] || 0;
         CPU.screen = Math.round(screen); CPU.fps = frames;
@@ -30570,7 +30574,7 @@ registerProcessor("nb-rec", NBRec);`;
       document.body.classList.toggle("dj-on", on);
       try { wake(on || !lv.hidden); } catch (e) {}
       if (on) { TLS.since = performance.now() / 1000; TLS.base = null; TLS.lag = 0; TLS.ts = null; clearInterval(tlT); tlT = setInterval(tlTick, 1000); if (!TLS.raf) TLS.raf = requestAnimationFrame(djFrame); paintDjCaps(); add139("dj", "open"); }
-      else if (lv.hidden) { clearInterval(tlT); add139("dj", "closed"); }
+      else if (lv.hidden) { add139("dj", "closed"); }
     }
     function djFrame() { TLS.frames++; if (!djv.hidden) TLS.raf = requestAnimationFrame(djFrame); else TLS.raf = 0; }
     new MutationObserver(djOpenChanged).observe(djv, { attributes: true, attributeFilter: ["hidden"] });
@@ -30737,7 +30741,7 @@ registerProcessor("nb-rec", NBRec);`;
     {
       const t0 = tlTick;
       tlTick = function () {
-        const on = !((lv.hidden && $id("djView").hidden) || !ctx), d = on ? dropTick() : 0, last0 = TL[TL.length - 1];
+        const on = !!ctx && !document.hidden, d = on ? dropTick() : 0, last0 = TL[TL.length - 1];
         const r = t0.apply(this, arguments);
         const row = TL[TL.length - 1];
         if (on && row && row !== last0) { const i = TL_HEAD.indexOf("dropouts"); while (row.length < i) row.push(""); row.push(d); }
@@ -31386,6 +31390,47 @@ registerProcessor("nb-rec", NBRec);`;
     if (LK.on) setTimeout(lkStart, 1500);
     paintGear();
     window.__live13 = { LK, LKS, lkStart, lkStop, lkState, lkGrid, lkBand, lkData, lkIn, gearHTML, heardPerf };
+    // ======================================================================
+    // 149: Log on every screen. The main screen (beside ☰), Rhythm, Beats and the Garage get the Log button Live and
+    // the DJ have: a tap marks the moment, grabs the last minute of sound and opens the report with the screen's
+    // name. The per-second record now runs on every screen (it was Live and the DJ only), so a log from anywhere carries
+    // the minutes before it. The red dot (the sound dropped out or fell behind since the last log) shows on every Log.
+    // ======================================================================
+    const LOGS = [logB, djLog];
+    function screenName() {
+      const open = id => { const e = $id(id); return !!(e && !e.hidden); };
+      if (!lv.hidden) return "Live";
+      if (open("gbView")) return "Garage"; if (open("bpView")) return "Beats"; if (open("rcView")) return "Rhythm"; if (open("djView")) return "DJ";
+      const m = document.querySelector('#modes .mode[aria-pressed="true"]');
+      return "Main screen (" + (m ? m.textContent.trim() : state.engine) + ", " + (state.view || "keys") + ")";
+    }
+    function logTap(where) {
+      const at = TL.length ? TL[TL.length - 1][0] : 0; TLS.marks.push(where + " " + at + " s");
+      add139("mark", "Log tapped on " + where + " at " + at + " s · fell behind " + TLS.seenLag + "x since the last log");
+      TLS.seenLag = 0; LOGS.forEach(b => b && b.classList.remove("warn"));
+      try { window.__nbReport && window.__nbReport.open(60, where + ": what went wrong just now? (optional)"); } catch (e) { noteMsg("Couldn't open the log (" + (e && e.message || e) + ")", true); }
+    }
+    function addLog(id, before, where) {
+      const anchor = $id(before); if (!anchor || $id(id)) return null;
+      const b = mkBtn(id, "lv-log nb-log", '<i aria-hidden="true"></i><span>Log</span>', "Log: save what the app is doing, the last minute of sound and every setting, to send for a fix");
+      anchor.before(b); b.addEventListener("click", () => { start(); logTap(typeof where === "function" ? where() : where); }); LOGS.push(b); LOGA.push([b, anchor]); return b;
+    }
+    // these bars place their buttons by CSS order: each Log takes the order of the button it sits beside
+    const LOGA = [];
+    const logOrder = () => LOGA.forEach(([b, a]) => { const o = getComputedStyle(a).order; if (b.style.order !== o) b.style.order = o; });
+    addLog("hdrLog", "menuBtn", screenName);
+    addLog("rcLog", "rcHelpBtn", "Rhythm");
+    addLog("bpLog", "bpHelpBtn", "Beats");
+    addLog("gbLog", "gbHelpBtn", "Garage");
+    // one red dot for all of them (Live's Log is the one the checks mark)
+    new MutationObserver(() => { const w = logB.classList.contains("warn"); LOGS.forEach(b => { if (b && b !== logB) { b.classList.toggle("warn", w); b.title = w ? logB.title : "Log: save what the app is doing, the last minute of sound and every setting, to send for a fix"; } }); })
+      .observe(logB, { attributes: true, attributeFilter: ["class"] });
+    djLog.addEventListener("click", () => logB.classList.remove("warn"));
+    logOrder(); addEventListener("resize", () => setTimeout(logOrder, 50));
+    // the record from launch, on every screen (Live and the DJ count their own frames; this counts the rest)
+    if (!tlT) { TLS.since = performance.now() / 1000; tlT = setInterval(tlTick, 1000); }
+    { const djv0 = $id("djView"); const mainFrame = () => { if (lv.hidden && (!djv0 || djv0.hidden)) TLS.frames++; requestAnimationFrame(mainFrame); }; requestAnimationFrame(mainFrame); }
+    window.__live14 = { LOGS, logTap, screenName };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
