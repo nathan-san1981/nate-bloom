@@ -4217,6 +4217,7 @@ body.dj-on > .app { visibility: hidden; }
       <kbd>↓ / ↑</kbd><span>octave down / up</span>
       <kbd>← / →</kbd><span>tempo down / up</span>
       <kbd>Shift+Enter</kbd><span>Hold on / off</span>
+      <kbd>`</kbd><span>every effect off / on (Effects and FX Lab), on any screen</span>
       <kbd>?</kbd><span>this help</span>
     </div>
     <p class="help-lic">Nate Bloom is free software under the GNU General Public License, version 3 or later, and comes with no warranty. Its source, and the licences of what it includes (Ableton Link is © Ableton AG, under the GPL version 2 or later), are at <a href="https://github.com/nathan-san1981/nate-bloom" target="_blank" rel="noopener">github.com/nathan-san1981/nate-bloom</a> (NOTICE.md).</p>
@@ -15603,7 +15604,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const n = pickIds().filter(id => FXC.by[id] && FXC.by[id].on !== false).length;
       if (fxRowLabel) fxRowLabel.textContent = "Effects · on " + n + (n === 1 ? " sound" : " sounds");
       const on = state.fx.on !== false; fxOnBtn.setAttribute("aria-pressed", String(on)); fxOnBtn.textContent = on ? "FX: On" : "FX: Off";
-      fxOnBtn.title = "Switch every effect off or on"; appRoot.classList.toggle("fxoff", !on);
+      fxOnBtn.title = "Switch every effect off or on (the ` key)"; appRoot.classList.toggle("fxoff", !on);
     }
     { const pf = paintFxState; paintFxState = function () { pf(); fxcPaint2(); }; }
     { const re = renderEngine; renderEngine = function () { re(); fxcPaint2(); }; }
@@ -29787,7 +29788,7 @@ z: [z]=Z
           ${row(["H"], "Hold")}${row(["A"], "Arp: tap to switch it on or off · hold it down and it plays only while held")}${row(["Z", "X"], "Arp octaves, fewer or more")}
           <div class="lv-pkg">Sounds and pages</div>
           ${row(["←", "→"], "the previous or next sound")}${row(["S"], "Sounds: arrows to move, Enter plays it alone, + or Shift Enter layers it")}
-          ${row(["K"], "the next knob page (Shift K: back)")}${row(["P"], "the next pad set (Shift P: back)")}${row(["F"], "the effects")}
+          ${row(["K"], "the next knob page (Shift K: back)")}${row(["P"], "the next pad set (Shift P: back)")}${row(["F"], "the effects")}${row(["\u0060"], "every effect off or on")}
           <div class="lv-pkg">Jam</div>
           ${row(["J"], "Jam: the loops and the band")}${row(["Y", "U", "I", "O"], "loops 1–4: record, then play or stop")}${row(["B"], "the band on or off")}
           <div class="lv-pkg">Transport</div>
@@ -31323,6 +31324,28 @@ registerProcessor("nb-rec", NBRec);`;
       }; }
     if (window.__live12) window.__live12.gearSnd = gearSnd;   // (Gear's template asks through __live12)
     window.__live15 = { ADEV, adevRead, koCard };
+    // ======================================================================
+    // 151: one key for every effect. ` (the key left of 1, under Esc) switches all the effects off or back on from any
+    // screen: the Effects (Drive, Wobble, Echo, Space) and FX Lab, the same switch as FX: On. A note says which way
+    // it went. It isn't a note on any screen's keys, so nothing plays; while you type in a box it types as usual.
+    // ======================================================================
+    function fxKeyToggle() {
+      start();
+      const off = state.fx.on !== false;
+      setFxOn(!off);
+      if (!lv.hidden) {
+        try { if (!$id("lvFxp").hidden) lvPaintFx(); lvPaintTop(); } catch (e) {}
+        mlHud("Effects", off ? "off" : "on", null, off ? "` turns them back on" : "");
+      } else noteMsg(off ? "Effects off · ` turns them back on" : "Effects on");
+      return !off;
+    }
+    window.addEventListener("keydown", e => {
+      if (e.code !== "Backquote" || e.ctrlKey || e.metaKey || e.altKey) return;
+      const t = e.target; if (t && t.closest && t.closest("input:not([type=range]), textarea, select, [contenteditable]")) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (!e.repeat) fxKeyToggle();
+    }, true);
+    window.__live16 = { fxKeyToggle };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
