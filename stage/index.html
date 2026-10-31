@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nate Bloom Stage</title>
+<meta name="theme-color" content="#0c0a12">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #0c0a12; --panel: #13111b; --raised: #1d1a28; --line: #2e2a3d; --ink: #ece7f7; --dim: #8e86a6; --faint: #5b5470;
+  --lilac: #c4a3ff; --amber: #ffb65c; --teal: #7fd6c2; --rose: #ff5c7a; --red: #ff6b6b;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif; --font-body: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif; --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 16px/1.35 var(--font-body); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.btn { height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font-weight: 600; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn:hover { border-color: #4a4262; } .btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--lilac); border-color: var(--lilac); color: #1a1226; }
+.btn[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #0d1a16; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--raised); }
+.seg button { border: none; background: none; height: 36px; padding: 0 13px; font-size: 0.85rem; font-weight: 600; color: var(--dim); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.lab { font: 600 0.66rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); }
+.note { font-size: 0.8rem; color: var(--dim); margin: 0; }
+.mono { font-family: var(--font-mono); }
+/* ---------- the top bar ---------- */
+.top { position: relative; z-index: 5; height: 58px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--line); background: #0f0d16; }
+.brand { font: 700 0.95rem var(--font-display); display: flex; align-items: center; gap: 8px; white-space: nowrap; margin-right: 4px; }
+.brand i { width: 10px; height: 10px; border-radius: 50%; background: var(--rose); box-shadow: 0 0 12px var(--rose); }
+.brand small { font: 500 0.7rem var(--font-body); color: var(--dim); }
+.conn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-radius: 19px; border: 1px solid var(--line); background: var(--raised); font-size: 0.84rem; font-weight: 600; white-space: nowrap; max-width: 330px; overflow: hidden; text-overflow: ellipsis; }
+.conn i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #4a4262; }
+.conn.direct i { background: var(--teal); box-shadow: 0 0 8px var(--teal); } .conn.relay i, .conn.look i, .conn.connecting i { background: var(--amber); box-shadow: 0 0 8px var(--amber); } .conn.bad i { background: var(--red); }
+.tabs { display: flex; gap: 4px; margin-left: auto; }
+.tabs button { height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim); font-weight: 600; font-size: 0.9rem; }
+.tabs button[aria-selected="true"] { background: var(--raised); border-color: var(--line); color: var(--ink); }
+.recdot { display: none; align-items: center; gap: 6px; font: 600 0.8rem var(--font-mono); color: #ff9aae; }
+.recdot.on { display: inline-flex; } .recdot i { width: 9px; height: 9px; border-radius: 50%; background: var(--rose); animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { opacity: 0.25; } }
+.meter { width: 8px; height: 38px; border-radius: 4px; background: #1d1a28; overflow: hidden; display: flex; flex-direction: column-reverse; }
+.meter u { display: block; height: 0; background: linear-gradient(to top, var(--teal), #e9d36a 75%, var(--red)); transition: height 0.08s; }
+.icon { width: 38px; padding: 0; }
+/* ---------- views ---------- */
+main { position: absolute; inset: 58px 0 0 0; }
+.view { position: absolute; inset: 0; overflow: auto; padding: 14px; }
+.view[hidden] { display: none !important; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; min-width: 0; }
+.card h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+/* ---------- the monitor ---------- */
+#vMon { display: grid; gap: 12px; grid-template-columns: 1.15fr 1fr 0.85fr; grid-template-rows: auto auto 1fr; align-content: start; }
+.clock { grid-column: 1; display: flex; flex-direction: column; gap: 6px; }
+.bigbar { display: flex; align-items: baseline; gap: 14px; }
+.bigbar b { font: 700 clamp(56px, 8.2vw, 104px)/1 var(--font-mono); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.bigbar b span { color: var(--faint); }
+.beats { display: flex; gap: 8px; }
+.beats i { width: 22px; height: 22px; border-radius: 50%; background: #241f31; border: 1px solid var(--line); transition: background 0.05s; }
+.beats i.on { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 14px #ffb65c88; } .beats i.on.one { background: var(--rose); border-color: var(--rose); box-shadow: 0 0 14px #ff5c7a88; }
+.trow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 0.92rem; }
+.trow .bpm { font: 700 1.6rem var(--font-mono); } .trow .bpm small { font-size: 0.8rem; color: var(--dim); }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 14px; background: var(--raised); border: 1px solid var(--line); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.pill.on { border-color: var(--teal); color: var(--teal); } .pill.rec { border-color: var(--rose); color: #ff9aae; } .pill.warn { border-color: var(--amber); color: #ffcf8a; }
+.song { grid-column: 2; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.song .now { font: 700 1.5rem/1.2 var(--font-display); }
+.song .next { color: var(--dim); font-size: 0.95rem; }
+.song .notes { margin-top: 6px; white-space: pre-wrap; font-size: 1.25rem; line-height: 1.4; color: #f3e9ff; max-height: 9.5em; overflow: auto; }
+.song .notes:empty::before { content: "No notes for this song: add them in Editor → Set list."; color: var(--faint); font-size: 0.85rem; }
+.gear { grid-column: 3; display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; }
+.gr { display: flex; align-items: center; gap: 8px; }
+.gr i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #4a4262; } .gr i.on { background: var(--teal); } .gr i.warn { background: var(--amber); } .gr i.bad { background: var(--red); }
+.snd { grid-column: 1; display: flex; flex-direction: column; gap: 8px; }
+.snd .name { font: 700 1.7rem/1.15 var(--font-display); }
+.snd .sub { color: var(--dim); font-size: 0.9rem; margin-top: -4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { height: 30px; padding: 0 11px; border-radius: 15px; background: var(--raised); border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; }
+.chip.arp::after { content: "ARP"; font: 700 0.6rem var(--font-mono); padding: 2px 5px; border-radius: 5px; background: var(--lilac); color: #1a1226; }
+.held { font: 700 1.6rem var(--font-mono); color: #ffcf8a; min-height: 1.3em; letter-spacing: 0.02em; }
+.held small { font: 500 0.85rem var(--font-body); color: var(--dim); margin-left: 8px; }
+.jam { grid-column: 2; display: flex; flex-direction: column; gap: 8px; }
+.loops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.loop { border-radius: 12px; border: 1px solid var(--line); background: var(--raised); padding: 8px 10px; min-height: 58px; display: flex; flex-direction: column; justify-content: space-between; }
+.loop span { font: 600 0.66rem var(--font-mono); color: var(--dim); } .loop b { font-size: 1rem; }
+.loop.has { border-color: #7fd6c266; } .loop.on { border-color: var(--teal); background: #7fd6c21c; } .loop.rec { border-color: var(--rose); background: #ff5c7a24; } .loop.ready { border-color: var(--amber); border-style: dashed; }
+.bandrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bandrow .chord { font: 800 2rem var(--font-display); color: #ffcf8a; min-width: 70px; }
+.knobs { grid-column: 1 / span 2; }
+.kgrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)) 14px repeat(4, minmax(0, 0.8fr)); gap: 8px; align-items: end; }
+.kn { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.kn svg { width: 100%; max-width: 74px; aspect-ratio: 1; }
+.kn b { font: 600 0.8rem var(--font-mono); color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kn span { font-size: 0.78rem; color: var(--dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kn em { font: 700 0.62rem var(--font-mono); color: var(--faint); font-style: normal; }
+.fd { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.fd .rail { width: 14px; height: 74px; border-radius: 7px; background: #241f31; display: flex; flex-direction: column-reverse; overflow: hidden; }
+.fd .rail u { display: block; background: linear-gradient(to top, #b98b4d, #ffcf8a); }
+.fd b { font: 600 0.78rem var(--font-mono); } .fd span { font-size: 0.74rem; color: var(--dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pads { grid-column: 3; }
+.pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.pd { aspect-ratio: 1.6; border-radius: 9px; background: var(--raised); border: 1px solid var(--line); padding: 5px 7px; font-size: 0.74rem; font-weight: 600; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; transition: background 0.25s, border-color 0.25s; }
+.pd em { font: 600 0.6rem var(--font-mono); color: var(--faint); font-style: normal; }
+.pd.hit { background: #c4a3ff55; border-color: var(--lilac); transition: none; }
+.waiting { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; background: #0c0a12e6; z-index: 3; }
+.waiting[hidden] { display: none; }
+.waiting div { max-width: 520px; padding: 20px; } .waiting h2 { font: 700 1.3rem var(--font-display); margin: 0 0 8px; }
+/* ---------- hands ---------- */
+#vHands { display: grid; gap: 12px; grid-template-columns: 1fr minmax(300px, 0.9fr); grid-template-rows: auto auto 1fr; align-content: start; }
+.hloops { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.hb { min-height: 96px; border-radius: 16px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 10px 14px; text-align: left; position: relative; overflow: hidden; touch-action: manipulation; user-select: none; }
+.hb span { font: 600 0.7rem var(--font-mono); color: var(--dim); } .hb b { font-size: 1.25rem; }
+.hb kbd { position: absolute; top: 9px; right: 10px; font: 700 0.62rem var(--font-mono); padding: 2px 5px; border-radius: 4px; border: 1px solid var(--line); color: var(--dim); }
+.hb.has { border-color: #7fd6c266; } .hb.on { border-color: var(--teal); background: #7fd6c21c; } .hb.rec { border-color: var(--rose); background: #ff5c7a24; } .hb.ready { border-color: var(--amber); border-style: dashed; }
+.hb .hold { position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: var(--red); }
+.hrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+.hrow .hb { min-height: 72px; flex: 1 1 120px; }
+.hb.pressed { background: var(--teal); border-color: var(--teal); color: #0d1a16; } .hb.pressed span { color: #0d1a16b0; }
+.styles { display: flex; flex-wrap: wrap; gap: 6px; }
+.styles button { flex: 1 0 auto; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font-weight: 600; }
+.styles button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1226; }
+.xycard { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 8px; }
+.xy { position: relative; flex: 1; min-height: 300px; border-radius: 16px; border: 1px solid var(--line); background: radial-gradient(circle at 30% 70%, #2a1f45, #13111b 70%); touch-action: none; user-select: none; overflow: hidden; }
+.xy::before, .xy::after { content: ""; position: absolute; background: #ffffff10; } .xy::before { left: 50%; top: 0; bottom: 0; width: 1px; } .xy::after { top: 50%; left: 0; right: 0; height: 1px; }
+.xy .dot { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: radial-gradient(circle, #ffcf8a, #ff8ac6 60%, transparent 70%); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.xy.on .dot { opacity: 1; }
+.xy .ax { position: absolute; font: 600 0.72rem var(--font-mono); color: var(--dim); pointer-events: none; } .xy .ax.x { bottom: 8px; right: 12px; } .xy .ax.y { top: 10px; left: 12px; }
+.hb.tempo { flex: 0 0 84px; align-items: center; justify-content: center; } .hb.tempo b { font-size: 1.8rem; }
+.bpmbox { flex: 1 1 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; } .bpmbox span { font: 600 0.7rem var(--font-mono); color: var(--dim); } .bpmbox b { font: 700 1.6rem var(--font-mono); }
+.songs { display: flex; align-items: center; gap: 10px; }
+.songs .hb { flex: none; width: 84px; min-height: 72px; align-items: center; justify-content: center; font-size: 1.8rem; }
+.songs .mid { flex: 1; min-width: 0; } .songs .mid b { display: block; font: 700 1.2rem var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .songs .mid small { color: var(--dim); }
+/* ---------- visuals ---------- */
+#vVis { padding: 0; overflow: hidden; background: #000; }
+#visCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.visbar { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 10px; transition: opacity 0.4s; }
+.visbar.hide { opacity: 0; pointer-events: none; }
+.viscap { position: absolute; left: 22px; top: 18px; font: 600 1rem var(--font-mono); color: #ffffffcc; text-shadow: 0 2px 10px #000; pointer-events: none; }
+.viscap b { font-family: var(--font-display); font-size: 1.15rem; display: block; }
+body.fs .top { display: none; } body.fs main { top: 0; }
+/* ---------- editor ---------- */
+#vEdit { display: flex; flex-direction: column; gap: 12px; }
+.etabs { display: flex; gap: 8px; align-items: center; }
+.etabs .sp { flex: 1; }
+.estat { font-size: 0.84rem; color: var(--dim); } .estat.ok { color: var(--teal); } .estat.no { color: #ff9aae; }
+table.sl { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+table.sl td { background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 8px; vertical-align: top; }
+table.sl td:first-child { border-left: 1px solid var(--line); border-radius: 12px 0 0 12px; width: 92px; } table.sl td:last-child { border-right: 1px solid var(--line); border-radius: 0 12px 12px 0; width: 110px; }
+table.sl tr.cur td { border-color: var(--teal); }
+.sl .num { font: 700 1.1rem var(--font-mono); color: var(--dim); display: flex; align-items: center; gap: 4px; }
+.sl .mv { width: 30px; height: 30px; padding: 0; font-size: 0.8rem; }
+.sl input.nm { width: 100%; height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); padding: 0 10px; font-weight: 600; font-size: 1rem; }
+.sl textarea { width: 100%; min-height: 54px; margin-top: 6px; border-radius: 9px; border: 1px solid var(--line); background: #100e17; padding: 8px 10px; resize: vertical; font-size: 0.95rem; line-height: 1.35; }
+.sl .meta { font-size: 0.78rem; color: var(--dim); margin-top: 4px; }
+.sl .acts { display: flex; flex-direction: column; gap: 6px; }
+.rgrid { overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 10px; }
+.rrow { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.rrow .rn { flex: none; width: 150px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rrow .rn small { display: block; font: 500 0.7rem var(--font-mono); color: var(--faint); }
+.rrow select { flex: none; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); font-size: 0.78rem; }
+.cells { display: grid; grid-auto-flow: column; grid-auto-columns: 26px; gap: 3px; }
+.cell { width: 26px; height: 30px; border-radius: 6px; border: 1px solid #2a2538; background: #1a1724; padding: 0; }
+.cell.bt { background: #211d2d; } .cell.off { opacity: 0.25; }
+.cell.on { background: var(--lilac); border-color: var(--lilac); } .cell.on.acc { background: #ff8ac6; border-color: #ff8ac6; }
+.cell:focus-visible, .cell.cur { outline: 2px solid var(--amber); outline-offset: 1px; }
+.rrow.mute .rn { opacity: 0.5; }
+.kits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.kitc { display: flex; flex-direction: column; gap: 8px; }
+.kitc select { height: 38px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); padding: 0 8px; }
+.kitc .cur { font: 700 1.05rem var(--font-display); }
+/* ---------- band and track, MIDI ---------- */
+#vBand, #vMidi { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; align-content: start; }
+.big-sw { display: flex; align-items: center; gap: 14px; }
+.big-sw .btn { height: 52px; padding: 0 22px; font-size: 1rem; }
+.slider { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; }
+.slider input { flex: 1; }
+.slider output { font: 600 0.85rem var(--font-mono); min-width: 64px; text-align: right; }
+.field { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; flex-wrap: wrap; }
+.field input[type=number] { width: 90px; height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); padding: 0 8px; }
+.takes { display: flex; flex-direction: column; gap: 8px; }
+.take { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--raised); border: 1px solid var(--line); }
+.take div { flex: 1; min-width: 0; } .take b { display: block; } .take small { color: var(--dim); }
+.chk { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
+/* ---------- the pairing sheet ---------- */
+.sheet { position: fixed; inset: 0; z-index: 20; background: #0c0a12f2; display: flex; align-items: center; justify-content: center; }
+.sheet[hidden] { display: none; }
+.sheet .card { width: min(560px, 92vw); padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+.sheet h2 { margin: 0; font: 700 1.3rem var(--font-display); }
+.code { height: 60px; border-radius: 12px; border: 1px solid var(--line); background: #100e17; padding: 0 16px; font: 700 1.8rem var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; text-align: center; }
+.code.bad { border-color: var(--red); }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 30; padding: 10px 16px; border-radius: 12px; background: #2a2440; border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
+.toast.on { opacity: 1; }
+@media (max-width: 1100px) { #vMon { grid-template-columns: 1fr 1fr; } .gear { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 6px 16px; } .knobs, .pads { grid-column: 1 / -1; } .song, .jam { grid-column: 2; } .tabs button { padding: 0 9px; } .brand small { display: none; } }
+@media (max-width: 800px) { #vHands, #vBand, #vMidi { grid-template-columns: 1fr; } .xycard { grid-column: 1; grid-row: auto; } .kits { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><i></i>Stage <small>Nate Bloom</small></div>
+  <button class="conn" id="conn" title="The link to the tablet"><i></i><span>Not paired</span></button>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" data-v="vMon" aria-selected="true">Monitor</button><button role="tab" data-v="vHands">Hands</button><button role="tab" data-v="vVis">Visuals</button>
+    <button role="tab" data-v="vEdit">Editor</button><button role="tab" data-v="vBand">Band</button><button role="tab" data-v="vMidi">MIDI</button>
+  </nav>
+  <span class="recdot" id="recdot"><i></i><span>0:00</span></span>
+  <div class="meter" title="The tablet's level"><u id="meterU"></u></div>
+  <button class="btn icon" id="fsBtn" title="Full screen (F11 also works)" aria-label="Full screen">⤢</button>
+</div>
+<main>
+  <!-- the monitor -->
+  <section class="view" id="vMon" aria-label="Monitor">
+    <div class="card clock"><div class="lab">Bar · beat</div><div class="bigbar"><b id="mBar">–<span>.</span>–</b></div><div class="beats" id="mBeats"><i></i><i></i><i></i><i></i></div>
+      <div class="trow"><span class="bpm" id="mBpm">– <small>bpm</small></span><span id="mPlay"></span></div></div>
+    <div class="card song"><div class="lab" id="mSongLab">Set list</div><div class="now" id="mSong">–</div><div class="next" id="mNext"></div><div class="notes" id="mNotes"></div></div>
+    <div class="card gear" id="mGear"></div>
+    <div class="card snd"><div class="lab">Sound</div><div class="name" id="mSnd">–</div><div class="sub" id="mSub"></div><div class="chips" id="mLayers"></div>
+      <div class="trow" id="mHA"></div><div class="held" id="mHeld"></div></div>
+    <div class="card jam"><div class="lab">Jam</div><div class="loops" id="mLoops"></div><div class="bandrow"><span class="chord" id="mChord">–</span><div id="mBand"></div></div></div>
+    <div class="card" style="grid-column:3"><div class="lab">Level</div><canvas id="mSpec" height="90" style="width:100%;height:90px;display:block;margin-top:8px"></canvas><p class="note" id="mLat"></p></div>
+    <div class="card knobs"><h3><span class="lab">Knobs</span><span id="mKp" style="font-weight:600"></span></h3><div class="kgrid" id="mKnobs"></div></div>
+    <div class="card pads"><h3><span class="lab">Pads</span><span id="mPs" style="font-weight:600;font-size:0.9rem"></span></h3><div class="pgrid" id="mPads"></div></div>
+  </section>
+  <!-- hands -->
+  <section class="view" id="vHands" hidden aria-label="Hands">
+    <div class="card"><h3 class="lab">Loops <span class="note">tap: record, play, stop · hold to clear</span></h3><div class="hloops" id="hLoops"></div></div>
+    <div class="card"><h3 class="lab">Band</h3><div class="hrow"><button class="hb" id="hBand"><span>Band</span><b>Off</b><kbd>B</kbd></button><div class="styles" id="hStyles" style="flex:3 1 400px"></div></div></div>
+    <div class="card"><h3 class="lab">Play</h3>
+      <div class="hrow"><button class="hb" id="hGo" style="flex:2 1 180px"><span id="hGoWhat">Rhythm</span><b>▶</b><kbd>Space</kbd></button><button class="hb" id="hHold"><span>Hold</span><b>Hold</b><kbd>H</kbd></button><button class="hb" id="hArp"><span>Arp</span><b>Arp</b><kbd>A</kbd></button></div>
+      <div class="hrow" style="margin-top:10px"><button class="hb tempo" id="hSlow" aria-label="Slower"><b>−</b><kbd>−</kbd></button><div class="bpmbox"><span>Tempo</span><b id="hBpm">–</b></div><button class="hb tempo" id="hFast" aria-label="Faster"><b>+</b><kbd>=</kbd></button><button class="hb" id="hStop" style="flex:0 1 120px"><span>Stop all</span><b>■</b></button></div>
+      <div class="seg" id="hWhat" style="margin-top:10px"><button data-w="seq">Seq</button><button data-w="rc">Rhythm</button><button data-w="bp">Pads</button></div>
+      <div class="songs" style="margin-top:12px"><button class="hb" id="hPrev" aria-label="Previous song">‹</button><div class="mid"><small id="hSongLab">Set list</small><b id="hSong">–</b><small id="hNext"></small></div><button class="hb" id="hNextB" aria-label="Next song">›</button></div>
+      <p class="note" style="margin-top:8px">Keys here: 1–4 loops · B band · Space ▶ · H Hold · A Arp · ← → or Page Up/Down songs · − = tempo</p></div>
+    <div class="card xycard"><h3 class="lab">XY pad <span class="note">across: filter · up: Space · let go and both go back</span></h3><div class="xy" id="xy"><div class="dot"></div><span class="ax x">filter →</span><span class="ax y">↑ space</span></div></div>
+  </section>
+  <!-- visuals -->
+  <section class="view" id="vVis" hidden aria-label="Visuals">
+    <canvas id="visCanvas"></canvas>
+    <div class="viscap" id="visCap" hidden><b></b><span></span></div>
+    <div class="visbar" id="visBar"><div class="seg" id="visModes"></div><button class="btn" id="visCapBtn" aria-pressed="false">Caption</button><span class="sp" style="flex:1"></span><span class="note" id="visFps"></span><button class="btn" id="visFs">Full screen</button></div>
+  </section>
+  <!-- editor -->
+  <section class="view" id="vEdit" hidden aria-label="Editor">
+    <div class="etabs"><div class="seg" id="eTabs"><button data-e="sl" aria-pressed="true">Set list</button><button data-e="rc">Rhythm pattern</button><button data-e="kit">Pad kits</button></div><span class="sp"></span><span class="estat" id="eStat"></span><button class="btn" id="ePull">Reload from the tablet</button><button class="btn primary" id="ePush">Send to the tablet</button></div>
+    <div id="eSl"><table class="sl"><tbody id="slBody"></tbody></table><p class="note" id="slEmpty" hidden>No songs on the tablet yet: in Live, tap the set list box and save one.</p></div>
+    <div id="eRc" hidden><div class="rgrid" id="rcGrid"></div><p class="note" style="margin-top:8px">Click a step to switch it, Shift-click for an accent. Arrows move, Space switches, A accents. The length menu sets each track's loop.</p></div>
+    <div id="eKit" hidden><div class="kits" id="kitCards"></div><p class="note" style="margin-top:8px">A kit replaces all 16 pads of that bank on the tablet (it can undo it there).</p></div>
+  </section>
+  <!-- band and track -->
+  <section class="view" id="vBand" hidden aria-label="Band and track">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">The band, from the Pixelbook</div>
+      <div class="big-sw"><button class="btn" id="bHere" aria-pressed="false">Play the band here</button><span id="bSay" class="note"></span></div>
+      <p class="note">The tablet's Jam band (bass and drums in the chord you hold) plays from this Pixelbook instead, in time with the tablet, which then has less to do. If the link drops, the tablet picks the band back up by itself. Plug this Pixelbook's headphone jack into a channel on the mixer.</p>
+      <div class="slider"><span style="width:84px">Line it up</span><input type="range" id="bNudge" min="-200" max="200" step="1" value="0"><output id="bNudgeO">0 ms</output></div>
+      <p class="note">Play the band on both for a moment (tap Play the band here twice to compare) and move this until the two beats sit together: right if this one is early, left if it's late.</p>
+      <div class="slider"><span style="width:84px">Band level</span><input type="range" id="bLvl" min="0" max="1.5" step="0.01" value="1"><output id="bLvlO">100%</output></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">Backing track</div>
+      <div class="field"><input type="file" id="tFile" accept="audio/*"><span id="tName" class="note">No track loaded</span></div>
+      <div class="field">Its tempo <input type="number" id="tBpm" min="40" max="220" step="0.1" value="120"> bpm <button class="btn" id="tTap">Tap</button>
+        Starts at <input type="number" id="tOff" min="0" step="0.01" value="0"> s</div>
+      <label class="chk"><input type="checkbox" id="tFollow" checked> Follow the tablet's tempo (speeds the track up or down to match)</label>
+      <div class="big-sw"><button class="btn primary" id="tGo" disabled>Start on the next bar</button><button class="btn" id="tStop" disabled>Stop</button><span class="note" id="tSay"></span></div>
+      <div class="slider"><span style="width:84px">Track level</span><input type="range" id="tLvl" min="0" max="1.5" step="0.01" value="0.8"><output id="tLvlO">80%</output></div>
+    </div>
+  </section>
+  <!-- MIDI -->
+  <section class="view" id="vMidi" hidden aria-label="MIDI">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">The set, as MIDI</div>
+      <div class="big-sw"><button class="btn" id="mRec" aria-pressed="false">● Record</button><span class="note" id="mRecSay"></span></div>
+      <label class="chk"><input type="checkbox" id="mAuto" checked> Record whenever the tablet is linked (so nothing gets lost)</label>
+      <p class="note">Each note, pad hit and knob move is timed on the tablet as you play, so the file keeps the exact timing. Tracks: keys, pad notes, Beat Pads and Rhythm (what you hit and what the patterns played), the band's bass and drums, the knobs as controller moves, the tempo, and a marker at each song.</p>
+      <div class="lab" style="margin-top:4px">In the file</div>
+      <div id="mTracks" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="lab">Takes (kept on this Pixelbook)</div><div class="takes" id="mTakes"></div></div>
+  </section>
+  <div class="waiting" id="wait"><div><h2 id="waitH">Waiting for the tablet</h2><p class="note" id="waitP">In Nate Bloom on the tablet: Live → Gear (the No sync / clock button) → Pixelbook → Turn on.</p></div></div>
+</main>
+<div class="sheet" id="pair" hidden><div class="card">
+  <h2>Pair with the tablet</h2>
+  <p class="note">On the tablet: Live → Gear → Pixelbook → Turn on. Type the code it shows. Both need the same Wi-Fi or hotspot (and the internet, to find each other).</p>
+  <input class="code" id="pairCode" maxlength="9" placeholder="ABCD-EFGH" autocomplete="off" spellcheck="false">
+  <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" id="pairCancel">Cancel</button><button class="btn primary" id="pairGo">Connect</button></div>
+  <p class="note" id="pairMore"></p>
+</div></div>
+<div class="toast" id="toast"></div>
+<script src="link.js?v=148"></script>
+<script src="band.js?v=148"></script>
+<script src="visuals.js?v=148"></script>
+<script src="stage.js?v=148"></script>
+</body>
+</html>
