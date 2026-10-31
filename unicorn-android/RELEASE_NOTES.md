@@ -12,8 +12,8 @@ First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it 
 
 New in this version: jobs earn gems. Each of today's jobs she ticks on the star chart (or the morning and
 bedtime checklists) puts gems in Unicorn Meadow, 3 a job by default (set it in Edit jobs, or turn it off), plus
-5 more when she finishes them all. Meadow collects them with a cheer. Also Unicorn Meadow's latest version, with
-grown-up settings for its space-rock questions (how often, math or spelling, level).
+5 more when she finishes them all. Meadow collects them with a cheer. Also Unicorn Meadow's latest version: the
+Uh-oh button (monsters, earthquake, tornado, meteor shower) and grown-up settings for its space-rock questions.
 
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
 dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
