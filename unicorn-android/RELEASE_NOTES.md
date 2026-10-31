@@ -10,11 +10,13 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: Unicornauts, a space game where unicorn astronauts build rockets and fly to the planets,
-under Games, with Pluto shown as a dwarf planet and a who-found-it fact for every planet (the home button on its
-title screen goes back to the clock, and it counts toward the daily game time).
-Also real gravity in Space: drag a planet and every planet, the Sun and the black hole pull on each other, with a
-Planet weight slider from real up to 100x heavier; Unicorn Meadow's Uh-oh button; and jobs earn Meadow gems.
+New in this version: Unicornauts gets harder and more hands-on. Steer the rocket (touch above or below it, or
+the arrow buttons), fly into stars, steer around space rocks, and fly through the ring with the right answer:
+counting, numbers, adding and take-away within 10, letters, first sounds and simple words, getting harder after
+three right in a row. Plus satellites: send up a Love, Rainbow, Sparkle, Flower, Music or Dream satellite and
+Earth changes (hearts, rainbow colors, twinkles, flowers, music notes, sweet-dream moons). Also in this version:
+Pluto as a dwarf planet with who-found-it facts for every planet, real gravity in Space, Unicorn Meadow's Uh-oh
+button, and jobs earn Meadow gems.
 
 Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
 dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
