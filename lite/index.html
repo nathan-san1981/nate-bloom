@@ -3086,8 +3086,9 @@ body.dj-on > .app { visibility: hidden; }
 /* 148: the Pixelbook */
 .lv-gear i.look { background: #ffb65c; box-shadow: 0 0 6px #ffb65c88; }
 .lv-st.look, .lv-st.warn { background: #ffb65c; box-shadow: 0 0 6px #ffb65c88; }
-.lk-code { gap: 10px; } .lk-code b { font: 700 1.25rem var(--font-mono); letter-spacing: 0.08em; color: #ffcf8a; }
-.lk-sw { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--ink); }
+.pb-code { gap: 10px; } .pb-code b { font: 700 1.25rem var(--font-mono); letter-spacing: 0.08em; color: #ffcf8a; }
+.pb-sw { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.8rem; color: var(--ink); }
+.pb-sw input { width: 18px; height: 18px; accent-color: var(--lilac); }
 /* 149: Log on every screen */
 .nb-log { display: inline-flex; align-items: center; gap: 7px; position: relative; }
 @media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
@@ -31371,14 +31372,14 @@ registerProcessor("nb-rec", NBRec);`;
       if (window.NB_LITE) return "";
       const [c, s] = lkSay(), here = lkHere();
       return `<div class="lv-pkg">Pixelbook (Stage)</div>
-        <div class="lv-gr lk-st"><span class="lv-st${c ? " " + c : ""}"></span><span class="lk-say">${esc3(s)}</span>${here ? `<button class="btn" data-g="lk">${LK.on ? "Turn off" : "Turn on"}</button>` : ""}</div>
-        ${here && LK.on ? `<div class="lv-gr lk-code"><span>Code</span><b>${esc3(LK.code)}</b><button class="btn" data-g="lknew">New code</button></div>
+        <div class="lv-gr pb-st"><span class="lv-st${c ? " " + c : ""}"></span><span class="pb-say">${esc3(s)}</span>${here ? `<button class="btn" data-g="lk">${LK.on ? "Turn off" : "Turn on"}</button>` : ""}</div>
+        ${here && LK.on ? `<div class="lv-gr pb-code"><span>Code</span><b>${esc3(LK.code)}</b><button class="btn" data-g="lknew">New code</button></div>
         <p class="lv-note">On the Pixelbook open <b>nathan-san1981.github.io/nate-bloom/stage</b> and type the code once. Both on the same Wi-Fi or hotspot. Nothing here waits for it: if the link drops, the tablet carries on as it is.</p>
-        <label class="lk-sw"><input type="checkbox" data-g="lkctl"${LK.ctl !== false ? " checked" : ""}> Let the Pixelbook run loops, the band, ▶, the set list and edits</label>` : ""}`;
+        <label class="pb-sw"><input type="checkbox" data-g="lkctl"${LK.ctl !== false ? " checked" : ""}> Let the Pixelbook run loops, the band, ▶, the set list and edits</label>` : ""}`;
     }
     function gearLkPaint() {
       if (pick.hidden || !pick.querySelector(".lv-gearl")) return;
-      const [c, s] = lkSay(), st = pick.querySelector(".lk-st .lv-st"), say = pick.querySelector(".lk-say");
+      const [c, s] = lkSay(), st = pick.querySelector(".pb-st .lv-st"), say = pick.querySelector(".pb-say");
       if (st) st.className = "lv-st" + (c ? " " + c : ""); if (say) nbT(say, s);
     }
     { const og = openGear; openGear = function () {
