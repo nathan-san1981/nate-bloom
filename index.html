@@ -3089,6 +3089,11 @@ body.dj-on > .app { visibility: hidden; }
 .pb-code { gap: 10px; } .pb-code b { font: 700 1.25rem var(--font-mono); letter-spacing: 0.08em; color: #ffcf8a; }
 .pb-sw { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.8rem; color: var(--ink); }
 .pb-sw input { width: 18px; height: 18px; accent-color: var(--lilac); }
+/* 153: Gear from the ☰ menu: the popup in front of the main screen */
+.lv-pick.standalone { left: 50% !important; top: 50% !important; right: auto !important; bottom: auto !important; transform: translate(-50%, -50%); width: min(480px, calc(100vw - 20px)) !important; max-height: min(82vh, 720px) !important; z-index: 28; }
+.lv-pick-back { position: fixed; inset: 0; z-index: 27; background: rgba(10, 8, 16, 0.6); } .lv-pick-back[hidden] { display: none; }
+.lv-note.bad { color: #ffb0b0; }
+.lv-tr { flex-wrap: nowrap; align-items: flex-start; } .lv-tr > .lv-st { margin-top: 5px; } .lv-tr > span + span { flex: 1 1 auto; min-width: 0; }
 /* 149: Log on every screen */
 .nb-log { display: inline-flex; align-items: center; gap: 7px; position: relative; }
 @media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
@@ -4204,7 +4209,7 @@ body.dj-on > .app { visibility: hidden; }
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
-      <p><b>☰</b> (top right) holds Projects, Plugins, My sounds, Export, MIDI, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
+      <p><b>☰</b> (top right) holds Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
     </div>
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
@@ -17062,6 +17067,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       ["msBtn", "My sounds", "Save the sound you've dialled in"],
       ["exBtn", "Export", "Stems, MIDI file, K.O. II pads"],
       ["midiBtn", "MIDI", "Keyboards in, clock in and out"],
+      ["gearBtn", "Gear", "What's plugged in: the MiniLab, the K.O. II, sound, Pixelbook, who keeps time"],
       ["lkBtn", "Link", "Send projects to the computer and play together"],
       ["installBtn", "Install", "Add Nate Bloom to the home screen"],
       ["hisBtn", "History", "Every change, newest first: go back to any of them"],
@@ -31384,6 +31390,80 @@ registerProcessor("nb-rec", NBRec);`;
       return { midiDetail: { connected: !!md.access, inputs: mdIns(), outputs: md.access ? md.access.outputs.size : 0, androidLists: android, asks: MDL.asks, changes: MDL.changes } };
     });
     window.__live17 = { MDL, mdAsk, mdIns };
+    // ======================================================================
+    // 153: Gear in the ☰ menu, and the tablet's own view of what's plugged in. Gear (the MiniLab, the K.O. II, who
+    // keeps time, the sound buffer, dropouts, the Pixelbook) was only reachable from Live; a Gear tile in the ☰ menu
+    // opens the same panel on the main screen, centred, with a dimmed backdrop (a tap outside, ✕, Back or Esc closes
+    // it). In the Android app (1.0.8 or later) Gear and the report also carry what Android itself sees: every USB
+    // device on the hub and whether it offers sound or MIDI, which outputs Android has and where media goes, the
+    // media volume, Android's MIDI devices, and whether Purist is installed and which version. From those it says
+    // what's wrong: a device on the bus that Android isn't using (another app holds it), no devices at all (the hub
+    // or its cable), a low volume, a Purist older than 1.4.4.
+    // ======================================================================
+    const GEAR = { standalone: false, rerender: false };
+    const gearBack = document.createElement("div"); gearBack.className = "lv-pick-back"; gearBack.hidden = true; document.body.appendChild(gearBack);
+    gearBack.addEventListener("pointerdown", e => { e.preventDefault(); closePick(); });
+    function gearPark() {   // Gear's popup in front of the main screen (the popup lives in Live, which is hidden)
+      if (pick.parentNode !== document.body) document.body.appendChild(pick);
+      pick.classList.add("standalone"); gearBack.hidden = false;
+    }
+    function gearUnpark() {
+      GEAR.standalone = false; gearBack.hidden = true; pick.classList.remove("standalone");
+      if (pick.parentNode !== lv) lv.appendChild(pick);
+    }
+    { const cp = closePick; closePick = function () { const r = cp.apply(this, arguments); if (GEAR.standalone && !GEAR.rerender) gearUnpark(); return r; }; }
+    { const pa = popAt; popAt = function () {
+        GEAR.rerender = true; let r; try { r = pa.apply(this, arguments); } finally { GEAR.rerender = false; }
+        if (GEAR.standalone) { if (lv.hidden) gearPark(); else gearUnpark(); }
+        return r; }; }
+    function openGearAnywhere() {
+      start();
+      if (!lv.hidden) { openGear(); return; }
+      GEAR.standalone = true; openGear(); gearPark();
+    }
+    const gearBtn = document.createElement("button"); gearBtn.id = "gearBtn"; gearBtn.type = "button"; gearBtn.style.display = "none"; gearBtn.textContent = "Gear";
+    document.body.appendChild(gearBtn); gearBtn.addEventListener("click", openGearAnywhere);
+    // ---- what Android sees (the app's NBNativeBridge.diag, 1.0.8+) ----
+    function tabletDiag() {
+      if (!window.NBNativeBridge) return null;
+      if (!NBNativeBridge.diag) return { old: true };
+      try { const d = JSON.parse(NBNativeBridge.diag()); return d && typeof d === "object" ? d : { err: "unreadable" }; } catch (e) { return { err: String(e && e.message || e) }; }
+    }
+    const nameBit = s => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const sameGear = (a, b) => { const x = nameBit(a), y = nameBit(b); if (!x || !y) return false; if (x === y || x.includes(y) || y.includes(x)) return true; const wx = x.split(" ").filter(w => w.length > 2), wy = y.split(" ").filter(w => w.length > 2); return wx.some(w => wy.includes(w)); };
+    const verLess = (a, b) => { const pa = String(a).split(".").map(Number), pb = String(b).split(".").map(Number); for (let i = 0; i < 3; i++) { const x = pa[i] || 0, y = pb[i] || 0; if (x !== y) return x < y; } return false; };
+    function tabletNotes(d) {   // what the tablet's view says is wrong, in plain words
+      const out = [];
+      if (!d || d.old || d.err) return out;
+      const usb = d.usb || [], outs = d.outputs || [], midi = d.midi || [];
+      if (!usb.length) out.push(["warn", "No USB devices reach the tablet. Check the hub's cable to the tablet and the hub's power."]);
+      usb.forEach(u => {
+        if (u.midi && !midi.some(m => sameGear(m.name, u.name) || sameGear(m.product, u.name))) out.push(["bad", "Android isn't using the MIDI of " + u.name + ": another app may be holding it" + (d.purist && d.purist !== "not installed" ? " (Purist?)" : "") + ". Unplug it, close that app, plug it back in."]);
+        if (u.out && !outs.some(o => /usb/i.test(o.type) && (sameGear(o.name, u.name) || outs.filter(x => /usb/i.test(x.type)).length === 1))) out.push(["bad", "Android isn't using the sound of " + u.name + ": another app may be holding it" + (d.purist && d.purist !== "not installed" ? " (Purist?)" : "") + "."]);
+      });
+      if (d.purist && d.purist !== "not installed" && verLess(d.purist, "1.4.4")) out.push(["bad", "Purist " + d.purist + " is installed. That version can take over USB devices, MIDI included: install Purist 1.4.4 or delete it."]);
+      if (d.volume && d.volume.max && d.volume.music <= d.volume.max * 0.2) out.push(["warn", "The media volume is low: " + d.volume.music + " of " + d.volume.max + ". Press volume up with the headphones in."]);
+      if (d.media && d.media.length && d.media.every(m => /speaker/i.test(m))) out.push(["warn", "Android is sending sound to the tablet's own speaker, not the headphones."]);
+      return out;
+    }
+    function tabletHTML() {
+      const d = tabletDiag(); if (!d) return "";
+      if (d.old) return `<div class="lv-pkg">This tablet</div><p class="lv-note">Update the Android app (1.0.8 or later) and Gear shows what Android sees: USB devices, where the sound goes, the volume, Purist.</p>`;
+      if (d.err) return `<div class="lv-pkg">This tablet</div><p class="lv-note">Couldn't read the tablet's view (${esc3(d.err)}).</p>`;
+      const li = (cls, t) => `<div class="lv-gr lv-tr"><span class="lv-st${cls ? " " + cls : ""}"></span><span>${esc3(t)}</span></div>`;
+      const usb = (d.usb || []).map(u => u.name + " (" + [u.out ? "sound out" : "", u.in ? "sound in" : "", u.midi ? "MIDI" : ""].filter(Boolean).join(", ") + (u.audio || u.midi ? "" : "no sound or MIDI") + ")");
+      const where = d.media && d.media.length ? d.media.join(", ") : (d.outputs || []).length ? "one of: " + d.outputs.map(o => o.name).join(", ") : "nothing Android can name";
+      return `<div class="lv-pkg">This tablet (what Android sees)</div>
+        ${li(usb.length ? "on" : "warn", usb.length ? "On USB: " + usb.join(" · ") : "No USB devices")}
+        ${li(/speaker/i.test(where) ? "warn" : "on", "Sound goes to " + where + (d.volume && d.volume.max ? " · media volume " + d.volume.music + " of " + d.volume.max : ""))}
+        ${li((d.midi || []).length ? "on" : "", "MIDI devices: " + ((d.midi || []).length ? d.midi.map(m => m.name).join(", ") : "none"))}
+        ${d.purist ? li(d.purist === "not installed" ? "" : verLess(d.purist, "1.4.4") ? "bad" : "on", "Purist: " + (d.purist === "not installed" ? "not installed" : d.purist)) : ""}
+        ${tabletNotes(d).map(([c, t]) => `<p class="lv-note${c === "bad" ? " bad" : ""}"><b>${esc3(t)}</b></p>`).join("")}`;
+    }
+    { const gs = gearSnd; gearSnd = function () { return gs.apply(this, arguments) + tabletHTML(); }; }
+    if (window.__live12) window.__live12.gearSnd = gearSnd;
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => { const d = tabletDiag(); return { tablet: d, tabletNotes: tabletNotes(d).map(x => x[1]) }; });
+    window.__live18 = { GEAR, openGearAnywhere, tabletDiag, tabletNotes, tabletHTML, sameGear, verLess };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
