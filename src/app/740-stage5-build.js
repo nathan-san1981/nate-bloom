@@ -6,7 +6,8 @@
     // the tab is; one browser (Play's Sounds panel, as a drawer from the left); one mixer (the Mixer, as a drawer from
     // the bottom). The old header, its mode buttons, the tool row and the ☰ menu are parked out of sight: every
     // button still exists for the code that uses it, but the strip and Build are the way in. The new shell is on
-    // for good; ?shell=old (or nb-shell=old) is a hidden way back for one build, in case something was missed.
+    // for good: the ?shell=old hatch of 161 went in 166, and the parked chrome is reached only through the test
+    // suite's storage hook, nb-shell=old (660).
     // ======================================================================
     const BD = { tab: "sounds", el: null, obs: null, tick: 0 };
     try { const t = localStorage.getItem("nb-build-tab"); if (t) BD.tab = t; } catch (e) {}

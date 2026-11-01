@@ -22,6 +22,9 @@ piece of text and on which line. Standard library only, about a second.
 - A part boundary never splits a string, template literal or comment. New app code goes in a new `app/NNN-….js`
   (a new live step: between `650-…` and `900-minilab-close.js`, which closes the MiniLab/Live block).
 - Byte discipline: read and write as UTF-8 with `newline=""`; nothing rewrites line endings or trailing whitespace.
+- The shell is the interface (161). The old header, modes, tool row and ☰ menu are parked, not deleted, and nothing on
+  the page brings them back: `localStorage` `nb-shell=old` (read by `shWant` in `660`) is the test suite's hook only,
+  set by the older tests to drive the parked chrome. The `?shell=old` URL hatch of 161 went in 166; don't add another.
 
 ## Parts, in output order
 
@@ -116,7 +119,7 @@ piece of text and on which line. Standard library only, about a second.
 | `630-live-151-fx-key.js` | 1,316 | 151: the ` key toggles every effect; `__live16` |
 | `640-live-152-midi-rescan.js` | 3,115 | 152: MIDI devices that arrive later, Rescan; `__live17` |
 | `650-live-153-gear-menu.js` | 7,492 | 153: Gear in the ☰ menu, tablet diagnostics; `__live18` |
-| `660-live-154-state-shell.js` | 11,927 | 154 (stage 0): the state document `NBState` and the new-shell switch; `__live19` |
+| `660-live-154-state-shell.js` | — | 154 (stage 0): the state document `NBState` and the new-shell switch (`shWant`: the shell is on; `nb-shell=old` in storage is the test suite's hook for the parked chrome, see below); `__live19` |
 | `670-stage1-setup-strip-find.js` | 32,215 | 155 (stage 1): Set up (seven sections, today's sheets parked inside), Find, the strip; `__live20` |
 | `680-stage2-play.js` | 17,628 | 157 (stage 2): Play, the performance surface over Live's own parts; `__live21` |
 | `690-stage3-sync.js` | 14,072 | 158 (stage 3): the document over the link as patches, the console's intents (mixer pos / mute / solo, set list, the Library), permissions with the Accept bar, songs that carry their levels; `__live22` |
@@ -124,8 +127,9 @@ piece of text and on which line. Standard library only, about a second.
 | `710-xy-level-159.js` | 3,225 | 159: the Pixelbook's XY pad holds the level (a rider after the soft clipper, from the analyser); `__live24` |
 | `720-xy-modes-159.js` | 4,692 | 159: the XY pad's modes (which two controls it moves), chosen from the Pixelbook, kept on the tablet; `__live25` |
 | `730-stage4-audio.js` | 2,924 | 160 (stage 4): the audio line to the Pixelbook (the output after the limiter as a stereo Opus track on the link's direct line, on request); `__live26` |
-| `740-stage5-build.js` | 9,941 | 161 (stage 5): Build, the seven screens as tabs under the strip with one transport, the browser and the mixer as drawers; the old chrome parked; `__live27` |
+| `740-stage5-build.js` | — | 161 (stage 5): Build, the seven screens as tabs under the strip with one transport, the browser and the mixer as drawers; the old chrome parked; `__live27` |
 | `750-minilab-octave-transport.js` | — | 165: the MiniLab's Oct − / Oct + followed from the notes its keys send (the keyboard sends nothing for them); Shift + pads 13–16 from its DAW port drive ▶ ■ ●; `__live28` |
+| `760-minilab-screen.js` | — | 166: the MiniLab's screen shows where you are (two seconds after the last readout: the sound the keys play, the set-list song with "> next" or the tempo and key; repainted only when the text changes), and "Light up the MiniLab (pads, screen)" in the MIDI sheet's MiniLab section, one tap for the Lights box; `__live29` |
 | `900-minilab-close.js` | 261 | `__mod.nbCC`, `window.__ml` exports, `}` closing the MiniLab/Live block |
 | `990-iife-close.js` | 105 | wake lock request; `})();` |
 

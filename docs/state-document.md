@@ -15,7 +15,7 @@ One JSON object describes the whole instrument. The tablet owns it; everything e
 | `knobs` | the MiniLab page: `name`, `k[8]`, `f[4]` as `[name, text, value]` | Live's knob pages |
 | `pads` | `name` (the pad set), `n[]` (pad names) | Live's pad sets |
 | `keys` | `hold`, `held[]` (note names), `arp` `{on, oct}` | Hold, the arp |
-| `setlist` | `cur`, `n`, `name`, `next`, `pending` (switching on the next bar), `songs[] {name, bpm}` | the set list |
+| `setlist` | `cur`, `n`, `name`, `next`, `pending` (switching on the next bar), `vis` (the Stage visual the current song asks for, 166), `songs[] {name, bpm, vis}` | the set list |
 | `jam` | `loops[]`, `band` | Jam |
 | `health` | `dropouts` (last minute), `buffer`, `latencyMs`, `notes[]` (what the tablet's view says is wrong) | the dropout counter, Gear |
 | `perms` | `levels`, `scenes`, `sound`: `always` · `between-songs` · `ask` · `never` | Set up → Pixelbook (stage 1); stored as `nb-perms` |

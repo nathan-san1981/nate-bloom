@@ -347,7 +347,7 @@
     const slVer = () => SL.songs.length + ":" + SL.songs.map(S => S.name).join("|");
     const rcVer = () => RCP.tracks.map(tr => tr.snd + tr.len + tr.on.slice(0, tr.len).join("")).join("|");
     function lkData(kind) {
-      if (kind === "setlist") return { kind, ver: slVer(), cur: SL.cur, songs: SL.songs.map((S, i) => ({ i, name: S.name, bpm: S.bpm, notes: S.notes || "", label: S.label || "" })) };
+      if (kind === "setlist") return { kind, ver: slVer(), cur: SL.cur, songs: SL.songs.map((S, i) => ({ i, name: S.name, bpm: S.bpm, notes: S.notes || "", label: S.label || "", vis: S.vis || "" })) };   // (166) vis: the Stage visual the song asks for
       if (kind === "rhythm") return { kind, ver: rcVer(), steps: RCP.steps, swing: RCP.swing, tracks: RCP.tracks.map((tr, i) => ({ i, snd: tr.snd, name: (rcSnd(tr.snd) || {}).name || tr.snd, role: roleOf(tr.snd), len: tr.len, on: tr.on.slice(0, RC_MAX).map(x => x ? 1 : 0), acc: tr.acc.slice(0, RC_MAX).map(x => x ? 1 : 0), mute: !!tr.mute })) };
       if (kind === "kits") {
         const K = window.__bpkits, list = [];
@@ -362,7 +362,7 @@
       if (d.kind === "setlist") {
         if (d.ver !== slVer()) { lkSend("data", lkData("setlist")); return no("The set list changed on the tablet, so it was sent again: make the change once more"); }
         const old = SL.songs, cur = SL.cur >= 0 ? old[SL.cur] : null;
-        SL.songs = d.songs.filter(x => old[x.i]).map(x => { const S = old[x.i]; S.name = String(x.name || S.name).slice(0, 40); if (x.notes) S.notes = String(x.notes).slice(0, 2000); else delete S.notes; return S; });
+        SL.songs = d.songs.filter(x => old[x.i]).map(x => { const S = old[x.i]; S.name = String(x.name || S.name).slice(0, 40); if (x.notes) S.notes = String(x.notes).slice(0, 2000); else delete S.notes; if (x.vis) S.vis = String(x.vis).slice(0, 24); else delete S.vis; return S; });
         SL.cur = cur ? SL.songs.indexOf(cur) : -1; if (SL.pend) songCancel();
         slSave(); paintSong(); add139("link", "set list from the Pixelbook: " + SL.songs.length + " songs");
         lkSend("data", lkData("setlist")); return ok("Set list saved on the tablet");

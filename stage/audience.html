@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nate Bloom · audience</title>
-<meta name="description" content="The audience screen: the visuals, nothing else. Opened from Stage on the Pixelbook, meant for a second screen.">
+<meta name="description" content="The audience screen: the visuals, nothing else. Opened from Stage on the Pixelbook, meant for a second screen. ?q=0.3–1 renders at that fraction of the projector's size (166).">
 <style>
 html, body { margin: 0; height: 100%; background: #000; overflow: hidden; cursor: none; }
 body.pointer { cursor: default; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cap { position: absolute; left: 50%; bottom: 7vh; transform: translateX(-50%); padding: 10px 22px; border-radius: 14px; background: #00000088; color: #ece7f7; font: 600 clamp(20px, 3.2vw, 44px)/1.2 "Unbounded", "Arial Black", system-ui, sans-serif; letter-spacing: 0.02em; pointer-events: none; opacity: 0; transition: opacity 0.6s; max-width: 90vw; text-align: center; }
 .cap.on { opacity: 1; }
+.cue { position: absolute; right: 3vw; top: 4vh; padding: 8px 18px; border-radius: 12px; background: #00000088; color: #ffcf8a; font: 600 clamp(16px, 2.2vw, 30px)/1.2 "Unbounded", "Arial Black", system-ui, sans-serif; letter-spacing: 0.02em; pointer-events: none; opacity: 0; transition: opacity 0.6s; max-width: 60vw; text-align: right; }
+.cue.on { opacity: 1; }
 .hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #8e86a6; font: 500 18px system-ui, sans-serif; text-align: center; opacity: 0.8; pointer-events: none; }
 .hint[hidden] { display: none; }
 </style>
@@ -18,14 +20,18 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 <body>
 <canvas id="c"></canvas>
 <div class="cap" id="cap"></div>
+<div class="cue" id="cue"></div>
 <div class="hint" id="hint">Nate Bloom · audience screen<br><small>waiting for Stage · tap for full screen</small></div>
-<script src="visuals.js?v=160"></script>
+<script src="visuals.js?v=166"></script>
 <script>
 (function () {
   "use strict";
   const $ = id => document.getElementById(id);
-  let vis = null, last = null, capOn = false, song = "", hideT = 0;
-  try { vis = NBVisuals.create($("c")); vis.beatClock(() => last ? { beat: last.beat + (performance.now() - last.at) / 60000 * last.bpm, bpm: last.bpm, playing: !!last.playing } : null); vis.resize(); vis.start(); } catch (e) { console.error(e); }
+  let vis = null, last = null, capOn = false, song = "", cue = "", hideT = 0, scale = null;
+  // (166) ?q=0.3–1: a fixed render scale for the projector (Stage's Projector control sends the same over the channel)
+  const qArg = parseFloat(new URLSearchParams(location.search).get("q"));
+  if (isFinite(qArg) && qArg > 0) scale = Math.max(0.3, Math.min(1, qArg));
+  try { vis = NBVisuals.create($("c"), scale != null ? { scale } : {}); vis.beatClock(() => last ? { beat: last.beat + (performance.now() - last.at) / 60000 * last.bpm, bpm: last.bpm, playing: !!last.playing } : null); vis.resize(); vis.start(); } catch (e) { console.error(e); }
   const ch = new BroadcastChannel("nb-stage-audience");
   ch.onmessage = e => {
     const m = e.data; if (!m || !vis) return; const d = m.d || {};
@@ -39,13 +45,16 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
     else if (m.t === "beat") last = d ? Object.assign({ at: performance.now() }, d) : null;
     else if (m.t === "cap") { capOn = !!d.on; paintCap(); }
     else if (m.t === "song") { song = d.name || ""; paintCap(); }
+    else if (m.t === "cue") { cue = d.name || ""; paintCue(); }   // (166) "Next: …" from the Director's rehearsal cue
+    else if (m.t === "quality") { scale = d.q == null ? null : Math.max(0.3, Math.min(1, +d.q || 1)); if (vis.setScale) { try { vis.setScale(scale); } catch (x) {} } }
   };
   function paintCap() { const c = $("cap"); c.textContent = song; c.classList.toggle("on", capOn && !!song); }
+  function paintCue() { const c = $("cue"); c.textContent = cue ? "Next: " + cue : ""; c.classList.toggle("on", !!cue); }
   document.addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); });
   document.addEventListener("contextmenu", e => e.preventDefault());
   document.addEventListener("pointermove", () => { document.body.classList.add("pointer"); clearTimeout(hideT); hideT = setTimeout(() => document.body.classList.remove("pointer"), 2000); });
   window.addEventListener("resize", () => { if (vis) vis.resize(); });
-  window.__audience = { get vis() { return vis; }, get last() { return last; }, get song() { return song; } };
+  window.__audience = { get vis() { return vis; }, get last() { return last; }, get song() { return song; }, get cue() { return cue; }, get scale() { return scale; } };
 })();
 </script>
 </body>

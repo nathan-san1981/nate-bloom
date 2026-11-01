@@ -236,6 +236,19 @@ table.sl tr.cur td { border-color: var(--teal); }
 .take { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--raised); border: 1px solid var(--line); }
 .take div { flex: 1; min-width: 0; } .take b { display: block; } .take small { color: var(--dim); }
 .chk { display: flex; align-items: center; gap: 8px; font-size: 0.86rem; }
+/* ---------- 166: rehearsal, the Ready check, Bounce, the Projector control, the Visual picker ---------- */
+.reh .timer { font: 700 1.7rem var(--font-mono); font-variant-numeric: tabular-nums; min-width: 92px; color: var(--amber); }
+.cue-say { font: 700 clamp(1.2rem, 2.4vw, 1.8rem)/1.15 var(--font-display); color: var(--amber); padding: 8px 14px; border-radius: 12px; border: 1px solid #ffb65c66; background: #ffb65c14; }
+.cue-say[hidden] { display: none; }
+.ready { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; } #dReadyBox { margin: -4px 0 12px; padding: 10px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; } #dReadyBox[hidden] { display: none; }
+.rd { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid #ffffff0d; font-size: 0.9rem; }
+.rd i { flex: none; width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; background: var(--red); box-shadow: 0 0 8px #ff6b6b88; } .rd.ok i { background: var(--teal); box-shadow: 0 0 8px #7fd6c288; }
+.rd b { margin-right: 4px; } .rd span { color: var(--dim); } .rd small { display: block; color: #ffcf8a; font-size: 0.8rem; margin-top: 2px; }
+.rd-all { font: 700 1.1rem var(--font-display); margin-top: 8px; color: var(--red); } .rd-all.ok { color: var(--teal); }
+.btn.ok { border-color: var(--teal); color: var(--teal); } .btn.no { border-color: var(--red); color: #ff9aae; }
+.visbar .proj { display: inline-flex; align-items: center; gap: 8px; } .visbar .proj .seg button { padding: 0 10px; font-size: 0.8rem; }
+.note.follow { color: var(--teal); font-weight: 600; } .note.follow[hidden] { display: none; }
+.sl .vislab { display: inline-flex; align-items: center; gap: 6px; margin-right: 8px; } .sl select.vs { height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font-size: 0.8rem; padding: 0 6px; }
 /* ---------- the pairing sheet ---------- */
 .sheet { position: fixed; inset: 0; z-index: 20; background: #0c0a12f2; display: flex; align-items: center; justify-content: center; }
 .sheet[hidden] { display: none; }
@@ -266,14 +279,18 @@ table.sl tr.cur td { border-color: var(--teal); }
   <!-- the console (stage 3): Director, Mixer, Library. Everything here is the tablet's state document, shown; every
        change is an intent the tablet applies or declines. -->
   <section class="view" id="vDir" aria-label="Director">
-    <div class="c-status"><span class="pill" id="dStatus">not linked</span><span class="pill" id="dPerm">scenes: any time</span><span class="lab">The tablet applies each change on its own terms (Set up → Pixelbook)</span></div>
+    <div class="c-status"><span class="pill" id="dStatus">not linked</span><span class="pill" id="dPerm">scenes: any time</span><button class="btn sm" id="dReady" title="Checks the link, the audio line, the battery, the screen lock, MIDI on the tablet, storage for Capture and the tablet's dropouts">Ready?</button><span class="lab">The tablet applies each change on its own terms (Set up → Pixelbook)</span></div>
+    <div class="ready" id="dReadyBox" hidden title="Tap to hide"></div>
     <div class="dir">
       <div class="card now-card">
         <div class="lab">Playing now</div>
         <div class="now" id="dNow">–</div><div class="sub" id="dNowSub"></div>
+        <div class="cue-say" id="dCue" hidden></div>
         <div class="row"><span class="bar" id="dBar"></span><span class="chord" id="dChord" hidden></span><span class="pill" id="dPlaying">stopped</span><span class="pill" id="dFx">FX on</span></div>
         <div class="lab">Notes</div><div class="notes" id="dNotes"></div>
         <div class="lab">On the keys</div><div class="sub" id="dStack"></div>
+        <div class="lab">Rehearse</div>
+        <div class="row reh"><button class="btn" id="rCount" aria-pressed="false" title="One bar of the click in these headphones at the tablet's tempo, then ▶ on the tablet">Count-in</button><span class="timer" id="rTimer">–:––</span><span class="sub" id="rTimerSub">no song</span><button class="btn" id="rCue" aria-pressed="false" title="Show “Next: …” here and on the audience window now (it comes by itself in the last 30 s of a song whose length is known)">Cue</button></div>
         <div class="row"><button class="btn" id="dPrev">‹ Previous</button><button class="btn primary" id="dNext2">Next song ›</button><span class="sub" id="dNext"></span></div>
       </div>
       <div class="card">
@@ -324,7 +341,7 @@ table.sl tr.cur td { border-color: var(--teal); }
   <section class="view" id="vVis" hidden aria-label="Visuals">
     <canvas id="visCanvas"></canvas>
     <div class="viscap" id="visCap" hidden><b></b><span></span></div>
-    <div class="visbar" id="visBar"><div class="seg" id="visModes"></div><button class="btn" id="visCapBtn" aria-pressed="false">Caption</button><button class="btn" id="visAud" title="A second window with the visuals and nothing else: drag it to the other screen">Audience window</button><span class="sp" style="flex:1"></span><span class="note" id="visFps"></span><button class="btn" id="visFs">Full screen</button></div>
+    <div class="visbar" id="visBar"><div class="seg" id="visModes"></div><span class="note follow" id="visFollow" hidden title="The song that plays asked for this look (Editor → Set list → Visual); a tap on a mode takes over until the next song that asks">follows the set list</span><button class="btn" id="visCapBtn" aria-pressed="false">Caption</button><button class="btn" id="visAud" title="A second window with the visuals and nothing else: drag it to the other screen">Audience window</button><span class="proj" title="How large the audience window draws: Auto lets it adapt to the machine; Full, Half and Quarter pin the size per axis"><span class="lab">Projector</span><div class="seg" id="visProj"><button data-q="auto">Auto</button><button data-q="1">Full</button><button data-q="0.5">Half</button><button data-q="0.3">Quarter</button></div></span><span class="sp" style="flex:1"></span><span class="note" id="visFps"></span><button class="btn" id="visFs">Full screen</button></div>
   </section>
   <!-- editor -->
   <section class="view" id="vEdit" hidden aria-label="Editor">
@@ -363,6 +380,7 @@ table.sl tr.cur td { border-color: var(--teal); }
       <div class="big-sw"><button class="btn" id="cRec" aria-pressed="false">● Record audio</button><button class="btn" id="cMark" disabled title="A marker at this moment">+ Mark</button><span class="note">The tablet's output comes over the link's direct line as stereo Opus and is written here as 16-bit WAV, with a marker at every song. Record asks where to save; the file grows as it records.</span></div>
       <div class="row"><label class="chk"><input type="checkbox" id="cLine"> Audio line from the tablet</label><div class="meter h" title="What arrives"><u id="cMeter"></u></div><span class="note" id="cLineSay">off</span></div>
       <p class="note" id="cStat"></p><div class="chips" id="cMarks"></div>
+      <div class="row"><button class="btn" id="cBounce" disabled title="One MP3 per song, cut at the markers and named from them (192 kbit/s), plus the set as MIDI: shared, or downloaded">Bounce</button><span class="note" id="cBounceSay">Bounce: nothing recorded yet</span></div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">The set, as MIDI</div>
       <div class="big-sw"><button class="btn" id="mRec" aria-pressed="false">● Record</button><span class="note" id="mRecSay"></span></div>
@@ -385,6 +403,7 @@ table.sl tr.cur td { border-color: var(--teal); }
     <div class="card"><div class="lab">The audio line and the recording</div><div class="kv" id="hAud"></div></div>
     <div class="card"><div class="lab">This Pixelbook</div><div class="kv" id="hPb"></div></div>
     <div class="card" style="grid-column:1 / -1"><div class="lab">What the tablet says is wrong</div><p class="note" id="hNotes">nothing</p></div>
+    <div class="card" style="grid-column:1 / -1"><h3><span class="lab">Ready for the set?</span><button class="btn sm" id="hReadyBtn" style="margin-left:auto">Ready?</button></h3><p class="note">The link (direct, under 100 ms), the audio line, this Pixelbook's battery and screen lock, MIDI on the tablet, room for Capture, and the tablet's own dropouts.</p><div class="ready" id="hReady"></div></div>
   </section>
   <div class="waiting" id="wait"><div><h2 id="waitH">Waiting for the tablet</h2><p class="note" id="waitP">In Nate Bloom on the tablet: Live → Gear (the No sync / clock button) → Pixelbook → Turn on.</p></div></div>
 </main>
@@ -399,10 +418,10 @@ table.sl tr.cur td { border-color: var(--teal); }
 <audio id="rtAudio" muted playsinline hidden></audio>
 <script src="link.js?v=158"></script>
 <script src="band.js?v=158"></script>
-<script src="visuals.js?v=164"></script>
-<script src="console.js?v=160"></script>
-<script src="stage4.js?v=161"></script>
+<script src="visuals.js?v=166"></script>
+<script src="console.js?v=166"></script>
+<script src="stage4.js?v=166"></script>
 <script src="learn.js?v=161"></script>
-<script src="stage.js?v=164"></script>
+<script src="stage.js?v=166"></script>
 </body>
 </html>

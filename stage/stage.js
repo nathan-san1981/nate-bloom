@@ -55,7 +55,7 @@
   const send = (t, d, lossy) => !!(X.L && X.L.send(t, d, lossy ? { lossy: true } : null));
   const cmd = d => { if (!up()) { toast("Not linked to the tablet"); return false; } if (X.st && X.st.ctl === false) { toast("Control from here is switched off on the tablet (Gear)"); return false; } return send("cmd", d); };
   const pull = kind => send("pull", { kind });
-  window.__stageAPI = { up, send, toast, tabNow, pull, audio, ctxAt, fromTab, beatNow };   // what console.js and stage4.js use
+  window.__stageAPI = { up, send, cmd, toast, tabNow, pull, audio, ctxAt, fromTab, beatNow };   // what console.js and stage4.js use
   window.__stageActx = () => actx;
   function paintConn() {
     const c = $("conn"), m = X.mode, code = ls.get("stage-code", "");
@@ -293,11 +293,45 @@
         if (X.band && X.band.chord) vis.chord(X.band.chord.root, X.band.chord.q);
       } catch (e) { console.error(e); vis = null; }
     }
-    if (vis) { if (!vis.modes.some(m => m.id === visMode)) visMode = vis.modes[0].id; visSet(visMode); vis.resize(); vis.start(); }   // a stored mode that no longer exists falls back to the first
+    if (vis) { if (!vis.modes.some(m => m.id === visMode)) visMode = vis.modes[0].id; visApply(visMode, VF.auto); vis.resize(); vis.start(); }   // a stored mode that no longer exists falls back to the first; (166) opening the tab is not a manual switch
     visPoke();
   }
   function visOff() { if (vis) vis.stop(); }
-  function visSet(m) { visMode = m; ls.set("stage-vis", m); if (vis) vis.setMode(m); if (window.__audRelay) __audRelay("mode", { id: m }); $("visModes").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.m === m))); }
+  // (166) the visuals follow the set list: a song with a `vis` switches the mode on the next bar; a manual switch
+  // (visSet) sticks until the next song that asks for one
+  const VF = { timer: 0, auto: false, want: "" };
+  function visApply(m, auto) {
+    visMode = m; ls.set("stage-vis", m); if (vis) vis.setMode(m); if (window.__audRelay) __audRelay("mode", { id: m });
+    $("visModes").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.m === m)));
+    VF.auto = !!auto; const f = $("visFollow"); if (f) f.hidden = !VF.auto;
+  }
+  function visSet(m) { clearInterval(VF.timer); VF.timer = 0; VF.want = ""; visApply(m, false); }
+  function visFollow(m) {   // the song asked for m: on the next bar line (now, if nothing keeps time or the bar has just begun)
+    clearInterval(VF.timer); VF.timer = 0; VF.want = m;
+    if (!(window.NBVisuals && NBVisuals.modes.some(x => x.id === m))) return;
+    const go = () => { clearInterval(VF.timer); VF.timer = 0; if (VF.want !== m) return; VF.want = ""; visApply(m, true); };
+    // where the tablet's grid is: [bar index, ms since that bar began, the grid's identity]; null when nothing keeps time
+    const where = () => { const b = beatNow(), g = X.grid; if (!b || b.steps < 0 || !g || !g.sd) return null; const pos = ((b.steps % 16) + 16) % 16; return { bar: Math.floor(b.steps / 16), since: pos * g.sd * 1000, perf0: g.perf0, sd: g.sd }; };
+    const moved = (a, b) => a.sd !== b.sd || Math.abs(a.perf0 - b.perf0) > a.sd * 500;   // the grid's clock moved by more than half a step
+    let w = where();
+    if (!w || w.since < 450) { go(); return; }   // (the song comes up on the bar line and the word reaches us a moment later: that is "this bar")
+    // the tablet applies a song just before the bar line, and a song can move its clock: watch the live grid for the crossing
+    VF.timer = setInterval(() => {
+      if (VF.want !== m) { clearInterval(VF.timer); VF.timer = 0; return; }
+      const n = where(); if (!n) { go(); return; }
+      if (moved(n, w)) { if (n.since < 450) { go(); return; } w = n; return; }   // the clock moved: a new bar began there, or wait for its next
+      if (n.bar > w.bar) go();
+    }, 30);
+  }
+  X.visFollow = visFollow; X.visState = () => ({ mode: visMode, auto: VF.auto, pending: VF.want });
+  if (window.__console && __console.onSong) __console.onSong(cur => { if (cur && cur.vis) visFollow(cur.vis); });
+  // (166) Projector: the audience window's render scale. Auto = the engine's adaptive quality; Full / Half / Quarter pin it.
+  const PROJ = { q: ls.get("stage-proj", "auto") };
+  const projQ = () => PROJ.q === "auto" ? null : +PROJ.q;
+  X.projQ = projQ;
+  function projPaint() { $("visProj").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.q === PROJ.q))); }
+  $("visProj").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { PROJ.q = b.dataset.q; ls.set("stage-proj", PROJ.q); projPaint(); if (window.__audRelay) __audRelay("quality", { q: projQ() }); }));
+  projPaint();
   function visPoke() { const b = $("visBar"); b.classList.remove("hide"); clearTimeout(visHideT); visHideT = setTimeout(() => { if (X.view === "vVis") b.classList.add("hide"); }, 3000); document.body.style.cursor = ""; }
   $("vVis").addEventListener("pointermove", visPoke); $("vVis").addEventListener("pointerdown", visPoke);
   $("visCapBtn").addEventListener("click", () => { const c = $("visCap"); c.hidden = !c.hidden; setA($("visCapBtn"), "aria-pressed", String(!c.hidden)); ls.set("stage-viscap", !c.hidden); });
@@ -322,7 +356,7 @@
   function edPush() {
     if (!up()) { toast("Not linked to the tablet"); return; }
     const id = Math.random().toString(36).slice(2, 8);
-    if (ED.tab === "sl" && ED.sl) { send("push", { kind: "setlist", id, ver: ED.sl.ver, songs: ED.sl.songs.map(x => ({ i: x.i, name: x.name, notes: x.notes })) }); ED.slDirty = false; edStat("Sending…"); }
+    if (ED.tab === "sl" && ED.sl) { send("push", { kind: "setlist", id, ver: ED.sl.ver, songs: ED.sl.songs.map(x => ({ i: x.i, name: x.name, notes: x.notes, vis: x.vis || "" })) }); ED.slDirty = false; edStat("Sending…"); }   // (166) vis: the visual the song asks for ("" = as it is)
     else if (ED.tab === "rc" && ED.rc) { send("push", { kind: "rhythm", id, ver: ED.rc.ver, tracks: ED.rc.tracks.map(t => ({ i: t.i, len: t.len, on: t.on, acc: t.acc })) }); ED.rcDirty = false; edStat("Sending…"); }
     else if (ED.tab === "kit") toast("Pick a kit and press Load on a bank");
   }
@@ -337,13 +371,18 @@
     if (!S) { body.innerHTML = ""; $("slEmpty").hidden = false; setT($("slEmpty"), up() ? "Asking the tablet for its set list…" : "Link to the tablet to edit its set list."); return; }
     $("slEmpty").hidden = S.songs.length > 0; setT($("slEmpty"), "No songs on the tablet yet: in Live, tap the set list box and save one.");
     const cur = X.setlist ? X.setlist.cur : -1;
+    // (166) the Visual picker: the engine's modes by name, or "as it is" (no change when the song comes up)
+    const modes = (window.NBVisuals && NBVisuals.modes) || [];
+    const dur = window.__console && __console.songDur ? __console.songDur : () => null;
+    const visSel = (x, n) => `<select class="vs" aria-label="Song ${n + 1} visual" title="The visuals switch to this on the next bar when the song comes up"><option value=""${!x.vis ? " selected" : ""}>— as it is —</option>${modes.map(m => `<option value="${esc(m.id)}"${x.vis === m.id ? " selected" : ""}>${esc(m.name)}</option>`).join("")}</select>`;
     body.innerHTML = S.songs.map((x, n) => `<tr data-n="${n}" class="${x.i === cur ? "cur" : ""}"><td><div class="num">${n + 1}<button class="btn mv" data-a="up" aria-label="Move up"${n === 0 ? " disabled" : ""}>↑</button><button class="btn mv" data-a="dn" aria-label="Move down"${n === S.songs.length - 1 ? " disabled" : ""}>↓</button></div></td>
-      <td><input class="nm" value="${esc(x.name)}" maxlength="40" aria-label="Song ${n + 1} name"><textarea placeholder="Notes for this song: key, what to play, what comes next…" aria-label="Song ${n + 1} notes">${esc(x.notes)}</textarea><div class="meta">${x.bpm ? x.bpm + " bpm" : ""}${x.label ? " · " + esc(x.label) : ""}${x.i === cur ? " · playing now" : ""}</div></td>
+      <td><input class="nm" value="${esc(x.name)}" maxlength="40" aria-label="Song ${n + 1} name"><textarea placeholder="Notes for this song: key, what to play, what comes next…" aria-label="Song ${n + 1} notes">${esc(x.notes)}</textarea><div class="meta"><label class="vislab">Visual ${visSel(x, n)}</label>${x.bpm ? x.bpm + " bpm" : ""}${x.label ? " · " + esc(x.label) : ""}${dur(x.name) ? " · last run " + dur(x.name) : ""}${x.i === cur ? " · playing now" : ""}</div></td>
       <td><div class="acts"><button class="btn" data-a="go">Go to it</button><button class="btn" data-a="del">Remove</button></div></td></tr>`).join("");
     body.querySelectorAll("tr").forEach(tr => {
       const n = +tr.dataset.n, x = S.songs[n];
       tr.querySelector(".nm").addEventListener("input", e => { x.name = e.target.value; ED.slDirty = true; edStat("Not sent yet"); });
       tr.querySelector("textarea").addEventListener("input", e => { x.notes = e.target.value; ED.slDirty = true; edStat("Not sent yet"); });
+      tr.querySelector("select.vs").addEventListener("change", e => { x.vis = e.target.value; ED.slDirty = true; edStat("Not sent yet"); });
       tr.querySelectorAll("button[data-a]").forEach(b => b.addEventListener("click", () => {
         const a = b.dataset.a;
         if (a === "up" || a === "dn") { const j = a === "up" ? n - 1 : n + 1; [S.songs[n], S.songs[j]] = [S.songs[j], S.songs[n]]; ED.slDirty = true; edStat("Not sent yet"); slPaint(); }
@@ -574,6 +613,7 @@
   // ---------- keep the screen awake while linked ----------
   let wake = null;
   setInterval(async () => { try { if (up() && !wake && navigator.wakeLock && document.visibilityState === "visible") { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch (e) {} }, 5000);
+  X.wakeHeld = () => !!(wake && !wake.released);   // (166) for the Ready check
   // ---------- go ----------
   setView(ls.get("stage-view", "vDir"));
   if (!window.NBBand) $("bHere").disabled = true;

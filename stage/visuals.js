@@ -6,6 +6,8 @@
  *   vis.start(); vis.setMode(id);   // ids: see MODES below / vis.modes (id, name, desc)
  *   vis.beatClock(fn); vis.note(midi, vel, layer); vis.noteOff(midi);
  *   vis.chord(root, q); vis.level(rms, peak); vis.spectrum(arr16); vis.hit(kind, vel);
+ *   options: maxPixels, quality (starting adaptive level), adaptive (false: pinned), scale (166: a fixed render scale
+ *   per axis, 0.3–1, for a projector; vis.setScale(q) changes it, vis.setScale(null) goes back to Auto)
  *
  * Note colour wheel: pitch classes are laid out on the circle of fifths
  * (C red, G orange, D amber, A lime, E green, B teal, F# cyan, C# blue,
@@ -1694,7 +1696,10 @@
     if (!canvas || !canvas.getContext) throw new Error('NBVisuals.create: a <canvas> element is required');
     opts = opts || {};
     var maxPixels = num(opts.maxPixels, DEFAULT_MAX_PIXELS);
-    var adaptive = opts.adaptive !== false;
+    var adaptive = opts.adaptive !== false, adaptive0 = adaptive;
+    // (166) a fixed render scale per axis (0.3–1) for a projector: set, it replaces the adaptive quality; null = Auto
+    var userScale = opts.scale == null ? 1 : clamp(num(opts.scale, 1), 0.3, 1), fixedScale = opts.scale != null;
+    if (fixedScale) adaptive = false;
     var qi = 0;
     if (opts.quality != null) {
       var qv = num(opts.quality, 1), best = 0;
@@ -1943,7 +1948,7 @@
       var dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
       var w = cssW * dpr, h = cssH * dpr;
       var cap = Math.min(1, Math.sqrt((isGL && !blit2D ? maxPixels : 0.35e6) / (w * h)));
-      var s = cap * (isGL && !blit2D ? QUALITY[qi] : 1);
+      var s = cap * (isGL && !blit2D && !fixedScale ? QUALITY[qi] : 1) * userScale;
       var nw = Math.max(16, Math.round(w * s)), nh = Math.max(16, Math.round(h * s));
       if (nw !== canvas.width || nh !== canvas.height) {
         var bwC = canvas.clientWidth, bhC = canvas.clientHeight;
@@ -1964,6 +1969,14 @@
       i = clamp(i, 0, QUALITY.length - 1);
       if (i === qi) return;
       qi = i; applySize(false);
+    }
+
+    // (166) setScale(0.3–1): render at that fraction of the size per axis, fixed (the adaptive quality is off);
+    // setScale(null): back to Auto (the adaptive quality, from full)
+    function setScale(q) {
+      if (q == null) { fixedScale = false; userScale = 1; adaptive = adaptive0; qi = 0; probe = null; sinceQ = 0; goodT = 0; }
+      else { fixedScale = true; userScale = clamp(num(q, 1), 0.3, 1); adaptive = false; qi = 0; probe = null; }
+      if (cssW > 0 && cssH > 0) applySize(false);
     }
 
     // acquire a context (after every var above has been initialised)
@@ -2568,6 +2581,7 @@
       stop: stop,
       resize: resize,
       setMode: setMode,
+      setScale: setScale,
       modes: modeList(),
       beatClock: beatClock,
       note: note,
@@ -2596,7 +2610,7 @@
     Object.defineProperty(api, 'info', {
       get: function () {
         return { renderer: isGL ? (blit2D ? 'webgl-2d-blit' : 'webgl') : 'canvas2d', width: bw, height: bh,
-          quality: isGL ? QUALITY[qi] : 1, frameMs: Math.round(emaMs * 10) / 10, ink: isGL ? (inkLowp ? 'rgba8' : 'half-float') : 'none', notes: NN };
+          quality: isGL && !fixedScale ? QUALITY[qi] : 1, scale: fixedScale ? userScale : null, frameMs: Math.round(emaMs * 10) / 10, ink: isGL ? (inkLowp ? 'rgba8' : 'half-float') : 'none', notes: NN };
       }, enumerable: true
     });
     Object.defineProperty(api, '_debug', { get: function () { return { pal: Array.prototype.slice.call(pal), palLCH: Array.prototype.slice.call(palCur), glow: Array.prototype.slice.call(glow), swell: swell, kick: kick, t: t }; } });

@@ -2,7 +2,9 @@
    link as patches: the Director (the set list, the song that plays, what comes next, the notes large), the Mixer
    (every channel with a mouse: level, mute, solo), and the Library (every sound the tablet has, searched by name, sent
    to the tablet to play alone or to layer). Each change is an intent the tablet applies or refuses; the tablet wins
-   every conflict, and if the link drops nothing here changes anything there. */
+   every conflict, and if the link drops nothing here changes anything there.
+   166: the song watcher (C.onSong: who wants to know when the song changes), and rehearsal on the Director: a count-in
+   (a bar of the headphone click, then ▶), a run-through timer that remembers each song's last length, the "Next:" cue. */
 (function () {
   "use strict";
   const $ = id => document.getElementById(id);
@@ -36,6 +38,7 @@
     if (!C.doc) C.doc = { secs: {} };
     Object.assign(C.doc, d.patch || {}); C.doc.ver = d.ver; if (d.secs) C.doc.secs = d.secs; C.lastDoc = performance.now();
     paint(Object.keys(d.patch || {}));
+    if (d.patch && d.patch.setlist) songWatch();
   };
   C.onData = d => {
     if (d && d.kind === "library") { C.lib = d; C.favs = d.favs || []; libPaint(); return true; }
@@ -69,7 +72,7 @@
   // ---------- the Director ----------
   function dirPaint() {
     const sl = sec("setlist") || { songs: [], cur: -1 }, t = sec("transport") || {}, st = sec("stack") || { layers: [] }, fx = sec("fx") || {};
-    const rows = $("dList"); const html = (sl.songs || []).map((S, i) => `<button type="button" class="c-row${i === sl.cur ? " cur" : ""}" data-i="${i}"><span class="num">${i + 1}</span><span class="nm"><b>${esc(S.name)}</b><small>${S.bpm ? Math.round(S.bpm) + " bpm" : ""}${i === sl.cur ? (sl.pending ? " · switching on the next bar" : " · playing now") : ""}</small></span><span class="go">${i === sl.cur ? "now" : "Go ›"}</span></button>`).join("") || '<p class="note">No songs on the tablet yet. Set the tablet up the way the first song should sound, then + Add song.</p>';
+    const rows = $("dList"); const html = (sl.songs || []).map((S, i) => `<button type="button" class="c-row${i === sl.cur ? " cur" : ""}" data-i="${i}"><span class="num">${i + 1}</span><span class="nm"><b>${esc(S.name)}</b><small>${S.bpm ? Math.round(S.bpm) + " bpm" : ""}${S.vis ? " · " + esc(visName(S.vis)) : ""}${songDur(S.name) ? " · last run " + songDur(S.name) : ""}${i === sl.cur ? (sl.pending ? " · switching on the next bar" : " · playing now") : ""}</small></span><span class="go">${i === sl.cur ? "now" : "Go ›"}</span></button>`).join("") || '<p class="note">No songs on the tablet yet. Set the tablet up the way the first song should sound, then + Add song.</p>';
     if (rows.__html !== html) { rows.__html = html; rows.innerHTML = html; }
     const cur = sl.cur >= 0 ? sl.songs[sl.cur] : null, nx = sl.cur >= 0 && sl.cur + 1 < (sl.songs || []).length ? sl.songs[sl.cur + 1] : null;
     setT($("dNow"), cur ? cur.name : (sl.songs || []).length ? "No song chosen" : "No set list");
@@ -88,6 +91,7 @@
     return "";
   }
   function dirTick() {
+    rehTick();
     if (C.view !== "vDir") return;
     const X = window.__stage; let txt = "";
     try {
@@ -95,8 +99,79 @@
       if (g && g.src && g.perf0 != null && g.sd && a) { const now = a.tabNow(); const bar = 16 * g.sd * 1000; const into = ((now - g.perf0) % bar + bar) % bar; const left = (bar - into) / 1000; txt = "next bar in " + left.toFixed(1) + " s"; }
     } catch (e) {}
     setT($("dBar"), txt); const ch = dirChord(); setT($("dChord"), ch); $("dChord").hidden = !ch;
+    rehPaint();
   }
   setInterval(dirTick, 100);
+  // ---------- (166) the song watcher: the current song from the document, and who wants to know when it changes ----------
+  const SW = { sig: null, at: 0, cur: null, subs: [] };
+  C.onSong = f => { SW.subs.push(f); if (SW.cur) { try { f(SW.cur, null, true); } catch (e) {} } };
+  C.songNow = () => SW.cur;
+  C.songAt = () => SW.at;
+  function songWatch() {
+    const sl = sec("setlist"); if (!sl) return;
+    const i = sl.cur == null ? -1 : sl.cur, S = i >= 0 && sl.songs ? sl.songs[i] : null, name = sl.name || (S && S.name) || "";
+    let vis = sl.vis || (S && S.vis) || "";
+    if (!vis) { try { const X = window.__stage, L = X && X.setlist && X.setlist.songs ? X.setlist.songs.find(x => x.i === i) : null; if (L && L.vis) vis = L.vis; } catch (e) {} }
+    const sig = i + ":" + name;
+    if (sig === SW.sig) {   // the same song; its visual edited while it plays counts as a change for the visuals only (not the timer)
+      if (SW.cur && (vis || "") !== (SW.cur.vis || "")) { SW.cur.vis = vis; SW.subs.forEach(f => { try { f(SW.cur, SW.cur, false, true); } catch (e) { console.error(e); } }); if (C.view === "vDir") dirPaint(); }
+      return;
+    }
+    const prev = SW.cur, prevAt = SW.at, now = performance.now();
+    SW.cur = name ? { i, name, vis, bpm: S && S.bpm } : null; SW.at = now; SW.sig = sig;
+    if (prev && prev.name && prevAt && now - prevAt >= 2000) rehRemember(prev.name, now - prevAt);   // the run-through just finished
+    REH.cueOn = null; REH.at = SW.cur ? now : 0;
+    SW.subs.forEach(f => { try { f(SW.cur, prev, false); } catch (e) { console.error(e); } });
+    if (C.view === "vDir") dirPaint();
+  }
+  setInterval(songWatch, 250);
+  // ---------- (166) rehearsal: a count-in, a run-through timer per song, and the "Next:" cue ----------
+  const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  const REH = { dur: ls.get("stage-songdur", {}), at: 0, count: null, cueOn: null, cueSent: "", cueName: "" };   // cueOn: null = by itself (last 30 s), true = shown by hand, false = hidden by hand, until the next song
+  const fmtMs = ms => { const s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  const visName = id => { try { const m = NBVisuals.modes.find(x => x.id === id); return m ? m.name : id; } catch (e) { return id; } };
+  function songDur(name) { const d = REH.dur[name]; return d ? fmtMs(d) : null; }
+  C.songDur = songDur;
+  function rehRemember(name, ms) { if (!name || !(ms > 0)) return; REH.dur[name] = Math.round(ms); ls.set("stage-songdur", REH.dur); }
+  C.durations = list => { (list || []).forEach(x => rehRemember(x.name, x.ms)); if (C.view === "vDir") dirPaint(); };   // from a Capture's markers
+  function countIn() {
+    const a = A(), X = window.__stage; if (!a || !a.up()) { if (a) a.toast("Not linked to the tablet"); return; }
+    if (REH.count) return;
+    const S4 = window.__stage4; if (!S4 || !S4.click) { a.toast("The click isn't loaded: reload the page"); return; }
+    const t = sec("transport") || {}, bpm = t.tempo || (X && X.st && X.st.bpm) || 120, beat = 60 / bpm;
+    const ac = a.audio(); if (!ac) return;
+    const lead = 0.1, t0 = ac.currentTime + lead;
+    for (let n = 0; n < 4; n++) S4.click(t0 + n * beat, n === 0);
+    REH.count = { bpm, t0: performance.now() + lead * 1000, beatMs: beat * 1000 };
+    // ▶ lands on the downbeat after the bar: the command leaves half a round trip early; if the tablet already plays, it stays as it is
+    const rtt = (X && X.L && X.L.rtt) || 0, wait = lead * 1000 + 4 * beat * 1000 - rtt / 2;
+    setTimeout(() => {
+      REH.count = null; const s = X && X.st, playing = !!(s && s.on && s.on[s.play]);
+      if (!playing) { a.cmd({ do: "play" }); a.toast("▶ after the count-in"); } else a.toast("The tablet already plays: count-in only");
+      rehPaint();
+    }, Math.max(0, wait));
+    a.toast("Count-in: one bar at " + Math.round(bpm) + " bpm, then ▶");
+    rehPaint();
+  }
+  function rehNext() { const sl = sec("setlist"); if (!sl || !(sl.cur >= 0) || !sl.songs) return null; const nx = sl.songs[sl.cur + 1]; return nx ? nx.name : null; }
+  function rehTick() {   // the cue: on demand, or in the last 30 s of a song whose length is known
+    const cur = SW.cur, nx = cur ? rehNext() : null; let on = false;
+    if (nx) { if (REH.cueOn != null) on = REH.cueOn; else { const d = REH.dur[cur.name]; if (d && REH.at && performance.now() - REH.at >= d - 30000) on = true; } }
+    const name = on ? nx : "";
+    if (name !== REH.cueSent) { REH.cueSent = name; if (window.__audRelay) __audRelay("cue", { name }); }
+    REH.cueName = name;
+  }
+  C.cueNow = () => REH.cueName;
+  function rehPaint() {
+    const tm = $("rTimer"); if (!tm) return;
+    const cur = SW.cur, ms = cur && REH.at ? performance.now() - REH.at : 0;
+    setT(tm, cur ? fmtMs(ms) : "–:––");
+    const d = cur ? REH.dur[cur.name] : null; setT($("rTimerSub"), cur ? (d ? "last run " + fmtMs(d) : "first run") : "no song");
+    const cb = $("rCount"); if (REH.count) { const n = Math.min(4, Math.max(1, Math.floor((performance.now() - REH.count.t0) / REH.count.beatMs) + 1)); setT(cb, "Count-in · " + n); cb.setAttribute("aria-pressed", "true"); } else { setT(cb, "Count-in"); cb.setAttribute("aria-pressed", "false"); }
+    $("rCue").setAttribute("aria-pressed", String(!!REH.cueName)); $("rCue").disabled = !rehNext();
+    const c = $("dCue"); setT(c, REH.cueName ? "Next: " + REH.cueName : ""); c.hidden = !REH.cueName;
+  }
+  C.REH = REH; C.countIn = countIn;
   // ---------- the Mixer ----------
   const chanRow = (c, i) => `<div class="mx-row${c.muted ? " muted" : ""}${c.solo ? " solo" : ""}" data-i="${i}">
       <div class="mx-name"><b>${esc(c.name.replace(/ volume$/, ""))}</b>${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</div>
@@ -165,6 +240,8 @@
   $("dAddNo").addEventListener("click", () => { $("dAddRow").hidden = true; });
   $("dAddGo").addEventListener("click", () => { const n = $("dAddName").value.trim(); $("dAddRow").hidden = true; intent("setlist.add", { value: n }).then(r => { if (r.ok) A().toast(r.msg); }); });
   $("dAddName").addEventListener("keydown", e => { if (e.key === "Enter") $("dAddGo").click(); if (e.key === "Escape") $("dAddNo").click(); });
+  $("rCount").addEventListener("click", countIn);
+  $("rCue").addEventListener("click", () => { REH.cueOn = !REH.cueName; rehTick(); rehPaint(); });   // showing → hide it (for this song); hidden → show it
   window.addEventListener("keydown", e => {
     if (C.view !== "vDir" || e.target.closest("input, textarea")) return;
     if (e.key === "PageDown" || e.key === "ArrowRight") { e.preventDefault(); intent("setlist.next"); }

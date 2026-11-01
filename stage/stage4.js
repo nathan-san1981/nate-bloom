@@ -1,7 +1,9 @@
 /* Nate Bloom Stage, stage 4 (160): the audio line from the tablet, Capture (a WAV on this Pixelbook with a marker per
    song, written as it records so nothing is lost), the Health panel, the click in these headphones, and the audience
    window (visuals only, no controls, on a second screen). The audio line is for recording and pictures, never for
-   what you hear: it is decoded here muted. */
+   what you hear: it is decoded here muted.
+   166: Bounce (one MP3 per song from the last Capture's markers, lame.js in a Worker, plus the set as MIDI; shared or
+   downloaded), the Ready check (Health and the Director), the audience window's Projector scale and "Next:" cue. */
 (function () {
   "use strict";
   const $ = id => document.getElementById(id);
@@ -16,8 +18,8 @@
   function streamIn(stream) {
     const had = !!ST.stream; ST.stream = stream || null;
     const el = $("rtAudio"); if (el) { try { el.srcObject = ST.stream; el.muted = true; if (ST.stream) el.play().catch(() => {}); } catch (e) {} }
-    if (ST.stream) { ST.since = performance.now(); if (had === false && CAP.on) mark("audio line back"); }
-    else if (had && CAP.on) { ST.lost++; mark("audio line lost"); }
+    if (ST.stream) { ST.since = performance.now(); if (had === false && CAP.on) mark("audio line back", "line"); }
+    else if (had && CAP.on) { ST.lost++; mark("audio line lost", "line"); }
     wireStream(); paintStream();
   }
   function wireStream() {
@@ -35,7 +37,7 @@
     setT($("cLineSay"), !up ? "not linked" : !ST.want ? "off" : !ST.on ? "asked the tablet…" : !ST.stream ? "the tablet sends, nothing arrives yet (a direct line is needed: not through the internet)" : "on · " + (ST.rate ? ST.rate / 1000 + " kHz" : "") + " stereo Opus 192 kbit/s");
   }
   // ---------- Capture: a WAV written as it records ----------
-  const CAP = { on: false, node: null, ctx: null, frames: 0, rate: 48000, t0: 0, w0: 0, chunks: [], bytes: 0, writable: null, name: "", markers: [], q: Promise.resolve(), backlog: 0, gaps: 0, drift: 0, mem: true, err: "", last: null, songSig: "", pong: 0, pingAt: 0, markN: 0 };
+  const CAP = { on: false, node: null, ctx: null, frames: 0, rate: 48000, t0: 0, w0: 0, chunks: [], bytes: 0, writable: null, handle: null, name: "", markers: [], q: Promise.resolve(), backlog: 0, gaps: 0, drift: 0, mem: true, err: "", last: null, songSig: "", pong: 0, pingAt: 0, markN: 0, tabT0: 0 };
   const s16 = v => { v = v < -1 ? -1 : v > 1 ? 1 : v; return (v < 0 ? v * 32768 : v * 32767) | 0; };
   const str = (dv, o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
   function wavHeader(rate, frames, tailBytes) {
@@ -59,8 +61,9 @@
     if (!d.l || (!CAP.on && !d.last)) return;
     const n = d.l.length; if (n) { const pcm = new Int16Array(n * 2); for (let i = 0, j = 0; i < n; i++) { pcm[j++] = s16(d.l[i]); pcm[j++] = s16(d.r[i]); } CAP.frames += n; CAP.bytes += pcm.byteLength; if (CAP.writable) write(pcm); else CAP.chunks.push(pcm); }
   }
-  function mark(name) { if (!CAP.on) return; CAP.markers.push({ frame: CAP.frames, name: String(name || "mark").slice(0, 120), at: Date.now() }); paintCap(); }
-  function markSong(force) { const s = songNow(), sig = s ? s.i + ":" + s.name : ""; if (sig !== CAP.songSig || force) { CAP.songSig = sig; mark(s ? s.name : (force ? "start" : "no song")); } }
+  // (166) kind: "song" (a set-list change, the start), "mark" (by hand), "gap", "line" — the Bounce cuts at the "song" ones
+  function mark(name, kind) { if (!CAP.on) return; CAP.markers.push({ frame: CAP.frames, name: String(name || "mark").slice(0, 120), at: Date.now(), kind: kind || "mark" }); paintCap(); }
+  function markSong(force) { const s = songNow(), sig = s ? s.i + ":" + s.name : ""; if (sig !== CAP.songSig || force) { CAP.songSig = sig; mark(s ? s.name : (force ? "start" : "no song"), "song"); } }
   async function capStart() {
     if (CAP.on) return;
     const a = A() && A().audio ? A().audio() : null; if (!a) { A().toast("Tap once anywhere first: the browser wants a touch before sound"); return; }
@@ -69,16 +72,17 @@
       if (!CAP.node || CAP.ctx !== a) { await a.audioWorklet.addModule("capture-worklet.js?v=160"); CAP.node = new AudioWorkletNode(a, "nb-capture", { numberOfInputs: 1, numberOfOutputs: 0, channelCount: 2, channelCountMode: "explicit", channelInterpretation: "speakers" }); CAP.ctx = a; CAP.node.port.onmessage = onBlock; wireStream(); if (ST.in) ST.in.connect(CAP.node); }
     } catch (e) { A().toast("Can't record here: " + (e && e.message || e)); return; }
     const name = "Nate Bloom set " + stamp() + ".wav";
-    CAP.writable = null; CAP.mem = true; CAP.err = "";
+    CAP.writable = null; CAP.handle = null; CAP.mem = true; CAP.err = "";
     if (window.showSaveFilePicker && !window.__nbNoPicker) {
-      try { const h = await showSaveFilePicker({ suggestedName: name, types: [{ description: "WAV audio", accept: { "audio/wav": [".wav"] } }] }); CAP.writable = await h.createWritable(); CAP.mem = false; CAP.name = h.name || name; }
-      catch (e) { CAP.writable = null; CAP.mem = true; }   // (cancelled or not allowed: kept in memory, offered as a download at Stop)
+      try { const h = await showSaveFilePicker({ suggestedName: name, types: [{ description: "WAV audio", accept: { "audio/wav": [".wav"] } }] }); CAP.writable = await h.createWritable(); CAP.handle = h; CAP.mem = false; CAP.name = h.name || name; }
+      catch (e) { CAP.writable = null; CAP.handle = null; CAP.mem = true; }   // (cancelled or not allowed: kept in memory, offered as a download at Stop)
     }
     if (CAP.mem) CAP.name = name;
     CAP.rate = a.sampleRate; CAP.frames = 0; CAP.chunks = []; CAP.bytes = 0; CAP.markers = []; CAP.gaps = 0; CAP.drift = 0; CAP.backlog = 0; CAP.q = Promise.resolve(); CAP.songSig = ""; CAP.markN = 0;
     if (CAP.writable) await write(new Uint8Array(44));
     if (a.state !== "running") { try { await a.resume(); } catch (e) {} }
-    CAP.on = true; CAP.t0 = a.currentTime; CAP.w0 = performance.now(); CAP.pong = performance.now(); CAP.node.port.postMessage("start");
+    CAP.on = true; CAP.t0 = a.currentTime; CAP.w0 = performance.now(); CAP.pong = performance.now(); CAP.tabT0 = A().tabNow(); CAP.node.port.postMessage("start");
+    BNC.files = []; BNC.say = ""; BNC.err = "";
     markSong(true); paintCap();
   }
   async function capStop() {
@@ -90,11 +94,99 @@
       try { await CAP.writable.write({ type: "write", position: 0, data: header }); await CAP.writable.close(); } catch (e) { CAP.err = String(e && e.message || e); }
       CAP.writable = null; A().toast("Saved " + CAP.name);
     } else if (CAP.frames) {
-      const blob = new Blob([header].concat(CAP.chunks, [tail]), { type: "audio/wav" }), u = URL.createObjectURL(blob), el = document.createElement("a"); el.href = u; el.download = CAP.name; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); CAP.chunks = [];
+      const blob = new Blob([header].concat(CAP.chunks, [tail]), { type: "audio/wav" }), u = URL.createObjectURL(blob), el = document.createElement("a"); el.href = u; el.download = CAP.name; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000);
       A().toast("Downloading " + CAP.name);
     }
-    CAP.last = { name: CAP.name, seconds: CAP.frames / CAP.rate, markers: CAP.markers.length, gaps: CAP.gaps, mem: CAP.mem, err: CAP.err };
+    // (166) the take stays reachable for the Bounce: the blocks in memory mode, the file's handle otherwise (read back in slices)
+    CAP.last = { name: CAP.name, seconds: CAP.frames / CAP.rate, markers: CAP.markers.length, gaps: CAP.gaps, mem: CAP.mem, err: CAP.err, marks: CAP.markers.slice(), rate: CAP.rate, frames: CAP.frames, chunks: CAP.mem ? CAP.chunks : null, handle: CAP.handle, tabT0: CAP.tabT0, tabT1: A().tabNow() };
+    CAP.chunks = []; CAP.handle = null;
+    try { if (window.__console && __console.durations) __console.durations(songsOf(CAP.last).filter(s => s.named).map(s => ({ name: s.song, ms: (s.b - s.a) / CAP.last.rate * 1000 }))); } catch (e) {}   // each song's length, for the Director
     paintCap();
+  }
+  // ---------- (166) Bounce: one MP3 per song from the last Capture's markers, plus the set as MIDI ----------
+  const BNC = { on: false, files: [], say: "", err: "", worker: null, lameOK: null };
+  const LAME_URL = new URL("lame.js?v=166", location.href).href;
+  const safeName = s => String(s || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "·").replace(/\s+/g, " ").trim().slice(0, 60);
+  function songsOf(T) {   // marker-to-marker songs: [{a, b (frames), song, name: "NN Song.mp3", named}], nothing under half a second
+    if (!T || !T.frames) return [];
+    const ms = (T.marks || []).filter(m => (m.kind || "song") === "song" || (!m.kind && !/^(mark \d+|gap \d+ ms|audio line (lost|back))$/.test(m.name))).sort((x, y) => x.frame - y.frame);
+    const out = [];
+    ms.forEach((m, i) => { const a = m.frame, b = i + 1 < ms.length ? ms[i + 1].frame : T.frames; if (b - a < T.rate / 2) return; const named = !!(m.name && m.name !== "start" && m.name !== "no song"); out.push({ a, b, song: named ? m.name : "", named }); });
+    out.forEach((s, i) => { const nn = String(i + 1).padStart(2, "0"); s.name = nn + " " + (s.named ? safeName(s.song) : "Song " + nn) + ".mp3"; });
+    return out;
+  }
+  async function pcmSlice(T, a, b) {   // interleaved 16-bit stereo frames [a, b) of the last take
+    const n = b - a, out = new Int16Array(n * 2);
+    if (T.chunks) {
+      let at = 0, o = 0;
+      for (const c of T.chunks) { const len = c.length / 2, s = Math.max(a, at), e = Math.min(b, at + len); if (e > s) { out.set(c.subarray((s - at) * 2, (e - at) * 2), o); o += (e - s) * 2; } at += len; if (at >= b) break; }
+      return out;
+    }
+    if (T.handle) { const f = await T.handle.getFile(); const buf = await f.slice(44 + a * 4, 44 + b * 4).arrayBuffer(); const v = new Int16Array(buf); out.set(v.subarray(0, Math.min(v.length, out.length))); return out; }
+    throw new Error("the take is gone (a new recording replaced it)");
+  }
+  const WORKER_SRC = `importScripts(${JSON.stringify(LAME_URL)});
+    self.onmessage = e => { const d = e.data, enc = new lamejs.Mp3Encoder(2, d.rate, 192), n = d.pcm.length >> 1, L = new Int16Array(n), R = new Int16Array(n);
+      for (let i = 0, j = 0; i < n; i++) { L[i] = d.pcm[j++]; R[i] = d.pcm[j++]; }
+      const BLK = 1152 * 8, parts = []; let k = 0;
+      for (let i = 0; i < n; i += BLK) { const m = enc.encodeBuffer(L.subarray(i, i + BLK), R.subarray(i, i + BLK)); if (m.length) parts.push(m); if (++k % 10 === 0) postMessage({ p: Math.min(1, (i + BLK) / n) }); }
+      const f = enc.flush(); if (f.length) parts.push(f);
+      postMessage({ done: new Blob(parts, { type: "audio/mpeg" }) }); };`;
+  function encodeWorker(pcm, rate, onP) {
+    return new Promise((res, rej) => {
+      let w; try { w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }))); } catch (e) { rej(e); return; }
+      w.onerror = e => { w.terminate(); rej(new Error(e && e.message || "the encoder failed")); };
+      w.onmessage = e => { const d = e.data; if (d.p != null) onP(d.p); if (d.done) { w.terminate(); res(d.done); } };
+      w.postMessage({ rate, pcm }, [pcm.buffer]);
+    });
+  }
+  function lameHere() {   // the fallback: lame.js on this page (loaded once, only if the Worker can't)
+    if (window.lamejs) return Promise.resolve(); if (BNC.lameOK) return BNC.lameOK;
+    return BNC.lameOK = new Promise((res, rej) => { const s = document.createElement("script"); s.src = LAME_URL; s.onload = () => res(); s.onerror = () => { BNC.lameOK = null; rej(new Error("lame.js didn't load")); }; document.head.appendChild(s); });
+  }
+  async function encodeHere(pcm, rate, onP) {
+    await lameHere(); const enc = new lamejs.Mp3Encoder(2, rate, 192), n = pcm.length >> 1, L = new Int16Array(n), R = new Int16Array(n);
+    for (let i = 0, j = 0; i < n; i++) { L[i] = pcm[j++]; R[i] = pcm[j++]; }
+    const BLK = 1152 * 8, parts = []; let k = 0;
+    for (let i = 0; i < n; i += BLK) { const m = enc.encodeBuffer(L.subarray(i, i + BLK), R.subarray(i, i + BLK)); if (m.length) parts.push(m); if (++k % 10 === 0) { onP(Math.min(1, (i + BLK) / n)); await new Promise(r => setTimeout(r, 0)); } }
+    const f = enc.flush(); if (f.length) parts.push(f);
+    return new Blob(parts, { type: "audio/mpeg" });
+  }
+  function setMidi(T) {   // the set as MIDI (what stage.js records since the link came up), cut to the capture's span
+    const M = window.__stage && __stage.midi; if (!M) return null;
+    const a = A(), takes = (M.REC.on && M.REC.take ? [M.REC.take] : []).concat(M.REC.takes || []);
+    const end = K0 => (M.REC.on && K0 === M.REC.take ? a.tabNow() : K0.t1);
+    const K = takes.find(x => x.t0 <= T.tabT1 && end(x) >= T.tabT0) || takes[0]; if (!K) return null;
+    const t0 = Math.max(K.t0, T.tabT0 || K.t0), t1 = T.tabT1 || end(K);
+    const before = list => list.filter(x => x[0] <= t0).slice(-1).map(x => [t0].concat(x.slice(1)));
+    const cp = Object.assign({}, K, { t0, t1, evs: (K.evs || []).filter(e => e[1] >= t0 - 30 && e[1] <= t1 + 30), tempo: before(K.tempo || []).concat((K.tempo || []).filter(x => x[0] > t0 && x[0] <= t1)), marks: before(K.marks || []).concat((K.marks || []).filter(x => x[0] > t0 && x[0] <= t1)), cc: (K.cc || []).filter(x => x[0] >= t0 && x[0] <= t1) });
+    if (!cp.tempo.length) cp.tempo = [[t0, 120]];
+    try { return new Blob([M.buildMidi(cp)], { type: "audio/midi" }); } catch (e) { console.error(e); return null; }
+  }
+  const dlBlob = (blob, name) => { const u = URL.createObjectURL(blob), el = document.createElement("a"); el.href = u; el.download = name; document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); };
+  async function deliver(files) {   // the share sheet when there is one (Chrome OS has it), else a download each
+    if (!window.__nbNoShare && navigator.share && navigator.canShare) { try { if (navigator.canShare({ files })) { await navigator.share({ files, title: "Nate Bloom set" }); return "shared"; } } catch (e) { if (e && e.name === "AbortError") return "cancelled"; } }
+    for (let i = 0; i < files.length; i++) { dlBlob(files[i], files[i].name); if (i < files.length - 1) await new Promise(r => setTimeout(r, 250)); }
+    return "downloaded";
+  }
+  async function bounce() {
+    const T = CAP.last; if (BNC.on || CAP.on) return; if (!T || !T.frames) { A().toast("Nothing to bounce: record the set first"); return; }
+    const songs = songsOf(T); if (!songs.length) { A().toast("No song long enough to bounce"); return; }
+    BNC.on = true; BNC.err = ""; BNC.files = []; BNC.say = "starting…"; paintCap();
+    try {
+      for (let i = 0; i < songs.length; i++) {
+        const s = songs[i], onP = p => { BNC.say = "encoding " + (i + 1) + " of " + songs.length + " · " + Math.round(p * 100) + "% · " + s.name; paintCap(); };
+        onP(0); const pcm = await pcmSlice(T, s.a, s.b); let blob;
+        try { blob = await encodeWorker(pcm, T.rate, onP); } catch (e) { console.warn("bounce: the worker failed, encoding on the page", e); blob = await encodeHere(await pcmSlice(T, s.a, s.b), T.rate, onP); }   // (pcm went to the worker: slice again)
+        BNC.files.push(new File([blob], s.name, { type: "audio/mpeg" }));
+      }
+      const mid = setMidi(T); if (mid) BNC.files.push(new File([mid], "Set.mid", { type: "audio/midi" }));
+      BNC.say = "handing over " + BNC.files.length + " files…"; paintCap();
+      const how = await deliver(BNC.files);
+      BNC.say = (how === "shared" ? "shared " : how === "cancelled" ? "ready (the share was cancelled): " : "downloaded ") + songs.length + (songs.length === 1 ? " song" : " songs") + (mid ? " + Set.mid" : "") + " at 192 kbit/s";
+      A().toast("Bounce: " + BNC.say);
+    } catch (e) { BNC.err = String(e && e.message || e); BNC.say = "failed: " + BNC.err; A().toast("Bounce failed: " + BNC.err); }
+    BNC.on = false; paintCap();
   }
   function capWatch() {   // once a second: the song marker, the drift between the worklet's frames and the wall clock, the worklet's pulse
     if (!CAP.on) return;
@@ -115,20 +207,27 @@
       : CAP.last ? "Last take: " + CAP.last.name + " · " + fmtS(CAP.last.seconds) + " · " + CAP.last.markers + " markers · " + (CAP.last.gaps ? CAP.last.gaps + " gaps" : "no gaps") + (CAP.last.err ? " · " + CAP.last.err : "") : "Nothing recorded yet. Record asks where to save the file; it's written as it goes, so a crash or a closed lid loses nothing before it.");
     const mk = $("cMarks"); if (mk) { const html = CAP.markers.slice(-8).map(m => `<span class="chip">${fmtS(m.frame / CAP.rate)} ${esc(m.name)}</span>`).join(" "); if (mk.__html !== html) { mk.__html = html; mk.innerHTML = html; } }
     const m = $("cMeter"); if (m) { const r = streamRms(); m.style.height = Math.min(100, Math.round(Math.sqrt(r) * 130)) + "%"; }
+    // (166) the Bounce line
+    const bb = $("cBounce"); if (bb) {
+      const T = CAP.last, songs = T && !CAP.on ? songsOf(T) : [];
+      bb.disabled = BNC.on || CAP.on || !songs.length;
+      setT($("cBounceSay"), BNC.on ? "Bounce: " + BNC.say : BNC.say ? "Bounce: " + BNC.say : CAP.on ? "Bounce: after Stop" : songs.length ? "Bounce: " + songs.length + (songs.length === 1 ? " song" : " songs") + " from the markers (" + songs.map(s => s.name.replace(/\.mp3$/, "")).join(", ") + ") + Set.mid" : "Bounce: nothing recorded yet");
+    }
   }
   setInterval(() => { const m = $("cMeter"); if (m && ST.src) { const r = streamRms(); m.style.height = Math.min(100, Math.round(Math.sqrt(r) * 130)) + "%"; } }, 80);
   // ---------- the click in these headphones ----------
   const K = { on: false, vol: 0.6, acc: true, onlyPlay: true, last: null, bus: null, ctx: null };
   try { Object.assign(K, JSON.parse(localStorage.getItem("stage-click") || "{}"), { last: null, bus: null, ctx: null }); } catch (e) {}
   const kSave = () => { try { localStorage.setItem("stage-click", JSON.stringify({ on: K.on, vol: K.vol, acc: K.acc, onlyPlay: K.onlyPlay })); } catch (e) {} };
+  let clickN = 0;   // every click scheduled (the beat while the tablet plays, and the Director's count-in)
   function clickAt(a, when, accent) {
+    clickN++;
     if (!K.bus || K.ctx !== a) { K.bus = a.createGain(); K.bus.connect(a.destination); K.ctx = a; }
     K.bus.gain.value = K.vol * K.vol;
     const o = a.createOscillator(), g = a.createGain(); o.type = "sine"; o.frequency.value = accent ? 1500 : 1000;
     g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(accent ? 1 : 0.7, when + 0.002); g.gain.exponentialRampToValueAtTime(0.001, when + (accent ? 0.05 : 0.03));
     o.connect(g).connect(K.bus); o.start(when); o.stop(when + 0.08);
   }
-  let clickN = 0;
   function clickTick() {
     const a = A(); if (!K.on || !a || !a.up()) return;
     const S = X(), g = S && S.grid; if (!g || !g.src || g.perf0 == null || !(S.L && S.L.offset != null)) return;
@@ -139,7 +238,7 @@
     for (let t = g.perf0 + n * beatMs; t < horizon; t += beatMs, n++) {
       if (K.last != null && t <= K.last) continue; K.last = t;
       const when = a.ctxAt(a.fromTab(t)); if (when < ac.currentTime) continue;
-      clickAt(ac, when, K.acc && n % 4 === 0); clickN++;
+      clickAt(ac, when, K.acc && n % 4 === 0);
     }
   }
   setInterval(clickTick, 100);
@@ -147,11 +246,13 @@
   // ---------- the audience window ----------
   const AUDR = { ch: null, win: null, cap: false, songSig: "", mode: "" };
   const post = (t, d) => { if (AUDR.ch) { try { AUDR.ch.postMessage({ t, d }); } catch (e) {} } };
+  const projQ = () => { try { return X() && X().projQ ? X().projQ() : null; } catch (e) { return null; } };   // (166) the Projector control's render scale (null: Auto)
   function audOpen() {
     if (!AUDR.ch) AUDR.ch = new BroadcastChannel("nb-stage-audience");
-    try { AUDR.win = window.open("audience.html?v=160", "nb-audience", "popup=1,width=1280,height=720"); } catch (e) { AUDR.win = null; }
+    const q = projQ();
+    try { AUDR.win = window.open("audience.html?v=166" + (q != null ? "&q=" + q : ""), "nb-audience", "popup=1,width=1280,height=720"); } catch (e) { AUDR.win = null; }
     if (!AUDR.win) { A().toast("The browser blocked the window: allow pop-ups for this page"); return; }
-    setTimeout(() => { post("mode", { id: AUDR.mode || localStorage.getItem("stage-vis") && JSON.parse(localStorage.getItem("stage-vis")) }); post("cap", { on: AUDR.cap }); audSong(true); }, 800);
+    setTimeout(() => { post("mode", { id: AUDR.mode || localStorage.getItem("stage-vis") && JSON.parse(localStorage.getItem("stage-vis")) }); post("cap", { on: AUDR.cap }); post("quality", { q: projQ() }); audSong(true); try { post("cue", { name: (window.__console && __console.cueNow && __console.cueNow()) || "" }); } catch (e) {} }, 800);
     A().toast("Audience window open: drag it to the other screen and tap it for full screen");
   }
   function audSong(force) { const s = songNow(), sig = s ? s.i + ":" + s.name : ""; if (sig !== AUDR.songSig || force) { AUDR.songSig = sig; post("song", { name: s ? s.name : "" }); } }
@@ -178,6 +279,50 @@
     setT($("hNotes"), notes.length ? notes.join("  ·  ") : "nothing");
   }
   setInterval(healthPaint, 1000);
+  // ---------- (166) the Ready check: one line per thing, green or red, with what to do ----------
+  const RD = { on: false, last: null };
+  async function ready() {
+    if (RD.on) return RD.last; RD.on = true; paintReady();
+    const S = X(), a = A(), d = window.__console && __console.doc, L = (S && S.L) || {}, out = [];
+    let code = ""; try { code = JSON.parse(localStorage.getItem("stage-code") || '""'); } catch (e) {}
+    const up = !!(a && a.up()), rtt = L.rtt;
+    // the link
+    out.push({ k: "Link", ok: up && S.mode === "direct" && rtt != null && rtt < 100,
+      text: !code ? "not paired" : !up ? "not linked" : (S.mode === "direct" ? "direct" : "through the internet") + (rtt != null ? " · " + rtt + " ms round trip" : ""),
+      fix: !code ? "Tap the box at the top left and type the code from the tablet (Live → Gear → Pixelbook)." : !up ? "On the tablet: Live → Gear → Pixelbook → Turn on; both on the same Wi-Fi or hotspot." : S.mode !== "direct" ? "No direct line: put both on the same Wi-Fi or the phone's hotspot (the audio line needs it too)." : rtt == null ? "No round trip measured yet: give it a second." : rtt >= 100 ? "A slow round trip: closer to the router, or use the hotspot instead of the venue's Wi-Fi." : "" });
+    // the audio line
+    let st = null; try { st = up && S.L && S.L.stats ? await S.L.stats() : null; } catch (e) {}
+    const ib = st && st.inbound, receiving = !!(ST.stream && ((ib && ib.packets > 0) || (ST.src && streamRms() > 1e-5)));
+    out.push({ k: "Audio line", ok: ST.want && !!ST.stream && receiving,
+      text: !ST.want ? "off" : !ST.stream ? "asked for, nothing arrives" : receiving ? "open and receiving" + (ib ? " · " + ib.packets + " packets" + (ib.lost ? ", " + ib.lost + " lost" : "") : "") : "open, nothing received yet",
+      fix: !ST.want ? "Capture → switch on “Audio line from the tablet”." : !ST.stream ? "The line needs a direct link (same Wi-Fi); check the Link line above." : !receiving ? "Play a note on the tablet; if nothing arrives, switch the line off and on." : "" });
+    // the battery
+    let b = batt; try { if (!b && navigator.getBattery) b = await navigator.getBattery(); } catch (e) {}
+    out.push({ k: "Battery", ok: !b || b.charging || b.level >= 0.5, text: b ? Math.round(b.level * 100) + "%" + (b.charging ? " · charging" : " · on battery") : "not reported by this browser", fix: b && !b.charging && b.level < 0.5 ? "Plug the charger in before the set." : "" });
+    // the screen lock
+    const held = !!(S && S.wakeHeld && S.wakeHeld());
+    out.push({ k: "Screen", ok: held, text: held ? "stays awake (wake lock held)" : "may go to sleep",
+      fix: held ? "" : !navigator.wakeLock ? "This browser has no wake lock: Settings → Device → Power → never sleep." : !up ? "The lock is taken once the tablet is linked." : "Tap the page once (the lock is asked for every 5 s); if it never holds, Settings → Device → Power → never sleep." });
+    // MIDI on the tablet
+    const r = (d && d.rig) || {}, ins = r.midiIns || [];
+    out.push({ k: "MIDI on the tablet", ok: !!d && ins.length > 0, text: !d ? "no state from the tablet yet" : ins.length ? ins.join(", ") : "no MIDI inputs",
+      fix: !d ? "Wait for the link; the tablet sends its rig once connected." : ins.length ? "" : "Plug the MiniLab (and the K.O. II) into the tablet, then Set up → MIDI → Connect." });
+    // storage for Capture
+    let est = null; try { est = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null; } catch (e) {}
+    const free = est && est.quota != null ? Math.max(0, est.quota - (est.usage || 0)) : null, gb = free == null ? null : free / 1073741824;
+    out.push({ k: "Storage for Capture", ok: gb == null || gb >= 1, text: gb == null ? "not reported" : (gb >= 1 ? gb.toFixed(1) + " GB" : Math.round(gb * 1024) + " MB") + " free (an hour of WAV is 0.7 GB)", fix: gb != null && gb < 1 ? "Free some space (Files: old takes, downloads), or record to a USB drive." : "" });
+    // the tablet's own dropouts
+    const h = (d && d.health) || {}, drops = h.dropouts;
+    out.push({ k: "The tablet's sound", ok: !!d && !drops, text: !d ? "no state from the tablet yet" : drops ? drops + (drops === 1 ? " dropout" : " dropouts") + " in the last minute" : "no dropouts",
+      fix: !d ? "Wait for the link." : drops ? ((h.notes || []).join(" ") || "Set up → Sound check → Steady buffer; fewer layers and effects.") : "" });
+    RD.last = { at: Date.now(), ok: out.every(x => x.ok), lines: out }; RD.on = false; paintReady(); return RD.last;
+  }
+  function paintReady() {
+    const R = RD.last;
+    const html = RD.on && !R ? '<p class="note">Checking…</p>' : !R ? "" : R.lines.map(l => `<div class="rd ${l.ok ? "ok" : "no"}"><i></i><div><b>${esc(l.k)}</b> <span>${esc(l.text)}</span>${l.ok || !l.fix ? "" : `<small>${esc(l.fix)}</small>`}</div></div>`).join("") + `<div class="rd-all ${R.ok ? "ok" : "no"}">${R.ok ? "Ready" : "Not ready: " + R.lines.filter(l => !l.ok).length + (R.lines.filter(l => !l.ok).length === 1 ? " thing" : " things") + " to see to"}</div>`;
+    ["hReady", "dReadyBox"].forEach(id => { const el = $(id); if (!el) return; if (el.__html !== html) { el.__html = html; el.innerHTML = html; } if (id === "dReadyBox") el.hidden = !html; });
+    ["hReadyBtn", "dReady"].forEach(id => { const b = $(id); if (b) { b.disabled = RD.on; setT(b, RD.on ? "Checking…" : R ? (R.ok ? "Ready ✓" : "Ready?") : "Ready?"); b.classList.toggle("ok", !!(R && R.ok)); b.classList.toggle("no", !!(R && !R.ok)); } });
+  }
   // ---------- wiring ----------
   function wire() {
     $("cRec").addEventListener("click", () => { if (CAP.on) capStop(); else capStart(); });
@@ -189,8 +334,13 @@
     $("kOnlyPlay").addEventListener("change", e => { K.onlyPlay = e.target.checked; kSave(); });
     $("visAud").addEventListener("click", audOpen);
     try { new MutationObserver(() => { const on = $("visCapBtn").getAttribute("aria-pressed") === "true"; if (on !== AUDR.cap) { AUDR.cap = on; post("cap", { on }); } }).observe($("visCapBtn"), { attributes: true, attributeFilter: ["aria-pressed"] }); } catch (e) {}
+    $("cBounce").addEventListener("click", bounce);
+    $("hReadyBtn").addEventListener("click", ready); $("dReady").addEventListener("click", ready);
+    $("dReadyBox").addEventListener("click", () => { $("dReadyBox").hidden = true; });
     paintClick(); paintCap(); paintStream();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
-  window.__stage4 = { ST, CAP, K, AUDR, streamIn, streamWant, onAudioData, capStart, capStop, mark, wavHeader, cueChunks, clickTick, get clickN() { return clickN; }, healthPaint, audOpen };
+  // click(when, accent): one click of the headphone metronome at audio time `when` (the Director's count-in uses it)
+  const click = (when, accent) => { const a = A() && A().audio ? A().audio() : null; if (a) clickAt(a, when, accent); };
+  window.__stage4 = { ST, CAP, K, AUDR, BNC, RD, streamIn, streamWant, onAudioData, capStart, capStop, mark, wavHeader, cueChunks, clickTick, click, get clickN() { return clickN; }, healthPaint, audOpen, bounce, songsOf, setMidi, ready };
 })();

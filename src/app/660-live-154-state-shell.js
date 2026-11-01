@@ -3,8 +3,9 @@
     // instrument (rig, transport, stack, mixer, FX, pads, set list, jam, health), each section with a version that
     // bumps when it changes. Anything (the Pixelbook, a report, the new shell) reads it; changes go through intents
     // that the tablet applies or refuses with the current value (the tablet wins every conflict). Stage 0 reads it
-    // from today's objects and applies a handful of intents; the switch (Help → New shell, or ?shell=new) shows an
-    // empty skeleton of the three spaces and the strip, off by default. Reports carry the document.
+    // from today's objects and applies a handful of intents; the switch (Help → New shell, or ?shell=new; the button
+    // went in 161, the URL parameter in 166) showed an empty skeleton of the three spaces and the strip, off by
+    // default. Reports carry the document.
     // ======================================================================
     const NBS = { ver: 0, secs: {}, doc: null, at: 0, subs: new Set(), timer: 0, perms: null, log: [] };
     const nbsTry = (f, d) => { try { const v = f(); return v === undefined ? d : v; } catch (e) { return d; } };
@@ -39,7 +40,7 @@
         mixer: nbsTry(() => mixChannels().map(c => ({ group: c.group, name: c.name, sub: c.sub || "", level: Math.round(c.get() * 1000) / 1000, dflt: c.dflt })), []),
         fx: { on: state.fx.on !== false },
         knobs: S.kp || {}, pads: S.pads || {}, keys: { hold: !!S.hold, held: S.held || [], arp: S.arp || {} },
-        setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm })), []) },
+        setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm, vis: x.vis || "" })), []), vis: nbsTry(() => (SL.cur >= 0 && SL.songs[SL.cur] && SL.songs[SL.cur].vis) || "", "") },
         jam: S.jam || {},
         health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []).concat(nbsDropNote(S, outName)) },
         perms: Object.assign({}, nbsPerms()), ctl: S.ctl !== false,
@@ -88,8 +89,10 @@
     window.NBState = { schema: 1, get: nbsGet, refresh: () => nbsRefresh(true), subscribe: nbsSubscribe, intent: nbsIntent, perms: nbsPerms, get ver() { return NBS.ver; } };
     // ---- the new-shell switch ----
     const SH = { on: false, el: null, space: "play", unsub: null };
-    // (161) the shell is the interface: on unless ?shell=old or nb-shell=old asks for the old one (a hidden way back, for one build)
-    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q !== "old"; return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
+    // (161) the shell is the interface. (166) the ?shell=old URL hatch of 161 is gone; nb-shell=old in storage is the
+    // test suite's hook only (the older tests in the harness set it to drive the parked chrome): no control on the
+    // page writes it any more (shellSet(false) has no caller), and it stays so the parked chrome can be tested.
+    const shWant = () => { try { return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
