@@ -183,7 +183,7 @@
 
     // 3. drawing: skip frames nobody can see or that wouldn't change
     const djView = document.getElementById("djView");
-    const covered = () => !djView.hidden || !document.getElementById("rcView").hidden || document.body.classList.contains("trk-open") || document.body.classList.contains("live-on");
+    const covered = () => !djView.hidden || !document.getElementById("rcView").hidden || document.body.classList.contains("trk-open") || document.body.classList.contains("live-on") || document.body.classList.contains("setup-on");
     let flat = 0;
     { const d0 = draw; draw = function () {
         if (covered()) { requestAnimationFrame(draw); return; }

@@ -54,7 +54,7 @@
     for (let i = 0; i < 4; i++) { const c = document.createElement("div"); c.className = "mls-c mls-fc"; c.dataset.c = "F" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsF").appendChild(c); sF.push(c); }
     for (let i = 0; i < 16; i++) { const c = document.createElement("div"); c.className = "mls-pad" + (i === 8 ? " mls-b" : ""); c.dataset.p = i; c.innerHTML = `<b>${i + 1}</b><span></span>`; $id("mlsP").appendChild(c); sP.push(c); }
     const tablet = () => { try { return matchMedia("(min-width: 760px)").matches; } catch (e) { return innerWidth >= 760; } };
-    const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive()) && !document.body.classList.contains("live-on");
+    const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive()) && !document.body.classList.contains("live-on") && !document.body.classList.contains("setup-on");
     // what a knob or fader does on this screen: what you gave it, or the layout's
     function eff(kind, i, lay) {
       const pg = lay.page, id = kind + i;

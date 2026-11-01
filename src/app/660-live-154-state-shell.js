@@ -12,11 +12,13 @@
       if (!NBS.perms) { NBS.perms = { levels: "always", scenes: "always", sound: "between-songs" }; try { Object.assign(NBS.perms, JSON.parse(localStorage.getItem("nb-perms") || "{}")); } catch (e) {} }
       return NBS.perms;
     }
+    const NBD = { at: 0, d: null };
+    function nbsDiag() { const now = performance.now(); if (now - NBD.at > 2000) { NBD.d = nbsTry(tabletDiag, null); NBD.at = now; } return NBD.d; }   // (the app's diag walks USB, audio and MIDI: at most every 2 s)
     function nbsRead() {   // today's objects, read into the document's shape
-      const S = nbsTry(lkState, null) || {}, d = nbsTry(tabletDiag, null), gear = S.gear || {}, song = S.song || {};
+      const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};
       const outName = nbsTry(() => (ctx && ctx.sinkId) ? String(ctx.sinkId) : (d && d.media && d.media.length ? d.media.join(", ") : "system default"), "system default");
       return {
-        rig: { minilab: !!gear.ml, ko2: !!gear.ko, pixelbook: !!nbsTry(lkUp, false), computerKeys: nbsTry(() => !!__live4.capsOn(), false), sync: gear.sync || "off",
+        rig: { minilab: !!gear.ml, ko2: !!gear.ko, pixelbook: !!nbsTry(lkUp, false), computerKeys: nbsTry(() => !!__live4.capsOn(), false), sync: gear.sync || "off", midiIns: nbsTry(mdIns, []),
           out: outName, devices: nbsTry(() => ADEV.list.slice(0, 12), []), volume: d && d.volume ? { music: d.volume.music, max: d.volume.max } : null,
           buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, android: !!window.NB_NATIVE, app: nbsTry(() => String(NBNativeBridge.version()), ""), purist: d && d.purist ? d.purist : "" },
         transport: { tempo: S.bpm == null ? nbsTry(rcBpm, null) : S.bpm, playing: S.on || {}, target: S.play || "", live: !!S.live, key: { root: scl.key, scale: scl.scale }, octave: state.octave, rec: S.rec == null ? null : S.rec },
