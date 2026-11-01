@@ -250,7 +250,7 @@
         if (on && !was) { if (!chars.children.length) spPaintChars(); else spPaintInfo(); spWarm(); spPaintSyl(); spFitText(); }
         return r;
       }; }
-    window.__sp = { SPS, SPC, SP_CHARS, setVoice: spSetVoice, setText: spSetText, parse: spParse, word: spWord, syls: spSylSegs, phrase: spPhraseSegs, restart: spRestart, say: spSay, dict: () => SPD, voice: spVoice, nodes: SPR };
+    window.__sp = { SPS, SPC, SP_CHARS, setVoice: spSetVoice, setText: spSetText, parse: spParse, word: spWord, syls: spSylSegs, phrase: spPhraseSegs, restart: spRestart, say: spSay, dict: () => SPD, dictLoad: spDictLoad, voice: spVoice, nodes: SPR };
     if (state.engine === "speech") setTimeout(() => { try { renderEngine(); } catch (e) {} }, 0);
   }
   }

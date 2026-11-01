@@ -251,7 +251,13 @@
   function rcStLoad(pc) {
     const src = STK_SRC[pc] || pc;
     if (STK.buf[src]) return STK.buf[src];
-    if (STK.pend[src] || !ctx || !window.NB_STUDIO || !NB_STUDIO[src]) return null;
+    if (STK.pend[src] || !ctx) return null;
+    if (!window.NB_STUDIO) {   // (162: on the site the Studio kit is a file, fetched once; warmed up after the page settles)
+      if (!window.NB_STUDIO_LAZY || !NB_STUDIO_LAZY.includes(src)) return null;
+      STK.pend[src] = nbStudioFetch().then(() => { delete STK.pend[src]; rcStLoad(pc); }, () => { delete STK.pend[src]; });
+      return null;
+    }
+    if (!NB_STUDIO[src]) return null;
     STK.pend[src] = Promise.all(NB_STUDIO[src].map(layer => Promise.all(layer.map(b64 => decode(rcB64(b64)).then(b => { b.__on = rcStOnset(b); return b; })))))
       .then(L => { STK.buf[src] = L; delete STK.pend[src]; }, () => { delete STK.pend[src]; });
     return null;

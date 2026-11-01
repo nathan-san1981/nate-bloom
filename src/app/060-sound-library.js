@@ -152,9 +152,19 @@
     state.cur = { id: "n:" + i, cat: "nb" };
     renderEngine(); save();
   }
+  // (162) on the site the kits' sounds live in snd/kit-<slug>.json, fetched the first time a kit is used (the page carries
+  // only their names); the service worker keeps a fetched kit for offline. The artifact carries the sounds inline.
+  const kitFull = new Map();
+  async function kitData(slug) {
+    const d = window.NB_KITS && window.NB_KITS[slug];
+    if (d && !d.lazy) return d;
+    if (kitFull.has(slug)) return kitFull.get(slug);
+    const pr = fetchText(window.NB_SND + "kit-" + slug + ".json").then(t => JSON.parse(t)); kitFull.set(slug, pr);
+    pr.catch(() => kitFull.delete(slug)); return pr;
+  }
+  window.__nbKitData = kitData;
   async function loadKit(slug) {
-    let d = window.NB_KITS && window.NB_KITS[slug];
-    if (!d) d = JSON.parse(await fetchText("snd/kit-" + slug + ".json"));
+    const d = await kitData(slug);
     for (let k = 0; k < NPADS; k++) {
       const p = d.pads[k];
       Object.assign(state.pads.p[k], Object.fromEntries(PAD_KNOBS.map(([key, , v]) => [key, v])));
@@ -242,8 +252,7 @@
   const PHRASE = [[0, 0], [4, 0.2], [7, 0.4], [12, 0.6]];
   async function kitBuffers(slug) {
     if (kitCache.has(slug)) return kitCache.get(slug);
-    let d = window.NB_KITS && window.NB_KITS[slug];
-    if (!d) d = JSON.parse(await fetchText("snd/kit-" + slug + ".json"));
+    const d = await kitData(slug);
     const bufs = await Promise.all(d.pads.map(p => p ? decode(b64bytes(p.mp3)) : null));
     kitCache.set(slug, bufs);
     return bufs;

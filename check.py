@@ -17,7 +17,7 @@ REFS = [
     ("lite/manifest.webmanifest", os.path.join(SITE_DIR, "lite", "manifest.webmanifest")),
     ("lite/sw.js", os.path.join(SITE_DIR, "lite", "sw.js")),
     ("lite/sim.html", os.path.join(SITE_DIR, "lite", "sim.html")),
-]
+] + [(os.path.join("snd", n), os.path.join(ROOT, "snd", n)) for n in sorted(build.lazy_files())]   # (162: the on-demand data, in the repo's snd/)
 
 
 def first_difference(a, b):

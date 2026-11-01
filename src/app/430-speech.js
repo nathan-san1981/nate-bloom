@@ -1,7 +1,12 @@
   // ---------- Speech ----------
   {
   const SP_ALPHA = "!#$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghi";
+  //@site-only
+  //@include data/sp-dict-lazy.js
+  //@end
+  //@art-only
   //@include data/sp-dict.js
+  //@end
   const SP_WK = `// nb-speech: the speech chips. One processor plays every voice; each voice walks through its targets (formants,
 // voicing, hiss) and renders them the way its machine did: formant filters, LPC lattices, synced oscillators,
 // VOSIM pulse trains, a filter bank.
@@ -306,7 +311,8 @@ registerProcessor("nb-speech", NbSpeech);
     if (SPD.map || SPD.loading) return SPD.loading || Promise.resolve();
     SPD.loading = (async () => {
       try {
-        const bin = Uint8Array.from(atob(SP_DICT_B64), c => c.charCodeAt(0));
+        const b64 = SP_DICT_B64 || await (await fetch(window.NB_SND + "sp-dict.b64")).text();   // (162: on the site the dictionary is a file, fetched the first time speech needs it)
+        const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
         const ds = new DecompressionStream("gzip"), txt = await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();
         SPD.map = spDictParse(txt);
       } catch (e) { SPD.map = new Map(); }   // (no gzip here: the spelling rules do it all)

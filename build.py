@@ -18,7 +18,7 @@ How it works (see src/README.md):
   4. Lite is derived from the site page by src/tools/make_lite.py. The artifact is written without a final line
      break (that is how the published file is).
 Standard library only; text is handled as UTF-8 with line breaks left exactly as they are."""
-import os, re, sys, time, shutil
+import json, os, re, sys, time, shutil
 sys.dont_write_bytecode = True
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -48,7 +48,40 @@ def listed(d):
             if os.path.isfile(os.path.join(d, n)) and not n.startswith(".") and not n.endswith("~")]
 
 
+# (162) the big data blocks leave the site page and load on demand from snd/: the page keeps an index of the kits
+# (names, notes; no sound), a list of the Studio kit's sounds, and an empty dictionary constant. The artifact, one
+# file by nature, keeps everything inline. These virtual includes are made from the real data files at build time.
+def data_json(name):
+    text = read(os.path.join(SRC, "data", name))
+    head, tail = text.index("{"), text.rindex("}")
+    return json.loads(text[head:tail + 1])
+_lazy_cache = {}
+def lazy(rel):
+    if rel in _lazy_cache: return _lazy_cache[rel]
+    if rel == "data/kits-index.js":
+        kits = data_json("kits.js")
+        index = {k: {"name": v.get("name"), "src": v.get("src"), "lazy": True, "pads": [None if p is None else {kk: vv for kk, vv in p.items() if kk != "mp3"} for p in v.get("pads", [])]} for k, v in kits.items()}
+        out = "window.NB_KITS = " + json.dumps(index, separators=(",", ":"), ensure_ascii=False) + ";\n"
+    elif rel == "data/studio-index.js":
+        out = "window.NB_STUDIO_LAZY = " + json.dumps(sorted(data_json("studio.js").keys())) + ";\n"
+    elif rel == "data/sp-dict-lazy.js":
+        out = '  const SP_DICT_B64 = "";\n'
+    else:
+        return None
+    _lazy_cache[rel] = out
+    return out
+def lazy_files():
+    """the files for <outdir>/snd/ (served by the site, cached by its service worker once heard)"""
+    files = {}
+    kits = data_json("kits.js")
+    for k, v in kits.items(): files["kit-" + k + ".json"] = json.dumps(v, separators=(",", ":"), ensure_ascii=False)
+    files["studio-kit.json"] = json.dumps(data_json("studio.js"), separators=(",", ":"))
+    d = read(os.path.join(SRC, "data", "sp-dict.js")); m = re.search(r'const SP_DICT_B64 = "([^"]*)"', d)
+    files["sp-dict.b64"] = m.group(1) if m else ""
+    return files
 def included(rel, depth):
+    v = lazy(rel)
+    if v is not None: return v
     p = os.path.join(SRC, rel)
     if os.path.isdir(p):
         return "".join(expand(read(f), depth + 1, f) for f in listed(p))
@@ -116,6 +149,9 @@ def build(outdir):
         write(os.path.join(outdir, rel), text)
     os.makedirs(os.path.join(outdir, "lite"), exist_ok=True)
     shutil.copyfile(os.path.join(SRC, "lite", "sim.html"), os.path.join(outdir, "lite", "sim.html"))
+    os.makedirs(os.path.join(outdir, "snd"), exist_ok=True)
+    for name, text in lazy_files().items(): write(os.path.join(outdir, "snd", name), text)
+    print(f"{sum(os.path.getsize(os.path.join(outdir, 'snd', n)) for n in lazy_files()):>10,d}  {os.path.join(outdir, 'snd')}/ ({len(lazy_files())} files, loaded on demand)")
     for rel in [r for r, _ in outputs] + [os.path.join("lite", "sim.html")]:
         print(f"{os.path.getsize(os.path.join(outdir, rel)):>10,d}  {os.path.join(outdir, rel)}")
     print(f"built in {time.time() - t0:.1f}s")

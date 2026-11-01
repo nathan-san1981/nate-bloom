@@ -312,7 +312,14 @@
     const c = RC.samp[id]; if (c) return c.buf || null;
     let data = null;
     if (id.startsWith("f8:")) { const s = RC_F808.find(x => "f8:" + x.id === id); if (s) data = s.mp3; }
-    else if ((m = /^k:([\w-]+):(\d+)$/.exec(id)) && window.NB_KITS && NB_KITS[m[1]] && NB_KITS[m[1]].pads[+m[2]]) data = NB_KITS[m[1]].pads[+m[2]].mp3;
+    else if ((m = /^k:([\w-]+):(\d+)$/.exec(id)) && window.NB_KITS && NB_KITS[m[1]] && NB_KITS[m[1]].pads[+m[2]]) {
+      data = NB_KITS[m[1]].pads[+m[2]].mp3;
+      if (!data && window.__nbKitData && ctx) {   // (162: the kit's sounds are a file on the site: fetched, then decoded)
+        const entry = RC.samp[id] = { buf: null }, n = +m[2];
+        __nbKitData(m[1]).then(K => decode(rcB64(K.pads[n].mp3))).then(b => { entry.buf = b; }, () => { delete RC.samp[id]; });
+        return null;
+      }
+    }
     if (!data || !ctx) return null;
     const entry = RC.samp[id] = { buf: null };
     decode(rcB64(data)).then(b => { entry.buf = b; }, () => { delete RC.samp[id]; });

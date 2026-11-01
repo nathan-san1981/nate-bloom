@@ -51,6 +51,7 @@ piece of text and on which line. Standard library only, about a second.
 | --- | ---: | --- |
 | `000-iife-open.js` | 26 | `(() => {` `"use strict";` |
 | `010-engines-state-audio.js` | 18,886 | ENGINES + knob definitions, State (defaults, storage), Audio graph (context, master chain, effects) |
+| `012-lazy-data.js` | 1,365 | 162: where the on-demand data lives (`NB_SND`), the Studio kit's fetch and warm-up |
 | `020-samples-808-voices.js` | 27,086 | Samples (slots, decode, peaks), the 808, Voices (makeVoice, polyphony, MAX_VOICES) |
 | `030-chords-knobs-keyboard.js` | 30,708 | Chords, Knobs (drawing, drag), Keyboard (keys, touch, computer keys) |
 | `040-sequencer-voice-recorder.js` | 21,780 | Sequencer (grid, clock), tab/mode wiring; Voice recorder (hold to record) — site-only |
@@ -134,3 +135,8 @@ piece of text and on which line. Standard library only, about a second.
 | `tools/make_lite.py` | — | the Lite substitutions (`make_lite()`), manifest and service worker text; also a CLI |
 | `tools/sim_head.js` | 9,308 | the simulator head script Lite inlines after `window.NB_LITE = true` |
 | `tools/where.py` | — | find which part holds a piece of text |
+
+
+## The data that isn't in the page (162)
+
+The site page carries an index of the kits (names, notes), a list of the Studio kit's sounds and an empty dictionary constant; the sounds themselves and the speech dictionary are files the build writes into `<outdir>/snd/` (`kit-<slug>.json` for each kit, `studio-kit.json`, `sp-dict.b64`) and the repo keeps in `snd/`. The page fetches each the first time it's needed (the Studio kit warms up on its own after the page settles) and the service worker keeps it for offline. `build.py` makes the index files from `data/kits.js`, `data/studio.js` and `data/sp-dict.js` as virtual includes (`data/kits-index.js`, `data/studio-index.js`, `data/sp-dict-lazy.js`); the artifact, one file by nature, includes the real ones (`@art-only`). The site page went from 7.8 MB to 3.1 MB.
