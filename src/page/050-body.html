@@ -1,0 +1,1265 @@
+</script>
+<!--@site-only-->
+
+<!--@end-->
+<div class="uitoast" id="uiToast" hidden></div>
+<div class="nbtoast" id="nbToast" hidden><span></span><button class="btn">Undo</button></div>
+<div class="app">
+  <header>
+    <h1>Nate <span>Bloom</span></h1>
+    <div class="hright">
+    <button class="btn mixbtn" id="mixBtn" aria-label="Mixer">Mix</button>
+    <select class="rectarget" id="recTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
+    <button class="btn takebtn" id="takeBtn" aria-label="Record what you play">● Rec</button>
+    <button class="btn stopall" id="stopAll" aria-label="Stop everything" title="Stop everything: sequencer, Rhythm Creator, DJ, Jam, Tracks, pads and held notes"><span class="lg">■ Stop all</span><span class="sm">■ All</span></button>
+    <button class="btn his-p" id="hisUndoP" disabled aria-label="Undo the last change">↶</button><button class="btn his-p" id="hisRedoP" disabled aria-label="Redo">↷</button>
+    <button class="btn" id="menuBtn" aria-label="Menu" aria-haspopup="dialog">☰</button>
+    <div class="modes" id="modes" role="group" aria-label="What to play">
+      <button class="btn mode" id="mSynths" data-mode="synths" aria-pressed="true" title="Synths: the engines, the sound library and instruments, played on the keys"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M8.8 19V12.5M15.2 19V12.5"/><rect x="6.6" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/><rect x="13.8" y="5" width="3.6" height="7.5" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="stl">Synths</span></button>
+      <button class="btn mode" id="mSamples" data-mode="samples" aria-pressed="false" title="Samples: the sampler (8 slots) and the 12 pads"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h1.5M6.5 8.5v7M10 5v14M13.5 9v6M17 6.5v11M20.5 11v2"/></svg><span class="stl">Samples</span></button>
+      <button class="btn mode" id="mDrums" data-mode="drums" aria-pressed="false" title="Drums: the 808, 909 and CR-78 drum machine"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="10" rx="8" ry="3"/><path d="M4 10v6.5c0 1.7 3.6 3 8 3s8-1.3 8-3V10"/><path d="M8 4.5l3.5 4.2M16.5 3.5l-3 5.2"/></svg><span class="stl">Drums</span></button>
+      <span class="msep" aria-hidden="true"></span>
+      <button class="btn mode studio" id="djBtn" title="DJ: mix two songs and grab samples"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="13.5" r="7.5"/><circle cx="10" cy="13.5" r="2"/><path d="M20 3v8l-4.5 3.5"/></svg><span class="stl">DJ</span></button>
+      <button class="btn mode studio" id="rcBtn" title="Rhythm Creator: a 16-track drum machine"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="3.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="3" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="3.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="16.75" y="10.5" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="16" width="5" height="5" rx="1.3" fill="currentColor"/><rect x="9.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="16.75" y="16.75" width="4.5" height="4.5" rx="1.1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="stl">Rhythm</span></button>
+      <button class="btn mode studio" id="bpBtn" title="Beats: Beat Pads, 16 pads to play, record and chop samples"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="8.5" height="8.5" rx="2" fill="currentColor"/><rect x="13" y="2.5" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="13" width="8.5" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="13" y="13" width="8.5" height="8.5" rx="2" fill="currentColor"/></svg><span class="stl">Beats</span></button>
+      <button class="btn mode studio" id="gbBtn" title="Garage: a GarageBand-style studio. Choose an instrument, play it, record tracks, arrange, mix and export a song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 3.4l-7.1 7.1" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M12.9 10.1c-1.8-1.2-4.3-.9-5.8.6-.8.9-1.2 2-1 3.1-1.4 0-2.7.6-3.4 1.7-1.1 1.7-.4 3.9 1.4 4.7 1.6.7 3.5.1 4.4-1.4.5-.8.6-1.7.4-2.5 1.2.2 2.4-.2 3.3-1.1 1.6-1.6 1.6-4 .7-5.1z" fill="currentColor"/><path d="M17.7 1.9l4.4 4.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="stl">Garage</span></button>
+    </div>
+    </div>
+  </header>
+
+  <div class="nowbar" id="nowBar" hidden></div>
+  <div class="toolrow" id="toolRow">
+  <div class="betabar" id="betaBar">
+    <button class="btn" id="betaTracksBtn">▤ Tracks</button>
+    <button class="btn" id="songBtn">Song</button>
+    <button class="btn" id="prBtn">Projects</button>
+    <span class="bsep" aria-hidden="true"></span>
+    <button class="btn" id="betaFxBtn">FX Lab</button>
+    <button class="btn" id="wamBtn">Plugins</button>
+    <button class="btn" id="moBtn">Motion</button>
+    <button class="btn" id="msBtn">My sounds</button>
+    <span class="bsep" aria-hidden="true"></span>
+    <button class="btn" id="exBtn">Export</button>
+    <button class="btn" id="midiBtn">MIDI</button>
+    <button class="btn" id="lkBtn" hidden title="Link with the tablet or the computer on the same Wi-Fi">Link</button>
+    <span class="bsep" id="installSep" aria-hidden="true"></span>
+    <button class="btn" id="installBtn">Install</button>
+    <span class="spacer"></span>
+    <button class="btn his-b" id="hisUndo" disabled aria-label="Undo" title="Undo the last change, wherever it was (Ctrl+Z)">↶</button>
+    <button class="btn his-b" id="hisRedo" disabled aria-label="Redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button class="btn" id="hisBtn" title="Every change you can undo">History</button>
+    <button class="btn" id="helpBtn" aria-label="Help, settings and Report">?</button>
+    <button class="btn exitbtn" id="exitBtn" title="Save your work and close">⏻ Exit</button>
+  </div>
+  <div class="seg views" id="views" role="group" aria-label="View">
+    <button id="modeKeys" aria-pressed="true">Keys</button>
+    <button id="modeSeq" aria-pressed="false">Seq</button>
+    <button id="modeNotes" aria-pressed="false">Notes</button>
+  </div>
+  </div>
+  <div class="takebar" id="takeBar" hidden>
+    <div class="tinfo" id="takeInfo">Take ready</div>
+    <button class="btn" id="takeExport">Export WAV</button>
+    <button class="btn" id="takeMp3" title="A small file for Messenger, iMessage or email">Export MP3</button>
+    <button class="btn" id="takeToSlot">Send to sampler</button>
+    <button class="btn" id="takeToTracks" hidden title="Put the take on a new audio track in the Garage">→ Garage</button>
+    <button class="btn" id="takeDiscard">Discard</button>
+  </div>
+
+  <div class="tabs" role="group" aria-label="Sound engine" id="tabs"></div>
+  <div class="stk" id="stk" role="group" aria-label="Sounds playing together">
+    <div class="stk-row" id="stkRow"></div>
+    <div class="stk-help" id="stkHelp"></div>
+    <div class="qk" id="qk"><span class="qk-lab">Quick</span><div class="qk-row" id="qkRow" role="group" aria-label="Quick sounds"></div></div>
+  </div>
+
+  <div class="soundbar" id="soundbar">
+    <button class="btn sbarrow" id="sndPrev" aria-label="Previous sound">‹</button>
+    <button class="sbmain" id="sndOpen" aria-label="Choose a sound">
+      <canvas class="scope" id="scope" aria-hidden="true"></canvas>
+      <span class="sbtext"><span class="sbname" id="sndName">Supersaw</span><span class="sbsub" id="sndSub">Tap to browse sounds</span></span>
+    </button>
+    <button class="btn sbarrow" id="sndNext" aria-label="Next sound">›</button>
+  </div>
+
+  <div class="machbar" id="machBar" hidden><span class="lab">Drums</span></div>
+  <div class="fmbar" id="fmBar" hidden>
+    <select id="fmSel" aria-label="FM patch"></select>
+    <button class="btn" id="fmImport">Import .syx</button>
+    <button class="btn" id="fmClearBank" aria-label="Remove imported DX7 voices">✕</button>
+    <small id="fmInfo"></small>
+    <input type="file" id="fmFile" accept=".syx,.SYX,application/octet-stream" multiple hidden>
+  </div>
+  <div class="panelbar">
+    <div class="seg small" role="group" aria-label="Controls">
+      <button id="pSound" aria-pressed="true">Sound</button>
+      <button id="pFx" aria-pressed="false" aria-label="Effects">FX</button>
+      <button id="pLab" aria-pressed="false" hidden>Lab</button>
+      <button id="pArp" aria-pressed="false">Arp</button>
+      <button id="pJam" aria-pressed="false" title="Loops that record what you play, and a band that follows your chords">Jam</button>
+      <button id="pHide" aria-pressed="false" aria-label="Hide the sliders" title="Hide the sliders (tap a tab to show them again)">▾</button>
+    </div>
+    <span class="hint2" id="panelHint" hidden></span>
+    <label class="meter" id="chordWrap"><span class="mlab">Chord</span>
+      <select id="chord" aria-label="Chord type"></select>
+    </label>
+    <label class="meter" id="meterWrap" hidden><span class="mlab">Time</span>
+      <select id="meter" aria-label="Time signature"></select>
+    </label>
+    <button class="btn" id="beatsBtn" hidden title="Pick a beat for the pattern">Beats…</button>
+  </div>
+
+  <div class="row" id="engineRow">
+    <div class="row-label"><span id="engineLabel">Supersaw</span><span class="rtools"><span id="engineAfter" class="fname">after Surge XT</span><button class="btn demo" data-demo="sound" title="Hear this sound">▶ Demo</button></span></div>
+    <div class="sp-card" id="spCard" hidden>
+      <div class="sp-chars" id="spChars" role="group" aria-label="Voice"></div>
+      <p class="sp-info" id="spInfo"></p>
+      <textarea id="spText" rows="2" spellcheck="false" autocomplete="off" aria-label="Words to sing" placeholder="Type the words: each note sings the next syllable"></textarea>
+      <div class="sp-acts">
+        <div class="seg small" id="spMode" role="group" aria-label="Each note plays"><button data-m="sing" title="Each note sings the next syllable">Syllable</button><button data-m="word" title="Each note says the next word">Word</button><button data-m="line" title="Each note says the next line">Line</button></div>
+        <button class="btn" id="spLoop" title="Start the words again after the last syllable">Loop</button>
+        <button class="btn" id="spRestart" title="Back to the first syllable (the sequencer and the Garage start there too)">↺ Start</button>
+        <button class="btn" id="spSay" aria-pressed="false" title="Hear the words spoken">▶ Say it</button>
+        <select id="spEx" aria-label="Example words"><option value="">Examples…</option></select>
+        <span class="sp-pos" id="spPos"></span>
+      </div>
+      <div class="sp-syls" id="spSyls" aria-label="Syllables: the lit one plays next; tap one to start there"></div>
+      <p class="sp-hint">Each note sings the lit syllable · tap a syllable to start there · a dash on its own holds a vowel · [HH AH0 L OW1] for exact sounds</p>
+    </div>
+    <div class="sbar" id="sbar" hidden>
+      <div class="slots" id="slots" role="group" aria-label="Sample slot"></div>
+      <button class="btn loadbig" id="loadBtn" title="Load a WAV, MP3, M4A or AIFF into the selected slot"><svg class="upi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/></svg><span class="lg">Load WAV / MP3</span><span class="sm">Load</span></button>
+      <button class="btn" id="lineBtn" title="Record from a USB interface, the mic, or anything plugged in">Record input</button>
+      <button class="btn" id="editBtn">Edit</button>
+      <div class="seg small" role="group" aria-label="Sample mode">
+        <button id="mPlay" aria-pressed="true">Play</button>
+        <button id="mGrain" aria-pressed="false">Grain</button>
+        <button id="mSlice" aria-pressed="false">Slice</button>
+      </div>
+      <button class="btn" id="mLoop" aria-pressed="false" title="Held notes keep looping the sample (or the part between Start and Length)">Loop</button>
+<!--@site-only-->
+      <button class="btn rec" id="recBtn">● Hold to record</button>
+<!--@end-->
+    </div>
+    <div class="sfit" id="sfit" hidden>
+      <div class="sfit-row">
+        <span class="lab2">Tempo</span>
+        <span class="ed-val" id="sfBpm" title="This sample's tempo (found automatically)">—</span>
+        <button class="btn" id="sfHalf" title="The tempo is double what it should be">½×</button>
+        <button class="btn" id="sfDbl" title="The tempo is half what it should be">2×</button>
+        <button class="btn" id="sfMatch" title="Stretch the sample to the app's tempo, pitch unchanged">Match 96</button>
+        <span class="ed-grp"><span class="lab2">Fit</span>
+        <button class="btn" data-sfit="1" title="Make the sample exactly 1 bar long at the app's tempo">1 bar</button>
+        <button class="btn" data-sfit="2">2</button>
+        <button class="btn" data-sfit="4">4</button>
+        <button class="btn" data-sfit="8">8</button></span>
+        <button class="btn" id="sfReset" title="Back to the sample's own length and pitch">Reset</button>
+      </div>
+      <div class="sfit-row">
+        <span class="ed-grp ed-sl"><span class="lab2">Length</span>
+        <input type="range" id="sfLen" min="-200" max="200" step="1" value="0" aria-label="Length: slower and longer, or faster and shorter, without changing pitch">
+        <span class="ed-val" id="sfLenV">1.00×</span></span>
+        <span class="ed-grp ed-sl"><span class="lab2">Pitch</span>
+        <input type="range" id="sfPitch" min="-12" max="12" step="1" value="0" aria-label="Pitch in semitones, without changing length">
+        <span class="ed-val" id="sfPitchV">0 st</span></span>
+      </div>
+    </div>
+<!--@site-only-->
+    <div class="pending" id="pending" hidden>
+      <div class="pinfo" id="pendInfo">Take ready</div>
+      <div class="slots" id="pendSlots" role="group" aria-label="Save take to slot"></div>
+      <button class="btn" id="pendPlay">▶ Hear it</button>
+      <button class="btn" id="pendDiscard">Discard</button>
+    </div>
+<!--@end-->
+    <input type="file" id="fileIn" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff" hidden>
+    <div class="sbar" id="padbar" hidden>
+      <button class="btn loadbig" id="padLoad"><svg class="upi" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/></svg>Load to pad</button>
+      <label class="meter">From <select id="padFrom" aria-label="Copy a sample slot to this pad"><option value="">—</option></select></label>
+      <button class="btn" id="padEdit">Edit</button>
+      <button class="btn" id="padClear">Clear</button>
+    </div>
+    <input type="file" id="padFile" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff,.flac" multiple hidden>
+    <div class="sbar" id="instbar" hidden>
+      <label class="meter">Inst <select id="instSel" aria-label="Instrument"></select></label>
+      <button class="btn" id="instLoad">Load…</button>
+      <button class="btn" id="instRemove" hidden>Remove</button>
+      <label class="meter" id="presetWrap" hidden>Preset <select id="presetSel" aria-label="Preset"></select></label>
+    </div>
+    <input type="file" id="instFile" multiple hidden>
+    <div class="sbar" id="drbar" hidden>
+      <div id="drChips" role="group" aria-label="Drum sound to edit"></div>
+      <button class="btn" id="drReset">Reset</button>
+      <button class="btn" id="drBeats">Beats…</button>
+    </div>
+    <div class="sbar" id="libbar" hidden>
+      <button class="btn" id="lyOpen">Layers &amp; zones</button>
+      <span class="hint2" id="lySum">1 sound</span>
+    </div>
+
+    <div class="knobs six" id="engineKnobs"></div>
+    <div class="sbar an-bar" id="anBar" hidden>
+      <span class="an-lab">Analog</span>
+      <button class="btn" id="anOn" aria-pressed="true" title="Analog-style filters with drive, and drift, on the synths (for the next notes you play)">On</button>
+      <button class="btn" id="anMore" aria-expanded="false" aria-label="More analog settings">⋯</button>
+      <select id="anFilt" aria-label="Filter model"><option value="auto">Filter: as designed</option><option value="ladder">Ladder 24 dB</option><option value="svf">State-variable 12 dB</option></select>
+      <label class="an-k" id="anDriveK">Drive <input type="range" id="anDrive" min="0" max="100" aria-label="Analog filter drive"><em id="anDriveV"></em></label>
+      <label class="an-k">Drift <input type="range" id="anDrift" min="0" max="100" aria-label="Tuning drift"><em id="anDriftV"></em></label>
+    </div>
+  </div>
+
+  <div class="row" id="arpRow" hidden>
+    <div class="row-label"><span>Arpeggiator</span><span class="rtools"><span id="arpHint">each sound has its own arp</span><button class="btn demo" data-demo="arp" title="Hold a chord for the arp">▶ Demo</button></span></div>
+    <div class="arp-voices" id="arpVoices" role="group" aria-label="Sound to arpeggiate"></div>
+    <div class="arp-ctl" id="arpCtl">
+      <button class="btn" id="arpOn" aria-pressed="false">Arp off</button>
+      <select id="arpMode" aria-label="Arp pattern"></select>
+      <select id="arpRate" aria-label="Arp speed"></select>
+      <span class="arp-oct"><button class="btn" id="arpOctDn" aria-label="Fewer octaves">−</button><span id="arpOct">1 oct</span><button class="btn" id="arpOctUp" aria-label="More octaves">+</button></span>
+      <label class="arp-gate">Gate <input type="range" id="arpGate" min="10" max="100" value="60"></label>
+    </div>
+  </div>
+
+  <div class="row fx" id="fxRow" hidden>
+    <div class="row-label"><span>Effects</span><span class="rtools"><button class="btn fxmix" id="fxOnBtn" aria-pressed="true" title="Switch every effect off or on">FX: On</button><button class="btn demo" data-demo="fx" title="Hear the effects">▶ Demo</button><button class="btn fxmix" id="fxMix">Mixer…</button></span></div>
+    <div class="knobs" id="fxKnobs"></div>
+    <div class="sbar fx-more" id="fxMore">
+      <label class="fxm">Reverb <select id="fxVerb" aria-label="Reverb type"><option value="classic">Hall (classic)</option><option value="plate">Plate</option><option value="room">Room</option><option value="chamber">Chamber</option><option value="cathedral">Cathedral</option><option value="shimmer">Shimmer (an octave up in the tail)</option></select></label>
+      <label class="fxm">Echo <select id="fxEchoSync" aria-label="Echo time"><option value="free">Free time</option><option value="0.25">1/16</option><option value="0.5">1/8</option><option value="0.75">1/8 dotted</option><option value="1">1/4</option><option value="1.5">1/4 dotted</option><option value="2">1/2</option></select></label>
+      <label class="fxm">Duck on the kick <select id="fxDuck" aria-label="Duck the synths on the kick"><option value="off">Off</option><option value="light">Light</option><option value="medium">Medium</option><option value="pump">Pump</option></select></label>
+    </div>
+    <div class="fxpick" id="fxPick" role="group" aria-label="Sounds that go through the effects"></div>
+    <div class="fxlive" data-where="fx"></div>
+  </div>
+
+  <div class="row jam" id="jamRow" hidden>
+    <div class="row-label"><span>Jam · loops &amp; band</span><span class="rtools"><span class="hint2" id="jamTempo"></span></span></div>
+    <div class="jam-strip">
+      <div class="jam-loopsrow"><div class="jam-loops" id="jamLoops"></div><button class="btn" id="jamLoopsOff" title="Stop every loop (they keep what they recorded)">■</button></div>
+      <div class="jam-band">
+        <button class="btn" id="jamBandOn" aria-pressed="false" title="A bass line and a beat that follow the chord you hold on the keys">Band</button>
+        <span class="jam-lab">style</span><select id="jamStyle" aria-label="Band style"></select>
+        <span class="jam-lab">bass</span><select id="jamBass" aria-label="Bass sound"></select>
+        <span class="jam-lab">chord</span><span class="jam-chord" id="jamChord">C</span>
+        <label class="jam-lab">bass <input type="range" id="jamBassLvl" min="0" max="1" step="0.01" aria-label="Bass level"></label>
+        <label class="jam-lab">drums <input type="range" id="jamDrumLvl" min="0" max="1" step="0.01" aria-label="Drums level"></label>
+      </div>
+    </div>
+  </div>
+  <div class="row fx lab" id="labRow" hidden>
+    <div class="row-label"><span>FX Lab<em>beta</em><em class="labhint" id="labOff" hidden style="color:var(--amber)!important">· FX off</em><em class="labhint" id="labCount"></em></span><span class="rtools"><button class="btn demo" data-demo="fx" title="Hear the effects">▶ Demo</button><button class="btn fxmix" id="labMotion">Motion…</button><button class="btn fxmix" id="labFull">⤢ Full</button></span></div>
+    <div class="fxlive" data-where="lab"></div>
+    <div class="labnav" id="labNav" role="tablist" aria-label="FX Lab sections"></div>
+    <div class="labwrap"><button class="btn labarr l" id="labPrev" aria-label="Earlier effects" hidden>‹</button><div class="labstrip" id="labStrip"></div><button class="btn labarr r" id="labNext" aria-label="More effects">›</button></div>
+  </div>
+
+  <div class="transport">
+    <div class="tgroup" id="octGroup">
+      <button class="btn" id="octDown" aria-label="Octave down (↓ key)" data-key="↓">−</button>
+      <div class="oct" id="octLabel">C3</div>
+      <button class="btn" id="octUp" aria-label="Octave up (↑ key)" data-key="↑">+</button>
+    </div>
+    <button class="btn" id="gridBtn" aria-pressed="false" aria-label="Lighted note pads" title="Lighted note pads">▦</button>
+    <button class="btn" id="perfBtn" aria-pressed="false" aria-label="Play view" title="Play view: just the keys">⤢</button>
+    <div class="tgroup" id="bpmGroup" hidden>
+      <button class="btn" id="bpmDown" aria-label="Slower">−</button>
+      <div class="oct" id="bpmLabel">96 bpm</div>
+      <button class="btn" id="bpmUp" aria-label="Faster">+</button>
+      <button class="btn" id="clickBtn" aria-pressed="false" aria-label="Click track" title="Click track">♩</button>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="play" aria-pressed="false" title="Play the beat (the pattern in Seq)" data-key="Space">▶ Play</button>
+    <button class="btn" id="hold" aria-pressed="false" title="Hold: notes keep sounding after you let go; tap again to release" data-key="⇧↵">Hold</button>
+    <button class="btn" id="clear" hidden>Clear</button>
+    <button class="btn" id="seqUndo" hidden disabled aria-label="Undo" title="Undo the last change to the pattern">↶</button><button class="btn" id="seqRedo" hidden disabled aria-label="Redo" title="Redo">↷</button>
+    <button class="btn" id="keepBtn" title="Keep the last 90 seconds of what you just played, after the fact">Keep</button>
+    <button class="btn" id="panic" data-key="Esc" title="Stop the beat and what you're playing here. Other parts keep going; the red ■ at the top stops everything">Stop</button>
+  </div>
+
+  <div class="notesarea" id="notesArea" hidden>
+    <div class="sc-tools">
+      <div class="grp" id="scDurs" role="group" aria-label="Note length">
+        <button class="btn" data-d="1" aria-label="Sixteenth note"></button>
+        <button class="btn" data-d="2" aria-label="Eighth note"></button>
+        <button class="btn" data-d="4" aria-label="Quarter note"></button>
+        <button class="btn" data-d="8" aria-label="Half note"></button>
+        <button class="btn" data-d="16" aria-label="Whole note"></button>
+      </div>
+      <button class="btn" id="scDot" aria-label="Dotted" aria-pressed="false">•</button>
+      <div class="grp" id="scAccs" role="group" aria-label="Accidental for the next note">
+        <button class="btn acc" data-a="-1" aria-label="Flat">♭</button>
+        <button class="btn acc" data-a="0" aria-label="Natural">♮</button>
+        <button class="btn acc" data-a="1" aria-label="Sharp">♯</button>
+      </div>
+      <button class="btn" id="scRest">Rest</button>
+    </div>
+    <div class="sc-tools">
+      <div class="grp" id="scView" role="group" aria-label="View"><button class="btn" data-v="staff" aria-pressed="true">Staff</button><button class="btn" data-v="roll" aria-pressed="false">Roll</button></div>
+      <select id="scKey" aria-label="Key signature"></select>
+      <button class="btn" id="scBarsDn" aria-label="Fewer bars">−</button><span class="bars" id="scBars">4 bars</span><button class="btn" id="scBarsUp" aria-label="More bars">+</button>
+      <button class="btn" id="mlOpenNotes" aria-label="Choose a melody">♪</button>
+      <button class="btn" id="scWrite" aria-pressed="false" aria-label="Write notes from the keys">✎ Keys</button>
+      <button class="btn" id="scUndo" aria-label="Undo">↶</button><button class="btn" id="scRedo" disabled aria-label="Redo">↷</button>
+      <button class="btn" id="scClear">Clear</button>
+      <span class="sc-info" id="scInfo"></span>
+    </div>
+    <div class="sc-staff">
+      <svg id="scHead" aria-hidden="true"></svg>
+      <div class="sc-scroll" id="scScroll"><svg id="scSvg" aria-label="Staff: drag to place a note, tap a note to erase"></svg></div>
+    </div>
+    <div class="pr-scroll" id="prScroll" hidden>
+      <div class="pr-top"><div class="pr-corner"></div><svg id="prRuler" aria-label="Bars: tap to move the cursor"></svg></div>
+      <div class="pr-mid"><svg id="prKeys" aria-label="Keys: tap to hear a pitch"></svg><svg id="prSvg" aria-label="Piano roll: tap to add a note, drag a note to move it, drag its right end to change its length, tap a note to erase"></svg></div>
+      <div class="pr-bot"><div class="pr-vlab">Vel</div><svg id="prVel" aria-label="Velocity: drag a note's bar up or down"></svg></div>
+    </div>
+  </div>
+  <button class="jumpbtn" id="jumpPlay" hidden>▼ Pads</button>
+  <div class="gridbar" id="gridBar" hidden>
+    <span class="lab">Pads in</span>
+    <select id="gridRoot" aria-label="Pad root note"></select>
+    <select id="gridScale" aria-label="Pad scale"></select>
+    <span class="hint">rows rise a fourth · purple = root</span>
+  </div>
+  <div class="blendrow" id="blendRow">
+    <button class="btn" id="blendBtn" aria-pressed="false" title="Soften and overlap the notes you play">Blend: Off</button>
+    <input type="range" id="blendAmt" min="0" max="100" value="45" aria-label="Blend amount">
+    <span id="blendVal">45%</span>
+    <button class="btn" id="scaleBtn" aria-pressed="false" title="Lock the keys to a scale">Scale: Off</button>
+  </div>
+  <div class="carrybar" id="carryBar" hidden role="status"><b class="cb-h">Still playing</b><span class="cb-items" id="carryItems"></span><button class="btn cb-all" id="carryStop">Stop these</button></div>
+  <div class="heldbar" id="heldBar" hidden>
+    <span id="heldInfo">Held</span>
+    <button class="btn heldfx" id="heldFx" aria-pressed="true" title="Send the held notes through the effects and FX Lab">FX</button>
+    <button class="btn" id="heldPP">⏸ Pause</button>
+    <button class="btn" id="heldRelease">Release</button>
+  </div>
+  <div class="playrow" id="playrow">
+    <div class="wheels" id="wheels">
+      <div class="wheel" id="bendWheel" role="slider" tabindex="0" aria-label="Pitch bend" aria-valuemin="-100" aria-valuemax="100">
+        <div class="wtrack"><div class="wcenter"></div><div class="wthumb"></div></div>
+        <button class="wlab" id="bendRange" aria-label="Bend range in semitones">±2</button>
+      </div>
+      <div class="wheel" id="modWheel" role="slider" tabindex="0" aria-label="Vibrato" aria-valuemin="0" aria-valuemax="100">
+        <div class="wtrack"><div class="wthumb"></div></div>
+        <span class="wlab">Vib</span>
+      </div>
+    </div>
+    <div class="keys" id="keys" aria-label="Keyboard"></div>
+  </div>
+  <div class="alsobar" id="alsoBar" hidden>
+    <button class="btn" id="alsoMelody" aria-label="Choose a melody">♪ Melody</button>
+    <span class="lab" id="alsoLab">Also<br>playing</span>
+    <div class="alsochips" id="alsoChips"></div>
+    <button class="btn" id="alsoOnly">Drums only</button>
+  </div>
+  <div class="drummerbar" id="drummerBar" hidden>
+    <span class="lab">Drummer</span>
+    <div class="seg small" role="group" aria-label="Drummer"><button data-dr="off" aria-pressed="true">Off</button><button data-dr="gentle" aria-pressed="false">Gentle</button><button data-dr="lively" aria-pressed="false">Lively</button></div>
+    <small id="drummerNow"></small>
+  </div>
+  <div class="stepbar" id="stepBar" hidden>
+    <div class="seg small" role="group" aria-label="What tapping a step does"><button data-sm="notes" aria-pressed="true">Steps</button><button data-sm="chance" aria-pressed="false">Chance</button><button data-sm="rolls" aria-pressed="false">Rolls</button></div>
+    <small id="stepHint"></small>
+    <button class="btn" id="stepReset">Reset</button>
+  </div>
+  <div class="seqarea" id="seqArea" hidden>
+    <div class="seqwrap" id="seqWrap"><div class="seq" id="seq" aria-label="Step sequencer"></div></div>
+    <div class="sbtrack" id="sbTrack" aria-hidden="true"><div class="sbthumb" id="sbThumb"></div></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="fxLab" hidden>
+  <div class="ed-card" role="dialog" aria-label="FX Lab">
+    <div class="ed-head"><strong>FX Lab</strong></div>
+    <span class="ed-info" style="text-align:left">New effects on the master output, after the regular FX. Off means fully bypassed.</span>
+    <div class="mx-list" id="fxLabList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big demo" data-demo="fx">▶ Demo</button>
+      <button class="btn big" id="fxLabReset">Reset</button>
+      <button class="btn big primary" id="fxLabDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="dj" id="djView" hidden role="dialog" aria-label="DJ">
+  <div class="dj-top">
+    <strong>DJ</strong>
+    <span class="dj-msg" id="djMsg">Load a song on each deck, then press Auto sync</span>
+    <button class="btn" id="djKeep" title="Keep the last 90 seconds you heard, after the fact">Keep the last 90 s</button>
+    <button class="btn" id="djKeyLock" aria-pressed="true" title="Speed changes keep the song's pitch">Key lock</button>
+    <select class="rectarget" id="djRecTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
+    <button class="btn takebtn" id="djRec" aria-label="Record the mix" title="Record everything you hear">● Rec</button>
+    <button class="btn" id="djRhythm" aria-pressed="false" title="Play the Rhythm Creator locked to the song's tempo and beat">🥁 Rhythm</button>
+    <button class="btn" id="djStop" title="Stop the DJ: both decks, the pads, the play-along beat and a mix in progress">■ Stop</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
+    <button class="btn" id="djHelpBtn" aria-label="How the DJ tab works">?</button>
+    <button class="btn primary" id="djDone">Done</button>
+  </div>
+  <div class="nowbar" id="djNow" hidden></div>
+  <div class="dj-main">
+    <section class="dj-deck" data-d="0"></section>
+    <section class="dj-mid">
+      <canvas class="dj-align" id="djAlign" aria-label="Beat alignment: when the lines of both songs stack up, they're in time"></canvas>
+      <div class="dj-cap">Beat lines of both songs · stacked = in time</div>
+      <div class="seg small dj-leadseg" role="group" aria-label="Which song sets the tempo">
+        <button data-lead="0" aria-pressed="true">A leads</button><button data-lead="1" aria-pressed="false">B leads</button>
+      </div>
+      <div class="dj-dialrow">
+        <button class="btn dj-nudge" id="djNudgeL" title="Hold to slow the other song a little and pull it back">◀◀<small>slow</small></button>
+        <canvas class="dj-dial" id="djDial" aria-label="Sync dial: turn to change the other song's tempo"></canvas>
+        <button class="btn dj-nudge" id="djNudgeR" title="Hold to speed the other song up a little and push it forward">▶▶<small>push</small></button>
+      </div>
+      <div class="dj-syncinfo" id="djSyncInfo">—</div>
+      <div class="dj-autorow">
+        <button class="btn" id="djJumpL" title="Move the other song back exactly one beat">−1 beat</button>
+        <button class="btn primary dj-auto" id="djAuto" aria-pressed="false">AUTO SYNC</button>
+        <button class="btn" id="djJumpR" title="Move the other song forward exactly one beat">+1 beat</button>
+      </div>
+      <div class="dj-bothrow">
+        <button class="btn primary" id="djBothPlay" title="Start both decks at the same moment (the other comes in on the lead's beat) · stops both when both are playing">▶ Both</button>
+        <button class="btn" id="djBothTop" title="Both decks back to their first beat and start together">⏮ Both</button>
+        <button class="btn" id="djLink" aria-pressed="true" title="Link: start a deck within 1.5 s of the other and it joins it, as if you'd pressed both at once">Link</button>
+        <button class="btn" id="djQuant" aria-pressed="true" title="Q: hot cue jumps wait for the next beat so the rhythm carries on">Q</button>
+      </div>
+      <div class="dj-smartrow">
+        <button class="btn" id="djSmart" title="Smart mix: reads both songs and plans where and how to mix into the next one">✦ Smart mix</button>
+        <button class="btn" id="djToTracks" title="Put both songs in the Garage, matched in tempo and key and lined up on the beat, to build a mashup">→ Garage</button>
+      </div>
+      <label class="dj-xf"><b>A</b><input type="range" id="djXf" min="0" max="1" step="0.01" value="0.5" aria-label="Crossfader"><b>B</b></label>
+      <div class="dj-cap">Crossfader · double-tap to centre</div>
+    </section>
+    <section class="dj-deck" data-d="1"></section>
+  </div>
+  <section class="dj-crate">
+    <div class="dj-bh">
+      <b>Songs</b><span class="dj-lab">up to 4 · tap one for options</span>
+      <button class="btn" id="djAddSong">+ Add song</button>
+      <span class="dj-lab" style="margin-left:auto" id="djCrateHint"></span>
+    </div>
+    <div class="dj-songs" id="djSongs"></div>
+    <div class="dj-autobar">
+      <span class="dj-lab">Next song on</span>
+      <div class="seg small" id="djNextDeck" role="group" aria-label="Deck the next song goes on">
+        <button data-nd="auto" aria-pressed="true" title="Whichever deck isn't playing">Auto</button>
+        <button data-nd="0" aria-pressed="false" title="The next song always comes in on deck A">Deck A</button>
+        <button data-nd="1" aria-pressed="false" title="The next song always comes in on deck B">Deck B</button>
+      </div>
+      <span class="dj-lab" id="djNextHint"></span>
+    </div>
+    <div class="dj-autobar">
+      <button class="btn" id="djAutoOn" aria-pressed="false" title="Mixes the next song in by itself when the playing one is nearly over">Auto DJ</button>
+      <span class="dj-lab">Style</span>
+      <div class="seg small" id="djStyle" role="group" aria-label="Mix style">
+        <button data-style="auto" aria-pressed="true" title="Picks a style from the two songs' tempo, key and energy">Auto</button>
+        <button data-style="blend" aria-pressed="false" title="16 bars, bass swaps halfway">Blend</button>
+        <button data-style="swap" aria-pressed="false" title="8 bars, drop the bass over">Bass swap</button>
+        <button data-style="cut" aria-pressed="false" title="Cut on the next bar">Cut</button>
+        <button data-style="filter" aria-pressed="false" title="8 bars, the old song filters away">Filter</button>
+        <button data-style="echo" aria-pressed="false" title="8 bars, the old song echoes out">Echo out</button>
+      </div>
+    </div>
+    <div class="dj-autobar">
+      <span class="dj-lab">Mix tempo</span>
+      <button class="btn sm" id="djBpmDown" aria-label="Slower">−</button><b class="dj-bpmval" id="djBpmVal">—</b><button class="btn sm" id="djBpmUp" aria-label="Faster">+</button>
+      <button class="btn" id="djBpmRec" title="Use the tempo that suits both songs">Recommended: —</button>
+      <button class="btn" id="djBpmOff" title="Back to the lead song's own tempo">Lead's own</button>
+    </div>
+    <div class="dj-autobar">
+      <span class="dj-lab">Beat</span>
+      <button class="btn sm" id="djBeatPrev" aria-label="Previous beat">‹</button><span class="dj-beatname" id="djBeatName">—</span><button class="btn sm" id="djBeatNext" aria-label="Next beat">›</button>
+      <button class="btn" id="djBeatPlay" aria-pressed="false" title="Plays the drum machine in time with the decks">▶ Play along</button>
+      <label class="dj-pv"><span>Beat vol</span><input type="range" id="djBeatVol" min="0" max="1" step="0.01" value="0.7" aria-label="Beat volume"></label>
+    </div>
+    <div class="dj-mixrow">
+      <button class="btn primary dj-mixin" id="djMixIn">MIX IN NEXT ▶</button>
+      <div class="dj-plan" id="djPlan">Add songs, play one, pick what's next</div>
+    </div>
+  </section>
+  <section class="dj-bank">
+    <div class="dj-bh">
+      <b>Sample bank</b>
+      <span class="dj-lab">Grab from</span>
+      <div class="seg small" role="group" aria-label="Grab from" id="djSrc"><button data-src="0">A</button><button data-src="1">B</button><button data-src="2">Mix</button></div>
+      <span class="dj-lab">Length</span>
+      <div class="seg small" role="group" aria-label="Grab length in beats" id="djLen"><button data-n="1">1</button><button data-n="2">2</button><button data-n="4">4</button><button data-n="8">8</button><button data-n="16">16</button></div>
+      <span class="dj-lab">beats</span>
+      <button class="btn" id="djQ" aria-pressed="true" title="Pads start on the next beat and play at the song's tempo">In time</button>
+      <button class="btn" id="djLoopPads" aria-pressed="false" title="Pads keep looping until you tap them again">Loop pads</button>
+      <label class="dj-pv"><span>Pads</span><input type="range" id="djPadVol" min="0" max="1" step="0.01" value="0.85" aria-label="Pad volume"></label>
+    </div>
+    <div class="dj-pads" id="djPads"></div>
+    <div class="dj-cap">Empty pad: tap to grab the next beats · Full pad: tap to play · Hold a pad for → Sampler, → Pads, → Deck, Save WAV, Clear</div>
+  </section>
+  <input type="file" id="djFile" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.aac,.ogg,.flac" hidden>
+  <input type="file" id="djFile2" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.aac,.ogg,.flac" hidden>
+</div>
+
+<div class="editor sheet" id="djMenu" hidden>
+  <div class="ed-card" role="dialog" aria-label="DJ menu">
+    <div class="ed-head"><strong id="djmTitle">Pad</strong><span class="ed-info" id="djmInfo"></span></div>
+    <div class="dj-mlist" id="djmList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="djmCancel">Close</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="djHelp" hidden>
+  <div class="ed-card" role="dialog" aria-label="How the DJ tab works">
+    <div class="ed-head"><strong>DJ · how it works</strong></div>
+    <div class="dj-helptext">
+      <p><b>Load</b> a song on each deck (a file, or anything already in a sampler slot or the bank). The tempo (BPM) and the beat grid are found automatically. If the BPM looks doubled or halved, use <b>½×</b> / <b>2×</b>; if it's wrong, tap <b>Tap</b> along with 4+ beats.</p>
+      <p><b>AUTO SYNC</b> matches the other song's tempo to the lead song and lines up the beats, starting it if it's stopped. While it's lit, the songs stay locked: change the lead's tempo and the other follows.</p>
+      <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
+      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it). To clear one, hold it, or tap <b>✕</b> at the end of the row and then the cue; hold <b>✕</b> to clear all four. Hot cues only ever move their own deck: with sync on, the jump lands on the other song's beat and the other song carries on untouched. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
+      <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
+      <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
+      <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
+      <p><b>✦ Smart mix</b> reads both songs (the coloured strip under each waveform shows their sections: intro, build-up, drop, breakdown, groove, outro) and plans the mix into the song on the other deck, or the next one from Songs: where to leave the playing song (usually its outro or a breakdown), where the next one comes in (its first downbeat or Phrase mark, so its first drop lands as the mix ends), the tempo they meet at, the style and its length, and a key shift when that makes the keys fit. The plan says why; pick another spot, style or key there, then <b>Start the mix</b>. The next song comes in exactly when the playing one gets there: MIX IN counts down (tap it to go now) and ✦ cancels. While it gets ready (loading the next song, reading both), the progress bar at the top shows each step and about how long is left; ✕ there cancels. It can't hear vocals, so two vocals over each other are still up to your ears.</p>
+      <p><b>Key</b> on each deck moves the song up or down in semitones without changing its speed (it uses key lock); tap the number to put it back. Next to it are the song's key and Camelot code, and where a shift takes it.</p>
+      <p><b>→ Tracks</b> puts both songs on Tracks at one tempo (a whole BPM; the app's tempo is set to match so the grid lines up), with key lock and any key shift, lined up on the beat: as you hear them if both decks are playing, otherwise with their first downbeats on the same bar. If the keys clash and neither deck is shifted, the second song is moved to fit. Then split, copy and move sections to build a mashup.</p>
+      <p>The decks keep playing when you press Done, so you can play the keys over the mix. <b>■ Stop</b> here stops the DJ (decks, pads, the play-along beat, a mix in progress); the red <b>■ All</b>, or <b>■ Stop all</b> on the main screen, stops everything. The main screen's own Stop leaves the DJ playing.</p>
+    </div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="djHelpDone">Got it</button></div>
+  </div>
+</div>
+
+
+<div class="trk" id="tracks" hidden role="dialog" aria-label="Tracks">
+  <div class="trk-top">
+    <strong>Tracks</strong>
+    <span class="spacer"></span>
+    <button class="btn round" id="trkHome" aria-label="Back to start">⏮</button>
+    <button class="btn round" id="trkPlay" aria-pressed="false" aria-label="Play or stop">▶</button>
+    <button class="btn round" id="trkRec" aria-label="Record">●</button>
+    <span class="time" id="trkTime">0:00.00</span>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
+  </div>
+  <div class="trk-tools">
+    <button class="btn" id="trkAdd">+ Track</button>
+    <button class="btn" id="trkImport">Import</button>
+    <button class="btn" id="trkSplit">Split</button>
+    <button class="btn" id="trkDup">Copy</button>
+    <button class="btn" id="trkDel">Delete</button>
+    <button class="btn" id="trkAutoAdd" title="Automate a plugin's control along the timeline">+ Automation</button>
+    <button class="btn" id="trkUndo">↶ Undo</button><button class="btn" id="trkRedo" disabled aria-label="Redo">↷</button>
+    <button class="btn" id="trkSnap">Snap: Beat</button>
+    <button class="btn" id="trkZoomOut" aria-label="Zoom out">−</button>
+    <button class="btn" id="trkZoomIn" aria-label="Zoom in">+</button>
+    <button class="btn" id="trkWithBeat" aria-pressed="false">+ Beat</button>
+    <button class="btn" id="trkBounce">Bounce</button>
+    <button class="btn" id="trkExport">Export WAV</button>
+  </div>
+  <div class="trk-sel" id="trkSelBar" hidden>
+    <span id="trkSelName"></span>
+    <span>Gain</span><input type="range" id="trkGain" min="-30" max="12" step="0.5" aria-label="Clip gain"><span id="trkGainVal">0 dB</span>
+    <button class="btn" id="trkNorm">Normalize</button>
+  </div>
+  <div class="trk-scroll" id="trkScroll"><div class="trk-inner" id="trkInner"></div></div>
+  <div class="trk-top">
+    <div class="trk-foot" id="trkStatus"></div>
+    <button class="btn" id="trkMin">Play along</button>
+    <button class="btn primary" id="trkDone">Done</button>
+  </div>
+  <input type="file" id="trkFile" accept="audio/*,.wav,.mp3,.m4a,.aif,.aiff,.flac,.ogg" multiple hidden>
+</div>
+<div class="trkmini gbmini" id="gbMini" hidden role="group" aria-label="The Garage song">
+  <button class="btn" id="gbMiniPlay" aria-label="Play the song">▶</button>
+  <button class="btn" id="gbMiniRec" aria-label="Record" hidden>●</button>
+  <span class="time" id="gbMiniPos">1 . 1</span>
+  <button class="btn" id="gbMiniOpen">Garage</button>
+  <button class="btn" id="gbMiniX" aria-label="Stop and close">✕</button>
+</div>
+<div class="trkmini" id="trkMini" hidden>
+  <button class="btn" id="trkMiniPlay" aria-label="Play or stop tracks">▶</button>
+  <button class="btn" id="trkMiniRec" aria-label="Record">●</button>
+  <span class="time" id="trkMiniTime">0:00.00</span>
+  <button class="btn" id="trkMiniOpen">▤ Tracks</button>
+</div>
+
+<div class="dj rc" id="rcView" hidden role="dialog" aria-label="Rhythm Creator">
+  <div class="dj-top rc-top">
+    <strong>Rhythm Creator</strong>
+    <button class="btn primary" id="rcPlay" aria-pressed="false">▶ Play</button>
+    <button class="btn" id="rcFill" title="A drum fill into the next bar, with a crash on the one">Fill</button>
+    <div class="rc-tempo"><button class="btn" id="rcBpmDown" aria-label="Slower">−</button><span id="rcBpm">96 bpm</span><button class="btn" id="rcBpmUp" aria-label="Faster">+</button><button class="btn" id="rcDj" aria-pressed="true" title="Auto BPM: while a DJ deck plays, follow its tempo and lock to its beat">DJ</button></div>
+    <button class="btn takebtn" id="rcRec" title="Record everything you hear">● Rec</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
+    <button class="btn" id="rcHelpBtn" aria-label="How the Rhythm Creator works">?</button>
+    <button class="btn primary" id="rcDone">Done</button>
+  </div>
+  <div class="nowbar" id="rcNow" hidden></div>
+  <div class="rc-sync" id="rcSync" hidden><span class="rc-syncdot"></span><span id="rcSyncTxt"></span><button class="btn" id="rcSyncBtn"></button></div>
+  <div class="rc-pop" id="rcPop" hidden role="dialog" aria-label="Step options">
+    <div class="rc-pop-h"><b id="rcPopT">Step</b><button class="btn" id="rcPopPlay" aria-label="Hear it">▶</button><button class="btn primary" id="rcPopX">Done</button></div>
+    <div class="rc-pop-r"><span>Hit</span><button class="btn" data-k="on">On</button><button class="btn" data-k="acc">Accent</button><button class="btn" data-k="flam">Flam</button></div>
+    <div class="rc-pop-r"><span>Roll</span><button class="btn" data-roll="0">1</button><button class="btn" data-roll="2">2</button><button class="btn" data-roll="3">3</button><button class="btn" data-roll="4">4</button></div>
+    <div class="rc-pop-r"><span>Chance</span><button class="btn" data-prob="0">100%</button><button class="btn" data-prob="1">75%</button><button class="btn" data-prob="2">50%</button><button class="btn" data-prob="3">25%</button><button class="btn" data-prob="4">1:2</button><button class="btn" data-prob="5">2:2</button><button class="btn" data-prob="6">1:4</button><button class="btn" data-prob="7">4:4</button></div>
+    <div class="rc-pop-r"><span>Nudge</span><button class="btn" data-nudge="3">−½</button><button class="btn" data-nudge="4">−¼</button><button class="btn" data-nudge="0">0</button><button class="btn" data-nudge="1">+¼</button><button class="btn" data-nudge="2">+½</button></div>
+  </div>
+  <div class="rc-bar">
+    <div class="seg small" id="rcModes" role="group" aria-label="What a tap on a step does">
+      <button data-m="hits" aria-pressed="true">Hits</button><button data-m="acc" aria-pressed="false">Accent</button><button data-m="flam" aria-pressed="false">Flam</button><button data-m="roll" aria-pressed="false">Roll</button><button data-m="prob" aria-pressed="false">Chance</button><button data-m="nudge" aria-pressed="false">Nudge</button>
+    </div>
+    <div class="seg small" id="rcPages" role="group" aria-label="Page"></div><button class="btn" id="rcZoom" aria-pressed="false" title="Show 8 steps at a time, with bigger cells">8 steps</button>
+    <label class="rc-mini rc-sigl">Time <select id="rcSig" aria-label="Time signature"><option>4/4</option><option>3/4</option><option>6/8</option><option>5/4</option><option>7/8</option><option>12/8</option></select></label>
+    <label class="rc-mini">Steps <select id="rcLen"><option value="16">16</option><option value="32">32</option><option value="48">48</option><option value="64">64</option></select></label>
+    <label class="rc-mini">Swing <input type="range" id="rcSwing" min="0" max="75" value="0"><em id="rcSwingV">0%</em></label>
+  </div>
+  <div class="rc-grid" id="rcGrid"></div>
+  <div class="rc-tools">
+    <div class="rc-tool rc-kitrow"><span class="lab2">Kit</span><select id="rcKitSel" aria-label="Swap every track to a kit"></select>
+      <label class="rc-mini" title="How human it plays: small timing and loudness differences, hats that breathe, ghost notes">Feel <input type="range" id="rcFeel" min="0" max="100" value="35"><em id="rcFeelV">35</em></label>
+      <label class="rc-mini" title="How much of the studio room you hear">Room <input type="range" id="rcRoom" min="0" max="100" value="35"><em id="rcRoomV">35</em></label></div>
+    <div class="rc-tool"><span class="lab2">Make a beat</span><select id="rcStyle" aria-label="Style"></select>
+      <label class="rc-mini">Busy <input type="range" id="rcBusy" min="0" max="100" value="50"></label>
+      <label class="rc-mini">Complex <input type="range" id="rcCplx" min="0" max="100" value="40"></label>
+      <button class="btn primary" id="rcMake">Make</button><button class="btn" id="rcVary">Vary</button><button class="btn" id="rcClear">Clear all</button><button class="btn" id="rcUndo" disabled title="Undo the last change">↶ Undo</button><button class="btn" id="rcRedo" disabled aria-label="Redo" title="Redo">↷</button></div>
+    <div class="rc-tool"><span class="lab2">Morph</span><button class="btn" id="rcMorphA" title="Save the kit as it sounds now as A">Save A</button>
+      <input type="range" id="rcMorph" min="0" max="100" value="0" aria-label="Morph between kit A and kit B" disabled>
+      <button class="btn" id="rcMorphB" title="Save the kit as it sounds now as B">Save B</button>
+      <label class="rc-mini">Level <input type="range" id="rcLevel" min="0" max="120" value="85"></label></div>
+  </div>
+  <div class="rc-ed" id="rcEd"></div>
+</div>
+
+<div class="dj bp" id="bpView" hidden role="dialog" aria-label="Beat Pads">
+  <div class="dj-top bp-top">
+    <strong>Beat Pads</strong>
+    <button class="btn primary" id="bpPlay" aria-pressed="false">▶ Play</button>
+    <button class="btn bp-rec" id="bpRec" aria-pressed="false" title="Record what you play into the loop (adds to what's there)">● Rec</button>
+    <span class="bp-bpm" id="bpBpm">120 bpm</span>
+    <button class="btn" id="bpUndo" disabled title="Take back the last recording pass">↶ Undo</button>
+    <button class="btn" id="bpClear" title="Clear every hit in the loop">Clear the loop</button>
+    <button class="btn" id="bpFx" aria-pressed="false" title="Send Beat Pads through the effects and FX Lab">FX</button>
+    <button class="btn stopall" data-stopall aria-label="Stop everything" title="Stop everything in the app">■ All</button>
+    <button class="btn" id="bpHelpBtn" aria-label="How Beat Pads works">?</button>
+    <button class="btn primary" id="bpDone">Done</button>
+  </div>
+  <div class="bp-loop"><canvas id="bpLoopCv" aria-label="The loop: every hit, and where it's playing"></canvas><span class="bp-status" id="bpStatus"></span></div>
+  <div class="bp-main">
+    <div class="bp-left">
+      <div class="bp-banks" id="bpBanks" role="group" aria-label="Pad bank"></div>
+      <div class="bp-grid" id="bpGrid"></div>
+      <div class="bp-keys" id="bpKeys" aria-label="Keyboard shortcuts for Beat Pads"></div>
+    </div>
+    <div class="bp-right">
+      <div class="bp-row"><span class="lab2">Seq</span><div class="bp-seqs" id="bpSeqs" role="group" aria-label="Sequences"></div>
+        <button class="btn" id="bpCopy" title="Copy this sequence into the next empty one and switch to it">Copy</button>
+        <button class="btn" id="bpSong" aria-pressed="false" title="Song: play sequences in a chain">Song</button></div>
+      <div class="bp-song" id="bpSongBox" hidden>
+        <div class="bp-chain" id="bpChain" aria-label="The song: sequences in order"></div>
+        <div class="bp-row"><button class="btn" id="bpAddSeq">+ Seq 1</button><button class="btn" id="bpSongClr">Clear song</button><span class="bp-songinfo" id="bpSongInfo"></span></div>
+      </div>
+      <div class="bp-row"><button class="btn" id="bpL16" aria-pressed="false" title="16 Levels: the selected pad's sound on all 16 pads">16 Levels</button>
+        <select id="bpL16p" aria-label="What 16 Levels changes"><option value="tune">Tune</option><option value="vel">Velocity</option><option value="decay">Decay</option><option value="filter">Filter</option></select>
+        <span class="bp-l16tag" id="bpL16Tag"></span>
+        <button class="btn" id="bpResamp" title="Render the sequence (or the song) into a new sample on a pad">Resample</button>
+        <button class="btn" id="bpToTrk" title="Put the sequence (or the song) on a new audio track in the Garage, as regions">→ Garage</button></div>
+      <div class="bp-row">
+        <label class="rc-mini">Loop <select id="bpBars"><option value="1">1 bar</option><option value="2">2 bars</option><option value="4">4 bars</option><option value="8">8 bars</option></select></label>
+        <label class="rc-mini">Quantize <select id="bpQ"><option value="0">Off</option><option value="2">1/8</option><option value="1.3333">1/8 T</option><option value="1">1/16</option><option value="0.6667">1/16 T</option><option value="0.5">1/32</option></select></label>
+        <label class="rc-mini">Strength <input type="range" id="bpQs" min="0" max="100" value="100"><em id="bpQsV">100%</em></label>
+        <label class="rc-mini">Swing <input type="range" id="bpSw" min="50" max="75" value="50"><em id="bpSwV">50%</em></label>
+      </div>
+      <div class="bp-row">
+        <button class="btn" id="bpRep" aria-pressed="false" title="Note repeat: hold a pad for a roll in time">Repeat</button>
+        <select id="bpRate" aria-label="Repeat rate"><option value="2">1/8</option><option value="1.3333">1/8 T</option><option value="1" selected>1/16</option><option value="0.6667">1/16 T</option><option value="0.5">1/32</option></select>
+        <button class="btn" id="bpFull" aria-pressed="false" title="Every hit at full level (otherwise: higher on the pad = louder)">Full level</button>
+        <button class="btn" id="bpClick" aria-pressed="false" title="Metronome while playing">Click</button>
+        <button class="btn" id="bpCin" aria-pressed="true" title="One bar of clicks before recording starts">Count-in</button>
+      </div>
+      <div class="bp-edit" id="bpEdit"></div>
+      <div class="bp-chop" id="bpChop">
+        <div class="bp-row"><span class="lab2">Chop</span>
+          <select id="bpSrc" aria-label="Sample to chop"></select><button class="btn" id="bpLoad">Load WAV / MP3…</button>
+          <select id="bpMode" aria-label="How to cut"><option value="tr">Transients</option><option value="16">16 equal</option><option value="8">8 equal</option><option value="4">4 equal</option></select>
+          <label class="rc-mini">Sensitivity <input type="range" id="bpSens" min="0" max="100" value="55"></label>
+          <label class="rc-mini">To bank <select id="bpTo"><option>C</option><option>D</option><option>B</option><option>A</option></select></label>
+          <button class="btn primary" id="bpChopGo">Chop to pads</button>
+        </div>
+        <canvas id="bpWave" aria-label="The sample, with where it gets cut"></canvas>
+        <input type="file" id="bpFile" accept="audio/*,.mp3,.wav,.m4a,.aif,.aiff,.flac" hidden>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="editor sheet" id="bpKitSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Load a kit">
+    <div class="ed-head"><strong id="bpKitTitle">Load a kit onto bank A</strong></div>
+    <span class="ed-info" style="text-align:left">Fills all 16 pads on this bank. ▶ plays a quick groove first. Your recorded hits stay, so the beat plays on the new kit; Undo puts the old pads back.</span>
+    <div class="bp-kits" id="bpKitList"></div>
+    <div class="ed-foot"><button class="btn primary" id="bpKitDone">Done</button></div>
+  </div>
+</div>
+<div class="editor sheet" id="bpHelp" hidden>
+  <div class="ed-card" role="dialog" aria-label="Beat Pads help">
+    <div class="ed-head"><strong>Beat Pads</strong></div>
+    <div class="rc-helptext">
+      <p><b>Pads.</b> 16 pads, 4 banks. Pad 1 is bottom-left, like an MPC. Bank A is the Studio kit (real drums) laid out for finger drumming, bank B is Studio percussion, C and D are for your chops. <b>Clear</b> at the end of the bank row empties every pad on that bank (and its hits in this sequence); Undo brings them back. Hit higher on a pad for louder, lower for softer; <b>Full level</b> makes every hit full. </p>
+      <p><b>Kits.</b> <b>Kit…</b> in the bank row loads a whole kit onto the bank you're on: the Studio drums and percussion, 808, real 808 samples, 909, Trap, FM & FX, hand percussion and the library kits. ▶ plays a quick groove on a kit first. Every kit sits the same way (kick, snare and hats on the bottom row, rim and clap above, then toms, cymbals on top), so a beat you recorded plays on the new kit, and Undo puts the old pads back.</p>
+      <p><b>Keyboard.</b> The pads are the left-hand block of keys, laid out like the pads: <b>1 2 3 4</b> are the top row (pads 13–16), <b>Q W E R</b> 9–12, <b>A S D F</b> 5–8 and <b>Z X C V</b> the bottom row (pads 1–4). Each pad shows its key. With the right hand: <b>Space</b> plays or stops, <b>Enter</b> records, <b>← →</b> change the bank, <b>↑ ↓</b> the sequence, <b>Esc</b> closes Beat Pads (it keeps playing), <b>Ctrl Z</b> (⌘ Z on a Mac) takes back the last recording pass, and holding <b>Shift</b> turns on Repeat while you hold pads. The keys show on computers and whenever you use a keyboard; <b>Letters on keys</b> in the menu turns them off.</p>
+      <p><b>Recording.</b> Pick the loop length and tap <b>● Rec</b>: one bar of count-in, then everything you hit goes into the loop, and each time round you can add more (overdub). <b>↶ Undo</b> takes back the last pass. <b>Quantize</b> moves hits onto the grid (Strength sets how far) and <b>Swing</b> pushes the off-beats late, MPC style; both work on what's already recorded, so you can change them after.</p>
+      <p><b>Repeat.</b> Turn on <b>Repeat</b>, pick a rate, and hold a pad for a roll in time. Move your finger up or down the pad to change how hard it hits.</p>
+      <p><b>A pad.</b> Tap a pad to pick it: its sound (any Rhythm Creator sound, a sampler slot or a chop), Level, Tune, Decay, Tone, Pan, a choke group (pads in the same group cut each other off, like a closed hat stopping an open one), Reverse for chops, and Erase to remove that pad's hits from the loop.</p>
+      <p><b>Chop.</b> Pick a sampler slot or load a file, choose Transients (cuts where hits start; Sensitivity finds more or fewer) or equal parts, choose a bank and tap <b>Chop to pads</b>: slice 1 goes on pad 1, and so on. Tap the waveform to hear a slice.</p>
+      <p><b>Sequences.</b> Eight of them, each with its own loop length and hits. Tap a number to switch; while playing, the switch happens at the end of the loop (the number blinks until then). <b>Copy</b> puts the current sequence into the next empty one and switches to it, for a variation or a fill.</p>
+      <p><b>Song.</b> Turn on <b>Song</b> and <b>+ Seq</b> adds the sequence you're on to the chain. Tap a step to play it ×1 to ×4, ✕ removes it. Play runs the chain from the top and loops it. Recording turns Song off and records into the sequence you're on.</p>
+      <p><b>16 Levels.</b> Pick a pad and turn on <b>16 Levels</b>: all 16 pads play that sound, from pad 1 to pad 16 rising in Tune (pad 9 is as recorded), Velocity, Decay or Filter. Recorded hits keep their level, so a bassline played from one 808 boom plays back as played.</p>
+      <p><b>Resample</b> renders the sequence (or the song when Song is on) into a free sampler slot and the next empty pad, ready to chop. A sequence comes out as a seamless loop. FX aren't printed in, so turn on FX to hear them on the new pad. <b>→ Tracks</b> puts it on a new track in Tracks as clips: the sequence four times, or one clip per song step, to rearrange there.</p>
+      <p><b>MIDI.</b> With Beat Pads open, a pad controller or the K.O. II plays the pads (notes 36–51 are pads 1–16, others wrap round), and incoming Start/Stop runs Beat Pads. A MiniLab 3's pads 1–8 play pads 1–8 (the bottom two rows), its bank B pads 9–16; its knobs edit the pad you hit last, and its keys play that pad in tune. With <i>Send clock</i> on in the MIDI sheet, Beat Pads and the Rhythm Creator send clock and start/stop too.</p>
+      <p><b>Timing.</b> The tempo is the app's (the Rhythm Creator's, and a playing DJ deck's when Auto BPM is on). When the Rhythm Creator is playing, Beat Pads starts on its next bar. <b>FX</b> sends the pads through the effects and FX Lab; the Mixer has a Beat Pads fader.</p>
+    </div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="bpHelpDone">Done</button></div>
+  </div>
+</div>
+<div class="editor sheet" id="rcHelp" hidden>
+  <div class="ed-card" role="dialog" aria-label="Rhythm Creator help">
+    <div class="ed-head"><strong>Rhythm Creator</strong></div>
+    <div class="rc-helptext">
+      <p><b>Tracks.</b> Sixteen tracks, one sound each. Tap a track's name to select it and hear it; its sound and knobs appear under the grid. <b>Mute</b> and <b>Solo</b> are there too.</p>
+      <p><b>Sounds.</b> 808 (synthesized from the original circuit), 909, Analog (modelled kick, snare and hats), FM, Trap (808 boom with pitch glide, snap, stacked clap, trap hat), Hand percussion, Electro &amp; FX (zap, noise riser and reverse cymbal that last a number of beats set by Decay, tom drop), Real 808 samples, and your sampler slots, pads and kits.</p>
+      <p><b>Knobs.</b> Level, Pan, Tune (±24 semitones), Decay, Tone, Character (its name changes with the sound: Snappy, Click, Glide…), a filter (low-pass, high-pass or band-pass with frequency and resonance), Drive, and the track's own length. A shorter length loops sooner than the others: 12 steps against 16 makes a polyrhythm.</p>
+      <p><b>Steps.</b> The row above the grid sets what a tap does. <b>Hits</b> turns steps on and off. <b>Accent</b> plays louder (yellow). <b>Flam</b> adds a soft grace hit just before. <b>Roll</b> cycles 2, 3 and 4 hits inside the step. <b>Chance</b> cycles 75%, 50%, 25% and bar conditions: 1:2 plays on the first of every two loops, 2:2 on the second, 1:4 and 4:4 likewise. <b>Nudge</b> moves the hit a quarter or half step late or early.</p>
+      <p><b>Real drums.</b> The Studio kit is a recorded acoustic kit: every hit has up to four loudness layers (how hard you play picks the layer) and alternate takes, so two hits in a row are never the same recording. Studio percussion is recorded too. <b>Kit</b> swaps every track to the matching sound of a kit and keeps the pattern (Undo puts it back). <b>Feel</b> is how human it plays: small timing and loudness differences, hats that breathe, off-beat snare hits as ghost notes; 0 is machine-tight. <b>Room</b> is how much of the studio room you hear; on a Studio sound, Character is that track's own room amount.</p>
+      <p><b>Euclid.</b> Under the knobs: spreads a number of hits as evenly as possible over the track's length; Rotate shifts the result.</p>
+      <p><b>Make a beat.</b> Pick a style, how busy and how complex, and tap Make: every track gets a part that fits its sound, and the tempo and swing are set for the style. <b>Vary</b> changes about 15% of the hits and keeps the downbeats.</p>
+      <p><b>Morph.</b> Save A, change the knobs, Save B, then slide between the two kits.</p>
+      <p><b>Timing.</b> Tempo is shared with the sequencer, and when the sequencer is playing the Rhythm Creator locks to it. <b>DJ</b> next to the tempo is Auto BPM (on by default): while a DJ deck plays, the Rhythm Creator takes that deck's tempo and locks to its beat, with step 1 on the song's bar lines (or on its Phrase mark), and stays with it through speed changes, sync and hot cue jumps. When the deck stops it keeps that tempo until you stop. Tap − or + to take the tempo back (Auto turns off; Undo turns it on again). Closed hats cut off open hats. Steps sets the pattern length (16 to 64, in pages).</p>
+      <p><b>Sound.</b> FX → Apply to → Rhythm sends it through the effects. Mix has a Rhythm Creator fader. ● Rec records everything you hear.</p>
+      <p class="rc-credits">808 voices follow iO-808 by Vincent Riemer (MIT licence). Analog models are ported from Mutable Instruments Plaits by Emilie Gillet (MIT licence). Real 808 samples: Michael Fischer's TR-808 set (CC0). Studio kit and Studio percussion: Virtuosity Drums by Versilian Studios, played by Austin McMahon (CC0).</p>
+    </div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="rcHelpDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="reportSheet" style="align-items:center" hidden>
+  <div class="ed-card" role="dialog" aria-label="Report" style="padding-bottom:12px">
+    <div class="ed-head"><strong>Report a problem</strong></div>
+    <span class="ed-info" style="text-align:left">Saves one zip: what happened in the app, every setting, and the last 30 seconds of sound. Nothing is sent anywhere by itself.</span>
+    <label class="sp-lab" for="reportNote"><span>What went wrong? (optional)</span></label>
+    <textarea id="reportNote" rows="3" placeholder="e.g. the keys stopped making sound after I opened DJ" style="width:100%;box-sizing:border-box;background:var(--raised);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:0.9rem;resize:vertical"></textarea>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="reportCancel">Cancel</button>
+      <button class="btn big primary" id="reportGo">Save report</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="mixer" hidden>
+  <div class="ed-card" role="dialog" aria-label="Mixer">
+    <div class="ed-head"><strong>Mixer</strong></div>
+    <span class="ed-info" style="text-align:left">Drag to set each sound's volume; the number is how far it is from its usual level (0 dB). Double-tap a slider to put it back.</span>
+    <div class="mx-meter" aria-label="Output level"><div><i id="mxMeterBar"></i></div><span id="mxMeterLab">Silent</span></div>
+    <div class="mx-list" id="mxList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="mxReset">Reset levels</button>
+      <button class="btn big primary" id="mxDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="melodies" hidden>
+  <div class="ed-card" role="dialog" aria-label="Melodies">
+    <div class="ed-head"><strong>Melodies</strong></div>
+    <span class="ed-info" id="mlInfo" style="text-align:left"></span>
+    <div class="ly-quick">
+      <label class="bt-tempo"><input type="checkbox" id="mlBeat" checked> Preview with the beat</label>
+      <button class="btn" id="mlUndo" disabled>Undo last melody</button>
+    </div>
+    <div class="gen-box" id="genBox" hidden>
+      <div class="gen-row"><button class="btn primary" id="genNew">✨ Generate</button>
+        <select id="genMood" aria-label="Style"><option value="ambient">Ambient (long notes)</option><option value="flow" selected>Flowing</option><option value="busy">Busy</option></select>
+        <select id="genScale" aria-label="Scale"><option value="maj">Major</option><option value="min">Minor</option><option value="penta" selected>Pentatonic</option><option value="mpenta">Minor penta</option><option value="dorian">Dorian</option><option value="lydian">Lydian</option></select>
+        <select id="genBars" aria-label="Length"><option value="2">2 bars</option><option value="4" selected>4 bars</option><option value="8">8 bars</option></select></div>
+      <div class="gen-row"><label><input type="checkbox" id="genEvolve"> Evolve while playing (a note or two changes each time round)</label></div>
+    </div>
+    <div class="bt-list" id="mlList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="mlCancel">Cancel</button>
+      <button class="btn big primary" id="mlUse" disabled>Use this melody</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="secPick" hidden>
+  <div class="ed-card" role="dialog" aria-label="Choose part of a long file">
+    <div class="ed-head"><strong>Choose the part you want</strong></div>
+    <span class="ed-info" id="spTitle" style="text-align:left"></span>
+    <div id="spInfo"></div>
+    <div class="sp-lab"><span>Whole file · drag to select</span></div>
+    <canvas class="sp-cv" id="spAll" aria-label="Whole file. Drag across it to choose a section."></canvas>
+    <div class="sp-lab"><span>Close-up · drag the gold edges</span></div>
+    <canvas class="sp-cv zoom" id="spZoom" aria-label="Close-up of the selection. Drag an edge to fine tune."></canvas>
+    <div class="sp-row">
+      <button class="btn primary" id="spPlay">▶ Preview</button>
+      <div class="grp"><span>Start</span><button class="btn" id="spA-" aria-label="Start earlier">‹</button><button class="btn" id="spA+" aria-label="Start later">›</button></div>
+      <div class="grp"><span>End</span><button class="btn" id="spB-" aria-label="End earlier">‹</button><button class="btn" id="spB+" aria-label="End later">›</button></div>
+    </div>
+    <div class="sp-row">
+      <div class="grp"><span>Length</span><button class="btn" data-splen="2">2 s</button><button class="btn" data-splen="5">5 s</button><button class="btn" data-splen="10">10 s</button><button class="btn" data-splen="30">30 s</button><button class="btn" data-splen="60">1 min</button></div>
+    </div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="spCancel">Cancel</button>
+      <button class="btn big" id="spUseAll">Use whole file</button>
+      <button class="btn big primary" id="spUse">Use selection</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="motion" hidden>
+  <div class="ed-card" role="dialog" aria-label="Motion">
+    <div class="ed-head"><strong>Motion</strong></div>
+    <span class="ed-info" style="text-align:left">Slow movement for everything you hear: two LFOs and an XY pad. Drift wanders at random.</span>
+    <div class="xy-wrap">
+      <div class="xy-sel"><label>Left–right <select id="xyX" aria-label="XY pad left-right"></select></label><label>Up–down <select id="xyY" aria-label="XY pad up-down"></select></label></div>
+      <div class="xy-pad" id="xyPad" aria-label="XY pad"><div class="xy-dot" id="xyDot"></div></div>
+    </div>
+    <div class="mx-list" id="moList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big demo" data-demo="motion">▶ Demo</button>
+      <button class="btn big" id="moReset">Reset</button>
+      <button class="btn big primary" id="moDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="exitSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Exit">
+    <div class="ed-head"><strong>Exit Nate Bloom</strong></div>
+    <span class="ed-info" style="text-align:left">Save and exit adds what you have now to <b>Projects</b>, so you can open this exact version again. Either way, the next time you open Nate Bloom it starts where you left off.</span>
+    <div class="pr-new"><input id="exitName" maxlength="40" aria-label="Save as"></div>
+    <span class="ed-info" id="exitInfo" style="text-align:left"></span>
+    <div class="ed-foot sheet-foot exit-foot">
+      <button class="btn big" id="exitCancel">Cancel</button>
+      <button class="btn big" id="exitNoSave">Exit without saving</button>
+      <button class="btn big primary" id="exitSave">Save and exit</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="projects" hidden>
+  <div class="ed-card" role="dialog" aria-label="Projects">
+    <div class="ed-head"><strong>Projects</strong></div>
+    <span class="ed-info" id="prInfo" style="text-align:left"></span>
+    <div class="pr-safe" id="prSafe"><div class="mx-lab"><b>Keep your work safe</b><small id="prSafeS">Checking…</small></div><button class="btn primary" id="prBackup" title="Everything in one file: sounds, beats, samples, tracks and settings">Back up to a file</button></div>
+    <div class="pr-new"><input id="prName" placeholder="Name this project" maxlength="40" aria-label="Project name"><button class="btn primary" id="prSave">Save</button></div>
+    <div class="mx-list" id="prList"></div>
+    <input type="file" id="prFile" accept=".nbproj,.zip,application/zip,application/octet-stream" hidden>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="prImport">Import file</button>
+      <button class="btn big primary" id="prDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="wlSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugin controls">
+    <div class="ed-head"><strong id="wlTitle">Plugin controls</strong></div>
+    <span class="ed-info" id="wlInfo" style="text-align:left"></span>
+    <div class="mx-list wl-list" id="wlList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="wlDone">Cancel</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="lkSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Link">
+    <div class="ed-head"><strong>Link</strong><span class="lk-dot" id="lkDot" aria-hidden="true"></span></div>
+    <span class="ed-info" id="lkInfo" style="text-align:left"></span>
+    <div class="lk-body" id="lkBody"></div>
+    <div class="lk-body" id="ablBody" hidden></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="lkDone">Done</button></div>
+  </div>
+</div>
+<div class="editor sheet" id="qkSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Quick sounds">
+    <div class="ed-head"><strong>Quick sounds</strong></div>
+    <span class="ed-info" style="text-align:left">The row under Playing. Tap one there to play it alone; + plays it with what's playing.</span>
+    <div class="lk-body" id="qkList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="qkAdd">+ Add a sound</button><button class="btn big primary" id="qkDone">Done</button></div>
+  </div>
+</div>
+<div class="dj gb" id="gbView" hidden role="dialog" aria-label="Garage">
+  <div class="gb-bar" id="gbBar">
+    <div class="gb-grp gb-left">
+      <button class="gb-ib gb-songs" id="gbSongsBtn" aria-label="My Songs" title="My Songs"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h10M4 18h7"/><path d="M18 17V5l3 2"/><circle cx="16" cy="17" r="2.2"/></svg><span>Songs</span></button>
+      <button class="gb-ib" id="gbUndo" aria-label="Undo" title="Undo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button class="gb-ib" id="gbBrowseBtn" aria-label="Instruments" title="Instruments: add a track"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></svg></button>
+      <button class="gb-ib" id="gbViewBtn" aria-label="Tracks" title="Tracks"></button>
+      <button class="gb-ib" id="gbMixBtn" aria-label="Mixer" title="Mixer: every track's volume and pan"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4v16M12 4v16M18 4v16"/><rect x="3.5" y="13" width="5" height="3" rx="1" fill="currentColor"/><rect x="9.5" y="7" width="5" height="3" rx="1" fill="currentColor"/><rect x="15.5" y="11" width="5" height="3" rx="1" fill="currentColor"/></svg></button>
+    </div>
+    <div class="gb-grp gb-tp">
+      <button class="gb-ib" id="gbHome" aria-label="Back to the beginning" title="Back to the beginning"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="4" y="5" width="2.6" height="14" rx="1"/><path d="M20 5.5v13L8.5 12z"/></svg></button>
+      <button class="gb-ib gb-play" id="gbPlay" aria-label="Play" title="Play (space)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg></button>
+      <button class="gb-ib gb-rec" id="gbRec" aria-label="Record" title="Record (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="currentColor"/></svg></button>
+      <button class="gb-lcd" id="gbLcd" aria-label="Song settings"><b id="gbPos">1 . 1</b><small id="gbInfo">100 · C · 4/4</small></button>
+    </div>
+    <div class="gb-grp gb-right">
+      <button class="gb-ib" id="gbLoopsBtn" aria-label="Loops" title="Drum loops"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg></button>
+      <button class="gb-ib" id="gbMetro" aria-pressed="true" aria-label="Metronome" title="Metronome"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 16l5-9"/></svg></button>
+      <button class="gb-ib" id="gbTypeBtn" aria-pressed="false" aria-label="Musical Typing" title="Musical Typing: play with the computer keyboard (A = C)"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 15h6"/></svg></button>
+      <button class="gb-ib" id="gbSetBtn" aria-label="Song settings" title="Tempo, key, time, count-in"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
+      <button class="gb-ib" id="gbHelpBtn" aria-label="How the Garage works" title="How it works">?</button>
+      <button class="btn primary gb-done" id="gbDone">Done</button>
+    </div>
+  </div>
+  <div class="gb-main">
+    <section class="gb-browse" id="gbBrowse" hidden>
+      <div class="gb-bh"><strong>Choose an instrument</strong><small id="gbBrowseSub">Each one becomes a track. Play it, press ● to record, then arrange it in Tracks.</small></div>
+      <div class="gb-cards" id="gbCards"></div>
+    </section>
+    <section class="gb-inst" id="gbInst" hidden>
+      <div class="gb-ih" id="gbIh"></div>
+      <div class="gb-ibody" id="gbIb"></div>
+    </section>
+    <section class="gb-tracks" id="gbTracks" hidden>
+      <div class="gb-tl" id="gbTl"><div class="gb-tlin" id="gbTlin"></div></div>
+      <div class="gb-rmenu" id="gbRmenu" hidden></div>
+      <div class="gb-tbar" id="gbTbar"></div>
+      <div class="gb-ed" id="gbEd" hidden>
+        <div class="gb-edh" id="gbEdh"></div>
+        <div class="gb-edw" id="gbEdw"><canvas id="gbEdc"></canvas></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="editor sheet gb-sheet" id="gbSheet" hidden>
+  <div class="ed-card" role="dialog" aria-labelledby="gbShT">
+    <div class="ed-head"><strong id="gbShT">Garage</strong><span class="ed-info" id="gbShI"></span></div>
+    <div class="gb-sb" id="gbShB"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="gbShDone">Done</button></div>
+  </div>
+</div>
+<div class="lk-code" id="lkCode" hidden role="alertdialog" aria-label="Link code"><div><small id="lkCodeWho"></small><b id="lkCodeNum"></b><span>Type this code on the tablet</span></div></div>
+
+<div class="editor sheet" id="hisSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="History">
+    <div class="ed-head"><strong>History</strong></div>
+    <span class="ed-info" id="hisInfo" style="text-align:left">Every change you can take back, newest first. Tap one to go back to just before it; tap a dimmed one to bring it back.</span>
+    <div class="mx-list his-list" id="hisList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn" id="hisSUndo">↶ Undo</button><button class="btn" id="hisSRedo">↷ Redo</button>
+      <button class="btn big primary" id="hisDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="mySounds" hidden>
+  <div class="ed-card" role="dialog" aria-label="My sounds">
+    <div class="ed-head"><strong>My sounds</strong></div>
+    <span class="ed-info" id="msInfo" style="text-align:left"></span>
+    <div class="pr-new"><input id="msName" placeholder="Name this sound" maxlength="40" aria-label="Sound name"><button class="btn primary" id="msSave">Save sound</button></div>
+    <div class="mx-list" id="msList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big primary" id="msDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="song" hidden>
+  <div class="ed-card" role="dialog" aria-label="Song">
+    <div class="ed-head"><strong>Song</strong></div>
+    <span class="ed-info" id="songInfo" style="text-align:left"></span>
+    <div class="sp-lab"><span>Patterns</span></div>
+    <div class="song-slots" id="songSlots"></div>
+    <div class="sp-lab"><span>Song order · tap a length to change it</span><span id="songLen"></span></div>
+    <div class="song-chain" id="songChain"></div>
+    <div class="gen-row"><button class="btn" id="songOn" aria-pressed="false">Song mode: Off</button><button class="btn primary" id="songPlay">▶ Play song</button><button class="btn" id="songClear">Clear order</button></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big primary" id="songDone">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="exports" hidden>
+  <div class="ed-card" role="dialog" aria-label="Export">
+    <div class="ed-head"><strong>Export</strong></div>
+    <span class="ed-info" id="exInfo" style="text-align:left"></span>
+    <div class="ex-list">
+      <div class="ex-item"><div class="mx-lab"><b>Stems of everything playing</b><small>From the next bar: every part (each synth, samples, drums, Rhythm Creator, Beat Pads, DJ) to its own WAV, plus the reverb and the full mix, all the same length so they line up in Bitwig.</small>
+        <span class="ex-opts"><label>Bars <select id="exStBars" aria-label="How many bars to record"><option>4</option><option selected>8</option><option>16</option><option>32</option></select></label></span></div><button class="btn primary" id="exStRec">Record</button></div>
+      <div class="ex-item"><div class="mx-lab"><b>Stems from the Garage</b><small>One WAV per audio track of the Garage song (recordings and imported files), all starting at 0:00 so they line up.</small></div><button class="btn primary" id="exStems">Export</button></div>
+      <div class="ex-item"><div class="mx-lab"><b>MIDI file</b><small>Notes melody, SY row, drums, the Rhythm Creator (4 bars) and Beat Pads (the song or the sequence), drums as GM notes on ch 10, at your tempo and time signature.</small></div><button class="btn primary" id="exMidi">Export</button></div>
+      <div class="ex-item"><div class="mx-lab"><b>Pads for the K.O. II</b><small>Your 12 pads as numbered mono WAVs. <label style="display:inline-flex;gap:4px;align-items:center"><input type="checkbox" id="exSlots"> include sampler slots</label></small></div><button class="btn primary" id="exPads">Export</button></div>
+    </div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="exDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="midiSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="MIDI">
+    <div class="ed-head"><strong>MIDI</strong></div>
+    <span class="ed-info" id="mdInfo" style="text-align:left"></span>
+    <button class="btn primary" id="mdConnect" style="height:40px">Connect</button>
+    <div class="md-opts">
+      <label><input type="checkbox" data-mo="auto"><span>Connect by itself when Nate Bloom opens<small>and each device comes back on or off as you left it</small></span></label>
+      <label><input type="checkbox" data-mo="noteIn"><span>Play Nate Bloom from MIDI keyboards<small>notes in on any channel</small></span></label>
+      <label><input type="checkbox" data-mo="clockOut"><span>Send clock and start/stop<small>the K.O. II follows Nate Bloom's tempo</small></span></label>
+      <label><input type="checkbox" data-mo="clockIn"><span>Follow incoming clock<small>Nate Bloom follows the K.O. II or Bitwig</small></span></label>
+      <label><input type="checkbox" data-mo="notesOut"><span>Send melody + SY notes<small>to play the MicroFreak or Minilogue XD</small></span></label>
+      <label><input type="checkbox" data-mo="keysOut"><span>Send what you play on the keys too</span></label>
+      <label><input type="checkbox" data-mo="drumsOut"><span>Send drum hits as GM drum notes on channel 10</span></label>
+      <label><input type="checkbox" data-mo="padsIn"><span>MIDI notes play Beat Pads while it's open<small>notes 36–51 are pads 1–16 of the bank on screen</small></span></label>
+      <label class="md-lat"><span>Line up the K.O. II<small id="mdLatI">holds back clock and notes by the tablet's audio delay plus this</small></span><input type="range" id="mdLat" min="-50" max="250" step="5" value="0" aria-label="Extra delay for what Nate Bloom sends, in milliseconds"><em id="mdLatV">+0 ms</em></label>
+      <label>Velocity <select id="mdVel" aria-label="How much velocity changes the level">
+        <option value="off">Off (every note the same)</option><option value="light">Light touch</option><option value="normal">Normal</option><option value="firm">Firm</option></select></label>
+      <label>Notes channel <select id="mdCh" aria-label="MIDI channel for notes">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option></select></label>
+    </div>
+    <div class="mx-list" id="mdPorts"></div>
+    <div class="md-learn" id="sinkRow" hidden><div class="mx-lab"><b>Sound out</b><small id="sinkInfo">Where Nate Bloom plays: a USB interface, headphones, HDMI</small></div><select id="sinkSel" aria-label="Sound output"></select></div>
+    <div class="md-learn"><div class="mx-lab"><b>MIDI learn</b><small>Any knob, slider or the XY pad, from a knob on your controller. A mapping works on the screen you made it on.</small></div><button class="btn primary" id="mlLearn">Learn</button></div>
+    <div class="mx-list" id="mdLearnList"></div>
+    <details class="md-guide"><summary>K.O. II setup</summary><div class="rc-helptext">
+      <p><b>Wiring.</b> Hub in the tablet, the charger in the hub's USB-C PD port, the K.O. II in a USB-A port with a data cable (a charge-only cable won't show up here).</p>
+      <p><b>Sound A (best).</b> The hub's 3.5 mm jack into the K.O. II's IN; listen on the K.O. II's OUT. One mix, one volume knob, and the K.O. II's FX work on Nate Bloom. Tablet volume around 70–80% so its input doesn't distort.</p>
+      <p><b>Sound B (K.O. II OS 2.5+).</b> The USB cable carries the audio too. On the K.O. II: SHIFT+ERASE, <b>5 1 1</b> ENTER to hear it live; its sampler can take USB as the source to sample Nate Bloom. Android uses one USB audio device at a time, usually the last one plugged in.</p>
+      <p><b>Nate Bloom leads (recommended).</b> Tick <i>Send clock and start/stop</i>; on the K.O. II: SHIFT+ERASE, <b>1 0 1</b> ENTER. Play here (sequencer, Rhythm Creator or Beat Pads) starts the K.O. II at this tempo.</p>
+      <p><b>K.O. II leads.</b> On the K.O. II: SHIFT+ERASE, <b>1 0 2</b> ENTER; tick <i>Follow incoming clock</i>. Its Play starts Beat Pads or the Rhythm Creator when one is open, otherwise the sequencer. Nate Bloom then sounds late by the tablet's audio delay, which nothing can pull back.</p>
+      <p><b>Line up.</b> Put a four-on-the-floor kick on both. If the K.O. II's kick comes first, slide <i>Line up the K.O. II</i> right; if Nate Bloom's does, slide left, until they land as one hit. Redo it when you switch between A and B.</p>
+      <p><b>K.O. II pads → Nate Bloom.</b> Give a pad a MIDI channel (SHIFT+SOUND, knob X; knob Y sets the root note). Sound <b>000</b> makes a MIDI-only pad: in keys mode it plays and sequences Nate Bloom's synths. If drum pads trigger the synth, system <b>1 2 7</b> sends only from pads with a channel.</p>
+      <p><b>Recording the K.O. II.</b> Over USB audio it's also an input: Samples → Record input → pick the K.O. II.</p>
+    </div></details>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="mdDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="installSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Install">
+    <div class="ed-head"><strong>Install as an app</strong></div>
+    <span class="ed-info" id="inInfo" style="text-align:left"></span>
+    <button class="btn primary" id="inGo" style="height:44px" hidden>Install Nate Bloom</button>
+    <div class="sp-lab"><span>Android tablet (Chrome)</span></div>
+    <ol class="in-steps"><li>Open your GitHub Pages link in Chrome.</li><li>Tap ⋮ → <b>Add to home screen</b> → <b>Install</b>.</li></ol>
+    <div class="sp-lab"><span>iPhone / iPad (Safari)</span></div>
+    <ol class="in-steps"><li>Open your GitHub Pages link in Safari.</li><li>Tap Share → <b>Add to Home Screen</b>.</li></ol>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="inDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="scaleSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Scale lock">
+    <div class="ed-head"><strong>Scale lock</strong><span class="ed-info">keys outside the scale dim and snap to the nearest note in it</span></div>
+    <div class="sp-lab"><span>Key</span></div>
+    <div class="sc-keys" id="scKeys"></div>
+    <div class="sp-lab"><span>Scale</span><button class="btn" id="scOff" style="height:26px;font-size:0.7rem">Turn off</button></div>
+    <div class="sc-scales" id="scScales"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="scDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="helpSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Help">
+    <div class="ed-head"><strong>How Nate Bloom works</strong><button class="btn" id="reportBtn" title="Save a report of what the app is doing, its settings and the last 30 seconds of sound, to send for a fix">Report a problem</button></div>
+    <div class="help-list">
+      <p><b>Getting around:</b> <b>Synths · Samples · Drums</b> pick what you play: the synth engines (with Lib, Inst and your pinned sounds), the sampler and the 12 pads, or the drum machine; the row of tabs under them shows only that section's sounds. <b>DJ</b>, <b>Rhythm</b> (the Rhythm Creator), <b>Beats</b> (Beat Pads) and <b>Garage</b> open full screens of their own (a green dot means one is playing). <b>Keys · Seq · Notes</b> switch what this page shows. On a phone the sections sit in the bar along the bottom; on a tablet or a computer they're in the top bar. The top bar also has <b>Mix</b>, <b>● Rec</b>, the red <b>■</b> that stops everything, <b>↶</b> (undo) and <b>☰</b>, which holds the rest: Projects, Plugins, My sounds, Export, MIDI, Install, History, this help and Exit. Controls that don't apply to what you're playing (Chord, octave, Arp and Hold on the drums and pads) are hidden. Rows that scroll sideways fade at the edge where there's more. The <b>Playing ▾</b> under the top bar lists everything making sound (sequencer, Rhythm Creator, DJ decks, arps, Jam, Tracks, held notes, pads). Tap it for a card per thing, with <b>Only this</b> (hear just that one; the rest keep going, silent), <b>Edit</b> (go to it) and <b>■ Stop</b>. An arp keeps playing on its synth when you pick another synth; Edit takes you back to it with its notes held, to add or take away notes. What you play on the keys yourself always sounds. Back (the Android gesture) closes whatever is open on top. <b>↶</b> takes back the last change (see Undo); big changes (a new beat, Clear) also offer Undo for a few seconds. <b>⤢</b> next to the octave buttons is Play view: just the keys, bigger. Report a problem is at the top of this help.</p>
+      <p><b>Keys · Seq · Notes</b> are the three views. Keys is the instrument, Seq is the step sequencer for drums and a one-bar tune, Notes is a staff you write a melody on.</p>
+      <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
+      <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
+      <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
+      <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
+      <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays.</p>
+      <p><b>Live (top bar, or the menu on a phone):</b> a screen for playing out, with no keys on it (the MiniLab has them). Eight knobs and four faders sit as they do on the MiniLab and move with it; drag one up or down to move it by touch. Knob pages: <b>Sound</b> (the sound's own knobs), <b>FX</b>, <b>FX Lab</b> (turning an effect up switches it on, all the way down switches it off), <b>Mix</b> and <b>Mine</b> (empty until you fill it). The faders stay put across pages: the sound's filter, Echo, Space and the master. Tap any knob's or fader's name to give it another job; Back to undoes it. Pad sets: Beat Pads banks A to D (Kit… loads a kit onto the bank), Notes and Chords in the key you've set, <b>FX moves</b> (hold a pad and the effect comes in, let go and it's back as it was), Samples and the Rhythm Creator's 16 tracks. On the MiniLab the big knob turns the knob pages and Shift + turn steps through the sounds (it plays the one you stop on); hold <b>Shift</b> and the knobs and faders switch to their Shift layer (the knobs: FX, or the page you tap while holding Shift; the faders: each sound that's playing and the beat); a click plays or stops what ▶ is set to (Seq, Rhythm or Pads), Shift + click records. <b>FX</b> opens every effect and the FX Lab at once. <b>K.O. II</b> sends it the clock and start/stop, so it plays in time.</p>
+      <p><b>Live on stage:</b> the lock (next to Done) means Back, Esc or a stray tap can't close Live; hold Done to leave. The screen stays on while Live is open, and the thin meter by ■ lights when the safety limiter is catching peaks (nothing clips). <b>Gear</b> shows what's plugged in and who keeps time: <b>K.O. II follows</b> (Nate Bloom sends tempo, start and stop), <b>K.O. II leads</b> (its clock drives Nate Bloom and Live's ▶ target) or <b>No sync</b>; the clock goes only to the K.O. II when it's plugged in (the MIDI sheet's Clock buttons choose otherwise), so other gear never starts by surprise. Sample… records the K.O. II's USB audio (its firmware 2.5 or later) into the sampler. The <b>set list</b> (right of the knob pages) saves songs: the sound, tempo, FX and FX Lab, the Rhythm pattern, the Beat Pads bank and sequence and this screen's pages; ‹ › change song, on the next bar while something plays. With the MiniLab's big knob set to Songs, turning it cues a song and a click loads it. The <b>column on the left</b> shows what's playing, all the time: a card for each layer (lit: the one the knobs play; its Arp tag says whether it's arpeggiating, in the arp or left out, and a tap on it changes that; drag its bar for its level; ✕ stops it), Hold with the notes it's holding, the Arp, and the sounds themselves (Quick, Favourites or Lately: tap one to play it alone, + to layer it). Above them: the sound (‹ › step through, the layer count or + Layer a sound opens <b>Sounds</b>: what's playing, each layer in or out of the arp, Quick sounds, favourites and the ones played lately; tap a sound to play it alone, + to layer it), <b>Hold</b>, the <b>Arp</b> (tap to switch it on or off; hold it and it plays only while you hold) with its octaves, ⋯ for which layers arpeggiate, the pattern, speed and gate, and <b>Split pads</b>: the number keys 1–8 (top row or number pad) play pads 1–8 and the MiniLab's pads play 9–16. A <b>computer keyboard</b> runs Live too: number keys play pads, H is Hold, A the Arp (hold it down for only while held), Space ▶ / ■, and <b>?</b> lists the rest; once a keyboard is used, each control shows its key. <b>Sample</b> (by the pad sets, or E) grabs the last 1, 2, 4 or 8 bars of what you heard, or records the K.O. II (or the mic), onto a pad of the Samples set (S1–S4 are its pads 13–16), kept after a reload. <b>● Rec</b> records everything you hear, up to an hour, into this device's storage (a reload doesn't lose it); ▾ lists your recordings to save as WAV or MP3. ● Loop records into Beat Pads when ▶ plays Pads. <b>CPU</b> by the level meter shows how hard the tablet is working (the app's own work, whether the sound keeps up, and the audio engine's and the tablet's load where the browser reports them); a tap shows the breakdown and switches for the heaviest effects that are on. <b>Log</b> (or G) saves what Live was doing, the last minute of sound and every setting in one zip to send for a fix; its dot means the sound has fallen behind since the last log. <b>Capture</b> turns what you just played on the keys or the Notes and Chords pads (the last phrase, lined up to the bar of what's playing) into a new Garage track with that sound.</p>
+      <p><b>Record input (Smp tab):</b> record from a USB audio interface, the mic or anything plugged in straight into the current slot, with a level meter and an option to chop it onto the pads. MIDI clock out (MIDI sheet) keeps hardware in time with the app.</p>
+      <p><b>Keep 90s:</b> the last 90 seconds of everything you hear are always kept; tap Keep 90s and that moment becomes a take you can export as WAV or MP3, send to the sampler, or put on the Tracks. Nothing needs to be armed in advance.</p>
+      <p><b>Effects:</b> one set of knobs (Drive, Wobble, Echo, Space) plus the <b>FX Lab</b> (<b>Effects · FX Lab</b> at the top of the FX tab, in Keys), applied only to the sounds you switch on in the <b>Apply to</b> row under the knobs: each synth, Drums, Sampler, Pads, Lib &amp; Inst and DJ. Sounds that are off play clean, straight to the output. <b>FX: On/Off</b> switches every effect at once.</p>
+      <p hidden><b>Effects per sound:</b> the Effects panel edits the sound whose tab is open (the label says which): each synth, the drums, the sampler, the pads and the instruments keep their own Drive, Wobble, Echo, Space, on/off and amount, so a dry beat can sit under a washed-out pad. <b>→ All</b> gives every sound the open sound's settings; <b>Per sound / Global</b> switches to one setting for everything. The Mixer's FX switch and the FX Lab stay global.</p>
+      <p><b>Garage:</b> the Garage tab is a GarageBand-style studio, and Nate Bloom's one timeline: audio tracks record the microphone or Nate Bloom itself (everything you play, while the song plays), Import audio adds files, audio regions have Gain & fades, + Automation draws or records a plugin's control, a track's volume can be automated, Play along keeps the song going in a small bar, and → Garage (the take bar, the DJ, Beat Pads) puts audio there. What was in Tracks is a Garage song called Tracks. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
+      <p><b>Beats</b> has two tabs at the top: <b>Grid</b> is the Rhythm Creator and <b>Pads</b> is Beat Pads (16 pads to play, record and chop samples onto; its <b>?</b> explains them). <b>Rhythm Creator</b> (Grid): a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
+      <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
+      <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
+      <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
+      <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
+      <p><b>Playing from a keyboard</b> (Bluetooth or USB) works like GarageBand's Musical Typing, here and in the Garage: <b>A</b> is C at the left edge of the keys, the home row <b>A S D F G H J K L ; '</b> plays the white keys and <b>W E T Y U O P</b> the black keys. <b>Z</b> / <b>X</b> (or <b>↓</b> / <b>↑</b>) move an octave down or up, <b>C</b> / <b>V</b> play softer or harder. On the drums <b>A</b> is the kick, <b>S</b> the snare, <b>D</b> the clap, <b>F</b> the hi-hat, <b>H</b> the open hat, <b>J</b> the tom, <b>W</b> the rim and <b>E</b> the cowbell; the 12 Pads and Beat Pads use the grid of keys that matches the pads on screen. Every key shows its letter. <b>Two rows</b> (the setting at the bottom of this help) gives the older layout instead: three octaves, the Z row and the Q row as the white keys. <b>Space</b> plays the beat, <b>Esc</b> stops, <b>Shift+Enter</b> is Hold, <b>←</b> / <b>→</b> change the tempo, <b>?</b> opens this help. Letters show on the keys once you've played from a keyboard: <button class="btn" id="kbdLabBtn" style="height:28px;padding:0 10px">Letters on keys: On</button></p>
+      <p><b>Playing from a controller:</b> how hard you hit a key sets the level (MIDI → Velocity: Off, Light touch, Normal or Firm); the pitch-bend and mod wheels move the ±2 and Vib wheels, aftertouch adds vibrato as you lean on a key, and the sustain pedal holds notes until you lift it. Plugin instruments get all of it. <b>Hold</b> keeps notes ringing after you let go, so you can play over them or arpeggiate them. <b>Stop</b> stops the beat and what you're playing in Keys, Seq and Notes; the Rhythm Creator, the DJ, Jam loops and Tracks keep going. The red <b>■ Stop all</b> at the top (<b>■ All</b> on a phone, and in the DJ, Rhythm Creator and Tracks bars) stops everything. <b>Play</b> runs the sequencer and the Notes melody.</p>
+      <p>The button next to the tabs (it reads <b>Single notes · Scale off</b> to start) holds <b>Chord</b> (each key plays a chord), <b>Scale</b> (locks the keyboard to a key so nothing sounds wrong) and <b>Blend</b> (softens and overlaps notes). <b>Mix</b> (top) balances every sound, shows a level meter, and has the <b>Effects</b> switch and amount that bypass or scale every effect at once (also on the Effects panel).</p>
+      <p><b>Speech</b> (the Speech tab) talks and sings, after Plogue's Chipspeech: thirteen voices from the machines that first spoke, from Bell Labs' Voder (1939) and the IBM 704 that sang Daisy Bell (1961) to the Speak &amp; Spell, the Votrax and TI chips, SAM, DECtalk, MacInTalk and the Atari ST, each made the way its machine made it. Type the words; each note sings the next syllable (or the next word or line). A dash on its own holds a vowel over another note; [HH AH0 L OW1] gives exact phonemes. Speed shortens the consonants, Formant changes the size of the voice, Grit brings out the chip (past halfway it circuit-bends the Speak &amp; Spell). Words come from the CMU Pronouncing Dictionary.</p>
+      <p><b>Natewave</b> (the Wave tab) is a wavetable synth in the spirit of Massive and Serum. Its eight faders are macros; <b>Edit</b> opens the rest: two oscillators that scan wavetables (a hundred built in, from analog shapes and vowels to FM and phase distortion, or one made from your own sample), each with a warp (bend, sync, mirror, squeeze, crush, FM, fold, ring), unison and width; a sub and noise; two filters (ladder, state-variable, comb, formant) in series, parallel or split; three envelopes; three LFOs that can lock to the tempo. To modulate anything, drag a source from the strip at the bottom onto a knob (or tap the source, then knobs) and drag the knob to set how much; the Mod matrix lists every line and can scale one by another (a macro that sets how much an LFO moves). <b>Mutate</b> changes the sound a little, more or a lot, keeping the sections you lock; ↶ goes back. <b>Make a sound</b> (Osc → wavetable → Yours) turns a sample into a wavetable and copies how it starts, fades and darkens into the envelopes and filter. Natewave's sounds are in the Sound browser under Natewave.</p>
+      <p><b>Your plugins</b> (YOURS in the plugin list): Twin 77, Duet 80, Nebula 80, Hypnagogia, Para Four, Stab 85, Pop 89, Unicorn Dream, Fuzz Bass and the Ballad Kit 88 drum kit, and the Glitch Starter effect, built from your own CLAP and nih-plug code, so they sound as they do in Bitwig. They follow Nate Bloom's tempo; Glitch Starter glitches while the sequencer plays, and plays C, D, E, F, G as stutter, reverse, tape stop, crush, gate.</p>
+      <p><b>Playing sounds together</b>: the <b>Playing</b> row (Synths; it appears once two or more sounds play together) shows every sound the keys play, and the sequencer and MIDI play them all too. Under it, <b>Quick</b> has the engines and the sounds you keep there: tap one to play it alone, <b>+</b> to play it with what's playing, <b>✓</b> to stop it; ✎ chooses what's in the row (your sounds, which engines show, + any sound from the list). The <b>+</b> on a Quick sound, or <b>+ Together</b> next to any sound in the sound list or in Plugins, adds one: Nate Bloom's synth engines, Studio instruments, library sounds, plugins (yours too), your SF2/SFZ instrument and a Sampler slot, in any mix. Tap a sound in the row to see its controls; ✕ stops that one; <b>Only …</b> keeps just the highlighted one; ⚙ opens a plugin's own panel. Tapping a sound in the sound list (or <b>Play alone</b> in Plugins) plays it by itself and stops the rest; the ‹ › arrows swap the highlighted one. Each has its own fader in Mix, and picking a plugin never plays a note by itself.</p>
+      <p><b>⚡ Fast plugins</b> (in the apps, at the top of Plugins): your own plugins (YOURS) play from the app's low-latency audio, the way the fast pads do, so they answer sooner when you play them live. While it's on, Nate Bloom's effects, Takes and Tracks don't hear them; turn it off to record them.</p>
+      <p><b>Link</b> (in the apps): the tablet app and the Linux app on the same Wi-Fi. On the computer, Link → Turn on. On the tablet, ☰ → Link → Find computers, pick it and type the code the computer shows (only the first time). Then send this project either way, and with Play together on, both share one tempo and Play and Stop start and stop both at the same moment.</p>
+      <p><b>Ableton Link</b> (in the apps, under Link): Nate Bloom joins the Link session on your network, with Bitwig, Live and the other Link apps. The tempo follows both ways, the sequencer and the Rhythm Creator stay on the session's beats, and Play waits for the next bar so it starts on the beat with the others (if they're already playing, it comes in on the next 16th). With Start/Stop Sync on, Play and Stop here start and stop them too, and theirs start and stop Nate Bloom. In Bitwig: Settings → Synchronization → Sync Method: Link, then the Link button by the transport.</p>
+      <p><b>Studio</b> (in the sound browser) has real recorded instruments that download the first time you pick one: pianos (the grand also with 3 velocity layers, and an upright), strings, double bass, harp, mallets, brass, woodwinds and a pipe organ. Instruments with velocity layers play a softer recording, not just a quieter one, when you play gently on a MIDI keyboard or lower a note's velocity in the piano roll.</p>
+      <p><b>Plugin controls</b>: in MIDI learn, tap Plugin control… to pick any loaded plugin's control, then move a knob on your controller. In the Garage, + Automation adds a lane for a plugin control: draw its moves with your finger, or press ● on the lane and turn the control (in the plugin's panel or with a learned knob) while Tracks plays; ● records over what's there, so turn it off to hear the lane play back. A on the lane turns it off and on; ✕ removes it (↶ brings it back).</p>
+      <p><b>Undo and redo</b>: ↶ in the top bar (or Ctrl+Z; Ctrl+Shift+Z redoes) takes back the last change wherever it was: the sound (knobs, presets, engines, effects), Notes, the Seq pattern, the Rhythm Creator, Beat Pads and the Garage. The full screens (Beats and the Garage) have the same ↶ in their top bar, for the changes you made there. History (☰) lists the changes, newest first, with Undo and Redo; tap one to go back to just before it.</p>
+      <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
+      <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
+      <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
+      <p><b>New shell</b> (the rebuild, stage 0): a skeleton of the three spaces, Play · Build · Set up, and the strip across the top, behind a switch. The interface you know stays underneath, untouched. <button class="btn" id="shellBtn" style="height:28px;padding:0 10px">New shell: Off</button></p>
+      <p><b>☰</b> (top right) holds Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
+      <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
+    </div>
+    <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
+    <div class="sp-lab"><span>Keyboard shortcuts</span></div>
+    <div class="help-grid">
+      <kbd>A S D F … / W E T …</kbd><span>play notes (Musical Typing): the home row is the white keys, the row above the black keys</span>
+      <kbd>Z / X</kbd><span>octave down / up</span>
+      <kbd>C / V</kbd><span>softer / harder</span>
+      <kbd>Space</kbd><span>play / pause</span>
+      <kbd>Esc</kbd><span>stop everything, or close a sheet</span>
+      <kbd>↓ / ↑</kbd><span>octave down / up</span>
+      <kbd>← / →</kbd><span>tempo down / up</span>
+      <kbd>Shift+Enter</kbd><span>Hold on / off</span>
+      <kbd>`</kbd><span>every effect off / on (Effects and FX Lab), on any screen</span>
+      <kbd>?</kbd><span>this help</span>
+    </div>
+    <p class="help-lic">Nate Bloom is free software under the GNU General Public License, version 3 or later, and comes with no warranty. Its source, and the licences of what it includes (Ableton Link is © Ableton AG, under the GPL version 2 or later), are at <a href="https://github.com/nathan-san1981/nate-bloom" target="_blank" rel="noopener">github.com/nathan-san1981/nate-bloom</a> (NOTICE.md).</p>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="hapticBtn" aria-pressed="true">Vibrate on taps: On</button><button class="btn big primary" id="helpDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="tabMenu" hidden>
+  <div class="ed-card" role="dialog" aria-label="Tab options">
+    <div class="ed-head"><strong id="tmTitle">Tab</strong><span class="ed-info">long-press any tab for these</span></div>
+    <div class="tm-list" id="tmList"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="tmCancel">Cancel</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="nameSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Name">
+    <div class="ed-head"><strong id="nsTitle">Name this sound</strong></div>
+    <input id="nsInput" type="text" maxlength="40" aria-label="Name" autocomplete="off">
+    <div class="ed-foot sheet-foot"><button class="btn big" id="nsCancel">Cancel</button><button class="btn big primary" id="nsOk">Save</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="beats" hidden>
+  <div class="ed-card" role="dialog" aria-label="808 beats">
+    <div class="ed-head"><strong>Drum Beats</strong></div>
+    <span class="ed-info" id="btInfo" style="text-align:left"></span>
+    <div class="ly-quick">
+      <label class="bt-tempo"><input type="checkbox" id="btTempo"> Use each beat's tempo</label>
+      <button class="btn" id="btUndo" disabled>Undo last beat</button>
+    </div>
+    <div class="bt-filter" id="btFilter" role="group" aria-label="Beat styles"></div>
+    <div class="bt-list" id="btList"></div>
+    <div class="ed-foot sheet-foot">
+      <button class="btn big" id="btCancel">Cancel</button>
+      <button class="btn big primary" id="btUse" disabled>Use this beat</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor" id="layers" hidden>
+  <div class="ed-card" role="dialog" aria-label="Layers and key zones">
+    <div class="ed-head"><strong>Layers &amp; zones</strong></div>
+    <span class="ed-info" id="lyInfo" style="text-align:left"></span>
+    <div class="ly-quick">
+      <button class="btn" id="lyLayer">Layer all</button>
+      <button class="btn" id="lySplit">Split at C4</button>
+      <button class="btn" id="lySpread">Spread across keys</button>
+    </div>
+    <div id="lyParts"></div>
+    <div class="ed-foot"><button class="btn demo" data-demo="sound">▶ Demo</button><button class="btn primary" id="lyDone">Done</button></div>
+  </div>
+</div>
+
+<div class="browser" id="browser" hidden>
+  <div class="br-head">
+    <strong>Sounds</strong>
+    <input id="brSearch" type="search" placeholder="Search sounds" aria-label="Search sounds" autocomplete="off">
+    <button class="btn primary" id="brDone">Done</button>
+  </div>
+  <div class="br-cats" id="brCats" role="group" aria-label="Sound categories"></div>
+  <div class="br-mode" id="brMode" hidden></div>
+  <div class="br-list" id="brList"></div>
+  <div class="br-foot">▶ plays a quick preview · tap a name: it plays alone · + together: it plays with what's playing · ☆ saves a favorite<br>Library: GeneralUser GS by S. Christian Collins, FluidR3 by Frank Wen, JCLive, Chaos and more, converted by WebAudioFont (MIT)</div>
+</div>
+
+<div class="editor sheet" id="lineSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Record from an input">
+    <div class="ed-head"><strong>Record from an input</strong><span class="ed-info">goes to the current sampler slot</span></div>
+    <span class="ed-info" style="text-align:left">A USB audio interface, the tablet's mic, the K.O. II or anything plugged in. Pick the input, play something and watch the meter (aim below the line), then Record. Up to 60 seconds.</span>
+    <div class="ly-quick"><select id="lineDev" aria-label="Input" style="flex:1;min-width:0"></select><button class="btn" id="lineRefresh" title="Look for inputs again">↻</button></div>
+    <canvas id="lineMeter" aria-label="Input level" style="width:100%;height:14px;border-radius:7px;background:#0f0d16"></canvas>
+    <div class="ly-quick"><label class="dj-lab" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="lineTrim" checked> trim silence</label><label class="dj-lab" style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="lineChop"> also chop onto 8 pads</label></div>
+    <span class="ed-info" id="lineStatus" style="text-align:left"></span>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="lineDone">Done</button><button class="btn big primary" id="lineRec" aria-pressed="false">● Record</button></div>
+  </div>
+</div>
+
+<div class="editor" id="editor" hidden>
+  <div class="ed-card" role="dialog" aria-label="Sample editor">
+    <div class="ed-head"><strong id="edTitle">Edit</strong><span class="ed-info" id="edInfo"></span></div>
+    <canvas id="edWave" aria-label="Waveform. Drag to select part of the sample."></canvas>
+    <div class="ed-grid">
+      <button class="btn" id="edPlay">▶ Play</button>
+      <button class="btn" id="edAll">Select all</button>
+      <button class="btn" id="edTrim">Trim</button>
+      <button class="btn" id="edCut">Cut</button>
+      <button class="btn" id="edRev">Reverse</button>
+      <button class="btn" id="edNorm">Normalize</button>
+      <button class="btn" id="edFadeIn">Fade in</button>
+      <button class="btn" id="edFadeOut">Fade out</button>
+      <button class="btn" id="edDown">−3 dB</button>
+      <button class="btn" id="edUp">+3 dB</button>
+      <button class="btn" id="edUndo">Undo</button>
+      <button class="btn" id="edRevert">Revert</button>
+    </div>
+    <div class="ed-legend">Drag on the wave to select part · <b>Trim</b> keeps the selection, <b>Cut</b> removes it · <b>Save</b> puts it back in the slot</div>
+    <div class="ed-row">
+      <span class="lab2">Chop</span>
+      <label class="meter"><select id="edChopN" aria-label="Number of pads"><option value="4">4 pads</option><option value="8" selected>8 pads</option><option value="12">12 pads</option></select></label>
+      <div class="seg small" role="group" aria-label="Chop method">
+        <button id="edEven" aria-pressed="false">Even</button>
+        <button id="edHits" aria-pressed="true">Hits</button>
+      </div>
+      <button class="btn" id="edChop">Chop → Pads</button>
+      <button class="btn" id="edToPad">Selection → P1</button>
+    </div>
+    <div class="ed-foot">
+      <button class="btn" id="edCancel">Cancel</button>
+      <button class="btn primary" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="editor sheet" id="smartSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Smart mix">
+    <div class="ed-head"><strong>✦ Smart mix</strong><span class="ed-info" id="smSub"></span></div>
+    <div class="sm-body" id="smBody"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big" id="smCancel">Cancel</button><button class="btn big primary" id="smGo">Start the mix</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="wamSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugins">
+    <div class="ed-head"><strong>Plugins</strong></div>
+    <span class="ed-info" style="text-align:left">Web Audio Modules, the web's version of VSTs: they run on every device Nate Bloom does. Instruments play from the keys, the sequencer and MIDI. Effects go on the whole mix, on one sound, or on a send (Send A, Send B) that every sound can feed.</span>
+    <div class="wam-list" id="wamList"></div>
+    <div class="ed-foot"><button class="btn primary" id="wamDone">Done</button></div>
+  </div>
+</div>
+<div class="wam-dock" id="wamGui" hidden>
+  <div class="ed-card" role="dialog" aria-label="Plugin controls">
+    <div class="ed-head"><strong id="wamGuiTitle">Plugin</strong><span class="ed-info" id="wamGuiSub"></span><button class="btn primary" id="wamGuiDone">Done</button></div>
+    <div class="wam-gui" id="wamGuiBox"></div>
+  </div>
+</div>
+<div class="editor sheet" id="menuSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Menu">
+    <div class="ed-head"><strong>Menu</strong></div>
+    <div class="menu-grid" id="menuGrid"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="menuDone">Done</button></div>
+  </div>
+</div>
+
+<div class="editor sheet" id="playSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="How the keys play">
+    <div class="ed-head"><strong>How the keys play</strong></div>
+    <div class="ps-body" id="psBody"></div>
+    <div class="ed-foot sheet-foot"><button class="btn big primary" id="psDone">Done</button></div>
+  </div>
+</div>
+
+<div class="start" id="start">
+  <div class="start-card">
+    <h2>Nate Bloom</h2>
+    <p class="start-sub">Synths, drums, samples, a sequencer, DJ decks and a drum machine.</p>
+    <button class="btn" id="startBtn">Tap to start sound</button>
+    <p style="font-size:0.78rem">Plays with the silent switch on or off. No sound? Raise the volume. Help is under <b>?</b>.</p>
+  </div>
+</div>
+

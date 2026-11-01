@@ -3094,6 +3094,23 @@ body.dj-on > .app { visibility: hidden; }
 .lv-pick-back { position: fixed; inset: 0; z-index: 27; background: rgba(10, 8, 16, 0.6); } .lv-pick-back[hidden] { display: none; }
 .lv-note.bad { color: #ffb0b0; }
 .lv-tr { flex-wrap: nowrap; align-items: flex-start; } .lv-tr > .lv-st { margin-top: 5px; } .lv-tr > span + span { flex: 1 1 auto; min-width: 0; }
+/* 154: the new shell, stage 0: a skeleton behind a switch */
+#shell { position: fixed; inset: 0; z-index: 45; background: #13111b; color: #ece8f4; display: flex; flex-direction: column; }
+#shell[hidden] { display: none; }
+.sh-strip { display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04); min-height: 40px; flex-wrap: wrap; }
+.sh-spaces { display: flex; gap: 4px; }
+.sh-sp { background: none; border: 0; color: inherit; opacity: 0.6; font: inherit; font-size: 1.05rem; padding: 6px 10px; border-radius: 8px; }
+.sh-sp.on { opacity: 1; font-weight: 700; background: rgba(255, 255, 255, 0.1); }
+.sh-mid { flex: 1 1 auto; text-align: center; font-variant-numeric: tabular-nums; opacity: 0.9; min-width: 120px; }
+.sh-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sh-dot { opacity: 0.45; padding-left: 14px; position: relative; font-size: 0.85rem; }
+.sh-dot::before { content: ""; position: absolute; left: 0; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #777; }
+.sh-dot.on { opacity: 1; } .sh-dot.on::before { background: #7fe0a5; }
+.sh-out { font-size: 0.85rem; opacity: 0.8; }
+.sh-body { flex: 1 1 auto; padding: 24px; max-width: 720px; overflow: auto; }
+.sh-stage { font-size: 0.85rem; opacity: 0.7; margin-bottom: 18px; }
+.sh-body h2 { margin: 0 0 8px; font-size: 1.6rem; } .sh-body p { line-height: 1.5; opacity: 0.9; }
+.sh-row { margin-top: 20px; }
 /* 149: Log on every screen */
 .nb-log { display: inline-flex; align-items: center; gap: 7px; position: relative; }
 @media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
@@ -4349,6 +4366,7 @@ body.lite .pwr[aria-pressed="true"], body.lite .tabwrap.eng .tab.playing:not([ar
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
+      <p><b>New shell</b> (the rebuild, stage 0): a skeleton of the three spaces, Play · Build · Set up, and the strip across the top, behind a switch. The interface you know stays underneath, untouched. <button class="btn" id="shellBtn" style="height:28px;padding:0 10px">New shell: Off</button></p>
       <p><b>☰</b> (top right) holds Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
     </div>
@@ -31607,6 +31625,121 @@ registerProcessor("nb-rec", NBRec);`;
     if (window.__live12) window.__live12.gearSnd = gearSnd;
     (window.__nbReportExtras = window.__nbReportExtras || []).push(() => { const d = tabletDiag(); return { tablet: d, tabletNotes: tabletNotes(d).map(x => x[1]) }; });
     window.__live18 = { GEAR, openGearAnywhere, tabletDiag, tabletNotes, tabletHTML, sameGear, verLess };
+    // ======================================================================
+    // 154, stage 0 of the rebuild: the state document and the new-shell switch. One JSON document describes the whole
+    // instrument (rig, transport, stack, mixer, FX, pads, set list, jam, health), each section with a version that
+    // bumps when it changes. Anything (the Pixelbook, a report, the new shell) reads it; changes go through intents
+    // that the tablet applies or refuses with the current value (the tablet wins every conflict). Stage 0 reads it
+    // from today's objects and applies a handful of intents; the switch (Help → New shell, or ?shell=new) shows an
+    // empty skeleton of the three spaces and the strip, off by default. Reports carry the document.
+    // ======================================================================
+    const NBS = { ver: 0, secs: {}, doc: null, at: 0, subs: new Set(), timer: 0, perms: null, log: [] };
+    const nbsTry = (f, d) => { try { const v = f(); return v === undefined ? d : v; } catch (e) { return d; } };
+    function nbsPerms() {
+      if (!NBS.perms) { NBS.perms = { levels: "always", scenes: "always", sound: "between-songs" }; try { Object.assign(NBS.perms, JSON.parse(localStorage.getItem("nb-perms") || "{}")); } catch (e) {} }
+      return NBS.perms;
+    }
+    function nbsRead() {   // today's objects, read into the document's shape
+      const S = nbsTry(lkState, null) || {}, d = nbsTry(tabletDiag, null), gear = S.gear || {}, song = S.song || {};
+      const outName = nbsTry(() => (ctx && ctx.sinkId) ? String(ctx.sinkId) : (d && d.media && d.media.length ? d.media.join(", ") : "system default"), "system default");
+      return {
+        rig: { minilab: !!gear.ml, ko2: !!gear.ko, pixelbook: !!nbsTry(lkUp, false), computerKeys: nbsTry(() => !!__live4.capsOn(), false), sync: gear.sync || "off",
+          out: outName, devices: nbsTry(() => ADEV.list.slice(0, 12), []), volume: d && d.volume ? { music: d.volume.music, max: d.volume.max } : null,
+          buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, android: !!window.NB_NATIVE, app: nbsTry(() => String(NBNativeBridge.version()), ""), purist: d && d.purist ? d.purist : "" },
+        transport: { tempo: S.bpm == null ? nbsTry(rcBpm, null) : S.bpm, playing: S.on || {}, target: S.play || "", live: !!S.live, key: { root: scl.key, scale: scl.scale }, octave: state.octave, rec: S.rec == null ? null : S.rec },
+        stack: { layers: (S.layers || []).map(l => ({ name: l.n, arp: !!l.a })), sound: S.sound || {} },
+        mixer: nbsTry(() => mixChannels().map(c => ({ group: c.group, name: c.name, sub: c.sub || "", level: Math.round(c.get() * 1000) / 1000, dflt: c.dflt })), []),
+        fx: { on: state.fx.on !== false },
+        knobs: S.kp || {}, pads: S.pads || {}, keys: { hold: !!S.hold, held: S.held || [], arp: S.arp || {} },
+        setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm })), []) },
+        jam: S.jam || {},
+        health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []) },
+        perms: Object.assign({}, nbsPerms()), ctl: S.ctl !== false,
+      };
+    }
+    function nbsRefresh(force) {   // re-read; bump the versions of the sections that changed; tell the subscribers
+      const now = performance.now(); if (!force && NBS.doc && now - NBS.at < 100) return NBS.doc;
+      const fresh = nbsRead(), changed = [];
+      Object.keys(fresh).forEach(k => { const s = JSON.stringify(fresh[k]), sec = NBS.secs[k]; if (!sec) { NBS.secs[k] = { ver: ++NBS.ver, json: s }; changed.push(k); } else if (sec.json !== s) { sec.json = s; sec.ver = ++NBS.ver; changed.push(k); } });
+      NBS.doc = fresh; NBS.at = now;
+      if (changed.length && NBS.subs.size) NBS.subs.forEach(f => { try { f(nbsGet(), changed); } catch (e) {} });
+      return fresh;
+    }
+    function nbsGet() { const d = nbsRefresh(false); const o = { schema: 1, ver: NBS.ver, secs: {} }; Object.keys(NBS.secs).forEach(k => { o.secs[k] = NBS.secs[k].ver; }); return Object.assign(o, d); }
+    function nbsSubscribe(f) {
+      NBS.subs.add(f); if (!NBS.timer) NBS.timer = setInterval(() => { if (!document.hidden) nbsRefresh(true); }, 250);
+      try { f(nbsGet(), Object.keys(NBS.secs)); } catch (e) {}
+      return () => { NBS.subs.delete(f); if (!NBS.subs.size && NBS.timer) { clearInterval(NBS.timer); NBS.timer = 0; } };
+    }
+    function nbsIntent(it) {   // {path, value, index?, base?}: applied, or refused with the current value
+      const no = (msg, sec) => { const r = { ok: false, msg, ver: NBS.ver }; if (sec) r.value = nbsGet()[sec]; return r; };
+      const ok = (msg, sec) => { nbsRefresh(true); NBS.log.push([Math.round(performance.now() / 1000), it.path, msg]); if (NBS.log.length > 40) NBS.log.shift(); add139("state", it.path + " · " + msg); return { ok: true, msg, ver: NBS.ver, value: sec ? nbsGet()[sec] : undefined }; };
+      if (!it || typeof it !== "object" || typeof it.path !== "string") return no("not an intent");
+      const sec = it.path.split(".")[0], P = nbsPerms();
+      if (it.base != null && NBS.secs[sec] && it.base < NBS.secs[sec].ver) return no("changed on the tablet since: look again", sec);
+      switch (it.path) {
+        case "fx.on": setFxOn(!!it.value); return ok("effects " + (it.value ? "on" : "off"), "fx");
+        case "transport.tempo": { const b = Math.round(+it.value); if (!(b >= 50 && b <= 180)) return no("tempo is 50 to 180", "transport"); setBpm(b); return ok(b + " bpm", "transport"); }
+        case "mixer.level": {
+          if (P.levels !== "always") return no("levels from the Pixelbook are off (Set up → Pixelbook)", "mixer");
+          const i = it.index | 0, c = nbsTry(() => mixChannels()[i], null); if (!c) return no("no channel " + i, "mixer");
+          const v = Math.max(0, Math.min(2, +it.value || 0)); c.set(v); try { save(); } catch (e) {} try { if (!$id("mixer").hidden) renderMixer(); } catch (e) {}
+          return ok(c.name + " to " + Math.round(v * 100) + "%", "mixer");
+        }
+        case "setlist.go": {
+          if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist");
+          const i = it.index | 0; if (!(i >= 0 && i < SL.songs.length)) return no("no song " + (i + 1), "setlist");
+          songGo(i); return ok("song " + (i + 1) + (nbsTry(nextBarIn, null) == null ? "" : " on the next bar"), "setlist");
+        }
+        case "setlist.next": { if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist"); const i = SL.cur + 1; if (i >= SL.songs.length) return no("that was the last song", "setlist"); songGo(i); return ok("song " + (i + 1), "setlist"); }
+        case "perms": { const v = it.value || {}; ["levels", "scenes", "sound"].forEach(k => { if (typeof v[k] === "string") P[k] = v[k]; }); try { localStorage.setItem("nb-perms", JSON.stringify(P)); } catch (e) {} return ok("permissions saved", "perms"); }
+      }
+      return no("unknown intent " + it.path);
+    }
+    (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ stateDoc: nbsGet(), stateLog: NBS.log }));
+    window.NBState = { schema: 1, get: nbsGet, refresh: () => nbsRefresh(true), subscribe: nbsSubscribe, intent: nbsIntent, perms: nbsPerms, get ver() { return NBS.ver; } };
+    // ---- the new-shell switch ----
+    const SH = { on: false, el: null, space: "play", unsub: null };
+    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q === "new"; return localStorage.getItem("nb-shell") === "new"; } catch (e) { return false; } };
+    const SH_TEXT = {
+      play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
+      build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
+      setup: ["Set up", "Stage 1 brings the rig here: Sound check, MIDI, Gear, Pixelbook, Projects, App and Help, plus Find over everything."],
+    };
+    function shBuild() {
+      if (SH.el) return SH.el;
+      const el = document.createElement("div"); el.id = "shell"; el.hidden = true;
+      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp" data-sp="setup">Set up</button></div>
+        <div class="sh-mid" id="shMid"></div>
+        <div class="sh-right"><span class="sh-dot" data-k="minilab">MiniLab</span><span class="sh-dot" data-k="ko2">K.O. II</span><span class="sh-dot" data-k="pixelbook">Pixelbook</span><span class="sh-out" id="shOut"></span><button type="button" class="btn" id="shLog">Log</button><button type="button" class="btn" id="shFind" disabled title="Find comes in stage 1">Find</button></div></div>
+        <div class="sh-body"><div class="sh-stage">Stage 0 · the new shell is a skeleton behind a switch. The current interface is untouched underneath it.</div><h2 id="shTitle"></h2><p id="shText"></p>
+        <div class="sh-row"><button type="button" class="btn primary" id="shBack">Back to the current interface</button></div></div>`;
+      document.body.appendChild(el); SH.el = el;
+      el.querySelectorAll(".sh-sp").forEach(b => b.addEventListener("click", () => { SH.space = b.dataset.sp; shPaint(); }));
+      $id("shBack").addEventListener("click", () => shellSet(false));
+      $id("shLog").addEventListener("click", () => { try { __live14.logTap("shell"); } catch (e) {} });
+      return el;
+    }
+    function shPaint(doc) {
+      if (!SH.el || SH.el.hidden) return; const d = doc || nbsGet(), t = d.transport || {}, r = d.rig || {};
+      SH.el.querySelectorAll(".sh-sp").forEach(b => b.classList.toggle("on", b.dataset.sp === SH.space));
+      const key = t.key && t.key.scale && t.key.scale !== "off" ? " · " + (nbsTry(() => nnm(t.key.root * 1 + 60).replace(/\d+$/, ""), "") + " " + t.key.scale) : "";
+      const on = Object.keys(t.playing || {}).filter(k => t.playing[k]);
+      nbT($id("shMid"), (t.tempo == null ? "" : Math.round(t.tempo) + " bpm") + key + (on.length ? " · playing: " + on.join(", ") : " · stopped"));
+      SH.el.querySelectorAll(".sh-dot").forEach(s => s.classList.toggle("on", !!r[s.dataset.k]));
+      nbT($id("shOut"), "out: " + (r.out || "?") + (d.health && d.health.dropouts ? " · " + d.health.dropouts + " drops" : ""));
+      const tx = SH_TEXT[SH.space] || SH_TEXT.play; nbT($id("shTitle"), tx[0]); nbT($id("shText"), tx[1]);
+    }
+    function shellSet(on) {
+      SH.on = !!on; try { localStorage.setItem("nb-shell", on ? "new" : "old"); } catch (e) {}
+      const el = shBuild(); el.hidden = !on; document.body.classList.toggle("shell-new", !!on);
+      if (on) { if (!SH.unsub) SH.unsub = nbsSubscribe(d => shPaint(d)); shPaint(); } else if (SH.unsub) { SH.unsub(); SH.unsub = null; }
+      const b = $id("shellBtn"); if (b) nbT(b, "New shell: " + (on ? "On" : "Off"));
+      add139("shell", on ? "new shell on" : "new shell off");
+    }
+    { const b = $id("shellBtn"); if (b) b.addEventListener("click", () => shellSet(!SH.on)); }
+    if (shWant()) { const go = () => setTimeout(() => shellSet(true), 50); if ($id("start").hidden) go(); else $id("startBtn").addEventListener("click", go); }   // (after "Tap to start sound")
+    window.__live19 = { NBS, SH, nbsRead, nbsIntent, shellSet, shPaint };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
