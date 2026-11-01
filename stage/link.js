@@ -8,6 +8,8 @@
    L.send(type, data, { lossy })   lossy: may be dropped through the brokers (meters, frequent state)
    L.mode    "off" | "looking" (no tablet/stage yet) | "connecting" (found, making a direct line) | "direct" | "relay"
    L.offset  (stage) the tablet's performance.now() minus ours, in ms;  L.rtt  round trip in ms
+   L.setAudio(track)   (tablet, 160) the audio track sent on the direct line (null: none); opt.onAudio(stream) (stage)
+   L.stats()           a summary of the direct line's audio: bytes, packets, lost, jitter
    L.close() */
 (function () {
   "use strict";
@@ -110,7 +112,16 @@
     }
     // ---- the direct connection ----
     const direct = () => !!(dc && dc.readyState === "open");
-    function dropPc() { try { dc && dc.close(); } catch (e) {} try { pc && pc.close(); } catch (e) {} dc = null; pc = null; if (L.mode === "direct") setMode(L.peer ? "relay" : "looking"); }
+    function dropPc() { try { dc && dc.close(); } catch (e) {} try { pc && pc.close(); } catch (e) {} dc = null; pc = null; L.audioTx = null; if (L.audioStream) { L.audioStream = null; try { opt.onAudio && opt.onAudio(null); } catch (e) {} } if (L.mode === "direct") setMode(L.peer ? "relay" : "looking"); }
+    // (160) the audio line: stereo Opus at 192 kbit/s, for the Pixelbook's recording and pictures, never for what you hear
+    function stereoOpus(sdp) {
+      try {
+        const m = /a=rtpmap:(\d+) opus\/48000\/2/i.exec(sdp); if (!m) return sdp;
+        const pt = m[1], re = new RegExp("a=fmtp:" + pt + " ([^\\r\\n]*)"), add = "stereo=1;sprop-stereo=1;maxaveragebitrate=192000;maxplaybackrate=48000;useinbandfec=1";
+        if (re.test(sdp)) return sdp.replace(re, (all, params) => "a=fmtp:" + pt + " " + params.split(";").map(x => x.trim()).filter(x => x && !/^(stereo|sprop-stereo|maxaveragebitrate|maxplaybackrate|useinbandfec)=/.test(x)).concat([add]).join(";"));
+        return sdp.replace(m[0], m[0] + "\r\na=fmtp:" + pt + " " + add);
+      } catch (e) { return sdp; }
+    }
     function newPc() {
       dropPc();
       if (opt.rtc === false || typeof RTCPeerConnection === "undefined") return null;
@@ -130,12 +141,14 @@
       if (now() - offerAt < 4000 || L.closed) return; offerAt = now();
       const p = newPc(); if (!p) return;
       wire(p.createDataChannel("nb", { ordered: true }));
-      try { await p.setLocalDescription(await p.createOffer()); await gathered(p); if (p === pc) sign("offer", { type: "offer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
+      if (opt.audio !== false) { try { L.audioTx = p.addTransceiver("audio", { direction: "sendonly" }); if (L.sendTrack) L.audioTx.sender.replaceTrack(L.sendTrack).catch(() => {}); } catch (e) { L.audioTx = null; } }
+      try { const o = await p.createOffer(); await p.setLocalDescription({ type: "offer", sdp: stereoOpus(o.sdp) }); await gathered(p); if (p === pc) sign("offer", { type: "offer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
     }
     async function answer(sdp) {
       const p = newPc(); if (!p) return;
       p.ondatachannel = e => { if (p === pc) wire(e.channel); };
-      try { await p.setRemoteDescription(sdp); await p.setLocalDescription(await p.createAnswer()); await gathered(p); if (p === pc) sign("answer", { type: "answer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
+      p.ontrack = e => { if (p !== pc || !e.track || e.track.kind !== "audio") return; const s = (e.streams && e.streams[0]) || new MediaStream([e.track]); L.audioStream = s; try { opt.onAudio && opt.onAudio(s, e.track); } catch (x) {} };
+      try { await p.setRemoteDescription(sdp); const a = await p.createAnswer(); await p.setLocalDescription({ type: "answer", sdp: stereoOpus(a.sdp) }); await gathered(p); if (p === pc) sign("answer", { type: "answer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
     }
     // ---- through the brokers, while there's no direct line ----
     function checkRelay() {   // (a few seconds to make a direct line first; then the brokers carry it)
@@ -158,6 +171,18 @@
       if (L.mode !== "relay") return false;
       if (o && o.lossy) { const s = Math.floor(now() / 1000); if (relayBudget.t !== s) { relayBudget.t = s; relayBudget.n = 0; } if (++relayBudget.n > (opt.relayPerSec || 6)) return false; }
       L.sentRelay++; sign("app", { t, d }, L.peer); return true;
+    };
+    L.setAudio = track => { L.sendTrack = track || null; const tx = L.audioTx; if (tx && pc && tx.sender) { try { tx.sender.replaceTrack(L.sendTrack).catch(() => {}); } catch (e) {} } return !!(tx && pc); };
+    L.stats = async () => {
+      if (!pc) return null;
+      try {
+        const out = { direct: direct(), inbound: null, outbound: null };
+        (await pc.getStats()).forEach(r => {
+          if (r.type === "inbound-rtp" && r.kind === "audio") out.inbound = { bytes: r.bytesReceived || 0, packets: r.packetsReceived || 0, lost: r.packetsLost || 0, jitterMs: Math.round((r.jitter || 0) * 1000), concealed: r.concealedSamples || 0, codec: r.codecId || "" };
+          if (r.type === "outbound-rtp" && r.kind === "audio") out.outbound = { bytes: r.bytesSent || 0, packets: r.packetsSent || 0 };
+        });
+        return out;
+      } catch (e) { return null; }
     };
     L.close = () => {
       if (L.closed) return; L.closed = true;

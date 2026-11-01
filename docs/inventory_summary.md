@@ -183,3 +183,8 @@ Source: `/home/claude/night-bloom-site/index.html` (read-only). Rows in `invento
 - Every full screen has a `[data-stopall]` ■ All button and a Log button (hdrLog, rcLog, bpLog, gbLog, lvLog, djLog) sharing one red dropout dot; the Strip must keep both.
 - 'Keep 90s' lives in three places today: keepBtn (transport), djKeep (DJ ⋯) and Live's Sample 'What you just heard'; one Build transport control can cover all three.
 - Live's `lvRec` button is now ● Loop (records into Beat Pads when ▶ plays Pads); the audio recorder is `lvTake` (● Rec) with `lvTakes` (▾ recordings list). Both must survive in Play's bottom bar.
+
+
+## Checked off (build 161, stage 5)
+
+Every row's new home exists on the page or on Stage: **336 done**, 1 n/a (a conditional row that turned out not to be needed), 0 open. Two columns were added to `inventory.csv`: `status` and `checked` (where the row is reached now). What "done" means here: the control still exists and its home is built — Build's seven tabs host today's screens whole (the synth editor, Beat Pads, the Rhythm Creator, the sampler, Song mode, the Garage and Tracks, DJ), so a control that lived on one of those screens is reached through the tab. The old header, the mode buttons, the tool row and the ☰ menu are parked out of sight rather than deleted, so nothing that still works by tapping them has broken; deleting them for size is the remaining clean-up.

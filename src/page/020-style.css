@@ -3211,3 +3211,45 @@ body.shell-new .lv-pick.standalone.drawer { top: 84px !important; }
 @media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
 @media (max-width: 1500px) { header #hdrLog span { display: none; } header #hdrLog { padding: 0 11px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* 161 (stage 5): Build, the bar under the strip; the old chrome parked; the browser and the mixer as drawers */
+#buildBar { position: fixed; top: 40px; left: 0; right: 0; height: 44px; z-index: 44; background: #171422; color: #ece8f4; display: flex; align-items: center; gap: 8px; padding: 0 8px; box-sizing: border-box; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+#buildBar[hidden] { display: none; }
+.bd-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 0 1 auto; min-width: 0; } .bd-tabs::-webkit-scrollbar { display: none; }
+.bd-tab { height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid transparent; background: none; color: #b7afcc; font: 600 0.88rem var(--font-body, system-ui); white-space: nowrap; cursor: pointer; }
+.bd-tab[aria-selected="true"] { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.16); color: #fff; }
+.bd-sub { display: flex; gap: 4px; flex: 0 0 auto; } .bd-sub:empty { display: none; }
+.bd-subtab { height: 28px; padding: 0 10px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.14); background: none; color: #b7afcc; font: 600 0.78rem var(--font-body, system-ui); white-space: nowrap; cursor: pointer; }
+.bd-subtab[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+.bd-right { margin-left: auto; display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.bd-right .btn { height: 32px; padding: 0 10px; font-size: 0.84rem; }
+.bd-right .btn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+.bd-tr { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.bd-tr .bd-play { min-width: 44px; font-size: 1rem; } .bd-tr .bd-play[aria-pressed="true"] { background: var(--teal, #7fd6c2); border-color: var(--teal, #7fd6c2); color: #0d1a16; }
+.bd-tr .bd-stop { color: #ff8a9a; } .bd-tr .bd-rec { color: #ff8a9a; }
+.bd-tr .bd-bpm { width: 30px; padding: 0; } .bd-tr b { min-width: 34px; text-align: center; font: 700 0.9rem var(--font-mono, monospace); }
+body.build-on .app { padding-top: 94px; }
+body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser { top: 84px; }
+body.build-on.mls-on .app { padding-top: calc(94px + var(--mls-h)); }
+body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(84px + var(--mls-h)); }
+body.build-on .mls { top: 84px; }
+body.build-on .lv-pick.standalone.drawer { top: 84px !important; }
+/* the old chrome: parked out of sight, still there for the code that taps it */
+body.shell-new .app > header, body.shell-new #toolRow, body.shell-new #nowBar { position: absolute !important; left: -9999px !important; top: 0 !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+body.shell-new .app { padding-top: 50px; }
+/* the mixer as a drawer from the bottom in Build */
+body.build-on #mixer { top: auto !important; bottom: 0; height: min(60vh, 520px); } body.build-on #mixer .ed-card { max-height: 100%; border-radius: 16px 16px 0 0; }
+@media (max-width: 700px) { #buildBar { gap: 4px; padding: 0 4px; } .bd-tab { padding: 0 9px; font-size: 0.8rem; } .bd-right .btn { padding: 0 7px; } #bdSnd, #bdMix { display: none; } .bd-tr { margin-left: 0; padding-left: 4px; } }
+body.shell-new #modes { display: none !important; }
+@media (max-width: 700px) {
+  #buildBar { height: 84px; flex-wrap: wrap; align-content: flex-start; row-gap: 2px; padding-top: 4px; }
+  .bd-tabs { flex: 1 1 100%; width: 100%; } .bd-sub { order: 3; } .bd-right { order: 2; margin-left: 0; width: 100%; justify-content: flex-end; }
+  #bdSnd, #bdMix { display: inline-flex; }
+  body.build-on .app { padding-top: 134px; }
+  body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser { top: 124px; }
+  body.build-on.mls-on .app { padding-top: calc(134px + var(--mls-h)); }
+  body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(124px + var(--mls-h)); }
+  body.build-on .mls { top: 124px; }
+  body.build-on .lv-pick.standalone.drawer { top: 124px !important; }
+}
+.sh-sp { white-space: nowrap; }
+@media (max-width: 700px) { .sh-sp { padding: 0 7px; font-size: 0.84rem; } .sh-spaces { gap: 2px; } }

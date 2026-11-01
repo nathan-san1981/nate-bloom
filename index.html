@@ -3231,6 +3231,48 @@ body.shell-new .lv-pick.standalone.drawer { top: 84px !important; }
 @media (max-width: 1100px) { .nb-log span { display: none; } .nb-log { padding: 0 11px; } }
 @media (max-width: 1500px) { header #hdrLog span { display: none; } header #hdrLog { padding: 0 11px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* 161 (stage 5): Build, the bar under the strip; the old chrome parked; the browser and the mixer as drawers */
+#buildBar { position: fixed; top: 40px; left: 0; right: 0; height: 44px; z-index: 44; background: #171422; color: #ece8f4; display: flex; align-items: center; gap: 8px; padding: 0 8px; box-sizing: border-box; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+#buildBar[hidden] { display: none; }
+.bd-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; flex: 0 1 auto; min-width: 0; } .bd-tabs::-webkit-scrollbar { display: none; }
+.bd-tab { height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid transparent; background: none; color: #b7afcc; font: 600 0.88rem var(--font-body, system-ui); white-space: nowrap; cursor: pointer; }
+.bd-tab[aria-selected="true"] { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.16); color: #fff; }
+.bd-sub { display: flex; gap: 4px; flex: 0 0 auto; } .bd-sub:empty { display: none; }
+.bd-subtab { height: 28px; padding: 0 10px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.14); background: none; color: #b7afcc; font: 600 0.78rem var(--font-body, system-ui); white-space: nowrap; cursor: pointer; }
+.bd-subtab[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+.bd-right { margin-left: auto; display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.bd-right .btn { height: 32px; padding: 0 10px; font-size: 0.84rem; }
+.bd-right .btn[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+.bd-tr { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; padding-left: 8px; border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.bd-tr .bd-play { min-width: 44px; font-size: 1rem; } .bd-tr .bd-play[aria-pressed="true"] { background: var(--teal, #7fd6c2); border-color: var(--teal, #7fd6c2); color: #0d1a16; }
+.bd-tr .bd-stop { color: #ff8a9a; } .bd-tr .bd-rec { color: #ff8a9a; }
+.bd-tr .bd-bpm { width: 30px; padding: 0; } .bd-tr b { min-width: 34px; text-align: center; font: 700 0.9rem var(--font-mono, monospace); }
+body.build-on .app { padding-top: 94px; }
+body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser { top: 84px; }
+body.build-on.mls-on .app { padding-top: calc(94px + var(--mls-h)); }
+body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(84px + var(--mls-h)); }
+body.build-on .mls { top: 84px; }
+body.build-on .lv-pick.standalone.drawer { top: 84px !important; }
+/* the old chrome: parked out of sight, still there for the code that taps it */
+body.shell-new .app > header, body.shell-new #toolRow, body.shell-new #nowBar { position: absolute !important; left: -9999px !important; top: 0 !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+body.shell-new .app { padding-top: 50px; }
+/* the mixer as a drawer from the bottom in Build */
+body.build-on #mixer { top: auto !important; bottom: 0; height: min(60vh, 520px); } body.build-on #mixer .ed-card { max-height: 100%; border-radius: 16px 16px 0 0; }
+@media (max-width: 700px) { #buildBar { gap: 4px; padding: 0 4px; } .bd-tab { padding: 0 9px; font-size: 0.8rem; } .bd-right .btn { padding: 0 7px; } #bdSnd, #bdMix { display: none; } .bd-tr { margin-left: 0; padding-left: 4px; } }
+body.shell-new #modes { display: none !important; }
+@media (max-width: 700px) {
+  #buildBar { height: 84px; flex-wrap: wrap; align-content: flex-start; row-gap: 2px; padding-top: 4px; }
+  .bd-tabs { flex: 1 1 100%; width: 100%; } .bd-sub { order: 3; } .bd-right { order: 2; margin-left: 0; width: 100%; justify-content: flex-end; }
+  #bdSnd, #bdMix { display: inline-flex; }
+  body.build-on .app { padding-top: 134px; }
+  body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser { top: 124px; }
+  body.build-on.mls-on .app { padding-top: calc(134px + var(--mls-h)); }
+  body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(124px + var(--mls-h)); }
+  body.build-on .mls { top: 124px; }
+  body.build-on .lv-pick.standalone.drawer { top: 124px !important; }
+}
+.sh-sp { white-space: nowrap; }
+@media (max-width: 700px) { .sh-sp { padding: 0 7px; font-size: 0.84rem; } .sh-spaces { gap: 2px; } }
 </style>
 </head>
 <body>
@@ -4341,7 +4383,7 @@ body.shell-new .lv-pick.standalone.drawer { top: 84px !important; }
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
-      <p><b>Set up and Find</b> (☰, at the top): <b>Set up</b> is the rig in one place: Sound check (where the sound goes, volume, buffer, dropouts, a test tone), MIDI, Gear, Pixelbook, Projects, App and this Help. <b>Find</b> (also the <kbd>/</kbd> key or Ctrl-K) searches everything: type two letters and get settings, sounds, songs, pad sets, help and actions such as FX off or Rescan MIDI; Enter runs the first one. <b>New shell</b> (the rebuild, stage 1): a strip across the top with the tempo, key and bar, dots for the MiniLab, the K.O. II and the Pixelbook, where the sound goes, dropouts, Log and Find, and the three spaces Play · Build · Set up; the interface you know runs under it. <button class="btn" id="shellBtn" style="height:28px;padding:0 10px">New shell: Off</button></p>
+      <p><b>Set up and Find</b> (on the strip): <b>Set up</b> is the rig in one place: Sound check (where the sound goes, volume, buffer, dropouts, a test tone), MIDI, Gear, Pixelbook, Projects, App and this Help. <b>Find</b> (also the <kbd>/</kbd> key or Ctrl-K) searches everything: type two letters and get settings, sounds, songs, pad sets, help and actions such as FX off or Rescan MIDI; Enter runs the first one. <b>The strip</b> across the top shows the tempo, key and bar, dots for the MiniLab, the K.O. II and the Pixelbook, where the sound goes, dropouts, Log and Find, and the three spaces: <b>Play</b> (the performance surface), <b>Build</b> (Sounds · Beats · Rhythm · Samples · Songs · Tracks · DJ, with one transport, the Sounds browser and the Mixer as drawers) and <b>Set up</b>.</p>
       <p><b>☰</b> (top right) holds Set up, Find, Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
     </div>
@@ -31027,6 +31069,8 @@ registerProcessor("nb-rec", NBRec);`;
    L.send(type, data, { lossy })   lossy: may be dropped through the brokers (meters, frequent state)
    L.mode    "off" | "looking" (no tablet/stage yet) | "connecting" (found, making a direct line) | "direct" | "relay"
    L.offset  (stage) the tablet's performance.now() minus ours, in ms;  L.rtt  round trip in ms
+   L.setAudio(track)   (tablet, 160) the audio track sent on the direct line (null: none); opt.onAudio(stream) (stage)
+   L.stats()           a summary of the direct line's audio: bytes, packets, lost, jitter
    L.close() */
 (function () {
   "use strict";
@@ -31129,7 +31173,16 @@ registerProcessor("nb-rec", NBRec);`;
     }
     // ---- the direct connection ----
     const direct = () => !!(dc && dc.readyState === "open");
-    function dropPc() { try { dc && dc.close(); } catch (e) {} try { pc && pc.close(); } catch (e) {} dc = null; pc = null; if (L.mode === "direct") setMode(L.peer ? "relay" : "looking"); }
+    function dropPc() { try { dc && dc.close(); } catch (e) {} try { pc && pc.close(); } catch (e) {} dc = null; pc = null; L.audioTx = null; if (L.audioStream) { L.audioStream = null; try { opt.onAudio && opt.onAudio(null); } catch (e) {} } if (L.mode === "direct") setMode(L.peer ? "relay" : "looking"); }
+    // (160) the audio line: stereo Opus at 192 kbit/s, for the Pixelbook's recording and pictures, never for what you hear
+    function stereoOpus(sdp) {
+      try {
+        const m = /a=rtpmap:(\d+) opus\/48000\/2/i.exec(sdp); if (!m) return sdp;
+        const pt = m[1], re = new RegExp("a=fmtp:" + pt + " ([^\\r\\n]*)"), add = "stereo=1;sprop-stereo=1;maxaveragebitrate=192000;maxplaybackrate=48000;useinbandfec=1";
+        if (re.test(sdp)) return sdp.replace(re, (all, params) => "a=fmtp:" + pt + " " + params.split(";").map(x => x.trim()).filter(x => x && !/^(stereo|sprop-stereo|maxaveragebitrate|maxplaybackrate|useinbandfec)=/.test(x)).concat([add]).join(";"));
+        return sdp.replace(m[0], m[0] + "\r\na=fmtp:" + pt + " " + add);
+      } catch (e) { return sdp; }
+    }
     function newPc() {
       dropPc();
       if (opt.rtc === false || typeof RTCPeerConnection === "undefined") return null;
@@ -31149,12 +31202,14 @@ registerProcessor("nb-rec", NBRec);`;
       if (now() - offerAt < 4000 || L.closed) return; offerAt = now();
       const p = newPc(); if (!p) return;
       wire(p.createDataChannel("nb", { ordered: true }));
-      try { await p.setLocalDescription(await p.createOffer()); await gathered(p); if (p === pc) sign("offer", { type: "offer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
+      if (opt.audio !== false) { try { L.audioTx = p.addTransceiver("audio", { direction: "sendonly" }); if (L.sendTrack) L.audioTx.sender.replaceTrack(L.sendTrack).catch(() => {}); } catch (e) { L.audioTx = null; } }
+      try { const o = await p.createOffer(); await p.setLocalDescription({ type: "offer", sdp: stereoOpus(o.sdp) }); await gathered(p); if (p === pc) sign("offer", { type: "offer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
     }
     async function answer(sdp) {
       const p = newPc(); if (!p) return;
       p.ondatachannel = e => { if (p === pc) wire(e.channel); };
-      try { await p.setRemoteDescription(sdp); await p.setLocalDescription(await p.createAnswer()); await gathered(p); if (p === pc) sign("answer", { type: "answer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
+      p.ontrack = e => { if (p !== pc || !e.track || e.track.kind !== "audio") return; const s = (e.streams && e.streams[0]) || new MediaStream([e.track]); L.audioStream = s; try { opt.onAudio && opt.onAudio(s, e.track); } catch (x) {} };
+      try { await p.setRemoteDescription(sdp); const a = await p.createAnswer(); await p.setLocalDescription({ type: "answer", sdp: stereoOpus(a.sdp) }); await gathered(p); if (p === pc) sign("answer", { type: "answer", sdp: p.localDescription.sdp }, L.peer); } catch (e) {}
     }
     // ---- through the brokers, while there's no direct line ----
     function checkRelay() {   // (a few seconds to make a direct line first; then the brokers carry it)
@@ -31177,6 +31232,18 @@ registerProcessor("nb-rec", NBRec);`;
       if (L.mode !== "relay") return false;
       if (o && o.lossy) { const s = Math.floor(now() / 1000); if (relayBudget.t !== s) { relayBudget.t = s; relayBudget.n = 0; } if (++relayBudget.n > (opt.relayPerSec || 6)) return false; }
       L.sentRelay++; sign("app", { t, d }, L.peer); return true;
+    };
+    L.setAudio = track => { L.sendTrack = track || null; const tx = L.audioTx; if (tx && pc && tx.sender) { try { tx.sender.replaceTrack(L.sendTrack).catch(() => {}); } catch (e) {} } return !!(tx && pc); };
+    L.stats = async () => {
+      if (!pc) return null;
+      try {
+        const out = { direct: direct(), inbound: null, outbound: null };
+        (await pc.getStats()).forEach(r => {
+          if (r.type === "inbound-rtp" && r.kind === "audio") out.inbound = { bytes: r.bytesReceived || 0, packets: r.packetsReceived || 0, lost: r.packetsLost || 0, jitterMs: Math.round((r.jitter || 0) * 1000), concealed: r.concealedSamples || 0, codec: r.codecId || "" };
+          if (r.type === "outbound-rtp" && r.kind === "audio") out.outbound = { bytes: r.bytesSent || 0, packets: r.packetsSent || 0 };
+        });
+        return out;
+      } catch (e) { return null; }
     };
     L.close = () => {
       if (L.closed) return; L.closed = true;
@@ -31752,7 +31819,8 @@ registerProcessor("nb-rec", NBRec);`;
     window.NBState = { schema: 1, get: nbsGet, refresh: () => nbsRefresh(true), subscribe: nbsSubscribe, intent: nbsIntent, perms: nbsPerms, get ver() { return NBS.ver; } };
     // ---- the new-shell switch ----
     const SH = { on: false, el: null, space: "play", unsub: null };
-    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q === "new"; return localStorage.getItem("nb-shell") === "new"; } catch (e) { return false; } };
+    // (161) the shell is the interface: on unless ?shell=old or nb-shell=old asks for the old one (a hidden way back, for one build)
+    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q !== "old"; return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
@@ -31801,7 +31869,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 159;
+    window.NB_BUILD = 161;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -31904,12 +31972,10 @@ registerProcessor("nb-rec", NBRec);`;
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
         ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
-        ${suRow("New shell", `<button type="button" class="btn" id="suShell">New shell: ${SH.on ? "On" : "Off"}</button><span class="su-note">the strip across the top and the three spaces; the interface you know runs under it</span>`, "suShellRow")}
         ${suRow("Keys and letters", '<button type="button" class="btn" id="suKeys">In Help…</button><span class="su-note">letters on the keys, the keyboard layout, hints, vibration</span>', "suKeysRow")}`;
     }
     function suAppWire() {
       $id("suInstall").addEventListener("click", () => $id("installBtn").click());
-      $id("suShell").addEventListener("click", () => shellSet(!SH.on));
       $id("suKeys").addEventListener("click", () => suOpen("help", "#kbdLabBtn"));
     }
     // ---- the space ----
@@ -31993,7 +32059,6 @@ registerProcessor("nb-rec", NBRec);`;
       act("Save the log", "what the app was doing, the last minute of sound, every setting", () => logTap("find"), "report bug dropout");
       act("Report a problem", "a zip to send for a fix", () => $id("reportBtn").click(), "bug log help");
       act("Save and exit", "save as a project and close", () => $id("exitBtn").click(), "quit close");
-      act("New shell on / off", "the strip and the three spaces (stage 1)", () => shellSet(!SH.on), "rebuild strip spaces");
       const set = (sec, t, s, hi, k) => add("Settings", t, "Set up › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
       set("sound", "Sound goes to", "where Android or the browser sends the sound", "#suOutRow", "output route headphones speaker usb");
       if (window.NB_NATIVE) set("sound", "Media volume", "the tablet's volume", "#suVolRow", "loud quiet");
@@ -32020,7 +32085,6 @@ registerProcessor("nb-rec", NBRec);`;
       set("projects", "Exit and save", "close Nate Bloom", "#suExit", "quit");
       set("app", "Install as an app", "add to the home screen", "#suInstallRow", "home screen pwa");
       set("app", "Versions", "the page build and the Android app", "#suVerRow", "update version build");
-      set("app", "New shell", "the strip and the three spaces", "#suShellRow", "rebuild strip spaces");
       set("help", "How Nate Bloom works", "the whole help", "#helpSheet", "manual guide");
       set("help", "Keys and shortcuts", "every key", ".help-grid", "keyboard shortcuts");
       set("help", "Letters on the keys", "and the keyboard layout", "#kbdLabBtn", "musical typing two rows");
@@ -32619,6 +32683,137 @@ registerProcessor("nb-rec", NBRec);`;
       }; }
     try { window.__live13.lkIn = lkIn; } catch (e) {}
     window.__live25 = { XY_MODES, XYM, xyMode, xySet, xyInfo, F_RES };
+    // ======================================================================
+    // 160, stage 4 (the tablet's side): the audio line to the Pixelbook. When Capture or Visuals there ask ("audio"),
+    // the tablet's output, after the limiter, goes out as a stereo Opus track on the link's direct line; when they
+    // let go, or the link drops, it stops. It is for recording and pictures on the Pixelbook, never for what you hear:
+    // nothing on the tablet's own output changes. The document's rig section says whether it's on.
+    // ======================================================================
+    const AUD = { on: false, dest: null, track: null, from: null, since: 0 };
+    const audFrom = () => (fx && (fx.safe || fx.comp)) || null;
+    function lkAudio(on) {
+      if (on) {
+        if (!ctx) start(); const src = audFrom(); if (!ctx || !src) return false;
+        if (!AUD.dest || AUD.dest.context !== ctx) { AUD.dest = ctx.createMediaStreamDestination(); AUD.dest.channelCount = 2; AUD.track = AUD.dest.stream.getAudioTracks()[0]; AUD.from = null; }
+        if (AUD.from !== src) { if (AUD.from) { try { AUD.from.disconnect(AUD.dest); } catch (e) {} } try { src.connect(AUD.dest); } catch (e) {} AUD.from = src; }
+        if (!AUD.on) { AUD.on = true; AUD.since = performance.now(); add139("link", "audio line to the Pixelbook: on"); }
+        try { if (LKS.L && LKS.L.setAudio) LKS.L.setAudio(AUD.track); } catch (e) {}
+      } else if (AUD.on) {
+        AUD.on = false; if (AUD.from) { try { AUD.from.disconnect(AUD.dest); } catch (e) {} AUD.from = null; }
+        try { if (LKS.L && LKS.L.setAudio) LKS.L.setAudio(null); } catch (e) {}
+        add139("link", "audio line to the Pixelbook: off");
+      }
+      try { nbsRefresh(true); } catch (e) {}
+      return AUD.on;
+    }
+    const audInfo = () => ({ kind: "audio", on: AUD.on, rate: ctx ? ctx.sampleRate : 0, direct: nbsTry(lkDirect, false), since: AUD.since });
+    { const rd = nbsRead; nbsRead = function () { const d = rd.apply(this, arguments); try { if (d.rig) d.rig.audioLine = AUD.on; } catch (e) {} return d; }; }
+    { const li = lkIn; lkIn = function (t, d) {
+        if (t === "cmd" && d && d.do === "audio") { lkAudio(!!d.on); try { lkSend("data", audInfo()); } catch (e) {} return; }
+        if (t === "pull" && d && d.kind === "audio") { try { lkSend("data", audInfo()); } catch (e) {} return; }
+        return li.apply(this, arguments);
+      }; }
+    try { window.__live13.lkIn = lkIn; } catch (e) {}
+    // the line follows the link: a new direct line gets the track again (the link keeps it), a dead link ends it
+    setInterval(() => { if (AUD.on && !nbsTry(lkUp, false)) lkAudio(false); }, 1000);
+    // (the chain can be rebuilt, e.g. after the sound recovers: follow it)
+    setInterval(() => { if (AUD.on && audFrom() && audFrom() !== AUD.from) lkAudio(true); }, 2000);
+    window.__live26 = { AUD, lkAudio, audInfo };
+    // ======================================================================
+    // 161, stage 5 (part one): Build. The seven screens of today become the tabs of one workspace under the strip:
+    // Sounds (the synth editor, FX, My sounds, Motion, plugins), Beats (Beat Pads, kits; the drum machine beside it),
+    // Rhythm (the Rhythm Creator), Samples (the sampler and recordings), Songs (Song mode, melodies, the set list),
+    // Tracks (the Garage and the multitrack editor), DJ. One transport on the bar (▶ ■ ● tempo undo) that plays what
+    // the tab is; one browser (Play's Sounds panel, as a drawer from the left); one mixer (the Mixer, as a drawer from
+    // the bottom). The old header, its mode buttons, the tool row and the ☰ menu are parked out of sight: every
+    // button still exists for the code that uses it, but the strip and Build are the way in. The new shell is on
+    // for good; ?shell=old (or nb-shell=old) is a hidden way back for one build, in case something was missed.
+    // ======================================================================
+    const BD = { tab: "sounds", el: null, obs: null, tick: 0 };
+    try { const t = localStorage.getItem("nb-build-tab"); if (t) BD.tab = t; } catch (e) {}
+    const BD_TABS = [["sounds", "Sounds", "the synth editor, FX, My sounds, Motion, plugins"], ["beats", "Beats", "Beat Pads and kits; the drum machine beside it"], ["rhythm", "Rhythm", "the Rhythm Creator"], ["samples", "Samples", "the sampler and recordings"], ["songs", "Songs", "Song mode, melodies, the set list"], ["tracks", "Tracks", "the Garage and the multitrack editor"], ["dj", "DJ", "two decks, key lock, the mix planner"]];
+    const BD_VIEWS = [["bpView", "bpDone"], ["rcView", "rcDone"], ["gbView", "gbDone"], ["djView", "djDone"], ["tracks", "trkDone"], ["song", "songDone"], ["melodies", "mlCancel"]];
+    const vis = id => { const el = $id(id); return !!(el && !el.hidden); };
+    function bdCloseViews(keep) { BD_VIEWS.forEach(([v, d]) => { if (v !== keep && vis(v)) { const b = $id(d); if (b) b.click(); else $id(v).hidden = true; } }); }
+    function bdTabNow() {   // what's on screen decides, so a screen opened some other way lights its tab
+      if (vis("bpView")) return "beats"; if (vis("rcView")) return "rhythm"; if (vis("gbView") || vis("tracks")) return "tracks"; if (vis("djView")) return "dj"; if (vis("song") || vis("melodies")) return "songs";
+      const m = $id("modes") && $id("modes").querySelector('.btn.mode[data-mode][aria-pressed="true"]'); const mode = m ? m.dataset.mode : "synths";
+      return mode === "samples" ? "samples" : mode === "drums" ? "beats" : "sounds";
+    }
+    function bdGo(tab, sub) {
+      start(); BD.tab = tab; try { localStorage.setItem("nb-build-tab", tab); } catch (e) {}
+      if (suOpenNow()) suClose(false); if (!lv.hidden) lvClose();
+      if (tab === "sounds") { bdCloseViews(); tap("mSynths"); }
+      else if (tab === "samples") { bdCloseViews(); tap("mSamples"); }
+      else if (tab === "beats") { if (sub === "machine") { bdCloseViews(); tap("mDrums"); } else { bdCloseViews("bpView"); if (!vis("bpView")) tap("bpBtn"); } }
+      else if (tab === "rhythm") { bdCloseViews("rcView"); if (!vis("rcView")) tap("rcBtn"); }
+      else if (tab === "tracks") { if (sub === "editor") { bdCloseViews("tracks"); if (!vis("tracks")) tap("betaTracksBtn"); } else { bdCloseViews("gbView"); if (!vis("gbView")) tap("gbBtn"); } }
+      else if (tab === "dj") { bdCloseViews("djView"); if (!vis("djView")) tap("djBtn"); }
+      else if (tab === "songs") { if (sub === "melodies") { bdCloseViews("melodies"); if (!vis("melodies")) tap("mlOpenNotes"); } else { bdCloseViews("song"); if (!vis("song")) tap("songBtn"); } }
+      add139("build", tab + (sub ? " · " + sub : "")); bdPaint();
+    }
+    // ---- the transport: what ▶ plays follows the tab ----
+    const bdPlayWhat = () => { const t = bdTabNow(); return t === "beats" && vis("bpView") ? "bp" : t === "rhythm" ? "rc" : t === "tracks" && vis("gbView") ? "gb" : t === "dj" ? "dj" : "seq"; };
+    function bdPlay() {
+      start(); const w = bdPlayWhat();
+      if (w === "bp") { tap("bpPlay"); return; }
+      if (w === "rc") { tap("rcPlay"); return; }
+      if (w === "gb") { tap("gbPlay"); return; }
+      if (w === "dj") { tap("djBothPlay"); return; }
+      tap("play");
+    }
+    function bdPlaying() { const w = bdPlayWhat(); return w === "bp" ? !!BP.playing : w === "rc" ? !!RC.playing : w === "gb" ? !!(window.__gb && __gb.TP && __gb.TP.on) : w === "dj" ? nbsTry(() => $id("djStop") && !$id("djStop").disabled && $id("djBothPlay").getAttribute("aria-pressed") === "true", false) : !!playing; }
+    // ---- the bar ----
+    function bdBuild() {
+      if (BD.el) return BD.el;
+      const el = document.createElement("div"); el.id = "buildBar"; el.hidden = true;
+      el.innerHTML = `<div class="bd-tabs" role="tablist" aria-label="Build">${BD_TABS.map(([id, nm, sub]) => `<button type="button" role="tab" class="bd-tab" data-t="${id}" title="${sub}">${nm}</button>`).join("")}</div>
+        <div class="bd-sub" id="bdSub"></div>
+        <div class="bd-right"><button type="button" class="btn" id="bdSnd" title="Every sound, to play alone or layer (the browser)">Sounds…</button><button type="button" class="btn" id="bdMix" title="The mixer, as a drawer">Mixer</button>
+          <span class="bd-tr"><button type="button" class="btn bd-play" id="bdPlay" title="Play what this tab is (Space in Live)">▶</button><button type="button" class="btn bd-stop" id="bdStop" title="Stop everything">■</button><button type="button" class="btn bd-rec" id="bdRec" title="Record what you play">●</button>
+          <button type="button" class="btn bd-bpm" id="bdBpmDn" title="Slower">−</button><b id="bdBpm">—</b><button type="button" class="btn bd-bpm" id="bdBpmUp" title="Faster">+</button><button type="button" class="btn" id="bdUndo" title="Undo the last change">↶</button></span></div>`;
+      document.body.appendChild(el); BD.el = el;
+      el.querySelectorAll(".bd-tab").forEach(b => b.addEventListener("click", () => bdGo(b.dataset.t)));
+      $id("bdSnd").addEventListener("click", () => { start(); if (pick.hidden) openSounds(); else closePick(); });
+      $id("bdMix").addEventListener("click", () => { start(); const m = $id("mixer"); if (m.hidden) tap("mixBtn"); else tap("mxDone"); });
+      $id("bdPlay").addEventListener("click", bdPlay);
+      $id("bdStop").addEventListener("click", () => tap("stopAll"));
+      $id("bdRec").addEventListener("click", () => tap("takeBtn"));
+      $id("bdBpmDn").addEventListener("click", () => tap("bpmDown")); $id("bdBpmUp").addEventListener("click", () => tap("bpmUp"));
+      $id("bdUndo").addEventListener("click", () => tap("hisUndoP"));
+      $id("bdSub").addEventListener("click", e => { const b = e.target.closest("button[data-sub]"); if (b) bdGo(BD.tab, b.dataset.sub === "main" ? "" : b.dataset.sub); });
+      return el;
+    }
+    const BD_SUBS = { beats: [["main", "Beat Pads", () => vis("bpView")], ["machine", "Drum machine", () => !vis("bpView") && bdTabNow() === "beats"]], tracks: [["main", "Garage", () => vis("gbView")], ["editor", "Tracks", () => vis("tracks")]], songs: [["main", "Song", () => vis("song")], ["melodies", "Melodies", () => vis("melodies")]] };
+    function bdPaint() {
+      if (!BD.el) return;
+      const on = SH.on && shSpaceNow() === "build" && $id("start").hidden;
+      BD.el.hidden = !on; document.body.classList.toggle("build-on", on);
+      if (!on) return;
+      const now = bdTabNow(); if (now !== BD.tab) BD.tab = now;
+      BD.el.querySelectorAll(".bd-tab").forEach(b => nbA(b, "aria-selected", String(b.dataset.t === BD.tab)));
+      const subs = BD_SUBS[BD.tab] || []; const html = subs.map(([id, nm, isOn]) => `<button type="button" class="bd-subtab" data-sub="${id}" aria-pressed="${isOn() ? "true" : "false"}">${nm}</button>`).join("");
+      const sb = $id("bdSub"); if (sb.__html !== html) { sb.__html = html; sb.innerHTML = html; }
+      nbA($id("bdPlay"), "aria-pressed", String(bdPlaying())); nbT($id("bdPlay"), bdPlaying() ? "■" : "▶");
+      nbT($id("bdBpm"), nbsTry(() => Math.round(rcBpm()) + "", "—"));
+      nbA($id("bdSnd"), "aria-pressed", String(!pick.hidden && lv.hidden)); nbA($id("bdMix"), "aria-pressed", String(vis("mixer")));
+      const u = $id("hisUndoP"); $id("bdUndo").disabled = !u || u.disabled;
+      nbT($id("bdRec"), $id("takeBtn") && /Stop/i.test($id("takeBtn").textContent) ? "■ Rec" : "●");
+    }
+    // the browser as a drawer from Build (Play's Sounds panel parked, as Play does it)
+    function bdPickObserve() {
+      if (BD.obs) return;
+      BD.obs = new MutationObserver(() => {
+        const mine = !pick.hidden && lv.hidden && document.body.classList.contains("build-on");
+        if (mine) pick.classList.add("standalone", "drawer", "bd-drawer"); else if (pick.classList.contains("bd-drawer")) pick.classList.remove("standalone", "drawer", "bd-drawer");
+        bdPaint(); });
+      BD.obs.observe(pick, { attributes: true, attributeFilter: ["hidden"] });
+    }
+    // ---- the strip owns the space; Build is what's under it when neither Play nor Set up is open ----
+    { const sp = shPaint; shPaint = function () { const r = sp.apply(this, arguments); try { bdPaint(); } catch (e) {} return r; }; }
+    { const ss = shellSet; shellSet = function (on) { const r = ss.apply(this, arguments); bdBuild(); bdPickObserve(); if (on && !BD.tick) BD.tick = setInterval(() => { if (!document.hidden) bdPaint(); }, 700); if (!on && BD.tick) { clearInterval(BD.tick); BD.tick = 0; } bdPaint(); return r; }; }
+    { const g = shGo; shGo = function (sp) { const r = g.apply(this, arguments); if (sp === "build") bdPaint(); return r; }; }
+    window.__live27 = { BD, BD_TABS, bdGo, bdTabNow, bdPlayWhat, bdPaint, bdCloseViews };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }

@@ -88,7 +88,8 @@
     window.NBState = { schema: 1, get: nbsGet, refresh: () => nbsRefresh(true), subscribe: nbsSubscribe, intent: nbsIntent, perms: nbsPerms, get ver() { return NBS.ver; } };
     // ---- the new-shell switch ----
     const SH = { on: false, el: null, space: "play", unsub: null };
-    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q === "new"; return localStorage.getItem("nb-shell") === "new"; } catch (e) { return false; } };
+    // (161) the shell is the interface: on unless ?shell=old or nb-shell=old asks for the old one (a hidden way back, for one build)
+    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q !== "old"; return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],

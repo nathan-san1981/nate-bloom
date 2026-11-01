@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 159;
+    window.NB_BUILD = 161;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -110,12 +110,10 @@
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
         ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
-        ${suRow("New shell", `<button type="button" class="btn" id="suShell">New shell: ${SH.on ? "On" : "Off"}</button><span class="su-note">the strip across the top and the three spaces; the interface you know runs under it</span>`, "suShellRow")}
         ${suRow("Keys and letters", '<button type="button" class="btn" id="suKeys">In Help…</button><span class="su-note">letters on the keys, the keyboard layout, hints, vibration</span>', "suKeysRow")}`;
     }
     function suAppWire() {
       $id("suInstall").addEventListener("click", () => $id("installBtn").click());
-      $id("suShell").addEventListener("click", () => shellSet(!SH.on));
       $id("suKeys").addEventListener("click", () => suOpen("help", "#kbdLabBtn"));
     }
     // ---- the space ----
@@ -199,7 +197,6 @@
       act("Save the log", "what the app was doing, the last minute of sound, every setting", () => logTap("find"), "report bug dropout");
       act("Report a problem", "a zip to send for a fix", () => $id("reportBtn").click(), "bug log help");
       act("Save and exit", "save as a project and close", () => $id("exitBtn").click(), "quit close");
-      act("New shell on / off", "the strip and the three spaces (stage 1)", () => shellSet(!SH.on), "rebuild strip spaces");
       const set = (sec, t, s, hi, k) => add("Settings", t, "Set up › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
       set("sound", "Sound goes to", "where Android or the browser sends the sound", "#suOutRow", "output route headphones speaker usb");
       if (window.NB_NATIVE) set("sound", "Media volume", "the tablet's volume", "#suVolRow", "loud quiet");
@@ -226,7 +223,6 @@
       set("projects", "Exit and save", "close Nate Bloom", "#suExit", "quit");
       set("app", "Install as an app", "add to the home screen", "#suInstallRow", "home screen pwa");
       set("app", "Versions", "the page build and the Android app", "#suVerRow", "update version build");
-      set("app", "New shell", "the strip and the three spaces", "#suShellRow", "rebuild strip spaces");
       set("help", "How Nate Bloom works", "the whole help", "#helpSheet", "manual guide");
       set("help", "Keys and shortcuts", "every key", ".help-grid", "keyboard shortcuts");
       set("help", "Letters on the keys", "and the keyboard layout", "#kbdLabBtn", "musical typing two rows");

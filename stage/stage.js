@@ -44,9 +44,9 @@
     const code = ls.get("stage-code", "");
     X.mode = "off"; paintConn();
     if (!window.NBLink || !NBLink.normCode(code)) { openPair(); return; }
-    const o = { role: "stage", code, onMessage: onMsg, onState: s => {
+    const o = { role: "stage", code, onMessage: onMsg, onAudio: s => { if (window.__stage4) __stage4.streamIn(s); }, onState: s => {
       const was = X.mode; X.mode = s.mode; X.brokers = s.brokers; X.of = s.of; paintConn();
-      if (up() && was !== s.mode) { X.L.send("hi", { v: 1 }); setTimeout(() => { pull("setlist"); pull("rhythm"); pull("kits"); if (X.here) X.L.send("bandHere", { on: true }); if (window.__console) __console.onUp(); if (X.xyHello) X.xyHello(); }, 300); }
+      if (up() && was !== s.mode) { X.L.send("hi", { v: 1 }); setTimeout(() => { pull("setlist"); pull("rhythm"); pull("kits"); if (X.here) X.L.send("bandHere", { on: true }); if (window.__console) __console.onUp(); if (X.xyHello) X.xyHello(); if (window.__stage4 && __stage4.ST.want) __stage4.streamWant(true); }, 300); }
       midiAuto(); } };
     if (q.get("nbbroker")) Object.assign(o, { brokers: q.get("nbbroker").split(","), iceServers: [], gatherMs: 800, helloMs: 2000, directWaitMs: 3000 });
     if (q.get("nbrtc") === "0") o.rtc = false;
@@ -55,7 +55,8 @@
   const send = (t, d, lossy) => !!(X.L && X.L.send(t, d, lossy ? { lossy: true } : null));
   const cmd = d => { if (!up()) { toast("Not linked to the tablet"); return false; } if (X.st && X.st.ctl === false) { toast("Control from here is switched off on the tablet (Gear)"); return false; } return send("cmd", d); };
   const pull = kind => send("pull", { kind });
-  window.__stageAPI = { up, send, toast, tabNow, pull };   // what the console (console.js) uses
+  window.__stageAPI = { up, send, toast, tabNow, pull, audio, ctxAt, fromTab, beatNow };   // what console.js and stage4.js use
+  window.__stageActx = () => actx;
   function paintConn() {
     const c = $("conn"), m = X.mode, code = ls.get("stage-code", "");
     let txt, cls;
@@ -68,7 +69,7 @@
     c.className = "conn " + cls; setT(c.querySelector("span"), txt);
     const w = $("wait"), show = !up() || !X.st;
     const con = X.view === "vDir" || X.view === "vMix" || X.view === "vLib";
-    w.hidden = !show || X.view === "vEdit" || X.view === "vMidi" || X.view === "vBand" || (con && !!(window.__console && __console.doc));
+    w.hidden = !show || X.view === "vEdit" || X.view === "vMidi" || X.view === "vBand" || X.view === "vHealth" || X.view === "vLearn" || (con && !!(window.__console && __console.doc));
     if (show) {
       setT($("waitH"), !code ? "Pair with the tablet" : m === "connecting" ? "Found the tablet: connecting…" : up() ? "Connected: waiting for the first update…" : X.L && X.of && !X.brokers ? "Can't reach the internet" : "Waiting for the tablet");
       setT($("waitP"), !code ? "Tap the box at the top left and type the code from the tablet (Live → Gear → Pixelbook)." : X.L && X.of && !X.brokers ? "The two find each other over the internet: join Wi-Fi or the iPhone's hotspot." : "In Nate Bloom on the tablet: Live → Gear (the No sync / clock button) → Pixelbook → Turn on. Code here: " + code + ".");
@@ -89,10 +90,10 @@
   function onMsg(t, d) {
     if (t === "st") { X.st = d; X.stAt = performance.now(); X.dirty = true; midiState(d); if (!$("wait").hidden) paintConn(); }
     else if (t === "grid") X.grid = d;
-    else if (t === "band") { const was = X.band; X.band = d; if (band) band.set({ style: d.style, bass: d.bass, bassLvl: d.bassLvl, drumLvl: d.drumLvl, chord: d.chord }); if (vis && d.chord && (!was || !was.chord || was.chord.root !== d.chord.root || was.chord.q !== d.chord.q)) vis.chord(d.chord.root, d.chord.q); }
-    else if (t === "lv") { X.lv = d; paintLevel(d); if (vis) { vis.level(d.r, d.p); if (d.s) vis.spectrum(d.s); } }
+    else if (t === "band") { const was = X.band; X.band = d; if (band) band.set({ style: d.style, bass: d.bass, bassLvl: d.bassLvl, drumLvl: d.drumLvl, chord: d.chord }); if (d.chord && (!was || !was.chord || was.chord.root !== d.chord.root || was.chord.q !== d.chord.q)) { if (vis) vis.chord(d.chord.root, d.chord.q); if (window.__audRelay) __audRelay("chord", { root: d.chord.root, q: d.chord.q }); } }
+    else if (t === "lv") { X.lv = d; paintLevel(d); if (vis) { vis.level(d.r, d.p); if (d.s) vis.spectrum(d.s); } if (window.__audRelay) __audRelay("level", { r: d.r, p: d.p, s: d.s }); }
     else if (t === "ev") (d || []).forEach(onEv);
-    else if (t === "data") { if (d && d.kind === "xy") { if (X.xyPaint) X.xyPaint(d); } else if (!(window.__console && __console.onData(d))) onData(d); }
+    else if (t === "data") { if (d && d.kind === "xy") { if (X.xyPaint) X.xyPaint(d); } else if (d && d.kind === "audio") { if (window.__stage4) __stage4.onAudioData(d); } else if (!(window.__console && __console.onData(d))) onData(d); }
     else if (t === "doc") { if (window.__console) __console.onDoc(d); }
     else if (t === "ack") { if (window.__console && __console.onAck(d)) return; toast(d.msg || (d.ok ? "Done" : "Not done")); edStat(d.msg, d.ok); }
   }
@@ -101,10 +102,11 @@
   function onEv(e) {
     midiEv(e);
     const k = e[0];
-    if (k === "n") { if (vis) later(e[1], () => vis.note(e[2], e[3] / 127, e[4] === "pd" ? 1 : 0)); }
-    else if (k === "f") { if (vis && vis.noteOff) later(e[1], () => vis.noteOff(e[2])); }
+    const R = window.__audRelay;
+    if (k === "n") { if (vis || R) later(e[1], () => { if (vis) vis.note(e[2], e[3] / 127, e[4] === "pd" ? 1 : 0); if (R) R("note", { m: e[2], v: e[3] / 127, pad: e[4] === "pd" ? 1 : 0 }); }); }
+    else if (k === "f") { if ((vis && vis.noteOff) || R) later(e[1], () => { if (vis && vis.noteOff) vis.noteOff(e[2]); if (R) R("noteOff", { m: e[2] }); }); }
     else if (k === "p" || k === "P" || k === "r" || k === "R") {
-      if (vis) later(e[1], () => vis.hit(ROLE_VIS[e[4]] || "other", e[3]));
+      if (vis || R) later(e[1], () => { if (vis) vis.hit(ROLE_VIS[e[4]] || "other", e[3]); if (R) R("hit", { kind: ROLE_VIS[e[4]] || "other", vel: e[3] }); });
       if (k === "p" || k === "r") later(e[1], () => flashPad(k, e[2]));
     }
   }
@@ -116,6 +118,8 @@
     if (v === "vVis") visOn(); else visOff();
     if (v === "vEdit") edPaint();
     if (v === "vMidi") midiPaint();
+    if (v === "vHealth" && window.__stage4) __stage4.healthPaint();
+    if (v === "vLearn" && window.__learn) __learn.paint();
     if (window.__console) __console.onView(v);
     X.dirty = true; paintConn();
   }
@@ -293,7 +297,7 @@
     visPoke();
   }
   function visOff() { if (vis) vis.stop(); }
-  function visSet(m) { visMode = m; ls.set("stage-vis", m); if (vis) vis.setMode(m); $("visModes").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.m === m))); }
+  function visSet(m) { visMode = m; ls.set("stage-vis", m); if (vis) vis.setMode(m); if (window.__audRelay) __audRelay("mode", { id: m }); $("visModes").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.m === m))); }
   function visPoke() { const b = $("visBar"); b.classList.remove("hide"); clearTimeout(visHideT); visHideT = setTimeout(() => { if (X.view === "vVis") b.classList.add("hide"); }, 3000); document.body.style.cursor = ""; }
   $("vVis").addEventListener("pointermove", visPoke); $("vVis").addEventListener("pointerdown", visPoke);
   $("visCapBtn").addEventListener("click", () => { const c = $("visCap"); c.hidden = !c.hidden; setA($("visCapBtn"), "aria-pressed", String(!c.hidden)); ls.set("stage-viscap", !c.hidden); });
@@ -433,7 +437,7 @@
       BS.next++;
       if (tp < nowTab - 30) continue;
       const evs = bandEvents(n, tp, b.sd);
-      evs.forEach(e => { midiEv(e); if (vis && e[0] === "bd") later(e[1], () => vis.hit(BD_VIS[e[2]] || "other", 0.8)); });
+      evs.forEach(e => { midiEv(e); if (e[0] === "bd" && (vis || window.__audRelay)) later(e[1], () => { if (vis) vis.hit(BD_VIS[e[2]] || "other", 0.8); if (window.__audRelay) __audRelay("hit", { kind: BD_VIS[e[2]] || "other", vel: 0.8 }); }); });
       if (X.here && band && actx && actx.state === "running") { try { band.playStep(n, Math.max(actx.currentTime, ctxAt(fromTab(tp) + X.nudge)), b.sd); } catch (e) { console.error(e); } }
     }
   }, 25);

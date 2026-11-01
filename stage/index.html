@@ -40,7 +40,7 @@ button { cursor: pointer; }
 .conn i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #4a4262; }
 .conn.direct i { background: var(--teal); box-shadow: 0 0 8px var(--teal); } .conn.relay i, .conn.look i, .conn.connecting i { background: var(--amber); box-shadow: 0 0 8px var(--amber); } .conn.bad i { background: var(--red); }
 .tabs { display: flex; gap: 4px; margin-left: auto; }
-.tabs button { height: 38px; padding: 0 11px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim); font-weight: 600; font-size: 0.88rem; }
+.tabs button { height: 38px; padding: 0 9px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim); font-weight: 600; font-size: 0.85rem; white-space: nowrap; flex: none; }
 .tabs button[aria-selected="true"] { background: var(--raised); border-color: var(--line); color: var(--ink); }
 .recdot { display: none; align-items: center; gap: 6px; font: 600 0.8rem var(--font-mono); color: #ff9aae; }
 .recdot.on { display: inline-flex; } .recdot i { width: 9px; height: 9px; border-radius: 50%; background: var(--rose); animation: blink 1s steps(2, start) infinite; }
@@ -208,7 +208,21 @@ table.sl tr.cur td { border-color: var(--teal); }
 .kitc select { height: 38px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); padding: 0 8px; }
 .kitc .cur { font: 700 1.05rem var(--font-display); }
 /* ---------- band and track, MIDI ---------- */
-#vBand, #vMidi { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; align-content: start; }
+#vBand, #vMidi, #vHealth, #vLearn { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; align-content: start; }
+.ln-top, .ln-kb { grid-column: 1 / -1; } .ln-big { font: 600 1.25rem/1.3 var(--font-display); overflow-wrap: anywhere; }
+.lnkeys { position: relative; height: clamp(150px, 26vh, 240px); margin-top: 8px; border-radius: 10px; overflow: hidden; background: #0c0a12; }
+.lk { position: absolute; top: 0; box-sizing: border-box; border: 1px solid #0c0a12; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 6px; font: 600 0.74rem var(--font-mono); transition: background 0.1s; }
+.lk-w { height: 100%; background: #e6e1f0; color: #3a3350; z-index: 1; border-radius: 0 0 6px 6px; } .lk-b { height: 62%; background: #2a2438; color: #cfc7e2; z-index: 2; border-radius: 0 0 5px 5px; }
+.lk small { position: absolute; top: 4px; font-size: 0.62rem; color: #8e86a6; }
+.lk-w.out { background: #bdb6cc; color: #7a7290; } .lk-b.out { background: #1a1624; color: #5b5470; }
+.lk-w.in { background: #d8f3ea; } .lk-b.in { background: #2b5c50; } .lk.root { box-shadow: inset 0 -5px 0 var(--teal); }
+.lk-w.ch { background: #d9c7ff; } .lk-b.ch { background: #6a4db0; color: #fff; } .lk.chroot { box-shadow: inset 0 -5px 0 var(--lilac); }
+.lk.held { background: var(--amber) !important; color: #1a1226 !important; }
+.chip.now { background: var(--lilac); border-color: var(--lilac); color: #1a1426; } .chip.next { border-color: var(--teal); color: var(--teal); } .chip.in { border-color: var(--teal); } .chip.out { opacity: 0.45; }
+.tabs { overflow-x: auto; scrollbar-width: none; } .tabs::-webkit-scrollbar { display: none; }
+.cap-audio { grid-column: 1 / -1; } .meter.h { width: 160px; height: 10px; border-radius: 5px; flex-direction: row; } .meter.h u { height: 100%; width: 0; background: linear-gradient(to right, var(--teal), #e9d36a 75%, var(--red)); }
+.kv { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; } .kvr { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid #ffffff0d; font-size: 0.9rem; } .kvr span { color: var(--dim); } .kvr b { text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+.big-sw .btn.on { background: var(--rose); border-color: var(--rose); color: #1a0c12; }
 .big-sw { display: flex; align-items: center; gap: 14px; }
 .big-sw .btn { height: 52px; padding: 0 22px; font-size: 1rem; }
 .slider { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; }
@@ -230,7 +244,7 @@ table.sl tr.cur td { border-color: var(--teal); }
 .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 30; padding: 10px 16px; border-radius: 12px; background: #2a2440; border: 1px solid var(--line); font-weight: 600; font-size: 0.9rem; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
 .toast.on { opacity: 1; }
 @media (max-width: 1100px) { #vMon { grid-template-columns: 1fr 1fr; } .gear { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; gap: 6px 16px; } .knobs, .pads { grid-column: 1 / -1; } .song, .jam { grid-column: 2; } .tabs button { padding: 0 9px; } .brand small { display: none; } }
-@media (max-width: 800px) { #vHands, #vBand, #vMidi { grid-template-columns: 1fr; } .xycard { grid-column: 1; grid-row: auto; } .kits { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 800px) { #vHands, #vBand, #vMidi, #vHealth { grid-template-columns: 1fr; } .xycard { grid-column: 1; grid-row: auto; } .kits { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -240,7 +254,7 @@ table.sl tr.cur td { border-color: var(--teal); }
   <nav class="tabs" role="tablist" aria-label="Views">
     <button role="tab" data-v="vDir" aria-selected="true">Director</button><button role="tab" data-v="vMix">Mixer</button><button role="tab" data-v="vLib">Library</button>
     <button role="tab" data-v="vMon">Monitor</button><button role="tab" data-v="vHands">Hands</button><button role="tab" data-v="vVis">Visuals</button>
-    <button role="tab" data-v="vEdit">Editor</button><button role="tab" data-v="vBand">Band</button><button role="tab" data-v="vMidi">MIDI</button>
+    <button role="tab" data-v="vEdit">Editor</button><button role="tab" data-v="vBand">Band</button><button role="tab" data-v="vMidi">Capture</button><button role="tab" data-v="vHealth">Health</button><button role="tab" data-v="vLearn">Learning</button>
   </nav>
   <span class="recdot" id="recdot"><i></i><span>0:00</span></span>
   <div class="meter" title="The tablet's level"><u id="meterU"></u></div>
@@ -308,7 +322,7 @@ table.sl tr.cur td { border-color: var(--teal); }
   <section class="view" id="vVis" hidden aria-label="Visuals">
     <canvas id="visCanvas"></canvas>
     <div class="viscap" id="visCap" hidden><b></b><span></span></div>
-    <div class="visbar" id="visBar"><div class="seg" id="visModes"></div><button class="btn" id="visCapBtn" aria-pressed="false">Caption</button><span class="sp" style="flex:1"></span><span class="note" id="visFps"></span><button class="btn" id="visFs">Full screen</button></div>
+    <div class="visbar" id="visBar"><div class="seg" id="visModes"></div><button class="btn" id="visCapBtn" aria-pressed="false">Caption</button><button class="btn" id="visAud" title="A second window with the visuals and nothing else: drag it to the other screen">Audience window</button><span class="sp" style="flex:1"></span><span class="note" id="visFps"></span><button class="btn" id="visFs">Full screen</button></div>
   </section>
   <!-- editor -->
   <section class="view" id="vEdit" hidden aria-label="Editor">
@@ -334,9 +348,20 @@ table.sl tr.cur td { border-color: var(--teal); }
       <div class="big-sw"><button class="btn primary" id="tGo" disabled>Start on the next bar</button><button class="btn" id="tStop" disabled>Stop</button><span class="note" id="tSay"></span></div>
       <div class="slider"><span style="width:84px">Track level</span><input type="range" id="tLvl" min="0" max="1.5" step="0.01" value="0.8"><output id="tLvlO">80%</output></div>
     </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">Click in these headphones</div>
+      <div class="big-sw"><button class="btn" id="kOn" aria-pressed="false">Click</button><span class="note">On the tablet's beat, from this Pixelbook's output only: the tablet and the audience never hear it.</span></div>
+      <div class="slider"><span style="width:84px">Level</span><input type="range" id="kVol" min="0" max="100" step="1" value="60"><output id="kVolO">60%</output></div>
+      <label class="chk"><input type="checkbox" id="kAcc" checked> Accent the first beat of the bar</label>
+      <label class="chk"><input type="checkbox" id="kOnlyPlay" checked> Only while the tablet plays</label>
+    </div>
   </section>
   <!-- MIDI -->
-  <section class="view" id="vMidi" hidden aria-label="MIDI">
+  <section class="view" id="vMidi" hidden aria-label="Capture">
+    <div class="card cap-audio" style="display:flex;flex-direction:column;gap:10px"><div class="lab">The set, as audio (a WAV on this Pixelbook)</div>
+      <div class="big-sw"><button class="btn" id="cRec" aria-pressed="false">● Record audio</button><button class="btn" id="cMark" disabled title="A marker at this moment">+ Mark</button><span class="note">The tablet's output comes over the link's direct line as stereo Opus and is written here as 16-bit WAV, with a marker at every song. Record asks where to save; the file grows as it records.</span></div>
+      <div class="row"><label class="chk"><input type="checkbox" id="cLine"> Audio line from the tablet</label><div class="meter h" title="What arrives"><u id="cMeter"></u></div><span class="note" id="cLineSay">off</span></div>
+      <p class="note" id="cStat"></p><div class="chips" id="cMarks"></div>
+    </div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px"><div class="lab">The set, as MIDI</div>
       <div class="big-sw"><button class="btn" id="mRec" aria-pressed="false">● Record</button><span class="note" id="mRecSay"></span></div>
       <label class="chk"><input type="checkbox" id="mAuto" checked> Record whenever the tablet is linked (so nothing gets lost)</label>
@@ -345,6 +370,19 @@ table.sl tr.cur td { border-color: var(--teal); }
       <div id="mTracks" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="lab">Takes (kept on this Pixelbook)</div><div class="takes" id="mTakes"></div></div>
+  </section>
+  <section class="view" id="vLearn" hidden aria-label="Learning">
+    <div class="card ln-top"><div class="lab">The key</div><div class="ln-big" id="lnKey">—</div><div class="lab" style="margin-top:8px">The chord the band is on</div><div class="ln-big" id="lnChord">—</div><div class="lab" style="margin-top:8px">Held on the tablet</div><div class="ln-big" id="lnHeld">—</div></div>
+    <div class="card ln-kb"><div class="lab">The keyboard · scale notes lit, the chord in lilac, held notes pressed</div><div class="lnkeys" id="lnKeys"></div></div>
+    <div class="card"><div class="lab">The chords of the key</div><div class="chips" id="lnChords"></div><p class="note" id="lnNext"></p></div>
+    <div class="card"><div class="lab">Live's pads</div><div class="chips" id="lnPads"></div><p class="note" id="lnPadsSay"></p></div>
+  </section>
+  <section class="view" id="vHealth" hidden aria-label="Health">
+    <div class="card"><div class="lab">The tablet</div><div class="kv" id="hTab"></div></div>
+    <div class="card"><div class="lab">The link</div><div class="kv" id="hLink"></div></div>
+    <div class="card"><div class="lab">The audio line and the recording</div><div class="kv" id="hAud"></div></div>
+    <div class="card"><div class="lab">This Pixelbook</div><div class="kv" id="hPb"></div></div>
+    <div class="card" style="grid-column:1 / -1"><div class="lab">What the tablet says is wrong</div><p class="note" id="hNotes">nothing</p></div>
   </section>
   <div class="waiting" id="wait"><div><h2 id="waitH">Waiting for the tablet</h2><p class="note" id="waitP">In Nate Bloom on the tablet: Live → Gear (the No sync / clock button) → Pixelbook → Turn on.</p></div></div>
 </main>
@@ -356,10 +394,13 @@ table.sl tr.cur td { border-color: var(--teal); }
   <p class="note" id="pairMore"></p>
 </div></div>
 <div class="toast" id="toast"></div>
+<audio id="rtAudio" muted playsinline hidden></audio>
 <script src="link.js?v=158"></script>
 <script src="band.js?v=158"></script>
 <script src="visuals.js?v=158"></script>
-<script src="console.js?v=159"></script>
-<script src="stage.js?v=159"></script>
+<script src="console.js?v=160"></script>
+<script src="stage4.js?v=161"></script>
+<script src="learn.js?v=161"></script>
+<script src="stage.js?v=160"></script>
 </body>
 </html>

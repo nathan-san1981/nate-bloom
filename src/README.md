@@ -122,6 +122,8 @@ piece of text and on which line. Standard library only, about a second.
 | `700-stuck-notes-159.js` | 4,659 | 159: the net under lost note-offs: Stop all forces every voice off, a watchdog for MIDI notes nothing could still hold, the log; `__live23` |
 | `710-xy-level-159.js` | 3,225 | 159: the Pixelbook's XY pad holds the level (a rider after the soft clipper, from the analyser); `__live24` |
 | `720-xy-modes-159.js` | 4,692 | 159: the XY pad's modes (which two controls it moves), chosen from the Pixelbook, kept on the tablet; `__live25` |
+| `730-stage4-audio.js` | 2,924 | 160 (stage 4): the audio line to the Pixelbook (the output after the limiter as a stereo Opus track on the link's direct line, on request); `__live26` |
+| `740-stage5-build.js` | 9,941 | 161 (stage 5): Build, the seven screens as tabs under the strip with one transport, the browser and the mixer as drawers; the old chrome parked; `__live27` |
 | `900-minilab-close.js` | 261 | `__mod.nbCC`, `window.__ml` exports, `}` closing the MiniLab/Live block |
 | `990-iife-close.js` | 105 | wake lock request; `})();` |
 
