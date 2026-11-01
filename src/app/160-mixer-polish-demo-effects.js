@@ -57,7 +57,7 @@
       safe.curve = (() => { const n = 4096, c = new Float32Array(n), k = 0.84; for (let i = 0; i < n; i++) { const x = (i / (n - 1)) * 2 - 1, a = Math.abs(x); c[i] = Math.sign(x) * (a <= k ? a : k + (1 - k) * Math.tanh((a - k) / (1 - k))); } return c; })();
       try { fx.comp.disconnect(analyser); } catch (e) {}
       fx.comp.connect(lim).connect(trim).connect(safe).connect(analyser);
-      fx.limiter = lim; fx.chainNodes.push(lim, trim, safe);
+      fx.limiter = lim; fx.safe = safe; fx.chainNodes.push(lim, trim, safe);
     };
     if (ctx && fx.comp) buildChain();
   }
