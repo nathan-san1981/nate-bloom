@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 157;
+    window.NB_BUILD = 158;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -97,7 +97,7 @@
       return `<div class="su-h">Pixelbook</div>
         ${suRow("Link", `<span id="suLink">${up ? "linked" : mode === "off" ? "off" : mode}</span> <button type="button" class="btn" id="suPair">Pair, code, who keeps time…</button><span class="su-note">in Gear</span>`, "suLinkRow")}
         <div class="su-h" style="margin-top:10px">What the Pixelbook may change</div><div id="suPerms">${sel("levels", "Levels (Mixer)")}${sel("scenes", "Scenes (Director)")}${sel("sound", "Replace a sound (Library)")}</div>
-        <p class="su-note">The tablet applies every change itself and wins any conflict; these only say which requests it accepts. The Mixer, Library and Director come in stage 3.</p>
+        <p class="su-note">The tablet applies every change itself and wins any conflict; these only say which requests it accepts. "Ask first" puts a bar here with Accept and No; "only between songs" refuses while anything plays. Open the Stage page on the Pixelbook for its Director, Mixer and Library.</p>
         ${$id("lkBtn") && !$id("lkBtn").hidden ? suRow("Computer", '<button type="button" class="btn" id="suLk">Link to the Linux app…</button><span class="su-note">projects both ways, Play together, Ableton Link</span>', "suLkRow") : ""}`;
     }
     function suPixWire() {

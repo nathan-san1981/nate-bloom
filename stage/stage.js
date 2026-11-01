@@ -44,7 +44,7 @@
     if (!window.NBLink || !NBLink.normCode(code)) { openPair(); return; }
     const o = { role: "stage", code, onMessage: onMsg, onState: s => {
       const was = X.mode; X.mode = s.mode; X.brokers = s.brokers; X.of = s.of; paintConn();
-      if (up() && was !== s.mode) { X.L.send("hi", { v: 1 }); setTimeout(() => { pull("setlist"); pull("rhythm"); pull("kits"); if (X.here) X.L.send("bandHere", { on: true }); }, 300); }
+      if (up() && was !== s.mode) { X.L.send("hi", { v: 1 }); setTimeout(() => { pull("setlist"); pull("rhythm"); pull("kits"); if (X.here) X.L.send("bandHere", { on: true }); if (window.__console) __console.onUp(); }, 300); }
       midiAuto(); } };
     if (q.get("nbbroker")) Object.assign(o, { brokers: q.get("nbbroker").split(","), iceServers: [], gatherMs: 800, helloMs: 2000, directWaitMs: 3000 });
     if (q.get("nbrtc") === "0") o.rtc = false;
@@ -53,6 +53,7 @@
   const send = (t, d, lossy) => !!(X.L && X.L.send(t, d, lossy ? { lossy: true } : null));
   const cmd = d => { if (!up()) { toast("Not linked to the tablet"); return false; } if (X.st && X.st.ctl === false) { toast("Control from here is switched off on the tablet (Gear)"); return false; } return send("cmd", d); };
   const pull = kind => send("pull", { kind });
+  window.__stageAPI = { up, send, toast, tabNow, pull };   // what the console (console.js) uses
   function paintConn() {
     const c = $("conn"), m = X.mode, code = ls.get("stage-code", "");
     let txt, cls;
@@ -64,7 +65,8 @@
     else { txt = "Looking for the tablet (" + code + ")"; cls = "look"; }
     c.className = "conn " + cls; setT(c.querySelector("span"), txt);
     const w = $("wait"), show = !up() || !X.st;
-    w.hidden = !show || X.view === "vEdit" || X.view === "vMidi" || X.view === "vBand";
+    const con = X.view === "vDir" || X.view === "vMix" || X.view === "vLib";
+    w.hidden = !show || X.view === "vEdit" || X.view === "vMidi" || X.view === "vBand" || (con && !!(window.__console && __console.doc));
     if (show) {
       setT($("waitH"), !code ? "Pair with the tablet" : m === "connecting" ? "Found the tablet: connecting…" : up() ? "Connected: waiting for the first update…" : X.L && X.of && !X.brokers ? "Can't reach the internet" : "Waiting for the tablet");
       setT($("waitP"), !code ? "Tap the box at the top left and type the code from the tablet (Live → Gear → Pixelbook)." : X.L && X.of && !X.brokers ? "The two find each other over the internet: join Wi-Fi or the iPhone's hotspot." : "In Nate Bloom on the tablet: Live → Gear (the No sync / clock button) → Pixelbook → Turn on. Code here: " + code + ".");
@@ -88,8 +90,9 @@
     else if (t === "band") { const was = X.band; X.band = d; if (band) band.set({ style: d.style, bass: d.bass, bassLvl: d.bassLvl, drumLvl: d.drumLvl, chord: d.chord }); if (vis && d.chord && (!was || !was.chord || was.chord.root !== d.chord.root || was.chord.q !== d.chord.q)) vis.chord(d.chord.root, d.chord.q); }
     else if (t === "lv") { X.lv = d; paintLevel(d); if (vis) { vis.level(d.r, d.p); if (d.s) vis.spectrum(d.s); } }
     else if (t === "ev") (d || []).forEach(onEv);
-    else if (t === "data") onData(d);
-    else if (t === "ack") { toast(d.msg || (d.ok ? "Done" : "Not done")); edStat(d.msg, d.ok); }
+    else if (t === "data") { if (!(window.__console && __console.onData(d))) onData(d); }
+    else if (t === "doc") { if (window.__console) __console.onDoc(d); }
+    else if (t === "ack") { if (window.__console && __console.onAck(d)) return; toast(d.msg || (d.ok ? "Done" : "Not done")); edStat(d.msg, d.ok); }
   }
   const ROLE_VIS = { kick: "kick", boom: "kick", snare: "snare", clap: "snare", rim: "snare", ch: "hat", oh: "hat", ride: "hat", cym: "hat", shaker: "hat" };
   const later = (tp, f) => { const d = fromTab(tp) - performance.now(); if (d > 5) setTimeout(f, Math.min(d, 2000)); else f(); };
@@ -111,6 +114,7 @@
     if (v === "vVis") visOn(); else visOff();
     if (v === "vEdit") edPaint();
     if (v === "vMidi") midiPaint();
+    if (window.__console) __console.onView(v);
     X.dirty = true; paintConn();
   }
   document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => setView(b.dataset.v)));
@@ -554,7 +558,7 @@
   let wake = null;
   setInterval(async () => { try { if (up() && !wake && navigator.wakeLock && document.visibilityState === "visible") { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch (e) {} }, 5000);
   // ---------- go ----------
-  setView(ls.get("stage-view", "vMon"));
+  setView(ls.get("stage-view", "vDir"));
   if (!window.NBBand) $("bHere").disabled = true;
   linkStart();
 })();

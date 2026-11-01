@@ -3193,6 +3193,9 @@ body.shell-new .lv-pick.standalone.drawer { top: 84px !important; }
   .pl-snd { min-width: 0; max-width: 40vw; }
   .pl-bar { flex-wrap: wrap; }
 }
+/* 158: the Pixelbook asks */
+.sndfix.pb-ask { border-color: var(--lilac); }
+.sndfix.pb-ask span { font-weight: 600; }
 /* 155: Find */
 .find .ed-card { max-width: 640px; }
 .find-head { align-items: center; }

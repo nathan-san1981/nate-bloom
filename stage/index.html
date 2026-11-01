@@ -39,7 +39,7 @@ button { cursor: pointer; }
 .conn i { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #4a4262; }
 .conn.direct i { background: var(--teal); box-shadow: 0 0 8px var(--teal); } .conn.relay i, .conn.look i, .conn.connecting i { background: var(--amber); box-shadow: 0 0 8px var(--amber); } .conn.bad i { background: var(--red); }
 .tabs { display: flex; gap: 4px; margin-left: auto; }
-.tabs button { height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim); font-weight: 600; font-size: 0.9rem; }
+.tabs button { height: 38px; padding: 0 11px; border-radius: 10px; border: 1px solid transparent; background: none; color: var(--dim); font-weight: 600; font-size: 0.88rem; }
 .tabs button[aria-selected="true"] { background: var(--raised); border-color: var(--line); color: var(--ink); }
 .recdot { display: none; align-items: center; gap: 6px; font: 600 0.8rem var(--font-mono); color: #ff9aae; }
 .recdot.on { display: inline-flex; } .recdot i { width: 9px; height: 9px; border-radius: 50%; background: var(--rose); animation: blink 1s steps(2, start) infinite; }
@@ -53,6 +53,40 @@ main { position: absolute; inset: 58px 0 0 0; }
 .view[hidden] { display: none !important; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; min-width: 0; }
 .card h3 { margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+/* ---------- the console (stage 3): Director, Mixer, Library ---------- */
+.c-status { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; } .c-status .lab { margin-left: auto; text-transform: none; letter-spacing: 0; font: 500 0.8rem var(--font-body); }
+.dir { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; min-height: calc(100% - 52px); align-items: start; }
+.dir .now-card { display: flex; flex-direction: column; gap: 10px; min-height: calc(100vh - 150px); }
+.dir .now { font: 600 clamp(1.7rem, 3.6vw, 2.8rem)/1.08 var(--font-display); overflow-wrap: anywhere; }
+.dir .sub { color: var(--dim); font-size: 1rem; }
+.dir .notes { white-space: pre-wrap; font-size: 1.35rem; line-height: 1.4; flex: 1; overflow: auto; min-height: 90px; } .dir .notes.empty { color: var(--faint); font-size: 1rem; }
+.dir .bar { font: 600 1rem var(--font-mono); color: var(--amber); min-width: 150px; }
+.dir .chord { font: 700 1.3rem var(--font-display); color: var(--teal); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .row[hidden], .c-row[hidden], .pill[hidden] { display: none; }
+.dir .list { display: flex; flex-direction: column; gap: 6px; }
+#dAddRow { margin-bottom: 10px; } #dAddName { flex: 1; min-width: 160px; height: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); padding: 0 10px; }
+.c-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); min-height: 50px; }
+.c-row .num { font: 600 0.8rem var(--font-mono); color: var(--dim); width: 22px; flex: none; }
+.c-row .nm { flex: 1; min-width: 0; display: flex; flex-direction: column; } .c-row .nm b { font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .c-row .nm small { color: var(--dim); font-size: 0.78rem; }
+.c-row .go { color: var(--dim); font-weight: 600; font-size: 0.85rem; flex: none; }
+.c-row.cur { border-color: var(--teal); background: #15241f; } .c-row.cur .go { color: var(--teal); }
+button.c-row:hover { border-color: #4a4262; }
+.mx-g { margin: 14px 0 6px; } #xRows .mx-g:first-child { margin-top: 0; }
+.mx-row { display: grid; grid-template-columns: 190px 36px 36px 1fr 90px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); margin-bottom: 6px; }
+.mx-row.muted { opacity: 0.6; } .mx-row.solo { border-color: var(--amber); }
+.mx-name { display: flex; flex-direction: column; min-width: 0; } .mx-name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.95rem; } .mx-name small { color: var(--dim); font-size: 0.75rem; }
+.mx-btn { height: 34px; width: 36px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); color: var(--dim); font-weight: 700; }
+.mx-btn.mx-m[aria-pressed="true"] { background: var(--rose); border-color: var(--rose); color: #1a0c12; } .mx-btn.mx-s[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #1a1226; }
+.mx-slider { width: 100%; height: 34px; accent-color: var(--lilac); margin: 0; }
+.mx-db { font: 600 0.85rem var(--font-mono); text-align: right; }
+.lib-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.lib-head input { flex: 1; min-width: 220px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); padding: 0 12px; font-size: 1rem; }
+.lib-stack { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 6px 0 12px; min-height: 30px; }
+.chip-x { border: none; background: none; color: var(--dim); font-size: 0.8rem; padding: 0 2px; } .chip-x:hover { color: var(--rose); }
+button.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+#lCats { margin-bottom: 10px; }
+.c-row.lib { margin-bottom: 6px; } .btn.sm { height: 32px; padding: 0 10px; font-size: 0.8rem; }
+.star { border: none; background: none; color: var(--dim); font-size: 1.1rem; width: 32px; flex: none; } .star.on { color: var(--amber); }
 /* ---------- the monitor ---------- */
 #vMon { display: grid; gap: 12px; grid-template-columns: 1.15fr 1fr 0.85fr; grid-template-rows: auto auto 1fr; align-content: start; }
 .clock { grid-column: 1; display: flex; flex-direction: column; gap: 6px; }
@@ -202,7 +236,8 @@ table.sl tr.cur td { border-color: var(--teal); }
   <div class="brand"><i></i>Stage <small>Nate Bloom</small></div>
   <button class="conn" id="conn" title="The link to the tablet"><i></i><span>Not paired</span></button>
   <nav class="tabs" role="tablist" aria-label="Views">
-    <button role="tab" data-v="vMon" aria-selected="true">Monitor</button><button role="tab" data-v="vHands">Hands</button><button role="tab" data-v="vVis">Visuals</button>
+    <button role="tab" data-v="vDir" aria-selected="true">Director</button><button role="tab" data-v="vMix">Mixer</button><button role="tab" data-v="vLib">Library</button>
+    <button role="tab" data-v="vMon">Monitor</button><button role="tab" data-v="vHands">Hands</button><button role="tab" data-v="vVis">Visuals</button>
     <button role="tab" data-v="vEdit">Editor</button><button role="tab" data-v="vBand">Band</button><button role="tab" data-v="vMidi">MIDI</button>
   </nav>
   <span class="recdot" id="recdot"><i></i><span>0:00</span></span>
@@ -210,8 +245,40 @@ table.sl tr.cur td { border-color: var(--teal); }
   <button class="btn icon" id="fsBtn" title="Full screen (F11 also works)" aria-label="Full screen">⤢</button>
 </div>
 <main>
+  <!-- the console (stage 3): Director, Mixer, Library. Everything here is the tablet's state document, shown; every
+       change is an intent the tablet applies or declines. -->
+  <section class="view" id="vDir" aria-label="Director">
+    <div class="c-status"><span class="pill" id="dStatus">not linked</span><span class="pill" id="dPerm">scenes: any time</span><span class="lab">The tablet applies each change on its own terms (Set up → Pixelbook)</span></div>
+    <div class="dir">
+      <div class="card now-card">
+        <div class="lab">Playing now</div>
+        <div class="now" id="dNow">–</div><div class="sub" id="dNowSub"></div>
+        <div class="row"><span class="bar" id="dBar"></span><span class="chord" id="dChord" hidden></span><span class="pill" id="dPlaying">stopped</span><span class="pill" id="dFx">FX on</span></div>
+        <div class="lab">Notes</div><div class="notes" id="dNotes"></div>
+        <div class="lab">On the keys</div><div class="sub" id="dStack"></div>
+        <div class="row"><button class="btn" id="dPrev">‹ Previous</button><button class="btn primary" id="dNext2">Next song ›</button><span class="sub" id="dNext"></span></div>
+      </div>
+      <div class="card">
+        <h3><span class="lab">Set list</span><span class="row" style="margin-left:auto"><button class="btn sm" id="dSave" title="Keep how the tablet sounds right now (levels, sounds, FX) in the song that plays">Save into this song</button><button class="btn sm" id="dAdd">+ Add song</button></span></h3>
+        <div class="row" id="dAddRow" hidden><input id="dAddName" maxlength="40" placeholder="A name for the song" autocomplete="off"><button class="btn sm primary" id="dAddGo">Add</button><button class="btn sm" id="dAddNo">Cancel</button></div>
+        <div class="list" id="dList"></div>
+        <p class="note" style="margin-top:10px">Go switches on the next bar, like the tablet. Page Down or → for the next song, Page Up or ← for the previous.</p>
+      </div>
+    </div>
+  </section>
+  <section class="view" id="vMix" hidden aria-label="Mixer">
+    <div class="c-status"><span class="pill" id="xStatus">not linked</span><span class="pill" id="xPerm">levels: any time</span><span class="lab">Levels travel with the song: Director → Save into this song</span></div>
+    <div id="xRows"></div><p class="note" id="xEmpty">Waiting for the tablet's channels…</p>
+  </section>
+  <section class="view" id="vLib" hidden aria-label="Library">
+    <div class="c-status"><span class="pill" id="lStatus">not linked</span><span class="pill" id="lPerm">sounds: any time</span><span class="lab" id="lCount"></span></div>
+    <div class="lib-head"><input id="lFind" type="search" placeholder="Find a sound by name, kind or family" autocomplete="off" spellcheck="false"></div>
+    <div class="lab">On the keys now</div><div class="lib-stack" id="lStack"></div>
+    <div class="chips" id="lCats"></div>
+    <div id="lRows"></div>
+  </section>
   <!-- the monitor -->
-  <section class="view" id="vMon" aria-label="Monitor">
+  <section class="view" id="vMon" hidden aria-label="Monitor">
     <div class="card clock"><div class="lab">Bar · beat</div><div class="bigbar"><b id="mBar">–<span>.</span>–</b></div><div class="beats" id="mBeats"><i></i><i></i><i></i><i></i></div>
       <div class="trow"><span class="bpm" id="mBpm">– <small>bpm</small></span><span id="mPlay"></span></div></div>
     <div class="card song"><div class="lab" id="mSongLab">Set list</div><div class="now" id="mSong">–</div><div class="next" id="mNext"></div><div class="notes" id="mNotes"></div></div>
@@ -287,9 +354,10 @@ table.sl tr.cur td { border-color: var(--teal); }
   <p class="note" id="pairMore"></p>
 </div></div>
 <div class="toast" id="toast"></div>
-<script src="link.js?v=148"></script>
-<script src="band.js?v=148"></script>
-<script src="visuals.js?v=148"></script>
-<script src="stage.js?v=148"></script>
+<script src="link.js?v=158"></script>
+<script src="band.js?v=158"></script>
+<script src="visuals.js?v=158"></script>
+<script src="console.js?v=158"></script>
+<script src="stage.js?v=158"></script>
 </body>
 </html>
