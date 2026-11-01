@@ -10,6 +10,8 @@
   const setT = (el, t) => { if (el && el.textContent !== t) el.textContent = t; };
   const setA = (el, a, v) => { if (el && el.getAttribute(a) !== v) el.setAttribute(a, v); };
   const q = new URLSearchParams(location.search);
+  // (159) a long press on the touch screen is a hold here (the XY pad, a pad, a hand button), not Chrome's menu
+  document.addEventListener("contextmenu", e => { if (!(e.target.closest && e.target.closest("input, textarea, a[href]"))) e.preventDefault(); });
   let toastT = 0; const toast = m => { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2600); };
   const NN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
   const X = { L: null, mode: "off", brokers: 0, of: 0, st: null, stAt: 0, grid: null, band: null, lv: null, setlist: null, rhythm: null, kits: null, here: false, view: "vMon", dirty: true };
