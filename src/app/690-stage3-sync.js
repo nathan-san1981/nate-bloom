@@ -31,8 +31,11 @@
         MX.solo = c.name; rows.forEach(x => { if (x.name !== c.name && !(x.name in MX.muted) && !(x.name in MX.kept)) { MX.kept[x.name] = x.get(); x.set(0); } });
       } else if (MX.solo === c.name) { MX.solo = null; rows.forEach(x => { if (x.name in MX.kept) { const v = MX.kept[x.name]; delete MX.kept[x.name]; x.set(v > 0 ? v : x.dflt); } }); }
     }
+    // the tablet's build travels in the state message and the document, so the Pixelbook can tell an old page apart
+    { const ls = lkState; lkState = function () { const S = ls.apply(this, arguments); try { S.b = window.NB_BUILD || 0; } catch (e) {} return S; }; }
     { const rd = nbsRead; nbsRead = function () {
         const d = rd.apply(this, arguments);
+        try { if (d.rig) d.rig.build = window.NB_BUILD || 0; } catch (e) {}
         try { d.mixer = mxRows().map(c => ({ group: c.group, name: c.name, sub: c.sub || "", level: Math.round(c.get() * 1000) / 1000, pos: mxPos(c.get(), c.law), text: mxDb(c.get(), c.dflt, c.law), dflt: c.dflt, muted: c.name in MX.muted, solo: MX.solo === c.name })); } catch (e) {}
         return d; }; }
     // ---- permissions: what the Pixelbook may change right now ----

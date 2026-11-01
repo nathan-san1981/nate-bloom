@@ -62,16 +62,16 @@
       return pr;
     }
     // (144) a plugin instrument keeps running its sound engine, silent or not, as long as it's loaded: once it's no
-    // longer a layer and nothing of it is sounding, its settings are kept and it's unloaded after 15 s. Picking it
-    // again loads it again.
+    // longer a layer its notes are released at once and, its settings kept, it's unloaded after 5 s (159: was 15 s,
+    // and a note it still held kept it loaded and ringing for good). Picking it again loads it again.
     setInterval(() => {
       if (!ctx || !NBW.parts.size) return;
       const now = Date.now(), inUse = id => state.lib.parts.some(p => p && p.id === id);
       NBW.parts.forEach((W, id) => {
         if (W.unloading) return;
-        if (inUse(id) || W.held.size) { W.idleSince = 0; return; }
-        if (!W.idleSince) { W.idleSince = now; return; }
-        if (now - W.idleSince < 15000) return;
+        if (inUse(id)) { W.idleSince = 0; return; }
+        if (!W.idleSince) { W.idleSince = now; try { const t = ctx.currentTime; W.held.forEach(n => nbwMidi(W, t, [0x80, n, 0])); W.held.clear(); nbwMidi(W, t, [0xB0, 123, 0]); nbwMidi(W, t, [0xB0, 64, 0]); } catch (e) {} return; }
+        if (now - W.idleSince < 5000) return;
         W.unloading = true;
         nbwKeep(W).catch(() => {}).then(() => {
           if (NBW.parts.get(id) !== W) return;

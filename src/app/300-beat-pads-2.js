@@ -224,11 +224,12 @@
   document.getElementById("bpResamp").addEventListener("click", bpResample);
   document.getElementById("bpToTrk").addEventListener("click", bpToTracks);
   // ---------- MIDI: pads in, Start/Stop in, clock out from Beat Pads and the Rhythm Creator ----------
+  const BP_MIDI_ON = new Set();   // (159) the notes Beat Pads took: their note-offs come here too, whatever is on screen by then
   function bpMidiNote(n, v) {
-    if (bpView.hidden) return false;
     const i = (((n - 36) % 16) + 16) % 16, k = BPS.bank * 16 + i, id = "m" + n;
-    if (v > 0) bpDown(k, BPS.full ? 1 : Math.max(0.12, Math.min(1, v / 127)), id); else bpUp(id);
-    return true;
+    if (v > 0) { if (bpView.hidden) return false; BP_MIDI_ON.add(n); bpDown(k, BPS.full ? 1 : Math.max(0.12, Math.min(1, v / 127)), id); return true; }
+    if (!BP_MIDI_ON.has(n)) return false;   // (a note-off for a note the keys got goes to the keys)
+    BP_MIDI_ON.delete(n); bpUp(id); return true;
   }
   function bpMidiTransport(on) {
     if (on && window.__liveTransport && window.__liveTransport(true)) return true;

@@ -424,6 +424,6 @@
     { const p0 = paint; paint = function () { p0(); try { if (!stk.hidden) paintQuick(); } catch (e) {} }; }
     setTimeout(() => { try { paint(); } catch (e) {} }, 0);
     window.__qk = { items: qkItems, alone: qkAlone, toggle: qkToggle, pin: qkPin, paint: paintQuick, PIN };
-    window.__stk = { items, groupsOn, together, drop, only, focusOn, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
+    window.__stk = { items, groupsOn, together, drop, only, focusOn, swap: e => swap(e, false), isSel, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
       seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }

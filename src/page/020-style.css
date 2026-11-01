@@ -2781,6 +2781,7 @@ body.live-on .browser { z-index: 29; }
 .lp-parp { height: 34px; padding: 0 14px; border-radius: 17px; border: 1px solid var(--line); background: none; color: var(--dim); font: 700 0.78rem var(--font-body); cursor: pointer; }
 .lp-parp[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: var(--panel); }
 .lp-px { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; }
+.lp-po { height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--line); background: none; color: var(--dim); font: 700 0.78rem var(--font-body); cursor: pointer; }
 .lp-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .lp-tile { display: flex; min-height: 50px; border-radius: 10px; background: var(--raised); border: 1.5px solid transparent; overflow: hidden; }
 .lp-tile.on { border-color: #7fd6c2; }

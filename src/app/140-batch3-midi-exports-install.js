@@ -139,6 +139,15 @@
     return outPorts().some(mdIsKO) ? mdIsKO(o) : true;
   }
   function mdClockPorts() { return outPorts().filter(mdClockTo); }
+  // (159) which inputs play the keys: a keyboard does; the K.O. II doesn't unless you say so, because its sequencer
+  // sends every pad hit as a note and that would play the synth stack. Its pads still reach Beat Pads, the Rhythm
+  // Creator and the Garage, and its clock still counts.
+  function mdKeysFrom(p) {
+    if (!p) return true;
+    const m = md.opt.keysFrom || {}, k = mdKey("in", p);
+    if (Object.prototype.hasOwnProperty.call(m, k)) return !!m[k];
+    return !mdIsKO(p);
+  }
   // how hard you play → how loud: 100 plays as the screen does, 127 a little louder
   const MD_VEL = { off: 0, light: 0.7, normal: 1.3, firm: 2 };
   function mdVelGain(v) { const k = MD_VEL[md.opt.vel || "normal"]; return k ? Math.min(1.3, Math.pow(Math.max(1, v) / 100, k)) : 1; }
@@ -159,7 +168,7 @@
     if (st === 0xfc && md.opt.clockIn) { if (typeof bpMidiTransport === "function") bpMidiTransport(false); if (playing) stopSeq(); return; }
     if ((cmd === 0x90 || cmd === 0x80) && md.opt.padsIn && typeof bpMidiNote === "function" && bpMidiNote(d1, cmd === 0x90 ? d2 : 0)) return;
     if (cmd === 0xb0 && typeof nbCC === "function" && nbCC(st & 15, d1, d2)) return;
-    if (!md.opt.noteIn) return;
+    if (!md.opt.noteIn || !mdKeysFrom(e.target)) return;
     if (cmd === 0xe0) { pm.bend = Math.max(-1, Math.min(1, ((d2 << 7) | d1) / 8192 - 1)); if (WHEEL_DRAW.bend) WHEEL_DRAW.bend(); applyPitch(); return; }
     if (cmd === 0xd0) { MODSRC.press = d1 / 127 * 0.8; pm.mod = Math.max(MODSRC.wheel, MODSRC.press); if (WHEEL_DRAW.mod) WHEEL_DRAW.mod(); applyPitch(); return; }
     if (cmd === 0xb0) {
@@ -189,6 +198,13 @@
           ck.title = to ? "Gets the clock, start and stop (when Send clock is on)" : "Doesn't get the clock";
           ck.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); md.opt.clockTo = Object.assign({}, md.opt.clockTo, { [mdKey("out", p)]: !mdClockTo(p) }); saveMd(); renderMidi(); });
           row.appendChild(ck);
+        }
+        if (kind === "in" && set.has(p.id)) {   // (159: whether this input plays the keys; the K.O. II's notes are its pads, not keys)
+          const kb = document.createElement("button"); kb.type = "button"; kb.className = "btn md-clk md-keys"; const on = mdKeysFrom(p);
+          kb.textContent = on ? "Keys ✓" : "Keys"; kb.setAttribute("aria-pressed", String(on));
+          kb.title = on ? "Its notes play the keys (the sound stack)" : "Its notes don't play the keys: pads, clock and learned knobs only";
+          kb.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); md.opt.keysFrom = Object.assign({}, md.opt.keysFrom, { [mdKey("in", p)]: !mdKeysFrom(p) }); saveMd(); renderMidi(); });
+          row.appendChild(kb);
         }
         mdPorts.appendChild(row);
       });

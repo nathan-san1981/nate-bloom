@@ -119,6 +119,7 @@ piece of text and on which line. Standard library only, about a second.
 | `670-stage1-setup-strip-find.js` | 32,215 | 155 (stage 1): Set up (seven sections, today's sheets parked inside), Find, the strip; `__live20` |
 | `680-stage2-play.js` | 17,628 | 157 (stage 2): Play, the performance surface over Live's own parts; `__live21` |
 | `690-stage3-sync.js` | 14,072 | 158 (stage 3): the document over the link as patches, the console's intents (mixer pos / mute / solo, set list, the Library), permissions with the Accept bar, songs that carry their levels; `__live22` |
+| `700-stuck-notes-159.js` | 4,659 | 159: the net under lost note-offs: Stop all forces every voice off, a watchdog for MIDI notes nothing could still hold, the log; `__live23` |
 | `900-minilab-close.js` | 261 | `__mod.nbCC`, `window.__ml` exports, `}` closing the MiniLab/Live block |
 | `990-iife-close.js` | 105 | wake lock request; `})();` |
 

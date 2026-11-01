@@ -92,6 +92,18 @@
       const e = entryOf(id); if (!e) return;
       try { await chooseEntry(e, false); } catch (x) {}
     }
+    // (159) a tap on a sound while several play: if it's one of them it gets the controls, otherwise it takes the place
+    // of the one that has them, and the rest play on. The stack collapses only on purpose: hold a sound, or Only.
+    const itemOf = id => { const its = stkItems(); if (id.startsWith("w:")) return its.find(x => x.t === "lib" && x.id === id.slice(2)); if (id === "e:inst") return its.find(x => x.t === "inst"); if (id.startsWith("e:")) return its.find(x => x.t === "syn" && x.id === id.slice(2)); return null; };
+    async function soundTap(id) {
+      start();
+      const its = stkItems();
+      if (its.length > 1 && !id.startsWith("my:") && window.__stk) {
+        const it = itemOf(id); if (it) { try { __stk.focusOn(it); } catch (e) {} return; }
+        const e = entryOf(id); if (e && !id.startsWith("n:")) { try { await __stk.swap(e); } catch (x) {} return; }
+      }
+      return soundAlone(id);
+    }
     async function soundToggle(id) {
       start(); const Q = qk(); if (!Q) return;
       await Q.toggle({ id, eng: id.startsWith("e:") ? id.slice(2) : undefined });
@@ -100,7 +112,7 @@
     const canLayer = id => { const Q = qk(); try { return !!(Q && Q.canLayer(id)); } catch (e) { return false; } };
     function tileHTML(id, name, sub) {
       const on = playingId(id), cur = !!(state.cur && state.cur.id === id);
-      return `<div class="lp-tile${on ? " on" : ""}${cur ? " cur" : ""}" data-id="${esc3(id)}"><button class="lp-tm" data-a="alone" title="Play ${esc3(name)} alone"><b>${esc3(name)}</b><small>${esc3(sub || "")}</small></button>${canLayer(id) ? `<button class="lp-tp" data-a="layer" aria-label="${on ? "Stop " + esc3(name) : "Layer " + esc3(name) + " with what's playing"}" title="${on ? "Playing · tap to stop it" : "Layer it with what's playing"}">${on ? "✓" : "+"}</button>` : ""}</div>`;
+      return `<div class="lp-tile${on ? " on" : ""}${cur ? " cur" : ""}" data-id="${esc3(id)}"><button class="lp-tm" data-a="tap" title="${on ? "Give " + esc3(name) + " the controls" : "Play " + esc3(name) + " in place of the sound with the controls"} · hold: play it alone"><b>${esc3(name)}</b><small>${esc3(sub || "")}</small></button>${canLayer(id) ? `<button class="lp-tp" data-a="layer" aria-label="${on ? "Stop " + esc3(name) : "Layer " + esc3(name) + " with what's playing"}" title="${on ? "Playing · tap to stop it" : "Layer it with what's playing"}">${on ? "✓" : "+"}</button>` : ""}</div>`;
     }
     function openSounds() {
       const items = stkItems(), Q = qk();
@@ -108,8 +120,8 @@
       const favIds = (typeof favs !== "undefined" ? favs : []).filter(id => entryOf(id)).slice(0, 12);
       const rec = L3.recent.filter(id => entryOf(id) && !favIds.includes(id)).slice(0, 8);
       const layers = items.map(it => { const k = itKey(it); return `<div class="lp-pl" data-k="${esc3(k)}"><span class="lp-pln"><b>${esc3(it.name)}</b><small>${esc3(it.kind || "")}${it.wait ? " · loading" : ""}</small></span>
-        <button class="lp-parp" data-k="${esc3(k)}" aria-pressed="${armed(k)}" title="In the arp or not">Arp</button>${items.length > 1 ? `<button class="lp-px" data-k="${esc3(k)}" aria-label="Stop ${esc3(it.name)}">✕</button>` : ""}</div>`; }).join("");
-      popSide(600, `<div class="lv-pkh"><div><strong>Sounds</strong><small>Tap a sound to play it alone · + layers it with what's playing</small></div><button class="btn" id="lvAllSnd">All sounds…</button><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
+        <button class="lp-parp" data-k="${esc3(k)}" aria-pressed="${armed(k)}" title="In the arp or not">Arp</button>${items.length > 1 ? `<button class="lp-po" data-k="${esc3(k)}" title="Only ${esc3(it.name)}: the others stop">Only</button><button class="lp-px" data-k="${esc3(k)}" aria-label="Stop ${esc3(it.name)}">✕</button>` : ""}</div>`; }).join("");
+      popSide(600, `<div class="lv-pkh"><div><strong>Sounds</strong><small>Tap a sound to play it (in place of the one with the controls) · + layers it · hold a sound to play it alone</small></div><button class="btn" id="lvAllSnd">All sounds…</button><button class="btn" id="lvPickClose" aria-label="Close">✕</button></div>
         <div class="lv-pkl">
           <div class="lv-pkg">Playing now${items.length > 1 ? " · " + items.length + " layers" : ""}</div><div class="lp-pls">${layers || '<p class="lv-note">Nothing playing from the keys.</p>'}</div>
           <div class="lv-pkg">Quick</div><div class="lp-tiles">${quick.map(q => tileHTML(q.id, q.name, q.sub)).join("")}</div>
@@ -120,10 +132,20 @@
       pick.querySelector("#lvPickClose").addEventListener("click", closePick);
       pick.querySelector("#lvAllSnd").addEventListener("click", () => { closePick(); tap("sndOpen"); });
       const again = () => setTimeout(() => { if (!pick.hidden && pick.querySelector(".lp-tiles")) openSounds(); lvPaintTop(); lvPaintKnobs(); }, 250);
-      pick.querySelectorAll(".lp-tile").forEach(t => t.addEventListener("click", async e => {
-        const b = e.target.closest("button[data-a]"); if (!b) return; const id = t.dataset.id;
-        if (b.dataset.a === "alone") { await soundAlone(id); ML.lay = null; again(); }
-        else { await soundToggle(id); ML.lay = null; again(); }
+      pick.querySelectorAll(".lp-tile").forEach(t => {
+        let holdT = 0, held = false;
+        t.addEventListener("click", async e => {
+          const b = e.target.closest("button[data-a]"); if (!b) return; const id = t.dataset.id;
+          if (held) { held = false; return; }
+          if (b.dataset.a === "tap") { await soundTap(id); ML.lay = null; again(); }
+          else { await soundToggle(id); ML.lay = null; again(); }
+        });
+        const tm = t.querySelector(".lp-tm");
+        tm.addEventListener("pointerdown", () => { held = false; clearTimeout(holdT); holdT = setTimeout(async () => { held = true; try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} await soundAlone(t.dataset.id); ML.lay = null; again(); }, 550); });
+        ["pointerup", "pointercancel", "pointerleave"].forEach(ev => tm.addEventListener(ev, () => clearTimeout(holdT)));
+      });
+      pick.querySelectorAll(".lp-po").forEach(b => b.addEventListener("click", () => {
+        const it = stkItems().find(x => itKey(x) === b.dataset.k); if (it && window.__stk) { try { __stk.only(it); } catch (e) {} } ML.lay = null; again();
       }));
       pick.querySelectorAll(".lp-parp").forEach(b => b.addEventListener("click", () => { arpArm(b.dataset.k, b.getAttribute("aria-pressed") !== "true"); openSounds(); }));
       pick.querySelectorAll(".lp-px").forEach(b => b.addEventListener("click", () => {

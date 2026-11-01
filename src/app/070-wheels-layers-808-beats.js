@@ -311,7 +311,8 @@
   renderLibPanel = function () {
     document.getElementById("engineLabel").textContent = "Library";
     const n = state.lib.parts.filter(p => p && p.id && p.on).length;
-    noteMsg(n > 1 ? n + " sounds · " + (state.lib.parts.some(p => p && (p.lo > 0 || p.hi < 127)) ? "split across the keys" : "layered") : libInst ? libInst.name + " · " + libInst.sub : "Tap the sound name above to pick from the library");
+    const tot = (() => { try { return Math.max(n, window.__stk ? __stk.items().length : n); } catch (e) { return n; } })();   // (159: the whole stack, not just the library's part of it)
+    noteMsg(tot > 1 ? tot + " sounds · " + (state.lib.parts.some(p => p && (p.lo > 0 || p.hi < 127)) ? "split across the keys" : "layered") : libInst ? libInst.name + " · " + libInst.sub : "Tap the sound name above to pick from the library");
     document.getElementById("lySum").textContent = n > 1 ? n + " sounds" : "1 sound";
     engineKnobsEl.innerHTML = "";
     LIB_KNOBS.forEach(([k, label]) => makeKnob(engineKnobsEl, k, label, () => state.lib.p, () => {}));

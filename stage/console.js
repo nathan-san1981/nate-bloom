@@ -9,6 +9,7 @@
   const A = () => window.__stageAPI;
   const C = { doc: null, lib: null, pending: new Map(), seq: 0, rtt: [], favs: [], q: "", cat: "all", view: "", drag: null, dragT: 0, lastDoc: 0 };
   window.__console = C;
+  C.paintStatus = () => paintStatus();
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const setT = (el, t) => { if (el && el.textContent !== t) el.textContent = t; };
   const NN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
@@ -42,12 +43,19 @@
     return false;
   };
   C.onView = v => { C.view = v; if (v === "vDir" || v === "vMix" || v === "vLib") paint(["setlist", "transport", "stack", "mixer", "perms", "fx", "jam", "rig"]); if (v === "vLib" && !C.lib) A().send("pull", { kind: "library" }); };
-  C.onUp = () => { const a = A(); a.send("pull", { kind: "doc" }); if (C.view === "vLib" || !C.lib) a.send("pull", { kind: "library" }); };
+  C.onUp = () => { const a = A(); C.upAt = performance.now(); a.send("pull", { kind: "doc" }); if (C.view === "vLib" || !C.lib) a.send("pull", { kind: "library" }); setTimeout(paintStatus, 4500); };
   const rtt = () => C.rtt.length ? Math.round(C.rtt.reduce((s, x) => s + x, 0) / C.rtt.length) : null;
+  const NEED = 158;   // the first tablet build that sends the document
+  const tabBuild = () => { try { const X = window.__stage; return (C.doc && C.doc.rig && C.doc.rig.build) || (X && X.st && X.st.b) || 0; } catch (e) { return 0; } };
+  // linked for a while, the tablet talks (st), but no document: its page is older than this one
+  const oldTablet = () => { const a = A(), X = window.__stage; return !!(a && a.up() && !C.doc && X && X.st && X.stAt && performance.now() - X.stAt < 15000 && performance.now() - C.upAt > 4000); };
+  C.upAt = 0;
   function paintStatus() {
-    const a = A(), p = sec("perms") || {}, r = rtt();
-    const txt = (a && a.up() ? "linked" : "not linked") + (r != null ? " · a change takes " + r + " ms" : "") + (C.doc ? " · state v" + C.doc.ver : "");
+    const a = A(), p = sec("perms") || {}, r = rtt(), b = tabBuild();
+    const txt = (a && a.up() ? "linked" : "not linked") + (r != null ? " · a change takes " + r + " ms" : "") + (C.doc ? " · state v" + C.doc.ver : "") + (b ? " · tablet build " + b : "")
+      + (oldTablet() ? " · the tablet's page is older than this one: reload Nate Bloom there" : "");
     ["dStatus", "xStatus", "lStatus"].forEach(id => setT($(id), txt));
+    const e = $("xEmpty"); if (e && !e.hidden) setT(e, !(a && a.up()) ? "Not linked to the tablet." : oldTablet() ? "The tablet runs an older Nate Bloom (build " + (b || "before " + NEED) + "): it doesn't send its channels yet. Reload Nate Bloom on the tablet (close and reopen the app, or ☰ → Reload) and this fills in." : C.doc ? "The tablet sent no channels (state v" + C.doc.ver + ")." : "Waiting for the tablet's channels…");
     setT($("xPerm"), "levels: " + permWord(p.levels)); setT($("dPerm"), "scenes: " + permWord(p.scenes)); setT($("lPerm"), "sounds: " + permWord(p.sound));
   }
   const permWord = v => ({ always: "any time", "between-songs": "only between songs", ask: "the tablet asks first", never: "never" })[v] || "any time";

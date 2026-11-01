@@ -7,7 +7,7 @@ One JSON object describes the whole instrument. The tablet owns it; everything e
 
 | Section | Holds | Read from today |
 | --- | --- | --- |
-| `rig` | `minilab`, `ko2`, `pixelbook` (booleans), `computerKeys`, `sync` (lead · follow · off), `out` (where the sound goes), `devices` (audio devices Android or the browser list), `volume` `{music, max}` (Android app 1.0.8+), `buffer` (fast · safe …), `latencyMs`, `android`, `app` (the Android app's version), `purist` | Gear, the MIDI layer, the Android bridge's `diag` |
+| `rig` | `build` (the page's build number, 159+), `minilab`, `ko2`, `pixelbook` (booleans), `computerKeys`, `sync` (lead · follow · off), `out` (where the sound goes), `devices` (audio devices Android or the browser list), `volume` `{music, max}` (Android app 1.0.8+), `buffer` (fast · safe …), `latencyMs`, `android`, `app` (the Android app's version), `purist` | Gear, the MIDI layer, the Android bridge's `diag` |
 | `transport` | `tempo`, `playing` `{seq, rc, bp}`, `target` (what ▶ plays), `live`, `key` `{root, scale}`, `octave`, `rec` (seconds recording, or null) | the sequencer, the Rhythm Creator, Beat Pads, Live |
 | `stack` | `layers[]` `{name, arp}`, `sound` `{name, sub}` | the sounds that play together |
 | `mixer` | `[{group, name, sub, level, dflt, pos, text, muted, solo}]` in the Mixer's order; `pos` is the slider 0–100, `text` the dB reading (stage 3) | `mixChannels()`, 158's mute / solo memory |

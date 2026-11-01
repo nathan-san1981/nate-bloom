@@ -20,7 +20,12 @@
       if (n >= 10) NBDROP.on = true; else if (n < 3) NBDROP.on = false;
       if (!NBDROP.on) return [];
       const where = out && out !== "system default" ? " on its way to " + out : "";
-      return ["The sound is dropping out" + where + ". " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or use another headphone output: the hub's own jack may not keep up." : "Use another headphone output: this one isn't keeping up even on Steady.")];
+      // (159) two reasons, and the tablet says which it sees: a lot playing at once (voices, layers, stuck notes), or
+      // an output that can't keep up. The first was blamed on the output before.
+      const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
+      if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
+      if (vs >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": a lot plays at once (" + vs + (vs === 1 ? " voice" : " voices") + " across " + lay + (lay === 1 ? " layer" : " layers") + "). Fewer layers or effects help; Stop all (■) clears anything that got stuck."];
+      return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
     }
     function nbsRead() {   // today's objects, read into the document's shape
       const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};

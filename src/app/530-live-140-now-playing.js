@@ -107,7 +107,7 @@
     $id("lvGrid").addEventListener("click", async e => {
       const b = e.target.closest("button[data-a]"), t = e.target.closest(".lp-tile"); if (!b || !t) return;
       const id = t.dataset.id;
-      if (b.dataset.a === "alone") await soundAlone(id); else await soundToggle(id);
+      if (b.dataset.a === "tap" || b.dataset.a === "alone") await soundTap(id); else await soundToggle(id);
       ML.lay = null; setTimeout(() => { lvPaintTop(); lvPaintKnobs(); paintCards(true); paintGrid(true); }, 250);
     });
     function paintNow() { try { paintCards(); paintHeld(); paintGrid(); } catch (e) {} }

@@ -800,6 +800,19 @@
       micMonitor(null, false); micClose(); edClose(); hideMenu();
       if (!sheet.hidden) { sheet.hidden = true; SH = null; }
       V.open = false; V.keys = null; view.hidden = true; saveNow();
+      gbPlugsRest();
+    }
+    // (159) a closed Garage costs nothing: its tracks' plugin copies keep running otherwise. Their settings are kept on
+    // the track and they load again when the Garage opens (prep).
+    function gbPlugsRest() {
+      try {
+        [...AU.plug.keys()].forEach(id => {
+          const P = AU.plug.get(id), tr = S && S.tracks.find(t => t.id === id);
+          const done = () => { try { dropPlug(id); } catch (e) {} };
+          if (P && P.node && tr && P.node.getState) Promise.resolve().then(() => P.node.getState()).then(st => { try { const j = JSON.stringify(st); if (j.length < 400000) { tr.pst = JSON.parse(j); saveNow(); } } catch (e) {} }).catch(() => {}).then(done);
+          else done();
+        });
+      } catch (e) {}
     }
     $("gbDone").addEventListener("click", e => {
       if (!e.isTrusted) {   // (Back or Escape: what's open inside the Garage closes first)
@@ -815,10 +828,14 @@
     addEventListener("resize", () => { if (!V.open) return; clearTimeout(rzT); rzT = setTimeout(() => { if (S.view === "inst") renderInst(); else if (S.view === "tracks") renderTracks(); if (ED.open) { edSize(); edDraw(); } if (V.menu) showMenu(); }, 160); });
     // MIDI, the sustain pedal and the computer keyboard play the selected track while the Garage is open
     const gbKeys = () => V.open && sheet.hidden && curTr() && curTr().kind !== "audio";
+    // (159) a note-off goes where its note-on went. Before, the Garage took every note-off while it was open, even
+    // for a note that had gone to the keys (a sheet open, an audio track selected): that note never stopped.
+    const GBN = new Map();   // note → the track it plays on
+    window.__gbNotes = GBN;
     {
       const n0 = noteOn, f0 = noteOff, ns0 = nbSustain;
-      noteOn = function (m) { if (gbKeys()) { liveOn(curTr(), m, clamp(NB_VEL, 0.05, 1)); lit(m, true); return; } return n0.apply(this, arguments); };
-      noteOff = function (m) { if (V.open && curTr()) { liveOff(curTr(), m); lit(m, false); return; } return f0.apply(this, arguments); };
+      noteOn = function (m) { if (gbKeys()) { const tr = curTr(); if (GBN.has(m)) { try { liveOff(GBN.get(m), m); } catch (e) {} } GBN.set(m, tr); liveOn(tr, m, clamp(NB_VEL, 0.05, 1)); lit(m, true); return; } return n0.apply(this, arguments); };
+      noteOff = function (m) { if (GBN.has(m)) { const tr = GBN.get(m); GBN.delete(m); try { liveOff(tr, m); } catch (e) {} lit(m, false); if (!voices.has(m)) return; } return f0.apply(this, arguments); };
       nbSustain = function (on) { if (V.open) { if (on) sustain = true; else sustainOff(); if (V.susBtn) V.susBtn.setAttribute("aria-pressed", String(sustain)); } return ns0.apply(this, arguments); };
     }
     const KD = new Map();
@@ -1236,7 +1253,7 @@
       select(i) { if (!S || !S.tracks[i]) return; S.sel = i; if (S.view === "inst") renderInst(); else renderTracks(); paintBar(); saveSong(); },
       seekBy(d) { if (!S || TP.on) return; S.ph = Math.max(0, Math.round(S.ph / S.sig + d) * S.sig); placePh(); paintPos(); },
       cycle() { const b = [...document.querySelectorAll("#gbTbar button")].find(x => x.textContent.includes("Cycle")); if (b) { b.click(); return; } gbDo(); S.cyc.on = !S.cyc.on; if (S.cyc.on && !(S.cyc.b > S.cyc.a)) { S.cyc.a = 0; S.cyc.b = 4 * S.sig; } saveSong(); gbSay(S.cyc.on ? "Cycle on" : "Cycle off"); } });
-    window.__gb = { get ml() { return window.__gb_ml(); }, capture: gbCapture, exportSheet, importFiles, audioStems, mini: gbMini, playAlong, clipSheet, vaSched, laneAdd, laneRun, migrateTracks, NBR, VA, put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose };
+    window.__gb = { get ml() { return window.__gb_ml(); }, capture: gbCapture, exportSheet, importFiles, audioStems, mini: gbMini, playAlong, clipSheet, vaSched, laneAdd, laneRun, migrateTracks, NBR, VA, put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose, liveAllOff, gbKeys };
   }
 
 

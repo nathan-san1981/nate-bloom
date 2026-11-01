@@ -343,7 +343,7 @@
       AU.sus.forEach((v, k) => { try { v.stop(ctx.currentTime); } catch (e) {} const [id, m] = k.split(":"), tr = S && S.tracks.find(x => x.id === id); if (tr) recOff(tr, +m); });
       AU.sus.clear();
     }
-    function liveAllOff() { if (!ctx) return; [AU.live, AU.sus].forEach(M => { M.forEach(v => { try { v.stop(ctx.currentTime); } catch (e) {} }); M.clear(); }); }
+    function liveAllOff() { try { if (window.__gbNotes) window.__gbNotes.clear(); } catch (e) {} if (!ctx) return; [AU.live, AU.sus].forEach(M => { M.forEach(v => { try { v.stop(ctx.currentTime); } catch (e) {} }); M.clear(); }); }
 
     // ---------- the transport ----------
     const TP = { on: false, rec: false, t0: 0, b0: 0, next: 0, timer: 0, ev: [], evi: 0, dirty: true, srcs: [], exp: null };

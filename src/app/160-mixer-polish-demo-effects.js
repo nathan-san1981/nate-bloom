@@ -87,8 +87,11 @@
   }
   {
     const on0 = noteOn, off0 = noteOff, held0 = toggleHeld;
-    noteOn = function (m) { return on0(snapNote(m)); };
-    noteOff = function (m) { return off0(snapNote(m)); };
+    // (159) a note-off releases the note its note-on became, even if the scale changed in between; a note that sounds
+    // as itself (Stop all walks the voices) is released as itself
+    const SNAPPED = new Map();
+    noteOn = function (m) { const s = snapNote(m); SNAPPED.set(m, s); return on0(s); };
+    noteOff = function (m) { const s = SNAPPED.has(m) ? SNAPPED.get(m) : voices.has(m) ? m : snapNote(m); SNAPPED.delete(m); return off0(s); };
     toggleHeld = function (m) { return held0(snapNote(m)); };
   }
   function paintScale() {

@@ -32,11 +32,12 @@
         num(() => Math.round(performance.memory.usedJSHeapSize / 1048576), ""), num(() => voices.size, ""), num(() => BP.voices.filter(v => v.end > ctx.currentTime).length, ""), num(() => heldVoices.size, ""),
         its.length, num(() => arpLive() ? 1 : 0, ""), state.hold ? 1 : 0, fxOnStr(), num(() => Math.round(window.__analog.la() * 1000), ""), num(() => window.__analog.NBAN.stalls, ""),
         LV.kpage + (LV.shift ? "^" + lvSPage() : ""), LV.pset, (LV.play === "bp" ? BP.playing : LV.play === "rc" ? RC.playing : playing) ? 1 : 0, Math.round(rcBpm()),
-        String((document.getElementById("sndName") || {}).textContent || "").slice(0, 28)]);
+        String((document.getElementById("sndName") || {}).textContent || "").slice(0, 28),
+        num(() => (window.__gb && __gb.AU ? __gb.AU.live.size + __gb.AU.sus.size : 0) + (window.__gbNotes ? __gbNotes.size : 0), ""), num(() => window.__wam && __wam.NBW ? __wam.NBW.parts.size : 0, ""), num(() => window.__live23 ? __live23.stuckN() : 0, "")]);
       if (TL.length > 900) TL.splice(0, 60);
       TLS.longMs = 0; TLS.longN = 0; TLS.frames = 0; TLS.midi = 0;
     }
-    const TL_HEAD = ["sec", "audio", "behind_ms", "outTs_ms", "playout", "stuck_ms", "stuck_n", "frames", "midi_msgs", "heap_MB", "voices", "pad_voices", "held", "layers", "arp", "hold", "fxlab", "lookahead_ms", "timing_stalls", "knobs", "pads", "playing", "bpm", "sound"];
+    const TL_HEAD = ["sec", "audio", "behind_ms", "outTs_ms", "playout", "stuck_ms", "stuck_n", "frames", "midi_msgs", "heap_MB", "voices", "pad_voices", "held", "layers", "arp", "hold", "fxlab", "lookahead_ms", "timing_stalls", "knobs", "pads", "playing", "bpm", "sound", "gb_voices", "plugins", "stuck"];
     let tlT = 0;
     new MutationObserver(() => {
       if (!lv.hidden) { TLS.since = performance.now() / 1000; TLS.base = null; TLS.lag = 0; TLS.ts = null; clearInterval(tlT); tlT = setInterval(tlTick, 1000); if (!TLS.raf) TLS.raf = requestAnimationFrame(tlFrame); add139("live", "open · " + innerWidth + "x" + innerHeight + " · " + fxOnStr()); }
