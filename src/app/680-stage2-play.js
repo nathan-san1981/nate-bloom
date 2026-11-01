@@ -42,7 +42,7 @@
         </div>`;
       document.body.appendChild(el); PLAY.el = el;
       // the chrome: every button delegates to Live's own
-      const click = id => () => { const b = $id(id); if (b) b.click(); };
+      const click = id => () => { const b = $id(id); if (b) b.click(); try { plPaintTop(); } catch (e) {} };   // the chrome follows at once, not at the next 250 ms tick
       $id("plDone").addEventListener("click", () => { if (LV.lock) { mlHud("Play is locked", "hold Done to leave", null); return; } plClose(); });
       $id("plDone").addEventListener("pointerdown", () => { if (!LV.lock) return; clearTimeout(PLAY.lockHold); $id("plDone").classList.add("holding"); PLAY.lockHold = setTimeout(() => { $id("plDone").classList.remove("holding"); plClose(); }, 700); });
       ["pointerup", "pointercancel", "pointerleave"].forEach(n => $id("plDone").addEventListener(n, () => { clearTimeout(PLAY.lockHold); $id("plDone").classList.remove("holding"); }));
