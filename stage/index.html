@@ -172,7 +172,12 @@ button.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); 
 /* ---------- visuals ---------- */
 #vVis { padding: 0; overflow: hidden; background: #000; }
 #visCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.visbar { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 10px; transition: opacity 0.4s; }
+.visbar { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; transition: opacity 0.4s; }
+#visModes { flex-wrap: wrap; row-gap: 4px; max-width: 100%; }   /* thirteen modes: two rows on the Pixelbook */
+#visModes button { padding: 0 10px; font-size: 0.8rem; }
+#visModes button[data-scary="1"] { color: #c98a6e; }
+#visModes button[data-scary="1"][aria-pressed="true"] { color: var(--panel); }
+#visModes button.first-scary { border-left: 1px solid var(--line); }
 .visbar.hide { opacity: 0; pointer-events: none; }
 .viscap { position: absolute; left: 22px; top: 18px; font: 600 1rem var(--font-mono); color: #ffffffcc; text-shadow: 0 2px 10px #000; pointer-events: none; }
 .viscap b { font-family: var(--font-display); font-size: 1.15rem; display: block; }
@@ -397,10 +402,10 @@ table.sl tr.cur td { border-color: var(--teal); }
 <audio id="rtAudio" muted playsinline hidden></audio>
 <script src="link.js?v=158"></script>
 <script src="band.js?v=158"></script>
-<script src="visuals.js?v=158"></script>
+<script src="visuals.js?v=163"></script>
 <script src="console.js?v=160"></script>
 <script src="stage4.js?v=161"></script>
 <script src="learn.js?v=161"></script>
-<script src="stage.js?v=160"></script>
+<script src="stage.js?v=163"></script>
 </body>
 </html>

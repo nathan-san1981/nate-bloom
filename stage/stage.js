@@ -288,7 +288,7 @@
       try {
         vis = NBVisuals.create($("visCanvas"));
         vis.beatClock(() => { const b = beatNow(); return b ? { beat: b.beat, bpm: b.bpm, playing: true } : null; });
-        const ms = $("visModes"); ms.innerHTML = vis.modes.map(m => `<button data-m="${m.id}">${esc(m.name)}</button>`).join("");
+        const ms = $("visModes"); let sc = false; ms.innerHTML = vis.modes.map(m => { const first = m.scary && !sc; if (m.scary) sc = true; return `<button data-m="${m.id}" data-scary="${m.scary ? 1 : 0}"${first ? ' class="first-scary"' : ""} title="${esc(m.desc || m.name)}">${esc(m.name)}</button>`; }).join("");
         ms.querySelectorAll("button").forEach(b => b.addEventListener("click", () => visSet(b.dataset.m)));
         if (X.band && X.band.chord) vis.chord(X.band.chord.root, X.band.chord.q);
       } catch (e) { console.error(e); vis = null; }
