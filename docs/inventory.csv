@@ -1,0 +1,338 @@
+area,kind,id,label,does,reached_today,new_home,note
+Main screen,view,,Main screen (body),"Header, engine tabs, sound/FX/arp panels, keys, Seq, Notes",app start,Build · Sounds · workspace,Keys fallback also lives in Play when no MiniLab
+Main screen,panel,start,Tap to start sound,Start overlay; unlocks audio on first tap,app start,Set up · Sound check,Enter/Space also start
+Main screen,button,mixBtn,Mix,Opens the Mixer sheet,header,Build · mixer drawer,
+Main screen,select,recTo,Where the recording goes,Picks the take destination when Rec stops,header,Build · transport · Record,Also in DJ top bar (djRecTo)
+Main screen,button,takeBtn,● Rec,Records what you play as a take,header,Build · transport · Record,MiniLab Shift+click big knob = Rec on Synths/Samples/Drums
+Main screen,button,stopAll,■ Stop all,"Stops sequencer, Rhythm, DJ, Jam, Tracks, pads, held notes",header (■ All on phone),Strip,Every full screen has a data-stopall copy; must stay one tap away
+Main screen,button,hisUndoP / hisRedoP,↶ ↷ (phone),Undo/redo the last change anywhere,"header, phones",Strip,Ctrl+Z / Ctrl+Shift+Z
+Main screen,button,menuBtn,☰,Opens the Menu sheet of tiles,header,Strip · space switcher,
+Main screen,button,hdrLog,Log,"Saves zip: log, last minute of sound, settings","header, left of ☰",Strip · Log,Red dot = dropout since last log; copies on Rhythm/Beats/Garage/Live/DJ
+Main screen,tab,mSynths / mSamples / mDrums,Synths · Samples · Drums,"Picks what the keys play: engines, sampler/pads, drum machine",header mode group (bottom bar on phones),Build · Sounds / Samples / Beats tabs,
+Main screen,tab,djBtn / rcBtn / bpBtn / gbBtn,DJ · Rhythm · Beats · Garage,Open the full screens; green dot when one plays,header mode group (bottom bar on phones),Strip · space switcher + Build tabs,Playing dot must survive on the switcher
+Main screen,panel,modes,Phone bottom tab bar,Same mode group fixed to the bottom on phones,phones,Strip · space switcher,
+Main screen,panel,nowBar / nowPop,Playing ▾,"Lists everything sounding; Only this, Edit, ■ Stop per card",under header while something plays,Play · sound cards; Strip,Isolate (solo) and Edit-takes-you-there behaviour
+Main screen,button,betaTracksBtn,▤ Tracks,Opens the Tracks view,tool row,Build · Tracks,
+Main screen,button,songBtn / songSeqBtn,Song,Opens the Song sheet (patterns A–D chain),tool row; Seq next to Beats…,Build · Songs · Song mode,
+Main screen,button,prBtn,Projects,Opens Projects sheet,tool row / ☰,Set up · Projects,
+Main screen,button,betaFxBtn,FX Lab,Docks FX Lab above the keys (labRow),tool row,Build · Sounds · FX panel,
+Main screen,button,wamBtn,Plugins,Opens the Plugins sheet,tool row / ☰,Build · Sounds · plugins,
+Main screen,button,moBtn / moLfoBtn,Motion / LFOs · XY,"Opens the Motion sheet (LFOs, XY pad, drift)",tool row; Motion panel,Build · Sounds · Motion,
+Main screen,button,msBtn,My sounds,Opens My sounds sheet,tool row / ☰,Build · Sounds · My sounds,
+Main screen,button,exBtn,Export,Opens Export sheet,tool row / ☰,Set up · Projects · export,
+Main screen,button,midiBtn,MIDI,Opens MIDI sheet,tool row / ☰,Set up · MIDI,
+Main screen,button,lkBtn,Link,Link with tablet/computer on same Wi-Fi; Ableton Link,tool row / ☰ (apps only),Set up · Pixelbook · link,Hidden outside the apps
+Main screen,button,installBtn,Install,Opens Install sheet,tool row / ☰,Set up · App · install,
+Main screen,button,hisUndo / hisRedo / hisBtn,↶ ↷ History,"Undo, redo, open History sheet",tool row,Strip (undo) + Set up · Projects · history,
+Main screen,button,helpBtn,?,"Opens Help, settings and Report",tool row / ☰,Set up · Help,? key
+Main screen,button,exitBtn,⏻ Exit,Opens Exit sheet (save and close),tool row / ☰,Set up · Projects · exit,
+Main screen,tab,modeKeys / modeSeq / modeNotes,Keys · Seq · Notes,Switch the main page view,tool row / top bar,Build · Sounds (Keys) / Beats (Seq) / Songs (Notes),Seq owns the one-bar SY tune; Notes the melody
+Main screen,panel,takeBar,Take ready bar,"Export WAV/MP3, Send to sampler, → Garage, Discard a take",after Rec/Keep stops,Build · Samples · recordings,
+Main screen,tab,tabs (.tab[data-engine]),Engine tabs,"Sounds · 15 Engines · More: Lib, Inst, Smp, Pads, Drums",under header,Build · browser drawer,+ badge stacks an engine; long-press menu
+Main screen,list,tabMenu items,Tab long-press menu,"Remove, hide, move, reset, rename, save sound, Play together",long-press a tab,Build · browser drawer · context menu,
+Main screen,panel,stk / stkRow,Playing row,"Sounds playing together; tap for controls, ✕ stops, Only…","Synths, when 2+ sounds play",Play · sound cards,Up to 8 parts (MAX_PARTS)
+Main screen,panel,qk / qkRow,Quick sounds row,"Tap plays alone, + layers, ✓ stops; ✎ edits row",under Playing row,Play · sound picker,qkSheet configures it
+Main screen,button,sndPrev / sndOpen / sndNext,Sound bar ‹ name ›,Step sounds; tap name opens the Sound browser,above knobs,Build · browser drawer; Play · sound cards,MiniLab big knob = next sound on Synths
+Main screen,panel,browser,Sounds browser,"Search, categories, favourites ☆, ▶ preview, + together",sound bar / Lib tab,Build · browser drawer,"Categories: Favorites, Nate Bloom, Pads, Keys, Bells, Strings, Winds, Leads, Guitar&Bass, World, Perc, Kits, Engines, My Instruments, Classic Synths, Studio, Natewave, Plugins"
+Main screen,panel,machBar,Drums machines,808 / 909 / CR-78 on/off chips,Drums tab or Seq,Build · Beats · Seq,
+Main screen,panel,fmBar,FM patch bar,"FM patch select, Import .syx, clear DX7 bank",FM engine,Build · Sounds · synth editor,
+Main screen,tab,pSound / pFx / pArp / pJam / pMorph / pHide,Sound · FX · Arp · Motion · Jam · ▾,Which slider panel shows; ▾ hides sliders,panel bar,Build · Sounds · editor tabs,Effects·FX Lab sub-switch inside FX
+Main screen,button,playOpts / playSheet,Single notes · Scale off,"Chord type, Scale lock, Blend in one sheet",panel bar chip,Play · right-thumb · Scale lock; Build · Sounds,Replaces chord/scale/blend row
+Main screen,select,chord,Chord,Each key plays this chord type,playOpts sheet,Build · Sounds · play options,
+Main screen,select,meter,Time,Time signature for Seq and Notes,panel bar (Seq/Notes),Build · transport,
+Main screen,button,beatsBtn / drBeats,Beats…,Pick a ready-made drum beat for the pattern,Seq / Drums bar,Build · Beats · Seq,
+Main screen,panel,engineRow / engineKnobs,Sound sliders,"The selected engine's 5–8 knobs, ▶ Demo",Sound panel,Build · Sounds · synth editor,MiniLab K1–K8 on Synths
+Main screen,button,sndMore / anBar,Analog,"Analog filter models, Drive, Drift (anOn, anFilt, anDrive, anDrift)",Sound panel next to Demo,Build · Sounds · synth editor,Lite starts with it off
+Main screen,panel,spCard,Speech card,"Words to sing; Syllable/Word/Line; Loop, Start, Say it, examples",Speech engine,Build · Sounds · synth editor,
+Main screen,panel,wvDock,Natewave editor,"Osc 1/2, sub, noise, filters, envelopes, LFOs, mod matrix, macros",Wave engine → Edit,Build · Sounds · wavetable,Make a sound from a sample
+Main screen,panel,"sbar (slots, loadBtn, lineBtn, editBtn, mPlay/mGrain/mSlice, mLoop, recBtn)",Sampler bar,"8 slots; Load, Record input, Edit; Play/Grain/Slice; Loop; record",Smp tab,Build · Samples · sampler,
+Main screen,panel,sfit,Fit to beat,"Tempo fix, Match, Fit 1/2/4/8 bars, Length, Pitch, Reset",Smp tab under slots,Build · Samples · sampler,
+Main screen,panel,pending,Take ready (sampler),"Save a sampler take to a slot, hear it, discard",after Hold to record,Build · Samples · sampler,
+Main screen,panel,padbar,Pads bar,"Load to pad, copy From slot, Edit, Clear",Pads tab,Build · Samples · pads,12 pads
+Main screen,panel,instbar,Inst bar,"SF2/SFZ instrument select, Load…, Remove, Preset",Inst tab,Build · Sounds · Studio instruments,
+Main screen,panel,drbar,Drum chips,"Pick drum to edit, Reset, Beats…",Drums tab,Build · Beats · drum machine,
+Main screen,panel,libbar / layers,Layers & zones,"Up to 4 library layers; Layer all, Split at C4, Spread",Lib tab,Build · Sounds · layers,
+Main screen,panel,arpRow,Arpeggiator,"Per-voice arp: on, pattern, speed, octaves, gate, voice",Arp panel,Play · right-thumb · Arp; Build · Sounds,Each sound has its own arp
+Main screen,panel,fxRow / fxKnobs,Effects,"Drive, Wobble, Echo, Space; FX: On/Off; Mixer…",FX panel,Build · Sounds · FX; Play · right-thumb · FX switch,` key toggles FX everywhere
+Main screen,select,fxVerb / fxEchoSync / fxDuck,Reverb · Echo · Duck,"Reverb type, echo sync division, kick ducking",FX panel more row,Build · Sounds · FX,
+Main screen,panel,fxPick,Apply to,Which sounds go through the effects,FX panel,Build · Sounds · FX,"Synths, Drums, Sampler, Pads, Lib & Inst, DJ, Rhythm, Beat Pads"
+Main screen,panel,labRow / labStrip / labNav,FX Lab (docked),"Density, Lo-fi, Hall+, Freeze, Shimmer; Motion…; ⤢ Full",FX panel → FX Lab,Build · Sounds · FX,Live knob page FX Lab mirrors it
+Main screen,panel,jamRow,Jam · loops & band,"4 loops, stop all, Band, style, bass sound, chord, levels",Jam panel,Play · right-thumb · Jam; Build · Songs,Live has its own Jam panel
+Main screen,panel,"Morph row (moName, moX, moY, snapshots A–D, Mutate, Macros)",Motion (Morph),"Morph between snapshots, Mutate, 8 macros, morph effects too",Motion panel,Build · Sounds · Motion,Macros could feed Play's eight macro knobs
+Main screen,button,octDown / octUp / octLabel,Octave − +,Octave down / up,transport,Play · right-thumb · Octave ±,↓ ↑ keys
+Main screen,toggle,gridBtn,▦ Lighted note pads,Launchpad-style pad grid instead of keys; root/scale (gridBar),transport,Play · pads · Notes set,
+Main screen,toggle,perfBtn,⤢ Play view,"Just the keys, bigger",transport,Dropped (duplicate of Play keys fallback),
+Main screen,button,bpmDown / bpmUp / bpmLabel / clickBtn,Tempo − + · ♩,Tempo; tap readout to set; click track,transport (Seq/Notes),Strip · tempo; Play · bottom bar · Tap tempo,← → keys
+Main screen,button,play,▶ Play,Plays the Seq pattern and Notes melody,transport,Play · bottom bar · Play,Space
+Main screen,toggle,hold,Hold,Notes keep sounding after release,transport,Play · right-thumb · Hold,Shift+Enter; heldBar shows FX/Pause/Release
+Main screen,button,clear / seqUndo / seqRedo,Clear ↶ ↷ (Seq),Clear pattern; undo/redo pattern,transport in Seq,Build · Beats · Seq,
+Main screen,button,keepBtn,Keep,Keeps the last 90 s heard as a take,transport,Build · transport · Record (Keep 90s),Nothing armed in advance
+Main screen,button,panic,Stop,Stops beat and keys here; others keep going,transport,Play · bottom bar · Stop,Esc
+Main screen,panel,"notesArea (scDurs, scDot, scAccs, scRest, scView, scKey, scBars, mlOpenNotes, scWrite, scUndo/Redo, scClear)",Notes staff / piano roll,"Melody editor: durations, accidentals, Staff/Roll, key, bars, melodies",Notes view,Build · Songs · melody editor,Piano roll velocity lane prVel
+Main screen,panel,blendRow / blendBtn / blendAmt / scaleBtn,Blend · Scale,Soften/overlap notes; lock keys to a scale,playOpts sheet,Play · right-thumb · Scale lock; Build · Sounds,scaleSheet picks key and scale
+Main screen,panel,carryBar,Still playing,Lists carried-over sources with Stop these,after leaving a screen,Dropped (duplicate of Playing ▾ / Play cards),
+Main screen,panel,heldBar,Held,"Held notes: FX on/off, Pause, Release",while Hold holds notes,Play · sound cards · Hold card,
+Main screen,slider,bendWheel / modWheel / bendRange,Pitch bend · Vib,Pitch bend (±2 range) and vibrato wheels,left of keys,Play · keys fallback,MIDI wheels drive them
+Main screen,panel,keys,Keyboard,On-screen keys; octaves fit the width,Keys view,Play · keys fallback,Musical Typing letters shown once a keyboard is used
+Main screen,button,jumpPlay,▼ Pads,Scrolls to pads/keys when off screen,when keys off screen,? (only if Play/Build keys can scroll off screen),"Scroll helper, no feature of its own"
+Main screen,panel,alsoBar,Also playing,"Melody pick, drum machine chips, Drums only",Seq view,Build · Beats · Seq,
+Main screen,panel,drummerBar,Drummer,"Off / Gentle / Lively: fills, breakdowns in 16-bar phrases",Seq view,Build · Beats · Seq,
+Main screen,panel,stepBar,Steps · Chance · Rolls,What tapping a step does; Reset,Seq view,Build · Beats · Seq,
+Main screen,panel,seqArea / seq,Step grid,SY row + 8 drum rows × 16 steps,Seq view,Build · Beats · Seq,Scroll bar sbTrack; meter groups
+Main screen,panel,kpad grid (buildKitPads),12 sample pads,Tap to play pads; keyboard grid matches,Pads tab,Play · pads · Samples set; Build · Samples,
+Main screen,panel,nbToast / undotoast / uiToast,Toasts,Undo after big changes; notes,"after Clear, new beat…",Strip · notifications,
+Main screen,button,Fast pads badge (nfp),Fast pads,Android low-latency pad audio; shows ms or why paused,next to FX in Beat Pads (app),Set up · Sound check,Android app only
+Live,view,liveView,Live,"Playing-out screen: knobs, faders, pads, column, no keys",☰ → Live / top bar Live,Play,Becomes Play
+Live,button,lvDone,Done,Leaves Live; hold to leave when locked,Live top,Strip · space switcher,Hold 700 ms when locked
+Live,toggle,lvLock,Lock,"Back, Esc and stray taps can't close Live",Live top,Play · lock,Screen stays awake while open (wake lock)
+Live,button,lvPrev / lvSnd / lvNext,Sound ‹ name ›,Step sounds; tap opens Sounds panel,Live column top,Play · sound picker,← → keys
+Live,button,lvLayers,Layer count / + Layer,"Opens Sounds: layers, arp in/out, Quick, favourites, lately",Live column,Play · sound picker,
+Live,button,lvBpmD / lvBpm / lvBpmU,Tempo − +,Tempo down/up,Live top,Strip · tempo; Play · bottom bar · Tap tempo,− = keys; Shift ×5
+Live,tab,lv-play seg (seq / rc / bp),▶ plays: Seq · Rhythm · Pads,What ▶ and the big knob click transport,Live top,Play · bottom bar · Play target,MIDI start/stop follows this target
+Live,button,lvGo,▶,Play / stop the chosen target,Live top,Play · bottom bar · Play,Space
+Live,button,lvRec,● Loop,Records into Beat Pads when ▶ plays Pads,Live top,Play · bottom bar · Loop,L key
+Live,button,lvTake / lvTakes,● Rec · ▾,Records all you hear up to an hour; recordings list WAV/MP3/delete,Live top,Play · bottom bar · Record,R key; kept in device storage
+Live,button,lvCap,Capture,Last phrase on keys/pads becomes a Garage track,Live top,Play · bottom bar · Capture,C key; lined up to the bar
+Live,button,lvSample,Sample,Grab last 1–8 bars or record an input onto a pad,Live top,Build · Samples · recordings; Play · pads · Samples set,E key; S1–S4 = pads 13–16
+Live,button,lvGear,Gear,"MiniLab, K.O. II, who keeps time, sound, Pixelbook",Live top,Set up · Gear,Dots for MiniLab / K.O. II / Pixelbook on it
+Live,toggle,lvKo,K.O. II clock,Send clock and start/stop to the K.O. II,Live top,Set up · MIDI · clock Lead,Hidden on narrow screens
+Live,button,lvDev,MiniLab 3 / MIDI / Connect MIDI,Connects MIDI or opens MIDI sheet,Live top,Strip · MiniLab dot,
+Live,button,lvFx / lvFxp,FX + Lab,"Opens every effect and FX Lab panel (FX On/Off, 4 knobs, Lab)",Live top,Play · right-thumb · FX switch,F key; ` toggles all
+Live,button,lvJam / lvJamP,Jam,"Loops 1–4, ■ Loops, Band, chord, styles, bass sound, levels",Live top,Play · right-thumb · Jam,"J, Y U I O, B keys"
+Live,button,lvCpu,CPU,Load readout; tap for breakdown and heavy-effect switches,Live top,Strip · dropout counter; Set up · Sound check,Sound buffer Fast/Steady in its popup
+Live,button,lvLog,Log,"Saves Live log, last minute of sound, settings",Live top,Strip · Log,G key
+Live,panel,lvMeter,Output meter,Level; lights when limiter catches peaks,Live top,Strip · headphone route / limiter,Limiter on by default
+Live,button,lvStop,■,Stop everything,Live top,Play · bottom bar · Stop,
+Live,tab,lvPages (KPAGES),Knob pages: Sound · FX · FX Lab · Mix · Mine,Which eight controls the knobs hold,Live knob area,Play · macro knobs · pages,K key; big knob turns pages
+Live,knob,lvKnobs (8),8 knobs,Drag to move; name tap gives another job,Live knob area,Play · macro knobs,Mirrored on MiniLab K1–K8; Shift layer
+Live,slider,lvFaders (4),4 faders,"Sound filter, Echo, Space, Master; stay across pages",Live knob area,Play · sound cards · levels,MiniLab F1–F4; Shift layer = each layer + beat
+Live,panel,lvPick,Give it another job,Picks a control for a knob/fader/pad; Back to,tap a knob/fader name,Play · macro knobs · assign,Learned mapping only on Live
+Live,button,lvSongPrev / lvSong / lvSongNext,Set list ‹ song ›,Prev/next song on the next bar; tap opens set list,right of knob pages,Play · bottom bar · set list,Next-bar switching; N / Shift N; big knob Songs mode cues+loads
+Live,panel,"Set list popup (lvSlName, lvSlAdd, big knob seg, rows Go ↑ ↓ Update ✕)",Set list,"Save, update, reorder, delete songs; big knob mode",tap set list box,Build · Songs · set list editor,"Song = sound, tempo, FX, Lab, Rhythm pattern, BP bank/seq, Live pages"
+Live,tab,lvPsets (PSETS),Pad sets: A B C D · Notes · Chords · FX moves · Samples · Rhythm,Which 16 pads the pad grid plays,Live pad area,Play · pads · pad sets,P key
+Live,pad,lvPads (16),16 pads,"Play the set; keys 1–8, Shift 1–8",Live pad area,Play · pads,"FX moves: hold = effect in, release = back"
+Live,button,lvKit,Kit…,Loads a kit onto the Beat Pads bank,Live pad sets,Build · Beats · kits,
+Live,toggle,lvHold,Hold,Notes keep sounding,Live column,Play · right-thumb · Hold,H key
+Live,toggle,lvArp / lvArpMore / lvArpOct,Arp · ⋯ · Octaves 1–4,"Tap toggles, hold is momentary; ⋯ layers, pattern, speed, gate",Live column,Play · right-thumb · Arp,"A key, Z/X octaves"
+Live,toggle,lvSplit,Split pads,"Keys 1–8 play pads 1–8, MiniLab pads 9–16",Live column,Play · pads · split,
+Live,button,lvKeys,Keyboard row,Opens the Live keys list; Show keys on controls,Live column foot,Set up · Help · keys,? key; lvCapsOn toggle
+Live,panel,lvCards / lvAddL,Now playing cards,"Card per layer: level, Arp tag, ✕; Hold; + Layer",Live column,Play · sound cards,Up to four cards in Play
+Live,panel,lvSrc / lvGrid / lvAllSnd2,Sounds: Quick · Favourites · Lately,"Tap plays alone, + layers; All sounds…",Live column,Play · sound picker,S key navigates
+Live,panel,"Gear popup (lv-sync seg lead/follow/off, Connect, Sample an input, MIDI settings)",Gear,"MiniLab, K.O. II sync mode, sampling, buffer, dropouts, Pixelbook",Live → Gear / ☰ → Gear,Set up · Gear + MIDI clock + Sound check,Clock goes only to the K.O. II unless MIDI sheet says otherwise
+Live,panel,"CPU popup (lc-buf Fast/Steady, lcReload)",CPU & sound buffer,Breakdown; Fast vs Steady buffer (reload),Live → CPU,Set up · Sound check · buffer,
+DJ,view,djView,DJ,"Two decks, sync, crate, Auto DJ, sample bank",header DJ,Build · DJ,Decks keep playing after Done
+DJ,button,djDone / djLock,Done · Lock,Leave DJ; lock for a gig,DJ top,Strip · space switcher; Build · DJ · lock,Lock added in 143
+DJ,button,djKeep,Keep the last 90 s,Keeps the last 90 s heard as a take,DJ top ⋯,Build · transport · Keep 90s,
+DJ,toggle,djKeyLock,Key lock,Speed changes keep pitch,DJ top ⋯,Build · DJ · decks,
+DJ,select,djRecTo,Where the recording goes,Take destination,DJ top,Build · transport · Record,
+DJ,button,djRec,● Rec,Record the mix,DJ top,Build · transport · Record,MiniLab Shift+click; R key
+DJ,toggle,djRhythm,🥁 Rhythm,Rhythm Creator locked to the song's tempo,DJ top,Build · DJ · play-along,
+DJ,button,djStop,■ Stop,"Stops decks, pads, play-along beat, mix",DJ top,Build · DJ · transport,
+DJ,button,djHelpBtn / djHelp,? · DJ help sheet,How the DJ works,DJ top,Set up · Help; Find,
+DJ,button,djCpu / djLog,CPU · Log,Load readout; DJ log zip,DJ top,Strip · dropout counter / Log,
+DJ,panel,"dj-deck ×2 (Load, wave, ▶, Cue, ⏮, BPM, ½× 2× Tap, Speed, Key, hot cues 1–4, Loop 1/2/4/8, High/Mid/Low/Filter/Volume)",Deck A / Deck B,"Load, play, cue, hot cues, loops, EQ, speed, key shift",DJ decks,Build · DJ · decks,"MiniLab: K1–8 EQs, F1–2 volumes, pads = play/cue/hot/loops; Phrase marker"
+DJ,panel,djAlign / dj-leadseg / djNudgeL / djDial / djNudgeR / djSyncInfo,Beat alignment · A/B leads · nudge · sync dial,Who leads; slow/push; dial sets other tempo,DJ middle,Build · DJ · sync,[ ] keys nudge
+DJ,button,djJumpL / djAuto / djJumpR,−1 beat · AUTO SYNC · +1 beat,Tempo-match and beat-align the other song,DJ middle,Build · DJ · sync,S key
+DJ,button,djBothPlay / djBothTop / djLink / djQuant,▶ Both · ⏮ Both · Link · Q,Start both; link near starts; quantized hot cues,DJ middle,Build · DJ · transport,Space = ▶ Both
+DJ,button,djSmart / smartSheet,✦ Smart mix,Plans where/how to mix into the next song; Start the mix,DJ middle,Build · DJ · mix planner,"Plan shows sections, tempo, style, key shift"
+DJ,button,djToTracks,→ Garage,Both songs to the Garage matched in tempo/key,DJ middle,Build · DJ → Tracks,
+DJ,slider,djXf,Crossfader,A–B balance; double-tap centres,DJ middle,Build · DJ · mixer,← → keys; MiniLab F3
+DJ,list,djSongs / djAddSong,Songs crate,Up to 4 analysed songs; tap for options,DJ crate,Build · DJ · crate,djMenu sheet for song/pad options
+DJ,tab,djNextDeck,Next song on: Auto · Deck A · Deck B,Which deck the next song takes,DJ crate,Build · DJ · mix planner,
+DJ,toggle,djAutoOn / djStyle,Auto DJ · Style,"Auto-mix next song; styles Blend, Bass swap, Cut, Filter, Echo",DJ crate,Build · DJ · mix planner,
+DJ,button,djBpmDown / djBpmUp / djBpmRec / djBpmOff,Mix tempo − + Recommended Lead's own,Mix tempo for both songs,DJ crate,Build · DJ · mix planner,
+DJ,button,djBeatPrev / djBeatNext / djBeatPlay / djBeatVol,Beat ‹ › ▶ Play along · vol,Suggested drum beat in time with decks,DJ crate,Build · DJ · play-along,
+DJ,button,djMixIn / djPlan,MIX IN NEXT ▶,Brings the next song in; plan text,DJ crate,Build · DJ · mix planner,Counts down; tap to go now
+DJ,panel,djSrc / djLen / djQ / djLoopPads / djPadVol / djPads (8),Sample bank,Grab 1–16 beats from A/B/Mix onto 8 pads; loop them,DJ bank,Build · Samples · DJ grabs; Play · pads,"Hold pad: → Sampler, → Pads, → Deck, Save WAV, Clear"
+DJ,sheet,djMenu,DJ menu (pad/song options),Options list for a pad or crate song,hold a pad / tap a song,Build · DJ · context menu,
+DJ,sheet,djHelp,DJ · how it works,Help text for every DJ control,DJ → ?,Set up · Help,
+DJ,sheet,smartSheet,✦ Smart mix,"Mix plan: spot, style, key; Start the mix",DJ → Smart mix,Build · DJ · mix planner,
+Beat Pads,view,bpView,Beat Pads,"16 pads × 4 banks, loop recorder, sequences, song, chop",header Beats (Pads),Build · Beats · Beat Pads,
+Beat Pads,tab,bt-sw (Rhythm · Pads),Rhythm / Pads switch,Hops between Rhythm Creator and Beat Pads,Beats/Rhythm top,Build · Beats / Rhythm tabs,
+Beat Pads,button,bpPlay / bpBpm,▶ Play · bpm,Plays the loop; tempo readout,Beats top,Build · transport,Space; starts on Rhythm's next bar
+Beat Pads,button,bpRec,● Rec,Records hits into the loop (overdub),Beats top,Build · transport · Record,Enter; count-in
+Beat Pads,button,bpUndo,↶,Takes back the last recording pass,Beats top,Strip · undo,Ctrl+Z
+Beat Pads,button,bpClear,Clear the loop,Clears every hit in the loop,Beats top ⋯,Build · Beats · Beat Pads,
+Beat Pads,toggle,bpFx,FX,Beat Pads through effects and FX Lab,Beats top ⋯,Build · Beats · Beat Pads,
+Beat Pads,button,bpHelpBtn / bpHelp / bpLog / bpDone,? · Log · Done,"Help sheet, log, leave",Beats top,Set up · Help; Strip,
+Beat Pads,panel,bpLoopCv / bpStatus,Loop canvas,Every hit and the playhead,Beats,Build · Beats · Beat Pads,
+Beat Pads,tab,bpBanks,Banks A B C D · Kit… · Clear,Pad bank; load kit; clear bank,Beats left,Build · Beats · kits,← → keys; MiniLab Shift+turn
+Beat Pads,pad,bpGrid (16),16 pads,Play; higher = louder; MPC layout pad 1 bottom-left,Beats left,Play · pads · bank sets; Build · Beats,Keys 1234 QWER ASDF ZXCV; MIDI 36–51
+Beat Pads,panel,bpKeys,Key hints,Keyboard shortcut labels for pads,Beats left,Set up · Help · keys,
+Beat Pads,tab,bpSeqs / bpCopy,Seq 1–8 · Copy,Switch sequences at loop end; copy to next empty,Beats right,Build · Beats · sequences,↑ ↓ keys; MiniLab big knob
+Beat Pads,toggle,bpSong / bpSongBox / bpChain / bpAddSeq / bpSongClr,Song chain,Play sequences in a chain; ×1–×4 per step,Beats right,Build · Songs · Beat Pads song,
+Beat Pads,toggle,bpL16 / bpL16p,16 Levels · Tune/Velocity/Decay/Filter,"Selected pad's sound on all 16 pads, rising",Beats right,Build · Beats · Beat Pads,
+Beat Pads,button,bpResamp,Resample,Renders sequence/song to a sampler slot and pad,Beats right,Build · Beats → Samples,
+Beat Pads,button,bpToTrk,→ Garage,Sequence/song onto a new Garage audio track,Beats right,Build · Beats → Tracks,
+Beat Pads,select,bpBars / bpQ / bpQs / bpSw,Loop · Quantize · Strength · Swing,Loop length 1–8 bars; grid quantize; swing,Beats right,Build · Beats · Beat Pads,Works on already-recorded hits
+Beat Pads,toggle,bpRep / bpRate / bpFull / bpClick / bpCin,Repeat · rate · Full level · Click · Count-in,"Note repeat, fixed level, metronome, count-in",Beats right,Build · Beats · Beat Pads; Play · bottom bar · Count-in,Shift held = Repeat
+Beat Pads,panel,"bpEdit (bpSnd, bpAud, bpChoke, bpRev, bpErase, Level/Tune/Decay/Tone/Pan)",Pad editor,"Selected pad: sound, choke, reverse, erase hits, knobs",tap a pad,Build · Beats · pad editor,MiniLab K1–K5 edit last pad hit
+Beat Pads,panel,"bpChop (bpSrc, bpLoad, bpMode, bpSens, bpTo, bpChopGo, bpWave)",Chop,Slice a slot/file by transients or equal parts onto a bank,Beats right,Build · Samples · chop,
+Beat Pads,sheet,bpKitSheet,Load a kit onto bank,Kit list with ▶ groove preview,Beats → Kit…,Build · Beats · kits,Recorded hits stay; Undo restores
+Beat Pads,sheet,bpHelp,Beat Pads help,"Pads, kits, keyboard, recording, song, MIDI",Beats → ?,Set up · Help,
+Rhythm Creator,view,rcView,Rhythm Creator,16-track drum machine with step grid,header Rhythm (Grid),Build · Rhythm,
+Rhythm Creator,button,rcPlay,▶ Play,Play / stop,Rhythm top,Build · transport,Locks to Seq when it plays
+Rhythm Creator,button,rcFill,Fill,Drum fill into next bar with crash,Rhythm top,Play · pads · FX moves,
+Rhythm Creator,button,rcBpmDown / rcBpm / rcBpmUp / rcDj,Tempo − + · DJ,Tempo; Auto BPM follows a playing DJ deck,Rhythm top,Strip · tempo; Build · Rhythm · sync,Undo turns Auto on again
+Rhythm Creator,button,rcRec,● Rec,Record everything you hear,Rhythm top,Build · transport · Record,
+Rhythm Creator,button,rcUndo / rcRedo,↶ ↷,Undo/redo pattern changes (20 steps),Rhythm top,Strip · undo,Ctrl+Z
+Rhythm Creator,button,rcHelpBtn / rcHelp / rcLog / rcDone,? · Log · Done,"Help sheet, log, leave",Rhythm top,Set up · Help; Strip,
+Rhythm Creator,panel,rcSync / rcSyncBtn,Sync bar,Says what it is locked to; button to release,Rhythm,Build · Rhythm · sync,
+Rhythm Creator,panel,"rcPop (Hit On/Accent/Flam, Roll 1–4, Chance, Nudge)",Step options,"Per-step hit type, roll, chance, nudge",long-press a step,Build · Rhythm · step editor,
+Rhythm Creator,tab,rcModes,Hits · Accent · Flam · Roll · Chance · Nudge,What a tap on a step does,Rhythm bar,Build · Rhythm,
+Rhythm Creator,tab,rcPages / rcZoom,Pages · 8 steps,Step pages; bigger cells,Rhythm bar,Build · Rhythm,
+Rhythm Creator,select,rcSig / rcLen / rcSwing,Time · Steps · Swing,"Time signature, 16–64 steps, swing",Rhythm bar,Build · Rhythm,MiniLab F1 = Swing
+Rhythm Creator,panel,rcGrid,Step grid,16 tracks × steps; mute/solo per track,Rhythm,Build · Rhythm · grid,MiniLab pads = 16 tracks; Shift+click writes hits
+Rhythm Creator,select,rcKitSel / rcFeel / rcRoom,Kit · Feel · Room,Swap all tracks to a kit; humanize; studio room,Rhythm tools,"Build · Rhythm · feel, room","MiniLab F2 Feel, F3 Room"
+Rhythm Creator,select,rcStyle / rcBusy / rcCplx / rcMake / rcVary / rcClear,Make a beat,"Style, busy, complex; Make, Vary, Clear all",Rhythm tools,Build · Rhythm · generator,
+Rhythm Creator,slider,rcMorphA / rcMorph / rcMorphB / rcLevel,Morph A–B · Level,Morph between two saved kits; output level,Rhythm tools,Build · Rhythm,MiniLab F4 Level
+Rhythm Creator,panel,"rcEd (rcSnd, rcAud, rcMute, rcSolo, 9 knobs, rcFt, rcTlen, Euclid rcEk/rcEr/rcEgo, rcClrT)",Track editor,"Sound, audition, mute, solo, 9 knobs, filter, length, Euclid",tap a track name,Build · Rhythm · track editor,MiniLab K1–K8 on selected track
+Rhythm Creator,sheet,rcHelp,Rhythm Creator help,"Tracks, sounds, knobs, steps, Euclid, Make, Morph, timing",Rhythm → ?,Set up · Help,Credits paragraph must stay (licences)
+Garage,view,gbView,Garage,"GarageBand-style studio: instruments, tracks, piano roll, mix, export",header Garage,Build · Tracks,Nate Bloom's one timeline
+Garage,button,gbDone / gbSongsBtn / gbUndo,Done · Songs · ↶,Leave; My Songs sheet; undo,Garage bar,Strip; Build · Songs; Strip · undo,
+Garage,button,gbBrowseBtn / gbViewBtn / gbMixBtn,Instruments · Tracks · Mixer,Browse instruments; tracks view; mixer sheet,Garage bar,Build · Tracks · browser drawer / mixer drawer,
+Garage,button,gbHome / gbPlay / gbRec / gbLcd,⏮ ▶ ● · position LCD,Transport; LCD opens song settings,Garage bar,Build · transport,"Space, R, Enter/Home"
+Garage,button,gbLoopsBtn / gbMetro / gbTypeBtn / gbSetBtn / gbHelpBtn / gbLog,Loops · Metronome · Musical Typing · Settings · ? · Log,"Loops sheet, click, keyboard instrument, song settings, help, log",Garage bar,Build · Tracks; Set up · Help; Strip,
+Garage,panel,gbBrowse / gbCards (9),Choose an instrument,Nine instrument kinds; each becomes a track,Garage → Instruments,Build · Tracks · browser drawer,Each becomes a track
+Garage,panel,gbInst / gbIh / gbIb,Instrument view,"Touch instrument for the selected track: strips, pads, keys",Garage → a track,Build · Tracks · instrument,MiniLab pads: drums / chords / autoplay
+Garage,panel,gbTracks / gbTl / gbRmenu / gbTbar,Tracks timeline,"Region menu, mute/solo, Cycle, automation lanes, drag regions",Garage → Tracks,Build · Tracks · multitrack editor,Automation lanes; Cycle ⟳
+Garage,panel,gbEd / gbEdc,Piano roll,"Add/move/resize/delete notes, Quantize, Velocity",Edit a region,Build · Tracks · note editor,
+Garage,sheet,gbSheet,Garage sheet (generic),One card hosting the nine Garage sub-sheets,Garage buttons,Build · Tracks · sheets,One sheet element reused
+Garage,panel,"Song settings (tempo, Tap, key, time signature, Count-in, Merge recordings, Seq beat plays along)",Song settings,"Tempo, key, time, count-in, merge, beat along",Garage LCD / ⚙,Build · transport; Build · Songs,
+Garage,panel,"Track sheet (name, sound Change, Controls, Volume, Pan, Reverb, Play it, Duplicate, Move, Delete)",Track settings,"Per-track name, sound, levels, order",tap a track name twice,Build · Tracks · track settings,
+Garage,panel,"Mixer sheet (M/S, volume, pan per track; whole song)",Garage mixer,"Every track's volume and pan, mute, solo",Garage → Mixer,Build · mixer drawer,
+Garage,panel,"My Songs (+ New song, Open, Rename, Duplicate, Delete, Export)",My Songs,Songs kept on device and in projects,Garage → Songs,Build · Songs · song list,
+Garage,panel,"Export sheet (Export now, Save WAV, Save MP3, Bounce to a track, Record it again)",Export song,Plays the song once and saves WAV/MP3,Garage → Songs → Export,Set up · Projects · export,
+Garage,panel,Drum loops sheet,Drum loops,Nate Bloom's beats dropped onto a Drums track,Garage → Loops,Build · Tracks · browser drawer,
+Garage,panel,Gain & fades sheet,Gain & fades,"Audio region gain, fades, Normalize",tap an audio region,Build · Tracks · region editor,
+Garage,panel,gbMini,Garage mini bar,"Play, Rec, position, Garage, ✕ while the song plays along",Play along,Strip · tempo / bar:beat,
+Tracks,view,tracks,Tracks (legacy),Older multitrack audio editor; data migrated to a Garage song,hidden: CSS line 2348 hides betaTracksBtn and trkMini; only Playing ▾ Edit,"Dropped (duplicate of Build · Tracks, the Garage timeline)",migrateTracks() moved it; keep the migration for old projects
+Tracks,button,trkHome / trkPlay / trkRec / trkTime,⏮ ▶ ● time,Transport,Tracks top (hidden view),Dropped (duplicate of Garage transport),
+Tracks,button,trkAdd / trkImport / trkSplit / trkDup / trkDel / trkAutoAdd,+ Track · Import · Split · Copy · Delete · + Automation,Track and clip tools; plugin automation lane,Tracks tools (hidden view),Dropped (duplicate of Garage region menu + laneAdd),"Garage must keep: Import, Split, Copy, Delete, plugin automation"
+Tracks,button,trkUndo / trkRedo / trkSnap / trkZoomOut / trkZoomIn / trkWithBeat / trkBounce / trkExport,↶ ↷ Snap Zoom + Beat Bounce Export WAV,"Edit helpers, snap, bounce, export",Tracks tools (hidden view),"Dropped (duplicate of Garage zoom, Export sheet, Bounce to a track)",Snap-to-beat and + Beat (Seq plays along) exist in Garage Song settings
+Tracks,slider,trkGain / trkNorm,Clip gain · Normalize,Selected clip gain,Tracks (hidden view),Dropped (duplicate of Garage Gain & fades),
+Tracks,button,trkMin / trkMini,Play along · mini bar,Keep playing in a small bar,Tracks (hidden view),Dropped (duplicate of gbMini),
+☰ menu,sheet,menuSheet / menuGrid,Menu,Grid of tiles from ITEMS,☰,Strip · space switcher + Set up,Hidden items skipped
+☰ menu,button,liveBtn,Live,"Big knobs, faders and pads for playing out",☰ → Live,Play,ITEMS array entry
+☰ menu,button,prBtn,Projects,"Save, open and share everything",☰ → Projects,Set up · Projects,ITEMS array entry
+☰ menu,button,wamBtn,Plugins,Plugin instruments and effects,☰ → Plugins,Build · Sounds · plugins,ITEMS array entry
+☰ menu,button,msBtn,My sounds,Save the sound you've dialled in,☰ → My sounds,Build · Sounds · My sounds,ITEMS array entry
+☰ menu,button,exBtn,Export,"Stems, MIDI file, K.O. II pads",☰ → Export,Set up · Projects · export,ITEMS array entry
+☰ menu,button,midiBtn,MIDI,"Keyboards in, clock in and out",☰ → MIDI,Set up · MIDI,ITEMS array entry
+☰ menu,button,gearBtn,Gear,"What's plugged in: MiniLab, K.O. II, sound, Pixelbook, who keeps time",☰ → Gear,Set up · Gear,ITEMS array entry
+☰ menu,button,lkBtn,Link,Send projects to the computer and play together,☰ → Link,Set up · Pixelbook · link,ITEMS array entry
+☰ menu,button,installBtn,Install,Add Nate Bloom to the home screen,☰ → Install,Set up · App · install,ITEMS array entry
+☰ menu,button,hisBtn,History,"Every change, newest first: go back to any",☰ → History,Set up · Projects · history,ITEMS array entry
+☰ menu,button,helpBtn,Help,How it works · vibration · report a problem,☰ → Help,Set up · Help,ITEMS array entry
+☰ menu,button,exitBtn,Exit,Save your work and close,☰ → Exit,Set up · Projects · exit,ITEMS array entry
+Sheet: fxLab,sheet,fxLab,FX Lab,"Master effects after regular FX: list, Demo, Reset, Done",FX Lab ⤢ Full,Build · Sounds · FX Lab,"Groups: Density, Lo-fi, Hall+, Freeze, Shimmer"
+Sheet: mixer,sheet,mixer,Mixer,"Fader per sound, output meter, Effects switch and amount, Reset",Mix button / FX Mixer…,Build · mixer drawer,"Channels: Master, synths, library layers, instrument, slots, drums, pads, Rhythm, DJ, Beat Pads, Tracks"
+Sheet: mixer,slider,mxList rows,Channel faders,"Drag level, double-tap resets, dB readout",Mixer,Build · mixer drawer,"MiniLab Mix layout: F1–4 rows 1–4, K1–8 rows 5–12"
+Sheet: melodies,sheet,melodies,Melodies,Ready-made melodies for Notes; preview with beat; Undo last,Notes ♪ / Also bar,Build · Songs · melodies,
+Sheet: melodies,panel,"genBox (genNew, genMood, genScale, genBars, genEvolve)",✨ Generate,"Generative melody: style, scale, length, evolve",Melodies sheet,Build · Songs · generative melodies,
+Sheet: secPick,sheet,secPick,Choose the part you want,"Pick a section of a long file: overview, zoom, preview",loading a file > 1 min,Build · Samples · import,Up to 5 minutes
+Sheet: motion,sheet,motion,Motion,"Two LFOs (target, shape, speed, depth), XY pad, drift",Motion button / LFOs · XY,Build · Sounds · Motion,XY pad is MIDI-learnable
+Sheet: exitSheet,sheet,exitSheet,Exit Nate Bloom,"Save as project and exit, or exit without saving",Exit button,Set up · Projects · exit,
+Sheet: projects,sheet,projects,Projects,"Back up, name and Save, Load/Export/Delete rows, Import file",Projects button,Set up · Projects,Storage status and backup reminder (prSafe)
+Sheet: wlSheet,sheet,wlSheet,Plugin controls (learn),Pick a loaded plugin's control for MIDI learn/automation,MIDI learn → Plugin control…,Set up · MIDI · learn,
+Sheet: lkSheet,sheet,lkSheet,Link,"Turn on, Find computers, send/get project, Unlink, Play together",Link button (apps),Set up · Pixelbook · link,Code shown in lkCode dialog
+Sheet: lkSheet,toggle,ablBody rows,Ableton Link · Start/Stop Sync · Timing,Join Link session; sync play/stop; ms nudge,Link sheet (apps),Set up · MIDI · clock,
+Sheet: qkSheet,sheet,qkSheet,Quick sounds,Choose what sits in the Quick row; + Add a sound,✎ on Quick row,Play · sound picker · Quick,
+Sheet: gbSheet,sheet,gbSheet,Garage sheet,Generic card for Garage sub-sheets,Garage,Build · Tracks · sheets,See Garage rows
+Sheet: hisSheet,sheet,hisSheet,History,Every undoable change newest first; tap to go back; Undo/Redo,History button,Set up · Projects · history,"Areas: Notes, Pattern, Rhythm, Tracks, Beat Pads, Garage, Sound"
+Sheet: mySounds,sheet,mySounds,My sounds,Name + Save sound; list of saved sounds,My sounds button,Build · Sounds · My sounds,Carries effects and octave
+Sheet: song,sheet,song,Song,"Patterns A–D chained with lengths; Song mode, Play, Clear",Song button,Build · Songs · Song mode,
+Sheet: exports,sheet,exports,Export,"Live stems, Garage stems, MIDI file, K.O. II pads",Export button,Set up · Projects · export,K.O. II pads = 12 pads as numbered mono WAVs (+ slots)
+Sheet: midiSheet,sheet,midiSheet,MIDI,"Connect, options, ports, Sound out, learn, MiniLab, K.O. II",MIDI button,Set up · MIDI,
+Sheet: midiSheet,toggle,data-mo auto/noteIn/clockOut/clockIn/notesOut/keysOut/drumsOut/padsIn,MIDI options,"Auto-connect, notes in/out, clock out/in, drums ch10, pads in",MIDI sheet,Set up · MIDI · inputs/outputs/clock,clockOut/clockIn = Lead/Follow; both off = Off
+Sheet: midiSheet,slider,mdLat,Line up the K.O. II,Extra ms delay for clock and notes sent,MIDI sheet,Set up · MIDI · clock,
+Sheet: midiSheet,select,mdVel / mdCh,Velocity · Notes channel,Velocity curve; MIDI channel for notes,MIDI sheet,Set up · MIDI,
+Sheet: midiSheet,list,"mdPorts (checkbox per port, Clock ✓ per output)",Inputs · Outputs,Enable ports; which outputs get clock,MIDI sheet,"Set up · MIDI · inputs, outputs",Clock only to K.O. II by default when plugged in
+Sheet: midiSheet,select,sinkRow / sinkSel,Sound out,"Audio output device (computer, Chromebook, Linux app)",MIDI sheet,Set up · Sound check · route,Fast pads follow it in the Linux app
+Sheet: midiSheet,button,mlLearn / mdLearnList,MIDI learn,Map a controller knob to any knob/slider/XY; per screen,MIDI sheet,Set up · MIDI · learn,
+Sheet: midiSheet,select,miniMode / miniBadges / miniLights / miniPadCh / miniStrip2 / miniMapBtn,MiniLab 3 section,"Layout mode, badges, pad lights, pads channel, Strip, map",MIDI sheet,Set up · MIDI · MiniLab layouts,
+Sheet: midiSheet,panel,md-guide,K.O. II setup,"Wiring, sound paths, lead/follow, line up, pads, recording",MIDI sheet (details),Set up · Help · K.O. II,
+Sheet: installSheet,sheet,installSheet,Install as an app,Install button; Android and iPhone steps,Install button,Set up · App · install,
+Sheet: scaleSheet,sheet,scaleSheet,Scale lock,"Key, scale, Turn off",Scale button / playOpts,Play · right-thumb · Scale lock,
+Sheet: helpSheet,sheet,helpSheet,How Nate Bloom works,"Topics, Report a problem, Fix sound, shortcuts, settings",? button / ? key,Set up · Help · how it works,Opens at the screen you're on
+Sheet: helpSheet,button,reportBtn / reportSheet,Report a problem,"Saves zip: log, settings, last 30 s of sound; note field",Help head,Set up · Help · send a report,Nothing sent by itself
+Sheet: helpSheet,button,helpFixSound,Fix sound,Reopens audio on whatever is plugged in now,Help,Set up · Sound check,
+Sheet: helpSheet,toggle,kbdLabBtn / kbLayoutBtn / hintsBtn / hapticBtn,Letters on keys · Keyboard: Musical Typing/Two rows · Hints · Vibrate on taps,App settings living in Help,Help,Set up · App · settings,
+Sheet: helpSheet,panel,help-toc (15 topics),Help topics,Fifteen topic groups from Getting around to Problems & settings,Help,Set up · Help; Find,
+Sheet: tabMenu,sheet,tabMenu,Tab options,Long-press menu for a tab,long-press a tab,Build · browser drawer · context menu,
+Sheet: nameSheet,sheet,nameSheet,Name this sound,Text input + Save,Save as sound,Build · Sounds · My sounds,
+Sheet: beats,sheet,beats,Drum Beats,"Style filter, previewed list, use beat tempo, Undo",Beats… button,Build · Beats · Seq · beat picker,
+Sheet: layers,sheet,layers,Layers & zones,"Library layers with key zones; Layer all, Split, Spread",Lib tab → Layers & zones,Build · Sounds · layers,class editor (no sheet class)
+Sheet: lineSheet,sheet,lineSheet,Record from an input,"Input device, meter, trim silence, chop to pads, Record",Smp → Record input; Live Gear → Sample,Build · Samples · recordings,Up to 60 s; K.O. II USB audio
+Sheet: editor,sheet,editor,Sample editor,"Trim, Cut, Reverse, Normalize, fades, gain, Chop → Pads, Save",Smp Edit / Pads Edit,Build · Samples · sample editor,
+Sheet: smartSheet,sheet,smartSheet,Smart mix,See DJ,DJ → ✦,Build · DJ · mix planner,
+Sheet: wamSheet,sheet,wamSheet,Plugins,"Instruments, effects per target, Add by link, Fast plugins",Plugins button,Build · Sounds · plugins,"Targets: Whole mix, Send A, Send B, each sound"
+Sheet: wamSheet,panel,wamGui,Plugin controls dock,A plugin's own GUI panel,Controls button,Build · Sounds · plugins · panel,
+Sheet: menuSheet,sheet,menuSheet,Menu,See ☰ menu,☰,Strip · space switcher,
+Sheet: playSheet,sheet,playSheet,How the keys play,"Chord, Scale, Blend sections",playOpts chip,Play · right-thumb; Build · Sounds,
+Sheet: reportSheet,sheet,reportSheet,Report a problem,"Optional note, Cancel, Save report",Help → Report,Set up · Help · send a report,
+Sheet: browser,sheet,browser,Sounds browser,See Main screen row,sound bar,Build · browser drawer,class browser
+Sheet: lvPick,sheet,lvPick,Live popup,"Hosts Gear, Set list, Arp, Sounds, Keys, CPU, Recordings, Sample",Live,Play · popups; Set up · Gear,Also parked on main screen for ☰ Gear
+Sheet: miniMap,sheet,miniMap / miniTab,MiniLab 3 map,What each control does on this screen; Learn; forget,tab at right edge / MIDI → Show the map,Set up · MIDI · MiniLab layouts,
+Sheet: miniStrip,panel,"miniStrip (mlsName, mlsK, mlsF, mlsEdit ✎, mlsPads, mlsP)",MiniLab strip,"Named knobs, faders, pads per screen; drag, tap, ✎ reassign",top of every screen (tablet),Strip · MiniLab dot → Play macro knobs,Hidden while Live is open
+Sheet: nowPop,sheet,nowPop,Playing cards,"Card per sounding thing: Only this, Edit, ■ Stop",Playing ▾,Play · sound cards,
+Sheet: lkCode,sheet,lkCode,Link code,Code to type on the tablet,Link pairing,Set up · Pixelbook · pair,
+Sheet: wvDock,sheet,wvDock,Natewave,Wavetable editor dock,Wave → Edit,Build · Sounds · wavetable,
+Keys,key,,A S D F … / W E T …,"Musical Typing: home row white keys, row above black",any screen with keys,Play · keys fallback; Build · Sounds,Two rows layout alternative
+Keys,key,,Z / X · C / V,Octave down/up; softer/harder,Keys,Play · keys fallback,
+Keys,key,,Space,Play / pause; Live ▶ target; DJ ▶ Both,everywhere,Play · bottom bar · Play,
+Keys,key,,Esc,"Stop everything, or close a sheet / panel",everywhere,Strip,Esc must still close whatever is on top
+Keys,key,,↓ / ↑,Octave down / up,main screen,Play · right-thumb · Octave ±,
+Keys,key,,← / →,Tempo down / up (±2),main screen,Strip · tempo,In DJ: crossfader; in Live: prev/next sound
+Keys,key,,Shift+Enter,Hold on / off,main screen,Play · right-thumb · Hold,
+Keys,key,,` (backquote),"Every effect off / on, Effects and FX Lab, any screen",everywhere,Play · right-thumb · FX switch,Rev 151
+Keys,key,,?,Opens Help (Live: keys list; DJ: keys list),everywhere,Set up · Help,
+Keys,key,,Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y,Undo / redo anywhere,everywhere,Strip · undo,Tracks keeps its own Ctrl+Z
+Keys,key,,Drums: A S D F H J W E,"Kick, snare, clap, hat, open hat, tom, rim, cowbell",Drums tab,Build · Beats · drum machine,
+Keys,key,,Pads grid: 1234 QWER ASDF ZXCV,Pad rows top to bottom; 12 Pads use the same grid,Pads tab / Beat Pads,Play · pads,
+Keys,key,,Beat Pads: Space Enter ← → ↑ ↓ Esc Ctrl+Z Shift,"Play, record, bank, sequence, close, undo pass, Repeat",Beat Pads,Build · Beats · Beat Pads,
+Keys,key,,Live: 1–8 / Shift 1–8,Pads 1–8 / 9–16 (number row or numpad),Live,Play · pads,
+Keys,key,,Live: H · A · Z X,Hold; Arp tap/hold-momentary; arp octaves,Live,Play · right-thumb,
+Keys,key,,Live: ← → · S · K · P · F,Prev/next sound; Sounds panel; knob page; pad set; effects,Live,Play · sound picker; Play · macro knobs · pages; Play · right-thumb · FX switch,Shift K / Shift P go back
+Keys,key,,Live: J · Y U I O · B,Jam panel; loops 1–4 record/play/stop; band on/off,Live,Play · right-thumb · Jam,
+Keys,key,,Live: Space R E L C − = N G Esc,"Transport, Rec, Sample, Loop, Capture, tempo, song, Log, close",Live,Play · bottom bar,Shift N previous song; Shift − = by 5
+Keys,key,,"DJ: Z X 1 2 3 4 Q W · M , 7 8 9 0 O P",Deck A play/cue/hot cues/loops · Deck B the same,DJ,Build · DJ,Hold keys for Cue and hot cues
+Keys,key,,DJ: Space S [ ] R G ← → ?,"Both, Auto sync, nudge, Rec, Log, crossfader, keys list",DJ,Build · DJ,Shift ← → = all A / all B
+Keys,key,,Garage: Space R Enter/Home Delete/Backspace + Musical Typing,"Play, record, start, delete region, play instrument",Garage,Build · Tracks,A = C; 1–8 chord strips on Smart tracks
+Keys,key,,Tracks: Space Delete/Backspace Ctrl+Z S,"Play, delete clip, undo, split",Tracks,Build · Tracks,
+Keys,key,,"Focus arrows (knobs, sliders, pads, Natewave, Live knobs)",Arrow keys nudge a focused control,any focused control,Build · all editors,Accessibility; keep role=slider keyboard handling
+MiniLab,layout,L.synths,Synths layout,Knobs: panel controls; faders: Now/Rhythm/FX/Master; pads: drums+chords,Synths mode,Play · macro knobs; Build · Sounds,Chords follow Scale key
+MiniLab,layout,L.samples,Samples layout,Pads: slots or pads; big knob picks slot/pad,Samples mode,Build · Samples,Keys play the slot's sample or pads chromatically
+MiniLab,layout,L.drums,Drums layout,Pads: the 8 drums twice; big knob picks a drum,Drums mode,Build · Beats · drum machine,
+MiniLab,layout,L.dj,DJ layout,"Knobs: deck EQs; faders: volumes, crossfader, master; pads: deck controls",DJ,Build · DJ,
+MiniLab,layout,L.grid,Rhythm layout,Knobs: track knobs; faders: Swing Feel Room Level; pads: 16 tracks,Rhythm Creator,Build · Rhythm,Shift+click toggles writing hits into the grid
+MiniLab,layout,L.pads,Beats layout,"Knobs: pad, swing, quantize, rate; faders: BP RC FX Master; pads: bank",Beat Pads,Build · Beats,Keys play last pad in tune
+MiniLab,layout,L.garage,Garage layout,"Knobs: Smart Controls, pan, volume; faders: 4 tracks; pads: drums/chords/transport",Garage,Build · Tracks,
+MiniLab,layout,L.mix,Mixer layout,"K and F = mixer rows; big knob scrolls, Done, Reset",Mixer sheet,Build · mixer drawer,
+MiniLab,layout,L.live,Live layout,"Controls as on screen; big knob: pages, ▶, sounds, Rec",Live,Play · macro knobs; Play · pads; Play · bottom bar · set list,"Shift layer: knobs → FX page, faders → each layer + beat"
+MiniLab,panel,miniStrip,Strip,"Named controls across the top on tablets; drag, tap, reassign",every screen (tablet),Strip · MiniLab,Setting Always / With the MiniLab / Off
+MiniLab,panel,miniMap,Map drawer,Per-screen map; Learn; Undo what I taught this screen,right-edge tab,Set up · MIDI · MiniLab layouts,
+MiniLab,toggle,miniMode / miniBadges / miniLights / miniPadCh,MiniLab settings,"Layouts mode, K1–K8 badges, pad lights via Arturia sysex, pads channel",MIDI sheet,Set up · MIDI · MiniLab layouts,Lights need Chrome sysex permission
+MiniLab,button,mlLearn / miniLearn / miniForget,MIDI learn,Give a knob/fader another job on this screen only,MIDI sheet / map,Set up · MIDI · learn,Mappings belong to a screen (learnPage)
+MiniLab,panel,mlHud,HUD,Says what a knob moved; connected/page notices,any screen,Strip · notifications,
+K.O. II,toggle,clockOut (Send clock and start/stop),K.O. II follows,"Nate Bloom sends tempo, start, stop over MIDI",MIDI sheet / Live Gear / lvKo,Set up · MIDI · clock Lead,Clock only to the K.O. II unless Clock ✓ chosen per output
+K.O. II,toggle,clockIn (Follow incoming clock),K.O. II leads,Its clock drives Nate Bloom and Live's ▶ target,MIDI sheet / Live Gear,Set up · MIDI · clock Follow,Its Play starts Beat Pads / Rhythm / Seq
+K.O. II,slider,mdLat,Line up the K.O. II,Extra delay so both kicks land together,MIDI sheet,Set up · MIDI · clock,
+K.O. II,toggle,padsIn,MIDI notes play Beat Pads,Notes 36–51 = pads 1–16 of bank on screen,MIDI sheet,Set up · MIDI · inputs,
+K.O. II,button,Gear → Sample the K.O. II…,Sample the K.O. II,Records its USB audio (OS 2.5+) into the sampler,Live Gear,Build · Samples · recordings,Pre-selects its input in lineSheet
+K.O. II,panel,Gear K.O. II status / koCard,K.O. II detected,On MIDI over USB; its sound card connected,Live Gear / ☰ Gear,Set up · Gear,KO_RE name match; Android may route sound to it
+K.O. II,panel,md-guide,K.O. II setup guide,"Wiring, sound paths, lead/follow codes, line up, pads, recording",MIDI sheet,Set up · Help · K.O. II,
+K.O. II,button,exPads,Export pads for the K.O. II,12 pads (+slots) as numbered mono WAVs,Export sheet,Set up · Projects · export,
+K.O. II,toggle,drumsOut / notesOut / keysOut,Send notes to it,"GM drums ch10, melody + SY notes, keys",MIDI sheet,Set up · MIDI · outputs,
+Pixelbook,toggle,Gear → Pixelbook (Stage) Turn on/off,Pixelbook link,Pairs with Stage over Wi-Fi/MQTT; status line,☰ Gear / Live Gear,Set up · Pixelbook · pair,"Works from the GitHub site, not Lite"
+Pixelbook,button,lknew,New code,New pairing code,Gear,Set up · Pixelbook · pair,
+Pixelbook,toggle,lkctl,"Let the Pixelbook run loops, band, ▶, set list, edits",Allow control from Stage,Gear,Set up · Pixelbook · permissions,
+Pixelbook,panel,LKS state sync,State to Stage,"Set list, rhythm, kits, band, XY mirrored to Stage",background,Pixelbook · Band / Director / Mixer,lvJBand says 'on the Pixelbook'
+Android app,toggle,NFP fast pads badge,Fast pads,Pads on Android low-latency audio; shows ms or why paused,Beat Pads next to FX (app),Set up · Sound check,"Paused by FX/EQ on pads, 16 Levels, Repeat, solo, recordings"
+Android app,toggle,FP Fast plugins,⚡ Fast plugins,Your plugins on the app's low-latency audio,Plugins sheet top (app),Set up · Sound check,Effects/Takes/Tracks don't hear them while on
+Android app,panel,tabletHTML (Gear),This tablet (what Android sees),"USB devices, sound route, media volume, MIDI devices, Purist",Gear (app 1.0.8+),Set up · Gear,Warnings in plain words
+Android app,button,mdConnect Rescan (MDL),Rescan MIDI,Asks Android for its MIDI list again; logs changes,MIDI sheet,Set up · MIDI · inputs,Rev 152
+Android app,panel,ADEV audio device log,Audio devices list,Logs device changes for the report,background / report,Set up · Sound check,Rev 150
+Android app,panel,playback notification,Keeps playing in background,Music continues when switching apps while sounding,app,Set up · App,
+Android app,panel,version,Android app version,Gear/report say app version; 1.0.8+ needed for diag,Gear,Set up · App · version,
+Android app,sheet,installSheet steps,Add to home screen,Chrome / Safari install steps,Install,Set up · App · install,
