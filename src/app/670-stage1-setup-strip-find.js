@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 156;
+    window.NB_BUILD = 157;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -190,7 +190,8 @@
       act("Stop everything", "sequencer, Rhythm, DJ, Jam, pads, held notes", () => $id("stopAll").click(), "stop all panic silence");
       act("Rescan MIDI", "ask for the MIDI devices again", () => { $id("midiBtn").click(); $id("mdConnect").click(); }, "midi minilab controller plug");
       act("Fix sound", "reopen the sound on whatever is plugged in now", () => { const b = $id("helpFixSound"); if (b) b.click(); }, "no sound silent audio");
-      act("Open Live", "big knobs, faders and pads for playing out", () => lvOpen(), "play perform stage");
+      act("Open Play", "the performance surface: stack, macros, pads, set list", () => plOpen(), "live perform stage");
+      act("Open Live", "the Live screen as it was", () => lvOpen(), "play perform stage");
       act("Open the DJ", "two decks, sync, crate", () => $id("djBtn").click(), "decks mix");
       act("Open the Rhythm Creator", "the 16-track drum machine", () => $id("rcBtn").click(), "beat grid drums");
       act("Open Beat Pads", "16 pads, banks, loop recorder", () => $id("bpBtn").click(), "pads kit");
@@ -294,7 +295,7 @@
       $id("shFind").addEventListener("click", () => fdOpen());
       return el;
     };
-    const shSpaceNow = () => suOpenNow() ? "setup" : !lv.hidden ? "play" : "build";
+    function shSpaceNow() { return suOpenNow() ? "setup" : !lv.hidden ? "play" : "build"; }
     function shGo(sp) {
       start();
       if (sp === "play") { suClose(false); if (lv.hidden) lvOpen(); }

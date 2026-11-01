@@ -263,6 +263,7 @@
     const ITEMS = [
       ["setupBtn", "Set up", "The rig: sound, MIDI, Gear, Pixelbook, projects, the app, help"],
       ["findBtn", "Find", "Any setting, sound, song or action: two letters (/ or Ctrl-K)"],
+      ["playBtn", "Play", "The performance surface: the stack, eight macros, pads, the set list"],
       ["liveBtn", "Live", "Big knobs, faders and pads for playing out"],
       ["prBtn", "Projects", "Save, open and share everything"],
       ["wamBtn", "Plugins", "Plugin instruments and effects"],
