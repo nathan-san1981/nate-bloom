@@ -304,6 +304,7 @@
     visMode = m; ls.set("stage-vis", m); if (vis) vis.setMode(m); if (window.__audRelay) __audRelay("mode", { id: m });
     $("visModes").querySelectorAll("button").forEach(b => setA(b, "aria-pressed", String(b.dataset.m === m)));
     VF.auto = !!auto; const f = $("visFollow"); if (f) f.hidden = !VF.auto;
+    const b = beatNow(); VF.last = { mode: m, auto: !!auto, steps: b ? b.steps : null, at: performance.now() };   // (where the grid was: for the tests)
   }
   function visSet(m) { clearInterval(VF.timer); VF.timer = 0; VF.want = ""; visApply(m, false); }
   function visFollow(m) {   // the song asked for m: on the next bar line (now, if nothing keeps time or the bar has just begun)
@@ -323,7 +324,7 @@
       if (n.bar > w.bar) go();
     }, 30);
   }
-  X.visFollow = visFollow; X.visState = () => ({ mode: visMode, auto: VF.auto, pending: VF.want });
+  X.visFollow = visFollow; X.visState = () => ({ mode: visMode, auto: VF.auto, pending: VF.want, last: VF.last || null });
   if (window.__console && __console.onSong) __console.onSong(cur => { if (cur && cur.vis) visFollow(cur.vis); });
   // (166) Projector: the audience window's render scale. Auto = the engine's adaptive quality; Full / Half / Quarter pin it.
   const PROJ = { q: ls.get("stage-proj", "auto") };
