@@ -134,12 +134,18 @@
       <div class="seg small" role="group" aria-label="Sample mode">
         <button id="mPlay" aria-pressed="true">Play</button>
         <button id="mGrain" aria-pressed="false">Grain</button>
+        <button id="mEle" aria-pressed="false" title="The elephant: the sample itself, with a pitch glide up, a formant that opens, a growl and a dive, shaped to its length">Elephant</button>
         <button id="mSlice" aria-pressed="false">Slice</button>
       </div>
       <button class="btn" id="mLoop" aria-pressed="false" title="Held notes keep looping the sample (or the part between Start and Length)">Loop</button>
+      <button class="btn" id="eleBtn" hidden title="The elephant's shape over the sample's waveform: its length, pitch glide, wah, growl, drive and level">Shape…</button>
 <!--@site-only-->
       <button class="btn rec" id="recBtn">● Hold to record</button>
 <!--@end-->
+    </div>
+    <div class="elepad" id="elePad" hidden>
+      <canvas id="eleXY" class="ele-xy" aria-label="Elephant pad: left to right is Wah, bottom to top is Growl. Drag it while you play."></canvas>
+      <div class="ele-cap">← <b>Wah</b> → &nbsp;·&nbsp; ↑ <b>Growl</b> &nbsp;·&nbsp; drag while you play; the knobs follow &nbsp;·&nbsp; <b>Shape…</b> lays the elephant over the sample's wave</div>
     </div>
     <div class="sfit" id="sfit" hidden>
       <div class="sfit-row">
@@ -1067,6 +1073,7 @@
       <p><b>Garage:</b> the Garage tab is a GarageBand-style studio, and Nate Bloom's one timeline: audio tracks record the microphone or Nate Bloom itself (everything you play, while the song plays), Import audio adds files, audio regions have Gain & fades, + Automation draws or records a plugin's control, a track's volume can be automated, Play along keeps the song going in a small bar, and → Garage (the take bar, the DJ, Beat Pads) puts audio there. What was in Tracks is a Garage song called Tracks. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
       <p><b>Beats</b> has two tabs at the top: <b>Grid</b> is the Rhythm Creator and <b>Pads</b> is Beat Pads (16 pads to play, record and chop samples onto; its <b>?</b> explains them). <b>Rhythm Creator</b> (Grid): a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
+      <p><b>Elephant (Smp tab, right of Grain):</b> the sample itself, played as Play plays it, with a trumpeting growl shaped over it: the pitch <b>glides</b> up, two formants open with it (<b>Wah</b>), a saw-wave rasp grows in as it climbs (<b>Growl</b>), the whole thing is <b>driven</b> hard, and at the end it dives. <b>Length</b> is the shape's length: ×1 is the time the sample takes to play under the glide, so the dive lands on the sample's end, and a shorter sample gets a shorter elephant; stretch or squeeze it, or <b>Fit to sample</b> to put it back. <b>dB</b> trims the level (−24 to +12) so it sits against the other sounds. The pad under the sample bar moves Wah (left–right) and Growl (up–down) while you play, and the knobs follow; <b>Shape…</b> opens a sheet like the sample editor's, with the sample's waveform and the shape drawn over it (drag the amber end to set its length), the pad, a slider per control, Preview and Reset. The sample's wave is never changed: Play, Grain and Slice still have it as it was.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
@@ -1180,6 +1187,29 @@
   </div>
 </div>
 
+<div class="editor" id="eleSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Elephant">
+    <div class="ed-head"><strong id="eleTitle">Elephant</strong><span class="ed-info" id="eleInfo"></span></div>
+    <canvas id="eleWave" aria-label="The sample's waveform, with the elephant's shape over it. Drag the amber end to set the shape's length."></canvas>
+    <div class="ed-legend">The sample plays as it is; the shape rides on it: the pitch <b>glides</b> up, the <b>wah</b> opens, the <b>growl</b> comes in, then it dives. Drag the amber end to stretch the shape · <b>Fit</b> matches the sample's length · the pad moves Wah and Growl live.</div>
+    <canvas id="eleXY2" class="ele-xy tall" aria-label="Elephant pad: left to right is Wah, bottom to top is Growl"></canvas>
+    <div class="ele-rows">
+      <span class="ed-grp ed-sl"><span class="lab2">Glide</span><input type="range" id="eleGlide" min="0" max="1000" step="1" value="500" aria-label="Glide: How far the pitch climbs, in semitones" title="How far the pitch climbs, in semitones"><span class="ed-val" id="eleGlideV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Wah</span><input type="range" id="eleWah" min="0" max="1000" step="1" value="500" aria-label="Wah: How far the formant opens, in Hz" title="How far the formant opens, in Hz"><span class="ed-val" id="eleWahV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Growl</span><input type="range" id="eleGrowl" min="0" max="1000" step="1" value="500" aria-label="Growl: The rasp's speed; its depth grows with it" title="The rasp's speed; its depth grows with it"><span class="ed-val" id="eleGrowlV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Drive</span><input type="range" id="eleDrive" min="0" max="1000" step="1" value="500" aria-label="Drive: How hard it shouts" title="How hard it shouts"><span class="ed-val" id="eleDriveV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Length</span><input type="range" id="eleLen" min="0" max="1000" step="1" value="500" aria-label="Length: The shape's length; ×1 is the sample's own" title="The shape's length; ×1 is the sample's own"><span class="ed-val" id="eleLenV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">dB</span><input type="range" id="eleDb" min="0" max="1000" step="1" value="500" aria-label="dB: Level trim, to sit against the other sounds" title="Level trim, to sit against the other sounds"><span class="ed-val" id="eleDbV">—</span></span>
+    </div>
+    <div class="ed-foot">
+      <button class="btn" id="elePlay">▶ Preview</button>
+      <button class="btn" id="eleFit" title="The shape's length becomes the sample's">Fit to sample</button>
+      <button class="btn" id="eleReset" title="Every elephant control back to where it started">Reset</button>
+      <span class="ed-sp"></span>
+      <button class="btn primary" id="eleDone">Done</button>
+    </div>
+  </div>
+</div>
 <div class="editor" id="editor" hidden>
   <div class="ed-card" role="dialog" aria-label="Sample editor">
     <div class="ed-head"><strong id="edTitle">Edit</strong><span class="ed-info" id="edInfo"></span></div>

@@ -81,11 +81,13 @@
     } catch (e) {}
   }
 
-  // One voice of the sampler: plain playback, or a cloud of short grains
+  // One voice of the sampler: plain playback, or a cloud of short grains (or the Elephant, 770, which plays the sample under its shape)
   const recentGrains = [];
+  let eleVoiceHook = null;
   function makeSampleVoice(midi, i, when, scale = 1) {
     const buf = sampBuf[i]; if (!buf || !ctx) return null;
     const slot = state.samp.slots[i], P = slot.p, mode = slot.mode;
+    if (mode === "elephant" && eleVoiceHook) return eleVoiceHook(midi, i, when, scale);
     const t = when ?? ctx.currentTime, rate = Math.pow(2, (midi - 60) / 12), dur = buf.duration;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = P.level * 1.4 * scale;

@@ -1051,6 +1051,21 @@ body.trk-open { overflow: hidden; }
 .sfit .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
 .sfit input[type=range] { flex: 1 1 auto; min-width: 90px; accent-color: var(--lilac); height: 28px; }
 .sfit.busy .ed-val { color: var(--lilac); }
+/* 166: Elephant (770): the pad under the sample bar, and the shape sheet */
+.elepad { display: flex; flex-direction: column; gap: 4px; flex: none; padding: 2px 0 4px; }
+.elepad[hidden] { display: none; }
+.ele-xy { width: 100%; height: 110px; border-radius: 8px; background: #0d0b13; border: 1px solid var(--line); touch-action: none; display: block; cursor: crosshair; }
+.ele-xy.tall { height: 150px; }
+.ele-cap { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); line-height: 1.5; }
+.ele-cap b { color: var(--ink); font-weight: 600; }
+#eleWave { width: 100%; height: 120px; border-radius: 8px; background: #0d0b13; border: 1px solid var(--line); touch-action: none; display: block; cursor: ew-resize; }
+.ele-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+.ele-rows .ed-sl { display: flex; align-items: center; gap: 6px; flex: none; min-width: 0; }
+.ele-rows .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; width: 46px; flex: none; }
+.ele-rows input[type=range] { flex: 1 1 auto; min-width: 50px; accent-color: var(--lilac); height: 28px; }
+.ele-rows .ed-val { width: 58px; min-width: 58px; text-align: right; flex: none; }
+.ed-foot .ed-sp { flex: 1 1 auto; }
+@media (max-width: 480px) { .ele-rows { grid-template-columns: 1fr; } }
 .ed-tempo .btn, .ed-stretch .btn { height: 30px; }
 #mLoop[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
 /* where ● Rec puts the recording */

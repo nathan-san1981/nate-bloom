@@ -117,6 +117,11 @@
       if (key === "scan") return (v * v * 1.5).toFixed(2) + "×";
       if (key === "slices") return SLICE_COUNTS[Math.round(v * (SLICE_COUNTS.length - 1))] + "";
       if (key === "sens") return v < 0.01 ? "Even" : "Hits " + Math.round(v * 100);
+      if (key === "eGlide") return "+" + Math.round(v * 24) + " st";
+      if (key === "eWah") { const hz = 300 * Math.pow(2, 0.5 + 3 * v); return hz >= 1000 ? (hz / 1000).toFixed(1) + "k" : Math.round(hz) + ""; }
+      if (key === "eGrowl") return Math.round(12 + 40 * v) + "Hz";
+      if (key === "eLen") return window.__live30 ? fmtTime(__live30.eleShapeLen(state.samp.slot, 1)) : "×" + Math.pow(4, 2 * v - 1).toFixed(2);
+      if (key === "eDb") { const db = -24 + 36 * v; return (db > 0 ? "+" : "") + db.toFixed(1) + " dB"; }
       return Math.round(v * 100) + "";
     }
     if (obj === state.drum) {
@@ -204,7 +209,7 @@
     const isDrum = state.engine === "drum", isSamp = state.engine === "samp";
     const e = isDrum ? DRUM : isSamp ? SAMP : ENGINES[state.engine];
     document.getElementById("engineLabel").textContent = isSamp
-      ? "Sampler · " + ({ grain: "granular", play: "playback", slice: "slices" })[state.samp.slots[state.samp.slot].mode] : e.name;
+      ? "Sampler · " + ({ grain: "granular", play: "playback", slice: "slices", elephant: "elephant" })[state.samp.slots[state.samp.slot].mode] : e.name;
     const after = document.getElementById("engineAfter");
     after.classList.remove("err");
     after.textContent = isSamp ? (state.samp.slots[state.samp.slot].name || "Slot S" + (state.samp.slot + 1) + " is empty") : e.after;
@@ -212,7 +217,7 @@
     engineKnobsEl.innerHTML = "";
     if (isSamp) {
       const slot = state.samp.slots[state.samp.slot];
-      (slot.mode === "grain" ? SAMP_GRAIN_KNOBS : slot.mode === "slice" ? SAMP_SLICE_KNOBS : SAMP_PLAY_KNOBS)
+      (slot.mode === "grain" ? SAMP_GRAIN_KNOBS : slot.mode === "slice" ? SAMP_SLICE_KNOBS : slot.mode === "elephant" ? SAMP_ELE_KNOBS : SAMP_PLAY_KNOBS)
         .forEach(([k, label]) => makeKnob(engineKnobsEl, k, label, () => state.samp.slots[state.samp.slot].p, () => {}));
       refreshSamplesUI();
     } else if (isDrum) {
@@ -291,6 +296,7 @@
     document.getElementById("mPlay").setAttribute("aria-pressed", String(md === "play"));
     document.getElementById("mGrain").setAttribute("aria-pressed", String(md === "grain"));
     document.getElementById("mSlice").setAttribute("aria-pressed", String(md === "slice"));
+    document.getElementById("mEle").setAttribute("aria-pressed", String(md === "elephant"));
     if (state.engine === "samp") {
       const after = document.getElementById("engineAfter");
       if (!after.classList.contains("err"))
@@ -302,6 +308,7 @@
   document.getElementById("mPlay").addEventListener("click", () => setSampMode("play"));
   document.getElementById("mGrain").addEventListener("click", () => setSampMode("grain"));
   document.getElementById("mSlice").addEventListener("click", () => setSampMode("slice"));
+  document.getElementById("mEle").addEventListener("click", () => setSampMode("elephant"));
   const fileIn = document.getElementById("fileIn");
   document.getElementById("loadBtn").addEventListener("click", () => { start(); fileIn.click(); });
   fileIn.addEventListener("change", async () => {
