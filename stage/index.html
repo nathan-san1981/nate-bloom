@@ -158,6 +158,7 @@ button.chip[aria-pressed="true"] { background: var(--ink); color: var(--panel); 
 .styles button { flex: 1 0 auto; height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font-weight: 600; }
 .styles button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1226; }
 .xycard { grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 8px; }
+.xycard h3 { flex-wrap: wrap; } #xyMode { height: 32px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); padding: 0 8px; font: 600 0.82rem var(--font-body); text-transform: none; letter-spacing: 0; }
 .xy { position: relative; flex: 1; min-height: 300px; border-radius: 16px; border: 1px solid var(--line); background: radial-gradient(circle at 30% 70%, #2a1f45, #13111b 70%); touch-action: none; user-select: none; overflow: hidden; }
 .xy::before, .xy::after { content: ""; position: absolute; background: #ffffff10; } .xy::before { left: 50%; top: 0; bottom: 0; width: 1px; } .xy::after { top: 50%; left: 0; right: 0; height: 1px; }
 .xy .dot { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: radial-gradient(circle, #ffcf8a, #ff8ac6 60%, transparent 70%); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
@@ -301,7 +302,7 @@ table.sl tr.cur td { border-color: var(--teal); }
       <div class="seg" id="hWhat" style="margin-top:10px"><button data-w="seq">Seq</button><button data-w="rc">Rhythm</button><button data-w="bp">Pads</button></div>
       <div class="songs" style="margin-top:12px"><button class="hb" id="hPrev" aria-label="Previous song">‹</button><div class="mid"><small id="hSongLab">Set list</small><b id="hSong">–</b><small id="hNext"></small></div><button class="hb" id="hNextB" aria-label="Next song">›</button></div>
       <p class="note" style="margin-top:8px">Keys here: 1–4 loops · B band · Space ▶ · H Hold · A Arp · ← → or Page Up/Down songs · − = tempo</p></div>
-    <div class="card xycard"><h3 class="lab">XY pad <span class="note">across: filter · up: Space · let go and both go back</span></h3><div class="xy" id="xy"><div class="dot"></div><span class="ax x">filter →</span><span class="ax y">↑ space</span></div></div>
+    <div class="card xycard"><h3 class="lab">XY pad <select id="xyMode" aria-label="What the pad moves" title="What the pad moves: across and up"><option value="fs">Filter · Space</option></select><span class="note" id="xyNote">let go and both go back</span></h3><div class="xy" id="xy"><div class="dot"></div><span class="ax x" id="xyAxX">filter →</span><span class="ax y" id="xyAxY">↑ space</span></div></div>
   </section>
   <!-- visuals -->
   <section class="view" id="vVis" hidden aria-label="Visuals">
