@@ -24,22 +24,15 @@ typedef double f64;
 extern "C" {
 #endif
 
-struct w2c_env;
-
 typedef struct w2c_duet80 {
-  struct w2c_env* w2c_env_instance;
   u32 w2c_g0;
   wasm_rt_memory_t w2c_memory;
   wasm_rt_funcref_table_t w2c_T0;
 } w2c_duet80;
 
-void wasm2c_duet80_instantiate(w2c_duet80*, struct w2c_env*);
+void wasm2c_duet80_instantiate(w2c_duet80*);
 void wasm2c_duet80_free(w2c_duet80*);
 wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t result_count, ...);
-
-/* import: 'env' 'sin' */
-f64 w2c_env_sin(struct w2c_env*, f64);
-void wasm_tailcall_w2c_env_sin(void **instance_ptr, void *tail_call_stack, wasm_rt_tailcallee_t *next);
 
 /* export: 'memory' */
 wasm_rt_memory_t* w2c_duet80_memory(w2c_duet80* instance);

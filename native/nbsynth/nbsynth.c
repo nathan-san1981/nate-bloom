@@ -45,7 +45,7 @@ static unsigned out_twin77(unsigned ch) { return w2c_twin77_nb_out(&i_twin77, ch
 static void tempo_twin77(double b, unsigned p) { (void) b; (void) p; }
 static void reset_twin77(void) { w2c_twin77_nb_reset(&i_twin77); }
 static w2c_duet80 i_duet80;
-static void mk_duet80(void) { wasm2c_duet80_instantiate(&i_duet80, &g_env); w2c_duet80_0x5F_wasm_call_ctors(&i_duet80); }
+static void mk_duet80(void) { wasm2c_duet80_instantiate(&i_duet80); w2c_duet80_0x5F_wasm_call_ctors(&i_duet80); }
 static wasm_rt_memory_t* mem_duet80(void) { return w2c_duet80_memory(&i_duet80); }
 static void init_duet80(float r) { w2c_duet80_nb_init(&i_duet80, r); }
 static unsigned params_duet80(void) { return w2c_duet80_nb_params(&i_duet80); }

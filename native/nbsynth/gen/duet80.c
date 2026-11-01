@@ -1291,8 +1291,8 @@ DEFINE_SIMD_STORE_LANE(v128_store64_lane1, simde_wasm_v128_store64_lane, u64, 1)
 
 
 static void w2c_duet80_0x5F_wasm_call_ctors_0(w2c_duet80*);
-static u32 w2c_duet80_f2(w2c_duet80*, u32);
-static void w2c_duet80_f3(w2c_duet80*, u32);
+static u32 w2c_duet80_f1(w2c_duet80*, u32);
+static void w2c_duet80_f2(w2c_duet80*, u32);
 static void w2c_duet80_nb_init_0(w2c_duet80*, f32);
 static u32 w2c_duet80_nb_params_0(w2c_duet80*);
 static u32 w2c_duet80_nb_count_0(w2c_duet80*);
@@ -1301,24 +1301,25 @@ static void w2c_duet80_nb_reset_0(w2c_duet80*);
 static void w2c_duet80_nb_midi_0(w2c_duet80*, u32, u32, u32);
 static void w2c_duet80_nb_render_0(w2c_duet80*, u32);
 static u32 w2c_duet80_nb_active_0(w2c_duet80*);
-static void w2c_duet80_f12(w2c_duet80*);
+static void w2c_duet80_f11(w2c_duet80*);
 static u32 w2c_duet80_nb_heap_0(w2c_duet80*);
-static u32 w2c_duet80_f14(w2c_duet80*, u32, u32, u32);
-static f32 w2c_duet80_f15(w2c_duet80*, f32);
-static u32 w2c_duet80_f16(w2c_duet80*, f32);
+static u32 w2c_duet80_f13(w2c_duet80*, u32, u32, u32);
+static f32 w2c_duet80_f14(w2c_duet80*, f32);
+static u32 w2c_duet80_f15(w2c_duet80*, f32);
 static u32 w2c_duet80_0x5FZnwm_0(w2c_duet80*, u32);
 static u32 w2c_duet80_0x5FZnam_0(w2c_duet80*, u32);
 static void w2c_duet80_0x5FZdlPv_0(w2c_duet80*, u32);
 static void w2c_duet80_0x5FZdaPv_0(w2c_duet80*, u32);
-static void w2c_duet80_f21(w2c_duet80*, u32);
-static u32 w2c_duet80_f22(w2c_duet80*, u32, u32, u32);
+static void w2c_duet80_f20(w2c_duet80*, u32);
+static u32 w2c_duet80_f21(w2c_duet80*, u32, u32, u32);
+static f32 w2c_duet80_f22(w2c_duet80*, f32);
 static f32 w2c_duet80_f23(w2c_duet80*, f32);
 static f32 w2c_duet80_f24(w2c_duet80*, f32);
-static f32 w2c_duet80_f25(w2c_duet80*, f32);
-static f32 w2c_duet80_f26(w2c_duet80*, f32, f32);
+static f32 w2c_duet80_f25(w2c_duet80*, f32, f32);
+static f32 w2c_duet80_f26(w2c_duet80*, f32);
 static f32 w2c_duet80_f27(w2c_duet80*, f32);
 static f32 w2c_duet80_f28(w2c_duet80*, f32);
-static f32 w2c_duet80_f29(w2c_duet80*, f32);
+static f64 w2c_duet80_f29(w2c_duet80*, f64);
 static void w2c_duet80_f30(w2c_duet80*, u32, f64);
 static void w2c_duet80_f31(w2c_duet80*, u32, u32);
 static void w2c_duet80_0x5FZNSt6vectorIfSaIfEE14_M_fill_assignEmRKf_0(w2c_duet80*, u32, u32, u32);
@@ -1336,17 +1337,17 @@ static void w2c_duet80_f43(w2c_duet80*, u32, u32, u32, u32, u32);
 static f32 w2c_duet80_f44(w2c_duet80*, u32, u32);
 static void w2c_duet80_f45(w2c_duet80*, u32, f32, f32, f32, u32, u32, u32);
 
-FUNC_TYPE_T(w2c_duet80_t0) = "\x0a\xb9\x50\x3c\x6a\xf0\x79\x2e\x9c\x53\x4a\xd4\xf1\x68\x37\xd4\xe0\xdf\x32\xf6\x00\xb4\x45\xdf\x75\x1e\xd7\x52\xa6\x86\xd7\xac";
-FUNC_TYPE_T(w2c_duet80_t1) = "\x36\xa9\xe7\xf1\xc9\x5b\x82\xff\xb9\x97\x43\xe0\xc5\xc4\xce\x95\xd8\x3c\x9a\x43\x0a\xac\x59\xf8\x4e\xf3\xcb\xfa\xb6\x14\x50\x68";
-FUNC_TYPE_T(w2c_duet80_t2) = "\x07\x80\x96\x7a\x42\xf7\x3e\xe6\x70\x5c\x2f\xac\x83\xf5\x67\xd2\xa2\xa0\x69\x41\x5f\xf8\xe7\x96\x7f\x23\xab\x00\x03\x5f\x4a\x3c";
-FUNC_TYPE_T(w2c_duet80_t3) = "\x89\x3a\x3d\x2c\x8f\x4d\x7f\x6d\x6c\x9d\x62\x67\x29\xaf\x3d\x44\x39\x8e\xc3\xf3\xe8\x51\xc1\x99\xb9\xdd\x9f\xd5\x3d\x1f\xd3\xe4";
-FUNC_TYPE_T(w2c_duet80_t4) = "\x1e\xae\xe1\x36\x90\x48\xec\x4e\x64\xad\xdd\x28\x27\x58\xf2\x7e\x99\xe4\x6d\xde\xa3\x4e\x0b\xe7\x9f\xe0\x73\x04\xe6\x6b\xd8\xad";
-FUNC_TYPE_T(w2c_duet80_t5) = "\x72\xab\x00\xdf\x20\x3d\xce\xa1\xf2\x29\xc7\x9d\x13\x40\x7e\x98\xac\x7d\x41\x4a\x53\x2e\x42\x42\x61\x55\x2e\xaa\xeb\xbe\xc6\x35";
-FUNC_TYPE_T(w2c_duet80_t6) = "\x78\xde\x71\xb6\x49\x9a\x33\x9d\xd3\x70\x88\x4c\x50\xd4\xea\xdf\xe1\x2a\x18\x12\xf6\xf3\x64\xf7\xea\x4f\x94\x19\xa7\x20\x28\xe8";
-FUNC_TYPE_T(w2c_duet80_t7) = "\xcd\xad\x8f\x6a\xaf\x3e\xd0\x86\xf0\x9a\xd7\xf0\xc7\x0d\x48\x9f\x27\x59\xf3\x8d\x71\xa1\x81\xa8\xcc\x06\x53\x98\x62\x34\xaa\xf5";
-FUNC_TYPE_T(w2c_duet80_t8) = "\xab\x97\xa1\xf3\x0e\x57\x7f\x3f\xb6\x79\xd4\xb2\xb6\x7f\xbc\x1d\xfc\x30\x70\x05\x01\xed\x79\x69\xae\x7b\xee\x28\xc6\x93\xa7\x8f";
-FUNC_TYPE_T(w2c_duet80_t9) = "\xd0\x3c\xe4\x8c\x8d\xf6\xe4\xc6\xe2\xa7\xb0\xce\xed\x62\x75\xf4\x07\x86\x04\xc8\x06\x76\x27\x08\xc1\x03\x22\x30\x74\xd7\xcf\xab";
-FUNC_TYPE_T(w2c_duet80_t10) = "\x98\x7e\x2b\xa0\xbc\xda\xe1\x35\x8f\x7d\xe1\xef\xce\x68\x51\x54\x76\xf1\xe0\xfd\xcc\xce\x53\x11\x11\x20\xa1\xeb\xca\x71\x2e\xbe";
+FUNC_TYPE_T(w2c_duet80_t0) = "\x36\xa9\xe7\xf1\xc9\x5b\x82\xff\xb9\x97\x43\xe0\xc5\xc4\xce\x95\xd8\x3c\x9a\x43\x0a\xac\x59\xf8\x4e\xf3\xcb\xfa\xb6\x14\x50\x68";
+FUNC_TYPE_T(w2c_duet80_t1) = "\x07\x80\x96\x7a\x42\xf7\x3e\xe6\x70\x5c\x2f\xac\x83\xf5\x67\xd2\xa2\xa0\x69\x41\x5f\xf8\xe7\x96\x7f\x23\xab\x00\x03\x5f\x4a\x3c";
+FUNC_TYPE_T(w2c_duet80_t2) = "\x89\x3a\x3d\x2c\x8f\x4d\x7f\x6d\x6c\x9d\x62\x67\x29\xaf\x3d\x44\x39\x8e\xc3\xf3\xe8\x51\xc1\x99\xb9\xdd\x9f\xd5\x3d\x1f\xd3\xe4";
+FUNC_TYPE_T(w2c_duet80_t3) = "\x1e\xae\xe1\x36\x90\x48\xec\x4e\x64\xad\xdd\x28\x27\x58\xf2\x7e\x99\xe4\x6d\xde\xa3\x4e\x0b\xe7\x9f\xe0\x73\x04\xe6\x6b\xd8\xad";
+FUNC_TYPE_T(w2c_duet80_t4) = "\x72\xab\x00\xdf\x20\x3d\xce\xa1\xf2\x29\xc7\x9d\x13\x40\x7e\x98\xac\x7d\x41\x4a\x53\x2e\x42\x42\x61\x55\x2e\xaa\xeb\xbe\xc6\x35";
+FUNC_TYPE_T(w2c_duet80_t5) = "\x78\xde\x71\xb6\x49\x9a\x33\x9d\xd3\x70\x88\x4c\x50\xd4\xea\xdf\xe1\x2a\x18\x12\xf6\xf3\x64\xf7\xea\x4f\x94\x19\xa7\x20\x28\xe8";
+FUNC_TYPE_T(w2c_duet80_t6) = "\xcd\xad\x8f\x6a\xaf\x3e\xd0\x86\xf0\x9a\xd7\xf0\xc7\x0d\x48\x9f\x27\x59\xf3\x8d\x71\xa1\x81\xa8\xcc\x06\x53\x98\x62\x34\xaa\xf5";
+FUNC_TYPE_T(w2c_duet80_t7) = "\xab\x97\xa1\xf3\x0e\x57\x7f\x3f\xb6\x79\xd4\xb2\xb6\x7f\xbc\x1d\xfc\x30\x70\x05\x01\xed\x79\x69\xae\x7b\xee\x28\xc6\x93\xa7\x8f";
+FUNC_TYPE_T(w2c_duet80_t8) = "\xd0\x3c\xe4\x8c\x8d\xf6\xe4\xc6\xe2\xa7\xb0\xce\xed\x62\x75\xf4\x07\x86\x04\xc8\x06\x76\x27\x08\xc1\x03\x22\x30\x74\xd7\xcf\xab";
+FUNC_TYPE_T(w2c_duet80_t9) = "\x98\x7e\x2b\xa0\xbc\xda\xe1\x35\x8f\x7d\xe1\xef\xce\x68\x51\x54\x76\xf1\xe0\xfd\xcc\xce\x53\x11\x11\x20\xa1\xeb\xca\x71\x2e\xbe";
+FUNC_TYPE_T(w2c_duet80_t10) = "\x0a\xb9\x50\x3c\x6a\xf0\x79\x2e\x9c\x53\x4a\xd4\xf1\x68\x37\xd4\xe0\xdf\x32\xf6\x00\xb4\x45\xdf\x75\x1e\xd7\x52\xa6\x86\xd7\xac";
 FUNC_TYPE_T(w2c_duet80_t11) = "\xe4\x86\x49\x6b\x60\x0c\x7a\x58\xb1\x3b\x19\xea\x31\xd4\xe1\x7a\x30\x21\xd5\x4b\x6b\x69\xfc\x41\xc9\x51\x70\xf2\xf9\x17\x44\xed";
 FUNC_TYPE_T(w2c_duet80_t12) = "\x26\x10\x81\xe2\x21\x43\xd6\x01\x3e\x2d\x2f\x16\x17\x78\x6f\xba\xb3\x2f\x4d\x54\x9b\x8a\xa9\xdd\xbf\x53\x92\x3c\xd3\x71\xc6\xb2";
 FUNC_TYPE_T(w2c_duet80_t13) = "\x79\x0a\x5d\xd5\xc8\xe4\xb5\x86\xbf\x9a\xcb\x8e\xd8\xfe\x49\x6d\x55\xb2\x68\x1e\x7c\xfc\x99\x61\xe0\x3e\x54\xa4\x15\xc4\xec\x84";
@@ -1357,8 +1358,8 @@ FUNC_TYPE_T(w2c_duet80_t17) = "\x10\x14\x42\x90\xbf\xa8\x37\x8c\xdc\x81\x9f\x4c\
 FUNC_TYPE_T(w2c_duet80_t18) = "\xcf\xb5\x37\xa6\xae\x30\x78\x2f\x83\xa5\x5e\x4f\x92\x9e\x80\x85\xb4\x8d\x6c\x74\xb4\x37\xbc\x8c\x81\xe8\xcc\x78\x8a\x74\xd6\x28";
 FUNC_TYPE_T(w2c_duet80_t19) = "\x95\x6c\xee\xf3\x80\x9e\x89\xeb\x73\x0a\x8a\xf9\x33\x65\xff\x99\xda\xfb\xeb\x48\x87\x79\x76\xec\x73\x34\xad\x6f\xd2\x06\x50\x95";
 
-static void wrap_w2c_duet80_f3(void *instance, u32 var_0) {
-  return w2c_duet80_f3((struct w2c_duet80*) instance, var_0);
+static void wrap_w2c_duet80_f2(void *instance, u32 var_0) {
+  return w2c_duet80_f2((struct w2c_duet80*) instance, var_0);
 }
 
 static void init_globals(w2c_duet80* instance) {
@@ -1746,7 +1747,7 @@ static void init_data_instances(w2c_duet80 *instance) {
 }
 
 static const wasm_elem_segment_expr_t elem_segment_exprs_w2c_duet80_e0[] = {
-  {RefFunc, w2c_duet80_t3, (wasm_rt_function_ptr_t)wrap_w2c_duet80_f3, {NULL}, 0},
+  {RefFunc, w2c_duet80_t2, (wasm_rt_function_ptr_t)wrap_w2c_duet80_f2, {NULL}, 0},
 };
 
 static void init_tables(w2c_duet80* instance) {
@@ -1979,23 +1980,8 @@ void w2c_duet80_0x5FZNSt6vectorIfSaIfEE14_M_fill_assignEmRKf(w2c_duet80* instanc
 #endif
 }
 
-/* handler for missing tail-call on import: 'env' 'sin' */
-WEAK_FUNC_DECL(wasm_tailcall_w2c_env_sin, wasm_fallback_duet80_w2c_env_sin)
-{
-  next->fn = NULL;
-  f64 params;
-  wasm_rt_memcpy(&params, tail_call_stack, sizeof(params));
-  f64 result = w2c_env_sin(*instance_ptr, params);
-  wasm_rt_memcpy(tail_call_stack, &result, sizeof(result));
-}
-
-static void init_instance_import(w2c_duet80* instance, struct w2c_env* w2c_env_instance) {
-  instance->w2c_env_instance = w2c_env_instance;
-}
-
-void wasm2c_duet80_instantiate(w2c_duet80* instance, struct w2c_env* w2c_env_instance) {
+void wasm2c_duet80_instantiate(w2c_duet80* instance) {
   assert(wasm_rt_is_initialized());
-  init_instance_import(instance, w2c_env_instance);
   init_globals(instance);
   init_tables(instance);
   init_memories(instance);
@@ -2020,20 +2006,11 @@ void wasm2c_duet80_free(w2c_duet80* instance) {
 wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t result_count, ...) {
   va_list args;
   
-  if (param_count == 1 && result_count == 1) {
-    va_start(args, result_count);
-    if (true && va_arg(args, int) == WASM_RT_F64 && va_arg(args, int) == WASM_RT_F64) {
-      va_end(args);
-      return w2c_duet80_t0;
-    }
-    va_end(args);
-  }
-  
   if (param_count == 0 && result_count == 0) {
     va_start(args, result_count);
     if (true) {
       va_end(args);
-      return w2c_duet80_t1;
+      return w2c_duet80_t0;
     }
     va_end(args);
   }
@@ -2042,7 +2019,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t2;
+      return w2c_duet80_t1;
     }
     va_end(args);
   }
@@ -2051,7 +2028,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t3;
+      return w2c_duet80_t2;
     }
     va_end(args);
   }
@@ -2060,7 +2037,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_F32) {
       va_end(args);
-      return w2c_duet80_t4;
+      return w2c_duet80_t3;
     }
     va_end(args);
   }
@@ -2069,7 +2046,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t5;
+      return w2c_duet80_t4;
     }
     va_end(args);
   }
@@ -2078,7 +2055,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t6;
+      return w2c_duet80_t5;
     }
     va_end(args);
   }
@@ -2087,7 +2064,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32 && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t7;
+      return w2c_duet80_t6;
     }
     va_end(args);
   }
@@ -2096,7 +2073,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_F32 && va_arg(args, int) == WASM_RT_F32) {
       va_end(args);
-      return w2c_duet80_t8;
+      return w2c_duet80_t7;
     }
     va_end(args);
   }
@@ -2105,7 +2082,7 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_F32 && va_arg(args, int) == WASM_RT_I32) {
       va_end(args);
-      return w2c_duet80_t9;
+      return w2c_duet80_t8;
     }
     va_end(args);
   }
@@ -2113,6 +2090,15 @@ wasm_rt_func_type_t wasm2c_duet80_get_func_type(uint32_t param_count, uint32_t r
   if (param_count == 2 && result_count == 1) {
     va_start(args, result_count);
     if (true && va_arg(args, int) == WASM_RT_F32 && va_arg(args, int) == WASM_RT_F32 && va_arg(args, int) == WASM_RT_F32) {
+      va_end(args);
+      return w2c_duet80_t9;
+    }
+    va_end(args);
+  }
+  
+  if (param_count == 1 && result_count == 1) {
+    va_start(args, result_count);
+    if (true && va_arg(args, int) == WASM_RT_F64 && va_arg(args, int) == WASM_RT_F64) {
       va_end(args);
       return w2c_duet80_t10;
     }
@@ -2209,12 +2195,12 @@ void w2c_duet80_0x5F_wasm_call_ctors_0(w2c_duet80* instance) {
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   (void)wasm_rt_local_memory_base;
   (void)wasm_rt_local_memory_size;
-  w2c_duet80_f12(instance);
+  w2c_duet80_f11(instance);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   FUNC_EPILOGUE;
 }
 
-u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
+u32 w2c_duet80_f1(w2c_duet80* instance, u32 var_p0) {
   v128 var_l1 = simde_wasm_i64x2_make(0, 0), var_l2 = simde_wasm_i64x2_make(0, 0), var_l3 = simde_wasm_i64x2_make(0, 0), var_l4 = simde_wasm_i64x2_make(0, 0), var_l5 = simde_wasm_i64x2_make(0, 0), var_l6 = simde_wasm_i64x2_make(0, 0);
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
@@ -2282,7 +2268,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2329,7 +2315,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2413,7 +2399,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2455,7 +2441,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2539,7 +2525,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2581,7 +2567,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2665,7 +2651,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2707,7 +2693,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2791,7 +2777,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2833,7 +2819,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2917,7 +2903,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -2959,7 +2945,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -3043,7 +3029,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -3085,7 +3071,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -3169,7 +3155,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 80u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -3211,7 +3197,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   var_i0 += var_i1;
   var_i1 = 0u;
   var_i2 = 96u;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = var_p0;
   var_i1 = 1056964608u;
@@ -3324,7 +3310,7 @@ u32 w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   return var_i0;
 }
 
-void w2c_duet80_f3(w2c_duet80* instance, u32 var_p0) {
+void w2c_duet80_f2(w2c_duet80* instance, u32 var_p0) {
   u32 var_l1 = 0;
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
@@ -3662,7 +3648,7 @@ u32 w2c_duet80_nb_active_0(w2c_duet80* instance) {
   return var_i0;
 }
 
-void w2c_duet80_f12(w2c_duet80* instance) {
+void w2c_duet80_f11(w2c_duet80* instance) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -3670,12 +3656,12 @@ void w2c_duet80_f12(w2c_duet80* instance) {
   (void)wasm_rt_local_memory_size;
   u32 var_i0, var_i1, var_i2;
   var_i0 = 5440u;
-  var_i0 = w2c_duet80_f2(instance, var_i0);
+  var_i0 = w2c_duet80_f1(instance, var_i0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_i0 = 1u;
   var_i1 = 0u;
   var_i2 = 14116u;
-  var_i0 = w2c_duet80_f22(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f21(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   FUNC_EPILOGUE;
 }
@@ -3693,7 +3679,7 @@ u32 w2c_duet80_nb_heap_0(w2c_duet80* instance) {
   return var_i0;
 }
 
-u32 w2c_duet80_f14(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
+u32 w2c_duet80_f13(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
   u32 var_l3 = 0, var_l4 = 0, var_l5 = 0, var_l7 = 0, var_l8 = 0;
   v128 var_l6 = simde_wasm_i64x2_make(0, 0);
   FUNC_PROLOGUE;
@@ -3771,7 +3757,7 @@ u32 w2c_duet80_f14(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
   return var_i0;
 }
 
-f32 w2c_duet80_f15(w2c_duet80* instance, f32 var_p0) {
+f32 w2c_duet80_f14(w2c_duet80* instance, f32 var_p0) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -3799,7 +3785,7 @@ f32 w2c_duet80_f15(w2c_duet80* instance, f32 var_p0) {
   return var_f0;
 }
 
-u32 w2c_duet80_f16(w2c_duet80* instance, f32 var_p0) {
+u32 w2c_duet80_f15(w2c_duet80* instance, f32 var_p0) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -3808,7 +3794,7 @@ u32 w2c_duet80_f16(w2c_duet80* instance, f32 var_p0) {
   u32 var_i0;
   f32 var_f0, var_f1;
   var_f0 = var_p0;
-  var_f0 = w2c_duet80_f15(instance, var_f0);
+  var_f0 = w2c_duet80_f14(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_p0 = var_f0;
   var_f0 = wasm_fabsf(var_f0);
@@ -3962,7 +3948,7 @@ void w2c_duet80_0x5FZdaPv_0(w2c_duet80* instance, u32 var_p0) {
   FUNC_EPILOGUE;
 }
 
-void w2c_duet80_f21(w2c_duet80* instance, u32 var_p0) {
+void w2c_duet80_f20(w2c_duet80* instance, u32 var_p0) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -3972,7 +3958,7 @@ void w2c_duet80_f21(w2c_duet80* instance, u32 var_p0) {
   FUNC_EPILOGUE;
 }
 
-u32 w2c_duet80_f22(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
+u32 w2c_duet80_f21(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -3984,7 +3970,7 @@ u32 w2c_duet80_f22(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2) {
   return var_i0;
 }
 
-f32 w2c_duet80_f23(w2c_duet80* instance, f32 var_p0) {
+f32 w2c_duet80_f22(w2c_duet80* instance, f32 var_p0) {
   u32 var_l2 = 0, var_l3 = 0;
   f32 var_l1 = 0;
   FUNC_PROLOGUE;
@@ -4087,7 +4073,7 @@ f32 w2c_duet80_f23(w2c_duet80* instance, f32 var_p0) {
   return var_f0;
 }
 
-f32 w2c_duet80_f24(w2c_duet80* instance, f32 var_p0) {
+f32 w2c_duet80_f23(w2c_duet80* instance, f32 var_p0) {
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
   uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
@@ -4097,13 +4083,13 @@ f32 w2c_duet80_f24(w2c_duet80* instance, f32 var_p0) {
   var_f0 = var_p0;
   var_f1 = 1.44269502f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   FUNC_EPILOGUE;
   return var_f0;
 }
 
-f32 w2c_duet80_f25(w2c_duet80* instance, f32 var_p0) {
+f32 w2c_duet80_f24(w2c_duet80* instance, f32 var_p0) {
   u32 var_l1 = 0, var_l2 = 0, var_l3 = 0, var_l4 = 0;
   FUNC_PROLOGUE;
   uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
@@ -4229,7 +4215,7 @@ f32 w2c_duet80_f25(w2c_duet80* instance, f32 var_p0) {
   return var_f0;
 }
 
-f32 w2c_duet80_f26(w2c_duet80* instance, f32 var_p0, f32 var_p1) {
+f32 w2c_duet80_f25(w2c_duet80* instance, f32 var_p0, f32 var_p1) {
   u64 var_l4 = 0;
   f32 var_l2 = 0, var_l3 = 0;
   FUNC_PROLOGUE;
@@ -4251,11 +4237,11 @@ f32 w2c_duet80_f26(w2c_duet80* instance, f32 var_p0, f32 var_p1) {
   var_i0 = var_f0 <= var_f1;
   if (var_i0) {goto var_B1;}
   var_f0 = var_p0;
-  var_f0 = w2c_duet80_f25(instance, var_f0);
+  var_f0 = w2c_duet80_f24(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = var_p1;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   goto var_Bfunc;
   var_B1:;
@@ -4296,11 +4282,11 @@ f32 w2c_duet80_f26(w2c_duet80* instance, f32 var_p0, f32 var_p1) {
   var_B3:;
   var_f0 = var_p0;
   var_f0 = -(var_f0);
-  var_f0 = w2c_duet80_f25(instance, var_f0);
+  var_f0 = w2c_duet80_f24(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = var_p1;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_p1 = var_f0;
   var_f1 = var_p1;
@@ -4313,6 +4299,137 @@ f32 w2c_duet80_f26(w2c_duet80* instance, f32 var_p0, f32 var_p1) {
   var_l2 = var_f0;
   var_B0:;
   var_f0 = var_l2;
+  var_Bfunc:;
+  FUNC_EPILOGUE;
+  return var_f0;
+}
+
+f32 w2c_duet80_f26(w2c_duet80* instance, f32 var_p0) {
+  u64 var_l3 = 0;
+  f32 var_l4 = 0;
+  f64 var_l1 = 0, var_l2 = 0;
+  FUNC_PROLOGUE;
+  uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
+  uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
+  (void)wasm_rt_local_memory_base;
+  (void)wasm_rt_local_memory_size;
+  u32 var_i0, var_i1;
+  u64 var_j0;
+  f32 var_f0, var_f1, var_f2;
+  f64 var_d0, var_d1, var_d2;
+  var_f0 = var_p0;
+  var_d0 = (f64)wasm_quietf(var_f0);
+  var_l1 = var_d0;
+  var_d1 = 0.63661977236758138;
+  var_d0 *= var_d1;
+  var_d1 = 0.5;
+  var_d0 += var_d1;
+  var_d0 = wasm_floor(var_d0);
+  var_l2 = var_d0;
+  var_d0 = wasm_fabs(var_d0);
+  var_d1 = 9.2233720368547758e+18;
+  var_i0 = var_d0 < var_d1;
+  var_i0 = !(var_i0);
+  if (var_i0) {goto var_B1;}
+  var_d0 = var_l2;
+  var_j0 = I64_TRUNC_S_F64(var_d0);
+  var_l3 = var_j0;
+  goto var_B0;
+  var_B1:;
+  var_j0 = 9223372036854775808ull;
+  var_l3 = var_j0;
+  var_B0:;
+  var_d0 = var_l1;
+  var_d1 = var_l2;
+  var_d2 = -1.5707963267948966;
+  var_d1 *= var_d2;
+  var_d0 += var_d1;
+  var_f0 = (f32)wasm_quiet(var_d0);
+  var_l4 = var_f0;
+  var_f1 = var_l4;
+  var_f0 *= var_f1;
+  var_p0 = var_f0;
+  var_j0 = var_l3;
+  var_i0 = (u32)(var_j0);
+  var_i1 = 3u;
+  var_i0 &= var_i1;
+  switch (var_i0) {
+    case 0: goto var_B5;
+    case 1: goto var_B4;
+    case 2: goto var_B3;
+    default: goto var_B2;
+  }
+  var_B5:;
+  var_f0 = var_p0;
+  var_f1 = var_l4;
+  var_f0 *= var_f1;
+  var_f1 = var_p0;
+  var_f2 = -0.000195152956f;
+  var_f1 *= var_f2;
+  var_f2 = 0.00833216123f;
+  var_f1 += var_f2;
+  var_f2 = var_p0;
+  var_f1 *= var_f2;
+  var_f2 = -0.166666552f;
+  var_f1 += var_f2;
+  var_f0 *= var_f1;
+  var_f1 = var_l4;
+  var_f0 += var_f1;
+  goto var_Bfunc;
+  var_B4:;
+  var_f0 = var_p0;
+  var_f1 = 2.44331568e-05;
+  var_f0 *= var_f1;
+  var_f1 = -0.00138873165f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = 0.0416666456f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = -0.5f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = 1.0f;
+  var_f0 += var_f1;
+  goto var_Bfunc;
+  var_B3:;
+  var_f0 = var_p0;
+  var_f1 = var_l4;
+  var_f0 *= var_f1;
+  var_f1 = var_p0;
+  var_f2 = 0.000195152956f;
+  var_f1 *= var_f2;
+  var_f2 = -0.00833216123f;
+  var_f1 += var_f2;
+  var_f2 = var_p0;
+  var_f1 *= var_f2;
+  var_f2 = 0.166666552f;
+  var_f1 += var_f2;
+  var_f0 *= var_f1;
+  var_f1 = var_l4;
+  var_f0 -= var_f1;
+  goto var_Bfunc;
+  var_B2:;
+  var_f0 = var_p0;
+  var_f1 = -2.44331568e-05;
+  var_f0 *= var_f1;
+  var_f1 = 0.00138873165f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = -0.0416666456f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = 0.5f;
+  var_f0 += var_f1;
+  var_f1 = var_p0;
+  var_f0 *= var_f1;
+  var_f1 = -1.0f;
+  var_f0 += var_f1;
   var_Bfunc:;
   FUNC_EPILOGUE;
   return var_f0;
@@ -4375,23 +4492,6 @@ f32 w2c_duet80_f27(w2c_duet80* instance, f32 var_p0) {
   }
   var_B5:;
   var_f0 = var_p0;
-  var_f1 = var_l4;
-  var_f0 *= var_f1;
-  var_f1 = var_p0;
-  var_f2 = -0.000195152956f;
-  var_f1 *= var_f2;
-  var_f2 = 0.00833216123f;
-  var_f1 += var_f2;
-  var_f2 = var_p0;
-  var_f1 *= var_f2;
-  var_f2 = -0.166666552f;
-  var_f1 += var_f2;
-  var_f0 *= var_f1;
-  var_f1 = var_l4;
-  var_f0 += var_f1;
-  goto var_Bfunc;
-  var_B4:;
-  var_f0 = var_p0;
   var_f1 = 2.44331568e-05;
   var_f0 *= var_f1;
   var_f1 = -0.00138873165f;
@@ -4409,7 +4509,7 @@ f32 w2c_duet80_f27(w2c_duet80* instance, f32 var_p0) {
   var_f1 = 1.0f;
   var_f0 += var_f1;
   goto var_Bfunc;
-  var_B3:;
+  var_B4:;
   var_f0 = var_p0;
   var_f1 = var_l4;
   var_f0 *= var_f1;
@@ -4426,7 +4526,7 @@ f32 w2c_duet80_f27(w2c_duet80* instance, f32 var_p0) {
   var_f1 = var_l4;
   var_f0 -= var_f1;
   goto var_Bfunc;
-  var_B2:;
+  var_B3:;
   var_f0 = var_p0;
   var_f1 = -2.44331568e-05;
   var_f0 *= var_f1;
@@ -4443,6 +4543,23 @@ f32 w2c_duet80_f27(w2c_duet80* instance, f32 var_p0) {
   var_f1 = var_p0;
   var_f0 *= var_f1;
   var_f1 = -1.0f;
+  var_f0 += var_f1;
+  goto var_Bfunc;
+  var_B2:;
+  var_f0 = var_p0;
+  var_f1 = var_l4;
+  var_f0 *= var_f1;
+  var_f1 = var_p0;
+  var_f2 = -0.000195152956f;
+  var_f1 *= var_f2;
+  var_f2 = 0.00833216123f;
+  var_f1 += var_f2;
+  var_f2 = var_p0;
+  var_f1 *= var_f2;
+  var_f2 = -0.166666552f;
+  var_f1 += var_f2;
+  var_f0 *= var_f1;
+  var_f1 = var_l4;
   var_f0 += var_f1;
   var_Bfunc:;
   FUNC_EPILOGUE;
@@ -4450,137 +4567,6 @@ f32 w2c_duet80_f27(w2c_duet80* instance, f32 var_p0) {
 }
 
 f32 w2c_duet80_f28(w2c_duet80* instance, f32 var_p0) {
-  u64 var_l3 = 0;
-  f32 var_l4 = 0;
-  f64 var_l1 = 0, var_l2 = 0;
-  FUNC_PROLOGUE;
-  uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
-  uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
-  (void)wasm_rt_local_memory_base;
-  (void)wasm_rt_local_memory_size;
-  u32 var_i0, var_i1;
-  u64 var_j0;
-  f32 var_f0, var_f1, var_f2;
-  f64 var_d0, var_d1, var_d2;
-  var_f0 = var_p0;
-  var_d0 = (f64)wasm_quietf(var_f0);
-  var_l1 = var_d0;
-  var_d1 = 0.63661977236758138;
-  var_d0 *= var_d1;
-  var_d1 = 0.5;
-  var_d0 += var_d1;
-  var_d0 = wasm_floor(var_d0);
-  var_l2 = var_d0;
-  var_d0 = wasm_fabs(var_d0);
-  var_d1 = 9.2233720368547758e+18;
-  var_i0 = var_d0 < var_d1;
-  var_i0 = !(var_i0);
-  if (var_i0) {goto var_B1;}
-  var_d0 = var_l2;
-  var_j0 = I64_TRUNC_S_F64(var_d0);
-  var_l3 = var_j0;
-  goto var_B0;
-  var_B1:;
-  var_j0 = 9223372036854775808ull;
-  var_l3 = var_j0;
-  var_B0:;
-  var_d0 = var_l1;
-  var_d1 = var_l2;
-  var_d2 = -1.5707963267948966;
-  var_d1 *= var_d2;
-  var_d0 += var_d1;
-  var_f0 = (f32)wasm_quiet(var_d0);
-  var_l4 = var_f0;
-  var_f1 = var_l4;
-  var_f0 *= var_f1;
-  var_p0 = var_f0;
-  var_j0 = var_l3;
-  var_i0 = (u32)(var_j0);
-  var_i1 = 3u;
-  var_i0 &= var_i1;
-  switch (var_i0) {
-    case 0: goto var_B5;
-    case 1: goto var_B4;
-    case 2: goto var_B3;
-    default: goto var_B2;
-  }
-  var_B5:;
-  var_f0 = var_p0;
-  var_f1 = 2.44331568e-05;
-  var_f0 *= var_f1;
-  var_f1 = -0.00138873165f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = 0.0416666456f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = -0.5f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = 1.0f;
-  var_f0 += var_f1;
-  goto var_Bfunc;
-  var_B4:;
-  var_f0 = var_p0;
-  var_f1 = var_l4;
-  var_f0 *= var_f1;
-  var_f1 = var_p0;
-  var_f2 = 0.000195152956f;
-  var_f1 *= var_f2;
-  var_f2 = -0.00833216123f;
-  var_f1 += var_f2;
-  var_f2 = var_p0;
-  var_f1 *= var_f2;
-  var_f2 = 0.166666552f;
-  var_f1 += var_f2;
-  var_f0 *= var_f1;
-  var_f1 = var_l4;
-  var_f0 -= var_f1;
-  goto var_Bfunc;
-  var_B3:;
-  var_f0 = var_p0;
-  var_f1 = -2.44331568e-05;
-  var_f0 *= var_f1;
-  var_f1 = 0.00138873165f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = -0.0416666456f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = 0.5f;
-  var_f0 += var_f1;
-  var_f1 = var_p0;
-  var_f0 *= var_f1;
-  var_f1 = -1.0f;
-  var_f0 += var_f1;
-  goto var_Bfunc;
-  var_B2:;
-  var_f0 = var_p0;
-  var_f1 = var_l4;
-  var_f0 *= var_f1;
-  var_f1 = var_p0;
-  var_f2 = -0.000195152956f;
-  var_f1 *= var_f2;
-  var_f2 = 0.00833216123f;
-  var_f1 += var_f2;
-  var_f2 = var_p0;
-  var_f1 *= var_f2;
-  var_f2 = -0.166666552f;
-  var_f1 += var_f2;
-  var_f0 *= var_f1;
-  var_f1 = var_l4;
-  var_f0 += var_f1;
-  var_Bfunc:;
-  FUNC_EPILOGUE;
-  return var_f0;
-}
-
-f32 w2c_duet80_f29(w2c_duet80* instance, f32 var_p0) {
   u64 var_l4 = 0;
   f32 var_l2 = 0, var_l3 = 0;
   f64 var_l1 = 0;
@@ -4681,6 +4667,32 @@ f32 w2c_duet80_f29(w2c_duet80* instance, f32 var_p0) {
   return var_f0;
 }
 
+f64 w2c_duet80_f29(w2c_duet80* instance, f64 var_p0) {
+  FUNC_PROLOGUE;
+  uint8_t* const wasm_rt_local_memory_base = (&instance->w2c_memory)->data;
+  uint64_t wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
+  (void)wasm_rt_local_memory_base;
+  (void)wasm_rt_local_memory_size;
+  f32 var_f0;
+  f64 var_d0, var_d1, var_d2;
+  var_d0 = var_p0;
+  var_d1 = var_p0;
+  var_d2 = 0.15915494309189535;
+  var_d1 *= var_d2;
+  var_d2 = 0.5;
+  var_d1 += var_d2;
+  var_d1 = wasm_floor(var_d1);
+  var_d2 = -6.2831853071795862;
+  var_d1 *= var_d2;
+  var_d0 += var_d1;
+  var_f0 = (f32)wasm_quiet(var_d0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
+  wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
+  var_d0 = (f64)wasm_quietf(var_f0);
+  FUNC_EPILOGUE;
+  return var_d0;
+}
+
 void w2c_duet80_f30(w2c_duet80* instance, u32 var_p0, f64 var_p1) {
   u32 var_l2 = 0, var_l3 = 0, var_l6 = 0;
   f32 var_l4 = 0, var_l5 = 0;
@@ -4779,7 +4791,7 @@ void w2c_duet80_f30(w2c_duet80* instance, u32 var_p0, f64 var_p1) {
   var_f2 = -56548.668f;
   var_f3 = var_l4;
   var_f2 /= var_f3;
-  var_f2 = w2c_duet80_f24(instance, var_f2);
+  var_f2 = w2c_duet80_f23(instance, var_f2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 -= var_f2;
   f32_store_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0), var_f1);
@@ -5771,7 +5783,7 @@ void w2c_duet80_f30(w2c_duet80* instance, u32 var_p0, f64 var_p1) {
   var_i2 -= var_i3;
   var_i3 = 4294967292u;
   var_i2 &= var_i3;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_B2:;
   var_i0 = var_p0;
@@ -5796,7 +5808,7 @@ void w2c_duet80_f30(w2c_duet80* instance, u32 var_p0, f64 var_p1) {
   var_i2 -= var_i3;
   var_i3 = 4294967292u;
   var_i2 &= var_i3;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_B3:;
   var_i0 = var_p0;
@@ -5916,7 +5928,7 @@ void w2c_duet80_f31(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
     var_d0 = var_l8;
     var_d1 = 1.5707963267948966;
     var_d0 *= var_d1;
-    var_d0 = w2c_env_sin(instance->w2c_env_instance, var_d0);
+    var_d0 = w2c_duet80_f29(instance, var_d0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_d1 = var_l8;
     var_d2 = 3.1415926535897931;
@@ -6454,7 +6466,7 @@ void w2c_duet80_0x5FZNSt6vectorIfSaIfEE14_M_fill_assignEmRKf_0(w2c_duet80* insta
   goto var_Bfunc;
   var_B0:;
   var_i0 = 5286u;
-  w2c_duet80_f21(instance, var_i0);
+  w2c_duet80_f20(instance, var_i0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   UNREACHABLE;
   var_Bfunc:;
@@ -7511,7 +7523,7 @@ void w2c_duet80_f34(w2c_duet80* instance, u32 var_p0) {
   var_i2 -= var_i3;
   var_i3 = 4294967292u;
   var_i2 &= var_i3;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_B0:;
   var_i0 = var_p0;
@@ -7536,7 +7548,7 @@ void w2c_duet80_f34(w2c_duet80* instance, u32 var_p0) {
   var_i2 -= var_i3;
   var_i3 = 4294967292u;
   var_i2 &= var_i3;
-  var_i0 = w2c_duet80_f14(instance, var_i0, var_i1, var_i2);
+  var_i0 = w2c_duet80_f13(instance, var_i0, var_i1, var_i2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_B1:;
   var_i0 = var_p0;
@@ -8321,7 +8333,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_i0 = i32_load8_u_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 6u);
   var_l8 = var_i0;
   var_f0 = var_l6;
-  var_f0 = w2c_duet80_f15(instance, var_f0);
+  var_f0 = w2c_duet80_f14(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = var_l6;
   var_i2 = var_l8;
@@ -8448,7 +8460,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f3 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i3) + 236u);
   var_f4 = 13.2877121f;
   var_f3 *= var_f4;
-  var_f3 = w2c_duet80_f23(instance, var_f3);
+  var_f3 = w2c_duet80_f22(instance, var_f3);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f4 = 0.00100000005f;
   var_f3 *= var_f4;
@@ -8488,7 +8500,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f1 += var_f2;
   var_f2 = 1.99315691f;
   var_f1 *= var_f2;
-  var_f1 = w2c_duet80_f23(instance, var_f1);
+  var_f1 = w2c_duet80_f22(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f0 *= var_f1;
   var_l20 = var_f0;
@@ -8623,11 +8635,11 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f1 = 1.57079637f;
   var_f0 *= var_f1;
   var_l4 = var_f0;
-  var_f0 = w2c_duet80_f28(instance, var_f0);
+  var_f0 = w2c_duet80_f27(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l39 = var_f0;
   var_f0 = var_l4;
-  var_f0 = w2c_duet80_f27(instance, var_f0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l40 = var_f0;
   var_i0 = 1u;
@@ -8704,7 +8716,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_i0 += var_i1;
     var_l43 = var_i0;
     var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0));
-    var_i0 = w2c_duet80_f16(instance, var_f0);
+    var_i0 = w2c_duet80_f15(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l45 = var_i0;
     var_i1 = 0u;
@@ -8751,7 +8763,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f2 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i2));
     var_f3 = 9.22881889f;
     var_f2 *= var_f3;
-    var_f2 = w2c_duet80_f23(instance, var_f2);
+    var_f2 = w2c_duet80_f22(instance, var_f2);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f1 *= var_f2;
     var_f2 = var_l23;
@@ -8835,7 +8847,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 *= var_f2;
     var_f0 += var_f1;
     var_l15 = var_f0;
-    var_f0 = w2c_duet80_f23(instance, var_f0);
+    var_f0 = w2c_duet80_f22(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l17 = var_f0;
     var_i0 = var_l43;
@@ -8844,7 +8856,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0));
     var_f1 = 9.96578407f;
     var_f0 *= var_f1;
-    var_f0 = w2c_duet80_f23(instance, var_f0);
+    var_f0 = w2c_duet80_f22(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l18 = var_f0;
     var_i0 = var_l43;
@@ -8896,7 +8908,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f0 = var_i2 ? var_f0 : var_f1;
     var_f1 = 3.14159274f;
     var_f0 *= var_f1;
-    var_f0 = w2c_duet80_f29(instance, var_f0);
+    var_f0 = w2c_duet80_f28(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l17 = var_f0;
     var_i0 = var_l8;
@@ -8934,11 +8946,11 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_i0 += var_i1;
     var_f1 = var_l18;
     var_f2 = 1.20000005f;
-    var_f1 = w2c_duet80_f26(instance, var_f1, var_f2);
+    var_f1 = w2c_duet80_f25(instance, var_f1, var_f2);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f2 = -3.58496261f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     f32_store_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0), var_f1);
     var_i0 = var_l8;
@@ -8966,11 +8978,11 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_i3 = var_f3 > var_f4;
     var_f1 = var_i3 ? var_f1 : var_f2;
     var_f2 = 1.20000005f;
-    var_f1 = w2c_duet80_f26(instance, var_f1, var_f2);
+    var_f1 = w2c_duet80_f25(instance, var_f1, var_f2);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f2 = -3.58496261f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     f32_store_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0), var_f1);
     var_i0 = var_l8;
@@ -9015,7 +9027,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f0 *= var_f1;
     var_f1 = -0.75f;
     var_f0 += var_f1;
-    var_f0 = w2c_duet80_f23(instance, var_f0);
+    var_f0 = w2c_duet80_f22(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l6 = var_f0;
     var_f0 = var_l10;
@@ -9033,11 +9045,11 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f0 = var_l19;
     var_f1 = 9.96578407f;
     var_f0 *= var_f1;
-    var_f0 = w2c_duet80_f23(instance, var_f0);
+    var_f0 = w2c_duet80_f22(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f1 = 20.0f;
     var_f0 *= var_f1;
-    var_f0 = w2c_duet80_f25(instance, var_f0);
+    var_f0 = w2c_duet80_f24(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l14 = var_f0;
     var_f0 = 1.0f;
@@ -9060,7 +9072,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l19 = var_f0;
@@ -9073,7 +9085,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l4 = var_f0;
@@ -9101,7 +9113,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l10 = var_f0;
@@ -9114,7 +9126,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l9 = var_f0;
@@ -9143,7 +9155,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l19 = var_f0;
@@ -9156,7 +9168,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l10 = var_f0;
@@ -9193,7 +9205,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l10 = var_f0;
@@ -9206,7 +9218,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l9 = var_f0;
@@ -9245,7 +9257,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l19 = var_f0;
@@ -9258,7 +9270,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l10 = var_f0;
@@ -9287,7 +9299,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1));
     var_f2 = 13.2877121f;
     var_f1 *= var_f2;
-    var_f1 = w2c_duet80_f23(instance, var_f1);
+    var_f1 = w2c_duet80_f22(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 *= var_f1;
     var_l4 = var_f0;
@@ -9300,7 +9312,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
     var_f3 = var_l5;
     var_f2 *= var_f3;
     var_f1 /= var_f2;
-    var_f1 = w2c_duet80_f24(instance, var_f1);
+    var_f1 = w2c_duet80_f23(instance, var_f1);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_f0 -= var_f1;
     var_l9 = var_f0;
@@ -9500,7 +9512,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 264u);
   var_f1 = 13.2877121f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = 0.000621504092f;
   var_f0 *= var_f1;
@@ -9514,7 +9526,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f3 = var_l13;
   var_f2 *= var_f3;
   var_f1 /= var_f2;
-  var_f1 = w2c_duet80_f24(instance, var_f1);
+  var_f1 = w2c_duet80_f23(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f0 -= var_f1;
   var_l4 = var_f0;
@@ -9523,7 +9535,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 268u);
   var_f1 = 13.2877121f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = 0.000333333359f;
   var_f0 *= var_f1;
@@ -9537,7 +9549,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f3 = var_l13;
   var_f2 *= var_f3;
   var_f1 /= var_f2;
-  var_f1 = w2c_duet80_f24(instance, var_f1);
+  var_f1 = w2c_duet80_f23(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f0 -= var_f1;
   var_l5 = var_f0;
@@ -9606,7 +9618,7 @@ void w2c_duet80_f37(w2c_duet80* instance, u32 var_p0, u32 var_p1, u32 var_p2, u3
   var_f4 = 10.9657841f;
   var_f3 *= var_f4;
   var_f2 += var_f3;
-  var_f2 = w2c_duet80_f23(instance, var_f2);
+  var_f2 = w2c_duet80_f22(instance, var_f2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f3 = var_l5;
   var_f2 /= var_f3;
@@ -11812,7 +11824,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f1 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i1) + 232u);
   var_f2 = 9.22881889f;
   var_f1 *= var_f2;
-  var_f1 = w2c_duet80_f23(instance, var_f1);
+  var_f1 = w2c_duet80_f22(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l3 = var_f1;
   var_f2 = 0.0500000007f;
@@ -11840,7 +11852,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   f32_store_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 4112u, var_f1);
   var_i0 = var_p1;
   var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 228u);
-  var_i0 = w2c_duet80_f16(instance, var_f0);
+  var_i0 = w2c_duet80_f15(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   switch (var_i0) {
     case 0: goto var_B6;
@@ -11854,7 +11866,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f0 = var_l5;
   var_f1 = 6.28318548f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f27(instance, var_f0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l5 = var_f0;
   goto var_B0;
@@ -12013,7 +12025,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f1 += var_f2;
   var_i2 = var_p1;
   var_f2 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i2) + 324u);
-  var_f2 = w2c_duet80_f15(instance, var_f2);
+  var_f2 = w2c_duet80_f14(instance, var_f2);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 *= var_f2;
   f32_store_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 16u, var_f1);
@@ -12053,7 +12065,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f3 = var_l4;
   var_f2 *= var_f3;
   var_f1 /= var_f2;
-  var_f1 = w2c_duet80_f24(instance, var_f1);
+  var_f1 = w2c_duet80_f23(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f0 -= var_f1;
   var_l5 = var_f0;
@@ -12071,7 +12083,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 304u);
   var_f1 = 13.2877121f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = 0.000333333359f;
   var_f0 *= var_f1;
@@ -12085,7 +12097,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f3 = var_l4;
   var_f2 *= var_f3;
   var_f1 /= var_f2;
-  var_f1 = w2c_duet80_f24(instance, var_f1);
+  var_f1 = w2c_duet80_f23(instance, var_f1);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f0 -= var_f1;
   var_l8 = var_f0;
@@ -12097,7 +12109,7 @@ void w2c_duet80_f42(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f0 = f32_load_default32(wasm_rt_local_memory_base, wasm_rt_local_memory_size, &instance->w2c_memory, (u64)(var_i0) + 276u);
   var_f1 = 7.32192802f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f23(instance, var_f0);
+  var_f0 = w2c_duet80_f22(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l5 = var_f0;
   var_i0 = var_p1;
@@ -13111,7 +13123,7 @@ f32 w2c_duet80_f44(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
     var_l13 = var_f0;
     var_f1 = 6.28318548f;
     var_f0 *= var_f1;
-    var_f0 = w2c_duet80_f27(instance, var_f0);
+    var_f0 = w2c_duet80_f26(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l14 = var_f0;
     var_f0 = 0.0f;
@@ -13604,7 +13616,7 @@ f32 w2c_duet80_f44(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
     var_f0 *= var_f1;
     var_f1 = var_l9;
     var_f0 += var_f1;
-    var_f0 = w2c_duet80_f23(instance, var_f0);
+    var_f0 = w2c_duet80_f22(instance, var_f0);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l10 = var_f0;
     var_i0 = var_p0;
@@ -13686,7 +13698,7 @@ f32 w2c_duet80_f44(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
     var_f4 = var_i6 ? var_f4 : var_f5;
     var_f5 = 3.14159274f;
     var_f4 *= var_f5;
-    var_f4 = w2c_duet80_f29(instance, var_f4);
+    var_f4 = w2c_duet80_f28(instance, var_f4);
     wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
     var_l13 = var_f4;
     var_f3 += var_f4;
@@ -13967,7 +13979,7 @@ f32 w2c_duet80_f44(w2c_duet80* instance, u32 var_p0, u32 var_p1) {
   var_f0 = var_l7;
   var_f1 = 6.28318548f;
   var_f0 *= var_f1;
-  var_f0 = w2c_duet80_f27(instance, var_f0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_f1 = var_l4;
   var_f0 *= var_f1;
@@ -14106,7 +14118,7 @@ void w2c_duet80_f45(w2c_duet80* instance, u32 var_p0, f32 var_p1, f32 var_p2, f3
   var_f1 = 6.28318548f;
   var_f0 *= var_f1;
   var_p2 = var_f0;
-  var_f0 = w2c_duet80_f27(instance, var_f0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l10 = var_f0;
   var_i0 = var_p0;
@@ -14115,7 +14127,7 @@ void w2c_duet80_f45(w2c_duet80* instance, u32 var_p0, f32 var_p1, f32 var_p2, f3
   var_f0 = var_p2;
   var_f1 = 1.57079637f;
   var_f0 += var_f1;
-  var_f0 = w2c_duet80_f27(instance, var_f0);
+  var_f0 = w2c_duet80_f26(instance, var_f0);
   wasm_rt_local_memory_size = (&instance->w2c_memory)->size;
   var_l11 = var_f0;
   var_f0 = var_l9;
