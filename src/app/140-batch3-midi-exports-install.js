@@ -177,9 +177,10 @@
     const sec = (title, list, set, kind) => {
       const h = document.createElement("div"); h.className = "sp-lab"; h.innerHTML = "<span></span>"; h.firstChild.textContent = title; mdPorts.appendChild(h);
       if (!list.length) { const e = document.createElement("div"); e.className = "pr-empty"; e.textContent = kind === "in" ? "No MIDI inputs found. Plug in the K.O. II or a keyboard over USB." : "No MIDI outputs found."; mdPorts.appendChild(e); }
+      const same = {}; list.forEach(p => { same[p.name] = (same[p.name] || 0) + 1; }); const nth = {};   // (156: a device with several ports of one name: numbered)
       list.forEach(p => {
-        const row = document.createElement("label"); row.className = "md-row";
-        row.innerHTML = '<input type="checkbox"><span></span>'; row.querySelector("span").textContent = p.name + (p.manufacturer ? " · " + p.manufacturer : "");
+        const row = document.createElement("label"); row.className = "md-row"; nth[p.name] = (nth[p.name] || 0) + 1;
+        row.innerHTML = '<input type="checkbox"><span></span>'; row.querySelector("span").textContent = p.name + (p.manufacturer ? " · " + p.manufacturer : "") + (same[p.name] > 1 ? " · port " + nth[p.name] + " of " + same[p.name] : "");
         const cb = row.querySelector("input"); cb.checked = set.has(p.id);
         cb.addEventListener("change", () => { cb.checked ? set.add(p.id) : set.delete(p.id); mdRemember(kind, p, cb.checked); renderMidi(); });
         if (kind === "out") {   // (which outputs get the clock, start and stop)

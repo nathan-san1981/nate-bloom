@@ -14,6 +14,14 @@
     }
     const NBD = { at: 0, d: null };
     function nbsDiag() { const now = performance.now(); if (now - NBD.at > 2000) { NBD.d = nbsTry(tabletDiag, null); NBD.at = now; } return NBD.d; }   // (the app's diag walks USB, audio and MIDI: at most every 2 s)
+    const NBDROP = { on: false };   // 156: the sound dropping out on its way to the output (the hub's own jack could not keep up on Fast)
+    function nbsDropNote(S, out) {
+      const n = S.drops == null ? 0 : S.drops;
+      if (n >= 10) NBDROP.on = true; else if (n < 3) NBDROP.on = false;
+      if (!NBDROP.on) return [];
+      const where = out && out !== "system default" ? " on its way to " + out : "";
+      return ["The sound is dropping out" + where + ". " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or use another headphone output: the hub's own jack may not keep up." : "Use another headphone output: this one isn't keeping up even on Steady.")];
+    }
     function nbsRead() {   // today's objects, read into the document's shape
       const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};
       const outName = nbsTry(() => (ctx && ctx.sinkId) ? String(ctx.sinkId) : (d && d.media && d.media.length ? d.media.join(", ") : "system default"), "system default");
@@ -28,7 +36,7 @@
         knobs: S.kp || {}, pads: S.pads || {}, keys: { hold: !!S.hold, held: S.held || [], arp: S.arp || {} },
         setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm })), []) },
         jam: S.jam || {},
-        health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []) },
+        health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []).concat(nbsDropNote(S, outName)) },
         perms: Object.assign({}, nbsPerms()), ctl: S.ctl !== false,
       };
     }

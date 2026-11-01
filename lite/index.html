@@ -11935,9 +11935,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const sec = (title, list, set, kind) => {
       const h = document.createElement("div"); h.className = "sp-lab"; h.innerHTML = "<span></span>"; h.firstChild.textContent = title; mdPorts.appendChild(h);
       if (!list.length) { const e = document.createElement("div"); e.className = "pr-empty"; e.textContent = kind === "in" ? "No MIDI inputs found. Plug in the K.O. II or a keyboard over USB." : "No MIDI outputs found."; mdPorts.appendChild(e); }
+      const same = {}; list.forEach(p => { same[p.name] = (same[p.name] || 0) + 1; }); const nth = {};   // (156: a device with several ports of one name: numbered)
       list.forEach(p => {
-        const row = document.createElement("label"); row.className = "md-row";
-        row.innerHTML = '<input type="checkbox"><span></span>'; row.querySelector("span").textContent = p.name + (p.manufacturer ? " · " + p.manufacturer : "");
+        const row = document.createElement("label"); row.className = "md-row"; nth[p.name] = (nth[p.name] || 0) + 1;
+        row.innerHTML = '<input type="checkbox"><span></span>'; row.querySelector("span").textContent = p.name + (p.manufacturer ? " · " + p.manufacturer : "") + (same[p.name] > 1 ? " · port " + nth[p.name] + " of " + same[p.name] : "");
         const cb = row.querySelector("input"); cb.checked = set.has(p.id);
         cb.addEventListener("change", () => { cb.checked ? set.add(p.id) : set.delete(p.id); mdRemember(kind, p, cb.checked); renderMidi(); });
         if (kind === "out") {   // (which outputs get the clock, start and stop)
@@ -31689,6 +31690,14 @@ registerProcessor("nb-rec", NBRec);`;
     }
     const NBD = { at: 0, d: null };
     function nbsDiag() { const now = performance.now(); if (now - NBD.at > 2000) { NBD.d = nbsTry(tabletDiag, null); NBD.at = now; } return NBD.d; }   // (the app's diag walks USB, audio and MIDI: at most every 2 s)
+    const NBDROP = { on: false };   // 156: the sound dropping out on its way to the output (the hub's own jack could not keep up on Fast)
+    function nbsDropNote(S, out) {
+      const n = S.drops == null ? 0 : S.drops;
+      if (n >= 10) NBDROP.on = true; else if (n < 3) NBDROP.on = false;
+      if (!NBDROP.on) return [];
+      const where = out && out !== "system default" ? " on its way to " + out : "";
+      return ["The sound is dropping out" + where + ". " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or use another headphone output: the hub's own jack may not keep up." : "Use another headphone output: this one isn't keeping up even on Steady.")];
+    }
     function nbsRead() {   // today's objects, read into the document's shape
       const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};
       const outName = nbsTry(() => (ctx && ctx.sinkId) ? String(ctx.sinkId) : (d && d.media && d.media.length ? d.media.join(", ") : "system default"), "system default");
@@ -31703,7 +31712,7 @@ registerProcessor("nb-rec", NBRec);`;
         knobs: S.kp || {}, pads: S.pads || {}, keys: { hold: !!S.hold, held: S.held || [], arp: S.arp || {} },
         setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm })), []) },
         jam: S.jam || {},
-        health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []) },
+        health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []).concat(nbsDropNote(S, outName)) },
         perms: Object.assign({}, nbsPerms()), ctl: S.ctl !== false,
       };
     }
@@ -31799,7 +31808,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 155;
+    window.NB_BUILD = 156;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
