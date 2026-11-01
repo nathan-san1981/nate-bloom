@@ -372,7 +372,13 @@
 
     if (id === "juno") {
       const filt = nbVF("ladder"); filt.type = "lowpass";
-      filt.frequency.value = expMap(p.cutoff, 180, 14000); filt.Q.value = 1.1;
+      const cut = expMap(p.cutoff, 180, 14000); filt.Q.value = 1.1;
+      // (166) the VCF envelope the Juno leans on: the filter opens with the note and settles back toward the cutoff;
+      // the sweep is wider the more closed the filter (an open one has nowhere to go), the decay follows Release
+      const sweep = 0.8 + 1.1 * (1 - p.cutoff), fa = Math.max(0.012, attack * 0.8), fd = 0.35 + 0.9 * p.release;
+      filt.frequency.setValueAtTime(cut, t);
+      filt.frequency.linearRampToValueAtTime(Math.min(16000, cut * Math.pow(2, sweep)), t + fa);
+      filt.frequency.setTargetAtTime(Math.min(16000, cut * Math.pow(2, sweep * 0.3)), t + fa, fd);
       // pulse wave = saw minus a delayed copy of itself; moving the delay is PWM
       const sum = ctx.createGain(); sum.gain.value = 0.26;
       const saw = ctx.createOscillator(); saw.type = "sawtooth"; saw.frequency.value = f;
@@ -385,21 +391,28 @@
       const sub = ctx.createOscillator(); sub.type = "square"; sub.frequency.value = f / 2;
       const subG = ctx.createGain(); subG.gain.value = 0.07;
       sub.connect(subG).connect(filt); sum.connect(filt);
-      // Juno-style stereo chorus: two short delays swept in opposite directions
+      // Juno-style stereo chorus: short delays swept against each other. (166) Three voices: left and right swept against each other as the Juno's two lines are, and a centre voice a quarter-cycle between them
+      // (left, right, and a centre voice that comes in as the knob goes up: the Juno's I+II, and JS80P's chorus 1),
+      // the wet path high-passed below 60 Hz so the sub stays put (the sweep itself is full-band, as the Juno's is)
       const dry = ctx.createGain(); dry.gain.value = 1 - p.chorus * 0.35;
       filt.connect(dry).connect(out);
       const merger = ctx.createChannelMerger(2);
       const cRate = 0.4 + p.chorus * 0.6, cDepth = 0.0012 + p.chorus * 0.0022;
-      const chLfo = ctx.createOscillator(); chLfo.frequency.value = cRate;
-      [[0, 1], [1, -1]].forEach(([ch, sign]) => {
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045;
-        const dep = ctx.createGain(); dep.gain.value = cDepth * sign;
-        chLfo.connect(dep).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = p.chorus * 0.85;
-        filt.connect(d).connect(wet).connect(merger, 0, ch);
+      const wetHp = ctx.createBiquadFilter(); wetHp.type = "highpass"; wetHp.frequency.value = 60; wetHp.Q.value = 0.5; filt.connect(wetHp);
+      const chLfos = [];
+      [[0, 0, p.chorus * 0.85], [1, 1 / 2, p.chorus * 0.85], [2, 1 / 4, p.chorus * p.chorus * 0.5]].forEach(([k, ph, wetG]) => {
+        const lfo = ctx.createOscillator(); lfo.frequency.value = cRate;
+        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
+        const dep = ctx.createGain(); dep.gain.value = cDepth;
+        lfo.connect(dep).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = wetG;
+        wetHp.connect(d).connect(wet);
+        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
+        chLfos.push(lfo);
       });
       merger.connect(out);
-      [saw, pwmLfo, sub, chLfo].forEach(o => { o.start(t); oscs.push(o); });
+      [saw, pwmLfo, sub, ...chLfos].forEach(o => { o.start(t); oscs.push(o); });
       ampEnv(out, t, attack, 0.5);
       out.gain.setTargetAtTime(0.42, t + attack, 0.5);
     }
