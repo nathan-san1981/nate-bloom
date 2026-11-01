@@ -53,8 +53,8 @@
           <button type="button" class="btn bd-bpm" id="bdBpmDn" title="Slower">−</button><b id="bdBpm">—</b><button type="button" class="btn bd-bpm" id="bdBpmUp" title="Faster">+</button><button type="button" class="btn" id="bdUndo" title="Undo the last change">↶</button></span></div>`;
       document.body.appendChild(el); BD.el = el;
       el.querySelectorAll(".bd-tab").forEach(b => b.addEventListener("click", () => bdGo(b.dataset.t)));
-      $id("bdSnd").addEventListener("click", () => { start(); if (pick.hidden) openSounds(); else closePick(); });
-      $id("bdMix").addEventListener("click", () => { start(); const m = $id("mixer"); if (m.hidden) tap("mixBtn"); else tap("mxDone"); });
+      $id("bdSnd").addEventListener("click", () => { start(); if (pick.hidden) openSounds(); else closePick(); bdPaint(); });
+      $id("bdMix").addEventListener("click", () => { start(); const m = $id("mixer"); if (m.hidden) tap("mixBtn"); else tap("mxDone"); bdPaint(); });   // the bar follows at once, not at the next tick
       $id("bdPlay").addEventListener("click", bdPlay);
       $id("bdStop").addEventListener("click", () => tap("stopAll"));
       $id("bdRec").addEventListener("click", () => tap("takeBtn"));

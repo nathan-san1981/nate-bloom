@@ -125,6 +125,7 @@ piece of text and on which line. Standard library only, about a second.
 | `720-xy-modes-159.js` | 4,692 | 159: the XY pad's modes (which two controls it moves), chosen from the Pixelbook, kept on the tablet; `__live25` |
 | `730-stage4-audio.js` | 2,924 | 160 (stage 4): the audio line to the Pixelbook (the output after the limiter as a stereo Opus track on the link's direct line, on request); `__live26` |
 | `740-stage5-build.js` | 9,941 | 161 (stage 5): Build, the seven screens as tabs under the strip with one transport, the browser and the mixer as drawers; the old chrome parked; `__live27` |
+| `750-minilab-octave-transport.js` | — | 165: the MiniLab's Oct − / Oct + followed from the notes its keys send (the keyboard sends nothing for them); Shift + pads 13–16 from its DAW port drive ▶ ■ ●; `__live28` |
 | `900-minilab-close.js` | 261 | `__mod.nbCC`, `window.__ml` exports, `}` closing the MiniLab/Live block |
 | `990-iife-close.js` | 105 | wake lock request; `})();` |
 
