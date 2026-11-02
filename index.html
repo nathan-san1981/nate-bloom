@@ -3328,6 +3328,22 @@ body.build-on .wam-dock, body.build-on .wv-dock { top: calc(92px + var(--sat)); 
 .wam-dock .ed-card > .ed-head { position: sticky; top: -12px; margin: -12px -12px 0; padding: 12px 12px 8px; background: var(--panel); z-index: 2; border-bottom: 1px solid var(--line); }
 .wam-dock .wam-foot { display: flex; justify-content: flex-end; padding-top: 8px; }
 .wam-dock .wam-foot .btn { height: 38px; padding: 0 22px; }
+/* 170: recording shows in the shell: a REC chip in the strip, the banner under the bars (not under them), Build's ● red */
+.sh-rec { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: 14px; background: #ff4d6d; color: #1a0f16; font: 700 0.78rem/1 var(--font-mono); font-variant-numeric: tabular-nums; cursor: pointer; }
+.sh-rec[hidden] { display: none; }
+.sh-rec i { width: 8px; height: 8px; border-radius: 50%; background: #1a0f16; animation: recblink 1s steps(2, start) infinite; }
+body.nb-rec #shell .sh-strip { box-shadow: inset 0 -2px 0 #ff4d6d; }
+body.shell-new .recbanner { top: calc(40px + var(--sat)); z-index: 60; }
+body.build-on .recbanner { top: calc(84px + var(--sat)); }
+body.shell-new.recording .app { padding-top: calc(94px + var(--sat)); }
+body.build-on.recording .app { padding-top: calc(138px + var(--sat)); }
+#bdRec.on { background: #ff4d6d; color: #1a0f16; border-color: #ff4d6d; font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) {
+  body.build-on .recbanner { top: calc(124px + var(--sat)); }
+  body.build-on.recording .app { padding-top: calc(178px + var(--sat)); }
+  .sh-rec { padding: 0 8px; gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) { .sh-rec i { animation: none; } }
 </style>
 </head>
 <body>
@@ -32012,7 +32028,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 169;
+    window.NB_BUILD = 170;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -32942,7 +32958,7 @@ registerProcessor("nb-rec", NBRec);`;
       nbT($id("bdBpm"), nbsTry(() => Math.round(rcBpm()) + "", "—"));
       nbA($id("bdSnd"), "aria-pressed", String(!pick.hidden && lv.hidden)); nbA($id("bdMix"), "aria-pressed", String(vis("mixer")));
       const u = $id("hisUndoP"); $id("bdUndo").disabled = !u || u.disabled;
-      nbT($id("bdRec"), $id("takeBtn") && /Stop/i.test($id("takeBtn").textContent) ? "■ Rec" : "●");
+      // (170: the ● and its recording time are painted by 790)
     }
     // the browser as a drawer from Build (Play's Sounds panel parked, as Play does it)
     function bdPickObserve() {
@@ -33478,6 +33494,52 @@ registerProcessor("nb-rec", NBRec);`;
     { const ms = makeSampleVoice; makeSampleVoice = function (midi, i, when) { try { const sl = state.samp.slots[i]; if (!sl || sl.mode !== "elephant") efTrigger(midi, when); } catch (e) {} return ms.apply(this, arguments); }; }
     if (typeof makeInstVoice === "function") { const mi = makeInstVoice; makeInstVoice = function (midi, when) { try { efTrigger(midi, when); } catch (e) {} return mi.apply(this, arguments); }; }
     window.__live31 = { EFX, efTrigger, applyEle, efLen, get EF() { return EF; } };
+    // ======================================================================
+    // 170: recording shows on every screen. In the shell the red banner of 220 sat under the strip (the strip is drawn
+    // over it) and Build's ● kept reading ●, so nothing said a take was rolling, in Lite or the full app. Now the strip
+    // carries a red REC chip with the time for whatever records (a take from ● or the DJ, Live's recorder, a Garage
+    // take); a tap on it stops that one. The banner sits under the strip and the Build bar instead of under them, and
+    // Build's ● turns red with the time.
+    // ======================================================================
+    {
+      const RS = { kind: "", t0: 0 };
+      const setT = (el, v) => { v = String(v); if (el && el.textContent !== v) el.textContent = v; };
+      const setA = (el, k, v) => { v = String(v); if (el && el.getAttribute(k) !== v) el.setAttribute(k, v); };
+      const press = id => { const b = document.getElementById(id); if (b && !b.disabled) b.click(); };
+      const takeClock = () => { try { return fmtClock(Math.max(0, ctx.currentTime - take.startedAt)); } catch (e) { return ""; } };
+      function recNow() {
+        try { if (take.rec) return { kind: "take", label: "Rec", stop: () => press("takeBtn") }; } catch (e) {}
+        try { const R = window.__live8 && window.__live8.RC8; if (R && R.on) return { kind: "live", label: "Rec", stop: () => window.__live8.recStop() }; } catch (e) {}
+        try { const T = window.__gb && window.__gb.TP; if (T && T.on && T.rec) return { kind: "garage", label: "Garage", stop: () => press("gbRec") }; } catch (e) {}
+        return null;
+      }
+      function chip() {
+        let c = document.getElementById("shRec"); if (c) return c;
+        const mid = document.getElementById("shMid"); if (!mid) return null;
+        c = document.createElement("button"); c.type = "button"; c.id = "shRec"; c.className = "sh-rec"; c.hidden = true;
+        c.innerHTML = '<i aria-hidden="true"></i><b>REC</b><span class="t">0:00</span>';
+        c.addEventListener("click", () => { const r = recNow(); if (r) r.stop(); });
+        mid.parentNode.insertBefore(c, mid);
+        return c;
+      }
+      function recTick() {
+        const r = recNow(), c = chip();
+        if (!r) { RS.kind = ""; if (c) c.hidden = true; document.body.classList.remove("nb-rec"); }
+        else {
+          if (RS.kind !== r.kind) { RS.kind = r.kind; RS.t0 = performance.now(); }
+          // the time from the recorder itself where it keeps one, else from when this saw it start
+          let s = (performance.now() - RS.t0) / 1000;
+          try { if (r.kind === "take" && ctx) s = ctx.currentTime - take.startedAt; else if (r.kind === "live" && ctx) s = ctx.currentTime - window.__live8.RC8.t0; } catch (e) {}
+          const t = fmtClock(Math.max(0, s));
+          if (c) { c.hidden = false; setT(c.querySelector("b"), r.label === "Rec" ? "REC" : "REC · " + r.label); setT(c.querySelector(".t"), t); setA(c, "aria-label", "Recording, " + t + " · tap to stop"); setA(c, "title", "Recording · tap to stop"); }
+          document.body.classList.add("nb-rec");
+        }
+        const br = document.getElementById("bdRec");
+        if (br) { const on = !!(r && r.kind === "take"); br.classList.toggle("on", on); setT(br, on ? "■ " + takeClock() : "●"); setA(br, "title", on ? "Recording · tap to stop" : "Record everything you hear"); }
+      }
+      setInterval(recTick, 250);
+      window.__recShown = { recNow, recTick };
+    }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }

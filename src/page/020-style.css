@@ -3308,3 +3308,19 @@ body.build-on .wam-dock, body.build-on .wv-dock { top: calc(92px + var(--sat)); 
 .wam-dock .ed-card > .ed-head { position: sticky; top: -12px; margin: -12px -12px 0; padding: 12px 12px 8px; background: var(--panel); z-index: 2; border-bottom: 1px solid var(--line); }
 .wam-dock .wam-foot { display: flex; justify-content: flex-end; padding-top: 8px; }
 .wam-dock .wam-foot .btn { height: 38px; padding: 0 22px; }
+/* 170: recording shows in the shell: a REC chip in the strip, the banner under the bars (not under them), Build's ● red */
+.sh-rec { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: 14px; background: #ff4d6d; color: #1a0f16; font: 700 0.78rem/1 var(--font-mono); font-variant-numeric: tabular-nums; cursor: pointer; }
+.sh-rec[hidden] { display: none; }
+.sh-rec i { width: 8px; height: 8px; border-radius: 50%; background: #1a0f16; animation: recblink 1s steps(2, start) infinite; }
+body.nb-rec #shell .sh-strip { box-shadow: inset 0 -2px 0 #ff4d6d; }
+body.shell-new .recbanner { top: calc(40px + var(--sat)); z-index: 60; }
+body.build-on .recbanner { top: calc(84px + var(--sat)); }
+body.shell-new.recording .app { padding-top: calc(94px + var(--sat)); }
+body.build-on.recording .app { padding-top: calc(138px + var(--sat)); }
+#bdRec.on { background: #ff4d6d; color: #1a0f16; border-color: #ff4d6d; font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) {
+  body.build-on .recbanner { top: calc(124px + var(--sat)); }
+  body.build-on.recording .app { padding-top: calc(178px + var(--sat)); }
+  .sh-rec { padding: 0 8px; gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) { .sh-rec i { animation: none; } }

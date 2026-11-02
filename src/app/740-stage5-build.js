@@ -78,7 +78,7 @@
       nbT($id("bdBpm"), nbsTry(() => Math.round(rcBpm()) + "", "—"));
       nbA($id("bdSnd"), "aria-pressed", String(!pick.hidden && lv.hidden)); nbA($id("bdMix"), "aria-pressed", String(vis("mixer")));
       const u = $id("hisUndoP"); $id("bdUndo").disabled = !u || u.disabled;
-      nbT($id("bdRec"), $id("takeBtn") && /Stop/i.test($id("takeBtn").textContent) ? "■ Rec" : "●");
+      // (170: the ● and its recording time are painted by 790)
     }
     // the browser as a drawer from Build (Play's Sounds panel parked, as Play does it)
     function bdPickObserve() {
