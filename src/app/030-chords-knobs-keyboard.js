@@ -131,6 +131,11 @@
       return Math.round(v * 100) + "";
     }
     if (key === "vowel") return ["A", "E", "I", "O", "U"][Math.round(v * 4)];
+    if (state.engine === "juno" || obj === state.params.juno) {   // 168: the 106's switches
+      if (key === "chorus") return v < 0.12 ? "Off" : v < 0.55 ? "I" : v < 0.88 ? "II" : "I+II";
+      if (key === "dco") return v < 0.2 ? "Saw" : v < 0.45 ? "Saw+Pls" : v < 0.7 ? "Pulse" : v < 0.9 ? "Pls+Sub" : "Sub+Nse";
+      if (key === "hpf") return v < 0.2 ? "Off" : v < 0.5 ? "1" : v < 0.8 ? "2" : "3";
+    }
     if (key === "material") return v < 0.25 ? "Kalimba" : v < 0.75 ? "Bell" : "Glass";
     if (key === "ring") return fmtTime(expMap(v, 0.3, 8));
     if (key === "swell") return fmtTime(expMap(v, 0.03, 1.5));

@@ -4,7 +4,7 @@ wasm2c (the same DSP the web app runs, as C), plus nbsynth.c, one small C API ov
 usage: gen_nbsynth.py WASM2C WAMDIR OUTDIR"""
 import os, re, subprocess, sys
 W2C, WAM, OUT = sys.argv[1:4]
-IDS = ["twin77", "duet80", "nebula80", "hypnagogia", "parafour", "stab85", "pop89", "unicorn_dream", "fuzz_bass", "ballad_kit", "twist"]   # the instruments (Glitch Starter and Galactic are effects)
+IDS = ["twin77", "duet80", "nebula80", "hypnagogia", "parafour", "stab85", "pop89", "unicorn_dream", "fuzz_bass", "ballad_kit", "twist", "juno106"]   # the instruments (Glitch Starter and Galactic are effects)
 os.makedirs(OUT, exist_ok=True)
 mods = []
 for pid in IDS:

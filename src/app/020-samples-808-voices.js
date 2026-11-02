@@ -381,29 +381,41 @@
       filt.frequency.setValueAtTime(cut, t);
       filt.frequency.linearRampToValueAtTime(Math.min(16000, cut * Math.pow(2, sweep)), t + fa);
       filt.frequency.setTargetAtTime(Math.min(16000, cut * Math.pow(2, sweep * 0.3)), t + fa, fd);
-      // pulse wave = saw minus a delayed copy of itself; moving the delay is PWM
-      const sum = ctx.createGain(); sum.gain.value = 0.26;
+      // (168) the 106's DCO, after the KR-106: saw, pulse (saw minus a delayed copy of itself; moving the delay is PWM), the
+      // sub an octave down and noise, mixed by DCO: saw → saw+pulse → pulse → pulse+sub → sub+noise
+      const dco = p.dco == null ? 0.35 : p.dco;
+      const lv = x => Math.max(0, 1 - Math.abs(x)), mSaw = lv(dco / 0.45) * 0.36, mPls = lv((dco - 0.5) / 0.5) * 0.26 + (dco > 0.2 && dco < 0.8 ? 0.04 : 0), mSub = lv((dco - 0.8) / 0.35) * 0.2, mNse = Math.max(0, dco - 0.75) * 0.8;
+      const sum = ctx.createGain(); sum.gain.value = mPls;
       const saw = ctx.createOscillator(); saw.type = "sawtooth"; saw.frequency.value = f;
       const dl = ctx.createDelay(0.1); dl.delayTime.value = 0.5 / f;
       const inv = ctx.createGain(); inv.gain.value = -1;
       saw.connect(sum); saw.connect(dl).connect(inv).connect(sum);
+      const sawG = ctx.createGain(); sawG.gain.value = mSaw; saw.connect(sawG);
       const pwmLfo = ctx.createOscillator(); pwmLfo.frequency.value = 0.55 + Math.random() * 0.1;
       const pwmDepth = ctx.createGain(); pwmDepth.gain.value = p.pwm * 0.42 / f;
       pwmLfo.connect(pwmDepth).connect(dl.delayTime);
       const sub = ctx.createOscillator(); sub.type = "square"; sub.frequency.value = f / 2;
-      const subG = ctx.createGain(); subG.gain.value = 0.07;
-      sub.connect(subG).connect(filt); sum.connect(filt);
+      const subG = ctx.createGain(); subG.gain.value = mSub;
+      // (168) the 106's HPF: off, or one of three corners before the VCF (position 0 on the real one is a little bass lift: left flat)
+      const hpfV = p.hpf == null ? 0 : p.hpf, hpfHz = hpfV < 0.2 ? 0 : hpfV < 0.5 ? 90 : hpfV < 0.8 ? 230 : 520;
+      const hpf = ctx.createBiquadFilter(); hpf.type = "highpass"; hpf.frequency.value = Math.max(10, hpfHz); hpf.Q.value = 0.6;
+      const dcoOut = hpfHz ? hpf : filt; if (hpfHz) hpf.connect(filt);
+      sub.connect(subG).connect(dcoOut); sum.connect(dcoOut); sawG.connect(dcoOut);
+      if (mNse > 0.001) { const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), nd = nb.getChannelData(0); for (let k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1; const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true; const ng = ctx.createGain(); ng.gain.value = mNse; ns.connect(ng).connect(dcoOut); ns.start(t); oscs.push(ns); }
       // Juno-style stereo chorus: short delays swept against each other. (166) Three voices: left and right swept against each other as the Juno's two lines are, and a centre voice a quarter-cycle between them
       // (left, right, and a centre voice that comes in as the knob goes up: the Juno's I+II, and JS80P's chorus 1),
       // the wet path high-passed below 60 Hz so the sub stays put (the sweep itself is full-band, as the Juno's is)
-      const dry = ctx.createGain(); dry.gain.value = 1 - p.chorus * 0.35;
+      // (168) the 106's chorus buttons: I (slow, wide), II (faster, shallower), I+II (both at once, the "crunchy" one); off below the first step
+      const chMode = p.chorus < 0.12 ? 0 : p.chorus < 0.55 ? 1 : p.chorus < 0.88 ? 2 : 3;
+      const chAmt = chMode ? 0.85 : 0;
+      const dry = ctx.createGain(); dry.gain.value = 1 - chAmt * 0.35;
       filt.connect(dry).connect(out);
       const merger = ctx.createChannelMerger(2);
-      const cRate = 0.4 + p.chorus * 0.6, cDepth = 0.0012 + p.chorus * 0.0022;
+      const cRate = chMode === 2 ? 0.86 : 0.51, cDepth = chMode === 2 ? 0.0024 : 0.0033;
       const wetHp = ctx.createBiquadFilter(); wetHp.type = "highpass"; wetHp.frequency.value = 60; wetHp.Q.value = 0.5; filt.connect(wetHp);
       const chLfos = [];
-      [[0, 0, p.chorus * 0.85], [1, 1 / 2, p.chorus * 0.85], [2, 1 / 4, p.chorus * p.chorus * 0.5]].forEach(([k, ph, wetG]) => {
-        const lfo = ctx.createOscillator(); lfo.frequency.value = cRate;
+      [[0, 0, chAmt], [1, 1 / 2, chAmt], [2, 1 / 4, chMode === 3 ? 0.6 : 0]].forEach(([k, ph, wetG]) => {
+        const lfo = ctx.createOscillator(); lfo.frequency.value = k === 2 && chMode === 3 ? 0.86 : cRate;
         const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
         const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
         const dep = ctx.createGain(); dep.gain.value = cDepth;

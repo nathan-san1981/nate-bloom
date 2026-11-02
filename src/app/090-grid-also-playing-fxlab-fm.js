@@ -195,7 +195,7 @@
   const onBeta = fn => betaListeners.push(fn);
 
   // ---------- FX Lab ----------
-  const BFX_DEF = { dens: 0.35, densOn: false, bits: 0.35, tone: 0.6, lofiOn: false, hmix: 0.3, hdecay: 0.55, hsize: 0.5, hdamp: 0.45, hwidth: 0.8, hallOn: false, frzOn: false, frzMix: 0.7, frzTone: 0.6, shimOn: false, shim: 0.4, shimFb: 0.5 };
+  const BFX_DEF = { dens: 0.35, densOn: false, bits: 0.35, tone: 0.6, lofiOn: false, hmix: 0.3, hdecay: 0.55, hsize: 0.5, hdamp: 0.45, hwidth: 0.8, hallOn: false, frzOn: false, frzMix: 0.7, frzTone: 0.6, shimOn: false, shim: 0.4, shimFb: 0.5, eleOn: false, eleGlide: 0.5, eleWah: 0.6, eleGrowl: 0.5, eleBlend: 0.6, eleDrive: 0.5, eleLen: 0.45, eleLevel: 0.7 };
   const bfx = Object.assign({}, BFX_DEF);
   try { Object.assign(bfx, JSON.parse(localStorage.getItem("nightbloom-bfx") || "{}")); } catch (e) {}
   let bfxSaveT = 0; const saveBfxNow = () => { clearTimeout(bfxSaveT); bfxSaveT = 0; try { localStorage.setItem("nightbloom-bfx", JSON.stringify(bfx)); } catch (e) {} };
@@ -445,6 +445,7 @@
     ["hallOn", "Hall+", "Dragonfly-style hall with early reflections", [["hmix", "Mix"], ["hdecay", "Decay"], ["hsize", "Size"], ["hdamp", "Damping"], ["hwidth", "Width"]]],
     ["frzOn", "Freeze", "On = hold the last two seconds forever", [["frzMix", "Level"], ["frzTone", "Tone"]]],
     ["shimOn", "Shimmer", "octave-up reverb that keeps climbing", [["shim", "Amount"], ["shimFb", "Climb"]]],
+    ["eleOn", "Elephant", "the trumpeting growl, what plays vocoded onto it; every note sets it off (168: 780)", [["eleGlide", "Glide"], ["eleWah", "Wah"], ["eleGrowl", "Growl"], ["eleBlend", "Blend"], ["eleDrive", "Drive"], ["eleLen", "Length"], ["eleLevel", "Level"]]],
   ];
   const fxLab = document.getElementById("fxLab"), fxLabList = document.getElementById("fxLabList");
   function renderFxLab() {

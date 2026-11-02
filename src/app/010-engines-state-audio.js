@@ -7,7 +7,7 @@
     vital:  { name: "Morph Pad",     short: "Morph",  after: "after Vital",
               knobs: [["morph","Morph",0.35],["motion","Motion",0.4],["tone","Tone",0.55],["attack","Attack",0.6],["release","Release",0.7]] },
     juno:   { name: "Juno Strings",  short: "Juno",   after: "after TAL-NoiseMaker",
-              knobs: [["pwm","PWM",0.5],["chorus","Chorus",0.6],["cutoff","Cutoff",0.55],["attack","Attack",0.35],["release","Release",0.6]] },
+              knobs: [["pwm","PWM",0.5],["dco","DCO",0.35],["chorus","Chorus",0.6],["cutoff","Cutoff",0.55],["hpf","HPF",0],["attack","Attack",0.35],["release","Release",0.6]] },   // 168: DCO mix, chorus I / II / I+II and the HPF, as the Juno-106 (after the KR-106)
     tyrell: { name: "Blade Brass",   short: "Brass",  after: "after TyrellN6",
               knobs: [["swell","Swell",0.45],["bite","Bite",0.4],["vibrato","Vibrato",0.35],["attack","Attack",0.25],["release","Release",0.55]] },
     choir:  { name: "Ghost Choir",   short: "Choir",  after: "after Spitfire LABS",

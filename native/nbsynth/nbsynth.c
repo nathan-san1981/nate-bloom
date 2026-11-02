@@ -15,6 +15,7 @@
 #include "fuzzbass.h"
 #include "balladkit.h"
 #include "twist.h"
+#include "juno106.h"
 
 struct w2c_env { int unused; };
 f64 w2c_env_sin(struct w2c_env* e, f64 x) { (void) e; return sin(x); }
@@ -155,6 +156,17 @@ static void render_twist(unsigned n) { w2c_twist_nb_render(&i_twist, n); }
 static unsigned out_twist(unsigned ch) { return w2c_twist_nb_out(&i_twist, ch); }
 static void tempo_twist(double b, unsigned p) { (void) b; (void) p; }
 static void reset_twist(void) { w2c_twist_nb_reset(&i_twist); }
+static w2c_juno106 i_juno106;
+static void mk_juno106(void) { wasm2c_juno106_instantiate(&i_juno106); w2c_juno106_0x5F_wasm_call_ctors(&i_juno106); }
+static wasm_rt_memory_t* mem_juno106(void) { return w2c_juno106_memory(&i_juno106); }
+static void init_juno106(float r) { w2c_juno106_nb_init(&i_juno106, r); }
+static unsigned params_juno106(void) { return w2c_juno106_nb_params(&i_juno106); }
+static unsigned count_juno106(void) { return w2c_juno106_nb_count(&i_juno106); }
+static void midi_juno106(unsigned a, unsigned b, unsigned d) { w2c_juno106_nb_midi(&i_juno106, a, b, d); }
+static void render_juno106(unsigned n) { w2c_juno106_nb_render(&i_juno106, n); }
+static unsigned out_juno106(unsigned ch) { return w2c_juno106_nb_out(&i_juno106, ch); }
+static void tempo_juno106(double b, unsigned p) { (void) b; (void) p; }
+static void reset_juno106(void) { w2c_juno106_nb_reset(&i_juno106); }
 static Plug g_plugs[] = {
   { "twin77", 0, 0, mk_twin77, mem_twin77, init_twin77, params_twin77, count_twin77, midi_twin77, render_twin77, out_twin77, tempo_twin77, reset_twin77 },
   { "duet80", 0, 0, mk_duet80, mem_duet80, init_duet80, params_duet80, count_duet80, midi_duet80, render_duet80, out_duet80, tempo_duet80, reset_duet80 },
@@ -167,6 +179,7 @@ static Plug g_plugs[] = {
   { "fuzz_bass", 0, 0, mk_fuzzbass, mem_fuzzbass, init_fuzzbass, params_fuzzbass, count_fuzzbass, midi_fuzzbass, render_fuzzbass, out_fuzzbass, tempo_fuzzbass, reset_fuzzbass },
   { "ballad_kit", 0, 0, mk_balladkit, mem_balladkit, init_balladkit, params_balladkit, count_balladkit, midi_balladkit, render_balladkit, out_balladkit, tempo_balladkit, reset_balladkit },
   { "twist", 0, 0, mk_twist, mem_twist, init_twist, params_twist, count_twist, midi_twist, render_twist, out_twist, tempo_twist, reset_twist },
+  { "juno106", 0, 0, mk_juno106, mem_juno106, init_juno106, params_juno106, count_juno106, midi_juno106, render_juno106, out_juno106, tempo_juno106, reset_juno106 },
 };
 #define N_PLUGS ((int) (sizeof(g_plugs) / sizeof(g_plugs[0])))
 static int g_rt = 0;

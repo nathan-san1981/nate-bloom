@@ -183,6 +183,16 @@
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
   {
+   "key": "natebloom/juno106",
+   "name": "Juno 106",
+   "vendor": "Nate Bloom",
+   "kind": "instrument",
+   "type": "Polysynth",
+   "desc": "Ultramaster KR-106's engine (Karl LaRocca, GPL-3): the Juno-60 and Juno-106 from hardware measurements \u2014 band-limited DCO, IR3109 filter, MN3009 bucket-brigade chorus, the real envelopes. Six voices, the 256 factory patches of both.",
+   "url": "natebloom/juno106/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
    "key": "burns-audio/drumsampler",
    "name": "DRM-16 DrumComputer",
    "vendor": "Sequencer Party",

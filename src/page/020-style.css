@@ -3290,3 +3290,13 @@ body.build-on .lv-pick.standalone.drawer { top: calc(84px + var(--sat)) !importa
   body.build-on.mls-on .app { padding-top: calc(134px + var(--mls-h) + var(--sat)); }
   body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(124px + var(--mls-h) + var(--sat)); }
 }
+/* 168: the phone page stays put. Nothing may widen the viewport (iOS then lets the whole page pan sideways and the top
+   bars look masked): rows of tools wrap instead of overflowing, and the app, the strip and the Build bar clip sideways.
+   In the shell the page itself never scrolls: the body is pinned and the app scrolls inside, under the fixed bars. */
+.row-label { flex-wrap: wrap; row-gap: 4px; }
+.row-label .rtools { flex-wrap: wrap; justify-content: flex-end; }
+.app, #shell, #buildBar { overflow-x: clip; }
+body.shell-new { position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
+body.shell-new .app { height: 100%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; box-sizing: border-box; }
+#shell { z-index: 62; } #buildBar { z-index: 61; }
+.sh-strip { color: var(--ink); }
