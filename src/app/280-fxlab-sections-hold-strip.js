@@ -12,7 +12,15 @@
     if (k.startsWith("l:")) { const pt = state.lib.parts[+k.slice(2)]; return pt ? (pt.level ?? 0.8) : 0.8; }
     return 0.8;
   }
-  const lvGain = k => { const v = lvLevel(k); return Number.isFinite(v) ? Math.max(0, v) / 0.8 : 1; };
+  // (172) a muted sound keeps its place in what's playing; its bus goes to silence, held notes included
+  function lvMuted(k) {
+    if (k.startsWith("e:")) return !!(state.layers[k.slice(2)] || {}).mute;
+    if (k.startsWith("s:")) { const sl = state.samp.slots[+k.slice(2)]; return !!(sl && sl.mute); }
+    if (k === "inst") return !!(state.inst && state.inst.mute);
+    if (k.startsWith("l:")) { const pt = state.lib.parts[+k.slice(2)]; return !!(pt && pt.mute); }
+    return false;
+  }
+  const lvGain = k => { if (lvMuted(k)) return 0; const v = lvLevel(k); return Number.isFinite(v) ? Math.max(0, v) / 0.8 : 1; };
   function lvBus(k, dest) {
     let g = LV[k];
     if (!g || g.__to !== dest || g.context !== ctx) { g = ctx.createGain(); g.gain.value = g.__v = lvGain(k); g.connect(dest); g.__to = dest; LV[k] = g; }

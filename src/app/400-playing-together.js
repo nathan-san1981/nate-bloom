@@ -68,6 +68,43 @@
     const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : true);
     let toastT = 0;
     function say(msg) { const el = document.getElementById("uiToast"); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2800); }
+    // ---- (172) mute: the sound stays in what's playing, silent, until it's unmuted (its bus does it, see lvMuted) ----
+    function muteHome(it) {
+      if (it.t === "syn") return state.layers[it.id];
+      if (it.t === "lib") return state.lib.parts[it.i];
+      if (it.t === "inst") return state.inst;
+      if (it.t === "samp") return state.samp.slots[it.slot];
+      return null;
+    }
+    const isMuted = it => { const h = muteHome(it); return !!(h && h.mute); };
+    function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute; }
+    function toggleMute(it) {
+      start();
+      const on = !isMuted(it); setMute(it, on);
+      try { lvApply(); } catch (e) {}
+      save(); paint();
+      say(on ? it.name + " is muted. It stays in, silent · tap the speaker again to hear it" : it.name + " is back on");
+    }
+    // a sound that leaves what's playing drops its mute, so it comes back audible when it's added again
+    function sweepMutes(its) {
+      let n = 0;
+      const has = f => its.some(f);
+      for (const id in state.layers) if (state.layers[id] && state.layers[id].mute && !has(x => x.t === "syn" && x.id === id)) { delete state.layers[id].mute; n++; }
+      state.lib.parts.forEach((p, i) => { if (p && p.mute && !has(x => x.t === "lib" && x.i === i)) { delete p.mute; n++; } });
+      if (state.inst && state.inst.mute && !has(x => x.t === "inst")) { delete state.inst.mute; n++; }
+      state.samp.slots.forEach((sl, i) => { if (sl && sl.mute && !has(x => x.t === "samp" && x.slot === i)) { delete sl.mute; n++; } });
+      if (n) { try { lvApply(); } catch (e) {} }
+    }
+    const SPK = muted => '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 9.5h4l5-4.2v13.4l-5-4.2H3z" fill="currentColor"/>' +
+      (muted ? '<path d="M15.5 9.5l5 5M20.5 9.5l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>'
+             : '<path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>') + '</svg>';
+    function muteBtn(cls, it) {
+      const m = isMuted(it), b = document.createElement("button"); b.className = cls; b.innerHTML = SPK(m);
+      b.title = m ? it.name + " is muted · tap to hear it again" : "Mute " + it.name + " (it stays in, silent)";
+      b.setAttribute("aria-label", b.title); b.setAttribute("aria-pressed", String(m));
+      b.addEventListener("click", ev => { ev.stopPropagation(); toggleMute(it); });
+      return b;
+    }
     // ---- changing it ----
     function keepFocusPlaying() { const g = grp(state.engine) || grp(S().f); if (g) S()[g] = true; }   // what had the controls plays on
     function focusOn(it) {
@@ -93,6 +130,7 @@
       const all = items(), rest = all.filter(x => !same(x, it)), s = S();
       if (!quiet && it.t !== "samp" && !rest.some(x => x.t !== "samp")) { say("It's the only sound playing. To change it, pick another sound (tap its name above)."); return false; }
       const wasSel = isSel(it);
+      setMute(it, false);   // (172) back audible if it's added again
       if (it.t === "syn") { state.layers[it.id].on = false; if (!synOn().length) s.syn = false; }
       else if (it.t === "lib") { removePart(it.i); if (!state.lib.parts.some(p => p && p.id)) s.lib = false; }
       else if (it.t === "inst") s.inst = false;
@@ -113,15 +151,18 @@
         }
       }
       renderEngine(); save();
-      if (!quiet) say(it.name + " stopped" + (rest.length ? ". Still playing: " + rest.map(x => x.name).join(", ") : ""));
+      if (!quiet) say(it.name + " is out" + (rest.length ? ". Still playing: " + rest.map(x => x.name).join(", ") : "") + " · + in Quick sounds brings it back");
+      try { lvApply(); } catch (e) {}
       return true;
     }
     function only(it) {
       const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1;
+      setMute(it, false);   // (172) "Only" means hear it
       if (it.t === "syn") { for (const k in state.layers) state.layers[k].on = k === it.id; state.engine = it.id; state.melodic = it.id; }
       else if (it.t === "lib") { for (let k = MAX_PARTS - 1; k >= 0; k--) if (k !== it.i && state.lib.parts[k]) removePart(k); libSel = 0; state.lib.parts.forEach(p => { if (p) p.on = true; }); state.engine = "lib"; }
       else if (it.t === "inst") state.engine = "inst";
       renderEngine(); save(); say("Only " + it.name + " now");
+      try { lvApply(); } catch (e) {}
     }
     // + Together: this one plays with everything that's playing (and gets the controls)
     async function together(e) {
@@ -247,17 +288,21 @@
       if (grp(state.engine)) S().f = state.engine;
       S().ls = libSelOn();
       const its = items(), n = its.length;
+      sweepMutes(its);
       stkRow.innerHTML = ""; stkRow.appendChild(el("span", "stk-lab", n > 1 ? "Playing together" : "Playing"));
       its.forEach(it => {
-        const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
+        const mu = isMuted(it);
+        const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
         if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
-        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · loading…" : it.off ? " · off, tap to turn on" : isSel(it) && n > 1 ? " · controls below" : "");
-        m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
+        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · loading…" : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
+        m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
         m.addEventListener("click", () => { start(); focusOn(it); });
         c.appendChild(m);
         if (it.t === "lib" && PLUG(it.id) && NBW_OK()) { const g = el("button", "sc-g", "⚙"); g.title = it.name + "'s own controls"; g.setAttribute("aria-label", g.title); g.addEventListener("click", () => { start(); __wam.instrument(it.id).then(W => __wam.openGui(W)).catch(() => {}); }); c.appendChild(g); }
-        if (n > 1) { const x = el("button", "sc-x", "✕"); x.title = "Stop " + it.name + " (the others keep playing)"; x.setAttribute("aria-label", "Stop " + it.name); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
+        // (172) the speaker mutes it and brings it back; ✕ takes it out of what's playing (+ in Quick sounds adds it again)
+        if (n > 1 || mu) c.appendChild(muteBtn("sc-m", it));
+        if (n > 1) { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out (the others keep playing · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
         stkRow.appendChild(c);
       });
       const add = el("button", "btn stk-add", "+ Add"); add.title = "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
@@ -265,7 +310,7 @@
       stkRow.appendChild(add);
       stkHelp.innerHTML = "";
       if (n > 1) {
-        const sel = its.find(isSel), t = el("span"); t.innerHTML = "<span class='long'><b>" + n + " play together</b> · tap one for its controls · ✕ stops it</span><span class='short'><b>" + n + " play together</b> · tap one: its controls · ✕ stops it</span>";
+        const sel = its.find(isSel), t = el("span"); t.innerHTML = "<span class='long'><b>" + n + " play together</b> · tap one for its controls · the speaker mutes it · ✕ takes it out</span><span class='short'><b>" + n + " play together</b> · speaker: mute · ✕: take out</span>";
         stkHelp.appendChild(t);
         if (sel) { const b = el("button", "btn", "Only " + sel.name); b.title = "Stop the others and keep " + sel.name; b.addEventListener("click", () => { start(); only(sel); }); stkHelp.appendChild(b); }
       } else {
@@ -354,10 +399,12 @@
       if (q.pin) { state.cur = { id: q.id, cat: e.cat || state.cur && state.cur.cat }; save(); }
       paint();
     }
+    // (172) the playing sound a Quick tile stands for
+    const qkItemOf = (q, its) => its.find(x => (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
     async function qkToggle(q) {
       start();
       if (qkPlaying(q)) {
-        const it = items().find(x => (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
+        const it = qkItemOf(q, items());
         if (it) drop(it); return;
       }
       const e = qkEntry(q); if (!e) return;
@@ -368,16 +415,18 @@
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
       const togOn = q => !q.id.startsWith("my:") && togOK(q.id);
+      const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
-        const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id);
-        const t = el("div", "qk-t" + (on ? " on" : "") + (cur ? " cur" : ""));
-        const m = el("button", "qm"); m.innerHTML = "<b></b><small></small>"; m.querySelector("b").textContent = q.name; m.querySelector("small").textContent = q.sub;
+        const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
+        const t = el("div", "qk-t" + (on ? " on" : "") + (cur ? " cur" : "") + (mu ? " muted" : ""));
+        const m = el("button", "qm"); m.innerHTML = "<b></b><small></small>"; m.querySelector("b").textContent = q.name; m.querySelector("small").textContent = mu ? "muted" : q.sub;
         m.title = "Play " + q.name + " alone"; m.setAttribute("aria-label", m.title);
         m.addEventListener("click", () => qkAlone(q));
         t.appendChild(m);
+        if (it && (many || mu)) t.appendChild(muteBtn("qs", it));   // (172) mute right on the tile while it plays with others
         if (togOn(q)) {
           const p = el("button", "qp", on ? "✓" : "+");
-          p.title = on ? q.name + " is playing · tap to stop it" : "Play " + q.name + " together with what's playing"; p.setAttribute("aria-label", p.title);
+          p.title = on ? q.name + " is playing · tap to take it out" : "Play " + q.name + " together with what's playing"; p.setAttribute("aria-label", p.title);
           p.addEventListener("click", () => qkToggle(q));
           t.appendChild(p);
         }

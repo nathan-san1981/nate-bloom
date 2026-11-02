@@ -3324,3 +3324,35 @@ body.build-on.recording .app { padding-top: calc(138px + var(--sat)); }
   .sh-rec { padding: 0 8px; gap: 5px; }
 }
 @media (prefers-reduced-motion: reduce) { .sh-rec i { animation: none; } }
+/* 172: mute on what's playing. The speaker on a Playing-together chip (and on a playing Quick tile) silences that sound
+   and keeps it in; ✕ (or the tile's ✓) takes it out. */
+.stk-chip .sc-m { width: 40px; flex: none; border-left: 1px solid var(--line); color: var(--dim); display: flex; align-items: center; justify-content: center; padding: 0; }
+.stk-chip .sc-m:hover { color: var(--ink); }
+.stk-chip .sc-m[aria-pressed="true"], .qk-t .qs[aria-pressed="true"] { color: #ff8fa8; background: #ff4d6d24; }
+.stk-chip .sc-m svg, .qk-t .qs svg { pointer-events: none; }
+.stk-chip.muted .sc-main b, .qk-t.muted .qm b { text-decoration: line-through; text-decoration-color: #ff8fa8; text-decoration-thickness: 2px; opacity: 0.75; }
+.stk-chip.muted .sc-main i { background: transparent; box-shadow: inset 0 0 0 1.5px var(--kc, var(--lilac)); }
+.stk-chip.muted .sc-main small, .qk-t.muted .qm small { color: #ff8fa8; }
+.qk-t .qs { width: 30px; flex: none; border-left: 1px solid var(--line); color: var(--dim); display: flex; align-items: center; justify-content: center; padding: 0; }
+.qk-t .qs:hover { color: var(--ink); }
+@media (max-width: 600px) { .stk-chip .sc-m { width: 34px; } }
+/* 172: recording with the MiniLab strip showing (mls-on, his Linux computer): the banner sits under the strip, not over
+   it, and the page moves down by the banner. (170's rule left out the strip's height, so the strip covered Playing
+   together and the Quick row's ✓s.) The DJ, Tracks and the sound list move down under the banner too. */
+body.recording.mls-on .recbanner { top: var(--mls-h); }
+body.recording.mls-on .app { padding-top: calc(54px + var(--mls-h)); }
+body.recording.mls-on .dj, body.recording.mls-on .trk, body.recording.mls-on .browser { top: calc(44px + var(--mls-h)); }
+body.shell-new.recording .dj, body.shell-new.recording .trk, body.shell-new.recording .browser { top: calc(84px + var(--sat)); }
+body.build-on.recording .dj, body.build-on.recording .trk, body.build-on.recording .browser { top: calc(128px + var(--sat)); }
+body.shell-new.recording.mls-on .recbanner { top: calc(40px + var(--mls-h) + var(--sat)); }
+body.shell-new.recording.mls-on .app { padding-top: calc(94px + var(--mls-h) + var(--sat)); }
+body.shell-new.recording.mls-on .dj, body.shell-new.recording.mls-on .trk, body.shell-new.recording.mls-on .browser { top: calc(84px + var(--mls-h) + var(--sat)); }
+body.build-on.recording.mls-on .recbanner { top: calc(84px + var(--mls-h) + var(--sat)); }
+body.build-on.recording.mls-on .app { padding-top: calc(138px + var(--mls-h) + var(--sat)); }
+body.build-on.recording.mls-on .dj, body.build-on.recording.mls-on .trk, body.build-on.recording.mls-on .browser { top: calc(128px + var(--mls-h) + var(--sat)); }
+@media (max-width: 700px) {
+  body.build-on.recording .dj, body.build-on.recording .trk, body.build-on.recording .browser { top: calc(168px + var(--sat)); }
+  body.build-on.recording.mls-on .recbanner { top: calc(124px + var(--mls-h) + var(--sat)); }
+  body.build-on.recording.mls-on .app { padding-top: calc(178px + var(--mls-h) + var(--sat)); }
+  body.build-on.recording.mls-on .dj, body.build-on.recording.mls-on .trk, body.build-on.recording.mls-on .browser { top: calc(168px + var(--mls-h) + var(--sat)); }
+}
