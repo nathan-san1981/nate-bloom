@@ -1071,6 +1071,21 @@ body.trk-open { overflow: hidden; }
 .sfit .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
 .sfit input[type=range] { flex: 1 1 auto; min-width: 90px; accent-color: var(--lilac); height: 28px; }
 .sfit.busy .ed-val { color: var(--lilac); }
+/* 166: Elephant (770): the pad under the sample bar, and the shape sheet */
+.elepad { display: flex; flex-direction: column; gap: 4px; flex: none; padding: 2px 0 4px; }
+.elepad[hidden] { display: none; }
+.ele-xy { width: 100%; height: 110px; border-radius: 8px; background: #0d0b13; border: 1px solid var(--line); touch-action: none; display: block; cursor: crosshair; }
+.ele-xy.tall { height: 150px; }
+.ele-cap { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); line-height: 1.5; }
+.ele-cap b { color: var(--ink); font-weight: 600; }
+#eleWave { width: 100%; height: 120px; border-radius: 8px; background: #0d0b13; border: 1px solid var(--line); touch-action: none; display: block; cursor: ew-resize; }
+.ele-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+.ele-rows .ed-sl { display: flex; align-items: center; gap: 6px; flex: none; min-width: 0; }
+.ele-rows .lab2 { font-family: var(--font-mono); font-size: 0.6rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; width: 46px; flex: none; }
+.ele-rows input[type=range] { flex: 1 1 auto; min-width: 50px; accent-color: var(--lilac); height: 28px; }
+.ele-rows .ed-val { width: 58px; min-width: 58px; text-align: right; flex: none; }
+.ed-foot .ed-sp { flex: 1 1 auto; }
+@media (max-width: 480px) { .ele-rows { grid-template-columns: 1fr; } }
 .ed-tempo .btn, .ed-stretch .btn { height: 30px; }
 #mLoop[aria-pressed="true"] { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
 /* where ● Rec puts the recording */
@@ -3573,10 +3588,16 @@ body.shell-new #modes { display: none !important; }
       <div class="seg small" role="group" aria-label="Sample mode">
         <button id="mPlay" aria-pressed="true">Play</button>
         <button id="mGrain" aria-pressed="false">Grain</button>
+        <button id="mEle" aria-pressed="false" title="The elephant: the sample itself, with a pitch glide up, a formant that opens, a growl and a dive, shaped to its length">Elephant</button>
         <button id="mSlice" aria-pressed="false">Slice</button>
       </div>
       <button class="btn" id="mLoop" aria-pressed="false" title="Held notes keep looping the sample (or the part between Start and Length)">Loop</button>
+      <button class="btn" id="eleBtn" hidden title="The elephant's shape over the sample's waveform: its length, pitch glide, wah, growl, drive and level">Shape…</button>
       <button class="btn rec" id="recBtn">● Hold to record</button>
+    </div>
+    <div class="elepad" id="elePad" hidden>
+      <canvas id="eleXY" class="ele-xy" aria-label="Elephant pad: left to right is Wah, bottom to top is Growl. Drag it while you play."></canvas>
+      <div class="ele-cap">← <b>Wah</b> → &nbsp;·&nbsp; ↑ <b>Growl</b> &nbsp;·&nbsp; drag while you play; the knobs follow &nbsp;·&nbsp; <b>Shape…</b> lays the elephant over the sample's wave</div>
     </div>
     <div class="sfit" id="sfit" hidden>
       <div class="sfit-row">
@@ -4504,6 +4525,7 @@ body.shell-new #modes { display: none !important; }
       <p><b>Garage:</b> the Garage tab is a GarageBand-style studio, and Nate Bloom's one timeline: audio tracks record the microphone or Nate Bloom itself (everything you play, while the song plays), Import audio adds files, audio regions have Gain & fades, + Automation draws or records a plugin's control, a track's volume can be automated, Play along keeps the song going in a small bar, and → Garage (the take bar, the DJ, Beat Pads) puts audio there. What was in Tracks is a Garage song called Tracks. Choose an instrument (Keyboard, Drums, Smart Bass, Guitar and Strings, Synths, your plugins, the Sampler or the Audio Recorder) and it becomes a track; play it on the screen, a MIDI keyboard or the computer keyboard, press ● to record, then arrange the regions in Tracks, edit notes in the piano roll, mix, and export the song as WAV or MP3. ? in the Garage explains the rest.</p>
       <p><b>Beats</b> has two tabs at the top: <b>Grid</b> is the Rhythm Creator and <b>Pads</b> is Beat Pads (16 pads to play, record and chop samples onto; its <b>?</b> explains them). <b>Rhythm Creator</b> (Grid): a 16-track drum machine: 808, 909, Analog, FM, Trap, hand percussion, Electro/FX and sample sounds, with accents, flams, rolls, step chance, nudges, per-track lengths, Euclidean fills, Make a beat, Vary, swing and Morph. Its ? button explains each part.</p>
       <p><b>DJ:</b> the DJ button in the top bar opens two decks. Load a song on each (a file, a sampler slot, or a bank pad), press <b>AUTO SYNC</b> and the other song is tempo-matched and beat-aligned to the lead; the <b>sync dial</b> and <b>◀◀ ▶▶</b> do the same by hand. Up to four songs sit in the crate, analysed for tempo, key and energy: queue one as next and <b>MIX IN NEXT</b> brings it in on the free deck (Blend, Bass swap, Cut, Filter or Echo out; Auto picks), or turn on <b>Auto DJ</b> and it mixes the next song in by itself as each one ends. Mix tempo (with a recommendation) and a suggested drum beat that plays in time are there too, and ● Rec records the whole mix. The 8-pad bank grabs exactly 1–16 beats from a deck or the mix, in time; hold a pad to send it to the sampler or the pads, or save a WAV. The ? button in the DJ view explains every control.</p>
+      <p><b>Elephant (Smp tab, right of Grain):</b> the sample itself, played as Play plays it, with a trumpeting growl shaped over it: the pitch <b>glides</b> up, two formants open with it (<b>Wah</b>), a saw-wave rasp grows in as it climbs (<b>Growl</b>), the whole thing is <b>driven</b> hard, and at the end it dives. <b>Length</b> is the shape's length: ×1 is the time the sample takes to play under the glide, so the dive lands on the sample's end, and a shorter sample gets a shorter elephant; stretch or squeeze it, or <b>Fit to sample</b> to put it back. <b>dB</b> trims the level (−24 to +12) so it sits against the other sounds. The pad under the sample bar moves Wah (left–right) and Growl (up–down) while you play, and the knobs follow; <b>Shape…</b> opens a sheet like the sample editor's, with the sample's waveform and the shape drawn over it (drag the amber end to set its length), the pad, a slider per control, Preview and Reset. The sample's wave is never changed: Play, Grain and Slice still have it as it was.</p>
       <p><b>Fit a sample to the beat (Smp tab, under the slots):</b> each slot's tempo is found automatically (½× / 2× if it's off). <b>Match</b> stretches it to the app's tempo, <b>Fit 1 / 2 / 4 / 8</b> makes it exactly that many bars long. <b>Length</b> slows it down or speeds it up (¼× to 4×) without changing pitch; <b>Pitch</b> moves it ±12 semitones without changing length. It works while things play, the slot keeps its original, and <b>Reset</b> goes back to it. <b>Loop</b> (next to Play / Grain / Slice) keeps a held note looping.</p>
       <p><b>Something not working?</b> Tap <b>Report a problem</b> at the top of this help (☰ → Help) right after it happens. It saves one small zip (what you tapped, any errors and slow moments, every setting, device and audio details, and the last 30 seconds of sound) that you can send to get it fixed. Nothing is sent anywhere by itself.</p>
       <p>In Lib, <b>+</b> next to any sound puts it on your tab bar, so it's always a tap away. <b>Long-press a tab</b> to remove it, hide an engine you don't use, move it, reset its sliders, rename it, or save the current settings as a sound of your own.</p>
@@ -4617,6 +4639,29 @@ body.shell-new #modes { display: none !important; }
   </div>
 </div>
 
+<div class="editor" id="eleSheet" hidden>
+  <div class="ed-card" role="dialog" aria-label="Elephant">
+    <div class="ed-head"><strong id="eleTitle">Elephant</strong><span class="ed-info" id="eleInfo"></span></div>
+    <canvas id="eleWave" aria-label="The sample's waveform, with the elephant's shape over it. Drag the amber end to set the shape's length."></canvas>
+    <div class="ed-legend">The sample plays as it is; the shape rides on it: the pitch <b>glides</b> up, the <b>wah</b> opens, the <b>growl</b> comes in, then it dives. Drag the amber end to stretch the shape · <b>Fit</b> matches the sample's length · the pad moves Wah and Growl live.</div>
+    <canvas id="eleXY2" class="ele-xy tall" aria-label="Elephant pad: left to right is Wah, bottom to top is Growl"></canvas>
+    <div class="ele-rows">
+      <span class="ed-grp ed-sl"><span class="lab2">Glide</span><input type="range" id="eleGlide" min="0" max="1000" step="1" value="500" aria-label="Glide: How far the pitch climbs, in semitones" title="How far the pitch climbs, in semitones"><span class="ed-val" id="eleGlideV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Wah</span><input type="range" id="eleWah" min="0" max="1000" step="1" value="500" aria-label="Wah: How far the formant opens, in Hz" title="How far the formant opens, in Hz"><span class="ed-val" id="eleWahV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Growl</span><input type="range" id="eleGrowl" min="0" max="1000" step="1" value="500" aria-label="Growl: The rasp's speed; its depth grows with it" title="The rasp's speed; its depth grows with it"><span class="ed-val" id="eleGrowlV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Drive</span><input type="range" id="eleDrive" min="0" max="1000" step="1" value="500" aria-label="Drive: How hard it shouts" title="How hard it shouts"><span class="ed-val" id="eleDriveV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">Length</span><input type="range" id="eleLen" min="0" max="1000" step="1" value="500" aria-label="Length: The shape's length; ×1 is the sample's own" title="The shape's length; ×1 is the sample's own"><span class="ed-val" id="eleLenV">—</span></span>
+      <span class="ed-grp ed-sl"><span class="lab2">dB</span><input type="range" id="eleDb" min="0" max="1000" step="1" value="500" aria-label="dB: Level trim, to sit against the other sounds" title="Level trim, to sit against the other sounds"><span class="ed-val" id="eleDbV">—</span></span>
+    </div>
+    <div class="ed-foot">
+      <button class="btn" id="elePlay">▶ Preview</button>
+      <button class="btn" id="eleFit" title="The shape's length becomes the sample's">Fit to sample</button>
+      <button class="btn" id="eleReset" title="Every elephant control back to where it started">Reset</button>
+      <span class="ed-sp"></span>
+      <button class="btn primary" id="eleDone">Done</button>
+    </div>
+  </div>
+</div>
 <div class="editor" id="editor" hidden>
   <div class="ed-card" role="dialog" aria-label="Sample editor">
     <div class="ed-head"><strong id="edTitle">Edit</strong><span class="ed-info" id="edInfo"></span></div>
@@ -5058,6 +5103,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const NSLOTS = 8;
   const NPADS = 12;
   const SAMP_SLICE_KNOBS = [["slices","Slices",0.34],["sens","Detect",0],["tone","Tone",1],["fade","Fade",0.15],["level","Level",0.8]];
+  // 166: Elephant, an effect on the sample itself (770): the shape's pitch glide, the formant sweep, the growl, the drive, the shape's length (×1 = the sample's) and a dB trim
+  const SAMP_ELE_KNOBS = [["eGlide","Glide",0.5],["eWah","Wah",0.6],["eGrowl","Growl",0.5],["eDrive","Drive",0.5],["eLen","Length",0.5],["eDb","dB",2 / 3]];
   const PAD_KNOBS = [["pitch","Pitch",0.5],["start","Start",0],["length","Length",1],["tone","Tone",1],["level","Level",0.8]];
   const INST_KNOBS = [["tune","Tune",0.5],["tone","Tone",1],["attack","Attack",0],["release","Release",0.35],["level","Level",0.8]];
   const SLICE_COUNTS = [4, 6, 8, 12, 16, 24, 32];
@@ -5066,7 +5113,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const DRUM_PAD_KNOBS = [["pitch","Pitch",0.5],["length","Length",0.5],["vol","Volume",0.8]];
   const LIB_KNOBS = [["tune","Tune",0.5],["tone","Tone",1],["attack","Attack",0],["decay","Decay",0.62],["release","Release",0.3],["level","Level",0.8]];
   const MAX_SAMPLE_SEC = 300;   // samples can be up to 5 minutes; longer files open the section picker
-  const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS].map(([k,,v]) => [k, v]));
+  const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS, ...SAMP_ELE_KNOBS].map(([k,,v]) => [k, v]));
 
   // ---------- State ----------
   const state = { engine: "saw", octave: 0, hold: false, params: {} };
@@ -5139,7 +5186,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         state.samp.slot = Math.min(NSLOTS - 1, saved.samp.slot | 0);
         saved.samp.slots.slice(0, NSLOTS).forEach((x, i) => {
           if (!x) return;
-          state.samp.slots[i].mode = ["grain", "play", "slice"].includes(x.mode) ? x.mode : "play"; state.samp.slots[i].loop = !!x.loop; if (x.fit && typeof x.fit === "object") state.samp.slots[i].fit = { s: +x.fit.s || 1, st: +x.fit.st || 0, bpm: +x.fit.bpm || 0 };
+          state.samp.slots[i].mode = ["grain", "play", "slice", "elephant"].includes(x.mode) ? x.mode : "play"; state.samp.slots[i].loop = !!x.loop; if (x.fit && typeof x.fit === "object") state.samp.slots[i].fit = { s: +x.fit.s || 1, st: +x.fit.st || 0, bpm: +x.fit.bpm || 0 };
           if (x.p) Object.assign(state.samp.slots[i].p, x.p);
         });
       }
@@ -5398,11 +5445,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     } catch (e) {}
   }
 
-  // One voice of the sampler: plain playback, or a cloud of short grains
+  // One voice of the sampler: plain playback, or a cloud of short grains (or the Elephant, 770, which plays the sample under its shape)
   const recentGrains = [];
+  let eleVoiceHook = null;
   function makeSampleVoice(midi, i, when, scale = 1) {
     const buf = sampBuf[i]; if (!buf || !ctx) return null;
     const slot = state.samp.slots[i], P = slot.p, mode = slot.mode;
+    if (mode === "elephant" && eleVoiceHook) return eleVoiceHook(midi, i, when, scale);
     const t = when ?? ctx.currentTime, rate = Math.pow(2, (midi - 60) / 12), dur = buf.duration;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = P.level * 1.4 * scale;
@@ -5689,7 +5738,13 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
 
     if (id === "juno") {
       const filt = nbVF("ladder"); filt.type = "lowpass";
-      filt.frequency.value = expMap(p.cutoff, 180, 14000); filt.Q.value = 1.1;
+      const cut = expMap(p.cutoff, 180, 14000); filt.Q.value = 1.1;
+      // (166) the VCF envelope the Juno leans on: the filter opens with the note and settles back toward the cutoff;
+      // the sweep is wider the more closed the filter (an open one has nowhere to go), the decay follows Release
+      const sweep = 0.8 + 1.1 * (1 - p.cutoff), fa = Math.max(0.012, attack * 0.8), fd = 0.35 + 0.9 * p.release;
+      filt.frequency.setValueAtTime(cut, t);
+      filt.frequency.linearRampToValueAtTime(Math.min(16000, cut * Math.pow(2, sweep)), t + fa);
+      filt.frequency.setTargetAtTime(Math.min(16000, cut * Math.pow(2, sweep * 0.3)), t + fa, fd);
       // pulse wave = saw minus a delayed copy of itself; moving the delay is PWM
       const sum = ctx.createGain(); sum.gain.value = 0.26;
       const saw = ctx.createOscillator(); saw.type = "sawtooth"; saw.frequency.value = f;
@@ -5702,21 +5757,28 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const sub = ctx.createOscillator(); sub.type = "square"; sub.frequency.value = f / 2;
       const subG = ctx.createGain(); subG.gain.value = 0.07;
       sub.connect(subG).connect(filt); sum.connect(filt);
-      // Juno-style stereo chorus: two short delays swept in opposite directions
+      // Juno-style stereo chorus: short delays swept against each other. (166) Three voices: left and right swept against each other as the Juno's two lines are, and a centre voice a quarter-cycle between them
+      // (left, right, and a centre voice that comes in as the knob goes up: the Juno's I+II, and JS80P's chorus 1),
+      // the wet path high-passed below 60 Hz so the sub stays put (the sweep itself is full-band, as the Juno's is)
       const dry = ctx.createGain(); dry.gain.value = 1 - p.chorus * 0.35;
       filt.connect(dry).connect(out);
       const merger = ctx.createChannelMerger(2);
       const cRate = 0.4 + p.chorus * 0.6, cDepth = 0.0012 + p.chorus * 0.0022;
-      const chLfo = ctx.createOscillator(); chLfo.frequency.value = cRate;
-      [[0, 1], [1, -1]].forEach(([ch, sign]) => {
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045;
-        const dep = ctx.createGain(); dep.gain.value = cDepth * sign;
-        chLfo.connect(dep).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = p.chorus * 0.85;
-        filt.connect(d).connect(wet).connect(merger, 0, ch);
+      const wetHp = ctx.createBiquadFilter(); wetHp.type = "highpass"; wetHp.frequency.value = 60; wetHp.Q.value = 0.5; filt.connect(wetHp);
+      const chLfos = [];
+      [[0, 0, p.chorus * 0.85], [1, 1 / 2, p.chorus * 0.85], [2, 1 / 4, p.chorus * p.chorus * 0.5]].forEach(([k, ph, wetG]) => {
+        const lfo = ctx.createOscillator(); lfo.frequency.value = cRate;
+        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
+        const dep = ctx.createGain(); dep.gain.value = cDepth;
+        lfo.connect(dep).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = wetG;
+        wetHp.connect(d).connect(wet);
+        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
+        chLfos.push(lfo);
       });
       merger.connect(out);
-      [saw, pwmLfo, sub, chLfo].forEach(o => { o.start(t); oscs.push(o); });
+      [saw, pwmLfo, sub, ...chLfos].forEach(o => { o.start(t); oscs.push(o); });
       ampEnv(out, t, attack, 0.5);
       out.gain.setTargetAtTime(0.42, t + attack, 0.5);
     }
@@ -5982,6 +6044,11 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       if (key === "scan") return (v * v * 1.5).toFixed(2) + "×";
       if (key === "slices") return SLICE_COUNTS[Math.round(v * (SLICE_COUNTS.length - 1))] + "";
       if (key === "sens") return v < 0.01 ? "Even" : "Hits " + Math.round(v * 100);
+      if (key === "eGlide") return "+" + Math.round(v * 24) + " st";
+      if (key === "eWah") { const hz = 300 * Math.pow(2, 0.5 + 3 * v); return hz >= 1000 ? (hz / 1000).toFixed(1) + "k" : Math.round(hz) + ""; }
+      if (key === "eGrowl") return Math.round(12 + 40 * v) + "Hz";
+      if (key === "eLen") return window.__live30 ? fmtTime(__live30.eleShapeLen(state.samp.slot, 1)) : "×" + Math.pow(4, 2 * v - 1).toFixed(2);
+      if (key === "eDb") { const db = -24 + 36 * v; return (db > 0 ? "+" : "") + db.toFixed(1) + " dB"; }
       return Math.round(v * 100) + "";
     }
     if (obj === state.drum) {
@@ -6069,7 +6136,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const isDrum = state.engine === "drum", isSamp = state.engine === "samp";
     const e = isDrum ? DRUM : isSamp ? SAMP : ENGINES[state.engine];
     document.getElementById("engineLabel").textContent = isSamp
-      ? "Sampler · " + ({ grain: "granular", play: "playback", slice: "slices" })[state.samp.slots[state.samp.slot].mode] : e.name;
+      ? "Sampler · " + ({ grain: "granular", play: "playback", slice: "slices", elephant: "elephant" })[state.samp.slots[state.samp.slot].mode] : e.name;
     const after = document.getElementById("engineAfter");
     after.classList.remove("err");
     after.textContent = isSamp ? (state.samp.slots[state.samp.slot].name || "Slot S" + (state.samp.slot + 1) + " is empty") : e.after;
@@ -6077,7 +6144,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     engineKnobsEl.innerHTML = "";
     if (isSamp) {
       const slot = state.samp.slots[state.samp.slot];
-      (slot.mode === "grain" ? SAMP_GRAIN_KNOBS : slot.mode === "slice" ? SAMP_SLICE_KNOBS : SAMP_PLAY_KNOBS)
+      (slot.mode === "grain" ? SAMP_GRAIN_KNOBS : slot.mode === "slice" ? SAMP_SLICE_KNOBS : slot.mode === "elephant" ? SAMP_ELE_KNOBS : SAMP_PLAY_KNOBS)
         .forEach(([k, label]) => makeKnob(engineKnobsEl, k, label, () => state.samp.slots[state.samp.slot].p, () => {}));
       refreshSamplesUI();
     } else if (isDrum) {
@@ -6156,6 +6223,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     document.getElementById("mPlay").setAttribute("aria-pressed", String(md === "play"));
     document.getElementById("mGrain").setAttribute("aria-pressed", String(md === "grain"));
     document.getElementById("mSlice").setAttribute("aria-pressed", String(md === "slice"));
+    document.getElementById("mEle").setAttribute("aria-pressed", String(md === "elephant"));
     if (state.engine === "samp") {
       const after = document.getElementById("engineAfter");
       if (!after.classList.contains("err"))
@@ -6167,6 +6235,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   document.getElementById("mPlay").addEventListener("click", () => setSampMode("play"));
   document.getElementById("mGrain").addEventListener("click", () => setSampMode("grain"));
   document.getElementById("mSlice").addEventListener("click", () => setSampMode("slice"));
+  document.getElementById("mEle").addEventListener("click", () => setSampMode("elephant"));
   const fileIn = document.getElementById("fileIn");
   document.getElementById("loadBtn").addEventListener("click", () => { start(); fileIn.click(); });
   fileIn.addEventListener("change", async () => {
@@ -31555,7 +31624,7 @@ registerProcessor("nb-rec", NBRec);`;
     const slVer = () => SL.songs.length + ":" + SL.songs.map(S => S.name).join("|");
     const rcVer = () => RCP.tracks.map(tr => tr.snd + tr.len + tr.on.slice(0, tr.len).join("")).join("|");
     function lkData(kind) {
-      if (kind === "setlist") return { kind, ver: slVer(), cur: SL.cur, songs: SL.songs.map((S, i) => ({ i, name: S.name, bpm: S.bpm, notes: S.notes || "", label: S.label || "" })) };
+      if (kind === "setlist") return { kind, ver: slVer(), cur: SL.cur, songs: SL.songs.map((S, i) => ({ i, name: S.name, bpm: S.bpm, notes: S.notes || "", label: S.label || "", vis: S.vis || "" })) };   // (166) vis: the Stage visual the song asks for
       if (kind === "rhythm") return { kind, ver: rcVer(), steps: RCP.steps, swing: RCP.swing, tracks: RCP.tracks.map((tr, i) => ({ i, snd: tr.snd, name: (rcSnd(tr.snd) || {}).name || tr.snd, role: roleOf(tr.snd), len: tr.len, on: tr.on.slice(0, RC_MAX).map(x => x ? 1 : 0), acc: tr.acc.slice(0, RC_MAX).map(x => x ? 1 : 0), mute: !!tr.mute })) };
       if (kind === "kits") {
         const K = window.__bpkits, list = [];
@@ -31570,7 +31639,7 @@ registerProcessor("nb-rec", NBRec);`;
       if (d.kind === "setlist") {
         if (d.ver !== slVer()) { lkSend("data", lkData("setlist")); return no("The set list changed on the tablet, so it was sent again: make the change once more"); }
         const old = SL.songs, cur = SL.cur >= 0 ? old[SL.cur] : null;
-        SL.songs = d.songs.filter(x => old[x.i]).map(x => { const S = old[x.i]; S.name = String(x.name || S.name).slice(0, 40); if (x.notes) S.notes = String(x.notes).slice(0, 2000); else delete S.notes; return S; });
+        SL.songs = d.songs.filter(x => old[x.i]).map(x => { const S = old[x.i]; S.name = String(x.name || S.name).slice(0, 40); if (x.notes) S.notes = String(x.notes).slice(0, 2000); else delete S.notes; if (x.vis) S.vis = String(x.vis).slice(0, 24); else delete S.vis; return S; });
         SL.cur = cur ? SL.songs.indexOf(cur) : -1; if (SL.pend) songCancel();
         slSave(); paintSong(); add139("link", "set list from the Pixelbook: " + SL.songs.length + " songs");
         lkSend("data", lkData("setlist")); return ok("Set list saved on the tablet");
@@ -31881,8 +31950,9 @@ registerProcessor("nb-rec", NBRec);`;
     // instrument (rig, transport, stack, mixer, FX, pads, set list, jam, health), each section with a version that
     // bumps when it changes. Anything (the Pixelbook, a report, the new shell) reads it; changes go through intents
     // that the tablet applies or refuses with the current value (the tablet wins every conflict). Stage 0 reads it
-    // from today's objects and applies a handful of intents; the switch (Help → New shell, or ?shell=new) shows an
-    // empty skeleton of the three spaces and the strip, off by default. Reports carry the document.
+    // from today's objects and applies a handful of intents; the switch (Help → New shell, or ?shell=new; the button
+    // went in 161, the URL parameter in 166) showed an empty skeleton of the three spaces and the strip, off by
+    // default. Reports carry the document.
     // ======================================================================
     const NBS = { ver: 0, secs: {}, doc: null, at: 0, subs: new Set(), timer: 0, perms: null, log: [] };
     const nbsTry = (f, d) => { try { const v = f(); return v === undefined ? d : v; } catch (e) { return d; } };
@@ -31917,7 +31987,7 @@ registerProcessor("nb-rec", NBRec);`;
         mixer: nbsTry(() => mixChannels().map(c => ({ group: c.group, name: c.name, sub: c.sub || "", level: Math.round(c.get() * 1000) / 1000, dflt: c.dflt })), []),
         fx: { on: state.fx.on !== false },
         knobs: S.kp || {}, pads: S.pads || {}, keys: { hold: !!S.hold, held: S.held || [], arp: S.arp || {} },
-        setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm })), []) },
+        setlist: { cur: song.cur == null ? -1 : song.cur, n: song.n || 0, name: song.name || "", next: song.next || "", pending: !!song.pend, songs: nbsTry(() => SL.songs.map(x => ({ name: x.name, bpm: x.bpm, vis: x.vis || "" })), []), vis: nbsTry(() => (SL.cur >= 0 && SL.songs[SL.cur] && SL.songs[SL.cur].vis) || "", "") },
         jam: S.jam || {},
         health: { dropouts: S.drops == null ? null : S.drops, buffer: S.buf || "fast", latencyMs: S.lat == null ? null : S.lat, notes: nbsTry(() => tabletNotes(d).map(x => x[1]), []).concat(nbsDropNote(S, outName)) },
         perms: Object.assign({}, nbsPerms()), ctl: S.ctl !== false,
@@ -31966,8 +32036,10 @@ registerProcessor("nb-rec", NBRec);`;
     window.NBState = { schema: 1, get: nbsGet, refresh: () => nbsRefresh(true), subscribe: nbsSubscribe, intent: nbsIntent, perms: nbsPerms, get ver() { return NBS.ver; } };
     // ---- the new-shell switch ----
     const SH = { on: false, el: null, space: "play", unsub: null };
-    // (161) the shell is the interface: on unless ?shell=old or nb-shell=old asks for the old one (a hidden way back, for one build)
-    const shWant = () => { try { const q = new URLSearchParams(location.search).get("shell"); if (q) return q !== "old"; return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
+    // (161) the shell is the interface. (166) the ?shell=old URL hatch of 161 is gone; nb-shell=old in storage is the
+    // test suite's hook only (the older tests in the harness set it to drive the parked chrome): no control on the
+    // page writes it any more (shellSet(false) has no caller), and it stays so the parked chrome can be tested.
+    const shWant = () => { try { return localStorage.getItem("nb-shell") !== "old"; } catch (e) { return true; } };
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
@@ -32016,7 +32088,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 165;
+    window.NB_BUILD = 166;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -32874,7 +32946,8 @@ registerProcessor("nb-rec", NBRec);`;
     // the tab is; one browser (Play's Sounds panel, as a drawer from the left); one mixer (the Mixer, as a drawer from
     // the bottom). The old header, its mode buttons, the tool row and the ☰ menu are parked out of sight: every
     // button still exists for the code that uses it, but the strip and Build are the way in. The new shell is on
-    // for good; ?shell=old (or nb-shell=old) is a hidden way back for one build, in case something was missed.
+    // for good: the ?shell=old hatch of 161 went in 166, and the parked chrome is reached only through the test
+    // suite's storage hook, nb-shell=old (660).
     // ======================================================================
     const BD = { tab: "sounds", el: null, obs: null, tick: 0 };
     try { const t = localStorage.getItem("nb-build-tab"); if (t) BD.tab = t; } catch (e) {}
@@ -33021,6 +33094,332 @@ registerProcessor("nb-rec", NBRec);`;
         return om.apply(this, arguments);
       }; }
     window.__live28 = { OCT, mlOctNote, mlOctApply, mlTransport, MCU };
+    // ======================================================================
+    // 166: the MiniLab's screen shows where you are. The readout (mlHud) mirrors onto the MiniLab's two lines while
+    // it's up, as before; two seconds after the last message the screen settles on an idle page: line 1 the sound
+    // the keys play (the stack's sound, the name the sound bar and Live's lvSnd show), line 2 the set list's song
+    // with "> next" when there is one, or, with no set list, the tempo and the key. It is repainted only when the
+    // text changes (sysex to the keyboard is slow) and only while the MiniLab is live with Lights on. The idle page
+    // follows the state document while it's wanted (one subscriber, no reads of its own); a readout, the 165 octave
+    // message among them, pushes the idle page back by its two seconds. Lights is one tap now: when a MiniLab is live
+    // and the lights are off, the MiniLab section of the MIDI sheet (Set up → MIDI parks that sheet) shows "Light up
+    // the MiniLab (pads, screen)", which does what the checkbox does, from a tap (Chrome asks for sysex on a gesture).
+    // The default stays off.
+    // ======================================================================
+    const SCR = { at: 0, on: "", t: 0, unsub: null, tick: 0 };
+    const SCR_IDLE = 2000;
+    const scrKey = (a, b) => String(a || "") + "\n" + String(b || "");
+    const scrWant = () => !!(md.access && ML.lights && mlLive());
+    function scrIdleText(d) {
+      d = d || nbsGet(); const st = d.stack || {}, sl = d.setlist || {}, t = d.transport || {};
+      const snd = (st.sound && st.sound.name) || (st.layers && st.layers[0] && st.layers[0].name) || "Nate Bloom";
+      let b;
+      if (sl.name) b = sl.name + (sl.next ? " > " + sl.next : "");
+      else { const k = t.key || {}, key = k.scale && k.scale !== "off" ? (KEY_NAMES[(((k.root | 0) % 12) + 12) % 12] || "") + " " + k.scale : ""; b = (t.tempo == null ? "" : Math.round(t.tempo) + " bpm") + (key ? " " + key : ""); }
+      return [String(snd).trim(), String(b).trim()];
+    }
+    const scrWrite = mlScreen;   // the original: the two lines to the keyboard (debounced 25 ms), nothing else
+    function scrMaybe(d) {
+      if (!scrWant() || performance.now() - SCR.at < SCR_IDLE) return;   // (a readout is up: its timer brings the idle page back)
+      const [a, b] = scrIdleText(d), k = scrKey(a, b);
+      if (k === SCR.on) return;
+      SCR.on = k; scrWrite(a, b);
+    }
+    function scrIdle() { SCR.t = 0; scrMaybe(null); }
+    // every readout goes through mlScreen: note the time and what the screen shows, and come back two seconds later
+    mlScreen = function (a, b) {
+      SCR.at = performance.now(); SCR.on = scrKey(a, b);
+      clearTimeout(SCR.t); SCR.t = setTimeout(scrIdle, SCR_IDLE + 30);
+      return scrWrite.apply(this, arguments);
+    };
+    // the document is followed only while the MiniLab is live with Lights on
+    function scrFollow() {
+      const w = scrWant();
+      if (w && !SCR.unsub) { SCR.unsub = nbsSubscribe(d => scrMaybe(d)); }
+      else if (!w && SCR.unsub) { SCR.unsub(); SCR.unsub = null; SCR.on = ""; }   // (a screen we stopped writing to may show anything: paint afresh next time)
+    }
+    SCR.tick = setInterval(() => { if (document.hidden) return; scrFollow(); if (!$id("midiSheet").hidden) litPaint(); }, 1000);
+    // new ports (Connect, Rescan, asking again for sysex, a MiniLab plugged in): what its screen shows is anyone's guess, so paint afresh
+    { const op = md.onPorts; md.onPorts = function () { const r = op ? op.apply(this, arguments) : undefined; SCR.on = ""; scrFollow(); if (SCR.unsub) setTimeout(() => scrMaybe(null), 700); return r; }; }
+    // ---- Lights in one tap ----
+    const litBtn = document.createElement("button"); litBtn.type = "button"; litBtn.className = "btn primary"; litBtn.id = "miniLit"; litBtn.hidden = true;
+    litBtn.textContent = "Light up the MiniLab (pads, screen)"; litBtn.title = "The same as the box below: Chrome asks once to control MIDI devices";
+    { const st = $id("miniSt"); if (st && st.parentNode) st.parentNode.insertBefore(litBtn, st.nextSibling); }
+    function litPaint() { const show = !ML.lights && mlLive(); if (litBtn.hidden === show) litBtn.hidden = !show; }
+    litBtn.addEventListener("click", () => {
+      const cb = $id("miniLights"); if (!cb || cb.checked) { litPaint(); return; }
+      cb.checked = true; cb.dispatchEvent(new Event("change", { bubbles: true }));   // (the checkbox's own handler: save, ask Chrome for sysex, light the pads)
+      add139("midi", "MiniLab lights on (one tap)"); litPaint(); scrFollow();
+    });
+    { const ps = paintSec; paintSec = function () { const r = ps.apply(this, arguments); try { litPaint(); } catch (e) {} return r; }; }
+    $id("midiBtn").addEventListener("click", litPaint);   // (the sheet's own listener holds the old paintSec by reference)
+    $id("miniLights").addEventListener("change", () => { litPaint(); scrFollow(); });
+    window.__live29 = { SCR, SCR_IDLE, scrIdleText, scrMaybe, scrFollow, litPaint, litBtn };
+    // ======================================================================
+    // 166: Elephant, the Skrillex-style trumpeting growl, as an effect on the sample itself. The sampler's fourth
+    // mode (Play · Grain · Elephant · Slice): the slot's sample plays as Play plays it (Start, Length, Loop, the
+    // waveform untouched) and a shape rides on it, sized to the sample: the pitch glides up (Glide, in semitones),
+    // two formants open with it (Wah), a saw-wave growl grows in as it climbs (Growl: the rasp on the level, the
+    // pitch and the formant), the whole thing is driven into a tanh (Drive), and at the end it dives back down.
+    // Length is the shape's length: ×1 is the time the sample takes to play under the glide, so Fit puts the dive at
+    // the sample's end; shorter samples get a shorter elephant. dB trims the level, −24 to +12, so it sits against
+    // the other sounds. The pad (under the sample bar, and bigger in the Shape sheet) moves Wah and Growl live while
+    // you play; Shape… opens a sheet like the sample editor's: the waveform with the shape drawn over it (drag the
+    // amber end to stretch the shape), the pad, a slider per control, Preview, Fit and Reset.
+    // ======================================================================
+    const ELE = { live: new Set(), prev: null, prevAt: 0, prevL: 0, raf: 0, drag: null, last: "" };
+    const ELE_KEYS = SAMP_ELE_KNOBS.map(k => k[0]);
+    const ELE_DEF = Object.fromEntries(SAMP_ELE_KNOBS.map(([k,, v]) => [k, v]));
+    const eleSlot = () => state.samp.slot;
+    const eleP = i => state.samp.slots[i == null ? eleSlot() : i].p;
+    const eleGlideSt = v => 24 * v;                             // semitones the pitch climbs over the rise
+    const eleWahHz = v => 300 * Math.pow(2, 0.5 + 3 * v);       // where the first formant opens to (425 Hz to 3.4 kHz)
+    const eleRateHz = v => 12 + 40 * v;                         // the growl's speed
+    const eleDepth = v => 0.15 + 0.6 * v;                       // and its depth
+    const eleDb = v => -24 + 36 * v;
+    const eleLenX = v => Math.pow(4, 2 * v - 1);                // ×0.25 to ×4 of the fitted length
+    const eleOn = () => state.engine === "samp" && state.samp.slots[eleSlot()].mode === "elephant";
+    const ELE_F0 = 300, ELE_RISE = 0.32, ELE_DIVE = 0.76;
+    function eleRates(P, rate) { const g = eleGlideSt(P.eGlide); return [rate * Math.pow(2, -g * 0.3 / 12), rate * Math.pow(2, g * 0.7 / 12)]; }
+    // how much faster than `rate` the sample runs under the shape, on average (the rise and the dive are exponential glides)
+    function eleAvgRate(P, rate) { const [r0, r1] = eleRates(P, rate); const m = r1 - r0 < 1e-6 ? r0 : (r1 - r0) / Math.log(r1 / r0); return (ELE_RISE + (1 - ELE_DIVE)) * m + (ELE_DIVE - ELE_RISE) * r1; }
+    function eleRegion(i) { const buf = sampBuf[i], P = eleP(i); if (!buf) return { off: 0, len: 0, dur: 0 }; const dur = buf.duration, off = P.start * dur * 0.98; return { off, len: Math.max(0.02, P.length * (dur - off)), dur }; }
+    function eleFitLen(i, rate) { const P = eleP(i); return eleRegion(i).len / eleAvgRate(P, rate || 1); }   // the shape that ends with the sample
+    function eleShapeLen(i, rate) { return Math.max(0.05, eleFitLen(i, rate) * eleLenX(eleP(i).eLen)); }
+    function eleCurve(d) {
+      const k = 1 + 24 * d, n = 1024, c = new Float32Array(n), norm = Math.tanh(k);
+      for (let j = 0; j < n; j++) { const x = j / (n - 1) * 2 - 1; c[j] = Math.tanh(k * x) / norm; }
+      return c;
+    }
+    const eleMakeup = d => 0.8 / (1 + 1.6 * d);   // the drive makes it louder; at the default the elephant sits about where Play does (test166e checks)
+    const eleLevel = (P, scale) => P.level * 1.4 * scale * Math.pow(10, eleDb(P.eDb) / 20) * eleMakeup(P.eDrive);
+    function eleVoice(midi, i, when, scale) {
+      const buf = sampBuf[i]; if (!buf || !ctx) return null;
+      const slot = state.samp.slots[i], P = slot.p;
+      const t = when ?? ctx.currentTime, rate = Math.pow(2, (midi - 60) / 12);
+      const { off, len } = eleRegion(i);
+      const L = eleShapeLen(i, rate), R = Math.max(0.03, ELE_RISE * L), D0 = Math.max(t + R + 0.005, t + ELE_DIVE * L), DL = Math.max(0.03, (1 - ELE_DIVE) * L);
+      const out = ctx.createGain(); out.gain.value = 0.0001;
+      const lvl = ctx.createGain(); lvl.gain.value = eleLevel(P, scale);
+      out.connect(lvl).connect(fx.input);
+      // the sample, as Play plays it
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      let [r0, r1] = eleRates(P, rate);
+      src.playbackRate.value = r0;
+      // the shape: 0 → 1 over the rise (an exponential, so the pitch climbs evenly), held, 1 → 0 over the dive
+      const shape = ctx.createConstantSource(); shape.offset.value = 0;
+      const B = Math.max(1.05, r1 / r0), N = 48;
+      const curve = up => Float32Array.from({ length: N }, (_, k) => { const x = up ? k / (N - 1) : 1 - k / (N - 1); return (Math.pow(B, x) - 1) / (B - 1); });
+      shape.offset.setValueAtTime(0, t); shape.offset.setValueCurveAtTime(curve(true), t, R); shape.offset.setValueCurveAtTime(curve(false), D0, DL);
+      const gPitch = ctx.createGain(); gPitch.gain.value = r1 - r0; shape.connect(gPitch).connect(src.playbackRate);
+      // two formants that open with the shape, over a little of the sample's own body
+      const pre = ctx.createGain(); pre.gain.value = 1; src.connect(pre);
+      let fTop = eleWahHz(P.eWah);
+      const f1 = ctx.createBiquadFilter(); f1.type = "bandpass"; f1.Q.value = 8; f1.frequency.value = ELE_F0;
+      const f2 = ctx.createBiquadFilter(); f2.type = "bandpass"; f2.Q.value = 6; f2.frequency.value = ELE_F0 * 2.4;
+      const gF1 = ctx.createGain(); gF1.gain.value = fTop - ELE_F0; shape.connect(gF1).connect(f1.frequency);
+      const gF2 = ctx.createGain(); gF2.gain.value = (fTop - ELE_F0) * 2.4; shape.connect(gF2).connect(f2.frequency);
+      const body = ctx.createBiquadFilter(); body.type = "lowpass"; body.frequency.value = 900; body.Q.value = 0.5;
+      const sum = ctx.createGain(); sum.gain.value = 1;
+      const m1 = ctx.createGain(); m1.gain.value = 1.8; pre.connect(f1).connect(m1).connect(sum);
+      const m2 = ctx.createGain(); m2.gain.value = 0.8; pre.connect(f2).connect(m2).connect(sum);
+      const m3 = ctx.createGain(); m3.gain.value = 0.55; pre.connect(body).connect(m3).connect(sum);
+      // the growl: a saw LFO that grows with the shape, on the level, the pitch and the first formant
+      const lfo = ctx.createOscillator(); lfo.type = "sawtooth"; lfo.frequency.value = eleRateHz(P.eGrowl);
+      const mul = ctx.createGain(); mul.gain.value = 0; lfo.connect(mul); shape.connect(mul.gain);
+      let dep = eleDepth(P.eGrowl);
+      const am = ctx.createGain(); am.gain.value = 1 - dep / 2;
+      const gAm = ctx.createGain(); gAm.gain.value = dep / 2; mul.connect(gAm).connect(am.gain);
+      const gFm = ctx.createGain(); gFm.gain.value = 0.05 * rate * dep; mul.connect(gFm).connect(src.playbackRate);
+      const gWm = ctx.createGain(); gWm.gain.value = 0.3 * fTop * dep; mul.connect(gWm).connect(f1.frequency);
+      // the drive, then the sample's Tone, then the growl's level, then the envelope
+      const drive = ctx.createWaveShaper(); drive.curve = eleCurve(P.eDrive); drive.oversample = "2x";
+      const post = ctx.createBiquadFilter(); post.type = "lowpass"; post.frequency.value = Math.min(expMap(P.tone, 250, 20000), 12000); post.Q.value = 0.7;
+      sum.connect(drive).connect(post).connect(am).connect(out);
+      if (slot.loop) { src.loop = true; src.loopStart = off; src.loopEnd = off + len; src.start(t, off); } else src.start(t, off, len);
+      shape.start(t); lfo.start(t);
+      out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 0.004);
+      const fade = expMap(P.fade, 0.02, 3);
+      const v = {
+        ele: true, slot: i, rate, t, L,
+        set(key, val) {   // the pad and the sheet move a playing elephant
+          const now = ctx.currentTime;
+          if (key === "eWah") { fTop = eleWahHz(val); gF1.gain.setTargetAtTime(fTop - ELE_F0, now, 0.02); gF2.gain.setTargetAtTime((fTop - ELE_F0) * 2.4, now, 0.02); gWm.gain.setTargetAtTime(0.3 * fTop * dep, now, 0.02); }
+          else if (key === "eGrowl") { dep = eleDepth(val); lfo.frequency.setTargetAtTime(eleRateHz(val), now, 0.02); am.gain.setTargetAtTime(1 - dep / 2, now, 0.02); gAm.gain.setTargetAtTime(dep / 2, now, 0.02); gFm.gain.setTargetAtTime(0.05 * rate * dep, now, 0.02); gWm.gain.setTargetAtTime(0.3 * fTop * dep, now, 0.02); }
+          else if (key === "eGlide") { [r0, r1] = eleRates(P, rate); src.playbackRate.setTargetAtTime(r0, now, 0.02); gPitch.gain.setTargetAtTime(r1 - r0, now, 0.02); }
+          else if (key === "eDrive") { drive.curve = eleCurve(val); lvl.gain.setTargetAtTime(eleLevel(P, scale), now, 0.02); }
+          else if (key === "eDb") lvl.gain.setTargetAtTime(eleLevel(P, scale), now, 0.02);
+        },
+        stop(at) {
+          const now = ctx.currentTime;
+          if (at == null) { at = now; out.gain.cancelScheduledValues(now); out.gain.setValueAtTime(Math.max(0.0001, out.gain.value), now); }
+          out.gain.setTargetAtTime(0.0001, at, fade / 4);
+          const end = at + fade * 1.6 + 0.05;
+          try { src.stop(end); } catch (e) {} try { shape.stop(end); lfo.stop(end); } catch (e) {}
+          if (at <= now + 0.01) ELE.live.delete(v); else setTimeout(() => ELE.live.delete(v), (at - now) * 1000);   // (a stop set for later: the pad still moves it until then)
+          setTimeout(() => { try { out.disconnect(); lvl.disconnect(); } catch (e) {} }, (end - now) * 1000 + 300);
+        },
+      };
+      ELE.live.add(v);
+      src.onended = () => { ELE.live.delete(v); };
+      return v;
+    }
+    eleVoiceHook = eleVoice;
+    // ---- setting a control: the slot, every playing elephant, the knob, the sliders, the pads ----
+    function eleSet(key, val, i) {
+      i = i == null ? eleSlot() : i; const P = eleP(i); val = Math.min(1, Math.max(0, +val || 0));
+      if (P[key] === val) return;
+      P[key] = val;
+      for (const v of ELE.live) if (v.slot === i) { try { v.set(key, val); } catch (e) {} }
+      if (i === eleSlot()) {
+        const lab = (SAMP_ELE_KNOBS.find(k => k[0] === key) || [])[1];
+        const el = lab && [...document.querySelectorAll("#engineKnobs .knob")].find(k => k.getAttribute("aria-label") === lab);
+        if (el && el.__nbSet) el.__nbSet(val); else save();   // (the knob repaints; P already holds the value)
+        elePaintAll();
+      }
+    }
+    // ---- the pads ----
+    const padXY = $id("eleXY"), padXY2 = $id("eleXY2"), padEl = $id("elePad"), eleBtn = $id("eleBtn");
+    function padDraw(cv) {
+      if (!cv || cv.offsetParent === null) return;
+      const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+      if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+      const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+      c.strokeStyle = "rgba(196,163,255,0.14)"; c.lineWidth = 1;
+      for (let k = 1; k < 4; k++) { c.beginPath(); c.moveTo(w * k / 4, 0); c.lineTo(w * k / 4, h); c.stroke(); c.beginPath(); c.moveTo(0, h * k / 4); c.lineTo(w, h * k / 4); c.stroke(); }
+      c.font = "10px ui-monospace, Menlo, monospace"; c.fillStyle = "rgba(236,231,247,0.45)";
+      c.textAlign = "right"; c.fillText("Wah →", w - 8, h - 7); c.textAlign = "left"; c.fillText("↑ Growl", 8, 14);
+      const P = eleP(), x = P.eWah * w, y = (1 - P.eGrowl) * h;
+      c.strokeStyle = "rgba(196,163,255,0.35)"; c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
+      c.fillStyle = ELE.drag && ELE.drag.cv === cv ? amber : lilac; c.beginPath(); c.arc(x, y, ELE.drag && ELE.drag.cv === cv ? 11 : 8, 0, Math.PI * 2); c.fill();
+      c.fillStyle = "#0d0b13"; c.beginPath(); c.arc(x, y, 3, 0, Math.PI * 2); c.fill();
+    }
+    function padFrom(cv, e) { const r = cv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, 1 - (e.clientY - r.top) / r.height))]; }
+    function padWire(cv) {
+      cv.addEventListener("pointerdown", e => {
+        if (!eleOn() && cv === padXY) return;
+        e.preventDefault(); cv.setPointerCapture(e.pointerId); ELE.drag = { cv, id: e.pointerId };
+        const [x, y] = padFrom(cv, e); eleSet("eWah", x); eleSet("eGrowl", y); padDraw(cv);
+      });
+      cv.addEventListener("pointermove", e => { if (!ELE.drag || ELE.drag.cv !== cv || ELE.drag.id !== e.pointerId) return; const [x, y] = padFrom(cv, e); eleSet("eWah", x); eleSet("eGrowl", y); });
+      const end = e => { if (ELE.drag && ELE.drag.cv === cv) { ELE.drag = null; padDraw(cv); save(); } };
+      cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+    }
+    padWire(padXY); padWire(padXY2);
+    // ---- the Shape sheet ----
+    const sheet = $id("eleSheet"), eleWave = $id("eleWave"), eleInfo = $id("eleInfo");
+    const sl = Object.fromEntries(ELE_KEYS.map(k => [k, $id("ele" + k.slice(1))]));   // eGlide → #eleGlide …
+    const slV = Object.fromEntries(ELE_KEYS.map(k => [k, $id("ele" + k.slice(1) + "V")]));
+    const eleFmt = (k, v) => display(k, v, eleP());
+    function eleSheetPaint() {
+      if (sheet.hidden) return;
+      const P = eleP();
+      for (const k of ELE_KEYS) { const want = String(Math.round(P[k] * 1000)); if (sl[k].value !== want) sl[k].value = want; slV[k].textContent = eleFmt(k, P[k]); }
+      const i = eleSlot(), { len } = eleRegion(i), L = eleShapeLen(i, 1), fit = eleFitLen(i, 1);
+      eleInfo.textContent = (sampBuf[i] ? fmtTime(len) + " of sample · " : "") + "shape " + fmtTime(L) + (Math.abs(L - fit) < 0.01 ? " (fits)" : L > fit ? " (longer than the sample)" : " (ends before the sample)");
+      padDraw(padXY2); eleWaveDraw();
+    }
+    function eleWaveDraw() {
+      const cv = eleWave, i = eleSlot(), buf = sampBuf[i]; if (!cv || sheet.hidden) return;
+      const dpr = window.devicePixelRatio || 1, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+      const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+      if (!buf) { c.fillStyle = "rgba(236,231,247,0.5)"; c.font = "12px ui-monospace, Menlo, monospace"; c.fillText("Load a sample into this slot first", 12, h / 2); return; }
+      const P = eleP(i), { off, len } = eleRegion(i), L = eleShapeLen(i, 1);
+      const span = Math.max(len / eleAvgRate(P, 1), L) * 1.06;   // seconds across the canvas: the sample as it plays under the shape, and the shape
+      const avg = eleAvgRate(P, 1), sx = (len / avg) / span * w;   // the sample's played part, in pixels
+      // the sample's waveform (the played part, as it plays under the shape: squeezed by the glide), in lilac
+      const chans = Array.from({ length: buf.numberOfChannels }, (_, k) => buf.getChannelData(k)), sr = buf.sampleRate;
+      const i0 = Math.floor(off * sr), n = Math.max(1, Math.floor(len * sr)), cols = Math.max(1, Math.floor(sx)), step = n / cols;
+      for (let x = 0; x < cols; x++) {
+        const a = i0 + Math.floor(x * step), b = Math.min(i0 + n, i0 + Math.floor((x + 1) * step) + 1), inc = Math.max(1, Math.floor((b - a) / 160));
+        let mn = 0, mx = 0;
+        for (const ch of chans) for (let j = a; j < b; j += inc) { const v = ch[j]; if (v < mn) mn = v; if (v > mx) mx = v; }
+        c.fillStyle = "rgba(196,163,255,0.55)"; c.fillRect(x, h / 2 - mx * h * 0.44, 1, Math.max(1, (mx - mn) * h * 0.44));
+      }
+      // the shape: pitch over time, in amber (the rise, the hold with the growl, the dive)
+      const Lx = L / span * w, [r0, r1] = eleRates(P, 1), g = eleGlideSt(P.eGlide);
+      const yOf = s => h * 0.82 - s * h * 0.64 * Math.min(1, 0.25 + g / 24);
+      c.strokeStyle = amber; c.lineWidth = 2; c.beginPath();
+      const B = Math.max(1.05, r1 / r0), dep = eleDepth(P.eGrowl);
+      for (let x = 0; x <= Lx; x++) {
+        const u = x / Lx; let s;
+        if (u < ELE_RISE) s = (Math.pow(B, u / ELE_RISE) - 1) / (B - 1); else if (u < ELE_DIVE) s = 1; else s = (Math.pow(B, 1 - (u - ELE_DIVE) / (1 - ELE_DIVE)) - 1) / (B - 1);
+        const growl = s * dep * 0.06 * h * Math.sin(x * 0.9);   // the rasp, drawn as a shiver
+        x === 0 ? c.moveTo(x, yOf(s)) : c.lineTo(x, yOf(s) + growl);
+      }
+      c.stroke();
+      // the end marker (drag it) and the sample's end
+      c.fillStyle = amber; c.fillRect(Math.min(w - 2, Math.max(0, Lx - 1)), 0, 2, h); c.fillRect(Math.min(w - 14, Math.max(0, Lx - 7)), h - 14, 14, 14);
+      c.fillStyle = "rgba(236,231,247,0.35)"; c.fillRect(Math.min(w - 1, sx), 0, 1, h);
+      c.font = "10px ui-monospace, Menlo, monospace"; c.fillStyle = "rgba(236,231,247,0.6)"; c.textAlign = "left";
+      c.fillText("sample ends " + fmtTime(len / avg), Math.min(w - 120, sx + 4), 12);
+      c.fillStyle = amber; c.textAlign = Lx > w - 90 ? "right" : "left"; c.fillText("shape " + fmtTime(L), Lx > w - 90 ? Lx - 6 : Lx + 6, h - 18);
+      if (ELE.prev && ctx) {   // the preview's playhead
+        const pos = (ctx.currentTime - ELE.prevAt) / span * w;
+        if (pos >= 0 && pos <= w) { c.fillStyle = "#ece7f7"; c.fillRect(pos, 0, 1.5, h); }
+      }
+    }
+    // dragging on the wave sets the shape's length (the amber end follows the finger)
+    eleWave.addEventListener("pointerdown", e => {
+      if (!sampBuf[eleSlot()]) return;
+      e.preventDefault(); eleWave.setPointerCapture(e.pointerId); ELE.wdrag = e.pointerId; eleWaveTo(e);
+    });
+    eleWave.addEventListener("pointermove", e => { if (ELE.wdrag === e.pointerId) eleWaveTo(e); });
+    const wEnd = e => { if (ELE.wdrag === e.pointerId) { ELE.wdrag = null; save(); } };
+    eleWave.addEventListener("pointerup", wEnd); eleWave.addEventListener("pointercancel", wEnd);
+    function eleWaveTo(e) {
+      const i = eleSlot(), P = eleP(i), r = eleWave.getBoundingClientRect(), { len } = eleRegion(i), L = eleShapeLen(i, 1);
+      const span = Math.max(len / eleAvgRate(P, 1), L) * 1.06, want = Math.max(0.05, (e.clientX - r.left) / r.width * span);
+      const x = want / eleFitLen(i, 1);   // ×fit → the knob: lenX = 4^(2v−1)
+      eleSet("eLen", (Math.log(Math.max(0.25, Math.min(4, x))) / Math.log(4) + 1) / 2);
+    }
+    function eleOpen() {
+      if (!eleOn()) return;
+      start();
+      const i = eleSlot(), s = state.samp.slots[i];
+      $id("eleTitle").textContent = "Elephant · S" + (i + 1) + (s.name ? " · " + s.name : "");
+      sheet.hidden = false; requestAnimationFrame(eleSheetPaint);
+    }
+    function eleClose() { elePrevStop(); sheet.hidden = true; }
+    function elePrevStop() { if (ELE.prev) { try { ELE.prev.stop(); } catch (e) {} ELE.prev = null; } cancelAnimationFrame(ELE.raf); ELE.raf = 0; $id("elePlay").textContent = "▶ Preview"; }
+    function elePrev() {
+      if (ELE.prev) { elePrevStop(); eleWaveDraw(); return; }
+      const i = eleSlot(); if (!sampBuf[i] || !ctx) return;
+      start();
+      const v = makeSampleVoice(60, i, undefined, 1); if (!v) return;
+      ELE.prev = v; ELE.prevAt = ctx.currentTime; ELE.prevL = v.L || eleShapeLen(i, 1);
+      const P = eleP(i), until = Math.max(ELE.prevL, eleRegion(i).len / eleAvgRate(P, 1)) + 0.05;
+      v.stop(ELE.prevAt + until);
+      $id("elePlay").textContent = "■ Stop";
+      const tick = () => { if (!ELE.prev) return; if (ctx.currentTime - ELE.prevAt > until + 0.4) { ELE.prev = null; $id("elePlay").textContent = "▶ Preview"; eleWaveDraw(); return; } eleWaveDraw(); ELE.raf = requestAnimationFrame(tick); };
+      ELE.raf = requestAnimationFrame(tick);
+    }
+    for (const k of ELE_KEYS) sl[k].addEventListener("input", () => eleSet(k, sl[k].value / 1000));
+    $id("elePlay").addEventListener("click", elePrev);
+    $id("eleFit").addEventListener("click", () => { eleSet("eLen", 0.5); add139("sampler", "Elephant fit to the sample"); });
+    $id("eleReset").addEventListener("click", () => { for (const k of ELE_KEYS) eleSet(k, ELE_DEF[k]); });
+    $id("eleDone").addEventListener("click", eleClose);
+    sheet.addEventListener("click", e => { if (e.target === sheet) eleClose(); });
+    eleBtn.addEventListener("click", eleOpen);
+    // ---- paint: the pad and Shape… show in Elephant mode; the pad follows the knobs ----
+    function elePaintAll() { padDraw(padXY); eleSheetPaint(); }
+    function elePaint() {
+      const on = eleOn();
+      if (padEl.hidden === on) padEl.hidden = !on;
+      if (eleBtn.hidden === on) eleBtn.hidden = !on;
+      if (!on && !sheet.hidden) eleClose();
+      if (on) requestAnimationFrame(() => padDraw(padXY));
+    }
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); try { elePaint(); } catch (e) {} return r; }; }
+    { const rs = refreshSamplesUI; refreshSamplesUI = function () { const r = rs.apply(this, arguments); try { elePaint(); } catch (e) {} return r; }; }
+    setInterval(() => {   // a knob turned by hand (or the MiniLab) moves the pad's dot
+      if (document.hidden || !eleOn() || ELE.drag) return;
+      const P = eleP(), k = P.eWah.toFixed(3) + "," + P.eGrowl.toFixed(3) + "," + P.eLen.toFixed(3) + "," + P.eGlide.toFixed(3);
+      if (k !== ELE.last) { ELE.last = k; elePaintAll(); }
+    }, 200);
+    elePaint();
+    window.__live30 = { ELE, eleVoice, eleSet, eleShapeLen, eleFitLen, eleAvgRate, eleRegion, eleOpen, eleClose, elePrev, eleLevel, eleMakeup, eleWahHz, eleRateHz, eleGlideSt, eleDb };
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }
