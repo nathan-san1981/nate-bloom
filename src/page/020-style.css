@@ -3356,3 +3356,17 @@ body.build-on.recording.mls-on .dj, body.build-on.recording.mls-on .trk, body.bu
   body.build-on.recording.mls-on .app { padding-top: calc(178px + var(--mls-h) + var(--sat)); }
   body.build-on.recording.mls-on .dj, body.build-on.recording.mls-on .trk, body.build-on.recording.mls-on .browser { top: calc(168px + var(--mls-h) + var(--sat)); }
 }
+/* 173: nothing on the keys (the last sound taken out) */
+.stk-none { font: 600 0.8rem var(--font-body); color: var(--dim); padding: 0 6px; }
+/* 173: the KeyLab Essential 61 mk3 in the strip: a 9th knob and faders 5–9 */
+.mls-c.mls-x { display: none; }
+body.kl-on .mls-c.mls-x { display: grid; }
+body.kl-on .mls-k { flex: 9; grid-template-columns: repeat(9, minmax(0, 1fr)); }
+body.kl-on .mls-f { flex: 9; grid-template-columns: repeat(9, minmax(0, 1fr)); }
+body.kl-on .mls-name { width: 70px; }
+/* 173: the keyboard's 61-key button */
+#kb61 { font: 700 0.72rem var(--font-mono); min-width: 40px; }
+@media (max-width: 760px) { #kb61 { display: none; } }
+/* 173: the Linux app across both screens: the page uses the whole width */
+body.nb-wide .app { max-width: none; }
+body.nb-wide .knobs { max-width: 1600px; }

@@ -1,6 +1,6 @@
   // ---------- Record the master output and export it ----------
   const take = { rec: false, L: [], R: [], len: 0, startedAt: 0, done: null, node: null, mute: null, timer: 0 };
-  const MAX_TAKE_SEC = 300;
+  const MAX_TAKE_SEC = NB_BIG ? 3600 : 300;   // (173) an hour on a big computer
   const takeBtn = document.getElementById("takeBtn"), takeBar = document.getElementById("takeBar");
   const takeInfo = document.getElementById("takeInfo");
   const fmtClock = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");

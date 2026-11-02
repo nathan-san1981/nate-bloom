@@ -3,7 +3,8 @@
   // library and plugin sounds, state.lib.parts), the SF2/SFZ instrument, and a Sampler slot. The group whose controls
   // show (state.engine) always plays; state.stack marks the others that play along with it.
   {
-    const NOSTK = () => ({ syn: false, lib: false, inst: false, samp: -1, f: "" });
+    const NOSTK = () => ({ syn: false, lib: false, inst: false, samp: -1, hw: false, off: false, f: "" });   // (173) off: the last sound was taken out, nothing plays from the keys
+    const HWX = () => window.__hw || null;   // (173) the hardware synth (800): played over MIDI, heard through the audio input
     if (!state.stack || typeof state.stack !== "object") state.stack = NOSTK();
     const S = () => state.stack || (state.stack = NOSTK());
     const isSyn = id => !!ENGINES[id] && (id !== "fm" || betaOn);
@@ -14,8 +15,12 @@
     let libSel = 0;
     const ADD = { on: false }, pend = new Set();   // (library slots a sound is loading into)
     function groupsOn(e = melo()) {
-      const s = S(), g = { syn: !!s.syn, lib: !!s.lib, inst: !!s.inst, samp: Number.isInteger(s.samp) ? s.samp : -1 };
-      const f = grp(e); if (f) g[f] = true;
+      const s = S(), g = { syn: !!s.syn, lib: !!s.lib, inst: !!s.inst, samp: Number.isInteger(s.samp) ? s.samp : -1, hw: !!s.hw && !!HWX() };
+      const f = grp(e);
+      // (173) after the last sound went out, anything that turns a synth on again (an engine tab, the Live screen, a
+      // controller) or loads a library sound brings the keys back
+      if (s.off && ((f === "syn" && synOn().length) || (f === "lib" && state.lib.parts.some(p => p && p.id)))) s.off = false;
+      if (f && !s.off) g[f] = true;
       if (!(g.samp >= 0 && g.samp < NSLOTS && sampBuf[g.samp])) g.samp = -1;
       if (g.lib && f !== "lib" && !state.lib.parts.some(p => p && p.id)) g.lib = false;
       return g;
@@ -28,6 +33,7 @@
       if (g.lib) out.push(...vc0("lib"));
       if (g.inst) out.push(...vc0("inst"));
       if (g.samp >= 0) { const sl = g.samp; out.push({ key: "samp", name: "Sampler", accepts: () => true, make: (m, when, scale = 1) => makeSampleVoice(m, sl, when, scale) }); }
+      if (g.hw) { const H = HWX(); out.push({ key: "hw", name: H.name, accepts: () => true, make: (m, when, scale = 1) => H.voice(m, when, scale) }); }
       return out;
     }
     voiceComponents = function (eng = state.engine) {
@@ -39,12 +45,14 @@
         const e = ["drum", "pads"].includes(state.engine) ? melo() : state.engine, f = grp(e);
         if (!f) return mvp.apply(this, arguments);
         const ke = state.engine; let vs;
-        state.engine = e; try { vs = mvp.call(this, m, when, scale); } finally { state.engine = ke; }   // (the one with the controls, as before: key lights and all)
+        if (S().off) vs = [];   // (173) nothing of Nate Bloom's is playing: only what plays along (a Sampler slot, the hardware synth)
+        else { state.engine = e; try { vs = mvp.call(this, m, when, scale); } finally { state.engine = ke; } }   // (the one with the controls, as before: key lights and all)
         const g = groupsOn(e), more = [];
         if (f !== "syn" && g.syn) more.push(...vc0(synOn()[0] || "saw"));
         if (f !== "lib" && g.lib) more.push(...vc0("lib"));
         if (f !== "inst" && g.inst) more.push(...vc0("inst"));
         if (g.samp >= 0) { const sl = g.samp; more.push({ accepts: () => true, make: (mm, w, sc) => makeSampleVoice(mm, sl, w, sc) }); }
+        if (g.hw) { const H = HWX(); more.push({ accepts: () => true, make: (mm, w, sc) => H.voice(mm, w, sc) }); }
         for (const c of more) if (c.accepts(m)) { const v = c.make(m, when, scale); if (v) vs.push(v); }
         return vs;
       }; }
@@ -53,13 +61,14 @@
       if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? "your plugin" : "plugin"; }
       return p.id.startsWith("nb-") ? "studio" : "library";
     }
-    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a" };
+    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
     function items() {
       const g = groupsOn(), out = [];
       if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => out.push({ t: "syn", id, name: ENGINES[id].name, kind: "synth" })); }
       if (g.lib) state.lib.parts.forEach((p, i) => { if (p && p.id) out.push({ t: "lib", i, id: p.id, name: p.name, kind: kindOf(p), off: !p.on, wait: !libInsts[i] }); });
       if (g.inst) out.push({ t: "inst", name: curInst ? curInst.name : "My instrument", kind: "instrument", wait: !curInst });
       if (g.samp >= 0) { const sl = state.samp.slots[g.samp]; out.push({ t: "samp", slot: g.samp, name: "Sampler S" + (g.samp + 1) + (sl && sl.name ? " · " + baseName(sl.name) : ""), kind: "sampler" }); }
+      if (g.hw) { const H = HWX(); out.push({ t: "hw", name: H.name, kind: "hardware", wait: !H.ready(), why: H.why() }); }
       return out;
     }
     const libSelOn = () => { const ps = state.lib.parts; return ps[libSel] && ps[libSel].id ? libSel : ps.findIndex(p => p && p.id); };
@@ -74,6 +83,7 @@
       if (it.t === "lib") return state.lib.parts[it.i];
       if (it.t === "inst") return state.inst;
       if (it.t === "samp") return state.samp.slots[it.slot];
+      if (it.t === "hw") return HWX();
       return null;
     }
     const isMuted = it => { const h = muteHome(it); return !!(h && h.mute); };
@@ -93,6 +103,7 @@
       state.lib.parts.forEach((p, i) => { if (p && p.mute && !has(x => x.t === "lib" && x.i === i)) { delete p.mute; n++; } });
       if (state.inst && state.inst.mute && !has(x => x.t === "inst")) { delete state.inst.mute; n++; }
       state.samp.slots.forEach((sl, i) => { if (sl && sl.mute && !has(x => x.t === "samp" && x.slot === i)) { delete sl.mute; n++; } });
+      { const H = HWX(); if (H && H.mute && !has(x => x.t === "hw")) { delete H.mute; n++; } }
       if (n) { try { lvApply(); } catch (e) {} }
     }
     const SPK = muted => '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 9.5h4l5-4.2v13.4l-5-4.2H3z" fill="currentColor"/>' +
@@ -106,10 +117,12 @@
       return b;
     }
     // ---- changing it ----
-    function keepFocusPlaying() { const g = grp(state.engine) || grp(S().f); if (g) S()[g] = true; }   // what had the controls plays on
+    function keepFocusPlaying() { const g = grp(state.engine) || grp(S().f); if (g && !S().off) S()[g] = true; }   // what had the controls plays on
     function focusOn(it) {
       const s = S();
+      if (it.t !== "samp" && it.t !== "hw") s.off = false;
       if (it.t === "samp") { say(it.name + " plays along with the keys. Its sample and settings are in Samples."); return; }
+      if (it.t === "hw") { const H = HWX(); if (H) H.open(); return; }
       const f0 = grp(state.engine), f1 = it.t;
       if (f0 && f0 !== f1) s[f0] = true;
       s[f1] = false;
@@ -128,18 +141,29 @@
     }
     function drop(it, quiet) {
       const all = items(), rest = all.filter(x => !same(x, it)), s = S();
-      if (!quiet && it.t !== "samp" && !rest.some(x => x.t !== "samp")) { say("It's the only sound playing. To change it, pick another sound (tap its name above)."); return false; }
+      const along = x => x.t === "samp" || x.t === "hw";   // (they play along; something of Nate Bloom's has the controls)
+      if (!along(it) && !rest.some(x => !along(x))) {   // (173) the last of Nate Bloom's sounds: out, and the keys play nothing (or only what plays along)
+        setMute(it, false); s.off = true;
+        if (it.t === "syn") { state.layers[it.id].on = false; s.syn = false; }
+        else if (it.t === "lib") { removePart(it.i); s.lib = false; }
+        else if (it.t === "inst") s.inst = false;
+        if (!rest.length) { try { allOff(); } catch (e) {} }
+        renderEngine(); save(); try { lvApply(); } catch (e) {}
+        if (!quiet) say(it.name + " is out. " + (rest.length ? "Still playing: " + rest.map(x => x.name).join(", ") + ". " : "Nothing plays from the keys now. ") + "A Quick sound or + Add brings one in");
+        return true;
+      }
       const wasSel = isSel(it);
       setMute(it, false);   // (172) back audible if it's added again
       if (it.t === "syn") { state.layers[it.id].on = false; if (!synOn().length) s.syn = false; }
       else if (it.t === "lib") { removePart(it.i); if (!state.lib.parts.some(p => p && p.id)) s.lib = false; }
       else if (it.t === "inst") s.inst = false;
+      else if (it.t === "hw") { s.hw = false; try { HWX().allOff(); } catch (e) {} }
       else s.samp = -1;
       const gone = it.t === "syn" ? !synOn().length : it.t === "lib" ? !state.lib.parts.some(p => p && p.id) : it.t === "inst";
       if (wasSel || (gone && grp(state.engine) === it.t)) {
         // its controls go to the next one still playing
         // (one of the same kind if there's one left, so a plugin's controls go to the next plugin)
-        const cand = items().filter(x => x.t !== "samp" && !(gone && x.t === it.t)), nxt = cand.find(x => x.t === it.t) || cand[0] || rest.find(x => x.t !== "samp");
+        const cand = items().filter(x => !along(x) && !(gone && x.t === it.t)), nxt = cand.find(x => x.t === it.t) || cand[0] || rest.find(x => !along(x));
         if (nxt) {
           const g0 = grp(state.engine), left = { syn: synOn().length > 0, lib: state.lib.parts.some(p => p && p.id), inst: it.t !== "inst" };
           if (g0 && g0 !== nxt.t) s[g0] = !!left[g0];   // what had the controls plays on if anything of it is left
@@ -156,8 +180,8 @@
       return true;
     }
     function only(it) {
-      const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1;
-      setMute(it, false);   // (172) "Only" means hear it
+      const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1; if (s.hw) { s.hw = false; try { HWX().allOff(); } catch (e) {} }
+      setMute(it, false); s.off = false;   // (172) "Only" means hear it
       if (it.t === "syn") { for (const k in state.layers) state.layers[k].on = k === it.id; state.engine = it.id; state.melodic = it.id; }
       else if (it.t === "lib") { for (let k = MAX_PARTS - 1; k >= 0; k--) if (k !== it.i && state.lib.parts[k]) removePart(k); libSel = 0; state.lib.parts.forEach(p => { if (p) p.on = true; }); state.engine = "lib"; }
       else if (it.t === "inst") state.engine = "inst";
@@ -222,7 +246,10 @@
       say("That one doesn't play from the keys"); return false;
     }
     // (170) adding a sound never moves or stops what's held: the held notes stay where they are, arp and all
-    { const t0 = together; together = async function (e) { nbKeepHeld++; try { return await t0.apply(this, arguments); } finally { nbKeepHeld--; } }; }
+    { const t0 = together; together = async function (e) {
+        nbKeepHeld++;
+        try { const r = await t0.apply(this, arguments); if (r && e && e.id !== "e:samp") S().off = false; return r; }   // (173) a sound added after the last went out: it plays
+        finally { nbKeepHeld--; } }; }
     window.__nbTogether = together;
     // tap a sound (the sound list, Play alone in Plugins): it plays alone; the arrows swap the highlighted one
     let swapping = false;
@@ -245,7 +272,7 @@
       if (e.id.startsWith("w:wam:")) preview = false;   // plugins don't play a note by themselves
       if (melodicPick(e.id)) {
         if (swapping && items().length > 1) return swap(e, preview);
-        const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1;   // alone: the others stop
+        const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1; s.off = false; if (s.hw) { s.hw = false; try { HWX().allOff(); } catch (e) {} }   // alone: the others stop
         const k = e.id.startsWith("e:") ? e.id.slice(2) : "";
         if (isSyn(k)) for (const x in state.layers) state.layers[x].on = x === k;
         if (e.id.startsWith("w:")) { const ps = state.lib.parts; for (let i = MAX_PARTS - 1; i >= 1; i--) if (ps[i]) removePart(i); if (ps[0]) ps[0].on = true; libSel = 0; }
@@ -290,22 +317,23 @@
       const its = items(), n = its.length;
       sweepMutes(its);
       stkRow.innerHTML = ""; stkRow.appendChild(el("span", "stk-lab", n > 1 ? "Playing together" : "Playing"));
+      if (!n) stkRow.appendChild(el("span", "stk-none", "No sound on the keys"));   // (173) the last one was taken out
       its.forEach(it => {
         const mu = isMuted(it);
         const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
         if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
-        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · loading…" : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
+        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
         m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
         m.addEventListener("click", () => { start(); focusOn(it); });
         c.appendChild(m);
         if (it.t === "lib" && PLUG(it.id) && NBW_OK()) { const g = el("button", "sc-g", "⚙"); g.title = it.name + "'s own controls"; g.setAttribute("aria-label", g.title); g.addEventListener("click", () => { start(); __wam.instrument(it.id).then(W => __wam.openGui(W)).catch(() => {}); }); c.appendChild(g); }
         // (172) the speaker mutes it and brings it back; ✕ takes it out of what's playing (+ in Quick sounds adds it again)
-        if (n > 1 || mu) c.appendChild(muteBtn("sc-m", it));
-        if (n > 1) { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out (the others keep playing · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
+        c.appendChild(muteBtn("sc-m", it));   // (173) even the only one: it can be muted, or taken out and nothing plays
+        { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out" + (n > 1 ? " (the others keep playing" : " (nothing plays from the keys") + " · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
         stkRow.appendChild(c);
       });
-      const add = el("button", "btn stk-add", "+ Add"); add.title = "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
+      const add = el("button", "btn stk-add", "+ Add"); add.title = !n ? "Pick a sound for the keys" : "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
       add.addEventListener("click", () => { ADD.on = true; openBrowser(); paintBrMode(); });
       stkRow.appendChild(add);
       stkHelp.innerHTML = "";
@@ -314,7 +342,8 @@
         stkHelp.appendChild(t);
         if (sel) { const b = el("button", "btn", "Only " + sel.name); b.title = "Stop the others and keep " + sel.name; b.addEventListener("click", () => { start(); only(sel); }); stkHelp.appendChild(b); }
       } else {
-        const t = el("span"); t.innerHTML = "<span class='long'>Tap a Quick sound to switch · <b>+</b> plays it with this one</span><span class='short'>Tap a Quick sound to switch · <b>+</b> plays it with this one</span>";
+        const t = el("span"); t.innerHTML = !n ? "<span class='long'>The keys play nothing · tap a Quick sound, or <b>+</b> on one, to bring a sound in</span><span class='short'>The keys play nothing · tap a Quick sound to bring one in</span>"
+          : "<span class='long'>Tap a Quick sound to switch · <b>+</b> plays it with this one · the speaker mutes it · ✕ takes it out</span><span class='short'>Tap a Quick sound to switch · <b>+</b> plays it with this one</span>";
         stkHelp.appendChild(t);
       }
       const lb = document.getElementById("wamCtl"); if (lb && state.engine === "lib") { const p = state.lib.parts[libSelOn()]; lb.hidden = !(p && PLUG(p.id)); if (p && PLUG(p.id)) lb.textContent = "⚙ " + p.name; }
@@ -324,6 +353,7 @@
     { const us = updateSoundBar; updateSoundBar = function () { const r = us.apply(this, arguments); try { paint(); } catch (e) {} return r; }; }
     // the sound bar names the highlighted one when several play
     { const cl = currentLabel; currentLabel = function () {
+        try { if (S().off && grp(state.engine) && !items().some(x => x.t !== "samp" && x.t !== "hw")) return ["No sound on the keys", "tap for all sounds"]; } catch (e) {}   // (173)
         const r = cl.apply(this, arguments);
         try { const its = items(); if (its.length > 1 && grp(state.engine)) { const it = its.find(isSel); if (it) return [it.t === "syn" ? r[0] : it.name, "with " + (its.length - 1) + " more · ‹ › swap it · tap for all sounds"]; } } catch (e) {}
         return r;
@@ -383,16 +413,19 @@
       (tabCfg.sounds || []).forEach(id => { const inf = qkInfo(id); if (inf) out.push({ id, pin: true, name: inf.name, sub: inf.sub || "" }); });
       Object.keys(ENGINES).forEach(id => { if (isSyn(id) && !(tabCfg.hidden || []).includes(id)) out.push({ id: "e:" + id, eng: id, name: ENGINES[id].short || ENGINES[id].name, sub: (typeof TAB_SUB !== "undefined" && TAB_SUB[id]) || "" }); });
       out.push({ id: "e:inst", name: "Inst", sub: "SF2 · SFZ" });
+      { const H = HWX(); if (H && H.shown()) out.splice((tabCfg.sounds || []).length, 0, { id: "hw:1", hw: true, name: H.short || H.name, sub: H.present() ? "hardware" : "not plugged in" }); }   // (173)
       return out;
     }
     const qkEntry = q => q.id.startsWith("e:") ? { id: q.id, name: q.eng ? ENGINES[q.eng].name : "My instrument", cat: "engines" } : entryById(q.id);
     function qkPlaying(q) {
+      if (q.hw) return groupsOn().hw;
       if (q.id.startsWith("e:") || q.id.startsWith("w:")) return inStack(q.id);
       if (q.id.startsWith("m:")) return groupsOn().inst && state.cur && state.cur.id === q.id;
       return false;
     }
     async function qkAlone(q) {
       start();
+      if (q.hw) { const H = HWX(); if (H) H.open(); return; }   // (it can't play alone: a sound of Nate Bloom's always has the controls)
       if (q.id.startsWith("my:")) { try { useSoundTab(q.id); } catch (e) {} return; }
       const e = qkEntry(q); if (!e) return;
       await chooseEntry(e, !q.id.startsWith("e:"));   // (an engine switches quietly, like its tab did; a sound plays a short note, plugins never)
@@ -400,13 +433,14 @@
       paint();
     }
     // (172) the playing sound a Quick tile stands for
-    const qkItemOf = (q, its) => its.find(x => (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
+    const qkItemOf = (q, its) => its.find(x => (q.hw && x.t === "hw") || (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
     async function qkToggle(q) {
       start();
       if (qkPlaying(q)) {
         const it = qkItemOf(q, items());
         if (it) drop(it); return;
       }
+      if (q.hw) { S().hw = true; keepFocusPlaying(); renderEngine(); save(); const H = HWX(); if (H) H.added(); return; }
       const e = qkEntry(q); if (!e) return;
       await together(e); paint();
     }
@@ -414,7 +448,7 @@
     function paintQuick() {
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
-      const togOn = q => !q.id.startsWith("my:") && togOK(q.id);
+      const togOn = q => q.hw || (!q.id.startsWith("my:") && togOK(q.id));
       const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));

@@ -28,7 +28,7 @@
   // Held notes live apart from played notes, so you can play over a drone,
   // and they keep the sound they were held with even if you switch engines.
   const heldVoices = new Map();
-  const MAX_HELD = 16;
+  const MAX_HELD = NB_BIG ? 32 : 16;
   const heldCount = () => { let n = 0; heldVoices.forEach(v => { n += v.tones.length; }); return n; };
   const markTones = (tones, fn, on) => tones.forEach(m => fn(m, on));
   function dropHeld(root) {
@@ -372,8 +372,13 @@
   }
   // the keys use the tablet's width (133): as many octaves as fit at 40 px or more a white key, two to five
   // (phones: two octaves)
+  // (173) 61 keys across, like the KeyLab Essential 61 (C2–C7, its range at its middle octave): the 61 button by the
+  // keys; until it's pressed, on whenever a KeyLab is plugged in
+  let KB61 = null; try { const v = localStorage.getItem("nightbloom-kb61"); if (v === "on" || v === "off") KB61 = v; } catch (e) {}
+  const kb61 = () => window.innerWidth > 760 && (KB61 === "on" || (KB61 == null && !!window.__klHere && window.__klHere()));
   const kbKeyCount = () => {
     if (window.innerWidth <= 600) return 25;
+    if (kb61()) return 61;
     const w = keysEl.getBoundingClientRect().width;
     if (!(w > 0)) return window.innerWidth >= 1100 ? 37 : 25;
     return Math.max(2, Math.min(5, Math.floor((w / 40 - 1) / 7))) * 12 + 1;
@@ -384,7 +389,8 @@
     if (state.engine === "pads") return buildKitPads();
     keysEl.classList.remove("pads", "kit"); padEls.clear();
     keysEl.innerHTML = ""; keyEls.clear();
-    const start = BASE + state.octave * 12, count = kbKeyCount();
+    const count = kbKeyCount(), start = (count === 61 ? 36 : BASE) + state.octave * 12;
+    keysEl.dataset.n = count;
     const whites = [];
     for (let m = start; m < start + count; m++) if (![1,3,6,8,10].includes(m % 12)) whites.push(m);
     const wPct = 100 / whites.length;
@@ -406,6 +412,17 @@
     try { kbLabel(); } catch (e) {}   // (not ready yet during the first build)
     voices.forEach(v => markTones(v.tones, markKey, true));
     heldVoices.forEach(v => markTones(v.tones, markHeld, true));
+  }
+  {
+    const pb = document.getElementById("perfBtn");
+    if (pb) {
+      const b = document.createElement("button"); b.className = "btn"; b.id = "kb61"; b.textContent = "61";
+      b.title = "61 keys across, like the KeyLab Essential 61"; b.setAttribute("aria-label", b.title); pb.after(b);
+      const paint = () => b.setAttribute("aria-pressed", String(kb61()));
+      b.addEventListener("click", () => { KB61 = kb61() ? "off" : "on"; try { localStorage.setItem("nightbloom-kb61", KB61); } catch (e) {} paint(); buildKeys(); });
+      paint();
+      setInterval(() => { paint(); if (!keysEl.classList.contains("pads") && !keysEl.classList.contains("kit") && keysEl.dataset.n && +keysEl.dataset.n !== kbKeyCount()) buildKeys(); }, 1500);   // (the KeyLab plugged in or out)
+    }
   }
   function markKey(m, on) { const k = keyEls.get(m); if (k) k.classList.toggle("down", on); }
   function markHeld(m, on) { const k = keyEls.get(m); if (k) k.classList.toggle("held", on); }

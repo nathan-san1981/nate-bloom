@@ -563,7 +563,7 @@
     };
   }
 
-  const MAX_VOICES = 8;
+  const MAX_VOICES = NB_BIG ? 32 : 8;   // (173) notes sounding at once before the oldest is let go
   const voices = new Map();   // midi -> voice
   const order = [];
 

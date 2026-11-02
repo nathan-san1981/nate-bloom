@@ -521,8 +521,8 @@
     }
     // A take is held in memory while it records (and copied once more as it becomes a region): past this
     // a phone's browser can run out of memory and lose it all, so recording stops here and the take is kept
-    const GB_MAX_REC_SEC = 10 * 60;
-    const recFull = () => setTimeout(() => { if (TP.on && TP.rec) { stop(); gbSay("Recording stopped at 10:00, the longest one take can be. The take is kept."); } }, 0);
+    const GB_MAX_REC_SEC = (NB_BIG ? 60 : 10) * 60;
+    const recFull = () => setTimeout(() => { if (TP.on && TP.rec) { stop(); gbSay("Recording stopped at " + nbMinSec(GB_MAX_REC_SEC) + ", the longest one take can be. The take is kept."); } }, 0);
     function audioRecStart() {
       if (!MIC.src) return;
       const proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;

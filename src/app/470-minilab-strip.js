@@ -49,9 +49,10 @@
       </div>
       <div class="mls-p" id="mlsP"></div>`;
     document.body.appendChild(strip);
+    // (173) a 9th knob and faders 5–9 for the KeyLab (shown with body.kl-on)
     const sK = [], sF = [], sP = [];
-    for (let i = 0; i < 8; i++) { const c = document.createElement("div"); c.className = "mls-c"; c.dataset.c = "K" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsK").appendChild(c); sK.push(c); }
-    for (let i = 0; i < 4; i++) { const c = document.createElement("div"); c.className = "mls-c mls-fc"; c.dataset.c = "F" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsF").appendChild(c); sF.push(c); }
+    for (let i = 0; i < 9; i++) { const c = document.createElement("div"); c.className = "mls-c" + (i > 7 ? " mls-x" : ""); c.dataset.c = "K" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsK").appendChild(c); sK.push(c); }
+    for (let i = 0; i < 9; i++) { const c = document.createElement("div"); c.className = "mls-c mls-fc" + (i > 3 ? " mls-x" : ""); c.dataset.c = "F" + i; c.innerHTML = `<b>${i + 1}</b><span></span><em></em><i><s></s></i>`; $id("mlsF").appendChild(c); sF.push(c); }
     for (let i = 0; i < 16; i++) { const c = document.createElement("div"); c.className = "mls-pad" + (i === 8 ? " mls-b" : ""); c.dataset.p = i; c.innerHTML = `<b>${i + 1}</b><span></span>`; $id("mlsP").appendChild(c); sP.push(c); }
     const tablet = () => { try { return matchMedia("(min-width: 760px)").matches; } catch (e) { return innerWidth >= 760; } };
     const stripOn = () => ML.strip !== "off" && tablet() && (ML.strip === "always" || mlLive()) && !document.body.classList.contains("live-on") && !document.body.classList.contains("setup-on");
@@ -76,6 +77,7 @@
       document.body.classList.toggle("mls-nopads", !ML.stripPads);
       if (full) {
         $id("mlsPg").textContent = PAGE_NAME[pg] || "";
+        { const kl = ML.dev === "kl"; document.body.classList.toggle("kl-on", kl); const b = strip.querySelector(".mls-name b"); if (b) b.textContent = kl ? "KeyLab" : "MiniLab"; strip.setAttribute("aria-label", (kl ? "KeyLab Essential: knobs, faders" : "MiniLab 3: knobs, faders") + " and pads on this screen"); }
         $id("mlsPads").textContent = ML.stripPads ? "▴" : "▾";
       }
       const sig = (lay.P || []).map(p => p ? (p.n || "") + "|" + (p.c || "") : "-").join(",") + [...(lay.Pyours || [])].join(",");

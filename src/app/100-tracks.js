@@ -436,8 +436,8 @@
   const trec = { on: false, node: null, mute: null, L: [], R: [], len: 0, mic: null, micNode: null, mL: [], mR: [], mlen: 0, at: 0, from: 0, targets: [] };
   // one take is held in memory as it records (and once more while it becomes a clip): past this a phone's
   // browser would run out of memory and lose the lot, so the take stops here and is kept
-  const MAX_TRK_REC_SEC = 10 * 60;
-  const trecFull = () => { if (!trec.on || trec.full) return; trec.full = true; setTimeout(() => { stopRec(); trkSay("Recording stopped at 10:00, the longest one take can be. It's kept."); }, 0); };
+  const MAX_TRK_REC_SEC = (NB_BIG ? 60 : 10) * 60;
+  const trecFull = () => { if (!trec.on || trec.full) return; trec.full = true; setTimeout(() => { stopRec(); trkSay("Recording stopped at " + nbMinSec(MAX_TRK_REC_SEC) + ", the longest one take can be. It's kept."); }, 0); };
   async function startRec() {
     start();
     if (trec.on) return;

@@ -47,7 +47,13 @@
   var more2Ready = false, more3Ready = false;
   const DRUM_PAD_KNOBS = [["pitch","Pitch",0.5],["length","Length",0.5],["vol","Volume",0.8]];
   const LIB_KNOBS = [["tune","Tune",0.5],["tone","Tone",1],["attack","Attack",0],["decay","Decay",0.62],["release","Release",0.3],["level","Level",0.8]];
-  const MAX_SAMPLE_SEC = 300;   // samples can be up to 5 minutes; longer files open the section picker
+  // (173) a computer with room to spare: the Linux app, or a desktop browser with 8 GB or more (not Lite, not a touch
+  // screen). It plays more notes at once and records and samples for longer; phones and tablets keep the old limits.
+  const NB_BIG = !window.NB_LITE && ((!!window.NB_NATIVE && window.NB_NATIVE.platform === "linux") ||
+    ((navigator.deviceMemory || 0) >= 8 && (navigator.hardwareConcurrency || 0) >= 6 && !(window.matchMedia && matchMedia("(pointer: coarse)").matches)));
+  window.NB_BIG = NB_BIG;
+  const MAX_SAMPLE_SEC = NB_BIG ? 1200 : 300;   // samples can be up to 5 minutes (20 on a big computer); longer files open the section picker
+  const nbMinSec = s => (s % 60 ? Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") : s / 60 + ":00");   // 300 → "5:00"
   const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS, ...SAMP_ELE_KNOBS].map(([k,,v]) => [k, v]));
 
   // ---------- State ----------

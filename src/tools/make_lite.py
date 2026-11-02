@@ -42,7 +42,7 @@ def make_lite(s, sim_js):
     one('ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });',
         'ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });')
     # six voices at once instead of eight
-    one("const MAX_VOICES = 8;", "const MAX_VOICES = 6;")
+    one("const MAX_VOICES = NB_BIG ? 32 : 8;", "const MAX_VOICES = 6;")
     # the supersaw with five saws instead of seven (the same width, a little thinner)
     one("""      const offsets = [-1, -0.62, -0.28, 0, 0.28, 0.62, 1];
       const gC = ctx.createGain(), gS = ctx.createGain(); gC.gain.value = 0.16; gS.gain.value = 0.11; gC.connect(filt); gS.connect(filt);

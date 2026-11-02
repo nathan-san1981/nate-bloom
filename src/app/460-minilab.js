@@ -6,19 +6,38 @@
   // ======================================================================
   {
     const ML = { mode: "auto", lights: false, badges: true, padCh: 9, hw: new Map(), encRel: new Set(), encRun: new Map(), virt: new Map(), fad: new Map(), mainAbs: new Set(), mainRun: new Map(),
-      page: "", pgNow: "", pgAt: 0, keyWay: new Map(), lay: null, layAt: 0, layPage: "", shift: false, held: new Map(), mon: "", seen: false, writeGrid: false, sent: new Map(), hudT: 0, gbDo: 0, src: false };
+      page: "", pgNow: "", pgAt: 0, dev: "ml", devSet: false, keyWay: new Map(), lay: null, layAt: 0, layPage: "", shift: false, held: new Map(), mon: "", seen: false, writeGrid: false, sent: new Map(), hudT: 0, gbDo: 0, src: false };
     try { const o = JSON.parse(localStorage.getItem("nightbloom-minilab") || "{}"); if (["auto", "off", "any"].includes(o.mode)) ML.mode = o.mode; ML.lights = !!o.lights; if (o.badges === false) ML.badges = false; if (o.padCh >= 0 && o.padCh < 16) ML.padCh = o.padCh | 0; } catch (e) {}
     const mlSave = () => { try { localStorage.setItem("nightbloom-minilab", JSON.stringify({ mode: ML.mode, lights: ML.lights, badges: ML.badges, padCh: ML.padCh, strip: ML.strip, stripPads: ML.stripPads })); } catch (e) {} };
-    const isML = p => !!p && /mini\s*lab\s*(3|iii|mk\s*3)|minilab3/i.test((p.name || "") + " " + (p.manufacturer || ""));
+    const isML0 = p => !!p && /mini\s*lab\s*(3|iii|mk\s*3)|minilab3/i.test((p.name || "") + " " + (p.manufacturer || ""));
+    // (173) the KeyLab Essential 61 mk3 gets the same layouts: knobs 1–8 and faders 1–4 as the MiniLab's, and its knob 9,
+    // faders 5–9 and display buttons on top. Its ports: "KL Essential 61 mk3 MIDI" (and DINTHRU, MCU/HUI, ALV).
+    const isKL = p => !!p && /key\s*lab\s*essential|kl\s*essential/i.test((p.name || "") + " " + (p.manufacturer || ""));
+    const isML = p => isML0(p) || isKL(p);
+    window.__klHere = () => !!md.access && [...md.access.inputs.values()].some(i => md.ins.has(i.id) && isKL(i));
     const mlPortOn = p => ML.mode === "any" ? true : ML.mode === "off" ? false : isML(p);
     // is a MiniLab (or, with "any controller", anything) plugged in and switched on in the MIDI sheet?
-    const mlLive = () => !!(md.access && ML.mode !== "off" && [...md.access.inputs.values()].some(i => md.ins.has(i.id) && mlPortOn(i)));
+    const mlLive = () => {
+      if (!md.access || ML.mode === "off") return false;
+      const ins = [...md.access.inputs.values()].filter(i => md.ins.has(i.id) && mlPortOn(i) && !/mcu|hui|alv|din/i.test(i.name || ""));
+      if (!ML.devSet && ins.length) { const nd = ins.some(isKL) && !ins.some(isML0) ? "kl" : "ml"; if (nd !== ML.dev) { ML.dev = nd; ML.lay = null; } }   // (until one of them is played: then the one played last)
+      return ins.length > 0;
+    };
     // ---------- the MiniLab's controls: the Arturia program and the DAW program send different numbers ----------
     const ENC = [[74, 71, 76, 77, 93, 18, 19, 16], [86, 87, 89, 90, 110, 111, 116, 117]];
     const FAD = [[82, 83, 85, 17], [14, 15, 30, 31]];
     const MAIN = { 114: "turn", 112: "sturn", 115: "click", 113: "sclick", 28: "turn", 29: "sturn", 118: "click", 119: "sclick" };
     const SHIFT_CC = [9, 27];
+    const KL_ENC = [74, 71, 76, 77, 93, 18, 19, 16, 17], KL_FAD = [73, 75, 79, 72, 80, 81, 82, 83, 85], KL_BTN = { 30: 1, 31: -1 };   // (its factory program: knobs 1–9, faders 1–9, the display's ‹ ›)
     function ctlOf(cc) {
+      if (ML.dev === "kl") {
+        let i = KL_ENC.indexOf(cc); if (i >= 0) return { kind: "K", i };
+        i = KL_FAD.indexOf(cc); if (i >= 0) return { kind: "F", i };
+        if (KL_BTN[cc]) return { kind: "B", d: KL_BTN[cc] };
+        if (MAIN[cc]) return { kind: "M", a: MAIN[cc] };
+        if (SHIFT_CC.includes(cc)) return { kind: "S" };
+        return null;
+      }
       for (const s of ENC) { const i = s.indexOf(cc); if (i >= 0) return { kind: "K", i }; }
       for (const s of FAD) { const i = s.indexOf(cc); if (i >= 0) return { kind: "F", i }; }
       if (MAIN[cc]) return { kind: "M", a: MAIN[cc] };
@@ -470,12 +489,46 @@
         M: { turn: ["Scroll the list", d => { const l = $id("mxList"); if (l) l.scrollTop += d * 56; }], click: ["Done", () => tap("mxDone")], sturn: ["Scroll faster", d => { const l = $id("mxList"); if (l) l.scrollTop += d * 280; }], sclick: ["Reset levels", () => tap("mxReset")] },
         keys: "Play the sound" };
     };
+    // (173) the KeyLab's knob 9 and faders 5–9: tempo, the level of each sound playing (1–4), the master volume;
+    // on the Mixer, faders 1–9 and knobs 1–9 are its rows
+    const K_TEMPO = FN("tempo", { get: () => (state.seq.bpm - 50) / 130, set(v) { setBpm(Math.round(50 + v * 130)); }, text: () => Math.round(state.seq.bpm) + " bpm", name: () => "Tempo" });
+    function stackFader(j) {
+      return mixFn("stk" + j, ch => {
+        const it = window.__stk && window.__stk.items()[j]; if (!it) return null;
+        if (it.t === "syn") return ch.find(c => c.name === ENGINES[it.id].name);
+        if (it.t === "samp") return ch.find(c => c.name.startsWith("S" + (it.slot + 1) + " · "));
+        if (it.t === "hw") return ch.find(c => c.group === "Hardware");
+        if (it.t === "inst") return ch.find(c => c.group === "Instrument") || ch.find(c => c.name === it.name);
+        return ch.find(c => c.name === it.name);
+      }, "Sound " + (j + 1));
+    }
+    const F_STK = [0, 1, 2, 3].map(stackFader);
+    // (173) on Synths, Samples and Drums the KeyLab is mostly the effects: knobs 1–6 the Effects panel (Drive, Wobble, Echo,
+    // Space, Volume, Amount) of the sound with the controls, 7–8 its Send A and Send B, 9 the tempo; faders 1–4 the sound's
+    // first four controls, 5–8 the levels of the sounds playing, 9 the master
+    const sendFn = x => {
+      const lv = () => { const w = window.__wam; if (!w || !w.NBW) return null; const v = (w.NBW.sendLv["ch:" + state.engine] || {})[x]; return Math.max(0, Math.min(1, +v || 0)); };
+      return FN("send" + x, { get: lv, set(v) { const w = window.__wam; if (w && w.setSend) { w.setSend("ch:" + state.engine, x, v); saveSoon(); } }, text: () => { const v = lv(); return v == null ? "—" : Math.round(v * 100) + "%"; }, name: () => "Send " + x.toUpperCase() });
+    };
+    const K_FX = [0, 1, 2, 3, 4, 5].map(i => Q("#fxKnobs .knob", i)).concat([sendFn("a"), sendFn("b")]);
+    function klExtras(lay, pg) {
+      if (pg === "mix") { const rows = i => Q("#mxList input[type=range]", i); lay.F = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(rows); lay.K = [9, 10, 11, 12, 13, 14, 15, 16, 17].map(rows); return; }
+      if (pg === "synths" || pg === "samples" || pg === "drums") {
+        lay.K = K_FX.concat([K_TEMPO]);
+        lay.F = [0, 1, 2, 3].map(i => Q("#engineKnobs .knob", i)).concat(F_STK, [F_MASTER]);
+        return;
+      }
+      lay.K = (lay.K || []).slice(0, 8); while (lay.K.length < 8) lay.K.push(null); lay.K[8] = K_TEMPO;
+      lay.F = (lay.F || []).slice(0, 4); while (lay.F.length < 4) lay.F.push(null);
+      F_STK.forEach((f, j) => { lay.F[4 + j] = f; }); lay.F[8] = F_MASTER;
+    }
     // ---------- the layout in use, with what you've taught it on this screen on top ----------
     function mlLayout(force) {
       const pg = force ? mlPage() : pageNow(), now = performance.now();
       if (!force && ML.lay && ML.layPage === pg && now - ML.layAt < 400) return ML.lay;
       let lay = null; try { lay = (L[pg] || L.synths)(); } catch (e) { lay = { K: [], F: [], P: [], M: {} }; }
-      lay.page = pg; try { padOverrides(lay, pg); } catch (e) {} ML.lay = lay; ML.layPage = pg; ML.layAt = now; return lay;
+      lay.page = pg; if (ML.dev === "kl") try { klExtras(lay, pg); } catch (e) {}
+      try { padOverrides(lay, pg); } catch (e) {} ML.lay = lay; ML.layPage = pg; ML.layAt = now; return lay;
     }
     // learned mappings belong to a screen (old ones are sorted onto the screen their control lives on)
     function learnPage(t) {
@@ -561,10 +614,19 @@
       } catch (e) {}
       return "";
     }
+    // (173) the KeyLab's transport over Mackie Control (its MCU/HUI port, when that's switched on): ▶ ■ ● and ⏪ ⏩ for the sounds
+    function klMcu(d) {
+      const st = d[0], n = d[1], v = d[2];
+      if ((st & 0xf0) !== 0x90 || !v) return;
+      const act = { 94: ["Play / stop", () => tap("play")], 93: ["Stop", () => tap("stopAll")], 95: ["● Rec", () => tap("takeBtn")], 91: ["Previous sound", () => nextSound(-1)], 92: ["Next sound", () => nextSound(1)] }[n];
+      if (act) { start(); try { act[1](); } catch (e) {} mlHud("KeyLab", act[0]); }
+    }
     { const om = onMidi; onMidi = function (e) {
         const p = e.target, d = e.data || [];
         if (!p || !md.ins.has(p.id) || !mlPortOn(p) || ML.mode === "off") { ML.src = false; return om.apply(this, arguments); }
+        if (isKL(p) && /mcu|hui/i.test(p.name || "")) { klMcu(e.data || []); return; }   // (173) the KeyLab's transport, when its MCU port is on
         if (isML(p) && /mcu|hui|alv|din/i.test(p.name || "")) return;   // (the MiniLab's DAW-control port: Mackie's transport arrives there as notes)
+        { const dv = isKL(p) ? "kl" : isML0(p) ? "ml" : ML.dev; if (dv !== ML.dev) { ML.dev = dv; ML.lay = null; } ML.devSet = true; }
         const st = d[0], d1 = d[1], d2 = d[2], cmd = st & 0xf0, ch = st & 15;
         if (st >= 0xf0) { ML.src = false; return om.apply(this, arguments); }
         if (!ML.seen) { ML.seen = true; setTimeout(() => mlRefresh(true), 0); }
@@ -579,6 +641,7 @@
           const c = ctlOf(d1);
           if (c && c.kind === "S") { ML.shift = d2 > 0; try { if (window.__nbShift) window.__nbShift(ML.shift); } catch (e) {} return; }
           if (c && c.kind === "M") { mlMain(c.a, d2, ch + ":" + d1); return; }
+          if (c && c.kind === "B") { if (d2 > 0) { const lay = mlLayout(), f = lay.M && lay.M.turn; if (f) { try { f[1](c.d); } catch (er) {} mlHud(f[0], c.d > 0 ? "next" : "back"); } } return; }
           if (c && (c.kind === "K" || c.kind === "F")) {
             ML.src = true;
             try {

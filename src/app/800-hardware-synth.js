@@ -1,0 +1,210 @@
+    // ======================================================================
+    // 173: a hardware synth in the stack (the Minilogue XD). Nate Bloom plays it over USB MIDI like any other sound in
+    // Playing together (keys, chords, Hold, the Arp, the sequencer), and its sound comes back in through the audio
+    // interface (the Volt 2) into the mix, with its own level and mute in the Mixer; Takes and Tracks hear it.
+    // A note goes out early by the input's delay, so what comes back lands with Nate Bloom's own sounds.
+    // ======================================================================
+    {
+      const HW_KEY = "nightbloom-hw", HW_RE = /minilogue\s*xd/i, IF_RE = /volt/i;
+      const H = window.__hw = { name: "Minilogue XD", short: "Minilogue", out: "", ch: 1, dev: "", pick: "12", level: 0.8, seen: false,
+        stream: null, src: null, split: null, merge: null, bus: null, dest: null, an: null, err: "", label: "", opening: null, notes: new Map(), sentAt: 0 };
+      try {
+        const o = JSON.parse(localStorage.getItem(HW_KEY) || "{}");
+        ["out", "dev", "pick"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; });
+        if (o.ch >= 1 && o.ch <= 16) H.ch = o.ch; if (Number.isFinite(o.level)) H.level = o.level; H.seen = !!o.seen;
+      } catch (e) {}
+      const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen })); } catch (e) {} };
+      const outs = () => md.access ? [...md.access.outputs.values()] : [];
+      const isHW = p => HW_RE.test(((p && p.name) || "") + " " + ((p && p.manufacturer) || ""));
+      // ---- MIDI to it: the port you picked, else the Minilogue's own (its SOUND port, not KBD/KNOB) ----
+      function hwPort() {
+        const all = outs(); if (!all.length) return null;
+        if (H.out) { const o = all.find(o => mdKey("out", o) === H.out); if (o) return o; }
+        const xs = all.filter(isHW);
+        return xs.find(o => /sound/i.test(o.name || "")) || xs.find(o => !/kbd|knob/i.test(o.name || "")) || xs[0] || null;
+      }
+      H.present = () => !!hwPort();
+      H.shown = () => H.seen || H.present();
+      H.ready = () => H.present() && !!H.src;
+      H.why = () => !md.access ? "connect MIDI" : !hwPort() ? "not plugged in" : H.opening ? "opening the input…" : !H.src ? (H.err || "no sound in yet") : "";
+      const inStack = () => { try { return !!window.__stk.groupsOn().hw; } catch (e) { return false; } };
+      // the input's own delay: the note goes out this much early, so the sound arrives in the mix on time
+      function inLatMs() {
+        let l = 0; try { const s = H.stream.getAudioTracks()[0].getSettings(); l = s && s.latency; } catch (e) {}
+        return Math.max(0, Math.min(200, (Number.isFinite(l) && l > 0 ? l : 0.012) * 1000 + (ctx && ctx.baseLatency ? ctx.baseLatency * 1000 : 0)));
+      }
+      const hwAt = when => { if (when == null || !ctx) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
+      // ---- a voice: a note on now (or when it's due), a note off when it stops ----
+      H.voice = function (m, when) {
+        const p = hwPort(); if (!p) return null;
+        const ch = (H.ch - 1) & 15, n = m & 127, vel = Math.max(1, Math.min(127, Math.round(NB_VEL7 || 100))), at = hwAt(when);
+        try { p.send([0x90 | ch, n, vel], at); } catch (e) { return null; }
+        H.notes.set(n, (H.notes.get(n) || 0) + 1); H.sentAt = performance.now();
+        let done = false;
+        return { midi: m, hw: true, stop(t) {
+          if (done) return; done = true;
+          const k = (H.notes.get(n) || 1) - 1; if (k > 0) { H.notes.set(n, k); return; } H.notes.delete(n);   // (the same note held twice: off once both let go)
+          const off = t == null ? 0 : hwAt(t);
+          try { p.send([0x80 | ch, n, 0], off && at ? Math.max(off, at + 1) : off); } catch (e) {}
+        } };
+      };
+      H.allOff = function () {
+        const p = hwPort(); if (!p) return; const ch = (H.ch - 1) & 15;
+        try { H.notes.forEach((c, n) => p.send([0x80 | ch, n, 0])); p.send([0xb0 | ch, 123, 0]); } catch (e) {}
+        H.notes.clear();
+      };
+      ["panic", "stopAll"].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener("click", () => H.allOff()); });
+      addEventListener("pagehide", () => H.allOff());
+      // ---- sound from it: the audio interface's inputs into the mix ----
+      const inputs = async () => { try { return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "audioinput"); } catch (e) { return []; } };
+      function hwCloseInput() {
+        try { if (H.src) H.src.disconnect(); if (H.split) H.split.disconnect(); if (H.merge) H.merge.disconnect(); } catch (e) {}
+        if (H.stream) H.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+        H.stream = H.src = H.split = H.merge = H.an = H.bus = H.dest = null;
+      }
+      function hwPick() {
+        if (!H.split || !H.merge) return;
+        let chs = 2; try { chs = H.stream.getAudioTracks()[0].getSettings().channelCount || 2; } catch (e) {}
+        try { H.split.disconnect(); } catch (e) {}
+        const L = H.pick === "2" && chs > 1 ? 1 : 0, R = H.pick === "1" || chs < 2 ? 0 : 1;
+        H.split.connect(H.merge, L, 0); H.split.connect(H.merge, R, 1);
+      }
+      // into its own effects chain through its own level (the Mixer's fader, mute) — and back in if the chain is rebuilt
+      function hwWire() {
+        if (!H.merge || !ctx || !fx) return;
+        let c = null; try { c = fxcGet("hw"); } catch (e) {}
+        const dest = c ? c.input : fx.input; if (!dest) return;
+        if (H.dest === dest && H.bus) return;
+        if (H.bus) { try { H.merge.disconnect(H.bus); } catch (e) {} }
+        H.bus = lvBus("hw", dest); H.merge.connect(H.bus); H.dest = dest;
+      }
+      try { if (typeof fxcNames === "object") fxcNames.hw = H.short; } catch (e) {}
+      async function hwOpen(force) {
+        if (H.opening) return H.opening;
+        if (!ctx) return false;
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { H.err = "no audio input in this browser"; return false; }
+        if (H.err && !force) return false;
+        H.opening = (async () => {
+          hwCloseInput(); H.err = "";
+          const cons = id => ({ audio: Object.assign({ echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 }, latency: { ideal: 0.005 } }, id ? { deviceId: { exact: id } } : {}) });
+          let id = H.dev;
+          if (!id) {   // the audio interface, by name (names show once an input has been allowed)
+            let devs = await inputs();
+            if (!devs.some(d => d.label)) { try { const t = await navigator.mediaDevices.getUserMedia({ audio: true }); t.getTracks().forEach(x => x.stop()); } catch (e) {} devs = await inputs(); }
+            const v = devs.find(d => IF_RE.test(d.label || "")); if (v) id = v.deviceId;
+          }
+          let st = null, why = "";
+          try { st = await navigator.mediaDevices.getUserMedia(cons(id)); } catch (e) { why = e && e.name || "error"; }
+          if (!st && id && !H.dev) { try { st = await navigator.mediaDevices.getUserMedia(cons("")); } catch (e) {} }
+          if (!st) { H.err = why === "NotAllowedError" ? "the audio input isn't allowed here" : "the audio input didn't open (" + why + ")"; return false; }
+          if (!inStack()) { st.getTracks().forEach(t => t.stop()); return false; }   // (taken out while it was opening)
+          H.stream = st; H.src = ctx.createMediaStreamSource(st);
+          H.split = ctx.createChannelSplitter(2); H.merge = ctx.createChannelMerger(2);
+          H.src.connect(H.split); hwPick();
+          H.an = ctx.createAnalyser(); H.an.fftSize = 1024; H.merge.connect(H.an);
+          hwWire();
+          const tr = st.getAudioTracks()[0]; H.label = tr ? tr.label : "";
+          if (tr) tr.addEventListener("ended", () => { if (H.stream !== st) return; H.err = "the audio input went away"; hwCloseInput(); paintAll(); });
+          return true;
+        })();
+        try { return await H.opening; } finally { H.opening = null; paintAll(); }
+      }
+      // in the stack: the input opens; out of it: the input closes and its notes stop
+      setInterval(() => {
+        if (!ctx) return;
+        const on = inStack();
+        if (on && !H.src && !H.opening && !H.err && H.present()) hwOpen();
+        else if (!on && (H.src || H.stream)) { hwCloseInput(); H.allOff(); paintAll(); }
+        if (on && H.src) hwWire();   // (keeps its chain awake: its own keys and sequencer make sound Nate Bloom didn't ask for)
+      }, 1000);
+      try { navigator.mediaDevices.addEventListener("devicechange", () => { if (inStack() && H.err) { H.err = ""; hwOpen(true); } if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
+      // ---- the ports came or went: the Quick row shows it once it's been seen ----
+      { const op = md.onPorts; md.onPorts = function () { if (op) op.apply(this, arguments); if (H.present() && !H.seen) { H.seen = true; hwSave(); } paintAll(); }; }
+      // ---- in the Mixer ----
+      { const mc = mixChannels; mixChannels = function () {
+          const ch = mc.apply(this, arguments);
+          if (H.shown()) ch.push({ group: "Hardware", name: H.name, sub: inStack() ? (H.ready() ? "playing now · " + (H.label || "audio in") : H.why()) : "add it from Quick sounds",
+            get: () => H.level, set: v => { H.level = v; hwSave(); try { lvApply(); } catch (e) {} }, dflt: 0.8, live: true });
+          return ch;
+        }; }
+      // ---- its sheet: where it's played from, where its sound comes in, its level ----
+      const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "hwSheet"; sh.hidden = true;
+      sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Minilogue XD">
+        <div class="ed-head"><strong>Minilogue XD</strong><span class="ed-info" id="hwState"></span></div>
+        <span class="ed-info" style="text-align:left">Nate Bloom plays it over USB MIDI with whatever else is playing, and its sound comes back in through your audio interface into the mix. Switch off the interface's direct monitoring for these inputs, or you'll hear it twice. Its own keys play it directly; MIDI › Keys makes them play the rest of the stack too.</span>
+        <div class="sp-lab"><span>MIDI to it</span></div>
+        <div class="ly-quick"><select id="hwOut" aria-label="MIDI output" style="flex:1;min-width:0"></select><select id="hwCh" aria-label="MIDI channel"></select></div>
+        <div class="sp-lab"><span>Its sound comes in from</span></div>
+        <div class="ly-quick"><select id="hwDev" aria-label="Audio input" style="flex:1;min-width:0"></select><select id="hwPick" aria-label="Which inputs"><option value="12">Inputs 1+2 (stereo)</option><option value="1">Input 1</option><option value="2">Input 2</option></select><button class="btn" id="hwRe" title="Look for inputs again">↻</button></div>
+        <canvas id="hwMeter" aria-label="Input level" style="width:100%;height:14px;border-radius:7px;background:#0f0d16"></canvas>
+        <div class="ly-quick"><span class="dj-lab" style="min-width:44px">Level</span><input type="range" id="hwLvl" min="0" max="125" style="flex:1" aria-label="Level"><span class="dj-lab" id="hwLvlV" style="min-width:48px;text-align:right"></span></div>
+        <span class="ed-info" id="hwMsg" style="text-align:left"></span>
+        <div class="ed-foot sheet-foot"><button class="btn big" id="hwTest">Test note</button><button class="btn big" id="hwIn"></button><button class="btn big primary" id="hwDone">Done</button></div>
+      </div>`;
+      document.body.appendChild(sh);
+      const $h = id => document.getElementById(id);
+      for (let c = 1; c <= 16; c++) { const o = document.createElement("option"); o.value = c; o.textContent = "Ch " + c; $h("hwCh").appendChild(o); }
+      let raf = 0;
+      async function hwSheetPaint() {
+        const out = $h("hwOut"); out.innerHTML = "";
+        const add = (sel, v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
+        const auto = outs().filter(isHW);
+        add(out, "", auto.length ? "Automatic · " + (hwPort() && !H.out ? hwPort().name : auto[0].name) : "Automatic · the Minilogue when it's plugged in");
+        outs().forEach(o => add(out, mdKey("out", o), o.name + (o.manufacturer ? " · " + o.manufacturer : "")));
+        out.value = H.out && outs().some(o => mdKey("out", o) === H.out) ? H.out : "";
+        $h("hwCh").value = H.ch; $h("hwPick").value = H.pick;
+        const dev = $h("hwDev"), devs = await inputs(); dev.innerHTML = "";
+        add(dev, "", "Automatic · " + (devs.find(d => IF_RE.test(d.label || "")) ? devs.find(d => IF_RE.test(d.label || "")).label : "the Volt when it's plugged in"));
+        devs.forEach((d, i) => add(dev, d.deviceId, d.label || "Input " + (i + 1)));
+        dev.value = H.dev && devs.some(d => d.deviceId === H.dev) ? H.dev : "";
+        $h("hwLvl").value = Math.round(H.level / 0.8 * 100); $h("hwLvlV").textContent = mxDb(H.level, 0.8);
+        const on = inStack();
+        $h("hwIn").textContent = on ? "Take it out" : "+ Play it with the rest";
+        $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : "plugged in · not playing";
+        const m = $h("hwMsg");
+        m.textContent = !md.access ? "Connect MIDI first (MIDI › Connect)." : !H.present() ? "Plug the Minilogue XD in over USB, or pick the MIDI output it's on (the Volt's MIDI out, say)." : H.err ? H.err.charAt(0).toUpperCase() + H.err.slice(1) + ". Pick the input and tap ↻." : on && H.src ? "Coming in from " + (H.label || "the input") + "." : "";
+        meter();
+      }
+      function meter() {
+        cancelAnimationFrame(raf);
+        const cv = $h("hwMeter"), c = cv.getContext("2d"), buf = new Float32Array(1024);
+        const draw = () => {
+          if (sh.hidden) return;
+          const w = cv.width = cv.clientWidth * (devicePixelRatio || 1), h = cv.height = cv.clientHeight * (devicePixelRatio || 1);
+          c.clearRect(0, 0, w, h);
+          if (H.an) { H.an.getFloatTimeDomainData(buf); let pk = 0; for (const v of buf) pk = Math.max(pk, Math.abs(v));
+            const x = Math.max(0, Math.min(1, (20 * Math.log10(pk + 1e-6) + 60) / 60)) * w; c.fillStyle = pk > 0.95 ? "#ff5c7a" : pk > 0.6 ? "#ffb65c" : "#7fd6c2"; c.fillRect(0, 0, x, h); }
+          c.fillStyle = "rgba(255,255,255,0.25)"; c.fillRect(w * (54 / 60), 0, 2, h);
+          raf = requestAnimationFrame(draw);
+        };
+        draw();
+      }
+      function paintAll() { try { window.__stk.paint(); } catch (e) {} if (!sh.hidden) hwSheetPaint(); }
+      H.open = () => { start(); if (!md.access) { try { connectMidi(); } catch (e) {} } sh.hidden = false; hwSheetPaint(); };
+      H.added = () => {
+        if (!H.present()) { try { (document.getElementById("uiToast") && (() => { const el = document.getElementById("uiToast"); el.textContent = H.name + " added · " + (md.access ? "plug it in over USB" : "connect MIDI") + " and it plays"; el.hidden = false; setTimeout(() => { el.hidden = true; }, 2800); })()); } catch (e) {} }
+        if (ctx && !H.src) { H.err = ""; hwOpen(true); }
+      };
+      $h("hwOut").addEventListener("change", e => { H.allOff(); H.out = e.target.value; hwSave(); hwSheetPaint(); paintAll(); });
+      $h("hwCh").addEventListener("change", e => { H.allOff(); H.ch = +e.target.value; hwSave(); });
+      $h("hwDev").addEventListener("change", e => { H.dev = e.target.value; hwSave(); H.err = ""; if (inStack()) hwOpen(true); else hwSheetPaint(); });
+      $h("hwPick").addEventListener("change", e => { H.pick = e.target.value; hwSave(); hwPick(); });
+      $h("hwRe").addEventListener("click", () => { H.err = ""; if (inStack()) hwOpen(true); else hwSheetPaint(); });
+      $h("hwLvl").addEventListener("input", e => { H.level = (+e.target.value / 100) * 0.8; $h("hwLvlV").textContent = mxDb(H.level, 0.8); hwSave(); try { lvApply(); } catch (er) {} });
+      $h("hwTest").addEventListener("click", () => { start(); const v = H.voice(60); if (!v) { $h("hwMsg").textContent = "No MIDI output for it yet."; return; } setTimeout(() => v.stop(), 600); });
+      $h("hwIn").addEventListener("click", () => {
+        start(); const st = window.__stk; if (!st) return;
+        if (inStack()) { const it = st.items().find(x => x.t === "hw"); if (it) st.drop(it); }
+        else { st.S().hw = true; renderEngine(); save(); H.added(); }
+        setTimeout(hwSheetPaint, 50);
+      });
+      $h("hwDone").addEventListener("click", () => { sh.hidden = true; cancelAnimationFrame(raf); });
+      // (173) the Linux app's Across both screens: the page drops its width limit while the window spans the screens
+      if (window.NB_NATIVE && window.NB_NATIVE.onWide) {
+        const setW = on => { document.body.classList.toggle("nb-wide", !!on); const b = document.getElementById("suWide"); if (b) b.setAttribute("aria-pressed", String(!!on)); };
+        window.NB_NATIVE.onWide(setW); try { window.NB_NATIVE.wideState().then(r => setW(r && r.wide)).catch(() => {}); } catch (e) {}
+      }
+      // the strip's controller dot says which one it is (the KeyLab or the MiniLab)
+      setInterval(() => { const kl = ML.dev === "kl" && !!(window.__klHere && window.__klHere()); document.querySelectorAll('.sh-dot[data-k="minilab"]').forEach(d => { const t = kl ? "KeyLab" : "MiniLab"; if (d.textContent !== t) d.textContent = t; }); }, 1500);
+      window.__hwDbg = { hwPort, inLatMs, hwAt, hwWire, hwOpen };
+    }

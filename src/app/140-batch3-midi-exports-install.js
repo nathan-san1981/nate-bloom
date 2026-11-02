@@ -146,7 +146,7 @@
     if (!p) return true;
     const m = md.opt.keysFrom || {}, k = mdKey("in", p);
     if (Object.prototype.hasOwnProperty.call(m, k)) return !!m[k];
-    return !mdIsKO(p);
+    return !mdIsKO(p) && !/minilogue/i.test(p.name || "");   // (173) the Minilogue's keys play the Minilogue; Keys ✓ makes them play the stack too
   }
   // how hard you play → how loud: 100 plays as the screen does, 127 a little louder
   const MD_VEL = { off: 0, light: 0.7, normal: 1.3, firm: 2 };

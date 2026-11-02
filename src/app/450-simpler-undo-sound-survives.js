@@ -10,9 +10,9 @@
     placeViews(); try { wideV.addEventListener("change", placeViews); } catch (e) { wideV.addListener(placeViews); }
     { const u = $("hisUndoP"); if (u) u.title = "Undo the last change (Ctrl+Z). Redo is in ☰ → History"; }
 
-    // ---- the Playing row only when sounds play together ----
+    // ---- the Playing row (173: always, even for one sound or none: its speaker and ✕ are how it's muted or taken out) ----
     const stk = $("stk"), stkRow = $("stkRow");
-    if (stk && stkRow) { const solo = () => stk.classList.toggle("solo", stkRow.querySelectorAll(".stk-chip").length <= 1); new MutationObserver(solo).observe(stkRow, { childList: true }); solo(); }
+    if (stk && stkRow) stk.classList.remove("solo");
 
     // ---- Effects · FX Lab: one tab ----
     const sws = [];

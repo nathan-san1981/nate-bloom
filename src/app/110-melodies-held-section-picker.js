@@ -322,7 +322,7 @@
     const len = sp.b - sp.a;
     spInfo.textContent = fmtM(sp.a) + " – " + fmtM(sp.b) + " · " + len.toFixed(2) + " s of " + fmtM(D);
     spUse.disabled = len < 0.05 || len > MAX_SAMPLE_SEC;
-    spUse.textContent = len > MAX_SAMPLE_SEC ? "Max 5:00 — shorten it" : "Use " + len.toFixed(1) + " s";
+    spUse.textContent = len > MAX_SAMPLE_SEC ? "Max " + nbMinSec(MAX_SAMPLE_SEC) + " — shorten it" : "Use " + len.toFixed(1) + " s";
     spUseAll.hidden = D > MAX_SAMPLE_SEC;
   }
   function spLoop() { spDraw(); if (sp.src) sp.raf = requestAnimationFrame(spLoop); }

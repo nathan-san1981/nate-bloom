@@ -2,7 +2,7 @@
 // The app is the same Nate Bloom as the website, served from inside the app at app://nate-bloom/ so it works
 // offline and keeps its own storage. It updates itself from the website in the background; instruments and
 // library sounds are kept after their first download. Saves land in Downloads/Nate Bloom.
-const { app, BrowserWindow, Menu, Notification, net, powerSaveBlocker, protocol, session, shell, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, Menu, Notification, net, powerSaveBlocker, protocol, session, shell, ipcMain, dialog, screen } = require("electron");
 const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
@@ -19,6 +19,8 @@ const SAVE_DIR = (() => { let d = app.getPath("downloads"); if (path.resolve(d) 
 
 app.setName("Nate Bloom");
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+// (173) a computer, not a tablet: the page may use up to 8 GB for long takes, big samples and many instruments
+app.commandLine.appendSwitch("js-flags", "--max-old-space-size=8192");
 protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true, codeCache: true } }]);
 
 if (!app.requestSingleInstanceLock()) { app.quit(); }
@@ -97,6 +99,30 @@ async function checkForUpdate(win) {
 }
 
 let win = null, blocker = null;
+// (173) Across both screens: the window spans every screen side by side (their common height), and the page uses the
+// whole width (the 61 keys of the KeyLab across both). View › Across Both Screens or Ctrl+Shift+F; it reopens that way.
+let WIDE = false, wideBack = null;
+function spanBounds() {
+  const a = screen.getAllDisplays().map(d => d.workArea);
+  const x = Math.min(...a.map(r => r.x)), y = Math.max(...a.map(r => r.y));
+  return { x, y, width: Math.max(...a.map(r => r.x + r.width)) - x, height: Math.max(400, Math.min(...a.map(r => r.y + r.height)) - y) };
+}
+function setWide(on) {
+  if (!win || win.isDestroyed()) return;
+  WIDE = !!on;
+  if (WIDE) {
+    if (!wideBack) wideBack = win.isMaximized() || win.isFullScreen() ? null : win.getBounds();
+    if (win.isFullScreen()) win.setFullScreen(false);
+    if (win.isMaximized()) win.unmaximize();
+    if (screen.getAllDisplays().length > 1) win.setBounds(spanBounds()); else win.maximize();   // (one screen: as wide as it goes)
+  } else {
+    if (win.isMaximized()) win.unmaximize();
+    if (wideBack && Number.isFinite(wideBack.x) && Number.isFinite(wideBack.y)) win.setBounds(wideBack); else { win.setSize(1280, 800); win.center(); }
+    wideBack = null;
+  }
+  win.webContents.send("nb:wide", WIDE);
+  try { buildMenu(); } catch (e) {}
+}
 
 function createWindow() {
   const statePath = path.join(app.getPath("userData"), "window.json");
@@ -108,9 +134,11 @@ function createWindow() {
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false },
   });
-  if (st.max) win.maximize();
-  win.once("ready-to-show", () => win.show());
-  const saveState = () => { try { const b = win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: win.isMaximized() })); } catch (e) {} };
+  if (st.max && !st.wide) win.maximize();
+  win.once("ready-to-show", () => { win.show(); if (st.wide) { wideBack = Number.isFinite(st.x) ? { x: st.x, y: st.y, width: st.width, height: st.height } : null; setWide(true); } });
+  const saveState = () => { try { const b = WIDE && wideBack ? wideBack : win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: !WIDE && win.isMaximized(), wide: WIDE })); } catch (e) {} };
+  win.webContents.on("did-finish-load", () => { if (WIDE) win.webContents.send("nb:wide", true); });
+  for (const ev of ["display-added", "display-removed", "display-metrics-changed"]) screen.on(ev, () => { if (WIDE && win && !win.isDestroyed()) setTimeout(() => { if (WIDE) setWide(true); }, 500); });
   win.on("close", saveState);
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
@@ -135,6 +163,7 @@ function buildMenu() {
       ] },
       { role: "reload", accelerator: "Ctrl+R" },
       { role: "togglefullscreen", accelerator: "F11" },
+      { label: "Across Both Screens", type: "checkbox", checked: WIDE, accelerator: "Ctrl+Shift+F", click: mi => setWide(mi.checked) },
       { type: "separator" },
       { role: "resetZoom" }, { role: "zoomIn", accelerator: "Ctrl+=" }, { role: "zoomOut" },
       { type: "separator" },
@@ -152,6 +181,8 @@ function linkUp() {
   return link;
 }
 ipcMain.on("nb:link-out", (e, s) => { if (link) link.out(String(s)); });
+ipcMain.on("nb:set-wide", (e, on) => setWide(!!on));
+ipcMain.handle("nb:wide", () => ({ wide: WIDE, screens: screen.getAllDisplays().length }));
 ipcMain.handle("nb:link-status", () => linkUp().status());
 ipcMain.handle("nb:link-enable", (e, on) => { linkUp().enable(!!on); return linkUp().status(); });
 app.on("before-quit", () => { try { link && link.stop(); } catch (e) {} });

@@ -20,6 +20,10 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
   toast: msg => ipcRenderer.send("nb:toast", String(msg)),
   foreground: () => {},
   back: () => false,
+  // (173) Across both screens: the window spans the screens, the page uses the whole width
+  setWide: on => ipcRenderer.send("nb:set-wide", !!on),
+  wideState: () => ipcRenderer.invoke("nb:wide"),
+  onWide: cb => ipcRenderer.on("nb:wide", (e, on) => { try { cb(!!on); } catch (er) {} }),
 });
 
 if (fp) contextBridge.exposeInMainWorld("NBFastPads", {

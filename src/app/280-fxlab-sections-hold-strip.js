@@ -10,6 +10,7 @@
     if (k.startsWith("s:")) { const sl = state.samp.slots[+k.slice(2)]; return sl && sl.p ? sl.p.level : 0.8; }
     if (k === "inst") return state.inst.p.level;
     if (k.startsWith("l:")) { const pt = state.lib.parts[+k.slice(2)]; return pt ? (pt.level ?? 0.8) : 0.8; }
+    if (k === "hw") return window.__hw ? window.__hw.level : 0.8;   // (173) the hardware synth's input
     return 0.8;
   }
   // (172) a muted sound keeps its place in what's playing; its bus goes to silence, held notes included
@@ -18,6 +19,7 @@
     if (k.startsWith("s:")) { const sl = state.samp.slots[+k.slice(2)]; return !!(sl && sl.mute); }
     if (k === "inst") return !!(state.inst && state.inst.mute);
     if (k.startsWith("l:")) { const pt = state.lib.parts[+k.slice(2)]; return !!(pt && pt.mute); }
+    if (k === "hw") return !!(window.__hw && window.__hw.mute);
     return false;
   }
   const lvGain = k => { if (lvMuted(k)) return 0; const v = lvLevel(k); return Number.isFinite(v) ? Math.max(0, v) / 0.8 : 1; };

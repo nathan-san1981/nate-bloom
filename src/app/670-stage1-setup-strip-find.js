@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 172;
+    window.NB_BUILD = 173;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -109,12 +109,14 @@
       const app = window.NB_NATIVE ? nbsTry(() => String(NBNativeBridge.version()), "") : "";
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
-        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
+        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && window.NB_NATIVE.platform === "linux" ? " · Linux app " + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
+        ${window.NB_NATIVE && window.NB_NATIVE.setWide ? suRow("Screens", `<button type="button" class="btn" id="suWide" aria-pressed="${document.body.classList.contains("nb-wide")}">Across both screens</button><span class="su-note">the window spans your screens side by side and the page uses the whole width (61 keys across both) · Ctrl+Shift+F</span>`, "suWideRow") : ""}
         ${suRow("Keys and letters", '<button type="button" class="btn" id="suKeys">In Help…</button><span class="su-note">letters on the keys, the keyboard layout, hints, vibration</span>', "suKeysRow")}`;
     }
     function suAppWire() {
       $id("suInstall").addEventListener("click", () => $id("installBtn").click());
       $id("suKeys").addEventListener("click", () => suOpen("help", "#kbdLabBtn"));
+      { const w = $id("suWide"); if (w) w.addEventListener("click", () => window.NB_NATIVE.setWide(!document.body.classList.contains("nb-wide"))); }
     }
     // ---- the space ----
     function suShow(sec) {
