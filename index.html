@@ -16844,6 +16844,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     partsClock();
   }
   let lastEng = state.engine, lastLayers = [];
+  let nbKeepHeld = 0;   // (170) while a sound is added to what plays, the held notes stay put: nothing is handed to an arp part
   function detachArp(eng) {
     if (eng === "drum" || eng === "pads" || (!heldVoices.size && !voices.size)) return;
     const keys = (ENGINES[eng] ? lastLayers : voiceComponents(eng).map(c => c.key)).filter(k => arpOn(k));
@@ -16857,7 +16858,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     try { noteMsg(nbEngName(eng) + " arp keeps playing · Playing ▾ to edit or stop it"); } catch (e) {}
   }
   { const re = renderEngine; renderEngine = function () {
-      if (state.engine !== lastEng) { const from = lastEng; lastEng = state.engine; try { detachArp(from); } catch (e) {} }
+      if (state.engine !== lastEng) { const from = lastEng; lastEng = state.engine; if (!nbKeepHeld) try { detachArp(from); } catch (e) {} }
       const r = re.apply(this, arguments);
       if (ENGINES[state.engine]) lastLayers = activeLayers().slice();
       return r;
@@ -24076,9 +24077,11 @@ registerProcessor("nb-wave", NBWave);
       }
       if (id.startsWith("n:")) {   // a Nate Bloom preset: its engines join the others
         const g = groupsOn(), prev = g.syn ? synOn() : [];
+        const keepArp = {}; prev.forEach(k => { if (state.arp[k]) keepArp[k] = Object.assign({}, state.arp[k]); });   // (170) a classic sound sets its own arp, not theirs
         keepFocusPlaying();
         applyPreset(Number(id.slice(2)));
-        prev.forEach(k => { state.layers[k].on = true; }); s.syn = false;
+        prev.forEach(k => { state.layers[k].on = true; if (keepArp[k]) Object.assign(getArp(k), keepArp[k]); }); s.syn = false;
+        try { arpClock(); } catch (e) {}
         renderEngine(); save(); say(e.name + " added · playing together"); return true;
       }
       if (id.startsWith("sp:")) {   // a Studio combination: its instruments join the others
@@ -24098,6 +24101,8 @@ registerProcessor("nb-wave", NBWave);
       }
       say("That one doesn't play from the keys"); return false;
     }
+    // (170) adding a sound never moves or stops what's held: the held notes stay where they are, arp and all
+    { const t0 = together; together = async function (e) { nbKeepHeld++; try { return await t0.apply(this, arguments); } finally { nbKeepHeld--; } }; }
     window.__nbTogether = together;
     // tap a sound (the sound list, Play alone in Plugins): it plays alone; the arrows swap the highlighted one
     let swapping = false;
@@ -32028,7 +32033,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 170;
+    window.NB_BUILD = 171;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];

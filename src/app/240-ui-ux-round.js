@@ -108,6 +108,7 @@
     partsClock();
   }
   let lastEng = state.engine, lastLayers = [];
+  let nbKeepHeld = 0;   // (170) while a sound is added to what plays, the held notes stay put: nothing is handed to an arp part
   function detachArp(eng) {
     if (eng === "drum" || eng === "pads" || (!heldVoices.size && !voices.size)) return;
     const keys = (ENGINES[eng] ? lastLayers : voiceComponents(eng).map(c => c.key)).filter(k => arpOn(k));
@@ -121,7 +122,7 @@
     try { noteMsg(nbEngName(eng) + " arp keeps playing · Playing ▾ to edit or stop it"); } catch (e) {}
   }
   { const re = renderEngine; renderEngine = function () {
-      if (state.engine !== lastEng) { const from = lastEng; lastEng = state.engine; try { detachArp(from); } catch (e) {} }
+      if (state.engine !== lastEng) { const from = lastEng; lastEng = state.engine; if (!nbKeepHeld) try { detachArp(from); } catch (e) {} }
       const r = re.apply(this, arguments);
       if (ENGINES[state.engine]) lastLayers = activeLayers().slice();
       return r;

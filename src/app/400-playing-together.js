@@ -156,9 +156,11 @@
       }
       if (id.startsWith("n:")) {   // a Nate Bloom preset: its engines join the others
         const g = groupsOn(), prev = g.syn ? synOn() : [];
+        const keepArp = {}; prev.forEach(k => { if (state.arp[k]) keepArp[k] = Object.assign({}, state.arp[k]); });   // (170) a classic sound sets its own arp, not theirs
         keepFocusPlaying();
         applyPreset(Number(id.slice(2)));
-        prev.forEach(k => { state.layers[k].on = true; }); s.syn = false;
+        prev.forEach(k => { state.layers[k].on = true; if (keepArp[k]) Object.assign(getArp(k), keepArp[k]); }); s.syn = false;
+        try { arpClock(); } catch (e) {}
         renderEngine(); save(); say(e.name + " added · playing together"); return true;
       }
       if (id.startsWith("sp:")) {   // a Studio combination: its instruments join the others
@@ -178,6 +180,8 @@
       }
       say("That one doesn't play from the keys"); return false;
     }
+    // (170) adding a sound never moves or stops what's held: the held notes stay where they are, arp and all
+    { const t0 = together; together = async function (e) { nbKeepHeld++; try { return await t0.apply(this, arguments); } finally { nbKeepHeld--; } }; }
     window.__nbTogether = together;
     // tap a sound (the sound list, Play alone in Plugins): it plays alone; the arrows swap the highlighted one
     let swapping = false;
