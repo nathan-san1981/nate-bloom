@@ -1,5 +1,5 @@
     // ======================================================================
-    // 166: Elephant, the Skrillex-style trumpeting growl, as an effect on the sample itself. The sampler's fourth
+    // 166/167: Elephant, the Skrillex-style trumpeting growl, with the sample's character on it. The sampler's fourth
     // mode (Play · Grain · Elephant · Slice): the slot's sample plays as Play plays it (Start, Length, Loop, the
     // waveform untouched) and a shape rides on it, sized to the sample: the pitch glides up (Glide, in semitones),
     // two formants open with it (Wah), a saw-wave growl grows in as it climbs (Growl: the rasp on the level, the
@@ -67,6 +67,33 @@
       const m1 = ctx.createGain(); m1.gain.value = 1.8; pre.connect(f1).connect(m1).connect(sum);
       const m2 = ctx.createGain(); m2.gain.value = 0.8; pre.connect(f2).connect(m2).connect(sum);
       const m3 = ctx.createGain(); m3.gain.value = 0.55; pre.connect(body).connect(m3).connect(sum);
+      // (167) the elephant's own voice: a saw, its octave a little sharp, and a sub, at the note's pitch under the same shape
+      const fc = 261.6256 * rate;   // C4 at the middle key; the sample's own pitch is whatever it is
+      const car = ctx.createGain(); car.gain.value = 0.5;
+      const cOsc = [["sawtooth", 1, 0.55, 0], ["sawtooth", 2, 0.3, 7], ["square", 0.5, 0.25, 0]].map(([type, mult, g, cents]) => {
+        const o = ctx.createOscillator(); o.type = type; o.frequency.value = fc * mult * (r0 / rate); o.detune.value = cents;
+        const gp = ctx.createGain(); gp.gain.value = fc * mult * (r1 - r0) / rate; shape.connect(gp).connect(o.frequency);   // the glide
+        const og = ctx.createGain(); og.gain.value = g; o.connect(og).connect(car); return { o, gp };
+      });
+      // the vocoder: the sample's band energies open the same bands of the elephant's voice (14 bands, 150 Hz to 7 kHz)
+      const NB = 14, voc = ctx.createGain(); voc.gain.value = 1;
+      const rectCurve = (() => { const c = new Float32Array(257); for (let k = 0; k < 257; k++) c[k] = Math.abs(k / 128 - 1); return c; })();
+      for (let k = 0; k < NB; k++) {
+        const fk = 150 * Math.pow(7000 / 150, k / (NB - 1));
+        const mb = ctx.createBiquadFilter(); mb.type = "bandpass"; mb.frequency.value = fk; mb.Q.value = 5;
+        const rect = ctx.createWaveShaper(); rect.curve = rectCurve;
+        const env = ctx.createBiquadFilter(); env.type = "lowpass"; env.frequency.value = 45; env.Q.value = 0.5;
+        const eg = ctx.createGain(); eg.gain.value = 6;
+        const cb = ctx.createBiquadFilter(); cb.type = "bandpass"; cb.frequency.value = fk; cb.Q.value = 5;
+        const cg = ctx.createGain(); cg.gain.value = 0;
+        pre.connect(mb).connect(rect).connect(env).connect(eg).connect(cg.gain);
+        car.connect(cb).connect(cg).connect(voc);
+      }
+      // Blend: the sample with the shape on it (sum) against the elephant's voice with the sample on it (voc)
+      let blend = P.eBlend == null ? 0.6 : P.eBlend;
+      const bDry = ctx.createGain(); bDry.gain.value = 1 - blend; sum.connect(bDry);
+      const bWet = ctx.createGain(); bWet.gain.value = blend * 1.6; voc.connect(bWet);
+      const mix = ctx.createGain(); mix.gain.value = 1; bDry.connect(mix); bWet.connect(mix);
       // the growl: a saw LFO that grows with the shape, on the level, the pitch and the first formant
       const lfo = ctx.createOscillator(); lfo.type = "sawtooth"; lfo.frequency.value = eleRateHz(P.eGrowl);
       const mul = ctx.createGain(); mul.gain.value = 0; lfo.connect(mul); shape.connect(mul.gain);
@@ -74,13 +101,14 @@
       const am = ctx.createGain(); am.gain.value = 1 - dep / 2;
       const gAm = ctx.createGain(); gAm.gain.value = dep / 2; mul.connect(gAm).connect(am.gain);
       const gFm = ctx.createGain(); gFm.gain.value = 0.05 * rate * dep; mul.connect(gFm).connect(src.playbackRate);
+      const gFmC = ctx.createGain(); gFmC.gain.value = 0.02 * fc * dep; cOsc.forEach(c => gFmC.connect(c.o.frequency)); mul.connect(gFmC);
       const gWm = ctx.createGain(); gWm.gain.value = 0.3 * fTop * dep; mul.connect(gWm).connect(f1.frequency);
       // the drive, then the sample's Tone, then the growl's level, then the envelope
       const drive = ctx.createWaveShaper(); drive.curve = eleCurve(P.eDrive); drive.oversample = "2x";
       const post = ctx.createBiquadFilter(); post.type = "lowpass"; post.frequency.value = Math.min(expMap(P.tone, 250, 20000), 12000); post.Q.value = 0.7;
-      sum.connect(drive).connect(post).connect(am).connect(out);
+      mix.connect(drive).connect(post).connect(am).connect(out);
       if (slot.loop) { src.loop = true; src.loopStart = off; src.loopEnd = off + len; src.start(t, off); } else src.start(t, off, len);
-      shape.start(t); lfo.start(t);
+      shape.start(t); lfo.start(t); cOsc.forEach(c => c.o.start(t));
       out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 0.004);
       const fade = expMap(P.fade, 0.02, 3);
       const v = {
@@ -88,8 +116,9 @@
         set(key, val) {   // the pad and the sheet move a playing elephant
           const now = ctx.currentTime;
           if (key === "eWah") { fTop = eleWahHz(val); gF1.gain.setTargetAtTime(fTop - ELE_F0, now, 0.02); gF2.gain.setTargetAtTime((fTop - ELE_F0) * 2.4, now, 0.02); gWm.gain.setTargetAtTime(0.3 * fTop * dep, now, 0.02); }
-          else if (key === "eGrowl") { dep = eleDepth(val); lfo.frequency.setTargetAtTime(eleRateHz(val), now, 0.02); am.gain.setTargetAtTime(1 - dep / 2, now, 0.02); gAm.gain.setTargetAtTime(dep / 2, now, 0.02); gFm.gain.setTargetAtTime(0.05 * rate * dep, now, 0.02); gWm.gain.setTargetAtTime(0.3 * fTop * dep, now, 0.02); }
-          else if (key === "eGlide") { [r0, r1] = eleRates(P, rate); src.playbackRate.setTargetAtTime(r0, now, 0.02); gPitch.gain.setTargetAtTime(r1 - r0, now, 0.02); }
+          else if (key === "eGrowl") { dep = eleDepth(val); lfo.frequency.setTargetAtTime(eleRateHz(val), now, 0.02); am.gain.setTargetAtTime(1 - dep / 2, now, 0.02); gAm.gain.setTargetAtTime(dep / 2, now, 0.02); gFm.gain.setTargetAtTime(0.05 * rate * dep, now, 0.02); gFmC.gain.setTargetAtTime(0.02 * fc * dep, now, 0.02); gWm.gain.setTargetAtTime(0.3 * fTop * dep, now, 0.02); }
+          else if (key === "eGlide") { [r0, r1] = eleRates(P, rate); src.playbackRate.setTargetAtTime(r0, now, 0.02); gPitch.gain.setTargetAtTime(r1 - r0, now, 0.02); cOsc.forEach((c, k) => { const mult = [1, 2, 0.5][k]; c.o.frequency.setTargetAtTime(fc * mult * (r0 / rate), now, 0.02); c.gp.gain.setTargetAtTime(fc * mult * (r1 - r0) / rate, now, 0.02); }); }
+          else if (key === "eBlend") { blend = val; bDry.gain.setTargetAtTime(1 - blend, now, 0.02); bWet.gain.setTargetAtTime(blend * 1.6, now, 0.02); }
           else if (key === "eDrive") { drive.curve = eleCurve(val); lvl.gain.setTargetAtTime(eleLevel(P, scale), now, 0.02); }
           else if (key === "eDb") lvl.gain.setTargetAtTime(eleLevel(P, scale), now, 0.02);
         },
@@ -98,7 +127,7 @@
           if (at == null) { at = now; out.gain.cancelScheduledValues(now); out.gain.setValueAtTime(Math.max(0.0001, out.gain.value), now); }
           out.gain.setTargetAtTime(0.0001, at, fade / 4);
           const end = at + fade * 1.6 + 0.05;
-          try { src.stop(end); } catch (e) {} try { shape.stop(end); lfo.stop(end); } catch (e) {}
+          try { src.stop(end); } catch (e) {} try { shape.stop(end); lfo.stop(end); cOsc.forEach(c => c.o.stop(end)); } catch (e) {}
           if (at <= now + 0.01) ELE.live.delete(v); else setTimeout(() => ELE.live.delete(v), (at - now) * 1000);   // (a stop set for later: the pad still moves it until then)
           setTimeout(() => { try { out.disconnect(); lvl.disconnect(); } catch (e) {} }, (end - now) * 1000 + 300);
         },

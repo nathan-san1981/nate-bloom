@@ -3268,3 +3268,25 @@ body.shell-new #modes { display: none !important; }
 }
 .sh-sp { white-space: nowrap; }
 @media (max-width: 700px) { .sh-sp { padding: 0 7px; font-size: 0.84rem; } .sh-spaces { gap: 2px; } }
+/* 167: the strip and the Build bar sit below the phone's status bar (the iPhone's notch / Dynamic Island area). The page is
+   viewport-fit=cover, so the top safe-area inset is ours to add: every fixed top offset under the strip moves down by it. */
+:root { --sat: env(safe-area-inset-top, 0px); }
+#shell { height: calc(40px + var(--sat)); padding-top: var(--sat); }
+body.shell-new .app { padding-top: calc(50px + var(--sat)); }
+body.shell-new .dj, body.shell-new .editor, body.shell-new .trk, body.shell-new .browser, body.shell-new .mls { top: calc(40px + var(--sat)); }
+body.shell-new.mls-on .app { padding-top: calc(50px + var(--mls-h) + var(--sat)); }
+body.shell-new.mls-on .dj, body.shell-new.mls-on .trk, body.shell-new.mls-on .browser { top: calc(40px + var(--mls-h) + var(--sat)); }
+body.play-on.shell-new > .lv-fxp { top: calc(40px + var(--sat)); }
+body.shell-new .lv-pick.standalone.drawer { top: calc(84px + var(--sat)) !important; }
+#buildBar { top: calc(40px + var(--sat)); }
+body.build-on .app { padding-top: calc(94px + var(--sat)); }
+body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser, body.build-on .mls { top: calc(84px + var(--sat)); }
+body.build-on.mls-on .app { padding-top: calc(94px + var(--mls-h) + var(--sat)); }
+body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(84px + var(--mls-h) + var(--sat)); }
+body.build-on .lv-pick.standalone.drawer { top: calc(84px + var(--sat)) !important; }
+@media (max-width: 700px) {
+  body.build-on .app { padding-top: calc(134px + var(--sat)); }
+  body.build-on .dj, body.build-on .editor, body.build-on .trk, body.build-on .browser, body.build-on .mls { top: calc(124px + var(--sat)); }
+  body.build-on.mls-on .app { padding-top: calc(134px + var(--mls-h) + var(--sat)); }
+  body.build-on.mls-on .dj, body.build-on.mls-on .trk, body.build-on.mls-on .browser { top: calc(124px + var(--mls-h) + var(--sat)); }
+}

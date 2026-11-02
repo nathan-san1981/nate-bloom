@@ -120,6 +120,7 @@
       if (key === "eGlide") return "+" + Math.round(v * 24) + " st";
       if (key === "eWah") { const hz = 300 * Math.pow(2, 0.5 + 3 * v); return hz >= 1000 ? (hz / 1000).toFixed(1) + "k" : Math.round(hz) + ""; }
       if (key === "eGrowl") return Math.round(12 + 40 * v) + "Hz";
+      if (key === "eBlend") return v < 0.02 ? "sample" : v > 0.98 ? "elephant" : Math.round(v * 100) + "%";
       if (key === "eLen") return window.__live30 ? fmtTime(__live30.eleShapeLen(state.samp.slot, 1)) : "×" + Math.pow(4, 2 * v - 1).toFixed(2);
       if (key === "eDb") { const db = -24 + 36 * v; return (db > 0 ? "+" : "") + db.toFixed(1) + " dB"; }
       return Math.round(v * 100) + "";

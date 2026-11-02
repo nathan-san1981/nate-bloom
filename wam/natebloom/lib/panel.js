@@ -21,6 +21,7 @@ button:active { transform: scale(0.97); }
 .menu .seg button { border: 0; border-radius: 0; background: #1f1a2a; height: 32px; min-width: 44px; }
 .menu .seg button[aria-pressed="true"] { background: var(--acc); color: #17131f; font-weight: 700; }
 .menu .l { font-size: 11.5px; color: #b9afd0; }
+.menu select.pick { appearance: none; -webkit-appearance: none; background: #1f1a2a; color: #ece7f7; border: 1px solid #3a3249; border-radius: 8px; height: 36px; min-width: 150px; max-width: 100%; padding: 0 28px 0 10px; font: inherit; font-size: 15px; }
 .g { grid-column: 1 / -1; font: 600 10.5px/1.2 ui-monospace, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #8e86a6; margin: 8px 0 -2px; border-top: 1px solid #2f2840; padding-top: 8px; }
 .g:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
 `;
@@ -67,6 +68,16 @@ export function panel(plugin, M) {
     vals[p.id] = p.init;
     if (p.hidden) { views[p.id] = () => {}; continue; }
     if (p.group && p.group !== group) { group = p.group; const g = document.createElement("div"); g.className = "g"; g.textContent = group.replace(/\//g, " · "); grid.appendChild(g); }
+    if (p.menu && p.menu.length > 6) {   // a long list (Twist's 24 models): a picker, not a row of buttons
+      const w = document.createElement("div"); w.className = "menu";
+      const sel = document.createElement("select"); sel.setAttribute("aria-label", p.label); sel.className = "pick";
+      p.menu.forEach(([lab, val]) => { const o = document.createElement("option"); o.value = val; o.textContent = lab; sel.appendChild(o); });
+      sel.addEventListener("change", () => set(p, +sel.value, true));
+      const l = document.createElement("span"); l.className = "l"; l.textContent = p.short || p.label;
+      w.append(sel, l); grid.appendChild(w);
+      views[p.id] = () => { const v = String(Math.round(vals[p.id])); if (sel.value !== v) sel.value = v; };
+      continue;
+    }
     if (p.menu) {
       const w = document.createElement("div"); w.className = "menu";
       const seg = document.createElement("div"); seg.className = "seg"; seg.setAttribute("role", "radiogroup"); seg.setAttribute("aria-label", p.label);

@@ -38,8 +38,8 @@
   const NSLOTS = 8;
   const NPADS = 12;
   const SAMP_SLICE_KNOBS = [["slices","Slices",0.34],["sens","Detect",0],["tone","Tone",1],["fade","Fade",0.15],["level","Level",0.8]];
-  // 166: Elephant, an effect on the sample itself (770): the shape's pitch glide, the formant sweep, the growl, the drive, the shape's length (×1 = the sample's) and a dB trim
-  const SAMP_ELE_KNOBS = [["eGlide","Glide",0.5],["eWah","Wah",0.6],["eGrowl","Growl",0.5],["eDrive","Drive",0.5],["eLen","Length",0.5],["eDb","dB",2 / 3]];
+  // 166: Elephant (770): the shape's pitch glide, the formant sweep, the growl, Blend (167: the sample vocoding the elephant's own voice), the drive, the shape's length (×1 = the sample's) and a dB trim
+  const SAMP_ELE_KNOBS = [["eGlide","Glide",0.5],["eWah","Wah",0.6],["eGrowl","Growl",0.5],["eBlend","Blend",0.6],["eDrive","Drive",0.5],["eLen","Length",0.5],["eDb","dB",2 / 3]];
   const PAD_KNOBS = [["pitch","Pitch",0.5],["start","Start",0],["length","Length",1],["tone","Tone",1],["level","Level",0.8]];
   const INST_KNOBS = [["tune","Tune",0.5],["tone","Tone",1],["attack","Attack",0],["release","Release",0.35],["level","Level",0.8]];
   const SLICE_COUNTS = [4, 6, 8, 12, 16, 24, 32];

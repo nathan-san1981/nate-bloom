@@ -93,7 +93,9 @@ async function ensureProcessor(ctx, M) {
   return done.get(procName(M));
 }
 class NBPortNode extends CompositeAudioNode {
-  setup(w, paramMgr) { this._w = w; this._wamNode = paramMgr; this._output = w; if (this._hasInput) this.connect(w, 0, 0); FAST.nodes.add(this); }
+  // an effect's input: this node (a gain) feeds the worklet — through the plain GainNode connect, since the composite's own
+  // connect forwards to _output (167: it used to wire the worklet to itself, so every ported effect passed silence)
+  setup(w, paramMgr) { this._w = w; this._wamNode = paramMgr; if (this._hasInput) GainNode.prototype.connect.call(this, w, 0, 0); this._output = w; FAST.nodes.add(this); }
   // can this plugin play natively here? (the apps, an instrument the app was built with)
   fastAvailable() { return !this._hasInput && fastIndex(this._M && this._M.id) >= 0; }
   get fast() { return !!this._fast; }

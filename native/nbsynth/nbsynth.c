@@ -14,6 +14,7 @@
 #include "unicorndream.h"
 #include "fuzzbass.h"
 #include "balladkit.h"
+#include "twist.h"
 
 struct w2c_env { int unused; };
 f64 w2c_env_sin(struct w2c_env* e, f64 x) { (void) e; return sin(x); }
@@ -143,6 +144,17 @@ static void render_balladkit(unsigned n) { w2c_balladkit_nb_render(&i_balladkit,
 static unsigned out_balladkit(unsigned ch) { return w2c_balladkit_nb_out(&i_balladkit, ch); }
 static void tempo_balladkit(double b, unsigned p) { w2c_balladkit_nb_tempo(&i_balladkit, b, p); }
 static void reset_balladkit(void) { w2c_balladkit_nb_reset(&i_balladkit); }
+static w2c_twist i_twist;
+static void mk_twist(void) { wasm2c_twist_instantiate(&i_twist); w2c_twist_0x5F_wasm_call_ctors(&i_twist); }
+static wasm_rt_memory_t* mem_twist(void) { return w2c_twist_memory(&i_twist); }
+static void init_twist(float r) { w2c_twist_nb_init(&i_twist, r); }
+static unsigned params_twist(void) { return w2c_twist_nb_params(&i_twist); }
+static unsigned count_twist(void) { return w2c_twist_nb_count(&i_twist); }
+static void midi_twist(unsigned a, unsigned b, unsigned d) { w2c_twist_nb_midi(&i_twist, a, b, d); }
+static void render_twist(unsigned n) { w2c_twist_nb_render(&i_twist, n); }
+static unsigned out_twist(unsigned ch) { return w2c_twist_nb_out(&i_twist, ch); }
+static void tempo_twist(double b, unsigned p) { (void) b; (void) p; }
+static void reset_twist(void) { w2c_twist_nb_reset(&i_twist); }
 static Plug g_plugs[] = {
   { "twin77", 0, 0, mk_twin77, mem_twin77, init_twin77, params_twin77, count_twin77, midi_twin77, render_twin77, out_twin77, tempo_twin77, reset_twin77 },
   { "duet80", 0, 0, mk_duet80, mem_duet80, init_duet80, params_duet80, count_duet80, midi_duet80, render_duet80, out_duet80, tempo_duet80, reset_duet80 },
@@ -154,6 +166,7 @@ static Plug g_plugs[] = {
   { "unicorn_dream", 0, 0, mk_unicorndream, mem_unicorndream, init_unicorndream, params_unicorndream, count_unicorndream, midi_unicorndream, render_unicorndream, out_unicorndream, tempo_unicorndream, reset_unicorndream },
   { "fuzz_bass", 0, 0, mk_fuzzbass, mem_fuzzbass, init_fuzzbass, params_fuzzbass, count_fuzzbass, midi_fuzzbass, render_fuzzbass, out_fuzzbass, tempo_fuzzbass, reset_fuzzbass },
   { "ballad_kit", 0, 0, mk_balladkit, mem_balladkit, init_balladkit, params_balladkit, count_balladkit, midi_balladkit, render_balladkit, out_balladkit, tempo_balladkit, reset_balladkit },
+  { "twist", 0, 0, mk_twist, mem_twist, init_twist, params_twist, count_twist, midi_twist, render_twist, out_twist, tempo_twist, reset_twist },
 };
 #define N_PLUGS ((int) (sizeof(g_plugs) / sizeof(g_plugs[0])))
 static int g_rt = 0;

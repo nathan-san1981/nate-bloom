@@ -173,6 +173,16 @@
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
   {
+   "key": "natebloom/twist",
+   "name": "Twist",
+   "vendor": "Nate Bloom",
+   "kind": "instrument",
+   "type": "Macro oscillator",
+   "desc": "Plaits' 24 models (Mutable Instruments, MIT) under three knobs: Harmonics, Timbre, Morph, through its own low-pass gate. Analog, phase distortion, three banks of 6-op FM, wave terrain, string machine, chiptune, wavetable, chords, speech, swarm, noise, particles, plucked string, bells, drums.",
+   "url": "natebloom/twist/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
    "key": "burns-audio/drumsampler",
    "name": "DRM-16 DrumComputer",
    "vendor": "Sequencer Party",
@@ -220,6 +230,16 @@
    "type": "Reverb",
    "desc": "The classic studio plate: dense, bright and quick to bloom. Lovely on vocals, snares and keys.",
    "url": "natebloom/plate/index.js",
+   "site": "https://nathan-san1981.github.io/nate-bloom/"
+  },
+  {
+   "key": "natebloom/galactic",
+   "name": "Galactic",
+   "vendor": "Nate Bloom",
+   "kind": "effect",
+   "type": "Reverb",
+   "desc": "Airwindows' Galactic3 (Chris Johnson, MIT): the huge, slowly drifting space that never quite ends. Replace low keeps it going; Detune drifts it; Bigness is the room; Derez for grit.",
+   "url": "natebloom/galactic/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
   {
