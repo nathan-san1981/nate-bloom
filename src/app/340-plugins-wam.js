@@ -283,6 +283,7 @@
       if (guiBack) { guiBack = false; sheet.hidden = false; nbwPaint(); }
     }
     document.getElementById("wamGuiDone").addEventListener("click", nbwCloseGui);
+    document.getElementById("wamGuiDone2").addEventListener("click", nbwCloseGui);   // (169: a Done at the bottom of a long panel too)
     window.addEventListener("keydown", e => { if (e.key === "Escape" && !gui.hidden && !document.querySelector(".editor:not([hidden]), .browser:not([hidden])")) { e.preventDefault(); e.stopImmediatePropagation(); nbwCloseGui(); } }, true);
     // ---- the Plugins sheet ----
     let showAdd = false, msg = "";

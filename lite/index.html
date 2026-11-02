@@ -3324,6 +3324,14 @@ body.shell-new { position: fixed; inset: 0; width: 100%; height: 100%; overflow:
 body.shell-new .app { height: 100%; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; box-sizing: border-box; }
 #shell { z-index: 62; } #buildBar { z-index: 61; }
 .sh-strip { color: var(--ink); }
+/* 169: the plugin controls dock (and the Natewave dock) sit below the strip and the Build bar, their header stays put
+   while the card scrolls, and a second Done sits at the bottom of a long panel */
+body.shell-new .wam-dock, body.shell-new .wv-dock { top: calc(48px + var(--sat)); }
+body.build-on .wam-dock, body.build-on .wv-dock { top: calc(92px + var(--sat)); }
+@media (max-width: 700px) { body.build-on .wam-dock, body.build-on .wv-dock { top: calc(132px + var(--sat)); } .wam-dock .ed-card { max-height: calc(100vh - 150px - var(--sat)); } }
+.wam-dock .ed-card > .ed-head { position: sticky; top: -12px; margin: -12px -12px 0; padding: 12px 12px 8px; background: var(--panel); z-index: 2; border-bottom: 1px solid var(--line); }
+.wam-dock .wam-foot { display: flex; justify-content: flex-end; padding-top: 8px; }
+.wam-dock .wam-foot .btn { height: 38px; padding: 0 22px; }
 </style>
 </head>
 <body class="lite">
@@ -4756,6 +4764,7 @@ body.shell-new .app { height: 100%; min-height: 0; overflow-y: auto; -webkit-ove
   <div class="ed-card" role="dialog" aria-label="Plugin controls">
     <div class="ed-head"><strong id="wamGuiTitle">Plugin</strong><span class="ed-info" id="wamGuiSub"></span><button class="btn primary" id="wamGuiDone">Done</button></div>
     <div class="wam-gui" id="wamGuiBox"></div>
+    <div class="wam-foot"><button class="btn primary" id="wamGuiDone2">Done</button></div>
   </div>
 </div>
 <div class="editor sheet" id="menuSheet" hidden>
@@ -21436,6 +21445,7 @@ registerProcessor("nb-verb", NBVerb);`;
       if (guiBack) { guiBack = false; sheet.hidden = false; nbwPaint(); }
     }
     document.getElementById("wamGuiDone").addEventListener("click", nbwCloseGui);
+    document.getElementById("wamGuiDone2").addEventListener("click", nbwCloseGui);   // (169: a Done at the bottom of a long panel too)
     window.addEventListener("keydown", e => { if (e.key === "Escape" && !gui.hidden && !document.querySelector(".editor:not([hidden]), .browser:not([hidden])")) { e.preventDefault(); e.stopImmediatePropagation(); nbwCloseGui(); } }, true);
     // ---- the Plugins sheet ----
     let showAdd = false, msg = "";
@@ -32145,7 +32155,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 168;
+    window.NB_BUILD = 169;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
