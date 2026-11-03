@@ -101,12 +101,40 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
             const p = document.createElement("p"); p.className = "wam-msg"; box.appendChild(p);
             const row = document.createElement("div"); row.className = "nbp-row"; box.appendChild(row);
             const b = (t, fn) => { const x = document.createElement("button"); x.className = "btn"; x.textContent = t; x.addEventListener("click", fn); row.appendChild(x); return x; };
+            // (184) a plugin with no window of its own (a VST3 built without an editor, as nih-plug makes them by default),
+            // or one whose window won't open here: its parameters as sliders in this panel, as a DAW shows them
+            const gen = document.createElement("div"); gen.className = "nbp-params"; gen.style.cssText = "display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto;margin-top:8px"; box.appendChild(gen);
+            let genT = 0;
+            const fmtV = (q, v) => q.steps > 0 && q.steps <= 12 ? String(Math.round(v)) : Math.abs(v) >= 100 ? v.toFixed(0) : Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2);
+            async function sliders() {
+              let ps = []; try { ps = await NP.params(id); P.params = ps; } catch (e) {}
+              gen.innerHTML = "";
+              const list = ps.filter(q => q.auto !== false && q.max > q.min);
+              if (!list.length) { const n = document.createElement("p"); n.className = "wam-msg dim"; n.textContent = "It shows no parameters either."; gen.appendChild(n); return; }
+              list.forEach(q => {
+                const r = document.createElement("label"); r.className = "ly-quick"; r.style.cssText = "align-items:center;gap:8px";
+                const nm = document.createElement("span"); nm.className = "dj-lab"; nm.style.cssText = "flex:0 0 38%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"; nm.textContent = q.name; nm.title = q.name;
+                const sl = document.createElement("input"); sl.type = "range"; sl.min = 0; sl.max = 1000; sl.style.flex = "1"; sl.setAttribute("aria-label", q.name); sl.dataset.pid = q.id;
+                const vv = document.createElement("span"); vv.className = "dj-lab"; vv.style.cssText = "min-width:52px;text-align:right";
+                const toN = v => Math.round((v - q.min) / (q.max - q.min) * 1000), toV = n => { let v = q.min + n / 1000 * (q.max - q.min); if (q.steps > 0) { const st = (q.max - q.min) / q.steps; v = q.min + Math.round((v - q.min) / st) * st; } return v; };
+                sl.value = toN(q.value); vv.textContent = fmtV(q, q.value);
+                sl.addEventListener("input", () => { const v = toV(+sl.value); vv.textContent = fmtV(q, v); try { NP.param(id, q.id, v); } catch (e) {} sl.__t = Date.now(); });
+                sl.__q = q; sl.__vv = vv; r.append(nm, sl, vv); gen.appendChild(r);
+              });
+              clearInterval(genT);
+              genT = setInterval(async () => {   // (moves made from MIDI learn, automation or the plugin itself show here)
+                if (!box.isConnected) { clearInterval(genT); return; }
+                let ps2 = []; try { ps2 = await NP.params(id); } catch (e) { return; }
+                gen.querySelectorAll("input[type=range]").forEach(sl => { if (Date.now() - (sl.__t || 0) < 800) return; const q2 = ps2.find(x => String(x.id) === sl.dataset.pid); if (!q2) return; const q = sl.__q; sl.value = Math.round((q2.value - q.min) / (q.max - q.min) * 1000); sl.__vv.textContent = fmtV(q, q2.value); });
+              }, 600);
+            }
             const show = async () => {
-              if (!info.gui) { p.textContent = info.name + " has no window of its own. Its controls are under MIDI learn and Tracks automation."; return; }
+              if (!info.gui) { row.hidden = true; p.textContent = info.name + " has no window of its own, so its controls are here (and under MIDI learn and Tracks automation)."; sliders(); return; }
               p.textContent = "Opening " + info.name + "'s window…";
               let r = null; try { r = await NP.gui(id, true, info.name + " · Nate Bloom"); } catch (e) { r = { open: false, why: String(e && e.message || e) }; }
               P.open = !!(r && r.open);
-              p.textContent = P.open ? info.name + "'s own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin." : "Its window didn't open" + (r && r.why ? ": " + r.why : "") + ".";
+              if (P.open) { p.textContent = info.name + "'s own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin."; gen.innerHTML = ""; clearInterval(genT); }
+              else { const why = r && r.why ? r.why : ""; p.textContent = /has no window/.test(why) ? info.name + " has no window of its own (it was built without one), so its controls are here, and under MIDI learn and Tracks automation." : "Its window didn't open" + (why ? ": " + why : "") + ", so its controls are here."; sliders(); }
             };
             b("Show its window", show); b("Close its window", async () => { try { await NP.gui(id, false); } catch (e) {} P.open = false; p.textContent = "Closed. Show its window opens it again."; });
             show();
