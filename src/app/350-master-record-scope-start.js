@@ -94,7 +94,7 @@
     }
     const file = new File([wav], name + ".wav", { type: "audio/wav" });
     try {
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (nbShareFiles(file)) {
         await navigator.share({ files: [file], title: name });
         return;
       }

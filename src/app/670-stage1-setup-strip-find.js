@@ -3,22 +3,22 @@
     // (Sound check, MIDI, Gear, Pixelbook, Projects, App, Help); the sheets that exist today (MIDI, Projects, Help,
     // Gear's popup) are parked inside it rather than copied, so nothing is duplicated. Find is one search over
     // actions, settings, sounds, songs, pad sets and help: / or Ctrl-K, two letters, Enter. The strip (the new shell,
-    // Help → New shell or Set up → App) is now real: tempo, key and bar:beat, dots for the MiniLab, the K.O. II and the
+    // Help → New shell or Settings → App) is now real: tempo, key and bar:beat, dots for the MiniLab, the K.O. II and the
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 173;
+    window.NB_BUILD = 174;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
     const suHidden = (id, name) => { const b = document.createElement("button"); b.id = id; b.type = "button"; b.style.display = "none"; b.textContent = name; document.body.appendChild(b); return b; };
-    const setupBtn = suHidden("setupBtn", "Set up"), findBtn = suHidden("findBtn", "Find");
+    const setupBtn = suHidden("setupBtn", "Settings"), findBtn = suHidden("findBtn", "Find");
     const suOpenNow = () => !!(SU.el && !SU.el.hidden);
     function suBuild() {
       if (SU.el) return SU.el;
-      const el = document.createElement("div"); el.className = "dj su"; el.id = "setup"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Set up");
-      el.innerHTML = `<div class="su-top"><strong>Set up</strong><span class="su-sub">the rig: nothing you touch mid-song</span><button type="button" class="btn" id="suFindBtn">Find</button><button type="button" class="btn primary" id="suDone">Done</button></div>
-        <div class="su-body"><nav class="su-nav" aria-label="Set up sections">${SU_SECS.map(([k, n]) => `<button type="button" data-sec="${k}" aria-pressed="false">${n}</button>`).join("")}</nav><div class="su-pane" id="suPane"></div></div>`;
+      const el = document.createElement("div"); el.className = "dj su"; el.id = "setup"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Settings");
+      el.innerHTML = `<div class="su-top"><strong>Settings</strong><span class="su-sub">the rig: nothing you touch mid-song</span><button type="button" class="btn" id="suFindBtn">Find</button><button type="button" class="btn primary" id="suDone">Done</button></div>
+        <div class="su-body"><nav class="su-nav" aria-label="Settings sections">${SU_SECS.map(([k, n]) => `<button type="button" data-sec="${k}" aria-pressed="false">${n}</button>`).join("")}</nav><div class="su-pane" id="suPane"></div></div>`;
       document.body.appendChild(el); SU.el = el; SU.pane = $id("suPane"); SU.nav = el.querySelector(".su-nav");
       SU.nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => suShow(b.dataset.sec)));
       $id("suDone").addEventListener("click", () => suClose(false));
@@ -199,7 +199,7 @@
       act("Save the log", "what the app was doing, the last minute of sound, every setting", () => logTap("find"), "report bug dropout");
       act("Report a problem", "a zip to send for a fix", () => $id("reportBtn").click(), "bug log help");
       act("Save and exit", "save as a project and close", () => $id("exitBtn").click(), "quit close");
-      const set = (sec, t, s, hi, k) => add("Settings", t, "Set up › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
+      const set = (sec, t, s, hi, k) => add("Settings", t, "Settings › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
       set("sound", "Sound goes to", "where Android or the browser sends the sound", "#suOutRow", "output route headphones speaker usb");
       if (window.NB_NATIVE) set("sound", "Media volume", "the tablet's volume", "#suVolRow", "loud quiet");
       if (!window.NB_LITE) set("sound", "Sound buffer", "Fast or Steady", "#suBufRow", "latency dropouts crackle steady fast");
@@ -247,7 +247,7 @@
     function fdRender(q) {
       q = String(q || "").trim().toLowerCase(); const toks = q.split(/\s+/).filter(Boolean);
       let rows;
-      if (!toks.length) rows = FD.items.filter(it => it.g === "Actions").slice(0, 6).concat(SU_SECS.map(([k, n]) => ({ g: "Settings", t: n, s: "Set up › " + n, run: () => suOpen(k) })));
+      if (!toks.length) rows = FD.items.filter(it => it.g === "Actions").slice(0, 6).concat(SU_SECS.map(([k, n]) => ({ g: "Settings", t: n, s: "Settings › " + n, run: () => suOpen(k) })));
       else {
         const scored = []; FD.items.forEach(it => { const sc = fdScore(it, toks); if (sc) scored.push([sc, it]); });
         scored.sort((a, b) => b[0] - a[0] || FD_ORDER.indexOf(a[1].g) - FD_ORDER.indexOf(b[1].g));
@@ -284,7 +284,7 @@
     shBuild = function () {   // (replaces stage 0's skeleton)
       if (SH.el) return SH.el;
       const el = document.createElement("div"); el.id = "shell"; el.hidden = true;
-      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp" data-sp="setup">Set up</button></div>
+      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp sh-set" data-sp="setup" title="Settings: sound, MIDI, gear, the app, help" aria-label="Settings"><span class="sh-gear" aria-hidden="true">⚙</span><span class="sh-setw">Settings</span></button></div>
         <div class="sh-mid" id="shMid"></div><div class="sh-msg" id="shMsg" hidden></div>
         <div class="sh-right"><span class="sh-dot" data-k="minilab">MiniLab</span><span class="sh-dot" data-k="ko2">K.O. II</span><span class="sh-dot" data-k="pixelbook">Pixelbook</span><span class="sh-out" id="shOut"></span><span class="sh-drops" id="shDrops" hidden></span><button type="button" class="btn" id="shLog">Log</button><button type="button" class="btn" id="shFind">Find</button></div></div>`;
       document.body.appendChild(el); SH.el = el;
@@ -326,7 +326,7 @@
       const now = { out: r.out || "", minilab: !!r.minilab, ko2: !!r.ko2, pixelbook: !!r.pixelbook, ins: (r.midiIns || []).join("|"), notes: (h.notes || []).join("|") }, p = SH.prev; SH.prev = now;
       if (!p) return;
       if (now.out !== p.out && now.out) shSay("Sound now goes to " + now.out, true);
-      if (now.minilab !== p.minilab) shSay(now.minilab ? "MiniLab connected" : "MiniLab gone", true);
+      if (now.minilab !== p.minilab) { const nm = ML.dev === "kl" ? "KeyLab" : "MiniLab"; shSay(now.minilab ? nm + " connected" : nm + " gone", true); }
       if (now.ko2 !== p.ko2) shSay(now.ko2 ? "K.O. II connected" : "K.O. II gone", true);
       if (now.pixelbook !== p.pixelbook) shSay(now.pixelbook ? "Pixelbook linked" : "Pixelbook gone", true);
       if (now.ins !== p.ins) { const a = p.ins ? p.ins.split("|") : [], b = now.ins ? now.ins.split("|") : []; const came = b.filter(x => !a.includes(x)), gone = a.filter(x => !b.includes(x)); if (came.length) shSay("MIDI: + " + came.join(", "), true); if (gone.length) shSay("MIDI: − " + gone.join(", "), true); }

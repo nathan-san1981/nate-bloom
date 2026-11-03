@@ -686,6 +686,7 @@
     // ---------- what you see: a readout, numbers on the controls, the map, the pads lit ----------
     const hud = document.createElement("div"); hud.className = "mini-hud"; hud.id = "miniHud"; hud.hidden = true; hud.setAttribute("role", "status");
     hud.innerHTML = "<b></b><span></span><em hidden></em><i><s></s></i>"; document.body.appendChild(hud);
+    const KL_HINT = "knobs 1–6: effects · 7–8: sends · 9: tempo · faders 1–4: the sound · 5–8: levels · 9: master";   // (173)
     const HINT = { synths: "pads 1–8 drums, 9–16 chords · knobs: the sound", samples: "pads: slots and pads · knobs: the sample", drums: "pads: the 8 drums · knobs: the drum you hit",
       dj: "pads 1–8 deck A, 9–16 deck B · knobs: the EQs", grid: "pads: the 16 tracks · knobs: the track you hit", pads: "pads: 1–16 here · knobs: the pad you hit · keys play it in tune",
       garage: "pads: the track's drums or chords, 13–16 ⏮ ▶ ● ⟳ · knobs: the track", mix: "knobs and faders: the rows of the Mixer" };
@@ -800,7 +801,7 @@
     });
     // ---------- pad colours and names on the MiniLab's screen (Arturia's own messages; needs Chrome's permission) ----------
     const SX = [0xf0, 0x00, 0x20, 0x6b, 0x7f, 0x42];
-    function mlOuts() { if (!md.access || !ML.lights) return []; try { return [...md.access.outputs.values()].filter(o => mlPortOn(o) && !/din|mcu|hui/i.test(o.name || "")); } catch (e) { return []; } }
+    function mlOuts() { if (!md.access || !ML.lights) return []; try { return [...md.access.outputs.values()].filter(o => mlPortOn(o) && !isKL(o) && !/din|mcu|hui/i.test(o.name || "")); } catch (e) { return []; } }   // (173: the MiniLab's lights and screen, never sent to the KeyLab)
     function mlSysex(bytes) { const outs = mlOuts(); if (!outs.length) return; const msg = SX.concat(bytes, [0xf7]); outs.forEach(o => { try { o.send(msg); } catch (e) {} }); }
     const rgb = hex => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || ""); return m ? [1, 2, 3].map(j => parseInt(m[j], 16) >> 1) : [0, 0, 0]; };
     function mlLight(i, hit) {
@@ -828,13 +829,13 @@
       if (!live && !map.hidden) { map.hidden = true; document.body.classList.remove("mini-open"); }
       if (document.body.classList.contains("mini-live") !== live) document.body.classList.toggle("mini-live", live);
       if (!live) { if (ML.wasLive) mlBadges(); ML.page = ""; ML.wasLive = false; return; }
-      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(); mlHud("MiniLab 3 connected", PAGE_NAME[pg0] || "", null, HINT[pg0]); }, 500); }
+      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(), kl = ML.dev === "kl"; mlHud(kl ? "KeyLab connected" : "MiniLab 3 connected", PAGE_NAME[pg0] || "", null, kl ? KL_HINT : HINT[pg0]); }, 500); }
       const pg = mlPage();
       if (force || pg !== ML.page) {
         const was = ML.page; ML.page = pg; ML.lay = null;
         if (live) {
           mlBadges(); paintMap(); ML.sent.clear(); mlLightAll();
-          if (was && was !== pg) mlHud("MiniLab 3", PAGE_NAME[pg] || "", null, HINT[pg]);
+          if (was && was !== pg && ML.dev !== "kl") mlHud("MiniLab 3", PAGE_NAME[pg] || "", null, HINT[pg]);   // (173: not for the KeyLab; its strip says it)
         }
       }
     }

@@ -261,7 +261,7 @@
     // ---- phones: ☰ Menu instead of the sideways tool row ----
     const menu = document.getElementById("menuSheet"), grid = document.getElementById("menuGrid");
     const ITEMS = [
-      ["setupBtn", "Set up", "The rig: sound, MIDI, Gear, Pixelbook, projects, the app, help"],
+      ["setupBtn", "Settings", "The rig: sound, MIDI, Gear, Pixelbook, projects, the app, help"],
       ["findBtn", "Find", "Any setting, sound, song or action: two letters (/ or Ctrl-K)"],
       ["playBtn", "Play", "The performance surface: the stack, eight macros, pads, the set list"],
       ["liveBtn", "Live", "Big knobs, faders and pads for playing out"],

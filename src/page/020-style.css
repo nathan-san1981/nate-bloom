@@ -3370,3 +3370,8 @@ body.kl-on .mls-name { width: 70px; }
 /* 173: the Linux app across both screens: the page uses the whole width */
 body.nb-wide .app { max-width: none; }
 body.nb-wide .knobs { max-width: 1600px; }
+/* 173: Settings (it was "Set up"): a gear and a word, outlined, on the strip of every screen and every version */
+.sh-sp.sh-set { opacity: 1; display: inline-flex; align-items: center; gap: 5px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); }
+.sh-sp.sh-set .sh-gear { color: var(--amber); font-size: 1.1em; line-height: 1; }
+.sh-sp.sh-set.on { background: rgba(255, 255, 255, 0.14); border-color: var(--amber); }
+@media (max-width: 380px) { .sh-sp.sh-set .sh-setw { display: none; } }

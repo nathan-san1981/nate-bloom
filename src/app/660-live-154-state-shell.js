@@ -25,8 +25,9 @@
       // an output that can't keep up. The first was blamed on the output before.
       const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
       if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
+      if (window.NB_BIG && bufWant() === "fast") return ["The sound is dropping out" + where + ". This computer has room for it: switch the sound buffer to Steady (Settings › Sound check) and reload; it gives the sound twice the slack for about 10 ms more delay."];   // (174)
       if (vs >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": a lot plays at once (" + vs + (vs === 1 ? " voice" : " voices") + " across " + lay + (lay === 1 ? " layer" : " layers") + "). Fewer layers or effects help; Stop all (■) clears anything that got stuck."];
-      return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
+      return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Settings → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
     }
     function nbsRead() {   // today's objects, read into the document's shape
       const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};
@@ -70,17 +71,17 @@
         case "fx.on": setFxOn(!!it.value); return ok("effects " + (it.value ? "on" : "off"), "fx");
         case "transport.tempo": { const b = Math.round(+it.value); if (!(b >= 50 && b <= 180)) return no("tempo is 50 to 180", "transport"); setBpm(b); return ok(b + " bpm", "transport"); }
         case "mixer.level": {
-          if (P.levels !== "always") return no("levels from the Pixelbook are off (Set up → Pixelbook)", "mixer");
+          if (P.levels !== "always") return no("levels from the Pixelbook are off (Settings → Pixelbook)", "mixer");
           const i = it.index | 0, c = nbsTry(() => mixChannels()[i], null); if (!c) return no("no channel " + i, "mixer");
           const v = Math.max(0, Math.min(2, +it.value || 0)); c.set(v); try { save(); } catch (e) {} try { if (!$id("mixer").hidden) renderMixer(); } catch (e) {}
           return ok(c.name + " to " + Math.round(v * 100) + "%", "mixer");
         }
         case "setlist.go": {
-          if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist");
+          if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Settings → Pixelbook)", "setlist");
           const i = it.index | 0; if (!(i >= 0 && i < SL.songs.length)) return no("no song " + (i + 1), "setlist");
           songGo(i); return ok("song " + (i + 1) + (nbsTry(nextBarIn, null) == null ? "" : " on the next bar"), "setlist");
         }
-        case "setlist.next": { if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist"); const i = SL.cur + 1; if (i >= SL.songs.length) return no("that was the last song", "setlist"); songGo(i); return ok("song " + (i + 1), "setlist"); }
+        case "setlist.next": { if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Settings → Pixelbook)", "setlist"); const i = SL.cur + 1; if (i >= SL.songs.length) return no("that was the last song", "setlist"); songGo(i); return ok("song " + (i + 1), "setlist"); }
         case "perms": { const v = it.value || {}; ["levels", "scenes", "sound"].forEach(k => { if (typeof v[k] === "string") P[k] = v[k]; }); try { localStorage.setItem("nb-perms", JSON.stringify(P)); } catch (e) {} return ok("permissions saved", "perms"); }
       }
       return no("unknown intent " + it.path);
@@ -96,12 +97,12 @@
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
-      setup: ["Set up", "Stage 1 brings the rig here: Sound check, MIDI, Gear, Pixelbook, Projects, App and Help, plus Find over everything."],
+      setup: ["Settings", "Stage 1 brings the rig here: Sound check, MIDI, Gear, Pixelbook, Projects, App and Help, plus Find over everything."],
     };
     function shBuild() {
       if (SH.el) return SH.el;
       const el = document.createElement("div"); el.id = "shell"; el.hidden = true;
-      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp" data-sp="setup">Set up</button></div>
+      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp sh-set" data-sp="setup" title="Settings: sound, MIDI, gear, the app, help" aria-label="Settings"><span class="sh-gear" aria-hidden="true">⚙</span><span class="sh-setw">Settings</span></button></div>
         <div class="sh-mid" id="shMid"></div>
         <div class="sh-right"><span class="sh-dot" data-k="minilab">MiniLab</span><span class="sh-dot" data-k="ko2">K.O. II</span><span class="sh-dot" data-k="pixelbook">Pixelbook</span><span class="sh-out" id="shOut"></span><button type="button" class="btn" id="shLog">Log</button><button type="button" class="btn" id="shFind" disabled title="Find comes in stage 1">Find</button></div></div>
         <div class="sh-body"><div class="sh-stage">Stage 0 · the new shell is a skeleton behind a switch. The current interface is untouched underneath it.</div><h2 id="shTitle"></h2><p id="shText"></p>

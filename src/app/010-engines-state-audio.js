@@ -52,6 +52,10 @@
   const NB_BIG = !window.NB_LITE && ((!!window.NB_NATIVE && window.NB_NATIVE.platform === "linux") ||
     ((navigator.deviceMemory || 0) >= 8 && (navigator.hardwareConcurrency || 0) >= 6 && !(window.matchMedia && matchMedia("(pointer: coarse)").matches)));
   window.NB_BIG = NB_BIG;
+  // (173) saving a file: the share sheet on a phone, tablet or Chromebook; on a computer (the Linux app included) it's a download
+  // (the Linux app files it in Downloads/Nate Bloom). A share with nowhere to go used to lose the file there.
+  const nbShareFiles = f => { try { const mob = /Android|iPhone|iPad|iPod|Mobile|CrOS/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+    return mob && !(window.NB_NATIVE && window.NB_NATIVE.platform === "linux") && !!navigator.canShare && navigator.canShare({ files: [f] }); } catch (e) { return false; } };
   const MAX_SAMPLE_SEC = NB_BIG ? 1200 : 300;   // samples can be up to 5 minutes (20 on a big computer); longer files open the section picker
   const nbMinSec = s => (s % 60 ? Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") : s / 60 + ":00");   // 300 → "5:00"
   const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS, ...SAMP_ELE_KNOBS].map(([k,,v]) => [k, v]));
@@ -258,6 +262,10 @@
   function buildAudio() {
     // "interactive" keeps Android on its fast audio path (asking for a bigger buffer switched it to the slow one: ~250 ms of lag)
     try { localStorage.removeItem("nightbloom-latency"); } catch (e) {}
+    // (174) the Linux app starts on Steady, once: Fast leaves the sound about 4 ms of slack, and on Linux (PipeWire through
+    // Chrome) a hiccup that size, not the CPU, turned into runs of dropouts with plenty of layers. Fast stays a tap away
+    // in Settings › Sound check.
+    try { if (!window.NB_LITE && window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !localStorage.getItem("nightbloom-buffer-lx174")) { localStorage.setItem("nightbloom-buffer", JSON.stringify("steady")); localStorage.setItem("nightbloom-buffer-lx174", "1"); } } catch (e) {}
     let nbSteady = false; try { nbSteady = !window.NB_LITE && JSON.parse(localStorage.getItem("nightbloom-buffer") || "null") === "steady"; } catch (e) {}
     if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
     else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });

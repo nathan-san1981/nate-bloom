@@ -153,7 +153,7 @@ registerProcessor("nb-rec", NBRec);`;
         catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here: use the site or the app" : "Couldn't save here: try again"; }
       }
       const file = new File([blob], fname, { type: mime });
-      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: fname }); return "Shared " + fname; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+      try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: fname }); return "Shared " + fname; } } catch (e) { if (e && e.name === "AbortError") return ""; }
       const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 120000);
       return "Saved " + fname;
     }

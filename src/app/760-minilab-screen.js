@@ -6,7 +6,7 @@
     // text changes (sysex to the keyboard is slow) and only while the MiniLab is live with Lights on. The idle page
     // follows the state document while it's wanted (one subscriber, no reads of its own); a readout, the 165 octave
     // message among them, pushes the idle page back by its two seconds. Lights is one tap now: when a MiniLab is live
-    // and the lights are off, the MiniLab section of the MIDI sheet (Set up → MIDI parks that sheet) shows "Light up
+    // and the lights are off, the MiniLab section of the MIDI sheet (Settings → MIDI parks that sheet) shows "Light up
     // the MiniLab (pads, screen)", which does what the checkbox does, from a tap (Chrome asks for sysex on a gesture).
     // The default stays off.
     // ======================================================================

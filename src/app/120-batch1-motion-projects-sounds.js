@@ -194,7 +194,7 @@
       catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here; use the hosted version." : "Couldn't save here. Try again."; }
     }
     const file = new File([u8], name + "." + ext, { type: mime || "application/octet-stream" });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+    try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
     const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000); return "Saved " + file.name;
   }

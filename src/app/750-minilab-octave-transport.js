@@ -41,8 +41,8 @@
       else if (what === "rec") { if (liveOpen()) tap("lvRec"); else tap("takeBtn"); mlHud("●", liveOpen() ? "Live's recorder" : "a take"); }
       else if (what === "loop") { if (liveOpen()) { tap("lvRec"); mlHud("Loop", "Live's loop recorder"); } else if ($id("gbView") && !$id("gbView").hidden) { tap("gbLoopsBtn"); mlHud("Loop", "the Garage's loops"); } else mlHud("Loop", "nothing to loop on this screen"); }
       else if (what === "start") { tap("stopAll"); mlHud("⏮", "back to the start"); }
-      else mlHud("MiniLab", what);
-      add139("midi", "MiniLab transport " + what);
+      else mlHud(ML.dev === "kl" ? "KeyLab" : "MiniLab", what);
+      add139("midi", (ML.dev === "kl" ? "KeyLab" : "MiniLab") + " transport " + what);
     }
     { const om = onMidi; onMidi = function (e) {
         const p = e.target, d = e.data || [];
@@ -53,7 +53,7 @@
             if (cmd === 0x90 || cmd === 0x80) return;   // (the release, or a Mackie key the app has no job for)
             return om.apply(this, arguments);
           }
-          if (cmd === 0x90 && d2 > 0 && ch !== ML.padCh && md.ins.has(p.id) && mlPortOn(p)) { try { mlOctNote(d1); } catch (err) {} }
+          if (cmd === 0x90 && d2 > 0 && ch !== ML.padCh && md.ins.has(p.id) && mlPortOn(p) && !isKL(p)) { try { mlOctNote(d1); } catch (err) {} }   // (173: not the KeyLab: its 61 keys don't move the screen)
         }
         return om.apply(this, arguments);
       }; }

@@ -496,6 +496,17 @@
       } else if (lastT >= 0) { stalled = 0; if (kicks && t - lastT > 0.2) { kicks = 0; if (!bar.hidden && go.hidden === false) bar.hidden = true; } }
       lastT = t;
     }, 300);
+    // (174) the clock runs but every buffer is a dropout for seconds on end (his Linux computer: "it just cut out
+    // completely"): the output stream has fallen out of step, and a fresh one fixes it. Twice in two minutes at most.
+    { let last = null, bad = 0, done = [];
+      setInterval(() => {
+        const s = ctx && ctx.playoutStats; if (!s || s.fallbackFramesEvents == null || document.hidden || busy || ctx.state !== "running") { last = null; bad = 0; return; }
+        const n = s.fallbackFramesEvents; if (last == null) { last = n; return; }
+        const per = n - last; last = n;
+        if (per >= 60) bad++; else bad = 0;
+        const now = performance.now(); done = done.filter(t => now - t < 120000);
+        if (bad >= 3 && done.length < 2) { bad = 0; done.push(now); reopen("the sound kept cutting out (" + per + " dropouts a second)"); try { noteMsg("The sound kept cutting out, so it was reopened. If it comes back, Settings › Sound check › Steady gives it more slack."); } catch (e) {} }
+      }, 1000); }
     // headphones or speakers plugged in or out
     let dcT = 0;
     try {

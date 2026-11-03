@@ -3390,6 +3390,11 @@ body.kl-on .mls-name { width: 70px; }
 /* 173: the Linux app across both screens: the page uses the whole width */
 body.nb-wide .app { max-width: none; }
 body.nb-wide .knobs { max-width: 1600px; }
+/* 173: Settings (it was "Set up"): a gear and a word, outlined, on the strip of every screen and every version */
+.sh-sp.sh-set { opacity: 1; display: inline-flex; align-items: center; gap: 5px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06); }
+.sh-sp.sh-set .sh-gear { color: var(--amber); font-size: 1.1em; line-height: 1; }
+.sh-sp.sh-set.on { background: rgba(255, 255, 255, 0.14); border-color: var(--amber); }
+@media (max-width: 380px) { .sh-sp.sh-set .sh-setw { display: none; } }
 </style>
 </head>
 <body>
@@ -4512,8 +4517,8 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
-      <p><b>Set up and Find</b> (on the strip): <b>Set up</b> is the rig in one place: Sound check (where the sound goes, volume, buffer, dropouts, a test tone), MIDI, Gear, Pixelbook, Projects, App and this Help. <b>Find</b> (also the <kbd>/</kbd> key or Ctrl-K) searches everything: type two letters and get settings, sounds, songs, pad sets, help and actions such as FX off or Rescan MIDI; Enter runs the first one. <b>The strip</b> across the top shows the tempo, key and bar, dots for the MiniLab, the K.O. II and the Pixelbook, where the sound goes, dropouts, Log and Find, and the three spaces: <b>Play</b> (the performance surface), <b>Build</b> (Sounds · Beats · Rhythm · Samples · Songs · Tracks · DJ, with one transport, the Sounds browser and the Mixer as drawers) and <b>Set up</b>.</p>
-      <p><b>☰</b> (top right) holds Set up, Find, Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
+      <p><b>⚙ Settings and Find</b> (on the strip): <b>Settings</b> is the rig in one place: Sound check (where the sound goes, volume, buffer, dropouts, a test tone), MIDI, Gear, Pixelbook, Projects, App and this Help. <b>Find</b> (also the <kbd>/</kbd> key or Ctrl-K) searches everything: type two letters and get settings, sounds, songs, pad sets, help and actions such as FX off or Rescan MIDI; Enter runs the first one. <b>The strip</b> across the top shows the tempo, key and bar, dots for the MiniLab, the K.O. II and the Pixelbook, where the sound goes, dropouts, Log and Find, and the three spaces: <b>Play</b> (the performance surface), <b>Build</b> (Sounds · Beats · Rhythm · Samples · Songs · Tracks · DJ, with one transport, the Sounds browser and the Mixer as drawers) and <b>⚙ Settings</b>.</p>
+      <p><b>☰</b> (top right) holds Settings, Find, Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
     </div>
     <p class="help-fix"><b>No sound</b> after switching apps or plugging in headphones? <button class="btn" id="helpFixSound" style="height:28px;padding:0 10px">Fix sound</button> reopens the sound on whatever is plugged in now. It also happens by itself when you come back to the app or plug something in.</p>
@@ -5086,6 +5091,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const NB_BIG = !window.NB_LITE && ((!!window.NB_NATIVE && window.NB_NATIVE.platform === "linux") ||
     ((navigator.deviceMemory || 0) >= 8 && (navigator.hardwareConcurrency || 0) >= 6 && !(window.matchMedia && matchMedia("(pointer: coarse)").matches)));
   window.NB_BIG = NB_BIG;
+  // (173) saving a file: the share sheet on a phone, tablet or Chromebook; on a computer (the Linux app included) it's a download
+  // (the Linux app files it in Downloads/Nate Bloom). A share with nowhere to go used to lose the file there.
+  const nbShareFiles = f => { try { const mob = /Android|iPhone|iPad|iPod|Mobile|CrOS/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+    return mob && !(window.NB_NATIVE && window.NB_NATIVE.platform === "linux") && !!navigator.canShare && navigator.canShare({ files: [f] }); } catch (e) { return false; } };
   const MAX_SAMPLE_SEC = NB_BIG ? 1200 : 300;   // samples can be up to 5 minutes (20 on a big computer); longer files open the section picker
   const nbMinSec = s => (s % 60 ? Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") : s / 60 + ":00");   // 300 → "5:00"
   const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS, ...SAMP_ELE_KNOBS].map(([k,,v]) => [k, v]));
@@ -5292,6 +5301,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   function buildAudio() {
     // "interactive" keeps Android on its fast audio path (asking for a bigger buffer switched it to the slow one: ~250 ms of lag)
     try { localStorage.removeItem("nightbloom-latency"); } catch (e) {}
+    // (174) the Linux app starts on Steady, once: Fast leaves the sound about 4 ms of slack, and on Linux (PipeWire through
+    // Chrome) a hiccup that size, not the CPU, turned into runs of dropouts with plenty of layers. Fast stays a tap away
+    // in Settings › Sound check.
+    try { if (!window.NB_LITE && window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !localStorage.getItem("nightbloom-buffer-lx174")) { localStorage.setItem("nightbloom-buffer", JSON.stringify("steady")); localStorage.setItem("nightbloom-buffer-lx174", "1"); } } catch (e) {}
     let nbSteady = false; try { nbSteady = !window.NB_LITE && JSON.parse(localStorage.getItem("nightbloom-buffer") || "null") === "steady"; } catch (e) {}
     if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
     else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
@@ -10905,7 +10918,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       return;
     }
     const file = new File([wav], name + ".wav", { type: "audio/wav" });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
     const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000); trkSay("Saved " + file.name);
   }
@@ -11578,7 +11591,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here; use the hosted version." : "Couldn't save here. Try again."; }
     }
     const file = new File([u8], name + "." + ext, { type: mime || "application/octet-stream" });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+    try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
     const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000); return "Saved " + file.name;
   }
@@ -12005,7 +12018,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here; use the hosted version." : "Couldn't save here. Try again."; }
     }
     const file = new File([blob], name + ".zip", { type: "application/zip" });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+    try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
     const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000); return "Saved " + file.name;
   }
@@ -15169,7 +15182,7 @@ registerProcessor("nb-capture", NBCap);`;
       catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here." : "Couldn't save here. Try again in a moment."; }
     }
     const file = new File([blob], name + ".mp3", { type: "audio/mpeg" });
-    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+    try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: name }); return "Shared " + file.name; } } catch (e) { if (e && e.name === "AbortError") return ""; }
     const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 60000); return "Saved " + file.name;
   }
@@ -17510,7 +17523,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     // ---- phones: ☰ Menu instead of the sideways tool row ----
     const menu = document.getElementById("menuSheet"), grid = document.getElementById("menuGrid");
     const ITEMS = [
-      ["setupBtn", "Set up", "The rig: sound, MIDI, Gear, Pixelbook, projects, the app, help"],
+      ["setupBtn", "Settings", "The rig: sound, MIDI, Gear, Pixelbook, projects, the app, help"],
       ["findBtn", "Find", "Any setting, sound, song or action: two letters (/ or Ctrl-K)"],
       ["playBtn", "Play", "The performance surface: the stack, eight macros, pads, the set list"],
       ["liveBtn", "Live", "Big knobs, faders and pads for playing out"],
@@ -19749,7 +19762,11 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
   // ======================================================================
   // The analog core: modelled filters (AudioWorklet), drift, and the timing guard
   // ======================================================================
-  const NBAN = { on: !window.NB_LITE, model: "auto", drive: 0.3, drift: 0.35, ok: false, loading: null, made: 0, stalls: 0, lastStall: 0 };
+  const NBAN = { on: !window.NB_LITE, model: "auto", drive: 0.3, drift: 0.35, ok: false, loading: null, made: 0, alive: 0, plain: 0, stalls: 0, lastStall: 0 };
+  const NBAN_MAX = 48, NBAN_LIVE = new Map();
+  // the filters working now: the ones heard from lately (one whose voice was unplugged isn't worked on any more, and goes quiet)
+  function nbanCount() { const now = performance.now(); for (const [k, at] of NBAN_LIVE) if (now > at) NBAN_LIVE.delete(k); NBAN.alive = NBAN_LIVE.size; return NBAN.alive; }
+  setInterval(nbanCount, 1000);   // (174) modelled filters running at once; past this a new voice gets the browser's own filter (one audio thread does all the work, however many cores)
   try { const o = JSON.parse(localStorage.getItem("nightbloom-analog") || "null"); if (o) ["on", "model", "drive", "drift"].forEach(k => { if (o[k] != null) NBAN[k] = o[k]; }); } catch (e) {}
   const saveAn = () => { try { localStorage.setItem("nightbloom-analog", JSON.stringify({ on: NBAN.on, model: NBAN.model, drive: NBAN.drive, drift: NBAN.drift })); } catch (e) {} };
   // Two filters, solved without delay in the feedback (topology-preserving transform), with soft saturation:
@@ -19769,13 +19786,19 @@ class NBVcf extends AudioWorkletProcessor {
     const d = Math.max(0, Math.min(1, p.drive == null ? 0.3 : p.drive)); this.drv = 1 + 3 * d;
     // each note's filter sits a little differently; a 24 dB ladder sits a little higher so it's as open as the filter it replaces
     this.dr = (this.lad ? 1.25 : 1) * (1 + (Math.random() * 2 - 1) * 0.035 * (p.drift == null ? 0.35 : p.drift));
-    this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; this.ic1 = 0; this.ic2 = 0; this.quiet = 0;
+    this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; this.ic1 = 0; this.ic2 = 0; this.quiet = 0; this.hb = 0; this.heard = false;
     this.w = Math.PI / sampleRate; this.ny = sampleRate * 0.45;
     this.port.onmessage = e => { const t = e.data && e.data.type; if (t) this.mode = t === "highpass" ? 1 : t === "bandpass" ? 2 : 0; };
   }
   process(inputs, outputs, params) {
     const inp = inputs[0], out = outputs[0][0];
-    if (!inp || !inp.length) { out.fill(0); return ++this.quiet < 60; }
+    // (174) a filter lets go ~0.1 s after its note has gone silent; before the note has sounded (an arp or Seq note set up
+    // ahead of time) it waits up to a second
+    const wait = this.heard ? 40 : 400;
+    if (++this.hb >= 150) { this.hb = 0; this.port.postMessage(1); }   // (174) "still working", every ~0.4 s: a filter whose voice was unplugged goes quiet and stops counting
+    if (!inp || !inp.length) { out.fill(0); if (++this.quiet < wait) return true; this.port.postMessage(0); return false; }
+    { const x0 = inp[0]; let pk = 0; for (let i = 0; i < x0.length; i += 4) { const a = x0[i] < 0 ? -x0[i] : x0[i]; if (a > pk) pk = a; }   // (174) a silent block: no maths
+      if (pk < 1e-7 && Math.abs(this.s4) + Math.abs(this.ic2) + Math.abs(this.s1) + Math.abs(this.ic1) < 1e-7) { out.fill(0); if (++this.quiet < wait) return true; this.port.postMessage(0); return false; } }
     const x = inp[0], fr = params.frequency, dtp = params.detune, n = out.length, qd = params.Q[0], drv = this.drv, idr = 1 / drv, lad = this.lad, mode = this.mode;
     const qlin = mode === 2 ? Math.max(0.1, qd) : Math.pow(10, Math.max(-20, Math.min(30, qd)) / 20);
     const k = lad ? Math.min(3.85, 4 * (1 - 1 / Math.max(1, qlin))) : 1 / Math.max(0.5, qlin);
@@ -19803,8 +19826,9 @@ class NBVcf extends AudioWorkletProcessor {
     this.s1 = Math.abs(s1) < tiny ? 0 : s1; this.s2 = Math.abs(s2) < tiny ? 0 : s2; this.s3 = Math.abs(s3) < tiny ? 0 : s3; this.s4 = Math.abs(s4) < tiny ? 0 : s4;
     this.ic1 = Math.abs(ic1) < tiny ? 0 : ic1; this.ic2 = Math.abs(ic2) < tiny ? 0 : ic2;
     // a note that has gone quiet for a few seconds is finished: let the node go
-    if (en < 1e-12 && Math.abs(s4) + Math.abs(ic2) < 1e-6) this.quiet++; else this.quiet = 0;
-    return this.quiet < 1000;
+    if (en < 1e-12 && Math.abs(s4) + Math.abs(ic2) < 1e-6) this.quiet++; else { this.quiet = 0; if (en > 1e-10) this.heard = true; }
+    if (this.quiet < (this.heard ? 40 : 400)) return true;   // (174: ~0.1 s of silence, not 2.7 s: a fast arp across five layers kept a hundred of these running)
+    this.port.postMessage(0); return false;
   }
 }
 registerProcessor("nb-vcf", NBVcf);`;
@@ -19822,13 +19846,16 @@ registerProcessor("nb-vcf", NBVcf);`;
   function nbVF(def) {
     if (!NBAN.on || !ctx) return ctx.createBiquadFilter();
     if (!NBAN.ok) { nbAnLoad(); return ctx.createBiquadFilter(); }
+    nbanCount();
+    if (NBAN.alive >= NBAN_MAX) { NBAN.plain++; return ctx.createBiquadFilter(); }
     const model = NBAN.model === "auto" ? def : NBAN.model;
     let n;
     try { n = new AudioWorkletNode(ctx, "nb-vcf", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 1, channelCountMode: "explicit", processorOptions: { model, drive: NBAN.drive, drift: NBAN.drift } }); }
     catch (e) { return ctx.createBiquadFilter(); }
     n.frequency = n.parameters.get("frequency"); n.Q = n.parameters.get("Q"); n.detune = n.parameters.get("detune"); n.nbAn = true; n.nbModel = model;
     let ty = "lowpass"; Object.defineProperty(n, "type", { get: () => ty, set: v => { if (v !== ty) { ty = v; n.port.postMessage({ type: v }); } } });
-    NBAN.made++;
+    NBAN.made++; const key = NBAN.made; NBAN_LIVE.set(key, performance.now() + 1500); NBAN.alive = NBAN_LIVE.size;
+    n.port.onmessage = e => { if (e.data === 1) { if (NBAN_LIVE.has(key)) NBAN_LIVE.set(key, performance.now() + 1200); return; } NBAN_LIVE.delete(key); NBAN.alive = NBAN_LIVE.size; n.port.onmessage = null; };   // (it says it's working, and when it's finished)
     return n;
   }
   // drift: a slightly different, slowly wandering tuning on every note
@@ -21864,7 +21891,7 @@ registerProcessor("nb-verb", NBVerb);`;
     }
     const file = new File([wav], name + ".wav", { type: "audio/wav" });
     try {
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (nbShareFiles(file)) {
         await navigator.share({ files: [file], title: name });
         return;
       }
@@ -28208,6 +28235,17 @@ z: [z]=Z
       } else if (lastT >= 0) { stalled = 0; if (kicks && t - lastT > 0.2) { kicks = 0; if (!bar.hidden && go.hidden === false) bar.hidden = true; } }
       lastT = t;
     }, 300);
+    // (174) the clock runs but every buffer is a dropout for seconds on end (his Linux computer: "it just cut out
+    // completely"): the output stream has fallen out of step, and a fresh one fixes it. Twice in two minutes at most.
+    { let last = null, bad = 0, done = [];
+      setInterval(() => {
+        const s = ctx && ctx.playoutStats; if (!s || s.fallbackFramesEvents == null || document.hidden || busy || ctx.state !== "running") { last = null; bad = 0; return; }
+        const n = s.fallbackFramesEvents; if (last == null) { last = n; return; }
+        const per = n - last; last = n;
+        if (per >= 60) bad++; else bad = 0;
+        const now = performance.now(); done = done.filter(t => now - t < 120000);
+        if (bad >= 3 && done.length < 2) { bad = 0; done.push(now); reopen("the sound kept cutting out (" + per + " dropouts a second)"); try { noteMsg("The sound kept cutting out, so it was reopened. If it comes back, Settings › Sound check › Steady gives it more slack."); } catch (e) {} }
+      }, 1000); }
     // headphones or speakers plugged in or out
     let dcT = 0;
     try {
@@ -28913,6 +28951,7 @@ z: [z]=Z
     // ---------- what you see: a readout, numbers on the controls, the map, the pads lit ----------
     const hud = document.createElement("div"); hud.className = "mini-hud"; hud.id = "miniHud"; hud.hidden = true; hud.setAttribute("role", "status");
     hud.innerHTML = "<b></b><span></span><em hidden></em><i><s></s></i>"; document.body.appendChild(hud);
+    const KL_HINT = "knobs 1–6: effects · 7–8: sends · 9: tempo · faders 1–4: the sound · 5–8: levels · 9: master";   // (173)
     const HINT = { synths: "pads 1–8 drums, 9–16 chords · knobs: the sound", samples: "pads: slots and pads · knobs: the sample", drums: "pads: the 8 drums · knobs: the drum you hit",
       dj: "pads 1–8 deck A, 9–16 deck B · knobs: the EQs", grid: "pads: the 16 tracks · knobs: the track you hit", pads: "pads: 1–16 here · knobs: the pad you hit · keys play it in tune",
       garage: "pads: the track's drums or chords, 13–16 ⏮ ▶ ● ⟳ · knobs: the track", mix: "knobs and faders: the rows of the Mixer" };
@@ -29027,7 +29066,7 @@ z: [z]=Z
     });
     // ---------- pad colours and names on the MiniLab's screen (Arturia's own messages; needs Chrome's permission) ----------
     const SX = [0xf0, 0x00, 0x20, 0x6b, 0x7f, 0x42];
-    function mlOuts() { if (!md.access || !ML.lights) return []; try { return [...md.access.outputs.values()].filter(o => mlPortOn(o) && !/din|mcu|hui/i.test(o.name || "")); } catch (e) { return []; } }
+    function mlOuts() { if (!md.access || !ML.lights) return []; try { return [...md.access.outputs.values()].filter(o => mlPortOn(o) && !isKL(o) && !/din|mcu|hui/i.test(o.name || "")); } catch (e) { return []; } }   // (173: the MiniLab's lights and screen, never sent to the KeyLab)
     function mlSysex(bytes) { const outs = mlOuts(); if (!outs.length) return; const msg = SX.concat(bytes, [0xf7]); outs.forEach(o => { try { o.send(msg); } catch (e) {} }); }
     const rgb = hex => { const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || ""); return m ? [1, 2, 3].map(j => parseInt(m[j], 16) >> 1) : [0, 0, 0]; };
     function mlLight(i, hit) {
@@ -29055,13 +29094,13 @@ z: [z]=Z
       if (!live && !map.hidden) { map.hidden = true; document.body.classList.remove("mini-open"); }
       if (document.body.classList.contains("mini-live") !== live) document.body.classList.toggle("mini-live", live);
       if (!live) { if (ML.wasLive) mlBadges(); ML.page = ""; ML.wasLive = false; return; }
-      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(); mlHud("MiniLab 3 connected", PAGE_NAME[pg0] || "", null, HINT[pg0]); }, 500); }
+      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(), kl = ML.dev === "kl"; mlHud(kl ? "KeyLab connected" : "MiniLab 3 connected", PAGE_NAME[pg0] || "", null, kl ? KL_HINT : HINT[pg0]); }, 500); }
       const pg = mlPage();
       if (force || pg !== ML.page) {
         const was = ML.page; ML.page = pg; ML.lay = null;
         if (live) {
           mlBadges(); paintMap(); ML.sent.clear(); mlLightAll();
-          if (was && was !== pg) mlHud("MiniLab 3", PAGE_NAME[pg] || "", null, HINT[pg]);
+          if (was && was !== pg && ML.dev !== "kl") mlHud("MiniLab 3", PAGE_NAME[pg] || "", null, HINT[pg]);   // (173: not for the KeyLab; its strip says it)
         }
       }
     }
@@ -30941,7 +30980,7 @@ registerProcessor("nb-rec", NBRec);`;
         catch (e) { if (e && e.code === "declined") return ""; return e && e.code === "too_large" ? "Too large to save here: use the site or the app" : "Couldn't save here: try again"; }
       }
       const file = new File([blob], fname, { type: mime });
-      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: fname }); return "Shared " + fname; } } catch (e) { if (e && e.name === "AbortError") return ""; }
+      try { if (nbShareFiles(file)) { await navigator.share({ files: [file], title: fname }); return "Shared " + fname; } } catch (e) { if (e && e.name === "AbortError") return ""; }
       const url = URL.createObjectURL(file), a = document.createElement("a"); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 120000);
       return "Saved " + fname;
     }
@@ -32144,8 +32183,9 @@ registerProcessor("nb-rec", NBRec);`;
       // an output that can't keep up. The first was blamed on the output before.
       const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
       if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
+      if (window.NB_BIG && bufWant() === "fast") return ["The sound is dropping out" + where + ". This computer has room for it: switch the sound buffer to Steady (Settings › Sound check) and reload; it gives the sound twice the slack for about 10 ms more delay."];   // (174)
       if (vs >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": a lot plays at once (" + vs + (vs === 1 ? " voice" : " voices") + " across " + lay + (lay === 1 ? " layer" : " layers") + "). Fewer layers or effects help; Stop all (■) clears anything that got stuck."];
-      return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Set up → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
+      return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Settings → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
     }
     function nbsRead() {   // today's objects, read into the document's shape
       const S = nbsTry(lkState, null) || {}, d = nbsDiag(), gear = S.gear || {}, song = S.song || {};
@@ -32189,17 +32229,17 @@ registerProcessor("nb-rec", NBRec);`;
         case "fx.on": setFxOn(!!it.value); return ok("effects " + (it.value ? "on" : "off"), "fx");
         case "transport.tempo": { const b = Math.round(+it.value); if (!(b >= 50 && b <= 180)) return no("tempo is 50 to 180", "transport"); setBpm(b); return ok(b + " bpm", "transport"); }
         case "mixer.level": {
-          if (P.levels !== "always") return no("levels from the Pixelbook are off (Set up → Pixelbook)", "mixer");
+          if (P.levels !== "always") return no("levels from the Pixelbook are off (Settings → Pixelbook)", "mixer");
           const i = it.index | 0, c = nbsTry(() => mixChannels()[i], null); if (!c) return no("no channel " + i, "mixer");
           const v = Math.max(0, Math.min(2, +it.value || 0)); c.set(v); try { save(); } catch (e) {} try { if (!$id("mixer").hidden) renderMixer(); } catch (e) {}
           return ok(c.name + " to " + Math.round(v * 100) + "%", "mixer");
         }
         case "setlist.go": {
-          if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist");
+          if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Settings → Pixelbook)", "setlist");
           const i = it.index | 0; if (!(i >= 0 && i < SL.songs.length)) return no("no song " + (i + 1), "setlist");
           songGo(i); return ok("song " + (i + 1) + (nbsTry(nextBarIn, null) == null ? "" : " on the next bar"), "setlist");
         }
-        case "setlist.next": { if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Set up → Pixelbook)", "setlist"); const i = SL.cur + 1; if (i >= SL.songs.length) return no("that was the last song", "setlist"); songGo(i); return ok("song " + (i + 1), "setlist"); }
+        case "setlist.next": { if (P.scenes !== "always") return no("scenes from the Pixelbook are off (Settings → Pixelbook)", "setlist"); const i = SL.cur + 1; if (i >= SL.songs.length) return no("that was the last song", "setlist"); songGo(i); return ok("song " + (i + 1), "setlist"); }
         case "perms": { const v = it.value || {}; ["levels", "scenes", "sound"].forEach(k => { if (typeof v[k] === "string") P[k] = v[k]; }); try { localStorage.setItem("nb-perms", JSON.stringify(P)); } catch (e) {} return ok("permissions saved", "perms"); }
       }
       return no("unknown intent " + it.path);
@@ -32215,12 +32255,12 @@ registerProcessor("nb-rec", NBRec);`;
     const SH_TEXT = {
       play: ["Play", "The performance surface comes here in stage 2: the stack of sounds, eight macros on the MiniLab's knobs, eight pads, Hold · Arp · Scale · Octave · FX · Jam under the right thumb, and the transport with the set list along the bottom. Nothing on it will move under your hands."],
       build: ["Build", "One workspace in stage 5: Sounds, Beats, Rhythm, Samples, Songs, Tracks and DJ as tabs, with one transport, one browser and one mixer."],
-      setup: ["Set up", "Stage 1 brings the rig here: Sound check, MIDI, Gear, Pixelbook, Projects, App and Help, plus Find over everything."],
+      setup: ["Settings", "Stage 1 brings the rig here: Sound check, MIDI, Gear, Pixelbook, Projects, App and Help, plus Find over everything."],
     };
     function shBuild() {
       if (SH.el) return SH.el;
       const el = document.createElement("div"); el.id = "shell"; el.hidden = true;
-      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp" data-sp="setup">Set up</button></div>
+      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp sh-set" data-sp="setup" title="Settings: sound, MIDI, gear, the app, help" aria-label="Settings"><span class="sh-gear" aria-hidden="true">⚙</span><span class="sh-setw">Settings</span></button></div>
         <div class="sh-mid" id="shMid"></div>
         <div class="sh-right"><span class="sh-dot" data-k="minilab">MiniLab</span><span class="sh-dot" data-k="ko2">K.O. II</span><span class="sh-dot" data-k="pixelbook">Pixelbook</span><span class="sh-out" id="shOut"></span><button type="button" class="btn" id="shLog">Log</button><button type="button" class="btn" id="shFind" disabled title="Find comes in stage 1">Find</button></div></div>
         <div class="sh-body"><div class="sh-stage">Stage 0 · the new shell is a skeleton behind a switch. The current interface is untouched underneath it.</div><h2 id="shTitle"></h2><p id="shText"></p>
@@ -32256,22 +32296,22 @@ registerProcessor("nb-rec", NBRec);`;
     // (Sound check, MIDI, Gear, Pixelbook, Projects, App, Help); the sheets that exist today (MIDI, Projects, Help,
     // Gear's popup) are parked inside it rather than copied, so nothing is duplicated. Find is one search over
     // actions, settings, sounds, songs, pad sets and help: / or Ctrl-K, two letters, Enter. The strip (the new shell,
-    // Help → New shell or Set up → App) is now real: tempo, key and bar:beat, dots for the MiniLab, the K.O. II and the
+    // Help → New shell or Settings → App) is now real: tempo, key and bar:beat, dots for the MiniLab, the K.O. II and the
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 173;
+    window.NB_BUILD = 174;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
     const suHidden = (id, name) => { const b = document.createElement("button"); b.id = id; b.type = "button"; b.style.display = "none"; b.textContent = name; document.body.appendChild(b); return b; };
-    const setupBtn = suHidden("setupBtn", "Set up"), findBtn = suHidden("findBtn", "Find");
+    const setupBtn = suHidden("setupBtn", "Settings"), findBtn = suHidden("findBtn", "Find");
     const suOpenNow = () => !!(SU.el && !SU.el.hidden);
     function suBuild() {
       if (SU.el) return SU.el;
-      const el = document.createElement("div"); el.className = "dj su"; el.id = "setup"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Set up");
-      el.innerHTML = `<div class="su-top"><strong>Set up</strong><span class="su-sub">the rig: nothing you touch mid-song</span><button type="button" class="btn" id="suFindBtn">Find</button><button type="button" class="btn primary" id="suDone">Done</button></div>
-        <div class="su-body"><nav class="su-nav" aria-label="Set up sections">${SU_SECS.map(([k, n]) => `<button type="button" data-sec="${k}" aria-pressed="false">${n}</button>`).join("")}</nav><div class="su-pane" id="suPane"></div></div>`;
+      const el = document.createElement("div"); el.className = "dj su"; el.id = "setup"; el.hidden = true; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Settings");
+      el.innerHTML = `<div class="su-top"><strong>Settings</strong><span class="su-sub">the rig: nothing you touch mid-song</span><button type="button" class="btn" id="suFindBtn">Find</button><button type="button" class="btn primary" id="suDone">Done</button></div>
+        <div class="su-body"><nav class="su-nav" aria-label="Settings sections">${SU_SECS.map(([k, n]) => `<button type="button" data-sec="${k}" aria-pressed="false">${n}</button>`).join("")}</nav><div class="su-pane" id="suPane"></div></div>`;
       document.body.appendChild(el); SU.el = el; SU.pane = $id("suPane"); SU.nav = el.querySelector(".su-nav");
       SU.nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => suShow(b.dataset.sec)));
       $id("suDone").addEventListener("click", () => suClose(false));
@@ -32452,7 +32492,7 @@ registerProcessor("nb-rec", NBRec);`;
       act("Save the log", "what the app was doing, the last minute of sound, every setting", () => logTap("find"), "report bug dropout");
       act("Report a problem", "a zip to send for a fix", () => $id("reportBtn").click(), "bug log help");
       act("Save and exit", "save as a project and close", () => $id("exitBtn").click(), "quit close");
-      const set = (sec, t, s, hi, k) => add("Settings", t, "Set up › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
+      const set = (sec, t, s, hi, k) => add("Settings", t, "Settings › " + suName(sec) + (s ? " · " + s : ""), () => suOpen(sec, hi), k);
       set("sound", "Sound goes to", "where Android or the browser sends the sound", "#suOutRow", "output route headphones speaker usb");
       if (window.NB_NATIVE) set("sound", "Media volume", "the tablet's volume", "#suVolRow", "loud quiet");
       if (!window.NB_LITE) set("sound", "Sound buffer", "Fast or Steady", "#suBufRow", "latency dropouts crackle steady fast");
@@ -32500,7 +32540,7 @@ registerProcessor("nb-rec", NBRec);`;
     function fdRender(q) {
       q = String(q || "").trim().toLowerCase(); const toks = q.split(/\s+/).filter(Boolean);
       let rows;
-      if (!toks.length) rows = FD.items.filter(it => it.g === "Actions").slice(0, 6).concat(SU_SECS.map(([k, n]) => ({ g: "Settings", t: n, s: "Set up › " + n, run: () => suOpen(k) })));
+      if (!toks.length) rows = FD.items.filter(it => it.g === "Actions").slice(0, 6).concat(SU_SECS.map(([k, n]) => ({ g: "Settings", t: n, s: "Settings › " + n, run: () => suOpen(k) })));
       else {
         const scored = []; FD.items.forEach(it => { const sc = fdScore(it, toks); if (sc) scored.push([sc, it]); });
         scored.sort((a, b) => b[0] - a[0] || FD_ORDER.indexOf(a[1].g) - FD_ORDER.indexOf(b[1].g));
@@ -32537,7 +32577,7 @@ registerProcessor("nb-rec", NBRec);`;
     shBuild = function () {   // (replaces stage 0's skeleton)
       if (SH.el) return SH.el;
       const el = document.createElement("div"); el.id = "shell"; el.hidden = true;
-      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp" data-sp="setup">Set up</button></div>
+      el.innerHTML = `<div class="sh-strip"><div class="sh-spaces"><button type="button" class="sh-sp" data-sp="play">Play</button><button type="button" class="sh-sp" data-sp="build">Build</button><button type="button" class="sh-sp sh-set" data-sp="setup" title="Settings: sound, MIDI, gear, the app, help" aria-label="Settings"><span class="sh-gear" aria-hidden="true">⚙</span><span class="sh-setw">Settings</span></button></div>
         <div class="sh-mid" id="shMid"></div><div class="sh-msg" id="shMsg" hidden></div>
         <div class="sh-right"><span class="sh-dot" data-k="minilab">MiniLab</span><span class="sh-dot" data-k="ko2">K.O. II</span><span class="sh-dot" data-k="pixelbook">Pixelbook</span><span class="sh-out" id="shOut"></span><span class="sh-drops" id="shDrops" hidden></span><button type="button" class="btn" id="shLog">Log</button><button type="button" class="btn" id="shFind">Find</button></div></div>`;
       document.body.appendChild(el); SH.el = el;
@@ -32579,7 +32619,7 @@ registerProcessor("nb-rec", NBRec);`;
       const now = { out: r.out || "", minilab: !!r.minilab, ko2: !!r.ko2, pixelbook: !!r.pixelbook, ins: (r.midiIns || []).join("|"), notes: (h.notes || []).join("|") }, p = SH.prev; SH.prev = now;
       if (!p) return;
       if (now.out !== p.out && now.out) shSay("Sound now goes to " + now.out, true);
-      if (now.minilab !== p.minilab) shSay(now.minilab ? "MiniLab connected" : "MiniLab gone", true);
+      if (now.minilab !== p.minilab) { const nm = ML.dev === "kl" ? "KeyLab" : "MiniLab"; shSay(now.minilab ? nm + " connected" : nm + " gone", true); }
       if (now.ko2 !== p.ko2) shSay(now.ko2 ? "K.O. II connected" : "K.O. II gone", true);
       if (now.pixelbook !== p.pixelbook) shSay(now.pixelbook ? "Pixelbook linked" : "Pixelbook gone", true);
       if (now.ins !== p.ins) { const a = p.ins ? p.ins.split("|") : [], b = now.ins ? now.ins.split("|") : []; const came = b.filter(x => !a.includes(x)), gone = a.filter(x => !b.includes(x)); if (came.length) shSay("MIDI: + " + came.join(", "), true); if (gone.length) shSay("MIDI: − " + gone.join(", "), true); }
@@ -32775,7 +32815,7 @@ registerProcessor("nb-rec", NBRec);`;
     // New intents for the console: mixer.pos (the slider's position), mixer.mute, mixer.solo, setlist.prev, setlist.save
     // (the current state into the current song), setlist.add, stack.replace / stack.add / stack.drop (the Library),
     // and the Pixelbook can pull the whole library. A song now carries the mixer's levels, so a scene recalls them.
-    // Permissions (Set up → Pixelbook): always · only between songs (nothing playing) · ask first (a bar on the tablet
+    // Permissions (Settings → Pixelbook): always · only between songs (nothing playing) · ask first (a bar on the tablet
     // with Accept) · never.
     // ======================================================================
     const SY = { sub: null, q: {}, qT: 0, asks: [], askT: 0, bar: null };
@@ -32810,10 +32850,10 @@ registerProcessor("nb-rec", NBRec);`;
     function permNow(kind) {   // true, or why not
       const v = nbsPerms()[kind] || "always";
       if (v === "always") return true;
-      if (v === "never") return "the tablet never takes this from the Pixelbook (Set up → Pixelbook)";
+      if (v === "never") return "the tablet never takes this from the Pixelbook (Settings → Pixelbook)";
       if (v === "ask") return "ask";
       const on = nbsTry(() => ({ seq: !!playing, rc: !!RC.playing, bp: !!BP.playing }), {});
-      return Object.values(on).some(Boolean) ? "only between songs: stop first (Set up → Pixelbook)" : true;
+      return Object.values(on).some(Boolean) ? "only between songs: stop first (Settings → Pixelbook)" : true;
     }
     function syAsk(text, run) {   // a bar on the tablet: Accept or No, 20 s
       if (!SY.bar) {
@@ -32901,7 +32941,7 @@ registerProcessor("nb-rec", NBRec);`;
       else if (!on && SY.sub) { SY.sub(); SY.sub = null; SY.q = {}; }
     }
     setInterval(() => { const up = nbsTry(lkUp, false); if (up !== !!SY.sub) syWatch(up); }, 500);
-    // Set up → Pixelbook's selects follow a permission changed elsewhere (Find, the Pixelbook, the old interface)
+    // Settings → Pixelbook's selects follow a permission changed elsewhere (Find, the Pixelbook, the old interface)
     nbsSubscribe((d, ch) => { if (!ch.includes("perms") || !d.perms) return; document.querySelectorAll("#setup select[data-perm]").forEach(s => { const v = d.perms[s.dataset.perm]; if (v && s.value !== v) s.value = v; }); });
     { const li = lkIn; lkIn = function (t, d) {
         if (t === "intent") { const r = nbsIntent(d || {}); lkSend("ack", Object.assign({ id: d && d.id, intent: d && d.path }, r)); return; }
@@ -33251,8 +33291,8 @@ registerProcessor("nb-rec", NBRec);`;
       else if (what === "rec") { if (liveOpen()) tap("lvRec"); else tap("takeBtn"); mlHud("●", liveOpen() ? "Live's recorder" : "a take"); }
       else if (what === "loop") { if (liveOpen()) { tap("lvRec"); mlHud("Loop", "Live's loop recorder"); } else if ($id("gbView") && !$id("gbView").hidden) { tap("gbLoopsBtn"); mlHud("Loop", "the Garage's loops"); } else mlHud("Loop", "nothing to loop on this screen"); }
       else if (what === "start") { tap("stopAll"); mlHud("⏮", "back to the start"); }
-      else mlHud("MiniLab", what);
-      add139("midi", "MiniLab transport " + what);
+      else mlHud(ML.dev === "kl" ? "KeyLab" : "MiniLab", what);
+      add139("midi", (ML.dev === "kl" ? "KeyLab" : "MiniLab") + " transport " + what);
     }
     { const om = onMidi; onMidi = function (e) {
         const p = e.target, d = e.data || [];
@@ -33263,7 +33303,7 @@ registerProcessor("nb-rec", NBRec);`;
             if (cmd === 0x90 || cmd === 0x80) return;   // (the release, or a Mackie key the app has no job for)
             return om.apply(this, arguments);
           }
-          if (cmd === 0x90 && d2 > 0 && ch !== ML.padCh && md.ins.has(p.id) && mlPortOn(p)) { try { mlOctNote(d1); } catch (err) {} }
+          if (cmd === 0x90 && d2 > 0 && ch !== ML.padCh && md.ins.has(p.id) && mlPortOn(p) && !isKL(p)) { try { mlOctNote(d1); } catch (err) {} }   // (173: not the KeyLab: its 61 keys don't move the screen)
         }
         return om.apply(this, arguments);
       }; }
@@ -33276,7 +33316,7 @@ registerProcessor("nb-rec", NBRec);`;
     // text changes (sysex to the keyboard is slow) and only while the MiniLab is live with Lights on. The idle page
     // follows the state document while it's wanted (one subscriber, no reads of its own); a readout, the 165 octave
     // message among them, pushes the idle page back by its two seconds. Lights is one tap now: when a MiniLab is live
-    // and the lights are off, the MiniLab section of the MIDI sheet (Set up → MIDI parks that sheet) shows "Light up
+    // and the lights are off, the MiniLab section of the MIDI sheet (Settings → MIDI parks that sheet) shows "Light up
     // the MiniLab (pads, screen)", which does what the checkbox does, from a tap (Chrome asks for sysex on a gesture).
     // The default stays off.
     // ======================================================================

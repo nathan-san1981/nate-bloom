@@ -1,7 +1,11 @@
   // ======================================================================
   // The analog core: modelled filters (AudioWorklet), drift, and the timing guard
   // ======================================================================
-  const NBAN = { on: !window.NB_LITE, model: "auto", drive: 0.3, drift: 0.35, ok: false, loading: null, made: 0, stalls: 0, lastStall: 0 };
+  const NBAN = { on: !window.NB_LITE, model: "auto", drive: 0.3, drift: 0.35, ok: false, loading: null, made: 0, alive: 0, plain: 0, stalls: 0, lastStall: 0 };
+  const NBAN_MAX = 48, NBAN_LIVE = new Map();
+  // the filters working now: the ones heard from lately (one whose voice was unplugged isn't worked on any more, and goes quiet)
+  function nbanCount() { const now = performance.now(); for (const [k, at] of NBAN_LIVE) if (now > at) NBAN_LIVE.delete(k); NBAN.alive = NBAN_LIVE.size; return NBAN.alive; }
+  setInterval(nbanCount, 1000);   // (174) modelled filters running at once; past this a new voice gets the browser's own filter (one audio thread does all the work, however many cores)
   try { const o = JSON.parse(localStorage.getItem("nightbloom-analog") || "null"); if (o) ["on", "model", "drive", "drift"].forEach(k => { if (o[k] != null) NBAN[k] = o[k]; }); } catch (e) {}
   const saveAn = () => { try { localStorage.setItem("nightbloom-analog", JSON.stringify({ on: NBAN.on, model: NBAN.model, drive: NBAN.drive, drift: NBAN.drift })); } catch (e) {} };
   // Two filters, solved without delay in the feedback (topology-preserving transform), with soft saturation:
@@ -21,13 +25,19 @@ class NBVcf extends AudioWorkletProcessor {
     const d = Math.max(0, Math.min(1, p.drive == null ? 0.3 : p.drive)); this.drv = 1 + 3 * d;
     // each note's filter sits a little differently; a 24 dB ladder sits a little higher so it's as open as the filter it replaces
     this.dr = (this.lad ? 1.25 : 1) * (1 + (Math.random() * 2 - 1) * 0.035 * (p.drift == null ? 0.35 : p.drift));
-    this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; this.ic1 = 0; this.ic2 = 0; this.quiet = 0;
+    this.s1 = 0; this.s2 = 0; this.s3 = 0; this.s4 = 0; this.ic1 = 0; this.ic2 = 0; this.quiet = 0; this.hb = 0; this.heard = false;
     this.w = Math.PI / sampleRate; this.ny = sampleRate * 0.45;
     this.port.onmessage = e => { const t = e.data && e.data.type; if (t) this.mode = t === "highpass" ? 1 : t === "bandpass" ? 2 : 0; };
   }
   process(inputs, outputs, params) {
     const inp = inputs[0], out = outputs[0][0];
-    if (!inp || !inp.length) { out.fill(0); return ++this.quiet < 60; }
+    // (174) a filter lets go ~0.1 s after its note has gone silent; before the note has sounded (an arp or Seq note set up
+    // ahead of time) it waits up to a second
+    const wait = this.heard ? 40 : 400;
+    if (++this.hb >= 150) { this.hb = 0; this.port.postMessage(1); }   // (174) "still working", every ~0.4 s: a filter whose voice was unplugged goes quiet and stops counting
+    if (!inp || !inp.length) { out.fill(0); if (++this.quiet < wait) return true; this.port.postMessage(0); return false; }
+    { const x0 = inp[0]; let pk = 0; for (let i = 0; i < x0.length; i += 4) { const a = x0[i] < 0 ? -x0[i] : x0[i]; if (a > pk) pk = a; }   // (174) a silent block: no maths
+      if (pk < 1e-7 && Math.abs(this.s4) + Math.abs(this.ic2) + Math.abs(this.s1) + Math.abs(this.ic1) < 1e-7) { out.fill(0); if (++this.quiet < wait) return true; this.port.postMessage(0); return false; } }
     const x = inp[0], fr = params.frequency, dtp = params.detune, n = out.length, qd = params.Q[0], drv = this.drv, idr = 1 / drv, lad = this.lad, mode = this.mode;
     const qlin = mode === 2 ? Math.max(0.1, qd) : Math.pow(10, Math.max(-20, Math.min(30, qd)) / 20);
     const k = lad ? Math.min(3.85, 4 * (1 - 1 / Math.max(1, qlin))) : 1 / Math.max(0.5, qlin);
@@ -55,8 +65,9 @@ class NBVcf extends AudioWorkletProcessor {
     this.s1 = Math.abs(s1) < tiny ? 0 : s1; this.s2 = Math.abs(s2) < tiny ? 0 : s2; this.s3 = Math.abs(s3) < tiny ? 0 : s3; this.s4 = Math.abs(s4) < tiny ? 0 : s4;
     this.ic1 = Math.abs(ic1) < tiny ? 0 : ic1; this.ic2 = Math.abs(ic2) < tiny ? 0 : ic2;
     // a note that has gone quiet for a few seconds is finished: let the node go
-    if (en < 1e-12 && Math.abs(s4) + Math.abs(ic2) < 1e-6) this.quiet++; else this.quiet = 0;
-    return this.quiet < 1000;
+    if (en < 1e-12 && Math.abs(s4) + Math.abs(ic2) < 1e-6) this.quiet++; else { this.quiet = 0; if (en > 1e-10) this.heard = true; }
+    if (this.quiet < (this.heard ? 40 : 400)) return true;   // (174: ~0.1 s of silence, not 2.7 s: a fast arp across five layers kept a hundred of these running)
+    this.port.postMessage(0); return false;
   }
 }
 registerProcessor("nb-vcf", NBVcf);`;
@@ -74,13 +85,16 @@ registerProcessor("nb-vcf", NBVcf);`;
   function nbVF(def) {
     if (!NBAN.on || !ctx) return ctx.createBiquadFilter();
     if (!NBAN.ok) { nbAnLoad(); return ctx.createBiquadFilter(); }
+    nbanCount();
+    if (NBAN.alive >= NBAN_MAX) { NBAN.plain++; return ctx.createBiquadFilter(); }
     const model = NBAN.model === "auto" ? def : NBAN.model;
     let n;
     try { n = new AudioWorkletNode(ctx, "nb-vcf", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 1, channelCountMode: "explicit", processorOptions: { model, drive: NBAN.drive, drift: NBAN.drift } }); }
     catch (e) { return ctx.createBiquadFilter(); }
     n.frequency = n.parameters.get("frequency"); n.Q = n.parameters.get("Q"); n.detune = n.parameters.get("detune"); n.nbAn = true; n.nbModel = model;
     let ty = "lowpass"; Object.defineProperty(n, "type", { get: () => ty, set: v => { if (v !== ty) { ty = v; n.port.postMessage({ type: v }); } } });
-    NBAN.made++;
+    NBAN.made++; const key = NBAN.made; NBAN_LIVE.set(key, performance.now() + 1500); NBAN.alive = NBAN_LIVE.size;
+    n.port.onmessage = e => { if (e.data === 1) { if (NBAN_LIVE.has(key)) NBAN_LIVE.set(key, performance.now() + 1200); return; } NBAN_LIVE.delete(key); NBAN.alive = NBAN_LIVE.size; n.port.onmessage = null; };   // (it says it's working, and when it's finished)
     return n;
   }
   // drift: a slightly different, slowly wandering tuning on every note

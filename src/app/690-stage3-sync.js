@@ -7,7 +7,7 @@
     // New intents for the console: mixer.pos (the slider's position), mixer.mute, mixer.solo, setlist.prev, setlist.save
     // (the current state into the current song), setlist.add, stack.replace / stack.add / stack.drop (the Library),
     // and the Pixelbook can pull the whole library. A song now carries the mixer's levels, so a scene recalls them.
-    // Permissions (Set up → Pixelbook): always · only between songs (nothing playing) · ask first (a bar on the tablet
+    // Permissions (Settings → Pixelbook): always · only between songs (nothing playing) · ask first (a bar on the tablet
     // with Accept) · never.
     // ======================================================================
     const SY = { sub: null, q: {}, qT: 0, asks: [], askT: 0, bar: null };
@@ -42,10 +42,10 @@
     function permNow(kind) {   // true, or why not
       const v = nbsPerms()[kind] || "always";
       if (v === "always") return true;
-      if (v === "never") return "the tablet never takes this from the Pixelbook (Set up → Pixelbook)";
+      if (v === "never") return "the tablet never takes this from the Pixelbook (Settings → Pixelbook)";
       if (v === "ask") return "ask";
       const on = nbsTry(() => ({ seq: !!playing, rc: !!RC.playing, bp: !!BP.playing }), {});
-      return Object.values(on).some(Boolean) ? "only between songs: stop first (Set up → Pixelbook)" : true;
+      return Object.values(on).some(Boolean) ? "only between songs: stop first (Settings → Pixelbook)" : true;
     }
     function syAsk(text, run) {   // a bar on the tablet: Accept or No, 20 s
       if (!SY.bar) {
@@ -133,7 +133,7 @@
       else if (!on && SY.sub) { SY.sub(); SY.sub = null; SY.q = {}; }
     }
     setInterval(() => { const up = nbsTry(lkUp, false); if (up !== !!SY.sub) syWatch(up); }, 500);
-    // Set up → Pixelbook's selects follow a permission changed elsewhere (Find, the Pixelbook, the old interface)
+    // Settings → Pixelbook's selects follow a permission changed elsewhere (Find, the Pixelbook, the old interface)
     nbsSubscribe((d, ch) => { if (!ch.includes("perms") || !d.perms) return; document.querySelectorAll("#setup select[data-perm]").forEach(s => { const v = d.perms[s.dataset.perm]; if (v && s.value !== v) s.value = v; }); });
     { const li = lkIn; lkIn = function (t, d) {
         if (t === "intent") { const r = nbsIntent(d || {}); lkSend("ack", Object.assign({ id: d && d.id, intent: d && d.path }, r)); return; }
