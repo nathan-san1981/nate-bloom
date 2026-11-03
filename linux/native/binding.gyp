@@ -5,6 +5,7 @@
       "sources": [
         "nb_fastpads_linux.cc",
         "nb_engine.cc",
+        "nb_bridge.cc",
         "../../native/nbsynth/nbsynth.c",
         "../../native/nbsynth/wasm-rt-impl.c",
         "../../native/nbsynth/wasm-rt-mem-impl.c",
@@ -53,7 +54,8 @@
         "-ldl",
         "-lpthread",
         "-lm",
-        "-latomic"
+        "-latomic",
+        "-lrt"
       ]
     },
     {

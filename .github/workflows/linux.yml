@@ -69,6 +69,9 @@ jobs:
           cd linux/native && npx --no-install node-gyp rebuild 2>&1 | tee /tmp/nb-logs/native.log
           node -e "const f = require('./build/Release/nbfastpads.node'); console.log(Object.keys(f).join(' '), '| Ableton Link:', typeof f.ablState)" | tee -a /tmp/nb-logs/native.log
           node -e "const p = require('./build/Release/nbplug.node'); console.log('plugin host:', Object.keys(p).join(' '))" | tee -a /tmp/nb-logs/native.log
+          # (187) the Nate Bloom Bridge plugin for Bitwig (a CLAP instrument; the app copies it into ~/.clap)
+          g++ -std=c++17 -O2 -fPIC -shared -Wall -Ithird_party/clap/include ../bridge/nb_bridge_clap.cc -o build/Release/NateBloomBridge.clap -lrt 2>&1 | tee -a /tmp/nb-logs/native.log
+          ls -la build/Release/NateBloomBridge.clap | tee -a /tmp/nb-logs/native.log
 
       - name: Package (.deb and AppImage)
         id: build
@@ -102,6 +105,12 @@ jobs:
         continue-on-error: true
         timeout-minutes: 6
         run: bash linux/ci/native_check.sh /tmp/nb-logs/native
+
+      - name: Bitwig bridge (the plugin played by a real-time CLAP host, timing)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 6
+        run: bash linux/ci/bridge_check.sh /tmp/nb-logs/bridge
 
       - name: Across both screens (two virtual monitors, no window manager and Cinnamon's)
         if: steps.build.outcome == 'success'

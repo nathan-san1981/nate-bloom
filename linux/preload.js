@@ -54,6 +54,22 @@ if (fp && fp.eng_attach && engineOK && !process.env.NB_NO_ENGINE) contextBridge.
   stop: () => fp.eng_stop(),
 });
 
+// (187) Nate Bloom ↔ Bitwig (native/nb_bridge.cc): the page posts { nbBridgeAttach: { hdr, rings, midi } } (its shared
+// memory) to its own window and this hands it on; the rest goes over NBBridge
+if (fp && fp.br_start && !process.env.NB_NO_BRIDGE) {
+  window.addEventListener("message", e => {
+    const d = e.data && e.data.nbBridgeAttach; if (!d || e.source !== window) return;
+    let ok = false, why = "";
+    try { ok = !!fp.br_start(new Float64Array(d.hdr), new Float32Array(d.rings), new Float64Array(d.midi)); if (!ok) why = "the bridge refused the memory"; } catch (er) { why = String(er && er.message || er); }
+    window.postMessage({ nbBridgeAttached: { ok, why } }, "*");
+  });
+  contextBridge.exposeInMainWorld("NBBridge", {
+    info: () => { try { return JSON.parse(fp.br_info()); } catch (e) { return null; } },
+    jack: (on, parts) => fp.br_jack(!!on, parts | 0),
+    midi: on => fp.br_midi(!!on),
+    plugin: () => ipcRenderer.invoke("nb:bridge-plugin"),
+  });
+}
 if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   start: () => fp.start(),
   sleep: () => fp.sleep(),

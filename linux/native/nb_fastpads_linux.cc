@@ -30,6 +30,7 @@
 #endif
 
 extern "C" napi_value nb_engine_init(napi_env env, napi_value exports);   // (176) nb_engine.cc
+extern "C" napi_value nb_bridge_init(napi_env env, napi_value exports);   // (187) nb_bridge.cc: Bitwig, JACK, MIDI ports
 
 namespace {
 
@@ -355,6 +356,7 @@ napi_value Init(napi_env env, napi_value exports) {
     };
     napi_define_properties(env, exports, sizeof props / sizeof props[0], props);
     nb_engine_init(env, exports);   // (176) the native synth engine (nb_engine.cc)
+    nb_bridge_init(env, exports);   // (187) the Bitwig bridge, JACK ports and MIDI ports (nb_bridge.cc)
     return exports;
 }
 

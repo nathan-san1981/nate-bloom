@@ -3446,6 +3446,8 @@ body.nb-wide .knobs { max-width: 1600px; }
 .nbi .nbi-dev { max-width: 260px; background: var(--raised); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px; }
 .nbi input[type=range] { width: 120px; }
 .nbi-meter { display: block; width: 100%; height: 8px; border-radius: 4px; background: #ffffff10; margin: 6px 0 2px; }
+.nb-bw { display: inline-flex; align-items: center; gap: 2px; padding: 0 10px; }
+.nb-bw.on b { color: var(--amber); }
 </style>
 </head>
 <body class="lite">
@@ -4676,6 +4678,14 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays. <b>Oct − / Oct +</b> move the MiniLab's own keys (it sends nothing for them), and the screen follows the notes they send: the keys, Play's Octave buttons and the strip move once a note lands outside the window they were on. <b>Shift + pads 13–16</b> (loop, stop, play, record) drive ▶ ■ ● on the screen you're on.</p>
+      <p><b>Bitwig (the Linux app):</b> the app puts the <b>Nate Bloom Bridge</b> plugin in <code>~/.clap</code>. In Bitwig, put it on a track (Instruments, by Nate Bloom; rescan plugins the first time). The track's notes, knobs and wheels play a sound of Nate Bloom's, and that sound comes back on the track, ready to record, mix and add Bitwig effects. The plugin reports about 56 ms of latency, and Bitwig's delay compensation lines it up with everything else. Use one bridge per sound you want on its own track. <b>Bitwig</b> in the top strip opens the sheet:
+        <ul>
+          <li>Each bridge, named after its track, has a menu of what it carries: <b>Everything</b> (what's playing, the mix before Nate Bloom's master compressor) or one sound.</li>
+          <li><b>Hear its input</b> lets audio sent into the bridge (a sidechain) play through Nate Bloom.</li>
+          <li><b>Only through Bitwig</b> turns Nate Bloom's own output off while a bridge carries everything, and takes a bridged sound out of Nate Bloom's mix, so nothing plays twice.</li>
+          <li><b>Follow Bitwig's tempo</b>, and optionally <b>Start and stop with Bitwig</b>.</li>
+        </ul>
+        For other apps there are also MIDI ports: "Nate Bloom in" plays what's playing, and "Nate Bloom send" → "Nate Bloom out" carries Nate Bloom's MIDI out. <b>JACK ports</b> add a stereo pair for the mix and for four parts (JACK · part N in the sheet), for Bitwig on its JACK engine or qpwgraph; they need pipewire-jack or JACK. Ableton Link keeps the tempo shared both ways. Bitwig's audio buffer should be 1024 frames or less.</p>
       <p><b>Which controller plays which sound:</b> each sound in Playing has a <b>🎹</b> menu. <b>Any keys</b> (the default) means every keyboard that plays what's playing. Tick one or more controllers instead and only they play it (the screen's keys and the sequencer always do). A controller ticked on a sound plays it even if it plays nothing else, so the MicroFreak's keys can play a plugin while its own sound comes through pass-through; its sheet has the same ticks under <b>Its keys and knobs also play</b>. Its knobs, wheels and pressure go to a plugin it plays.</p>
       <p><b>Which controller plays what (MIDI sheet):</b> each input that's on has a menu. <b>What's playing</b> plays the sound stack, as before. <b>Nothing</b> leaves it to the pads, clock and learned knobs. You can also give it a sound of its own: a synth, a library sound or plugin, the instrument, a sampler slot or the hardware synth, whatever the rest of the stack is. Several controllers can play the same sound. Each controller's sustain pedal holds its own notes. A controller that plays a plugin (a VST3, CLAP or LV2 in the Linux app) also sends it its knobs, pitch and mod wheels and pressure, so the plugin's own MIDI learn takes the MicroFreak's knobs, say. Knobs learned in Nate Bloom keep their jobs there. These notes play straight to that sound; the chord, Hold and the arp work on What's playing.</p>
       <p><b>Hardware synths (MicroFreak, Minilogue XD, MiniFreak, Crave, Grind, or any synth on a MIDI output):</b> add it from Quick sounds and Nate Bloom plays it with the rest; its sound comes back through your audio interface into its own Mixer channel. In its sheet, <b>Which synth</b> picks the model (Automatic finds the first one plugged in). <b>Pass-through</b> keeps its input open all the time, so its own presets, keys, sequencer and arp, and any pedal after it, come through whether or not Nate Bloom is playing it, and Takes, the Garage and Live's recorder have them too. Its own effects come through as they are. <b>Nate Bloom's effects on it</b> adds the Effects knobs on top, and plugin effects can go on its channel from the Plugins sheet.</p>
@@ -12431,6 +12441,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   // knobs only), or one sound of its own (a synth, a library sound or plugin, the instrument, a sampler slot, the
   // hardware synth), whatever the rest of the stack is. Several controllers can play the same sound. A controller
   // that plays a plugin also sends it its knobs, wheels and pressure, so the plugin's own MIDI learn takes them.
+  function mdOwnPort(p) { return /\bNate Bloom (in|out|send)\b/i.test((p && p.name) || ""); }   // (187: the app's own ALSA ports, nb_bridge.cc)
   function mdRoute(p) {
     const r = (md.opt.routes || {})[mdKey("in", p)];
     if (r) return r;
@@ -12451,14 +12462,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (window.__hw && window.__hw.shown && window.__hw.shown()) o.push(["hw", window.__hw.name]);
     return o;
   }
-  function mdRouteVoices(r, m, scale) {
+  function mdRouteVoices(r, m, scale, when) {
     const out = [];
     try {
-      if (r.startsWith("e:")) { const id = r.slice(2); if (ENGINES[id]) { const v = makeVoice(m, id, ((state.layers[id] && state.layers[id].level) || 0.8) * 1.25 * scale); if (v) out.push(v); } }
-      else if (r.startsWith("l:")) { const i = libIdx(r.slice(2)); if (i >= 0) { const pt = state.lib.parts[i]; if (m >= (pt.lo ?? 0) && m <= (pt.hi ?? 127)) { const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p, k0 = LVK; LVK = "l:" + i; try { const v = makeInstVoice(m + 12 * (pt.oct || 0), undefined, scale * 0.8 * 1.25, libInsts[i], P); if (v) out.push(v); } finally { LVK = k0; } } } }
-      else if (r === "inst") { const v = makeInstVoice(m, undefined, scale); if (v) out.push(v); }
-      else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), undefined, scale); if (v) out.push(v); }
-      else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m); if (v) out.push(v); }
+      if (r.startsWith("e:")) { const id = r.slice(2); if (ENGINES[id]) { const v = makeVoice(m, id, ((state.layers[id] && state.layers[id].level) || 0.8) * 1.25 * scale, when); if (v) out.push(v); } }
+      else if (r.startsWith("l:")) { const i = libIdx(r.slice(2)); if (i >= 0) { const pt = state.lib.parts[i]; if (m >= (pt.lo ?? 0) && m <= (pt.hi ?? 127)) { const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p, k0 = LVK; LVK = "l:" + i; try { const v = makeInstVoice(m + 12 * (pt.oct || 0), when, scale * 0.8 * 1.25, libInsts[i], P); if (v) out.push(v); } finally { LVK = k0; } } } }
+      else if (r === "inst") { const v = makeInstVoice(m, when, scale); if (v) out.push(v); }
+      else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), when, scale); if (v) out.push(v); }
+      else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m, when); if (v) out.push(v); }
+      else if (r === "stack") { (melodicVoices(m, when, scale) || []).forEach(v => { if (v) out.push(v); }); }   // (187: a bridge playing what's playing)
     } catch (er) {}
     return out;
   }
@@ -12539,6 +12551,9 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return [...md.access.inputs.values()].filter(p => md.ins.has(p.id) && !/mcu|hui|alv|din\s*thru|midi through|^through/i.test(p.name || ""))
       .map(p => ({ key: mdKey("in", p), name: (p.name || "MIDI").replace(/^KL\b/i, "KeyLab").replace(/^Arturia\s+/i, "").replace(/\s*(MIDI(\s*\d+)?|mk\s*3|Essential)\s*/gi, " ").replace(/\s*_\s*/g, " ").replace(/\s+/g, " ").trim() || p.name, full: p.name, stack: mdRoute(p) === "stack" }));
   };
+  window.__nbRoute = { sendPort(on) { if (!md.access) return false; const o = [...md.access.outputs.values()].find(x => /\bNate Bloom send\b/i.test(x.name || "")); if (!o) return false; mdRemember("out", o, !!on); if (on) md.outs.add(o.id); else md.outs.delete(o.id); renderMidi(); return true; },
+    sendOn() { if (!md.access) return null; const o = [...md.access.outputs.values()].find(x => /\bNate Bloom send\b/i.test(x.name || "")); return o ? md.outs.has(o.id) : null; },
+    voices: (r, m, sc, when) => mdRouteVoices(r, m, sc, when), options: () => mdRouteOptions(), plugs: r => mdRoutePlugs(r), velGain: v => mdVelGain(v) };   // (187: the Bitwig bridge plays through these)
   window.__nbMidiDbg = { route: p => mdRoute(p), setRoute: (p, r) => mdRouteSet(p, r), opts: () => mdRouteOptions(), feed: e => onMidi(e), md };   // (184: tests feed it messages)
   function renderMidi() {
     mdPorts.innerHTML = "";
@@ -12572,8 +12587,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         mdPorts.appendChild(row);
       });
     };
-    sec("Inputs (keyboards, the K.O. II's clock)", [...md.access.inputs.values()], md.ins, "in");
-    sec("Outputs (the K.O. II, synths)", [...md.access.outputs.values()], md.outs, "out");
+    sec("Inputs (keyboards, the K.O. II's clock)", [...md.access.inputs.values()].filter(p => !mdOwnPort(p)), md.ins, "in");
+    sec("Outputs (the K.O. II, synths)", [...md.access.outputs.values()].filter(p => !mdOwnPort(p) || /send/i.test(p.name || "")), md.outs, "out");
   }
   function paintMdOpts() {
     document.querySelectorAll("#midiSheet [data-mo]").forEach(cb => { cb.checked = !!md.opt[cb.dataset.mo]; });
@@ -12601,8 +12616,10 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       md.access = na; md.sysex = sx;
       const hook = () => {
         const mem = md.opt.ports || {};
-        md.access.inputs.forEach(i => { i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) { if (mem[mdKey("in", i)] === false) md.ins.delete(i.id); else md.ins.add(i.id); } });
-        md.access.outputs.forEach(o => { if (!md.seen || !md.seen.has(o.id)) { const r = mem[mdKey("out", o)]; if (r === true || (r == null && !(md.isCtl && md.isCtl(o)))) md.outs.add(o.id); else md.outs.delete(o.id); } });
+        // (187) the app's own MIDI ports (Nate Bloom in / send / out, for other apps): never an input here (its own MIDI
+        // would come straight back); "send" is an output only when switched on (the Bitwig sheet), "in" and "out" never
+        md.access.inputs.forEach(i => { if (mdOwnPort(i)) { i.onmidimessage = null; md.ins.delete(i.id); return; } i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) { if (mem[mdKey("in", i)] === false) md.ins.delete(i.id); else md.ins.add(i.id); } });
+        md.access.outputs.forEach(o => { if (mdOwnPort(o)) { if (!/send/i.test(o.name || "") || mem[mdKey("out", o)] !== true) md.outs.delete(o.id); else md.outs.add(o.id); return; } if (!md.seen || !md.seen.has(o.id)) { const r = mem[mdKey("out", o)]; if (r === true || (r == null && !(md.isCtl && md.isCtl(o)))) md.outs.add(o.id); else md.outs.delete(o.id); } });
         md.seen = new Set([...md.access.inputs.keys(), ...md.access.outputs.keys()]);
         renderMidi();
         if (md.onPorts) md.onPorts();
@@ -32843,7 +32860,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 186;
+    window.NB_BUILD = 187;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -35499,6 +35516,255 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         rows.forEach(r => legend.before(r));
         // a wider card for the extra rows
         edCard.classList.add("nb-edx-card");
+      }
+    }
+    // ======================================================================
+    // (187) Nate Bloom ↔ Bitwig, in the Linux app. In Bitwig, the Nate Bloom Bridge plugin (a CLAP instrument the app
+    // puts in ~/.clap) goes on a track: the track's notes, knobs and wheels play a sound of Nate Bloom's (what's
+    // playing, or one sound picked for that track here), and that sound comes back on the track in time (the plugin
+    // reports the delay and Bitwig makes up for it). Audio sent into the plugin can come into Nate Bloom too. Bitwig's
+    // tempo, and its start and stop if you like, reach Nate Bloom. JACK ports (a stereo pair for the mix and for each
+    // of four parts) and MIDI ports ("Nate Bloom in" to play it from any app, "Nate Bloom send" → "Nate Bloom out" for
+    // its MIDI out) do the same for other apps. The meeting place is native (nb_bridge.cc); this side keeps a shared
+    // ring per bridge: an AudioWorklet writes the part's sound into it at the plugin's frame numbers, and the plugin's
+    // MIDI comes out of it, each event played at the moment of the ring it belongs to.
+    // ======================================================================
+    {
+      const NNb = window.NB_NATIVE, NBB = window.NBBridge;
+      if (NNb && NNb.platform === "linux" && NBB && typeof SharedArrayBuffer === "function" && window.crossOriginIsolated) {
+        const NS = 16, HSZ = 32, RG = 16384, NMZ = 512;
+        const hdrB = new SharedArrayBuffer((NS + 2) * HSZ * 8), ringB = new SharedArrayBuffer(NS * 4 * RG * 4), midiB = new SharedArrayBuffer((NS + 1) * NMZ * 4 * 8);
+        const HB = new Float64Array(hdrB), MB = new Float64Array(midiB);
+        const BW = window.__nbBridge = { ok: false, why: "", slots: [], info: null, plugin: null, late: 0, notes: 0, leads: [], spk: null, spkCtx: null, wl: null, wlCtx: null, last: { bpm: 0, play: 0 } };
+        const OPTK = "nightbloom-bitwig"; let OPT = { routes: {}, hear: {}, only: true, tempo: true, transport: false, jack: false, midi: true };
+        try { OPT = Object.assign(OPT, JSON.parse(localStorage.getItem(OPTK) || "{}")); } catch (e) {}
+        const optSave = () => { try { localStorage.setItem(OPTK, JSON.stringify(OPT)); } catch (e) {} };
+        for (let i = 0; i <= NS; i++) BW.slots.push({ gen: -1, name: "", kind: 1, node: null, nodeCtx: null, tap: null, voices: new Map(), sus: null, live: false });
+        window.addEventListener("message", e => { const d = e.data && e.data.nbBridgeAttached; if (!d) return; BW.ok = !!d.ok; BW.why = d.why || ""; });
+        window.postMessage({ nbBridgeAttach: { hdr: hdrB, rings: ringB, midi: midiB } }, "*");
+        try { if (OPT.midi) NBB.midi(true); } catch (e) {}
+        try { if (OPT.jack) NBB.jack(true, 4); } catch (e) {}
+        try { NBB.plugin().then(p => { BW.plugin = p; }).catch(() => {}); } catch (e) {}
+        const routeOf = sl => OPT.routes[sl.name] || "stack";
+        const CHAIN_LAT = 0.0135;
+        const hdr = i => i * HSZ;
+        // ---- the worklet: the part's sound into the ring at the plugin's frames; Bitwig's audio out of it ----
+        const WSRC = `class NBBridgeP extends AudioWorkletProcessor {
+  constructor(o) { super(); const p = o.processorOptions; this.H = new Float64Array(p.hdr); this.R = new Float32Array(p.rings); this.s = p.slot; this.RG = p.ring; this.HS = p.hs;
+    this.gen = -1; this.W = null; this.ph = 0; this.pL = 0; this.pR = 0; this.rin = null; this.hear = false; this.dead = false;
+    this.port.onmessage = e => { const d = e.data || {}; if (d.stop) this.dead = true; if (d.hear != null) this.hear = !!d.hear; }; }
+  process(inputs, outputs) {
+    if (this.dead) return false;
+    const H = this.H, b = this.s * this.HS, RG = this.RG, out = outputs[0];
+    for (const c of out) c.fill(0);
+    if (H[b] !== 1) { this.W = null; return true; }
+    if (H[b + 1] !== this.gen) { this.gen = H[b + 1]; this.W = null; this.rin = null; }
+    if (H[b + 13] > 600) { this.W = null; return true; }   // (the host isn't processing: nothing to keep up with)
+    const psr = H[b + 2] || sampleRate, L = H[b + 7] || Math.round(0.032 * psr), R0 = H[b + 4], r0 = psr / sampleRate;
+    const D = Math.max(Math.round(0.008 * psr), L - Math.round(0.0295 * psr));   // (lead over the plugin's reading: L less the time a note takes to get here, 16 ms, and the effects chain's 13.5 ms)
+    if (this.W === null || Math.abs((this.W - R0) - D) > L) { this.W = Math.max(0, R0 + D); this.ph = 0; const o = this.s * 4 * this.RG; this.R.fill(0, o, o + 2 * this.RG); }   // (starting over: nothing old left in the ring)
+    const err = (this.W - R0) - D, rr = r0 * Math.max(0.995, Math.min(1.005, 1 - err / (psr * 4)));   // (a touch faster or slower until the lead is right: the two clocks drift)
+    const inp = inputs[0], xL = inp && inp[0], xR = inp && (inp[1] || inp[0]);
+    H[b + 18] = currentFrame - 1 + this.ph; H[b + 19] = this.W; H[b + 20] = rr;
+    const oL = this.s * 4 * RG, oR = oL + RG, step = 1 / rr, R = this.R;
+    let W = this.W, ph = this.ph, pL = this.pL, pR = this.pR;
+    for (let k = 0; k < 128; k++) { const cL = xL ? xL[k] : 0, cR = xR ? xR[k] : 0;
+      while (ph < 1) { const i = W % RG; R[oL + i] = pL + (cL - pL) * ph; R[oR + i] = pR + (cR - pR) * ph; W++; ph += step; }
+      ph -= 1; pL = cL; pR = cR; }
+    this.W = W; this.ph = ph; this.pL = pL; this.pR = pR; H[b + 5] = W;
+    // Bitwig's audio into the plugin → here (a little behind what's arrived)
+    if (this.hear && H[b + 14]) {
+      const inW = H[b + 6], iL = oL + 2 * RG, iR = oL + 3 * RG, Din = Math.round(0.012 * psr);
+      if (this.rin === null || Math.abs(inW - this.rin - Din) > L) this.rin = inW - Din;
+      const ri = r0 * Math.max(0.995, Math.min(1.005, 1 + ((inW - this.rin) - Din) / (psr * 4)));
+      const L0 = out[0], R1 = out[1] || out[0];
+      for (let k = 0; k < 128; k++) { const x = this.rin, i0 = Math.floor(x), f = x - i0, a = ((i0 % RG) + RG) % RG, c = (a + 1) % RG;
+        if (i0 >= 0 && i0 + 1 < inW) { L0[k] = R[iL + a] + (R[iL + c] - R[iL + a]) * f; R1[k] = R[iR + a] + (R[iR + c] - R[iR + a]) * f; }
+        this.rin += ri; }
+    }
+    return true;
+  }
+}
+registerProcessor("nb-bridge", NBBridgeP);`;
+        async function wlReady() {
+          if (!ctx || !ctx.audioWorklet) return false;
+          if (BW.wlCtx === ctx && BW.wl) return BW.wl;
+          if (BW.wlCtx === ctx && BW.wlP) return BW.wlP;
+          BW.wlCtx = ctx; BW.wl = null;
+          BW.wlP = ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([WSRC], { type: "text/javascript" }))).then(() => (BW.wl = true)).catch(() => false);
+          return BW.wlP;
+        }
+        // ---- the speakers: Nate Bloom's own output, off while Bitwig carries the mix ----
+        function spkWire() {
+          if (!ctx || !analyser) return null;
+          if (BW.spkCtx === ctx && BW.spk && BW.spkA === analyser) return BW.spk;
+          try { analyser.disconnect(ctx.destination); } catch (e) {}
+          const g = ctx.createGain(); analyser.connect(g).connect(ctx.destination);
+          BW.spk = g; BW.spkCtx = ctx; BW.spkA = analyser; return g;
+        }
+        // ---- what a bridge carries: the mix (what's playing), or one sound's own channel ----
+        const chainOf = r => r.startsWith("e:") ? r.slice(2) : r.startsWith("s:") ? "samp" : r === "inst" ? "inst" : r.startsWith("l:") ? "lib" : r === "hw" ? "hw" : null;
+        function untap(sl) {
+          const t = sl.tap; if (!t) return; sl.tap = null;
+          t.srcs.forEach(n => { try { n.disconnect(t.to); } catch (e) {} if (t.cut && fx && fx.master && t.ctx === ctx) { try { n.connect(fx.master); } catch (e) {} } });
+        }
+        function tapFor(sl, route) {
+          if (!sl.node) return;
+          const key = route + "|" + (OPT.only ? 1 : 0);
+          if (sl.tap && sl.tap.key === key && sl.tap.ctx === ctx && sl.tap.to === sl.node && sl.tap.srcs.every(n => n.context === ctx)) return;
+          untap(sl);
+          let srcs = [], cut = false;
+          if (route === "stack" || route === "none") { if (fx && fx.master) srcs = [fx.master]; }   // (the mix before Nate Bloom's master compressor and limiter: Bitwig's own master does that job, and they'd hold it back further)
+          else { const id = chainOf(route); let c = null; try { c = id ? fxcGet(id) : null; } catch (e) {} if (c) { srcs = [c.dry, c.echoOut].filter(Boolean); cut = !!OPT.only; } }
+          srcs.forEach(n => { try { n.connect(sl.node); if (cut && fx && fx.master) n.disconnect(fx.master); } catch (e) {} });
+          sl.tap = { key, ctx, to: sl.node, srcs, cut };
+        }
+        async function nodeFor(i, sl) {
+          if (!ctx) return null;
+          if (sl.node && sl.nodeCtx === ctx) return sl.node;
+          if (!(await wlReady())) return null;
+          if (sl.node) { try { sl.node.port.postMessage({ stop: 1 }); sl.node.disconnect(); } catch (e) {} untap(sl); }
+          const n = new AudioWorkletNode(ctx, "nb-bridge", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: "explicit", processorOptions: { hdr: hdrB, rings: ringB, slot: i, ring: RG, hs: HSZ } });
+          n.connect(fx && fx.master ? fx.master : ctx.destination);   // (Bitwig's audio, when it's let in; silent otherwise)
+          sl.node = n; sl.nodeCtx = ctx; n.port.postMessage({ hear: !!OPT.hear[sl.name] });
+          return n;
+        }
+        function dropSlot(sl) {
+          sl.voices.forEach(vs => vs.forEach(v => { try { v.stop(); } catch (e) {} })); sl.voices.clear(); sl.sus = null;
+          untap(sl); if (sl.node) { try { sl.node.port.postMessage({ stop: 1 }); sl.node.disconnect(); } catch (e) {} } sl.node = null; sl.live = false;
+        }
+        // ---- its MIDI, each event at the moment of the ring it belongs to ----
+        function whenOf(b, frame) {
+          if (!ctx || frame < 0) return undefined;
+          const af = HB[b + 18], aw = HB[b + 19], rr = HB[b + 20];
+          if (!(rr > 0)) return undefined;
+          // (each sound's effects chain holds it back by its tape-wobble delay, 12 ms, before it reaches the tap: played that much earlier)
+          const t = (af + (frame - aw) / rr) / ctx.sampleRate - CHAIN_LAT, now = ctx.currentTime;
+          BW.leads.push(Math.round((t - now) * 10000) / 10); if (BW.leads.length > 40) BW.leads.shift();   // (ms to spare when it arrived; below 0: late)
+          if (t < now + 0.002) { BW.late++; return undefined; }
+          return t > now + 1 ? undefined : t;
+        }
+        function midiIn(i, sl, route) {
+          const b = hdr(i); let tl = HB[b + 12]; const hd = HB[b + 11];
+          if (hd - tl > NMZ) tl = hd - NMZ;
+          for (; tl < hd; tl++) {
+            const m = MB.subarray(((i * NMZ) + (tl % NMZ)) * 4, ((i * NMZ) + (tl % NMZ)) * 4 + 4);
+            const fr = m[0], s0 = m[1] | 0, d1 = m[2] | 0, d2 = m[3] | 0, cmd = s0 & 0xf0, when = whenOf(b, fr);
+            try { start(); } catch (e) {}
+            if (cmd === 0x90 && d2 > 0) {
+              const k = (s0 & 15) + ":" + d1, old = sl.voices.get(k); if (old) old.forEach(v => { try { v.stop(when); } catch (e) {} });
+              NB_VEL7 = d2; let vs = []; try { vs = window.__nbRoute.voices(route, d1, window.__nbRoute.velGain(d2), when); } catch (e) {} finally { NB_VEL7 = 100; }
+              sl.voices.set(k, vs); BW.notes++;
+            } else if (cmd === 0x80 || cmd === 0x90) {
+              const k = (s0 & 15) + ":" + d1, vs = sl.voices.get(k); if (!vs) continue;
+              if (sl.sus) { sl.sus.add(k); vs.off = true; continue; }
+              sl.voices.delete(k); vs.forEach(v => { try { v.stop(when); } catch (e) {} });
+            } else if (cmd === 0xb0 && d1 === 64) {
+              if (d2 >= 64) sl.sus = sl.sus || new Set();
+              else if (sl.sus) { const held = sl.sus; sl.sus = null; held.forEach(k => { const vs = sl.voices.get(k); if (vs && vs.off) { sl.voices.delete(k); vs.forEach(v => { try { v.stop(when); } catch (e) {} }); } }); }
+            } else if (cmd === 0xb0 && (d1 === 120 || d1 === 123)) { sl.voices.forEach(vs => vs.forEach(v => { try { v.stop(when); } catch (e) {} })); sl.voices.clear(); sl.sus = null; }
+            else if (cmd === 0xb0 || cmd === 0xe0 || cmd === 0xd0 || cmd === 0xa0) {
+              // knobs, wheels, pressure: to the plugin it plays, at their moment; the wheels move Nate Bloom's own sounds too
+              let ps = []; try { ps = window.__nbRoute.plugs(route); } catch (e) {}
+              ps.forEach(P => { try { P.node.scheduleEvents({ type: "wam-midi", time: when == null ? P.ctx.currentTime : when, data: { bytes: [s0, d1, d2] } }); } catch (e) {} });
+              try {
+                if (cmd === 0xe0) { pm.bend = Math.max(-1, Math.min(1, ((d2 << 7) | d1) / 8192 - 1)); applyPitch(); }
+                else if (cmd === 0xb0 && d1 === 1) { MODSRC.wheel = d2 / 127; pm.mod = Math.max(MODSRC.wheel, MODSRC.press); applyPitch(); }
+              } catch (e) {}
+            }
+          }
+          HB[b + 12] = tl;
+        }
+        // ---- every couple of milliseconds: who's there, their sound and MIDI, the speakers, the tempo ----
+        function tick() {
+          if (!BW.ok || !ctx) return;
+          HB[(NS + 1) * HSZ] = ctx.sampleRate;
+          let carriesMix = false;
+          for (let i = 0; i < NS; i++) {
+            const b = hdr(i), sl = BW.slots[i], on = HB[b] === 1;
+            if (!on) { if (sl.live) dropSlot(sl); sl.gen = -1; continue; }
+            if (HB[b + 1] !== sl.gen) { dropSlot(sl); sl.gen = HB[b + 1]; }
+            sl.live = true; sl.kind = HB[b + 17] || 1;
+            const route = routeOf(sl);
+            if (!sl.node || sl.nodeCtx !== ctx) { if (!sl.pending) { sl.pending = true; nodeFor(i, sl).finally(() => { sl.pending = false; }); } }
+            else tapFor(sl, route);
+            midiIn(i, sl, route);
+            if ((route === "stack") && HB[b + 13] < 600) carriesMix = true;
+          }
+          // the "Nate Bloom in" MIDI port: other apps play it, at once
+          { const sl = BW.slots[NS]; midiIn(NS, sl, OPT.routes["Nate Bloom in"] || "stack"); }
+          const g = spkWire(); if (g) { const want = carriesMix && OPT.only ? 0 : 1; if (g.gain.value !== want) g.gain.setTargetAtTime(want, ctx.currentTime, 0.02); }
+          BW.carriesMix = carriesMix;
+          // Bitwig's tempo, start and stop (from the first plugin that's playing a part)
+          const pl = BW.slots.findIndex((s, i) => i < NS && s.live && s.kind === 1 && HB[hdr(i) + 13] < 600);
+          if (pl >= 0) { const b = hdr(pl), bpm = HB[b + 8], play = HB[b + 9] | 0;
+            if (OPT.tempo && bpm >= 40 && Math.abs(bpm - BW.last.bpm) > 0.05) { BW.last.bpm = bpm; if (Math.round(bpm) !== state.seq.bpm) try { setBpm(Math.round(bpm)); } catch (e) {} }
+            if (OPT.transport && play !== BW.last.play) { try { if (play && !playing) startSeq(); else if (!play && playing) stopSeq(); } catch (e) {} }
+            BW.last.play = play; }
+        }
+        setInterval(tick, 2);
+        BW.level = () => { if (!analyser) return null; const d = new Float32Array(2048); analyser.getFloatTimeDomainData(d); let q = 0; for (const x of d) q += x * x; return Math.sqrt(q / 2048); };
+        // names (the host's track names) and the ports' state, twice a second
+        setInterval(() => {
+          let inf = null; try { inf = NBB.info(); } catch (e) {} if (!inf) return; BW.info = inf;
+          inf.slots.forEach((s, i) => { const sl = BW.slots[i]; if (sl && s.state === 1 && s.name !== sl.name) { sl.name = s.name; if (sl.node) sl.node.port.postMessage({ hear: !!OPT.hear[sl.name] }); untap(sl); } });
+          paintBtn(); if (!sh.hidden) paintSheet();
+        }, 500);
+        // ---- the button and the sheet ----
+        const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn nb-bw"; btn.id = "shBw"; btn.innerHTML = "<b>Bitwig</b><span class='v'></span>"; btn.title = "Nate Bloom with Bitwig: the bridge plugin, JACK and MIDI ports";
+        btn.addEventListener("click", () => { start(); sh.hidden = false; paintSheet(); });
+        const placeBtn = () => { const c = document.getElementById("shCpu") || document.getElementById("shLog"); if (c && btn.nextSibling !== c) c.before(btn); };
+        setInterval(placeBtn, 1500); placeBtn();
+        const live = () => BW.slots.filter((s, i) => i < NS && s.live);
+        function paintBtn() { const n = live().filter(s => s.kind === 1).length; btn.querySelector(".v").textContent = n ? " · " + n : ""; btn.classList.toggle("on", n > 0); }
+        const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "bwSheet"; sh.hidden = true;
+        sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Bitwig"><div class="ed-head"><strong>Bitwig</strong><span class="ed-info" id="bwState"></span></div>
+          <div id="bwBody" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div class="ed-foot sheet-foot"><button class="btn big primary" id="bwDone">Done</button></div></div>`;
+        document.body.appendChild(sh);
+        sh.querySelector("#bwDone").addEventListener("click", () => { sh.hidden = true; });
+        const esc4 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+        function tog(label, sub, on, fn) { const r = document.createElement("label"); r.className = "md-row"; r.innerHTML = `<input type="checkbox"${on ? " checked" : ""}><span><b>${esc4(label)}</b><small style="display:block;font:0.66rem var(--font-mono);color:var(--dim)">${esc4(sub)}</small></span>`; r.querySelector("input").addEventListener("change", e => fn(e.target.checked)); return r; }
+        function lab(t) { const d = document.createElement("div"); d.className = "sp-lab"; d.innerHTML = "<span></span>"; d.firstChild.textContent = t; return d; }
+        function note(t) { const p = document.createElement("p"); p.className = "ed-info"; p.style.textAlign = "left"; p.textContent = t; return p; }
+        function paintSheet() {
+          const body = sh.querySelector("#bwBody"); if (!body) return; body.innerHTML = "";
+          const bridges = BW.slots.map((s, i) => ({ s, i })).filter(x => x.i < NS && x.s.live);
+          const plugs = bridges.filter(x => x.s.kind === 1);
+          sh.querySelector("#bwState").textContent = !BW.ok ? (BW.why || "starting…") : plugs.length ? plugs.length + (plugs.length === 1 ? " bridge" : " bridges") + " connected" : "no bridge yet";
+          body.appendChild(lab("In Bitwig"));
+          body.appendChild(note(BW.plugin && BW.plugin.installed ? "Put Nate Bloom Bridge (Browser › Instruments, by Nate Bloom; it's in ~/.clap) on a track. Its notes, knobs and wheels play the sound picked for it below, and that sound comes back on the track in time, ready to record and mix. One bridge per sound you want on a track of its own." : "The bridge plugin isn't installed" + (BW.plugin && BW.plugin.why ? " (" + BW.plugin.why + ")" : "") + "."));
+          if (BW.plugin && BW.plugin.updated) body.appendChild(note("The plugin was just updated: if Bitwig was open, rescan its plugins (Settings › Locations › Rescan) or restart it."));
+          const opts = (() => { try { return window.__nbRoute.options().filter(o => o[0] !== "none"); } catch (e) { return [["stack", "What's playing"]]; } })();
+          bridges.forEach(({ s, i }) => {
+            const b = hdr(i), r = document.createElement("div"); r.className = "ly-quick"; r.style.cssText = "align-items:center;gap:8px;flex-wrap:wrap";
+            const age = HB[b + 13], st = age > 600 ? "paused (Bitwig isn't playing audio)" : HB[b + 16] > 0 ? "running" : "running";
+            const nm = document.createElement("span"); nm.className = "dj-lab"; nm.style.cssText = "flex:1 1 160px;min-width:0"; nm.innerHTML = `<b style="color:var(--ink)">${esc4(s.name || "Bridge " + (i + 1))}</b> · ${s.kind === 2 ? "JACK" : "bridge"} · ${esc4(st)}`;
+            const sel = document.createElement("select"); sel.setAttribute("aria-label", "What " + (s.name || "this bridge") + " carries");
+            const cur = routeOf(s); let has = false;
+            opts.forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = (v === "stack" ? "Everything (what's playing)" : t); if (v === cur) has = true; sel.appendChild(o); });
+            if (!has) { const o = document.createElement("option"); o.value = cur; o.textContent = "(not loaded) " + cur; sel.appendChild(o); }
+            sel.value = cur; sel.addEventListener("change", () => { OPT.routes[s.name] = sel.value; optSave(); untap(s); s.voices.forEach(vs => vs.forEach(v => { try { v.stop(); } catch (e) {} })); s.voices.clear(); });
+            r.append(nm, sel);
+            if (s.kind === 1) { const h = document.createElement("button"); h.type = "button"; h.className = "btn"; const on = !!OPT.hear[s.name]; h.textContent = (on ? "✓ " : "") + "Hear its input"; h.title = "Audio sent into the bridge (a sidechain in Bitwig) plays through Nate Bloom"; h.setAttribute("aria-pressed", String(on));
+              h.addEventListener("click", () => { OPT.hear[s.name] = !OPT.hear[s.name]; optSave(); if (s.node) s.node.port.postMessage({ hear: !!OPT.hear[s.name] }); paintSheet(); }); r.appendChild(h); }
+            body.appendChild(r);
+          });
+          if (!bridges.length) body.appendChild(note("Nothing connected. Once a bridge is on a track (and Bitwig's audio is running) it shows here."));
+          body.appendChild(lab("Together"));
+          body.appendChild(tog("Only through Bitwig", "while a bridge carries everything, Nate Bloom's own output is off (no doubled sound); a bridge carrying one sound takes that sound out of Nate Bloom's mix", OPT.only, v => { OPT.only = v; optSave(); BW.slots.forEach(untap); }));
+          body.appendChild(tog("Follow Bitwig's tempo", "Nate Bloom's tempo is Bitwig's (Ableton Link does this too, both ways)", OPT.tempo, v => { OPT.tempo = v; optSave(); }));
+          body.appendChild(tog("Start and stop with Bitwig", "Bitwig's play and stop run Nate Bloom's sequencer", OPT.transport, v => { OPT.transport = v; optSave(); }));
+          body.appendChild(lab("Other apps"));
+          const inf = BW.info || {};
+          body.appendChild(tog("MIDI ports", inf.midi && inf.midi.on ? "on: \"Nate Bloom in\" plays what's playing from any app (in Bitwig: a track's output or a controller); \"Nate Bloom out\" carries Nate Bloom's MIDI out" : (inf.midi && inf.midi.why) || "\"Nate Bloom in\" and \"Nate Bloom out\" for other apps", OPT.midi, v => { OPT.midi = v; optSave(); try { NBB.midi(v); } catch (e) {} setTimeout(paintSheet, 300); }));
+          const so = (() => { try { return window.__nbRoute.sendOn(); } catch (e) { return null; } })();
+          if (OPT.midi && so != null) body.appendChild(tog("Send Nate Bloom's MIDI out to \"Nate Bloom out\"", "the MIDI sheet's Send options (melody, keys, drums, clock) then reach other apps too", !!so, v => { try { window.__nbRoute.sendPort(v); } catch (e) {} setTimeout(paintSheet, 200); }));
+          body.appendChild(tog("JACK ports", inf.jack && inf.jack.on ? "on: Nate Bloom in JACK / PipeWire with \"mix\" and \"part 1–4\" pairs; pick each part's sound above (JACK · part N)" : (inf.jack && inf.jack.why) || "a stereo pair for the mix and for four parts, for any JACK app (Bitwig on its JACK engine, qpwgraph)", OPT.jack, v => { OPT.jack = v; optSave(); try { NBB.jack(v, 4); } catch (e) {} setTimeout(paintSheet, 400); }));
+          if (BW.late) body.appendChild(note(BW.late + " notes arrived too late to land exactly and played at once."));
+        }
+        (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ bitwig: { ok: BW.ok, why: BW.why, notes: BW.notes, late: BW.late, carriesMix: !!BW.carriesMix, info: BW.info, opt: OPT,
+          slots: BW.slots.map((s, i) => s.live ? { i, name: s.name, kind: s.kind, route: routeOf(s), age: HB[hdr(i) + 13], under: HB[hdr(i) + 16], lat: HB[hdr(i) + 7], sr: HB[hdr(i) + 2] } : null).filter(Boolean) } }));
       }
     }
     if (window.__mod) window.__mod.nbCC = nbCC;

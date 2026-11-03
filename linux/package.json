@@ -23,7 +23,7 @@
     "productName": "Nate Bloom",
     "files": ["main.js", "preload.js", "link.js", "plugins.js", "plugscan.js", "plughost.js", "xspan.py", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node", "native/build/Release/nbplug.node"],
     "asarUnpack": ["native/build/Release/nbfastpads.node", "native/build/Release/nbplug.node"],
-    "extraResources": [{ "from": "site", "to": "site" }],
+    "extraResources": [{ "from": "site", "to": "site" }, { "from": "native/build/Release/NateBloomBridge.clap", "to": "clap/NateBloomBridge.clap" }],
     "linux": {
       "target": ["deb", "AppImage"],
       "category": "AudioVideo",

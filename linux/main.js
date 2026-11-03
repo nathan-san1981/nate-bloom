@@ -364,6 +364,24 @@ function cpuThreads(pid) {
   for (const t of ts) { try { const s = fs.readFileSync("/proc/" + pid + "/task/" + t + "/stat", "utf8"), i = s.lastIndexOf(")"), f = s.slice(i + 2).split(" "); out[t] = { comm: s.slice(s.indexOf("(") + 1, i), ticks: +f[11] + +f[12] }; } catch (e) {} }
   return out;
 }
+// (187) the Nate Bloom Bridge plugin for Bitwig: shipped inside the app, copied into ~/.clap (where Bitwig and other
+// CLAP hosts look; no root needed) whenever it's missing or a newer one came with the app. A copy, not a link: the
+// AppImage's own folder changes every time it opens.
+const bridgePlugin = { path: "", installed: false, why: "" };
+function installBridgePlugin() {
+  try {
+    const cands = [path.join(process.resourcesPath || "", "clap", "NateBloomBridge.clap"), path.join(__dirname, "native", "build", "Release", "NateBloomBridge.clap")];
+    const src = cands.find(f => { try { return fs.statSync(f).isFile(); } catch (e) { return false; } });
+    if (!src) { bridgePlugin.why = "this build has no bridge plugin"; return; }
+    const dir = path.join(require("os").homedir(), ".clap"), dst = path.join(dir, "NateBloomBridge.clap");
+    fs.mkdirSync(dir, { recursive: true });
+    let same = false; try { const a = fs.readFileSync(src), b = fs.readFileSync(dst); same = a.length === b.length && a.equals(b); } catch (e) {}
+    if (!same) { fs.copyFileSync(src, dst + ".part"); fs.chmodSync(dst + ".part", 0o755); fs.renameSync(dst + ".part", dst); }
+    Object.assign(bridgePlugin, { path: dst, installed: true, why: "", updated: !same });
+  } catch (e) { bridgePlugin.why = String(e && e.message || e); }
+}
+installBridgePlugin();
+ipcMain.handle("nb:bridge-plugin", () => bridgePlugin);
 ipcMain.handle("nb:cpu", () => {
   if (process.platform !== "linux" || !win || win.isDestroyed()) return null;
   const t = Number(process.hrtime.bigint()) / 1e9, pid = win.webContents.getOSProcessId(), st = cpuStat(), th = cpuThreads(pid);

@@ -155,6 +155,7 @@
   // knobs only), or one sound of its own (a synth, a library sound or plugin, the instrument, a sampler slot, the
   // hardware synth), whatever the rest of the stack is. Several controllers can play the same sound. A controller
   // that plays a plugin also sends it its knobs, wheels and pressure, so the plugin's own MIDI learn takes them.
+  function mdOwnPort(p) { return /\bNate Bloom (in|out|send)\b/i.test((p && p.name) || ""); }   // (187: the app's own ALSA ports, nb_bridge.cc)
   function mdRoute(p) {
     const r = (md.opt.routes || {})[mdKey("in", p)];
     if (r) return r;
@@ -175,14 +176,15 @@
     if (window.__hw && window.__hw.shown && window.__hw.shown()) o.push(["hw", window.__hw.name]);
     return o;
   }
-  function mdRouteVoices(r, m, scale) {
+  function mdRouteVoices(r, m, scale, when) {
     const out = [];
     try {
-      if (r.startsWith("e:")) { const id = r.slice(2); if (ENGINES[id]) { const v = makeVoice(m, id, ((state.layers[id] && state.layers[id].level) || 0.8) * 1.25 * scale); if (v) out.push(v); } }
-      else if (r.startsWith("l:")) { const i = libIdx(r.slice(2)); if (i >= 0) { const pt = state.lib.parts[i]; if (m >= (pt.lo ?? 0) && m <= (pt.hi ?? 127)) { const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p, k0 = LVK; LVK = "l:" + i; try { const v = makeInstVoice(m + 12 * (pt.oct || 0), undefined, scale * 0.8 * 1.25, libInsts[i], P); if (v) out.push(v); } finally { LVK = k0; } } } }
-      else if (r === "inst") { const v = makeInstVoice(m, undefined, scale); if (v) out.push(v); }
-      else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), undefined, scale); if (v) out.push(v); }
-      else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m); if (v) out.push(v); }
+      if (r.startsWith("e:")) { const id = r.slice(2); if (ENGINES[id]) { const v = makeVoice(m, id, ((state.layers[id] && state.layers[id].level) || 0.8) * 1.25 * scale, when); if (v) out.push(v); } }
+      else if (r.startsWith("l:")) { const i = libIdx(r.slice(2)); if (i >= 0) { const pt = state.lib.parts[i]; if (m >= (pt.lo ?? 0) && m <= (pt.hi ?? 127)) { const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p, k0 = LVK; LVK = "l:" + i; try { const v = makeInstVoice(m + 12 * (pt.oct || 0), when, scale * 0.8 * 1.25, libInsts[i], P); if (v) out.push(v); } finally { LVK = k0; } } } }
+      else if (r === "inst") { const v = makeInstVoice(m, when, scale); if (v) out.push(v); }
+      else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), when, scale); if (v) out.push(v); }
+      else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m, when); if (v) out.push(v); }
+      else if (r === "stack") { (melodicVoices(m, when, scale) || []).forEach(v => { if (v) out.push(v); }); }   // (187: a bridge playing what's playing)
     } catch (er) {}
     return out;
   }
@@ -263,6 +265,9 @@
     return [...md.access.inputs.values()].filter(p => md.ins.has(p.id) && !/mcu|hui|alv|din\s*thru|midi through|^through/i.test(p.name || ""))
       .map(p => ({ key: mdKey("in", p), name: (p.name || "MIDI").replace(/^KL\b/i, "KeyLab").replace(/^Arturia\s+/i, "").replace(/\s*(MIDI(\s*\d+)?|mk\s*3|Essential)\s*/gi, " ").replace(/\s*_\s*/g, " ").replace(/\s+/g, " ").trim() || p.name, full: p.name, stack: mdRoute(p) === "stack" }));
   };
+  window.__nbRoute = { sendPort(on) { if (!md.access) return false; const o = [...md.access.outputs.values()].find(x => /\bNate Bloom send\b/i.test(x.name || "")); if (!o) return false; mdRemember("out", o, !!on); if (on) md.outs.add(o.id); else md.outs.delete(o.id); renderMidi(); return true; },
+    sendOn() { if (!md.access) return null; const o = [...md.access.outputs.values()].find(x => /\bNate Bloom send\b/i.test(x.name || "")); return o ? md.outs.has(o.id) : null; },
+    voices: (r, m, sc, when) => mdRouteVoices(r, m, sc, when), options: () => mdRouteOptions(), plugs: r => mdRoutePlugs(r), velGain: v => mdVelGain(v) };   // (187: the Bitwig bridge plays through these)
   window.__nbMidiDbg = { route: p => mdRoute(p), setRoute: (p, r) => mdRouteSet(p, r), opts: () => mdRouteOptions(), feed: e => onMidi(e), md };   // (184: tests feed it messages)
   function renderMidi() {
     mdPorts.innerHTML = "";
@@ -296,8 +301,8 @@
         mdPorts.appendChild(row);
       });
     };
-    sec("Inputs (keyboards, the K.O. II's clock)", [...md.access.inputs.values()], md.ins, "in");
-    sec("Outputs (the K.O. II, synths)", [...md.access.outputs.values()], md.outs, "out");
+    sec("Inputs (keyboards, the K.O. II's clock)", [...md.access.inputs.values()].filter(p => !mdOwnPort(p)), md.ins, "in");
+    sec("Outputs (the K.O. II, synths)", [...md.access.outputs.values()].filter(p => !mdOwnPort(p) || /send/i.test(p.name || "")), md.outs, "out");
   }
   function paintMdOpts() {
     document.querySelectorAll("#midiSheet [data-mo]").forEach(cb => { cb.checked = !!md.opt[cb.dataset.mo]; });
@@ -325,8 +330,10 @@
       md.access = na; md.sysex = sx;
       const hook = () => {
         const mem = md.opt.ports || {};
-        md.access.inputs.forEach(i => { i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) { if (mem[mdKey("in", i)] === false) md.ins.delete(i.id); else md.ins.add(i.id); } });
-        md.access.outputs.forEach(o => { if (!md.seen || !md.seen.has(o.id)) { const r = mem[mdKey("out", o)]; if (r === true || (r == null && !(md.isCtl && md.isCtl(o)))) md.outs.add(o.id); else md.outs.delete(o.id); } });
+        // (187) the app's own MIDI ports (Nate Bloom in / send / out, for other apps): never an input here (its own MIDI
+        // would come straight back); "send" is an output only when switched on (the Bitwig sheet), "in" and "out" never
+        md.access.inputs.forEach(i => { if (mdOwnPort(i)) { i.onmidimessage = null; md.ins.delete(i.id); return; } i.onmidimessage = onMidi; if (!md.seen || !md.seen.has(i.id)) { if (mem[mdKey("in", i)] === false) md.ins.delete(i.id); else md.ins.add(i.id); } });
+        md.access.outputs.forEach(o => { if (mdOwnPort(o)) { if (!/send/i.test(o.name || "") || mem[mdKey("out", o)] !== true) md.outs.delete(o.id); else md.outs.add(o.id); return; } if (!md.seen || !md.seen.has(o.id)) { const r = mem[mdKey("out", o)]; if (r === true || (r == null && !(md.isCtl && md.isCtl(o)))) md.outs.add(o.id); else md.outs.delete(o.id); } });
         md.seen = new Set([...md.access.inputs.keys(), ...md.access.outputs.keys()]);
         renderMidi();
         if (md.onPorts) md.onPorts();
