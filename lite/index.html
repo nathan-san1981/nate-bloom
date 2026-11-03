@@ -4619,6 +4619,12 @@ body.nb-wide .knobs { max-width: 1600px; }
   <div class="ed-card" role="dialog" aria-label="Install">
     <div class="ed-head"><strong>Install as an app</strong></div>
     <span class="ed-info" id="inInfo" style="text-align:left"></span>
+    <div id="inLinux" hidden>
+      <div class="sp-lab"><span>Linux computer (Mint, Ubuntu): the full app</span></div>
+      <a class="btn primary" id="inDeb" style="height:44px;display:flex;align-items:center;justify-content:center;text-decoration:none" href="https://github.com/nathan-san1981/nate-bloom/releases/download/linux-latest/NateBloom-linux.deb">Download Nate Bloom for Linux (.deb)</a>
+      <ol class="in-steps"><li>Double-click <b>NateBloom-linux.deb</b> in Downloads → <b>Install Package</b>. Or in a terminal: <code>sudo apt install ~/Downloads/NateBloom-linux.deb</code></li><li>Open it from the menu under <b>Sound &amp; Video</b>. It adds fast pads, your plugins, Ableton Link, Sound out, both screens and USB MIDI, and updates itself.</li><li>Rather not install? The <a href="https://github.com/nathan-san1981/nate-bloom/releases/download/linux-latest/NateBloom-linux.AppImage">AppImage</a> runs as is (make it executable; Mint 22 needs <code>sudo apt install libfuse2t64</code> once).</li></ol>
+      <div class="sp-lab"><span>Or as a Chrome web app (fewer features)</span></div>
+    </div>
     <button class="btn primary" id="inGo" style="height:44px" hidden>Install Nate Bloom Lite</button>
     <div class="sp-lab"><span>Chromebook (Chrome)</span></div>
     <ol class="in-steps"><li>Click <b>Install Nate Bloom Lite</b> above, or the install icon at the right end of the address bar, or ⋮ → <b>Cast, save and share</b> → <b>Install Nate Bloom Lite</b>.</li><li>It opens in its own window and appears in the launcher; right-click its shelf icon → <b>Pin</b> to keep it there.</li></ol>
@@ -12534,7 +12540,14 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const inArtifact = !!(window.claude && window.claude.use) || location.hostname.endsWith("claude.ai");
     const go = document.getElementById("inGo");
     go.hidden = !installEvt;
-    document.getElementById("inInfo").textContent = inArtifact
+    // a Linux computer (not Android, not a Chromebook) gets the real Linux app first; the web-app install stays below it
+    const ua = navigator.userAgent || "";
+    const linuxPc = /Linux/i.test(ua) && !/Android|CrOS/i.test(ua);
+    document.getElementById("inLinux").hidden = !linuxPc;
+    if (linuxPc) go.textContent = "Install as a Chrome web app";
+    document.getElementById("inInfo").textContent = linuxPc
+      ? "On Linux, get the Linux app: it's the full Nate Bloom. The download link always gets the newest version."
+      : inArtifact
       ? "Install works from the hosted copy on GitHub Pages (this page lives inside Claude). Open your GitHub Pages link, then follow the steps below."
       : installEvt ? "Click Install to add Nate Bloom Lite as an app. It then opens in its own window and keeps working offline." : "Follow the steps below for your device.";
   });

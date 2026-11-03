@@ -298,7 +298,14 @@
     const inArtifact = !!(window.claude && window.claude.use) || location.hostname.endsWith("claude.ai");
     const go = document.getElementById("inGo");
     go.hidden = !installEvt;
-    document.getElementById("inInfo").textContent = inArtifact
+    // a Linux computer (not Android, not a Chromebook) gets the real Linux app first; the web-app install stays below it
+    const ua = navigator.userAgent || "";
+    const linuxPc = /Linux/i.test(ua) && !/Android|CrOS/i.test(ua);
+    document.getElementById("inLinux").hidden = !linuxPc;
+    if (linuxPc) go.textContent = "Install as a Chrome web app";
+    document.getElementById("inInfo").textContent = linuxPc
+      ? "On Linux, get the Linux app: it's the full Nate Bloom. The download link always gets the newest version."
+      : inArtifact
       ? "Install works from the hosted copy on GitHub Pages (this page lives inside Claude). Open your GitHub Pages link, then follow the steps below."
       : installEvt ? "Tap Install to add Nate Bloom to your home screen. It then opens full screen and keeps working offline." : "Follow the steps below for your device.";
   });

@@ -1033,6 +1033,12 @@
   <div class="ed-card" role="dialog" aria-label="Install">
     <div class="ed-head"><strong>Install as an app</strong></div>
     <span class="ed-info" id="inInfo" style="text-align:left"></span>
+    <div id="inLinux" hidden>
+      <div class="sp-lab"><span>Linux computer (Mint, Ubuntu): the full app</span></div>
+      <a class="btn primary" id="inDeb" style="height:44px;display:flex;align-items:center;justify-content:center;text-decoration:none" href="https://github.com/nathan-san1981/nate-bloom/releases/download/linux-latest/NateBloom-linux.deb">Download Nate Bloom for Linux (.deb)</a>
+      <ol class="in-steps"><li>Double-click <b>NateBloom-linux.deb</b> in Downloads → <b>Install Package</b>. Or in a terminal: <code>sudo apt install ~/Downloads/NateBloom-linux.deb</code></li><li>Open it from the menu under <b>Sound &amp; Video</b>. It adds fast pads, your plugins, Ableton Link, Sound out, both screens and USB MIDI, and updates itself.</li><li>Rather not install? The <a href="https://github.com/nathan-san1981/nate-bloom/releases/download/linux-latest/NateBloom-linux.AppImage">AppImage</a> runs as is (make it executable; Mint 22 needs <code>sudo apt install libfuse2t64</code> once).</li></ol>
+      <div class="sp-lab"><span>Or as a Chrome web app (fewer features)</span></div>
+    </div>
     <button class="btn primary" id="inGo" style="height:44px" hidden>Install Nate Bloom</button>
     <div class="sp-lab"><span>Android tablet (Chrome)</span></div>
     <ol class="in-steps"><li>Open your GitHub Pages link in Chrome.</li><li>Tap ⋮ → <b>Add to home screen</b> → <b>Install</b>.</li></ol>
