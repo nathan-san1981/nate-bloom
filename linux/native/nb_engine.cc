@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 #include <cstdlib>
 #include <mutex>
 #include <thread>
@@ -340,6 +341,7 @@ struct Engine {
     }
   }
   void workerLoop(int w) {
+    { char nm[16]; snprintf(nm, sizeof nm, "nb-eng-w%d", w + 1); pthread_setname_np(pthread_self(), nm); }   // (179: the app's CPU meter finds the engine's threads by name)
     int seen = 0;   // (from the start: a worker that starts late must still see the first job)
     while (!wstop.load()) {
       { std::unique_lock<std::mutex> lk(wmu); wcv.wait(lk, [&] { return wstop.load() || gen.load() != seen; }); }
@@ -417,6 +419,7 @@ struct Engine {
     double wfd = (double)wf; __atomic_store(&hdr[1], &wfd, __ATOMIC_RELEASE);
   }
   void loop() {
+    pthread_setname_np(pthread_self(), "nb-engine");
     { sched_param sp; sp.sched_priority = 20; pthread_setschedparam(pthread_self(), SCHED_FIFO, &sp); }   // (when the system allows it)
     while (run.load()) {
       double rfd; __atomic_load(&hdr[0], &rfd, __ATOMIC_ACQUIRE);

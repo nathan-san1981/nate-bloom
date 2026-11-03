@@ -339,6 +339,42 @@ ipcMain.handle("nb:version", () => app.getVersion());
 // (177) VST3 and CLAP plugins (plugins.js: finding them, the scan in its own process, crash notes)
 let plugs = null;
 try { plugs = require("./plugins.js").setup({ app, ipcMain, dialog, getWin: () => win, log: m => { if (process.env.NB_DEBUG) console.log("[nb]", m); } }); } catch (e) { console.warn("plugins:", e && e.message); }
+// (179) the CPU meter: measured, not estimated. Each second the page asks; this reads the kernel's own counts
+// (/proc) for the whole computer and each core, and for the page's threads by name: the browser's real-time audio
+// thread ("Realtime AudioW…", where every browser synth and effect is worked out), the native engine's ("nb-engine",
+// "nb-eng-w…") and each plugin's ("nb-plug-<n>"). A thread at 100% of one core has no time left: that's a dropout.
+// Nate Bloom as a whole comes from Electron's own per-process figures.
+let cpuPrev = null;
+const cpuStat = () => fs.readFileSync("/proc/stat", "utf8").split("\n").filter(l => /^cpu\d* /.test(l)).map(l => { const f = l.trim().split(/\s+/).slice(1, 9).map(Number); return { idle: f[3] + (f[4] || 0), tot: f.reduce((a, b) => a + b, 0) }; });
+function cpuThreads(pid) {
+  const out = {};
+  let ts = []; try { ts = fs.readdirSync("/proc/" + pid + "/task"); } catch (e) { return out; }
+  for (const t of ts) { try { const s = fs.readFileSync("/proc/" + pid + "/task/" + t + "/stat", "utf8"), i = s.lastIndexOf(")"), f = s.slice(i + 2).split(" "); out[t] = { comm: s.slice(s.indexOf("(") + 1, i), ticks: +f[11] + +f[12] }; } catch (e) {} }
+  return out;
+}
+ipcMain.handle("nb:cpu", () => {
+  if (process.platform !== "linux" || !win || win.isDestroyed()) return null;
+  const t = Number(process.hrtime.bigint()) / 1e9, pid = win.webContents.getOSProcessId(), st = cpuStat(), th = cpuThreads(pid);
+  let appPct = 0; try { appPct = app_metrics(); } catch (e) {}
+  const prev = cpuPrev; cpuPrev = { t, pid, st, th };
+  if (!prev || prev.pid !== pid || t - prev.t < 0.25) return { warming: true };
+  const dt = t - prev.t, HZ = 100, pct = (a, b) => Math.round(Math.max(0, a - b) / HZ / dt * 1000) / 10;
+  const busy = (a, b) => { const dT = a.tot - b.tot; return dT > 0 ? Math.round((1 - (a.idle - b.idle) / dT) * 1000) / 10 : 0; };
+  const cores = st.slice(1).map((c, i) => prev.st[i + 1] ? busy(c, prev.st[i + 1]) : 0);
+  const r = { secs: Math.round(dt * 100) / 100, computer: prev.st[0] ? busy(st[0], prev.st[0]) : 0, busiestCore: cores.length ? Math.max(...cores) : 0, cores: cores.length, app: appPct, audio: 0, audioOut: 0, engine: [], plugins: {}, pluginMain: 0 };
+  for (const id in th) {
+    const a = th[id], b = prev.th[id]; if (!b || b.comm !== a.comm) continue;
+    const p = pct(a.ticks, b.ticks), c = a.comm;
+    if (c.startsWith("Realtime AudioW")) r.audio = Math.max(r.audio, p);
+    else if (c.startsWith("AudioOutputDevi")) r.audioOut = Math.max(r.audioOut, p);
+    else if (c === "nb-engine" || c.startsWith("nb-eng-w")) r.engine.push(p);
+    else if (c === "nb-plugmain") r.pluginMain += p;
+    else if (c.startsWith("nb-plug-")) r.plugins[c.slice(8)] = (r.plugins[c.slice(8)] || 0) + p;
+  }
+  return r;
+});
+// Nate Bloom's processes together, in % of one core (Electron measures each since the last call)
+function app_metrics() { return Math.round(app.getAppMetrics().reduce((a, m) => a + ((m.cpu && m.cpu.percentCPUUsage) || 0), 0) * 10) / 10; }
 ipcMain.handle("nb:xid", () => { try { const b = win.getNativeWindowHandle(); return b.length >= 8 ? Number(b.readBigUInt64LE(0)) : b.readUInt32LE(0); } catch (e) { return 0; } });
 
 app.on("window-all-closed", () => app.quit());

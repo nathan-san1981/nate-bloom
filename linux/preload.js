@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
   // (173) Across both screens: the window spans the screens, the page uses the whole width
   setWide: on => ipcRenderer.send("nb:set-wide", !!on),
   wideState: () => ipcRenderer.invoke("nb:wide"),
+  // (179) the CPU meter: real measurements of the computer and of Nate Bloom's audio threads (main.js)
+  cpu: () => ipcRenderer.invoke("nb:cpu"),
   onWide: cb => ipcRenderer.on("nb:wide", (e, on) => { try { cb(!!on); } catch (er) {} }),
 });
 

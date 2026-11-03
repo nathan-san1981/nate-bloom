@@ -3383,3 +3383,24 @@ body.nb-wide .knobs { max-width: 1600px; }
 .sh-sp.sh-set .sh-gear { color: var(--amber); font-size: 1.1em; line-height: 1; }
 .sh-sp.sh-set.on { background: rgba(255, 255, 255, 0.14); border-color: var(--amber); }
 @media (max-width: 380px) { .sh-sp.sh-set .sh-setw { display: none; } }
+
+/* (179) the Linux app's CPU meter: the button (top strip and Live) and its breakdown */
+.nb-cpu { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; min-width: 88px; font-variant-numeric: tabular-nums; }
+.nb-cpu b { font: 700 0.62rem var(--font-mono); letter-spacing: 0.08em; color: var(--dim); }
+.nb-cpu .v { font: 700 0.85rem var(--font-mono); min-width: 2.6em; text-align: right; }
+.nb-cpu .bar, .nbc-row .bar { flex: none; width: 26px; height: 6px; border-radius: 3px; background: #ffffff17; overflow: hidden; }
+.nb-cpu .bar u, .nbc-row .bar u { display: block; height: 100%; width: 0; background: #7fd6c2; border-radius: 3px; transition: width 0.4s; }
+.nb-cpu.warm { border-color: #ffb65c99; } .nb-cpu.warm .v { color: #ffcf8a; } .nb-cpu.warm .bar u { background: #ffb65c; }
+.nb-cpu.hot { border-color: #ff6b6b; background: #ff5d5d1f; } .nb-cpu.hot .v { color: #ff8a8a; } .nb-cpu.hot .bar u { background: #ff5d5d; }
+.nb-cpu-pop { position: fixed; z-index: 9000; background: var(--raised); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 10px 30px #0008; max-height: 80vh; overflow: auto; }
+.nbc-h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; } .nbc-h small { color: var(--dim); font-size: 0.75rem; }
+.nbc-g { font: 600 0.68rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); margin: 10px 0 4px; }
+.nbc-g small { text-transform: none; letter-spacing: 0; font-weight: 400; display: block; margin-top: 2px; }
+.nbc-row { display: grid; grid-template-columns: 1fr auto 30px; grid-template-rows: auto auto; column-gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid #ffffff0d; }
+.nbc-row span { font-weight: 600; } .nbc-row b { font: 700 0.85rem var(--font-mono); text-align: right; }
+.nbc-row small { grid-column: 1 / -1; color: var(--dim); font-size: 0.72rem; line-height: 1.35; }
+.nbc-row .bar.off { visibility: hidden; }
+.nbc-row.warm b { color: #ffcf8a; } .nbc-row.warm .bar u { background: #ffb65c; }
+.nbc-row.hot b { color: #ff8a8a; } .nbc-row.hot .bar u { background: #ff5d5d; }
+.nbc-note { color: var(--dim); font-size: 0.75rem; margin: 4px 0; }
+@media (max-width: 1100px) { .nb-cpu { min-width: 0; padding: 0 8px; } .nb-cpu .bar { display: none; } }

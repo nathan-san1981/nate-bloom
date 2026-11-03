@@ -58,7 +58,7 @@ struct Main : MainLoop {
     if (run.load()) return;
     efd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC); run.store(true);
     std::mutex m; std::condition_variable cv; bool up = false;
-    th = std::thread([&, this] { gMainId = std::this_thread::get_id(); { std::lock_guard<std::mutex> lk(m); up = true; } cv.notify_all(); loopFn(); });
+    th = std::thread([&, this] { pthread_setname_np(pthread_self(), "nb-plugmain"); gMainId = std::this_thread::get_id(); { std::lock_guard<std::mutex> lk(m); up = true; } cv.notify_all(); loopFn(); });
     std::unique_lock<std::mutex> lk(m); cv.wait(lk, [&] { return up; });
   }
   void loopFn() {
@@ -157,6 +157,7 @@ static void notice(const std::string& s) { std::lock_guard<std::mutex> lk(gNoteM
 static std::shared_ptr<Inst> findInst(int id) { std::lock_guard<std::mutex> lk(gIMu); auto it = gInst.find(id); return it == gInst.end() ? nullptr : it->second; }
 
 static void audioLoop(Inst* I) {
+  { char nm[16]; snprintf(nm, sizeof nm, "nb-plug-%d", I->id); pthread_setname_np(pthread_self(), nm); }   // (179: the CPU meter finds each plugin by its thread)
   tlAudio = true;
   { sched_param sp; sp.sched_priority = 18; pthread_setschedparam(pthread_self(), SCHED_FIFO, &sp); }
   I->be->startAudio();
