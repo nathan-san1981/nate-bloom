@@ -77,10 +77,11 @@ registerProcessor("nb-bridge", NBBridgeP);`;
         // ---- the speakers: Nate Bloom's own output, off while Bitwig carries the mix ----
         function spkWire() {
           if (!ctx || !analyser) return null;
-          if (BW.spkCtx === ctx && BW.spk && BW.spkA === analyser) return BW.spk;
-          try { analyser.disconnect(ctx.destination); } catch (e) {}
-          const g = ctx.createGain(); analyser.connect(g).connect(ctx.destination);
-          BW.spk = g; BW.spkCtx = ctx; BW.spkA = analyser; return g;
+          const src = window.__nbOut && __nbOut.spkFrom ? __nbOut.spkFrom() : analyser;   // (188: with direct monitoring the speakers come from before the recorders' tap)
+          if (BW.spkCtx === ctx && BW.spk && BW.spkSrc === src) return BW.spk;
+          if (BW.spkCtx === ctx && BW.spk) { try { BW.spkSrc.disconnect(BW.spk); } catch (e) {} } else { BW.spk = ctx.createGain(); BW.spk.connect(ctx.destination); BW.spkCtx = ctx; }
+          try { src.disconnect(ctx.destination); } catch (e) {} try { if (src !== analyser) analyser.disconnect(ctx.destination); } catch (e) {}
+          src.connect(BW.spk); BW.spkSrc = src; return BW.spk;
         }
         // ---- what a bridge carries: the mix (what's playing), or one sound's own channel ----
         const chainOf = r => r.startsWith("e:") ? r.slice(2) : r.startsWith("s:") ? "samp" : r === "inst" ? "inst" : r.startsWith("l:") ? "lib" : r === "hw" ? "hw" : null;

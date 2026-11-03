@@ -22,11 +22,11 @@
         stream: null, src: null, split: null, merge: null, bus: null, dest: null, an: null, err: "", label: "", opening: null, notes: new Map(), sentAt: 0 };
       try {
         const o = JSON.parse(localStorage.getItem(HW_KEY) || "{}");
-        ["out", "dev", "pick", "model"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; }); H.thru = !!o.thru; H.fxOn = !!o.fxOn;
+        ["out", "dev", "pick", "model"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; }); H.thru = !!o.thru; H.fxOn = !!o.fxOn; H.direct = !!o.direct;
         if (o.ch >= 1 && o.ch <= 16) H.ch = o.ch; if (Number.isFinite(o.level)) H.level = o.level; H.seen = !!o.seen;
       } catch (e) {}
       try { H.hadIf = localStorage.getItem("nightbloom-hw-if") === "1"; } catch (e) {}
-      const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen, model: H.model, thru: H.thru, fxOn: H.fxOn })); } catch (e) {} };
+      const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen, model: H.model, thru: H.thru, fxOn: H.fxOn, direct: !!H.direct })); } catch (e) {} };
       const outs = () => md.access ? [...md.access.outputs.values()] : [];
       const pname = p => ((p && p.name) || "") + " " + ((p && p.manufacturer) || "");
       const modelOf = p => MODELS.find(m => m.id !== "other" && m.re.test(pname(p))) || null;
@@ -57,7 +57,12 @@
         let l = 0; try { const s = H.stream.getAudioTracks()[0].getSettings(); l = s && s.latency; } catch (e) {}
         return Math.max(0, Math.min(200, (Number.isFinite(l) && l > 0 ? l : 0.012) * 1000 + (ctx && ctx.baseLatency ? ctx.baseLatency * 1000 : 0)));
       }
-      const hwAt = when => { if (when == null || !ctx) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
+      // (188) with direct monitoring the interface plays the synth in the headphones the moment it sounds, and Nate
+      // Bloom's own sounds come out ~baseLatency + outputLatency after their time: a note goes out that much LATE, so
+      // the two meet in the headphones. Otherwise it goes out early by the input's delay, so its sound comes back in on time.
+      const outLatMs = () => ctx ? ((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000 : 0;
+      const hwAt = when => { if (!ctx) return 0; if (H.direct) { const ms = ((when == null ? ctx.currentTime : when) - ctx.currentTime) * 1000 + outLatMs(); return ms > 1 ? performance.now() + ms : 0; }
+        if (when == null) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
       // ---- a voice: a note on now (or when it's due), a note off when it stops ----
       H.voice = function (m, when) {
         // (183) muted: no notes go to it at all. Silencing its input wasn't enough: the Volt's own monitoring (or the
@@ -97,8 +102,39 @@
         H.split.connect(H.merge, L, 0); H.split.connect(H.merge, R, 1);
       }
       // into its own effects chain through its own level (the Mixer's fader, mute) — and back in if the chain is rebuilt
+      // (188) direct monitoring: the headphones already have it (the interface's own monitoring), so Nate Bloom doesn't
+      // play it again (no doubling) but records it as it is (raw, no effects, no master volume or compressor), lined up
+      // the way it's heard: everything else going to the recorders is held back by the round trip (out + in).
+      const OUT = window.__nbOut = { on: false, ctx: null, pre: null, del: null, a: null, safe: null, spkFrom: () => (OUT.on && OUT.ctx === ctx && OUT.pre) ? OUT.pre : analyser };
+      function outSplit() {
+        if (!ctx || !analyser || !fx || !fx.safe) return;
+        const bridgeSpk = !!(window.__nbBridge && __nbBridge.spk && __nbBridge.spkCtx === ctx);
+        if (H.direct && H.src) {
+          const d = Math.min(0.9, Math.max(0, (outLatMs() + inLatMs()) / 1000));
+          if (OUT.on && OUT.ctx === ctx && OUT.a === analyser && OUT.safe === fx.safe) { if (Math.abs(OUT.del.delayTime.value - d) > 0.002) OUT.del.delayTime.setTargetAtTime(d, ctx.currentTime, 0.05); return; }
+          const pre = ctx.createGain(), del = ctx.createDelay(1); del.delayTime.value = d;
+          try { fx.safe.disconnect(analyser); } catch (e) {}
+          fx.safe.connect(pre); pre.connect(del).connect(analyser);
+          if (!bridgeSpk) { try { analyser.disconnect(ctx.destination); } catch (e) {} pre.connect(ctx.destination); }   // (the Bitwig sheet's speaker switch rewires itself from __nbOut)
+          Object.assign(OUT, { on: true, ctx, pre, del, a: analyser, safe: fx.safe });
+        } else if (OUT.on) {
+          if (OUT.ctx === ctx && OUT.safe === fx.safe && OUT.a === analyser) {
+            try { fx.safe.disconnect(OUT.pre); } catch (e) {} try { OUT.pre.disconnect(); OUT.del.disconnect(); } catch (e) {}
+            fx.safe.connect(analyser); if (!bridgeSpk) analyser.connect(ctx.destination);
+          }
+          Object.assign(OUT, { on: false, pre: null, del: null });
+        }
+      }
       function hwWire() {
         if (!H.merge || !ctx || !fx) return;
+        outSplit();
+        if (H.direct) {   // raw, into the recorders only
+          if (H.dest === analyser && H.bus) { H.bus.gain.value = H.mute ? 0 : H.level / 0.8; return; }
+          if (H.bus) { try { H.merge.disconnect(H.bus); } catch (e) {} }
+          const g = ctx.createGain(); g.gain.value = H.mute ? 0 : H.level / 0.8; H.merge.connect(g); g.connect(analyser); H.bus = g; H.dest = analyser;
+          return;
+        }
+        if (H.dest === analyser) { try { H.merge.disconnect(H.bus); H.bus.disconnect(); } catch (e) {} H.bus = null; H.dest = null; }
         let c = null; try { c = fxcGet("hw"); } catch (e) {}
         const dest = c ? c.input : fx.input; if (!dest) return;
         if (H.dest === dest && H.bus) return;
@@ -185,6 +221,8 @@
         <div class="sp-lab"><span>Which synth</span></div>
         <div class="ly-quick"><select id="hwModel" aria-label="Which synth" style="flex:1;min-width:0"></select></div>
         <div class="ly-quick"><button class="btn" id="hwThru" aria-pressed="false" style="flex:1">Pass-through: hear it all the time</button><button class="btn" id="hwFxOn" aria-pressed="false" style="flex:1">Nate Bloom's effects on it</button></div>
+        <div class="ly-quick"><button class="btn" id="hwDirect" aria-pressed="false" style="flex:1">Direct monitoring: my interface plays it in my headphones</button></div>
+        <span class="ed-info" style="text-align:left" id="hwDirectInfo"></span>
         <div class="sp-lab"><span>Its keys and knobs also play</span></div>
         <div id="hwPlays" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         <span class="ed-info" style="text-align:left" id="hwThruInfo">With pass-through on, its own presets, keys, sequencer and arp, and any pedal after it, come through Nate Bloom whether or not Nate Bloom is playing it, so Takes, the Garage and Live's recorder have it too. Its own effects come through as they are; Nate Bloom's go on top only when you switch them on (the Effects knobs; plugin effects can go on it from the Plugins sheet).</span>
@@ -229,6 +267,8 @@
           else if (!its.length) { const n = document.createElement("span"); n.className = "ed-info"; n.textContent = "Nothing else is playing. Add a sound (a plugin, say), then tick it here."; box.appendChild(n); }
           else its.forEach(it => { const k = C.keyOf(it), L = C.get(k), on = L.includes(me.key); const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = (on ? "✓ " : "") + it.name; b.setAttribute("aria-pressed", String(on));
             b.addEventListener("click", () => { const L2 = C.get(k).filter(x => x !== me.key); if (!on) L2.push(me.key); C.set(k, L2); hwSheetPaint(); }); box.appendChild(b); }); }
+        $h("hwDirect").setAttribute("aria-pressed", String(!!H.direct));
+        $h("hwDirectInfo").textContent = H.direct ? "On: Nate Bloom doesn't play it back to you (the interface already does, so it isn't doubled). It records it raw, at full level and lined up the way you hear it: recordings match your headphones. The notes go out about " + Math.round(outLatMs()) + " ms later, so it meets Nate Bloom's own sounds in your ears." : "Off: Nate Bloom plays it back through its mix. Set the interface's monitor knob all the way to playback (USB), or you hear it twice: the raw copy, then Nate Bloom's ~50 ms later. Recordings only have the second copy, so they sound thinner than your headphones. On the Volt 2 that's the Monitor knob turned fully toward the computer.";
         $h("hwThru").setAttribute("aria-pressed", String(!!H.thru)); $h("hwFxOn").setAttribute("aria-pressed", String(hwFxIs()));
         $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : H.thru ? (H.ready() ? "pass-through: you hear it" : H.why()) : "plugged in · not playing";
         const m = $h("hwMsg");
@@ -259,6 +299,7 @@
       function hwFxIs() { return !!H.fxOn; }
       function hwFx() { try { const p = fxcParams("hw"), want = !!H.fxOn; if ((p.on !== false) !== want) { p.on = want; try { localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC)); } catch (e) {} if (fxChan.hw) fxcApply("hw"); } } catch (e) {} }
       $h("hwModel").addEventListener("change", e => { H.allOff(); H.model = e.target.value; setNames(); hwSave(); H.err = ""; if (wantIn()) hwOpen(true); hwSheetPaint(); paintAll(); });
+      $h("hwDirect").addEventListener("click", () => { start(); H.allOff(); H.direct = !H.direct; hwSave(); try { hwWire(); } catch (e) {} hwSheetPaint(); paintAll(); });
       $h("hwThru").addEventListener("click", () => { start(); H.thru = !H.thru; hwSave(); H.err = ""; if (wantIn() && !H.src) hwOpen(true); hwSheetPaint(); paintAll(); });
       $h("hwFxOn").addEventListener("click", () => { H.fxOn = !H.fxOn; hwSave(); hwFx(); hwSheetPaint(); });
       $h("hwOut").addEventListener("change", e => { H.allOff(); H.out = e.target.value; hwSave(); hwSheetPaint(); paintAll(); });
