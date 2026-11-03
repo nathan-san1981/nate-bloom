@@ -1,5 +1,5 @@
 """(176) CI: the native synth engine in the installed app, over its DevTools port: shared memory, the engine running
-and writing ahead, then each synth it plays (Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell) with the engine on and
+and writing ahead, then each synth it plays (Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell, Sync Lead, Comb Bells) with the engine on and
 off, a chord held through the same channel and effects: the engine had the notes, and the level close to the browser
 version's (within 3 dB). Prints PASS/FAIL lines; never fails the build. usage: native_check.py PORT OUT"""
 import asyncio, json, sys, math
@@ -47,7 +47,7 @@ async def main():
         check("the engine runs and writes ahead of the worklet", bool(st and st["running"] and (st["ahead"] or 0) > 0), st)
         if not st or not st["running"]:
             print("page build:", await ev("window.NB_BUILD")); return
-        for eng in ["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell"]:
+        for eng in ["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells"]:
             tab = await ev(f"(() => {{ const t = document.querySelector('.tab[data-engine=\"{eng}\"]'); if (t) t.click(); return !!t; }})()"); await pg.wait_for_timeout(400)
             if not tab: check(eng + ": its tab is there", False); continue
             await ev("window.__ne.set(true)"); await pg.wait_for_timeout(600)

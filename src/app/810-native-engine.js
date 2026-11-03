@@ -1,5 +1,5 @@
   // ======================================================================
-  // (176) The Linux app's native engine: the Juno, Supersaw, Analog, Hoover, Mono, Pluck and Tyrell worked out in compiled code on a pool of threads (nb_engine.cc), not
+  // (176) The Linux app's native engine: the Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell, Sync Lead and Comb Bells worked out in compiled code on a pool of threads (nb_engine.cc), not
   // on the browser's one audio thread. The engine writes finished audio into shared memory; the AudioWorklet here
   // ("nb-native-out") plays it into the Juno's own channel, so its chorus, effects, level, mute, recording and Log
   // carry on as before. Notes keep their times (an arp or Seq note set up ahead lands on its frame; a key played now
@@ -65,10 +65,10 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return b;
     }
     // the synths the engine plays, each from the same settings and formulas as its browser version (020, 170)
-    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell"]);
+    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells"]);
     let natMonoLast = null;
     function natParams(id, p, midi, t) {
-      const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(96);
+      const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(128);
       const AN = typeof NBAN !== "undefined" && NBAN.on, drift = (AN && NBAN.drift >= 0.01) ? (Math.random() * 2 - 1) * NBAN.drift * 4 : 0;
       // (177) the Analog bar, as the browser's voices have it (310): Drive, Drift's wander and each note's filter a little
       // different; with the Analog core off, the browser's plain 12 dB filter (no saturation, no ladder)
@@ -85,6 +85,15 @@ registerProcessor("nb-native-out", NBNativeOut);`;
           p.pwm * 0.42, 0.55 + Math.random() * 0.1, hpfHz, dryG, drift]);
         anSet();
         return { a, chorus: chMode ? ["juno", chMode, dryG] : null };
+      }
+      if (id === "bells") {   // (178) the Comb Bells (020): the modes between materials, each partial and its shimmer copy ringing down
+        const m = p.material * 2, i0 = Math.min(1, Math.floor(m)), fr = m - i0, ring = expMap(p.ring, 0.3, 8), amps = [1, 0.5, 0.35, 0.25, 0.18];
+        const ratios = MODES[0].map((_, k) => MODES[i0][k] * (1 - fr) + MODES[i0 + 1][k] * fr), parts = [];
+        ratios.forEach((r, k) => { if (f * r > 17000) return; const lv0 = amps[k] * (k ? 0.4 + p.hardness * 0.9 : 1) * 0.3, dec = ring / (1 + k * 0.9);
+          parts.push([r, 0, lv0, dec]); if (p.shimmer >= 0.02) parts.push([r, p.shimmer * 14, lv0 * 0.6, dec]); });
+        a[0] = 3; a[1] = parts.length; parts.forEach((q, k) => a.set(q, 2 + k * 4));
+        a[60] = p.hardness * 0.25; a[61] = 2000 + p.hardness * 5000; a[71] = release; a[72] = drift; anSet();
+        return { a, chorus: null };
       }
       a[0] = 2; a[72] = drift;
       const osc = list => { a[1] = list.length; list.forEach((o, i) => { const b = 2 + i * 7; a[b] = o.w; a[b + 1] = o.mul || 1; a[b + 2] = o.det || 0; a[b + 3] = o.det0 != null ? o.det0 : (o.det || 0); a[b + 4] = o.ramp || 0; a[b + 5] = o.g; a[b + 6] = o.ph || 0; }); };
@@ -124,6 +133,11 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         osc([{ w: SAW, det: -8, det0: -36, ramp: 0.08, g: 0.2 }, { w: SAW, det: 8, det0: -20, ramp: 0.08, g: 0.2 }, { w: SQR, det: 0, det0: -28, ramp: 0.08, g: 0.1 }]);
         filt(2, 0.5 + p.bite * 6, 1, 240, peak, peak * 0.45, swell, 0.6); amp(attack, 0.48, -1, 0.4, 0);
         a[87] = p.vibrato * 22; a[88] = 0.75; a[89] = 5.6;
+      } else if (id === "sync") {   // (178) three hard-synced waves crossfaded from a high ratio down to the resting one, a sub saw, the svf
+        const rEnd = 1 + p.sync * 3, rStart = rEnd * (1 + p.sweep * 1.6), rMid = Math.sqrt(rStart * rEnd), sweepT = 0.05 + p.sweep * 0.5;
+        osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
+        a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
+        filt(1, 1.2, 0, expMap(p.bite, 500, 15000)); amp(attack, 0.5, -1, 0.4, 0);
       } else return null;
       a[71] = release;
       anSet();

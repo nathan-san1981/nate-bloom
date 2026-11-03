@@ -33,7 +33,7 @@ namespace nbeng {
 
 static const int BLOCK = 128, MAXBUS = 8;
 
-static const int NP = 96;   // note parameters: [0] kind, then the kind's own (see Voice and Gen)
+static const int NP = 128;   // note parameters: [0] kind, then the kind's own (see Voice and Gen)
 struct Cmd { int type; int id; int bus; int64_t frame; int midi; double mix; double p[NP]; };   // type: 1 note on, 2 off, 3 kill, 4 all off, 5 pitch
 
 static inline float satf(float x) { return x < -3.f ? -1.f : x > 3.f ? 1.f : x * (27.f + x * x) / (27.f + 9.f * x * x); }
@@ -72,6 +72,7 @@ struct Biquad2 {   // RBJ low-pass and band-pass (Web Audio's shapes)
 };
 struct Gen {
   int nosc = 0; double wave[8], mul[8], det[8], det0[8], detT[8], gain[8], ph[8];
+  double skey[8] = {}, sdc[8] = {}; int fade[8] = {}; double fadeT = 0.1;   // (178) hard-sync waves (wave 4: mul is the ratio) and crossfades between them
   int ft = 0; double k = 1, fMode = 0, fBase = 1000, fPeak = 1000, fSettle = 1000, fT1 = 0.01, fTau = 0.3, dr = 1;
   double aAtk = 0.003, aPeak = 0.5, aSus = -1, aTau = 0.4, aMode = 0, release = 0.3, driftC = 0, gFrom = 1, gT = 0;
   bool comb = false; double cD0 = 0, cDep = 0, cRate = 3, cInv = -0.7, cPh = 0; std::vector<float> cBuf; int cW = 0;
@@ -83,7 +84,11 @@ struct Gen {
   inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
   void setup(const double* p, double sr, uint32_t seed) {
     rng = seed; nosc = std::max(0, std::min(8, (int)p[1]));
-    for (int i = 0; i < nosc; i++) { const double* o = p + 2 + i * 7; wave[i] = o[0]; mul[i] = o[1]; det[i] = o[2]; det0[i] = o[3]; detT[i] = o[4]; gain[i] = o[5]; rng = rng * 1664525u + 1013904223u; ph[i] = (rng >> 8) / 16777216.0 * o[6]; }
+    for (int i = 0; i < nosc; i++) { const double* o = p + 2 + i * 7; wave[i] = o[0]; mul[i] = o[1]; det[i] = o[2]; det0[i] = o[3]; detT[i] = o[4]; gain[i] = o[5]; rng = rng * 1664525u + 1013904223u; ph[i] = (rng >> 8) / 16777216.0 * o[6];
+      fade[i] = (int)p[100 + i];
+      if ((int)wave[i] == 4) {   // the page's syncWave(ratio): a saw reset every cycle, ratio in twelfths, without its DC
+        skey[i] = std::max(1.0, std::round(mul[i] * 12) / 12); mul[i] = 1; double m = 0; for (int k = 0; k < 512; k++) { const double x = k / 512.0 * skey[i]; m += (x - std::floor(x)) * 2 - 1; } sdc[i] = m / 512; } }
+    fadeT = p[99] > 0 ? p[99] : 0.1;
     ft = (int)p[58]; const double qlin = pow(10.0, std::max(-20.0, std::min(30.0, p[59])) / 20.0);
     k = ft == 2 ? std::min(3.85, 4 * (1 - 1 / std::max(1.0, qlin))) : 1 / std::max(0.5, qlin);
     fMode = p[60]; fBase = p[61]; fPeak = p[62]; fSettle = p[63]; fT1 = std::max(0.001, p[64]); fTau = std::max(0.005, p[65]); dr = (p[90] > 0 ? p[90] : 1) * (p[93] > 0 ? p[93] : 1); gdrv = p[91] > 0 ? p[91] : 1.9;
@@ -122,8 +127,15 @@ struct Gen {
         if (wv == 0) v = sawAt(ph[o], dt);
         else if (wv == 1) { double p2 = ph[o] + 0.5; if (p2 >= 1) p2 -= 1; v = (sawAt(ph[o], dt) - sawAt(p2, dt)) * 0.5; }
         else if (wv == 2) v = ph[o] < 0.5 ? 4 * ph[o] - 1 : 3 - 4 * ph[o];
+        else if (wv == 4) {   // hard sync: the slave saw (band-limited at its own wraps and at the master's reset)
+          const double k = skey[o], sx = ph[o] * k, sp = sx - std::floor(sx), dk = std::min(0.49, dt * k), fr = k - std::floor(k);
+          v = 2 * sp - 1 - polyblep(sp, dk) - sdc[o];
+          if (fr > 1e-6) v -= fr * polyblep(ph[o], dt);
+        }
         else v = sin(2 * M_PI * ph[o]);
-        x += v * gain[o];
+        double fg = 1;
+        if (fade[o]) { const double T = fadeT, u = t / T; fg = fade[o] == 1 ? std::max(0.0, 1 - u) : fade[o] == 3 ? std::min(1.0, u) : (u < 0.5 ? u * 2 : std::max(0.0, 2 - u * 2)); }
+        x += v * gain[o] * fg;
       }
       if (comb) {   // the stack minus a swept, delayed copy of itself
         cBuf[cW] = (float)x; const double d = std::max(1.0 / sr, cD0 + cDep * sin(2 * M_PI * cPh)) * sr; cPh += cRate * isr; if (cPh >= 1) cPh -= 1;
@@ -174,8 +186,44 @@ struct Gen {
   }
 };
 
+// (178) the Comb Bells: tuned partials (and their shimmer copies) each ringing down at its own rate, a click of
+// high-passed noise, the page's ampEnv and release. p[1] partials (up to 12); partial k at 2 + 4k: ratio, detune
+// (cents), level, ring time (s); p[60] click level, p[61] its high-pass (Hz).
+struct Bell {
+  int n = 0; double r[12], det[12], a[12], dec[12], ph[12], maxDec = 0; double nG = 0; Biquad hp; uint32_t rng = 3; double env = 0.0001, release = 0.3; int64_t endAt = INT64_MAX;
+  inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
+  void setup(const double* p, double sr, uint32_t seed) {
+    rng = seed; n = std::max(0, std::min(12, (int)p[1]));
+    for (int k = 0; k < n; k++) { const double* q = p + 2 + k * 4; r[k] = q[0]; det[k] = q[1]; a[k] = std::max(1e-4, q[2]); dec[k] = std::max(0.01, q[3]); ph[k] = 0; maxDec = std::max(maxDec, dec[k]); }
+    nG = p[60]; if (nG > 0) hp.highpass(std::max(100.0, p[61]), 1.12, sr);
+    release = std::max(0.01, p[71]);
+  }
+  bool render(int64_t from, int nf, float* out, int64_t start, int64_t rel, double f, double sr, double mix, double cents0) {
+    const double isr = 1.0 / sr, cR = exp(-1.0 / (std::max(0.005, release / 4) * sr));
+    double inc[12]; for (int k = 0; k < n; k++) inc[k] = f * r[k] * exp2((cents0 + det[k]) / 1200.0) * isr;
+    for (int i = 0; i < nf; i++) {
+      const int64_t fr = from + i; if (fr < start) continue;
+      if (fr >= endAt) return false;
+      const double t = (fr - start) * isr;
+      if (t > maxDec + 0.05 && fr < rel) return false;   // (every partial has rung down: nothing left to hear)
+      double x = 0;
+      for (int k = 0; k < n; k++) {
+        if (inc[k] > 0.354) continue;   // (above 17 kHz)
+        ph[k] += inc[k]; if (ph[k] >= 1) ph[k] -= 1;
+        const double g = t < 0.002 ? a[k] * t / 0.002 : t < dec[k] ? a[k] * pow(0.0005 / a[k], (t - 0.002) / std::max(0.001, dec[k] - 0.002)) : 0.0005;
+        x += sin(2 * M_PI * ph[k]) * g;
+      }
+      if (nG > 0 && t < 0.012 * 6) x += hp.run(noise()) * nG * pow(0.0005 / nG, t / 0.012);
+      if (fr < rel) env = t < 0.002 ? 0.0001 + (1 - 0.0001) * (t / 0.002) : 1;
+      else { if (endAt == INT64_MAX) endAt = rel + (int64_t)((release * 1.6 + 0.1) * sr); env = 0.0001 + (env - 0.0001) * cR; }
+      out[i] += (float)(x * env * mix);
+    }
+    return true;
+  }
+};
+
 struct Voice {
-  int id = 0, bus = 0, kind = 1; bool alive = false; Gen gen;
+  int id = 0, bus = 0, kind = 1; bool alive = false; Gen gen; Bell bell;
   int64_t start = 0, rel = INT64_MAX;   // frames (absolute)
   double sr = 48000, mix = 1;
   // Juno
@@ -190,6 +238,9 @@ struct Voice {
   inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
   // renders frames [from, from + n) into out (mono; the caller writes it to both channels); returns false when finished
   bool render(int64_t from, int n, float* out, double bendC, double vibC, double vibPh) {
+    if (kind == 3) {   // (the drift's slow wander, as nbDrift gives the browser's bells)
+      driftPh += driftRate * n / sr; if (driftPh >= 1) driftPh -= 1;
+      if (!bell.render(from, n, out, start, rel, f, sr, mix, driftC + driftDepth * sin(2 * M_PI * driftPh) + bendC)) { alive = false; return false; } return true; }
     if (kind == 2) { if (!gen.render(from, n, out, start, rel, f, sr, mix, bendC, vibC, vibPh, driftDepth, driftPh, driftRate)) { alive = false; return false; } return true; }
     const double isr = 1.0 / sr, w = M_PI / sr, ny = sr * 0.45;
     const double tauA = 0.5 * sr, cA = exp(-1.0 / tauA), tauR = std::max(0.005, release / 4) * sr, cR = exp(-1.0 / tauR), cF = exp(-isr / std::max(0.01, fd));
@@ -305,10 +356,15 @@ struct Engine {
       if (m.type == 1) {
         Voice v; v.id = m.id; v.bus = std::max(0, std::min(buses - 1, m.bus)); v.sr = sr; v.mix = m.mix; v.alive = true;
         v.start = std::max(m.frame, wf);   // (a note already due plays at once)
-        v.kind = (int)m.p[0] == 2 ? 2 : 1;
+        v.kind = (int)m.p[0] == 2 ? 2 : (int)m.p[0] == 3 ? 3 : 1;
         const double* p = m.p + 1;
         v.f = 440.0 * exp2((m.midi - 69) / 12.0);
         v.rng = (uint32_t)(m.id * 2654435761u + 12345u);
+        if (v.kind == 3) {
+          v.bell.setup(m.p, sr, v.rng); v.release = v.bell.release; v.driftC = m.p[72];
+          v.driftRate = 0.06 + ((v.rng >> 8) & 255) / 255.0 * 0.24; v.driftDepth = std::fabs(v.driftC) > 0 ? (m.p[92] > 0 ? m.p[92] : 0.35) * (3 + ((v.rng >> 16) & 255) / 255.0 * 4) : 0;
+          voices.push_back(v); continue;
+        }
         if (v.kind == 2) {
           v.gen.setup(m.p, sr, v.rng); v.release = v.gen.release; v.driftC = m.p[72];
           v.driftRate = 0.06 + ((v.rng >> 8) & 255) / 255.0 * 0.24; v.driftDepth = std::fabs(v.driftC) > 0 ? (m.p[92] > 0 ? m.p[92] : 0.35) * (3 + ((v.rng >> 16) & 255) / 255.0 * 4) : 0;
@@ -328,9 +384,9 @@ struct Engine {
       } else if (m.type == 2) {
         for (auto& v : voices) if (v.id == m.id && v.rel == INT64_MAX) v.rel = std::max(m.frame, std::max(wf, v.start));
       } else if (m.type == 3) {
-        for (auto& v : voices) if (v.id == m.id) { v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; }
+        for (auto& v : voices) if (v.id == m.id) { v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; }
       } else if (m.type == 4) {
-        for (auto& v : voices) { if (v.rel == INT64_MAX || v.rel > wf) v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; }
+        for (auto& v : voices) { if (v.rel == INT64_MAX || v.rel > wf) v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; }
       } else if (m.type == 5) { bendC = m.p[0]; vibC = m.p[1]; }
     }
   }

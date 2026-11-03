@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 177;
+    window.NB_BUILD = 178;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -124,7 +124,7 @@
           const n = P.plugins.length, l = P.live.size; nt.textContent = (n ? n + " found" + (l ? " · " + l + " loaded" : "") : "none found yet") + " · in " + (P.folders ? [...new Set([P.folders.vst3[0], P.folders.clap[0]])].map(x => x.replace(/^\/home\/[^/]+/, "~")).join(" and ") : "~/.vst3 and ~/.clap") + " and the system's plugin folders"; } }
       { const b = $id("suNat"), nt = $id("suNatNote"); if (b && window.__ne) {
           const paint = () => { const st = window.__ne.state(); b.setAttribute("aria-pressed", String(st.on)); b.textContent = st.on ? "On" : "Off";
-            nt.textContent = !st.on ? "off: the synths play on the browser's one audio thread" : st.running ? "Juno, Supersaw, Analog, Hoover, Mono, Pluck and Tyrell worked out on " + ((st.engine && st.engine.threads) || 1) + (((st.engine && st.engine.threads) || 1) === 1 ? " thread" : " threads") + (st.engine ? " · " + st.engine.voices + " sounding · " + Math.round(st.engine.blockUs / st.engine.budgetUs * 100) + "% of its time" : "") : "not running" + (st.why ? ": " + st.why : "") + " (the browser's synths play)"; };
+            nt.textContent = !st.on ? "off: the synths play on the browser's one audio thread" : st.running ? "Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell, Sync Lead and Comb Bells worked out on " + ((st.engine && st.engine.threads) || 1) + (((st.engine && st.engine.threads) || 1) === 1 ? " thread" : " threads") + (st.engine ? " · " + st.engine.voices + " sounding · " + Math.round(st.engine.blockUs / st.engine.budgetUs * 100) + "% of its time" : "") : "not running" + (st.why ? ": " + st.why : "") + " (the browser's synths play)"; };
           b.addEventListener("click", () => { window.__ne.set(!window.__ne.on); setTimeout(paint, 300); }); paint(); const iv = setInterval(() => { if (!document.body.contains(b)) clearInterval(iv); else paint(); }, 1000); } }
     }
     // ---- the space ----
