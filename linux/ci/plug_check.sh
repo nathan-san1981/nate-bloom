@@ -10,7 +10,12 @@ mkdir -p ~/.clap ~/.vst3/nbtest.vst3/Contents/x86_64-linux
 g++ -std=c++17 -O2 -fPIC -shared -I$H/clap/include linux/ci/plugtest/testclap.cc -o ~/.clap/nbtest.clap -lX11 > "$OUT/build_test.txt" 2>&1
 g++ -std=c++17 -O2 -fPIC -shared -I$H/vst3 linux/ci/plugtest/testvst3.cc $H/vst3/pluginterfaces/base/funknown.cpp -o ~/.vst3/nbtest.vst3/Contents/x86_64-linux/nbtest.so -lX11 >> "$OUT/build_test.txt" 2>&1
 ls -la ~/.clap ~/.vst3/nbtest.vst3/Contents/x86_64-linux >> "$OUT/build_test.txt" 2>&1
-TRY="NB Test Sine,NB Test VSine"
+B=~/.lv2/nbtest.lv2; mkdir -p $B
+gcc -O2 -fPIC -shared -I$H/lv2/include linux/ci/plugtest/lv2/nbtest_lv2.c -o $B/nbtest_lv2.so -lm >> "$OUT/build_test.txt" 2>&1
+gcc -O2 -fPIC -shared -I$H/lv2/include linux/ci/plugtest/lv2/nbtest_lv2ui.c -o $B/nbtest_lv2ui.so -lX11 >> "$OUT/build_test.txt" 2>&1
+cp linux/ci/plugtest/lv2/*.ttl $B/
+sudo apt-get install -y liblilv-0-0 x42-plugins lsp-plugins-lv2 > "$OUT/lv2_install.txt" 2>&1; ls /usr/lib/lv2 | head -40 >> "$OUT/lv2_install.txt"
+TRY="NB Test Sine,NB Test VSine,NB Test LSine"
 U=$(gh api repos/surge-synthesizer/releases-xt/releases/latest --jq '.assets[] | select(.name | test("linux-x(86_)?64.*\\.deb$")) | .browser_download_url' 2>/dev/null | head -1)
 if [ -n "$U" ] && curl -sSL -o /tmp/surge.deb "$U" && sudo apt-get install -y /tmp/surge.deb > "$OUT/surge_install.txt" 2>&1; then
   TRY="$TRY,Surge XT#CLAP,Surge XT#VST3"; echo "Surge XT: $U" >> "$OUT/surge_install.txt"
@@ -22,10 +27,19 @@ pkill -f "^/opt/Nate Bloom/nate-bloom" 2>/dev/null; sleep 2
 rm -f "$HOME/.config/Nate Bloom/window.json"; rm -rf "$HOME/.config/Nate Bloom/site"
 Xvfb :57 -screen 0 1600x1000x24 -nolisten tcp > "$OUT/xvfb.txt" 2>&1 & XV=$!
 sleep 2; export DISPLAY=:57
-NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 "$BIN" --no-sandbox --remote-debugging-port=9336 > "$OUT/app.txt" 2>&1 &
+NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 NB_PLUG_OOP=${NB_PLUG_OOP:-0} "$BIN" --no-sandbox --disable-gpu --remote-debugging-port=9336 > "$OUT/app.txt" 2>&1 &
 sleep 10
 timeout 400 python3 linux/ci/plug_check.py 9336 "$OUT" "$TRY" > "$OUT/checks.txt" 2>&1
 cat "$OUT/checks.txt"
+pkill -f "^/opt/Nate Bloom/nate-bloom" 2>/dev/null; sleep 3
+# (187) again with each plugin in its own process (the switch in the Plugins sheet): the test plugins, Surge's CLAP,
+# a crash, and Surge's VST3 last (it took the app's helper processes down in this mode)
+rm -f "$HOME/.config/Nate Bloom/window.json"
+NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 NB_PLUG_OOP=1 "$BIN" --no-sandbox --disable-gpu --remote-debugging-port=9336 > "$OUT/app_oop.txt" 2>&1 &
+sleep 10
+TRY2=$(echo "$TRY" | sed 's/,Surge XT#VST3//')
+timeout 400 python3 linux/ci/plug_check.py 9336 "$OUT" "$TRY2" > "$OUT/checks_oop.txt" 2>&1
+cat "$OUT/checks_oop.txt"
 pkill -f "^/opt/Nate Bloom/nate-bloom" 2>/dev/null; sleep 1; kill $XV 2>/dev/null
 cp /tmp/nb-plugtest-*.log "$OUT/" 2>/dev/null
 grep -iv "dbus" "$OUT/app.txt" | tail -30

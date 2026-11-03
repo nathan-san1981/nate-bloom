@@ -71,7 +71,8 @@ static clap_process_status pProc(const clap_plugin_t* p, const clap_process_t* p
   float* L = pr->audio_outputs[0].data32[0]; float* R = pr->audio_outputs[0].data32[1];
   for (uint32_t i = 0; i < n; i++) {
     while (ei < ne) { const clap_event_header_t* h = pr->in_events->get(pr->in_events, ei); if (h->time > i) break; ei++;
-      if (h->type == CLAP_EVENT_NOTE_ON) { auto* e = (const clap_event_note_t*)h; m->f = 440 * pow(2, (e->key - 69) / 12.0); m->vel = e->velocity; m->on = true; }
+      if (h->type == CLAP_EVENT_NOTE_ON) { auto* e = (const clap_event_note_t*)h; if (e->key == 127) { volatile int* z = nullptr; *z = 1; }   // (184: the crash test)
+        m->f = 440 * pow(2, (e->key - 69) / 12.0); m->vel = e->velocity; m->on = true; }
       else if (h->type == CLAP_EVENT_NOTE_OFF) m->on = false;
       else if (h->type == CLAP_EVENT_PARAM_VALUE) { auto* e = (const clap_event_param_value_t*)h; if (e->param_id == 1) m->gain = e->value; } }
     if (m->inst) { m->env += ((m->on ? 1.0 : 0.0) - m->env) * 0.002; m->ph += m->f / m->sr; if (m->ph > 1) m->ph -= 1; const float s = (float)(sin(2 * M_PI * m->ph) * m->env * m->vel * m->gain); L[i] = s; R[i] = s; }

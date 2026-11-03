@@ -50,6 +50,7 @@ struct Backend {
   virtual std::vector<ParamInfo> params() = 0;
   virtual bool getState(std::vector<uint8_t>& out) = 0;
   virtual bool setState(const std::vector<uint8_t>& in) = 0;
+  virtual std::string paramsJsonRemote() { return ""; }   // (184) a plugin in its own process answers this instead of params()
   virtual void setParamMain(uint32_t id, double v) {}   // tell the editor side (VST3) after a change from Nate Bloom
   virtual bool guiCanOpen() = 0;
   virtual bool guiOpen(Win* w, int& wOut, int& hOut, bool& resizable, std::string& err) = 0;   // into w
@@ -71,7 +72,9 @@ struct Backend {
 
 Backend* newClap();
 Backend* newVst3();
+Backend* newLv2();   // (182)
 bool scanClap(const std::string& path, std::vector<Found>& out, std::string& err);
 bool scanVst3(const std::string& path, std::vector<Found>& out, std::string& err);
+bool scanLv2(const std::string& path, std::vector<Found>& out, std::string& err);
 
 }  // namespace nbplug

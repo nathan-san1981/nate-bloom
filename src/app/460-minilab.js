@@ -511,7 +511,28 @@
       return FN("send" + x, { get: lv, set(v) { const w = window.__wam; if (w && w.setSend) { w.setSend("ch:" + state.engine, x, v); saveSoon(); } }, text: () => { const v = lv(); return v == null ? "—" : Math.round(v * 100) + "%"; }, name: () => "Send " + x.toUpperCase() });
     };
     const K_FX = [0, 1, 2, 3, 4, 5].map(i => Q("#fxKnobs .knob", i)).concat([sendFn("a"), sendFn("b")]);
+    // (186) on the Garage the KeyLab is the song's: faders 1–8 the volumes of its eight tracks (the group of eight the
+    // selected track is in), fader 9 the song's master level; knobs 1–6 the track's Smart Controls, 7–8 its pan and
+    // volume, 9 the song's tempo
+    const gbTrackFader8 = j => FN("gbf8:" + j, {
+      tr() { const G = GB(), S = G && G.song(); if (!S) return null; const b = Math.floor((S.sel | 0) / 8) * 8; return S.tracks[b + j] || null; },
+      name() { const t = this.tr(); return t ? t.name : "(no track " + (j + 1) + ")"; },
+      get() { const t = this.tr(); return t ? Math.max(0, Math.min(1, (t.vol ?? 0.8) / 1.2)) : null; },
+      set(v) { const t = this.tr(); if (!t) return; t.vol = v * 1.2; try { GB().applyLevels(); } catch (e) {} clearTimeout(ML.gbF); ML.gbF = setTimeout(() => { try { GB().saveSong(); } catch (e) {} }, 700); },
+      text() { const t = this.tr(); if (!t) return ""; const g = Math.pow(t.vol ?? 0.8, 2) * 1.25; return g > 0 ? (20 * Math.log10(g / 0.8)).toFixed(1).replace(/^-/, "−").replace(/^(?=\d)/, "+") + " dB" : "off"; },
+    });
+    const GB_MASTER = FN("gbmaster", { name: "Song master", get: () => { const S = GB() && GB().song(); return S ? Math.max(0, Math.min(1, (S.mvol != null ? S.mvol : 1) / 1.5)) : null; },
+      set(v) { const S = GB() && GB().song(); if (!S) return; S.mvol = Math.round(v * 150) / 100; try { GB().applyLevels(); } catch (e) {} clearTimeout(ML.gbF); ML.gbF = setTimeout(() => { try { GB().saveSong(); } catch (e) {} }, 700); },
+      text: () => { const S = GB() && GB().song(), m = S && S.mvol != null ? S.mvol : 1; return m < 0.001 ? "−∞" : (20 * Math.log10(m)).toFixed(1).replace(/^-/, "−") + " dB"; } });
+    const GB_TEMPO = FN("gbtempo", { name: "Song tempo", get: () => { const S = GB() && GB().song(); return S ? (S.bpm - 40) / 200 : null; }, set(v) { try { GB().tempo(40 + v * 200); } catch (e) {} },
+      text: () => { const S = GB() && GB().song(); return S ? S.bpm + " bpm" : ""; } });
     function klExtras(lay, pg) {
+      if (pg === "garage") {
+        lay.K = (lay.K || []).slice(0, 8); while (lay.K.length < 8) lay.K.push(null); lay.K[8] = GB_TEMPO;
+        lay.F = [0, 1, 2, 3, 4, 5, 6, 7].map(gbTrackFader8).concat([GB_MASTER]);
+        const S = GB() && GB().song(); if (S) lay.ffor = "Tracks " + (Math.floor((S.sel | 0) / 8) * 8 + 1) + "–" + (Math.floor((S.sel | 0) / 8) * 8 + 8) + " · 9: the song's master";
+        return;
+      }
       if (pg === "mix") { const rows = i => Q("#mxList input[type=range]", i); lay.F = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(rows); lay.K = [9, 10, 11, 12, 13, 14, 15, 16, 17].map(rows); return; }
       if (pg === "synths" || pg === "samples" || pg === "drums") {
         lay.K = K_FX.concat([K_TEMPO]);
@@ -641,6 +662,7 @@
           const c = ctlOf(d1);
           if (c && c.kind === "S") { ML.shift = d2 > 0; try { if (window.__nbShift) window.__nbShift(ML.shift); } catch (e) {} return; }
           if (c && c.kind === "M") { mlMain(c.a, d2, ch + ":" + d1); return; }
+          if (c && c.kind === "B" && ML.shift) { if (d2 > 0) { const G = GB(); if (G) { if (c.d > 0 && !G.isOpen()) { G.open(); mlHud("Garage", "opened (Shift + ‹ closes it)"); } else if (c.d < 0 && G.isOpen()) { G.close(); mlHud("Garage", "closed"); } setTimeout(() => mlRefresh(true), 200); } } return; }   // (186)
           if (c && c.kind === "B") { if (d2 > 0) { const lay = mlLayout(), f = lay.M && lay.M.turn; if (f) { try { f[1](c.d); } catch (er) {} mlHud(f[0], c.d > 0 ? "next" : "back"); } } return; }
           if (c && (c.kind === "K" || c.kind === "F")) {
             ML.src = true;
@@ -687,6 +709,7 @@
     const hud = document.createElement("div"); hud.className = "mini-hud"; hud.id = "miniHud"; hud.hidden = true; hud.setAttribute("role", "status");
     hud.innerHTML = "<b></b><span></span><em hidden></em><i><s></s></i>"; document.body.appendChild(hud);
     const KL_HINT = "knobs 1–6: effects · 7–8: sends · 9: tempo · faders 1–4: the sound · 5–8: levels · 9: master";   // (173)
+    const KL_GB_HINT = "Garage: faders 1–8 the tracks · 9 the song's master · knobs: the track, 9 the tempo · transport: the song · Shift + ‹ › close / open";   // (186)
     const HINT = { synths: "pads 1–8 drums, 9–16 chords · knobs: the sound", samples: "pads: slots and pads · knobs: the sample", drums: "pads: the 8 drums · knobs: the drum you hit",
       dj: "pads 1–8 deck A, 9–16 deck B · knobs: the EQs", grid: "pads: the 16 tracks · knobs: the track you hit", pads: "pads: 1–16 here · knobs: the pad you hit · keys play it in tune",
       garage: "pads: the track's drums or chords, 13–16 ⏮ ▶ ● ⟳ · knobs: the track", mix: "knobs and faders: the rows of the Mixer" };
@@ -829,7 +852,7 @@
       if (!live && !map.hidden) { map.hidden = true; document.body.classList.remove("mini-open"); }
       if (document.body.classList.contains("mini-live") !== live) document.body.classList.toggle("mini-live", live);
       if (!live) { if (ML.wasLive) mlBadges(); ML.page = ""; ML.wasLive = false; return; }
-      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(), kl = ML.dev === "kl"; mlHud(kl ? "KeyLab connected" : "MiniLab 3 connected", PAGE_NAME[pg0] || "", null, kl ? KL_HINT : HINT[pg0]); }, 500); }
+      if (!ML.wasLive) { ML.wasLive = true; setTimeout(() => { const pg0 = mlPage(), kl = ML.dev === "kl"; mlHud(kl ? "KeyLab connected" : "MiniLab 3 connected", PAGE_NAME[pg0] || "", null, kl ? (pg0 === "garage" ? KL_GB_HINT : KL_HINT) : HINT[pg0]); }, 500); }
       const pg = mlPage();
       if (force || pg !== ML.page) {
         const was = ML.page; ML.page = pg; ML.lay = null;

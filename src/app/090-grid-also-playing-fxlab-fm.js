@@ -333,9 +333,12 @@
   const fbWaves = new Map();
   function fbWave(beta) {
     const key = Math.round(beta * 50); if (fbWaves.has(key)) return fbWaves.get(key);
-    const N = 48, re = new Float32Array(N + 1), im = new Float32Array(N + 1), b = Math.min(0.99, key / 50);
+    const im = fbSpectrum(beta), w = ctx.createPeriodicWave(new Float32Array(im.length), im); fbWaves.set(key, w); return w;
+  }
+  function fbSpectrum(beta) {   // (the feedback operator's wave as harmonic amplitudes; the native engine's table too: 810)
+    const key = Math.round(beta * 50), N = 48, im = new Float32Array(N + 1), b = Math.min(0.99, key / 50);
     for (let n = 1; n <= N; n++) im[n] = b < 0.001 ? (n === 1 ? 1 : 0) : 2 * besselJ(n, n * b) / (n * b);
-    const w = ctx.createPeriodicWave(re, im); fbWaves.set(key, w); return w;
+    return im;
   }
   function fmVoice(f, t, p, out, oscs) {
     const P = fmPatch(), [links, carriers, fbOp] = FM_ALGS[(P.alg | 0) % 32];

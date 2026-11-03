@@ -409,7 +409,7 @@
   }
   function djPadMenu(k) {
     const it = DJ.bank[k]; if (!it) return;
-    const items = [["lab", "Send to the sampler"]];
+    const items = [["btn wide", "Edit pad " + (k + 1) + "… (trim, fade, reverse, gain)", () => djEditPad(k)], ["lab", "Send to the sampler"]];   // (186)
     for (let j = 0; j < NSLOTS; j++) items.push(["btn", "→ S" + (j + 1) + (sampBuf[j] ? " (replace)" : " (empty)"), () => {
       const b = trimBuffer(it.buf); setSample(j, b, it.name); storeSample(j, it.name, bufferToWav(b)); state.samp.slot = j; save();
       djMsg("Pad " + (k + 1) + " is in sampler slot S" + (j + 1) + " · play it from the Smp tab");
@@ -423,11 +423,40 @@
     items.push(["btn danger wide", "Clear pad " + (k + 1), () => { djSetPad(k, null); djMsg("Pad " + (k + 1) + " cleared"); }]);
     djOpenMenu("Pad " + (k + 1) + " · " + it.name, (it.buf.duration).toFixed(2) + " s" + (it.bpm ? " · " + it.bpm.toFixed(1) + " BPM" : ""), items);
   }
+  // (186) the sample editor (050) on what the DJ is playing or about to: a deck's song or sample, a pad of the bank.
+  // Saved back where it came from: a deck that was playing carries on from the same place (its beat grid, cues and loop
+  // kept when the length didn't change; otherwise the beat is found again), a pad that was playing starts again.
+  function djEditDeck(d) {
+    if (!d.buf || !ctx) return;
+    openEditor({ buf: d.buf, label: "Deck " + "AB"[d.i], name: d.name, async save(buf) {
+      const same = Math.abs(buf.duration - d.buf.duration) < 0.002, was = d.playing, pos = djPos(d), keep = { cues: d.cues, loop: d.loop, cue: d.cue, rate: d.rate, semi: d.semi || 0 };
+      const ci = d.crate != null ? d.crate : -1, nm = baseName(d.name) + " (edited)";
+      await djLoad(d, buf, nm, null, Object.assign({ crate: ci, key: d.key, cam: d.cam, energy: d.energy }, same && d.bpm0 ? { bpm: d.bpm0, off: d.off } : {}));
+      if (d.buf !== buf) return;
+      if (same) { d.cues = keep.cues; d.loop = keep.loop; d.cue = keep.cue; d.rate = keep.rate; d.semi = keep.semi; }
+      // a song from the Auto DJ's four keeps the edit there too (and after a reload)
+      const it = ci >= 0 && DJ.crate && DJ.crate[ci];
+      if (it) { Object.assign(it, { buf, name: nm, raw: bufferToWav(buf), env: d.env, envRate: d.envRate, bpm: d.bpm0, off: d.off }); try { djStoreCrate(ci); djPaintCrate(); } catch (e) {} }
+      d.p0 = Math.max(0, Math.min(pos, buf.duration - 0.05));
+      if (was) djPlay(d, true);
+      djPaintAll(); djMsg("Deck " + "AB"[d.i] + ": the edit is in" + (was ? ", playing on from " + djFmt(d.p0) : ""));
+    } });
+  }
+  function djEditPad(k) {
+    const it = DJ.bank[k]; if (!it || !ctx) return;
+    openEditor({ buf: it.buf, label: "pad " + (k + 1), name: it.name, save(buf) {
+      const same = Math.abs(buf.duration - it.buf.duration) < 0.002, was = !!DJ.padPlay[k];
+      djSetPad(k, { ...it, buf, name: baseName(it.name) + " (edited)", bpm: same ? it.bpm : null, beats: same ? it.beats : 0 });
+      if (was) djPadPlay(k);
+      djMsg("Pad " + (k + 1) + ": the edit is in");
+    } });
+  }
   function djLoadMenu(d) {
     const items = [["btn wide", "Song file… (MP3, WAV, M4A)", () => { djFileDeck = d.i; djFile.click(); }], ["lab", "From the sampler"]];
     for (let j = 0; j < NSLOTS; j++) if (sampBuf[j]) items.push(["btn", "S" + (j + 1) + " · " + baseName(state.samp.slots[j].name).slice(0, 22), () => djLoad(d, sampBuf[j], baseName(state.samp.slots[j].name))]);
     if (!sampBuf.some(Boolean)) items.push(["lab", "(the sampler is empty)"]);
     if (DJ.bank.some(Boolean)) { items.push(["lab", "From the bank"]); DJ.bank.forEach((it, k) => { if (it) items.push(["btn", "Pad " + (k + 1) + " · " + it.name, () => djLoad(d, it.buf, it.name, null, { bpm: it.bpm, off: 0 })]); }); }
+    if (d.buf) items.push(["btn wide", "Edit " + (d.playing ? "what's playing" : "this sample") + "… (trim, fade, reverse, gain)", () => djEditDeck(d)]);   // (186)
     if (d.buf) items.push(["btn danger wide", "Eject " + "AB"[d.i], () => { djPlay(d, false); d.buf = null; d.name = ""; d.env = null; d.bpm0 = 0; d.img = null; d.loop = null; if (DJ.sync) DJ.sync = false; djIdbPut("deck" + d.i, null); djPaintAll(); }]);
     djOpenMenu("Load deck " + "AB"[d.i], "", items);
   }
@@ -447,7 +476,7 @@
 
   // --- the deck panels ---
   const djTpl = d => `
-    <div class="dj-dh"><span class="dj-letter">${"AB"[d]}</span><span class="dj-beat"></span><div class="dj-name"><b>Empty</b><small>Load a song</small></div><button class="btn dj-load">Load…</button></div>
+    <div class="dj-dh"><span class="dj-letter">${"AB"[d]}</span><span class="dj-beat"></span><div class="dj-name"><b>Empty</b><small>Load a song</small></div><button class="btn dj-edit" title="Edit what's on this deck (trim, fade, reverse, gain); it plays on as you save" hidden>Edit</button><button class="btn dj-load">Load…</button></div>
     <canvas class="dj-wave" aria-label="Song overview: tap to jump"></canvas>
     <div class="dj-row">
       <button class="btn dj-play" aria-pressed="false" aria-label="Play or pause">▶</button>
@@ -470,6 +499,7 @@
   deckEls.forEach((el, i) => {
     el.innerHTML = djTpl(i); const d = DJ.decks[i], q = s => el.querySelector(s);
     q(".dj-load").addEventListener("click", () => { djBuild(); djRestore(); djLoadMenu(d); });
+    q(".dj-edit").addEventListener("click", () => { start(); djEditDeck(d); });
     q(".dj-play").addEventListener("click", () => { if (!d.buf) { djLoadMenu(d); return; } djPlay(d); });
     q(".dj-cue").addEventListener("click", () => djCue(d));
     q(".dj-restart").addEventListener("click", () => {
@@ -525,6 +555,7 @@
     q(".dj-speed output").textContent = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
     el.querySelectorAll(".dj-cues .btn[data-c]").forEach(b => { const v = d.cues[+b.dataset.c]; b.setAttribute("aria-pressed", String(v != null)); b.textContent = v != null ? (+b.dataset.c + 1) + " · " + djFmt(v) : String(+b.dataset.c + 1); });
     el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.setAttribute("aria-pressed", String(!!d.loop && d.loop.n === +b.dataset.n)));
+    q(".dj-edit").hidden = !d.buf;
     q(".dj-lsong").setAttribute("aria-pressed", String(!!d.loop && d.loop.n === "song")); q(".dj-lsong").disabled = !d.buf;
     el.querySelectorAll("[data-eq]").forEach(r => {
       const k = r.dataset.eq, v = d.eq[k]; r.value = v;

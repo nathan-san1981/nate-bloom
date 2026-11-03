@@ -31,11 +31,31 @@
       if (k !== OCT.k) { OCT.k = k; mlOctApply(k); }
     }
     // ---- the DAW port: Mackie Control transport ----
-    const MCU = { 94: "play", 93: "stop", 95: "rec", 86: "loop", 91: "start", 92: "ff" };
+    const MCU = { 94: "play", 93: "stop", 95: "rec", 86: "loop", 91: "start", 92: "ff", 89: "metro", 81: "undo", 80: "save" };   // (186: the KeyLab's Metro, Undo and Save too)
     const isMlDaw = p => isML(p) && /mcu|hui|alv|din/i.test(p.name || "");
     const liveOpen = () => { const l = $id("liveView"); return !!l && !l.hidden; };
+    // (186) on the Garage its transport is the song's: ▶ plays or stops it, ● records on the selected track, ⟳ cycle,
+    // ⏪ ⏩ a bar back and on (⏪ at the start of the song, or while it plays: back to the start), Metro, Undo
+    const gbOpenNow = () => { const v = $id("gbView"); return !!v && !v.hidden && !liveOpen(); };
+    function gbTransport(what) {
+      const G = window.__gb && __gb.ml; if (!G) return false;
+      const S = G.song();
+      if (what === "play") { tap("gbPlay"); mlHud("▶ / ■", "the song"); }
+      else if (what === "stop") { if (G.playing()) { G.stop(); mlHud("■", "the song stopped"); } else { tap("gbHome"); mlHud("⏮", "back to the start"); } }
+      else if (what === "rec") { tap("gbRec"); mlHud("●", "records on " + ((G.curTr() || {}).name || "the selected track")); }
+      else if (what === "loop") { G.cycle(); mlHud("⟳", "cycle"); }
+      else if (what === "start") { if (G.playing() || !S || !S.ph) { tap("gbHome"); mlHud("⏮", "back to the start"); } else { G.seekBy(-1); mlHud("⏪", "a bar back"); } }
+      else if (what === "ff") { G.seekBy(1); mlHud("⏩", "a bar on"); }
+      else if (what === "metro") { G.metro(); mlHud("Metronome", S && S.metro ? "on" : "off"); }
+      else if (what === "undo") { G.undo(); mlHud("Undo", ""); }
+      else if (what === "save") { G.saveSong(); mlHud("Saved", S ? S.name : ""); }
+      else return false;
+      add139("midi", (ML.dev === "kl" ? "KeyLab" : "MiniLab") + " transport " + what + " (Garage)");
+      return true;
+    }
     function mlTransport(what) {
       start();
+      if (gbOpenNow() && gbTransport(what)) return;
       if (what === "play") { if (liveOpen()) tap("lvGo"); else if ($id("bdPlay") && !$id("buildBar").hidden) tap("bdPlay"); else tap("play"); mlHud("▶", liveOpen() ? "Live's ▶ target" : "plays this tab"); }
       else if (what === "stop") { tap("stopAll"); mlHud("■", "everything stopped"); }
       else if (what === "rec") { if (liveOpen()) tap("lvRec"); else tap("takeBtn"); mlHud("●", liveOpen() ? "Live's recorder" : "a take"); }

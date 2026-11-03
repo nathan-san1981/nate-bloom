@@ -1,34 +1,57 @@
     // ======================================================================
-    // 173: a hardware synth in the stack (the Minilogue XD). Nate Bloom plays it over USB MIDI like any other sound in
+    // 173: a hardware synth in the stack (the Minilogue XD; 187: the MicroFreak and others too). Nate Bloom plays it over USB MIDI like any other sound in
     // Playing together (keys, chords, Hold, the Arp, the sequencer), and its sound comes back in through the audio
     // interface (the Volt 2) into the mix, with its own level and mute in the Mixer; Takes and Tracks hear it.
     // A note goes out early by the input's delay, so what comes back lands with Nate Bloom's own sounds.
     // ======================================================================
     {
-      const HW_KEY = "nightbloom-hw", HW_RE = /minilogue\s*xd/i, IF_RE = /volt/i;
-      const H = window.__hw = { name: "Minilogue XD", short: "Minilogue", out: "", ch: 1, dev: "", pick: "12", level: 0.8, seen: false,
+      // (187) any hardware synth, not only the Minilogue: the ones Nate Bloom knows by their USB names, or any MIDI output
+      // you pick. Pass-through keeps its input open all the time, so what it plays by itself (its own keys, sequencer,
+      // arp, a pedal after it) comes through the mix too, even when Nate Bloom isn't playing it.
+      const MODELS = [
+        { id: "mlxd", name: "Minilogue XD", short: "Minilogue", re: /minilogue\s*xd/i, port: /sound/i, skip: /kbd|knob/i },
+        { id: "mf", name: "MicroFreak", short: "MicroFreak", re: /micro\s*freak/i },
+        { id: "minif", name: "MiniFreak", short: "MiniFreak", re: /mini\s*freak/i },
+        { id: "crave", name: "Crave", short: "Crave", re: /crave/i },
+        { id: "grind", name: "Grind", short: "Grind", re: /grind/i },
+        { id: "mlog", name: "Minilogue", short: "Minilogue", re: /minilogue(?!\s*xd)/i, port: /sound/i, skip: /kbd|knob/i },
+        { id: "other", name: "Hardware synth", short: "Hardware", re: /^\b$/ },
+      ];
+      const HW_KEY = "nightbloom-hw", IF_RE = /volt/i;
+      const H = window.__hw = { name: "Minilogue XD", short: "Minilogue", model: "", thru: false, fxOn: false, out: "", ch: 1, dev: "", pick: "12", level: 0.8, seen: false,
         stream: null, src: null, split: null, merge: null, bus: null, dest: null, an: null, err: "", label: "", opening: null, notes: new Map(), sentAt: 0 };
       try {
         const o = JSON.parse(localStorage.getItem(HW_KEY) || "{}");
-        ["out", "dev", "pick"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; });
+        ["out", "dev", "pick", "model"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; }); H.thru = !!o.thru; H.fxOn = !!o.fxOn;
         if (o.ch >= 1 && o.ch <= 16) H.ch = o.ch; if (Number.isFinite(o.level)) H.level = o.level; H.seen = !!o.seen;
       } catch (e) {}
       try { H.hadIf = localStorage.getItem("nightbloom-hw-if") === "1"; } catch (e) {}
-      const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen })); } catch (e) {} };
+      const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen, model: H.model, thru: H.thru, fxOn: H.fxOn })); } catch (e) {} };
       const outs = () => md.access ? [...md.access.outputs.values()] : [];
-      const isHW = p => HW_RE.test(((p && p.name) || "") + " " + ((p && p.manufacturer) || ""));
+      const pname = p => ((p && p.name) || "") + " " + ((p && p.manufacturer) || "");
+      const modelOf = p => MODELS.find(m => m.id !== "other" && m.re.test(pname(p))) || null;
+      // the model in use: the one picked, else the first known synth plugged in, else the one last seen
+      function model() {
+        if (H.model) { const m = MODELS.find(x => x.id === H.model); if (m) return m; }
+        const on = outs().map(modelOf).find(Boolean); if (on) return on;
+        return MODELS.find(x => x.id === H.lastModel) || MODELS[0];
+      }
+      const isHW = p => { const m = model(); return m.id !== "other" && m.re.test(pname(p)); };
+      H.isSynthIn = p => !!modelOf(p);   // (its own keys play it, not the stack: MIDI › Keys says otherwise)
+      const setNames = () => { const m = model(); H.name = m.name; H.short = m.short; H.lastModel = m.id; try { if (typeof fxcNames === "object") fxcNames.hw = H.short; } catch (e) {} };
       // ---- MIDI to it: the port you picked, else the Minilogue's own (its SOUND port, not KBD/KNOB) ----
       function hwPort() {
         const all = outs(); if (!all.length) return null;
         if (H.out) { const o = all.find(o => mdKey("out", o) === H.out); if (o) return o; }
-        const xs = all.filter(isHW);
-        return xs.find(o => /sound/i.test(o.name || "")) || xs.find(o => !/kbd|knob/i.test(o.name || "")) || xs[0] || null;
+        const m = model(), xs = all.filter(isHW);
+        return (m.port && xs.find(o => m.port.test(o.name || ""))) || (m.skip && xs.find(o => !m.skip.test(o.name || ""))) || xs[0] || null;
       }
       H.present = () => !!hwPort();
       H.shown = () => H.seen || H.present();
       H.ready = () => H.present() && !!H.src;
       H.why = () => !md.access ? "connect MIDI" : !hwPort() ? "not plugged in" : H.opening ? "opening the input…" : !H.src ? (H.err || "no sound in yet") : "";
       const inStack = () => { try { return !!window.__stk.groupsOn().hw; } catch (e) { return false; } };
+      const wantIn = () => inStack() || (H.thru && H.present());   // (187) pass-through: heard whenever it's plugged in
       // the input's own delay: the note goes out this much early, so the sound arrives in the mix on time
       function inLatMs() {
         let l = 0; try { const s = H.stream.getAudioTracks()[0].getSettings(); l = s && s.latency; } catch (e) {}
@@ -82,7 +105,7 @@
         if (H.bus) { try { H.merge.disconnect(H.bus); } catch (e) {} }
         H.bus = lvBus("hw", dest); H.merge.connect(H.bus); H.dest = dest;
       }
-      try { if (typeof fxcNames === "object") fxcNames.hw = H.short; } catch (e) {}
+      setNames();
       async function hwOpen(force) {
         if (H.opening) return H.opening;
         if (!ctx) return false;
@@ -101,7 +124,7 @@
           try { st = await navigator.mediaDevices.getUserMedia(cons(id)); } catch (e) { why = e && e.name || "error"; }
           if (!st && id && !H.dev) { try { st = await navigator.mediaDevices.getUserMedia(cons("")); } catch (e) {} }
           if (!st) { H.err = why === "NotAllowedError" ? "the audio input isn't allowed here" : "the audio input didn't open (" + why + ")"; return false; }
-          if (!inStack()) { st.getTracks().forEach(t => t.stop()); return false; }   // (taken out while it was opening)
+          if (!wantIn()) { st.getTracks().forEach(t => t.stop()); return false; }   // (taken out while it was opening)
           H.stream = st; H.src = ctx.createMediaStreamSource(st);
           H.split = ctx.createChannelSplitter(2); H.merge = ctx.createChannelMerger(2);
           H.src.connect(H.split); hwPick();
@@ -122,10 +145,12 @@
       // in the stack: the input opens; out of it: the input closes and its notes stop
       setInterval(() => {
         if (!ctx) return;
-        const on = inStack();
+        setNames();
+        const on = wantIn();
         if (on && !H.src && !H.opening && !H.err && H.present()) hwOpen();
-        else if (!on && (H.src || H.stream)) { hwCloseInput(); H.allOff(); paintAll(); }
-        if (on && H.src) hwWire();   // (keeps its chain awake: its own keys and sequencer make sound Nate Bloom didn't ask for)
+        else if (!on && (H.src || H.stream)) { hwCloseInput(); if (!inStack()) H.allOff(); paintAll(); }
+        if (on && H.src) hwWire();
+        hwFx();   // (keeps its chain awake: its own keys and sequencer make sound Nate Bloom didn't ask for)
       }, 1000);
       // (182) a device came or went. Unplugging the Volt used to leave the Minilogue on the system's Default input (the
       // computer's own mic, or nothing) after the Volt came back: the headphones had it through the Volt's own
@@ -133,7 +158,7 @@
       // soon as that's there (the events come in pairs, so a short wait first).
       let hwDcT = 0;
       async function hwRecheck() {
-        if (!inStack() || H.opening) return;
+        if (!wantIn() || H.opening) return;
         if (H.err) { H.err = ""; hwOpen(true); return; }
         if (!H.src || !H.standIn) return;
         const devs = await inputs();
@@ -148,15 +173,19 @@
       // ---- in the Mixer ----
       { const mc = mixChannels; mixChannels = function () {
           const ch = mc.apply(this, arguments);
-          if (H.shown()) ch.push({ group: "Hardware", name: H.name, sub: inStack() ? (H.ready() ? "playing now · " + (H.label || "audio in") + (H.standIn ? " · not the Volt: Takes won't have it" : "") : H.why()) : "add it from Quick sounds",
+          if (H.shown()) ch.push({ group: "Hardware", name: H.name, sub: wantIn() ? (H.ready() ? (inStack() ? "playing now · " : "pass-through · ") + (H.label || "audio in") + (H.standIn ? " · not the Volt: Takes won't have it" : "") : H.why()) : "add it from Quick sounds",
             get: () => H.level, set: v => { H.level = v; hwSave(); try { lvApply(); } catch (e) {} }, dflt: 0.8, live: true });
           return ch;
         }; }
       // ---- its sheet: where it's played from, where its sound comes in, its level ----
       const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "hwSheet"; sh.hidden = true;
-      sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Minilogue XD">
-        <div class="ed-head"><strong>Minilogue XD</strong><span class="ed-info" id="hwState"></span></div>
+      sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Hardware synth">
+        <div class="ed-head"><strong id="hwTitle">Hardware synth</strong><span class="ed-info" id="hwState"></span></div>
         <span class="ed-info" style="text-align:left">Nate Bloom plays it over USB MIDI with whatever else is playing, and its sound comes back in through your audio interface into the mix. Switch off the interface's direct monitoring for these inputs, or you'll hear it twice. Its own keys play it directly; MIDI › Keys makes them play the rest of the stack too.</span>
+        <div class="sp-lab"><span>Which synth</span></div>
+        <div class="ly-quick"><select id="hwModel" aria-label="Which synth" style="flex:1;min-width:0"></select></div>
+        <div class="ly-quick"><button class="btn" id="hwThru" aria-pressed="false" style="flex:1">Pass-through: hear it all the time</button><button class="btn" id="hwFxOn" aria-pressed="false" style="flex:1">Nate Bloom's effects on it</button></div>
+        <span class="ed-info" style="text-align:left" id="hwThruInfo">With pass-through on, its own presets, keys, sequencer and arp, and any pedal after it, come through Nate Bloom whether or not Nate Bloom is playing it, so Takes, the Garage and Live's recorder have it too. Its own effects come through as they are; Nate Bloom's go on top only when you switch them on (the Effects knobs; plugin effects can go on it from the Plugins sheet).</span>
         <div class="sp-lab"><span>MIDI to it</span></div>
         <div class="ly-quick"><select id="hwOut" aria-label="MIDI output" style="flex:1;min-width:0"></select><select id="hwCh" aria-label="MIDI channel"></select></div>
         <div class="sp-lab"><span>Its sound comes in from</span></div>
@@ -174,7 +203,7 @@
         const out = $h("hwOut"); out.innerHTML = "";
         const add = (sel, v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
         const auto = outs().filter(isHW);
-        add(out, "", auto.length ? "Automatic · " + (hwPort() && !H.out ? hwPort().name : auto[0].name) : "Automatic · the Minilogue when it's plugged in");
+        add(out, "", auto.length ? "Automatic · " + (hwPort() && !H.out ? hwPort().name : auto[0].name) : "Automatic · the " + H.name + " when it's plugged in");
         outs().forEach(o => add(out, mdKey("out", o), o.name + (o.manufacturer ? " · " + o.manufacturer : "")));
         out.value = H.out && outs().some(o => mdKey("out", o) === H.out) ? H.out : "";
         $h("hwCh").value = H.ch; $h("hwPick").value = H.pick;
@@ -185,9 +214,15 @@
         $h("hwLvl").value = Math.round(H.level / 0.8 * 100); $h("hwLvlV").textContent = mxDb(H.level, 0.8);
         const on = inStack();
         $h("hwIn").textContent = on ? "Take it out" : "+ Play it with the rest";
-        $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : "plugged in · not playing";
+        { const ms = $h("hwModel"); ms.innerHTML = ""; const plugged = outs().map(modelOf).filter(Boolean);
+          add(ms, "", "Automatic · " + (plugged[0] ? plugged[0].name : "the first one plugged in"));
+          MODELS.forEach(m => add(ms, m.id, m.id === "other" ? "Another synth (pick its MIDI output below)" : m.name + (plugged.includes(m) ? " · plugged in" : "")));
+          ms.value = H.model || ""; }
+        $h("hwTitle").textContent = H.name;
+        $h("hwThru").setAttribute("aria-pressed", String(!!H.thru)); $h("hwFxOn").setAttribute("aria-pressed", String(hwFxIs()));
+        $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : H.thru ? (H.ready() ? "pass-through: you hear it" : H.why()) : "plugged in · not playing";
         const m = $h("hwMsg");
-        m.textContent = !md.access ? "Connect MIDI first (MIDI › Connect)." : !H.present() ? "Plug the Minilogue XD in over USB, or pick the MIDI output it's on (the Volt's MIDI out, say)." : H.err ? H.err.charAt(0).toUpperCase() + H.err.slice(1) + ". Pick the input and tap ↻." : on && H.src ? "Coming in from " + (H.label || "the input") + "." + (H.standIn ? " That isn't " + (H.dev ? "the input you picked" : "the Volt") + ", so Takes and Tracks won't have the Minilogue: plug it in and it switches back, or pick the input here." : "") : "";
+        m.textContent = !md.access ? "Connect MIDI first (MIDI › Connect)." : !H.present() ? "Plug the " + H.name + " in over USB, or pick the MIDI output it's on (the Volt's MIDI out, say)." : H.err ? H.err.charAt(0).toUpperCase() + H.err.slice(1) + ". Pick the input and tap ↻." : (on || H.thru) && H.src ? "Coming in from " + (H.label || "the input") + "." + (H.standIn ? " That isn't " + (H.dev ? "the input you picked" : "the Volt") + ", so Takes and Tracks won't have the " + H.short + ": plug it in and it switches back, or pick the input here." : "") : "";
         meter();
       }
       function meter() {
@@ -210,11 +245,17 @@
         if (!H.present()) { try { (document.getElementById("uiToast") && (() => { const el = document.getElementById("uiToast"); el.textContent = H.name + " added · " + (md.access ? "plug it in over USB" : "connect MIDI") + " and it plays"; el.hidden = false; setTimeout(() => { el.hidden = true; }, 2800); })()); } catch (e) {} }
         if (ctx && !H.src) { H.err = ""; hwOpen(true); }
       };
+      // (187) Nate Bloom's effects on its channel: off by default, so its own sound and effects come through untouched
+      function hwFxIs() { return !!H.fxOn; }
+      function hwFx() { try { const p = fxcParams("hw"), want = !!H.fxOn; if ((p.on !== false) !== want) { p.on = want; try { localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC)); } catch (e) {} if (fxChan.hw) fxcApply("hw"); } } catch (e) {} }
+      $h("hwModel").addEventListener("change", e => { H.allOff(); H.model = e.target.value; setNames(); hwSave(); H.err = ""; if (wantIn()) hwOpen(true); hwSheetPaint(); paintAll(); });
+      $h("hwThru").addEventListener("click", () => { start(); H.thru = !H.thru; hwSave(); H.err = ""; if (wantIn() && !H.src) hwOpen(true); hwSheetPaint(); paintAll(); });
+      $h("hwFxOn").addEventListener("click", () => { H.fxOn = !H.fxOn; hwSave(); hwFx(); hwSheetPaint(); });
       $h("hwOut").addEventListener("change", e => { H.allOff(); H.out = e.target.value; hwSave(); hwSheetPaint(); paintAll(); });
       $h("hwCh").addEventListener("change", e => { H.allOff(); H.ch = +e.target.value; hwSave(); });
-      $h("hwDev").addEventListener("change", e => { H.dev = e.target.value; hwSave(); H.err = ""; if (inStack()) hwOpen(true); else hwSheetPaint(); });
+      $h("hwDev").addEventListener("change", e => { H.dev = e.target.value; hwSave(); H.err = ""; if (wantIn()) hwOpen(true); else hwSheetPaint(); });
       $h("hwPick").addEventListener("change", e => { H.pick = e.target.value; hwSave(); hwPick(); });
-      $h("hwRe").addEventListener("click", () => { H.err = ""; if (inStack()) hwOpen(true); else hwSheetPaint(); });
+      $h("hwRe").addEventListener("click", () => { H.err = ""; if (wantIn()) hwOpen(true); else hwSheetPaint(); });
       $h("hwLvl").addEventListener("input", e => { H.level = (+e.target.value / 100) * 0.8; $h("hwLvlV").textContent = mxDb(H.level, 0.8); hwSave(); try { lvApply(); } catch (er) {} });
       $h("hwTest").addEventListener("click", () => { start(); const v = H.voice(60); if (!v) { $h("hwMsg").textContent = "No MIDI output for it yet."; return; } setTimeout(() => v.stop(), 600); });
       $h("hwIn").addEventListener("click", () => {

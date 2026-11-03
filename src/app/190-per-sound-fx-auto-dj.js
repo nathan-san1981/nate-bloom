@@ -243,6 +243,21 @@
     djMsg(it.name + ": " + (it.bpm ? it.bpm.toFixed(1) + " BPM" : "no steady beat") + (it.key ? " · " + it.key + " (" + it.cam + ")" : ""));
     return i;
   }
+  // (186) edit a song of the four, playing or queued: on a deck, the deck's edit (it plays on); otherwise its sound is
+  // opened, edited and kept in its spot (found again by its beat if its length changed)
+  async function djEditCrate(i) {
+    const it = DJ.crate[i]; if (!it || it.busy) return;
+    const onDeck = DJ.decks.find(d => d.crate === i && d.buf); if (onDeck) { djEditDeck(onDeck); return; }
+    let buf = it.buf;
+    if (!buf && it.raw) { it.busy = true; djPaintCrate(); try { buf = await jobRun("open", "Opening " + it.name + "…", () => decode(it.raw.slice(0))); } catch (e) { buf = null; } it.busy = false; djPaintCrate(); }
+    if (!buf) { djMsg("Couldn't open " + it.name + " to edit it"); return; }
+    openEditor({ buf, label: "song " + (i + 1), name: it.name, async save(nb) {
+      const same = Math.abs(nb.duration - buf.duration) < 0.002;
+      Object.assign(it, { buf: nb, name: baseName(it.name) + " (edited)", raw: bufferToWav(nb) });
+      if (!same) { try { const an = await djAnalyseAsync(nb); let bpm = an.bpm; if (bpm && bpm < 70) bpm *= 2; else if (bpm > 180) bpm /= 2; Object.assign(it, { env: an.env, envRate: an.envRate, bpm, off: an.off }); } catch (e) {} it.phrase = null; }
+      djStoreCrate(i); djPaintCrate(); djMsg("Song " + (i + 1) + ": the edit is in" + (DJ.next === i ? " · still next up" : ""));
+    } });
+  }
   function djCrateRemove(i) {
     const it = DJ.crate[i]; if (!it) return;
     DJ.decks.forEach(d => { if (d.crate === i) d.crate = -1; });
@@ -290,6 +305,7 @@
     items.push(["btn wide", DJ.next === i ? "Not next any more" : "Next up (queue it)", () => { DJ.next = DJ.next === i ? null : i; djPaintCrate(); djMsg(DJ.next === i ? it.name + " is next · MIX IN NEXT brings it in" : "Queue cleared"); }]);
     items.push(["btn wide", "Mix in now (" + djStyleName(djPlan(i).style) + ")", () => djStartMix(djPlan(i))]);
     items.push(["lab", (it.bpm ? it.bpm.toFixed(1) + " BPM" : "no steady beat") + (it.key ? " · " + it.key + " · " + it.cam : "") + " · energy " + Math.round(it.energy * 100) + "%" + (onDeck ? " · on deck " + "AB"[onDeck.i] : "")]);
+    items.push(["btn wide", "Edit… (trim, fade, reverse, gain)", () => djEditCrate(i)]);   // (186)
     items.push(["btn danger wide", "Remove from the songs", () => djCrateRemove(i)]);
     djOpenMenu("Song " + (i + 1) + " · " + it.name, "", items);
   }

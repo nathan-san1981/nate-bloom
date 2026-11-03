@@ -57,7 +57,9 @@ jobs:
         run: |
           git clone -q --depth 1 https://github.com/free-audio/clap.git linux/native/third_party/clap
           git clone -q --depth 1 --branch v3.8.1_build_84 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces || git clone -q --depth 1 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces
-          ls linux/native/third_party/clap/include/clap/clap.h linux/native/third_party/vst3/pluginterfaces/base/funknown.cpp
+          git clone -q --depth 1 https://github.com/lv2/lv2.git linux/native/third_party/lv2
+          git clone -q --depth 1 https://github.com/lv2/lilv.git linux/native/third_party/lilv
+          ls linux/native/third_party/clap/include/clap/clap.h linux/native/third_party/vst3/pluginterfaces/base/funknown.cpp linux/native/third_party/lilv/include/lilv/lilv.h linux/native/third_party/lv2/include/lv2/core/lv2.h
           dpkg -s libx11-dev >/dev/null 2>&1 || sudo apt-get install -y libx11-dev
 
       - name: Build the fast-pad engine
@@ -114,6 +116,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: bash linux/ci/plug_check.sh /tmp/nb-logs/plug
+
+      - name: Output latency with a real sound server (PulseAudio and PipeWire, null sink)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 15
+        run: bash linux/ci/latency_check.sh /tmp/nb-logs/latency
 
       - name: Publish logs to the ci-logs-linux branch
         if: always()

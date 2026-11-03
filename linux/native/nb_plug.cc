@@ -23,6 +23,13 @@
 #include <pthread.h>
 #include <sched.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <sys/syscall.h>
+#include <sys/wait.h>
+#include <linux/futex.h>
+#include <spawn.h>
+#include <signal.h>
 #include <time.h>
 #include <unistd.h>
 #include <algorithm>
@@ -36,6 +43,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+extern char** environ;
 
 namespace nbplug {
 
@@ -147,7 +155,7 @@ struct Inst {
   std::thread th; std::atomic<bool> run{false};
   std::mutex qmu; std::vector<MidiEv> mq; std::vector<ParamEv> pq;
   std::atomic<int64_t> pf{0}; std::atomic<double> us{0}, maxUs{0}; std::atomic<int64_t> blocks{0}, late{0};
-  XWin* win = nullptr; bool guiOpen = false;
+  XWin* win = nullptr; bool guiOpen = false; bool remote = false;
   std::atomic<bool> dead{false};
 };
 static std::mutex gIMu; static std::map<int, std::shared_ptr<Inst>> gInst; static int gNextId = 1;
@@ -194,7 +202,10 @@ static void audioLoop(Inst* I) {
       pf += BLOCK; I->pf.store(pf); I->blocks.fetch_add(1);
       double w = (double)pf; __atomic_store(&h[1], &w, __ATOMIC_RELEASE);
     }
-    timespec ts{ 0, 400000 }; nanosleep(&ts, nullptr);
+    // (181) sleep as long as the room ahead allows (half of what's beyond two blocks: the browser takes at most one
+    // burst meanwhile), not a fixed 0.4 ms: an idle plugin cost 3-4% of a core in wake-ups alone
+    { const double room = I->instrument ? ad : h[6]; const long us = (long)std::max(400.0, std::min(2000.0, (room - 256) / I->sr * 0.5e6));
+      timespec ts{ 0, us * 1000 }; nanosleep(&ts, nullptr); }
   }
   I->be->stopAudio();
 }
@@ -230,6 +241,7 @@ static std::vector<uint8_t> b64d(const std::string& s) {
   return o;
 }
 static std::string paramsJson(Backend* be) {
+  { const std::string r = be->paramsJsonRemote(); if (!r.empty()) return r; }
   std::string j = "["; bool first = true;
   for (auto& p : be->params()) { if (!first) j += ","; first = false;
     j += "{\"id\":" + jnum(p.id) + ",\"name\":" + jesc(p.name) + ",\"min\":" + jnum(p.min) + ",\"max\":" + jnum(p.max) + ",\"def\":" + jnum(p.def) + ",\"value\":" + jnum(p.value) + ",\"steps\":" + jnum(p.steps) + ",\"auto\":" + (p.automatable ? "true" : "false") + "}"; }
@@ -254,11 +266,13 @@ static napi_value async(napi_env env, std::function<bool(std::string&)> job) {
   return promise;
 }
 
+static std::string gHostScript, gExe;   // (184)
+static Backend* newRemote(const std::string& fmt, int id);
 // plug_scan(fmt, path) -> JSON [{fmt,path,uid,name,vendor,version,kind,features}] or {"error":...}  (the scanner process)
 static napi_value Scan(napi_env env, napi_callback_info info) {
   napi_value a[2]; if (getargs(env, info, a, 2) < 2) return str(env, "{\"error\":\"args\"}");
   const std::string fmt = args(env, a[0]), path = args(env, a[1]);
-  std::vector<Found> out; std::string err; const bool ok = fmt == "clap" ? scanClap(path, out, err) : scanVst3(path, out, err);
+  std::vector<Found> out; std::string err; const bool ok = fmt == "clap" ? scanClap(path, out, err) : fmt == "lv2" ? scanLv2(path, out, err) : scanVst3(path, out, err);
   if (!ok) return str(env, "{\"error\":" + jesc(err) + "}");
   std::string j = "["; for (size_t i = 0; i < out.size(); i++) { const Found& f = out[i]; if (i) j += ",";
     j += "{\"fmt\":" + jesc(f.fmt) + ",\"path\":" + jesc(f.path) + ",\"uid\":" + jesc(f.uid) + ",\"name\":" + jesc(f.name) + ",\"vendor\":" + jesc(f.vendor) + ",\"version\":" + jesc(f.version) + ",\"kind\":" + jesc(f.kind) + ",\"features\":" + jesc(f.features) + "}"; }
@@ -270,7 +284,9 @@ static napi_value Load(napi_env env, napi_callback_info info) {
   auto I = std::make_shared<Inst>(); I->fmt = args(env, a[0]); I->path = args(env, a[1]); I->uid = args(env, a[2]); I->sr = argd(env, a[3], 48000);
   { std::lock_guard<std::mutex> lk(gIMu); I->id = gNextId++; gInst[I->id] = I; }
   return async(env, [I](std::string& out) {
-    Backend* be = I->fmt == "clap" ? newClap() : newVst3();
+    Backend* be = nullptr;
+    if (!gHostScript.empty() && !getenv("NB_PLUG_INPROC")) { be = newRemote(I->fmt, I->id); I->remote = true; }   // (184) in its own process
+    else be = I->fmt == "clap" ? newClap() : I->fmt == "lv2" ? newLv2() : newVst3();
     be->loop = mainLoop();
     Inst* raw = I.get();
     be->onParamFromGui = [raw](uint32_t id, double v) { std::lock_guard<std::mutex> lk(raw->qmu); raw->pq.push_back({ raw->pf.load(), id, v }); notice("param:" + std::to_string(raw->id) + ":" + std::to_string(id) + ":" + jnum(v)); };
@@ -392,6 +408,205 @@ static napi_value Notices(napi_env env, napi_callback_info) {
   return arr;
 }
 
+// ---- (184) plugins in a process of their own ----
+// Each instance can run in a host process (Electron as plain Node running plughost.js, which calls plug_serve here):
+// if the plugin crashes, only that process goes and the page carries on with the plugin silent. Requests (load,
+// settings, parameters, its window) go over a socket pair; each 128-frame block goes through shared memory (a memfd),
+// handed over and back with futexes, so the round trip costs microseconds, not a frame. The plugin's window is put
+// straight into Nate Bloom's X11 window from the host (X11 lets one client put windows in another's).
+struct ShmBlock {
+  std::atomic<uint32_t> req, done; int32_t n, nme, npe, playing; int64_t frame; double bpm;
+  MidiEv me[512]; ParamEv pe[512]; float in[2][BLOCK]; float out[2][BLOCK];
+};
+static long futexWait(std::atomic<uint32_t>* a, uint32_t v, long ns) { timespec ts{ ns / 1000000000, ns % 1000000000 }; return syscall(SYS_futex, (uint32_t*)a, FUTEX_WAIT, v, &ts, nullptr, 0); }
+static void futexWake(std::atomic<uint32_t>* a) { syscall(SYS_futex, (uint32_t*)a, FUTEX_WAKE, 1, nullptr, nullptr, 0); }
+// messages: [u32 id][u8 op][payload]; answers [u32 id][u8 ok][payload]; notices from the host have id 0
+static bool sendMsg(int fd, uint32_t id, uint8_t op, const std::string& pl) { std::string m(5, '\0'); memcpy(&m[0], &id, 4); m[4] = (char)op; m += pl; return send(fd, m.data(), m.size(), MSG_NOSIGNAL) == (ssize_t)m.size(); }
+static bool recvMsg(int fd, uint32_t& id, uint8_t& op, std::string& pl, int timeoutMs) {
+  pollfd p{ fd, POLLIN, 0 }; if (poll(&p, 1, timeoutMs) <= 0) return false;
+  std::string b(4 << 20, '\0'); const ssize_t n = recv(fd, &b[0], b.size(), 0); if (n < 5) return false;
+  memcpy(&id, b.data(), 4); op = (uint8_t)b[4]; pl.assign(b.data() + 5, (size_t)n - 5); return true;
+}
+enum { OP_LOAD = 1, OP_PARAMS, OP_GETSTATE, OP_SETSTATE, OP_GUIOPEN, OP_GUICLOSE, OP_GUISIZE, OP_PARAMMAIN, OP_UNLOAD };
+
+struct Remote : Backend {
+  int sock = -1, shmFd = -1; pid_t pid = -1; ShmBlock* shm = nullptr; std::atomic<bool> dead{false};
+  std::string nm, vend; bool inst = true, gui = false; int lat = 0; std::string paramsJ = "[]";
+  std::thread reader; std::mutex mu; std::condition_variable cv; std::map<uint32_t, std::pair<bool, std::string>> answers; uint32_t nextId = 1;
+  Win* win = nullptr; int instId = 0;
+  bool start(std::string& err) {
+    int sv[2]; if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv) != 0) { err = "no socket"; return false; }
+    shmFd = memfd_create("nb-plug", MFD_CLOEXEC); if (shmFd < 0 || ftruncate(shmFd, sizeof(ShmBlock)) != 0) { err = "no shared memory"; return false; }
+    shm = (ShmBlock*)mmap(nullptr, sizeof(ShmBlock), PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); if (shm == MAP_FAILED) { shm = nullptr; err = "no shared memory"; return false; }
+    new (shm) ShmBlock(); shm->req.store(0); shm->done.store(0);
+    posix_spawn_file_actions_t fa; posix_spawn_file_actions_init(&fa);
+    posix_spawn_file_actions_adddup2(&fa, sv[1], 3); posix_spawn_file_actions_adddup2(&fa, shmFd, 4);
+    std::vector<std::string> envs; for (char** e = environ; *e; e++) if (strncmp(*e, "ELECTRON_RUN_AS_NODE=", 21)) envs.push_back(*e);
+    envs.push_back("ELECTRON_RUN_AS_NODE=1"); envs.push_back("NB_PLUG_ID=" + std::to_string(instId)); std::vector<char*> ev; for (auto& e : envs) ev.push_back(&e[0]); ev.push_back(nullptr);
+    std::string a0 = gExe, a1 = gHostScript; char* argv[] = { &a0[0], &a1[0], nullptr };
+    const int r = posix_spawn(&pid, gExe.c_str(), &fa, nullptr, argv, ev.data()); posix_spawn_file_actions_destroy(&fa);
+    close(sv[1]); sock = sv[0];
+    if (r != 0) { err = "the plugin's process wouldn't start"; return false; }
+    reader = std::thread([this] { readLoop(); });
+    return true;
+  }
+  void readLoop() {
+    for (;;) {
+      uint32_t id; uint8_t op; std::string pl;
+      pollfd p{ sock, POLLIN, 0 }; const int pr = poll(&p, 1, 500);
+      if (pr < 0) break; if (pr == 0) { if (dead.load()) break; continue; }
+      if (!recvMsg(sock, id, op, pl, 0)) { gone(); break; }
+      if (id == 0) { onNotice(pl); continue; }
+      { std::lock_guard<std::mutex> lk(mu); answers[id] = { op != 0, pl }; } cv.notify_all();
+    }
+  }
+  void gone() {
+    if (dead.exchange(true)) return;
+    cv.notify_all(); if (shm) futexWake(&shm->done); notice("crashed:" + std::to_string(instId));
+    if (loop) loop->post([this] { if (onGuiClosed && win) onGuiClosed(); });
+  }
+  void onNotice(const std::string& s) {
+    if (s.rfind("param ", 0) == 0) { uint32_t id = 0; double v = 0; if (sscanf(s.c_str() + 6, "%u %lf", &id, &v) == 2) notice("param:" + std::to_string(instId) + ":" + std::to_string(id) + ":" + jnum(v)); }
+    else if (s.rfind("resize ", 0) == 0) { int w = 0, h = 0; if (sscanf(s.c_str() + 7, "%d %d", &w, &h) == 2 && loop) loop->post([this, w, h] { if (onGuiResize) onGuiResize(w, h); }); }
+    else if (s == "closed" && loop) loop->post([this] { if (onGuiClosed) onGuiClosed(); });
+  }
+  bool call(uint8_t op, const std::string& pl, std::string& out, int timeoutMs) {
+    if (dead.load() || sock < 0) { out = "its process has stopped"; return false; }
+    uint32_t id; { std::lock_guard<std::mutex> lk(mu); id = nextId++; }
+    if (!sendMsg(sock, id, op, pl)) { gone(); out = "its process has stopped"; return false; }
+    std::unique_lock<std::mutex> lk(mu);
+    if (!cv.wait_for(lk, std::chrono::milliseconds(timeoutMs), [&] { return answers.count(id) || dead.load(); })) { out = "it stopped answering"; return false; }
+    if (!answers.count(id)) { out = "its process has stopped"; return false; }
+    auto a = answers[id]; answers.erase(id); out = a.second; return a.first;
+  }
+  static std::string field(const std::string& j, const char* k) {   // (a flat value out of our own small JSON)
+    const std::string key = std::string("\"") + k + "\":"; size_t i = j.find(key); if (i == std::string::npos) return ""; i += key.size();
+    if (j[i] == '"') { std::string o; for (size_t q = i + 1; q < j.size() && j[q] != '"'; q++) { if (j[q] == '\\' && q + 1 < j.size()) q++; o += j[q]; } return o; }
+    if (j[i] == '[') { int d = 0; size_t q = i; for (; q < j.size(); q++) { if (j[q] == '[') d++; else if (j[q] == ']' && --d == 0) break; } return j.substr(i, q - i + 1); }
+    size_t q = i; while (q < j.size() && j[q] != ',' && j[q] != '}') q++; return j.substr(i, q - i);
+  }
+  bool load(const std::string& path, const std::string& uid, double sr, std::string& err) override {
+    if (!start(err)) return false;
+    std::string out; if (!call(OP_LOAD, fmt + '\0' + path + '\0' + uid + '\0' + jnum(sr), out, 30000)) { err = out; return false; }
+    nm = field(out, "name"); vend = field(out, "vendor"); inst = field(out, "instrument") == "true"; gui = field(out, "gui") == "true"; lat = atoi(field(out, "latency").c_str()); paramsJ = field(out, "params");
+    return true;
+  }
+  std::string fmt;
+  std::string name() override { return nm; }
+  std::string vendor() override { return vend; }
+  bool isInstrument() override { return inst; }
+  int latency() override { return lat; }
+  std::vector<ParamInfo> params() override { return {}; }   // (paramsJson asks remoteParams instead)
+  std::string paramsJsonRemote() override { std::string out; if (call(OP_PARAMS, "", out, 5000)) paramsJ = out; return paramsJ.empty() ? "[]" : paramsJ; }
+  bool getState(std::vector<uint8_t>& o) override { std::string out; if (!call(OP_GETSTATE, "", out, 10000)) return false; o.assign(out.begin(), out.end()); return !o.empty(); }
+  bool setState(const std::vector<uint8_t>& in) override { std::string out; return call(OP_SETSTATE, std::string(in.begin(), in.end()), out, 10000) && out == "true"; }
+  void setParamMain(uint32_t id, double v) override { std::string out; call(OP_PARAMMAIN, std::to_string(id) + " " + jnum(v), out, 2000); }
+  bool guiCanOpen() override { return gui; }
+  bool guiOpen(Win* w, int& wo, int& ho, bool& rs, std::string& err) override {
+    win = w; std::string out;
+    if (!call(OP_GUIOPEN, std::to_string(w->xid()), out, 15000)) { err = out; return false; }
+    wo = atoi(field(out, "w").c_str()); ho = atoi(field(out, "h").c_str()); rs = field(out, "resizable") == "true"; return true;
+  }
+  void guiResized(int w, int h) override { std::string out; call(OP_GUISIZE, std::to_string(w) + " " + std::to_string(h), out, 2000); }
+  void guiClose() override { std::string out; call(OP_GUICLOSE, "", out, 5000); win = nullptr; }
+  void unload() override {
+    std::string out; call(OP_UNLOAD, "", out, 5000);
+    dead.store(true); if (sock >= 0) { shutdown(sock, SHUT_RDWR); }
+    if (reader.joinable()) reader.join();
+    if (sock >= 0) close(sock); sock = -1;
+    if (pid > 0) { int st; for (int i = 0; i < 20 && waitpid(pid, &st, WNOHANG) == 0; i++) usleep(50000); if (waitpid(pid, &st, WNOHANG) == 0) { kill(pid, SIGKILL); waitpid(pid, &st, 0); } pid = -1; }
+    if (shm) { munmap(shm, sizeof(ShmBlock)); shm = nullptr; } if (shmFd >= 0) close(shmFd); shmFd = -1;
+  }
+  void startAudio() override {}
+  void stopAudio() override {}
+  int lateBlocks = 0;
+  void process(const float* inL, const float* inR, float* outL, float* outR, int n, int64_t frame, const MidiEv* me, int nme, const ParamEv* pe, int npe, double bpm, bool playing) override {
+    if (dead.load() || !shm) { memset(outL, 0, n * 4); memset(outR, 0, n * 4); return; }
+    const uint32_t want = shm->done.load(std::memory_order_acquire) + 1;
+    shm->n = n; shm->frame = frame; shm->bpm = bpm; shm->playing = playing ? 1 : 0;
+    shm->nme = std::min(nme, 512); memcpy(shm->me, me, sizeof(MidiEv) * shm->nme); shm->npe = std::min(npe, 512); memcpy(shm->pe, pe, sizeof(ParamEv) * shm->npe);
+    memcpy(shm->in[0], inL, n * 4); memcpy(shm->in[1], inR, n * 4);
+    shm->req.store(want, std::memory_order_release); futexWake(&shm->req);
+    // wait for it: this thread works ahead of where the page reads (the room ahead), so a slow answer is caught up
+    // on; one that takes more than 40 ms gives silence for that block (and if the process has gone, so does the rest)
+    timespec t0; clock_gettime(CLOCK_MONOTONIC, &t0);
+    for (;;) {
+      const uint32_t d = shm->done.load(std::memory_order_acquire); if (d == want) break;
+      if (dead.load()) { memset(outL, 0, n * 4); memset(outR, 0, n * 4); return; }
+      timespec t1; clock_gettime(CLOCK_MONOTONIC, &t1); const long el = (t1.tv_sec - t0.tv_sec) * 1000000000L + (t1.tv_nsec - t0.tv_nsec);
+      if (el > 40000000L) { lateBlocks++; memset(outL, 0, n * 4); memset(outR, 0, n * 4); if (pid > 0) { int st; if (waitpid(pid, &st, WNOHANG) == pid) { pid = -1; gone(); } } return; }
+      futexWait(&shm->done, d, 40000000L - el);
+    }
+    memcpy(outL, shm->out[0], n * 4); memcpy(outR, shm->out[1], n * 4);
+  }
+};
+
+static Backend* newRemote(const std::string& fmt, int id) { Remote* r = new Remote(); r->fmt = fmt; r->instId = id; return r; }
+// the host process: plug_serve(socketFd, shmFd) runs until Nate Bloom closes the socket
+struct HostWin : Win { unsigned long id = 0; int sock = -1; unsigned long xid() override { return id; } void resize(int w, int h) override { sendMsg(sock, 0, 1, "resize " + std::to_string(w) + " " + std::to_string(h)); } void show() override {} };
+static napi_value Serve(napi_env env, napi_callback_info info) {
+  napi_value a[2]; if (getargs(env, info, a, 2) < 2) return boolv(env, false);
+  const int sock = (int)argd(env, a[0], 3), shmFd = (int)argd(env, a[1], 4);
+  ShmBlock* shm = (ShmBlock*)mmap(nullptr, sizeof(ShmBlock), PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0); if (shm == MAP_FAILED) return boolv(env, false);
+  Main* M = mainLoop(); Backend* be = nullptr; std::atomic<bool> run{true}; std::thread audio; HostWin hw; hw.sock = sock;
+  std::mutex pmu; std::vector<ParamEv> fromGui;
+  auto audioFn = [&] {
+    { char nm[16]; snprintf(nm, sizeof nm, "nb-ph-%s", getenv("NB_PLUG_ID") ? getenv("NB_PLUG_ID") : "0"); pthread_setname_np(pthread_self(), nm); } tlAudio = true;   // (the CPU meter's name for it)
+    { sched_param sp; sp.sched_priority = 18; pthread_setschedparam(pthread_self(), SCHED_FIFO, &sp); }
+    be->startAudio(); uint32_t seen = shm->done.load(); std::vector<ParamEv> pe;
+    while (run.load()) {
+      const uint32_t r = shm->req.load(std::memory_order_acquire);
+      if (r == seen) { futexWait(&shm->req, r, 200000000L); continue; }
+      pe.assign(shm->pe, shm->pe + shm->npe); { std::lock_guard<std::mutex> lk(pmu); for (auto& p : fromGui) pe.push_back({ shm->frame, p.id, p.value }); fromGui.clear(); }
+      be->process(shm->in[0], shm->in[1], shm->out[0], shm->out[1], shm->n, shm->frame, shm->me, shm->nme, pe.data(), (int)pe.size(), shm->bpm, shm->playing != 0);
+      seen = r; shm->done.store(r, std::memory_order_release); futexWake(&shm->done);
+    }
+    be->stopAudio();
+  };
+  for (;;) {
+    uint32_t id; uint8_t op; std::string pl;
+    if (!recvMsg(sock, id, op, pl, -1)) break;
+    std::string out; bool ok = false;
+    std::mutex m; std::condition_variable cv; bool done = false;
+    M->post([&] {
+      if (op == OP_LOAD) {
+        std::vector<std::string> f; size_t st = 0; for (int k = 0; k < 4; k++) { size_t e = pl.find('\0', st); f.push_back(pl.substr(st, e == std::string::npos ? std::string::npos : e - st)); st = e == std::string::npos ? pl.size() : e + 1; }
+        be = f[0] == "clap" ? newClap() : f[0] == "lv2" ? newLv2() : newVst3(); be->loop = M;
+        be->onParamFromGui = [&](uint32_t pid, double v) { { std::lock_guard<std::mutex> lk(pmu); fromGui.push_back({ 0, pid, v }); } sendMsg(sock, 0, 1, "param " + std::to_string(pid) + " " + jnum(v)); };
+        be->onGuiResize = [&](int w, int h) { hw.resize(w, h); };
+        be->onGuiClosed = [&] { sendMsg(sock, 0, 1, "closed"); };
+        std::string err;
+        if (!be->load(f[1], f[2], atof(f[3].c_str()), err)) { out = err; delete be; be = nullptr; }
+        else { ok = true; out = "{\"name\":" + jesc(be->name()) + ",\"vendor\":" + jesc(be->vendor()) + ",\"instrument\":" + (be->isInstrument() ? "true" : "false") + ",\"latency\":" + jnum(be->latency()) + ",\"gui\":" + (be->guiCanOpen() ? "true" : "false") + ",\"params\":" + paramsJson(be) + "}";
+          audio = std::thread(audioFn); }
+      } else if (!be) { out = "not loaded"; }
+      else if (op == OP_PARAMS) { ok = true; out = paramsJson(be); }
+      else if (op == OP_GETSTATE) { std::vector<uint8_t> d; ok = be->getState(d); out.assign(d.begin(), d.end()); ok = true; }
+      else if (op == OP_SETSTATE) { ok = true; out = be->setState(std::vector<uint8_t>(pl.begin(), pl.end())) ? "true" : "false"; }
+      else if (op == OP_PARAMMAIN) { uint32_t pid = 0; double v = 0; if (sscanf(pl.c_str(), "%u %lf", &pid, &v) == 2) be->setParamMain(pid, v); ok = true; }
+      else if (op == OP_GUIOPEN) { hw.id = strtoul(pl.c_str(), nullptr, 10); int W = 0, H = 0; bool rs = false; std::string err;
+        if (be->guiOpen(&hw, W, H, rs, err)) { ok = true; out = "{\"w\":" + jnum(W) + ",\"h\":" + jnum(H) + ",\"resizable\":" + (rs ? "true" : "false") + "}"; } else out = err; }
+      else if (op == OP_GUISIZE) { int w = 0, h = 0; if (sscanf(pl.c_str(), "%d %d", &w, &h) == 2) be->guiResized(w, h); ok = true; }
+      else if (op == OP_GUICLOSE) { be->guiClose(); ok = true; }
+      else if (op == OP_UNLOAD) { run.store(false); futexWake(&shm->req); if (audio.joinable()) audio.join(); be->unload(); delete be; be = nullptr; ok = true; }
+      std::lock_guard<std::mutex> lk(m); done = true; cv.notify_all();
+    });
+    { std::unique_lock<std::mutex> lk(m); cv.wait(lk, [&] { return done; }); }
+    sendMsg(sock, id, ok ? 1 : 0, out);
+    if (op == OP_UNLOAD) break;
+  }
+  run.store(false); futexWake(&shm->req); if (audio.joinable()) audio.join();
+  _exit(0);   // (the plugin's own threads and atexit handlers don't get a say)
+  return boolv(env, true);
+}
+// plug_config({ hostScript }): where plughost.js is; plugins then load in a process of their own
+static napi_value Config(napi_env env, napi_callback_info info) {
+  napi_value a[1]; if (getargs(env, info, a, 1) < 1) return boolv(env, false);
+  gHostScript = args(env, a[0]);
+  char buf[4096]; const ssize_t n = readlink("/proc/self/exe", buf, sizeof buf - 1); if (n > 0) { buf[n] = 0; gExe = buf; }
+  return boolv(env, !gHostScript.empty() && !gExe.empty() && access(gHostScript.c_str(), R_OK) == 0);
+}
+
 // the page going away (a reload, closing): every instance stops (its shared memory goes with the page) and is unloaded
 static void cleanupAll(void*) {
   std::vector<std::shared_ptr<Inst>> all; { std::lock_guard<std::mutex> lk(gIMu); for (auto& x : gInst) all.push_back(x.second); gInst.clear(); }
@@ -421,6 +636,8 @@ static napi_value Init(napi_env env, napi_value exports) {
     { "plug_transport", nullptr, Transport, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "plug_stats", nullptr, Stats, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "plug_notices", nullptr, Notices, nullptr, nullptr, nullptr, napi_default, nullptr },
+    { "plug_serve", nullptr, Serve, nullptr, nullptr, nullptr, napi_default, nullptr },
+    { "plug_config", nullptr, Config, nullptr, nullptr, nullptr, napi_default, nullptr },
   };
   napi_define_properties(env, exports, sizeof(d) / sizeof(d[0]), d);
   napi_add_env_cleanup_hook(env, cleanupAll, nullptr);

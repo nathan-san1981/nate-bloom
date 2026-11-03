@@ -56,13 +56,13 @@ async def main():
         await ev("window.__nbPlug.refresh(true)")
         r = await ev("NBPlug.list()")
         names = sorted(set(f["name"] + " (" + f["fmt"] + ", " + f["kind"] + ")" for f in r["plugins"]))
-        check("the scan finds the test plugins", all(any(n.startswith(t + " ") for n in names) for t in ["NB Test Sine", "NB Test Gain", "NB Test VSine", "NB Test VGain"]), names[:40])
+        check("the scan finds the test plugins", all(any(n.startswith(t + " ") for n in names) for t in ["NB Test Sine", "NB Test Gain", "NB Test VSine", "NB Test VGain", "NB Test LSine", "NB Test LGain"]), names[:40])
         print("couldn't be used:", json.dumps(r["errors"])[:600]); print("found in the page:", await ev("window.__nbPlug.plugins.length"))
         await ev("(async () => { const W = window.__nbPlug; const s = await NBPlug.list(); })()")
         await ev("document.getElementById('wamBtn').click()"); await pg.wait_for_timeout(800)
         await pg.screenshot(path=OUT + "/sheet.png", full_page=False)
         sheet = await ev("document.getElementById('wamList').innerText")
-        check("the Plugins sheet lists them, with the VST3 and CLAP section", "vst3 and clap on this computer" in sheet.lower() and "NB Test Sine" in sheet, sheet[:300].replace("\n", " | "))
+        check("the Plugins sheet lists them, with the VST3 and CLAP section", "on this computer" in sheet.lower() and "NB Test Sine" in sheet, sheet[:300].replace("\n", " | "))
         heard = {}
         for nm in TRY:
             nm = nm.strip()
@@ -118,6 +118,24 @@ async def main():
         db3 = 20 * math.log10(max(1e-9, again) / max(1e-9, before))
         check("after a reload NB Test Gain is back on the mix with its setting (-6 dB)", any(x["name"] == "NB Test Gain" for x in back) and -8 < db3 < -4.5, [back, round(db3, 2)])
         print("plugins:", json.dumps(back))
+        # (184) a plugin that crashes takes only its own process down: the test sine crashes on note 127
+        oop = await ev("!!(window.NBPlug.oop && NBPlug.oop().on)")
+        print("each plugin in its own process:", oop)
+        live = await ev("[...window.__nbPlug.live.values()].filter(x => x.name === 'NB Test Sine' && !x.fx).map(x => x.id)") if oop else []
+        if not oop: pass
+        elif not live:
+            await ev("(async () => { const k = window.__nbw.CAT.find(c => c.native && c.name === 'NB Test Sine').key; const sp = window.__nbw.spec(k); const inst = await window.__nbPlugCreate(sp, window.__ne.ctx || window.__lc); window.__crashInst = inst; })()")
+            await pg.wait_for_timeout(1500)
+            live = await ev("[...window.__nbPlug.live.values()].filter(x => x.name === 'NB Test Sine' && !x.fx).map(x => x.id)")
+        if not oop: pass
+        elif live:
+            await ev(f"NBPlug.midi({live[-1]}, Math.round((window.__lc.currentTime + 0.2) * window.__lc.sampleRate), 0x90, 127, 100)")
+            await pg.wait_for_timeout(3000)
+            st = await ev("window.__nbPlug.state()")
+            alive = await ev("1 + 1")
+            check("a plugin that crashes takes only its own process down (the page carries on, the plugin shows as crashed)", alive == 2 and any(x.get("crashed") for x in st), st)
+        else: check("a plugin that crashes takes only its own process down", False, "no test sine loaded")
+        if not oop: print("(the crash test needs each plugin in its own process: the second pass has it)")
         check("no page errors", not errs, errs[:3])
         print("RESULT " + ("OK" if not fails else "FAILED: " + "; ".join(fails)))
 asyncio.run(main())

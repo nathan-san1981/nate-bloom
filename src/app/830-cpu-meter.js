@@ -22,7 +22,7 @@
         const lg = document.getElementById("shLog"); if (lg && btns[0].nextSibling !== lg) lg.before(btns[0]);
         const lv = document.getElementById("lvJam") || document.getElementById("lvMeter"); if (lv && btns[1].nextSibling !== lv) lv.before(btns[1]);
       };
-      const plugName = id => { try { const P = window.__nbPlug && window.__nbPlug.live.get(+id); return P ? P.name + " (" + (P.fmt === "clap" ? "CLAP" : "VST3") + ")" : "plugin " + id; } catch (e) { return "plugin " + id; } };
+      const plugName = id => { try { const P = window.__nbPlug && window.__nbPlug.live.get(+id); return P ? P.name + " (" + (P.fmt === "clap" ? "CLAP" : P.fmt === "lv2" ? "LV2" : "VST3") + ")" : "plugin " + id; } catch (e) { return "plugin " + id; } };
       // dropouts the browser itself reports (its output had to fill in), plus the engine's and plugins' late blocks
       function dropTick() {
         let n = 0;
@@ -63,7 +63,7 @@
           <div class="nbc-g">The sound's threads <small>each a share of one core: at 100% it has no time left and the sound drops out</small></div>
           ${row("Browser audio", r.audio, "every browser synth, sample, effect and the mix")}
           ${eng.length ? row("Native engine", Math.max(...eng), eng.length + (eng.length === 1 ? " thread" : " threads") + (eng.length > 1 ? ", the busiest shown · " + r1(sum(eng)) + "% in all" : "") + " · " + (window.__ne && window.__ne.ok ? "Juno and the other native synths" : "idle")) : row("Native engine", null, window.__ne && window.__ne.on ? "not running" : "switched off (Settings › App)", false)}
-          ${plugs.length ? plugs.map(([id, v]) => row(plugName(id), v, "its own audio thread")).join("") : '<p class="nbc-note">No VST3 or CLAP plugins loaded.</p>'}
+          ${plugs.length ? plugs.map(([id, v]) => row(plugName(id), v, "its own audio thread")).join("") : '<p class="nbc-note">No VST3, CLAP or LV2 plugins loaded.</p>'}
           ${r.pluginMain > 0.5 ? row("Plugin windows", r.pluginMain, "plugins' own windows, loading and settings (not the sound)") : ""}
           <div class="nbc-g">Altogether</div>
           ${row("Nate Bloom", r.app / Math.max(1, r.cores), r1(r.app) + "% of one core across all its processes (screen, sound, network), of " + r.cores + " cores")}

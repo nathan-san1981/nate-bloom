@@ -24,6 +24,8 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <map>
+#include <memory>
 #include <algorithm>
 #include <pthread.h>
 #include <sched.h>
@@ -34,7 +36,7 @@ namespace nbeng {
 
 static const int BLOCK = 128, MAXBUS = 8;
 
-static const int NP = 128;   // note parameters: [0] kind, then the kind's own (see Voice and Gen)
+static const int NP = 160;   // note parameters: [0] kind, then the kind's own (see Voice and Gen)
 struct Cmd { int type; int id; int bus; int64_t frame; int midi; double mix; double p[NP]; };   // type: 1 note on, 2 off, 3 kill, 4 all off, 5 pitch
 
 static inline float satf(float x) { return x < -3.f ? -1.f : x > 3.f ? 1.f : x * (27.f + x * x) / (27.f + 9.f * x * x); }
@@ -71,6 +73,28 @@ struct Biquad2 {   // RBJ low-pass and band-pass (Web Audio's shapes)
   }
   inline double run(double x) { double y = b0 * x + z1; z1 = b1 * x - a1 * y + z2; z2 = b2 * x - a2 * y; return y; }
 };
+// (185) wavetables from the page's harmonic lists (its PeriodicWaves: the Vital's, the Zeb's, the FM's feedback
+// shapes), made once each and kept: a 2048-point cycle at a few harmonic counts, the one a note uses below Nyquist,
+// scaled to a peak of 1 as the browser scales a PeriodicWave
+struct Table { std::vector<std::vector<float>> mip; std::vector<int> maxH; };
+static std::mutex gTabMu; static std::map<int, std::shared_ptr<Table>> gTabs;
+static std::shared_ptr<Table> buildTable(const float* h, int nh) {
+  auto T = std::make_shared<Table>(); const int N = 2048;
+  std::vector<float> full(N, 0.f);
+  for (int H = std::max(1, nh - 1); ; H = H / 2) {
+    std::vector<float> c(N, 0.f);
+    for (int k = 1; k <= H && k < nh; k++) { const double a = h[k]; if (a == 0) continue; for (int i = 0; i < N; i++) c[i] += (float)(a * sin(2 * M_PI * k * i / N)); }
+    T->mip.push_back(c); T->maxH.push_back(H);
+    if (H <= 1) break;
+  }
+  float pk = 0; for (float v : T->mip[0]) pk = std::max(pk, std::fabs(v)); if (pk > 0) for (auto& m : T->mip) for (auto& v : m) v /= pk;
+  return T;
+}
+static inline double tableAt(const Table* T, double ph, double f, double sr) {
+  size_t m = 0; while (m + 1 < T->mip.size() && T->maxH[m] * std::fabs(f) > sr * 0.5) m++;
+  const auto& c = T->mip[m]; const double x = ph * 2048; const int i0 = (int)x; const double fr = x - i0; return c[i0 & 2047] * (1 - fr) + c[(i0 + 1) & 2047] * fr;
+}
+
 struct Gen {
   int nosc = 0; double wave[8], mul[8], det[8], det0[8], detT[8], gain[8], ph[8];
   double skey[8] = {}, sdc[8] = {}; int fade[8] = {}; double fadeT = 0.1;   // (178) hard-sync waves (wave 4: mul is the ratio) and crossfades between them
@@ -81,6 +105,9 @@ struct Gen {
   double nG = 0, nDec = 0.02; Biquad2 bp; double vibD = 0, vibOn = 0.75, vibRate = 5.6, vibPh = 0;
   double s1 = 0, s2 = 0, s3 = 0, s4 = 0, ic1 = 0, ic2 = 0, env = 0.0001; int64_t endAt = INT64_MAX;
   double gdrv = 1.9;   // (177) the Analog bar's Drive (1 + 3 × drive; near 0: no saturation, the Analog core off)
+  // (185) wavetable oscillators (wave 5), a shared LFO on oscillator levels and the cutoff (the Vital, the Zeb), formants and breath (the Choir)
+  std::shared_ptr<Table> tbl[8]; double lfoRate = 0, lfoPh = 0, lfoF = 0, lfoG[8] = {};
+  bool form = false; Biquad2 fb[3]; double fl[3] = {}; double brG = 0; Biquad brHp;
   uint32_t rng = 7;
   inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
   void setup(const double* p, double sr, uint32_t seed) {
@@ -90,6 +117,10 @@ struct Gen {
       if ((int)wave[i] == 4) {   // the page's syncWave(ratio): a saw reset every cycle, ratio in twelfths, without its DC
         skey[i] = std::max(1.0, std::round(mul[i] * 12) / 12); mul[i] = 1; double m = 0; for (int k = 0; k < 512; k++) { const double x = k / 512.0 * skey[i]; m += (x - std::floor(x)) * 2 - 1; } sdc[i] = m / 512; } }
     fadeT = p[99] > 0 ? p[99] : 0.1;
+    for (int i = 0; i < nosc; i++) if ((int)wave[i] == 5) { std::lock_guard<std::mutex> lk(gTabMu); auto it = gTabs.find((int)p[2 + i * 7 + 6]); if (it != gTabs.end()) tbl[i] = it->second; ph[i] = 0; if (!tbl[i]) wave[i] = 3; }
+    lfoRate = p[108]; lfoF = p[109]; for (int i = 0; i < 8; i++) lfoG[i] = p[110 + i];
+    form = p[118] > 0; if (form) for (int j = 0; j < 3; j++) { fb[j].set(1, p[119 + j], p[122 + j] > 0 ? p[122 + j] : 1, sr); fl[j] = p[125 + j]; }
+    brG = p[128]; if (brG > 0) brHp.highpass(p[129] > 0 ? p[129] : 700, 1.12, sr);
     ft = (int)p[58]; const double qlin = pow(10.0, std::max(-20.0, std::min(30.0, p[59])) / 20.0);
     k = ft == 2 ? std::min(3.85, 4 * (1 - 1 / std::max(1.0, qlin))) : 1 / std::max(0.5, qlin);
     fMode = p[60]; fBase = p[61]; fPeak = p[62]; fSettle = p[63]; fT1 = std::max(0.001, p[64]); fTau = std::max(0.005, p[65]); dr = (p[90] > 0 ? p[90] : 1) * (p[93] > 0 ? p[93] : 1); gdrv = p[91] > 0 ? p[91] : 1.9;
@@ -121,7 +152,8 @@ struct Gen {
           inc[o] = f * mul[o] * gl * exp2((common + d) / 1200.0) * isr;
         }
       }
-      double x = 0;
+      double x = 0, lfoV = 0;
+      if (lfoRate > 0) { lfoV = sin(2 * M_PI * lfoPh); lfoPh += lfoRate * isr; if (lfoPh >= 1) lfoPh -= 1; }
       for (int o = 0; o < nosc; o++) {
         const double dt = std::min(0.49, inc[o]); ph[o] += dt; if (ph[o] >= 1) ph[o] -= 1;
         double v; const int wv = (int)wave[o];
@@ -133,11 +165,14 @@ struct Gen {
           v = 2 * sp - 1 - polyblep(sp, dk) - sdc[o];
           if (fr > 1e-6) v -= fr * polyblep(ph[o], dt);
         }
+        else if (wv == 5 && tbl[o]) v = tableAt(tbl[o].get(), ph[o], inc[o] * sr, sr);
         else v = sin(2 * M_PI * ph[o]);
         double fg = 1;
         if (fade[o]) { const double T = fadeT, u = t / T; fg = fade[o] == 1 ? std::max(0.0, 1 - u) : fade[o] == 3 ? std::min(1.0, u) : (u < 0.5 ? u * 2 : std::max(0.0, 2 - u * 2)); }
-        x += v * gain[o] * fg;
+        x += v * (gain[o] + lfoG[o] * lfoV) * fg;
       }
+      if (brG > 0) x += brHp.run(noise()) * brG;   // breath: high-passed noise, all along
+      if (form) { const double s0 = x; x = 0; for (int j = 0; j < 3; j++) x += fb[j].run(s0) * fl[j]; }   // three formants side by side
       if (comb) {   // the stack minus a swept, delayed copy of itself
         cBuf[cW] = (float)x; const double d = std::max(1.0 / sr, cD0 + cDep * sin(2 * M_PI * cPh)) * sr; cPh += cRate * isr; if (cPh >= 1) cPh -= 1;
         double rp = cW - d; while (rp < 0) rp += 4096; const int i0 = (int)rp; const double fr2 = rp - i0; const double dl = cBuf[i0 & 4095] * (1 - fr2) + cBuf[(i0 + 1) & 4095] * fr2;
@@ -150,6 +185,7 @@ struct Gen {
           double fc = fBase;
           if (fMode == 1) fc = t < fT1 ? fBase + (fPeak - fBase) * (t / fT1) : fSettle + (fPeak - fSettle) * exp(-(t - fT1) / fTau);
           else if (fMode == 2) fc = t < fT1 ? fPeak : fBase + (fPeak - fBase) * exp(-(t - fT1) / fTau);
+          if (lfoF != 0) fc += lfoF * lfoV;
           fc *= dr; if (fc > ny) fc = ny; else if (fc < 10) fc = 10;
           if (fc != lastF) { lastF = fc; g = tan(w * fc); if (ft == 2) G = g / (1 + g); else { a1 = 1 / (1 + g * (g + k)); a2 = g * a1; a3 = g * a2; } }
         }
@@ -223,8 +259,57 @@ struct Bell {
   }
 };
 
+// (185) the FM synth (after Dexed, 090's fmVoice): six sine operators (the feedback one a table of its own, as the
+// page's fbWave), each with a four-point envelope of straight lines; a modulator's output is added to the frequency of
+// the operator it feeds (in Hz, as Web Audio's frequency input), the carriers summed. p[1] operators; operator k at
+// 2 + 12k: frequency (Hz), detune (cents), table id (-1 sine), carrier (1/0), the envelope v0 t1 v1 t2 v2 t3 v3; p[80]
+// links, then (from, to) pairs from p[81], numbered from 1; p[120] the carriers' gain, p[121] release.
+struct FM {
+  int n = 0; double fq[6], det[6], ev[6][7], ph[6] = {}, o[6] = {}; bool car[6]; std::shared_ptr<Table> tb[6];
+  int nl = 0, lf[16], lt[16], order[6]; double carG = 0.1, release = 0.3, env = 0.0001; int64_t endAt = INT64_MAX;
+  void setup(const double* p) {
+    n = std::max(0, std::min(6, (int)p[1]));
+    for (int k = 0; k < n; k++) { const double* q = p + 2 + k * 12; fq[k] = q[0]; det[k] = q[1]; car[k] = q[3] > 0.5; for (int j = 0; j < 7; j++) ev[k][j] = q[4 + j];
+      if (q[2] >= 0) { std::lock_guard<std::mutex> lk(gTabMu); auto it = gTabs.find((int)q[2]); if (it != gTabs.end()) tb[k] = it->second; } }
+    nl = std::max(0, std::min(16, (int)p[80]));
+    for (int j = 0; j < nl; j++) { lf[j] = (int)p[81 + j * 2] - 1; lt[j] = (int)p[82 + j * 2] - 1; if (lf[j] < 0 || lf[j] >= n || lt[j] < 0 || lt[j] >= n || lf[j] == lt[j]) { lf[j] = lt[j] = -1; } }
+    // modulators before what they feed (the links have no loops: feedback is in the table)
+    bool done[6] = {}; int m = 0;
+    for (int pass = 0; pass < 6 && m < n; pass++) for (int k = 0; k < n; k++) { if (done[k]) continue; bool ready = true; for (int j = 0; j < nl; j++) if (lt[j] == k && lf[j] >= 0 && !done[lf[j]]) ready = false; if (ready || pass == 5) { done[k] = true; order[m++] = k; } }
+    n = m; carG = p[120]; release = std::max(0.01, p[121]);
+  }
+  static inline double seg(const double* e, double t) {   // v0 → v1 by t1 → v2 by t2 → v3 by t3, then held
+    if (t >= e[5]) return e[6];
+    if (t >= e[3]) return e[4] + (e[6] - e[4]) * (t - e[3]) / std::max(1e-6, e[5] - e[3]);
+    if (t >= e[1]) return e[2] + (e[4] - e[2]) * (t - e[1]) / std::max(1e-6, e[3] - e[1]);
+    return e[0] + (e[2] - e[0]) * t / std::max(1e-6, e[1]);
+  }
+  bool render(int64_t from, int nf, float* out, int64_t start, int64_t rel, double sr, double mix, double bendC, double vibC, double vibPh0) {
+    const double isr = 1.0 / sr, cR = exp(-1.0 / (std::max(0.005, release / 4) * sr));
+    double mul[6], fqC[6];
+    for (int i = 0; i < nf; i++) {
+      const int64_t fr = from + i; if (fr < start) continue;
+      if (fr >= endAt) return false;
+      const double t = (fr - start) * isr;
+      if ((i & 15) == 0 || i == 0) { const double c = bendC + vibC * sin(vibPh0 + 2 * M_PI * 5.6 * i * isr); for (int k = 0; k < n; k++) { mul[k] = exp2((det[k] + c) / 1200.0); fqC[k] = std::min(fq[k], 20000.0); } }
+      double x = 0;
+      for (int a = 0; a < n; a++) {
+        const int k = order[a]; double md = 0; for (int j = 0; j < nl; j++) if (lt[j] == k && lf[j] >= 0) md += o[lf[j]];
+        const double hz = (fqC[k] + md) * mul[k]; ph[k] += hz * isr; ph[k] -= std::floor(ph[k]);
+        const double w = tb[k] ? tableAt(tb[k].get(), ph[k], hz, sr) : sin(2 * M_PI * ph[k]);
+        o[k] = w * seg(ev[k], t);
+        if (car[k]) x += o[k];
+      }
+      if (fr < rel) env = t < 0.003 ? 0.0001 + (1 - 0.0001) * (t / 0.003) : 1;
+      else { if (endAt == INT64_MAX) endAt = rel + (int64_t)((release * 1.6 + 0.1) * sr); env = 0.0001 + (env - 0.0001) * cR; }
+      out[i] += (float)(x * carG * env * mix);
+    }
+    return true;
+  }
+};
+
 struct Voice {
-  int id = 0, bus = 0, kind = 1; bool alive = false; Gen gen; Bell bell;
+  int id = 0, bus = 0, kind = 1; bool alive = false; Gen gen; Bell bell; FM fm;
   int64_t start = 0, rel = INT64_MAX;   // frames (absolute)
   double sr = 48000, mix = 1;
   // Juno
@@ -242,6 +327,7 @@ struct Voice {
     if (kind == 3) {   // (the drift's slow wander, as nbDrift gives the browser's bells)
       driftPh += driftRate * n / sr; if (driftPh >= 1) driftPh -= 1;
       if (!bell.render(from, n, out, start, rel, f, sr, mix, driftC + driftDepth * sin(2 * M_PI * driftPh) + bendC)) { alive = false; return false; } return true; }
+    if (kind == 4) { if (!fm.render(from, n, out, start, rel, sr, mix, bendC, vibC, vibPh)) { alive = false; return false; } return true; }
     if (kind == 2) { if (!gen.render(from, n, out, start, rel, f, sr, mix, bendC, vibC, vibPh, driftDepth, driftPh, driftRate)) { alive = false; return false; } return true; }
     const double isr = 1.0 / sr, w = M_PI / sr, ny = sr * 0.45;
     const double tauA = 0.5 * sr, cA = exp(-1.0 / tauA), tauR = std::max(0.005, release / 4) * sr, cR = exp(-1.0 / tauR), cF = exp(-isr / std::max(0.01, fd));
@@ -341,7 +427,7 @@ struct Engine {
     }
   }
   void workerLoop(int w) {
-    { char nm[16]; snprintf(nm, sizeof nm, "nb-eng-w%d", w + 1); pthread_setname_np(pthread_self(), nm); }   // (179: the app's CPU meter finds the engine's threads by name)
+    { char nm[16]; snprintf(nm, sizeof nm, "nb-eng-w%d", (w + 1) % 100); pthread_setname_np(pthread_self(), nm); }   // (179: the app's CPU meter finds the engine's threads by name)
     int seen = 0;   // (from the start: a worker that starts late must still see the first job)
     while (!wstop.load()) {
       { std::unique_lock<std::mutex> lk(wmu); wcv.wait(lk, [&] { return wstop.load() || gen.load() != seen; }); }
@@ -358,7 +444,7 @@ struct Engine {
       if (m.type == 1) {
         Voice v; v.id = m.id; v.bus = std::max(0, std::min(buses - 1, m.bus)); v.sr = sr; v.mix = m.mix; v.alive = true;
         v.start = std::max(m.frame, wf);   // (a note already due plays at once)
-        v.kind = (int)m.p[0] == 2 ? 2 : (int)m.p[0] == 3 ? 3 : 1;
+        v.kind = (int)m.p[0] == 2 ? 2 : (int)m.p[0] == 3 ? 3 : (int)m.p[0] == 4 ? 4 : 1;
         const double* p = m.p + 1;
         v.f = 440.0 * exp2((m.midi - 69) / 12.0);
         v.rng = (uint32_t)(m.id * 2654435761u + 12345u);
@@ -367,6 +453,7 @@ struct Engine {
           v.driftRate = 0.06 + ((v.rng >> 8) & 255) / 255.0 * 0.24; v.driftDepth = std::fabs(v.driftC) > 0 ? (m.p[92] > 0 ? m.p[92] : 0.35) * (3 + ((v.rng >> 16) & 255) / 255.0 * 4) : 0;
           voices.push_back(v); continue;
         }
+        if (v.kind == 4) { v.fm.setup(m.p); v.release = v.fm.release; voices.push_back(v); continue; }
         if (v.kind == 2) {
           v.gen.setup(m.p, sr, v.rng); v.release = v.gen.release; v.driftC = m.p[72];
           v.driftRate = 0.06 + ((v.rng >> 8) & 255) / 255.0 * 0.24; v.driftDepth = std::fabs(v.driftC) > 0 ? (m.p[92] > 0 ? m.p[92] : 0.35) * (3 + ((v.rng >> 16) & 255) / 255.0 * 4) : 0;
@@ -386,9 +473,9 @@ struct Engine {
       } else if (m.type == 2) {
         for (auto& v : voices) if (v.id == m.id && v.rel == INT64_MAX) v.rel = std::max(m.frame, std::max(wf, v.start));
       } else if (m.type == 3) {
-        for (auto& v : voices) if (v.id == m.id) { v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; }
+        for (auto& v : voices) if (v.id == m.id) { v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; v.fm.release = std::min(v.fm.release, 0.03); v.fm.endAt = INT64_MAX; }
       } else if (m.type == 4) {
-        for (auto& v : voices) { if (v.rel == INT64_MAX || v.rel > wf) v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; }
+        for (auto& v : voices) { if (v.rel == INT64_MAX || v.rel > wf) v.rel = wf; v.release = std::min(v.release, 0.03); v.endAt = INT64_MAX; v.gen.release = std::min(v.gen.release, 0.03); v.gen.endAt = INT64_MAX; v.bell.release = std::min(v.bell.release, 0.03); v.bell.endAt = INT64_MAX; v.fm.release = std::min(v.fm.release, 0.03); v.fm.endAt = INT64_MAX; }
       } else if (m.type == 5) { bendC = m.p[0]; vibC = m.p[1]; }
     }
   }
@@ -435,7 +522,7 @@ struct Engine {
         renderUs.store(renderUs.load() * 0.98 + us * 0.02); if (us > renderMaxUs.load()) renderMaxUs.store(us);
         blocks.fetch_add(1);
       }
-      timespec ts{0, 500000}; nanosleep(&ts, nullptr);
+      { const long us = (long)std::max(400.0, std::min(2000.0, (ahead - 256) / sr * 0.5e6)); timespec ts{0, us * 1000}; nanosleep(&ts, nullptr); }   // (181: as the plugins)
     }
   }
   void start() {
@@ -506,6 +593,17 @@ static napi_value Pitch(napi_env env, napi_callback_info info) {   // eng_pitch(
   Cmd c{}; c.type = 5; c.p[0] = argd(env, a[0]); c.p[1] = argd(env, a[1]);
   { std::lock_guard<std::mutex> lk(E->mu); E->q.push_back(c); } return boolv(env, true);
 }
+// (185) eng_table(id, harmonics Float64Array: [0] unused, [k] the k-th harmonic's sine amplitude) -> true
+static napi_value TableN(napi_env env, napi_callback_info info) {
+  napi_value a[2]; size_t n = getargs(env, info, a, 2); if (n < 1) return boolv(env, false);
+  size_t hl = 0; double* h = n > 1 ? (double*)typedData(env, a[1], &hl) : nullptr;
+  if (!h) { std::lock_guard<std::mutex> lk(gTabMu); gTabs.erase((int)argd(env, a[0])); return boolv(env, true); }   // (no list: that table goes)
+  if (hl < 2 || hl > 1024) return boolv(env, false);
+  std::vector<float> hf(hl); for (size_t i = 0; i < hl; i++) hf[i] = (float)h[i];
+  auto T = buildTable(hf.data(), (int)hl);
+  { std::lock_guard<std::mutex> lk(gTabMu); gTabs[(int)argd(env, a[0])] = T; }
+  return boolv(env, true);
+}
 static napi_value Stats(napi_env env, napi_callback_info info) {
   napi_value o; napi_create_object(env, &o);
   auto set = [&](const char* k, double v) { napi_set_named_property(env, o, k, num(env, v)); };
@@ -528,6 +626,7 @@ napi_value Init(napi_env env, napi_value exports) {
     { "eng_off", nullptr, Off, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "eng_kill", nullptr, Kill, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "eng_pitch", nullptr, Pitch, nullptr, nullptr, nullptr, napi_default, nullptr },
+    { "eng_table", nullptr, TableN, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "eng_stats", nullptr, Stats, nullptr, nullptr, nullptr, napi_default, nullptr },
     { "eng_stop", nullptr, Stop, nullptr, nullptr, nullptr, napi_default, nullptr },
   };

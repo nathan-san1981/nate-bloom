@@ -62,11 +62,14 @@
         "nb_plug.cc",
         "nb_plug_clap.cc",
         "nb_plug_vst3.cc",
+        "nb_plug_lv2.cc",
         "third_party/vst3/pluginterfaces/base/funknown.cpp"
       ],
       "include_dirs": [
         "third_party/clap/include",
-        "third_party/vst3"
+        "third_party/vst3",
+        "third_party/lv2/include",
+        "third_party/lilv/include"
       ],
       "defines": [
         "NAPI_VERSION=8"

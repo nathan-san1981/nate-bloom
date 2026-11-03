@@ -25,6 +25,18 @@ app.commandLine.appendSwitch("js-flags", "--max-old-space-size=8192");
 // (174) the sound's audio thread (where every synth, plugin and effect is worked out) at real-time priority, so the
 // rest of the computer can't push it late; Mint's rtkit grants it. Unknown names are ignored by Electron.
 app.commandLine.appendSwitch("enable-features", "AudioWorkletRealtimeThread,AudioWorkletThreadRealtimePriority");
+// (181) low latency: a smaller buffer between the page's sound and the sound server (the browser's own
+// "audio-buffer-size", in frames, and the PulseAudio/PipeWire client latency). Chosen with Fast/Steady in the app
+// (low-latency.json), applied when the app starts. NB_LOW_LATENCY=frames for tests.
+{
+  let ll = null;
+  try { ll = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "low-latency.json"), "utf8")); } catch (e) {}
+  const frames = process.env.NB_LOW_LATENCY ? +process.env.NB_LOW_LATENCY || 256 : ll && ll.on ? (+ll.frames || 256) : 0;
+  if (frames >= 64 && frames <= 2048) {
+    app.commandLine.appendSwitch("audio-buffer-size", String(frames));
+    if (!process.env.PULSE_LATENCY_MSEC) process.env.PULSE_LATENCY_MSEC = String(Math.max(3, Math.round(frames / 48)));
+  }
+}
 protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true, codeCache: true } }]);
 
 if (!app.requestSingleInstanceLock()) { app.quit(); }
@@ -356,6 +368,9 @@ ipcMain.handle("nb:cpu", () => {
   if (process.platform !== "linux" || !win || win.isDestroyed()) return null;
   const t = Number(process.hrtime.bigint()) / 1e9, pid = win.webContents.getOSProcessId(), st = cpuStat(), th = cpuThreads(pid);
   let appPct = 0; try { appPct = app_metrics(); } catch (e) {}
+  // (184) the plugins' own processes (children of the page's): their threads, named nb-ph-<n>
+  const kids = {}; try { for (const d of fs.readdirSync("/proc")) { if (!/^\d+$/.test(d)) continue; try { const s = fs.readFileSync("/proc/" + d + "/stat", "utf8"), f = s.slice(s.lastIndexOf(")") + 2).split(" "); if (+f[1] === pid) Object.assign(kids, Object.fromEntries(Object.entries(cpuThreads(+d)).map(([k, v]) => [d + ":" + k, v]))); } catch (e) {} } } catch (e) {}
+  Object.assign(th, kids);
   const prev = cpuPrev; cpuPrev = { t, pid, st, th };
   if (!prev || prev.pid !== pid || t - prev.t < 0.25) return { warming: true };
   const dt = t - prev.t, HZ = 100, pct = (a, b) => Math.round(Math.max(0, a - b) / HZ / dt * 1000) / 10;
@@ -370,7 +385,10 @@ ipcMain.handle("nb:cpu", () => {
     else if (c === "nb-engine" || c.startsWith("nb-eng-w")) r.engine.push(p);
     else if (c === "nb-plugmain") r.pluginMain += p;
     else if (c.startsWith("nb-plug-")) r.plugins[c.slice(8)] = (r.plugins[c.slice(8)] || 0) + p;
+    else if (c.startsWith("nb-ph-")) r.plugins[c.slice(6)] = (r.plugins[c.slice(6)] || 0) + p;
+    if (id.includes(":")) r.app += p;   // (Electron's own figures don't count the plugins' processes)
   }
+  r.app = Math.round(r.app * 10) / 10;
   return r;
 });
 // Nate Bloom's processes together, in % of one core (Electron measures each since the last call)

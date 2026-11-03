@@ -26,7 +26,12 @@ class NBStretch extends AudioWorkletProcessor {
     if (po && po.L) { this.L = po.L; this.R = po.R || po.L; this.len = this.L.length; this.sc = this.L instanceof Int16Array ? 1 / 32767 : 1; this.pos = (po.from || 0) * sampleRate; this.rate = po.rate || 1; this.P = po.pitch || 1; this.on = true; this.playing = true; this.startAt = -1; }
   }
   fresh() { this.accL.fill(0); this.accR.fill(0); this.outN = 0; this.outI = 0; this.prev = -1; }
-  wrap(p) { const l = this.loop; if (l && p >= l.b && l.b > l.a) p = l.a + ((p - l.a) % (l.b - l.a)); return p; }
+  // (186) a loop's end is held inside the file: a loop to the very end (a whole sample or song) used to stop at its last
+  // frame instead of going round, and the stretcher stopped a window short of it
+  lb() { const l = this.loop; return l ? Math.min(l.b, this.len - 2) : 0; }
+  looping() { const l = this.loop; return !!l && this.lb() - l.a > 64; }
+  wrap(p) { if (!this.looping()) return p; const a = this.loop.a, b = this.lb(); if (p >= b) p = a + ((p - a) % (b - a)); return p; }
+  wi(k) { if (!this.looping()) return k; const a = Math.ceil(this.loop.a), b = Math.floor(this.lb()); return k >= b ? a + ((k - a) % (b - a)) : k; }
   at(arr, p) { const i = Math.floor(p); if (i < 0 || i >= this.len) return 0; if (i >= this.len - 1) return arr[i]; const f = p - i; return arr[i] + (arr[i + 1] - arr[i]) * f; }
   produce() {
     const N = this.N, H = this.H, OV = this.OV, SR = this.SR, L = this.L, R = this.R, win = this.win, accL = this.accL, accR = this.accR, len = this.len, P = this.P;
@@ -47,8 +52,8 @@ class NBStretch extends AudioWorkletProcessor {
       src = target + bestD;
     }
     const si = Math.max(0, Math.floor(src));
-    if (P === 1) { for (let i = 0; i < N; i++) { const k = si + i; if (k >= len) break; accL[i] += L[k] * win[i]; accR[i] += R[k] * win[i]; } }
-    else { for (let i = 0; i < N; i++) { const q = si + i * P, k = Math.floor(q); if (k >= len - 1) break; const f = q - k; accL[i] += (L[k] + (L[k + 1] - L[k]) * f) * win[i]; accR[i] += (R[k] + (R[k + 1] - R[k]) * f) * win[i]; } }
+    if (P === 1) { for (let i = 0; i < N; i++) { const k = this.wi(si + i); if (k >= len) break; accL[i] += L[k] * win[i]; accR[i] += R[k] * win[i]; } }
+    else { for (let i = 0; i < N; i++) { const q = si + i * P, k0 = Math.floor(q), k = this.wi(k0), k1 = this.wi(k0 + 1); if (k1 >= len) break; const f = q - k0; accL[i] += (L[k] + (L[k1] - L[k]) * f) * win[i]; accR[i] += (R[k] + (R[k1] - R[k]) * f) * win[i]; } }
     this.outL.set(accL.subarray(0, H)); this.outR.set(accR.subarray(0, H)); this.outN = H; this.outI = 0;
     accL.copyWithin(0, H); accL.fill(0, N - H); accR.copyWithin(0, H); accR.fill(0, N - H);
     this.prev = si; this.pos += H * this.rate;
@@ -65,8 +70,8 @@ class NBStretch extends AudioWorkletProcessor {
     if (this.stopAt >= 0 && t + n / sr > this.stopAt) { kEnd = Math.max(0, Math.min(n, Math.round((this.stopAt - t) * sr))); stopping = true; }
     const direct = (!this.on || Math.abs(this.rate - 1) < 0.003) && this.P === 1;
     for (let k = k0; k < kEnd; k++) {
-      if (direct) { const p = this.wrap(this.pos); if (p >= this.len - 1) { this.end(); break; } oL[k] = this.at(this.L, p) * this.sc; oR[k] = this.at(this.R, p) * this.sc; this.pos += this.rate; }
-      else { if (this.outI >= this.outN) { if (this.wrap(this.pos) >= this.len - this.N * this.P - 2) { this.end(); break; } this.produce(); } oL[k] = this.outL[this.outI] * this.sc; oR[k] = this.outR[this.outI] * this.sc; this.outI++; }
+      if (direct) { const p = this.wrap(this.pos); if (p >= this.len - 1) { this.end(); break; } oL[k] = this.at(this.L, p) * this.sc; oR[k] = this.at(this.R, p) * this.sc; this.pos = p + this.rate; }
+      else { if (this.outI >= this.outN) { if (!this.looping() && this.pos >= this.len - this.N * this.P - 2) { this.end(); break; } this.pos = this.wrap(this.pos); this.produce(); } oL[k] = this.outL[this.outI] * this.sc; oR[k] = this.outR[this.outI] * this.sc; this.outI++; }
     }
     if (stopping) { this.playing = false; this.stopAt = -1; }
     this.sent += n; if (this.sent >= 4096) { this.sent = 0; this.port.postMessage({ pos: this.posOut() / sr }); }

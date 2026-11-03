@@ -49,6 +49,7 @@ if (fp && fp.eng_attach && engineOK && !process.env.NB_NO_ENGINE) contextBridge.
   off: (id, frame) => fp.eng_off(id, frame),
   kill: id => fp.eng_kill(id == null ? -1 : id),
   pitch: (bend, vib) => fp.eng_pitch(bend, vib),
+  table: (id, h) => fp.eng_table ? fp.eng_table(id, h || undefined) : false,   // (185)
   stats: () => fp.eng_stats(),
   stop: () => fp.eng_stop(),
 });
@@ -84,6 +85,14 @@ for (const p of [path.join(__dirname, "native", "build", "Release", "nbplug.node
   try { pl = require(p); break; } catch (e) {}
 }
 if (pl && !process.env.NB_NO_PLUGINS) {
+  // (184) each plugin in a process of its own (plughost.js), when it can start; otherwise in this one.
+  // (187) a switch, off until it's switched on (the Plugins sheet; it takes effect the next time the app opens): with
+  // one plugin (Surge XT's VST3 window) it took the app's helper processes down in testing
+  const UDp = (process.argv.find(a => a.startsWith("--nb-userdata=")) || "").slice(14), OOPF = UDp ? path.join(UDp, "plug-oop.json") : "";
+  let oopOn = process.env.NB_PLUG_OOP === "1";
+  try { if (!oopOn && OOPF) oopOn = JSON.parse(require("fs").readFileSync(OOPF, "utf8")).on === true; } catch (e) {}
+  if (process.env.NB_PLUG_INPROC) oopOn = false;
+  try { if (oopOn && pl.plug_config) pl.plug_config(path.join(__dirname, "plughost.js")); } catch (e) { oopOn = false; }
   window.addEventListener("message", e => {
     const d = e.data && e.data.nbPlugAttach; if (!d || e.source !== window) return;
     let ok = false, why = "";
@@ -92,6 +101,8 @@ if (pl && !process.env.NB_NO_PLUGINS) {
   });
   const keys = new Map();   // instance -> its key, for the crash note
   contextBridge.exposeInMainWorld("NBPlug", {
+    oop: () => ({ on: oopOn, next: (() => { try { return JSON.parse(require("fs").readFileSync(OOPF, "utf8")).on === true; } catch (e) { return false; } })() }),   // (187)
+    setOop: on => { try { require("fs").writeFileSync(OOPF, JSON.stringify({ on: !!on })); return true; } catch (e) { return false; } },
     list: () => ipcRenderer.invoke("nb:plug-list"),
     scan: full => ipcRenderer.invoke("nb:plug-scan", !!full),
     addFolder: () => ipcRenderer.invoke("nb:plug-folder"),

@@ -226,7 +226,10 @@
   }
 
   // ---------- Sample editor ----------
-  const ed = { chans: null, rate: 44100, a: 0, b: 0, undo: [], orig: null, target: null, name: "" };
+  const ed = { chans: null, rate: 44100, a: 0, b: 0, undo: [], orig: null, target: null, name: "", v0: 0, v1: 0 };
+  window.__nbEd = ed;   // (187: the Linux editor's extra tools, 850, reach it by this name)
+  // (187) the part of the sample on screen (the whole of it unless zoomed: the Linux app's editor zooms)
+  const edView = () => { const n = ed.chans ? ed.chans[0].length : 0; let v0 = ed.v0 || 0, v1 = ed.v1 || n; if (v1 > n || v1 <= v0) { v0 = 0; v1 = n; } return [v0, v1]; };
   const edEl = document.getElementById("editor"), edWave = document.getElementById("edWave"), edCtx = edWave.getContext("2d");
   const edInfo = document.getElementById("edInfo"), edPlayBtn = document.getElementById("edPlay");
   const edLen = () => ed.chans[0].length;
@@ -238,7 +241,7 @@
   function openEditor(target) {
     if (!ctx || !target.buf) return;
     ed.chans = chansOf(target.buf); ed.rate = target.buf.sampleRate; ed.orig = ed.chans.map(c => c.slice());
-    ed.a = 0; ed.b = edLen(); ed.undo = []; ed.target = target; ed.name = target.name;
+    ed.a = 0; ed.b = edLen(); ed.undo = []; ed.target = target; ed.name = target.name; ed.v0 = 0; ed.v1 = 0;
     document.getElementById("edTitle").textContent = "Edit · " + target.label;
     document.getElementById("edSave").textContent = "Save to " + target.label;
     document.getElementById("edToPad").textContent = "Selection → P" + (state.pads.sel + 1);
@@ -262,12 +265,12 @@
     if (!w || !h) return;
     edWave.width = Math.round(w * dpr); edWave.height = Math.round(h * dpr);
     edCtx.setTransform(dpr, 0, 0, dpr, 0, 0); edCtx.clearRect(0, 0, w, h);
-    const n = edLen(), lo = Math.min(ed.a, ed.b), hi = Math.max(ed.a, ed.b);
-    const ax = lo / n * w, bx = hi / n * w;
+    const n = edLen(), [v0, v1] = edView(), span = v1 - v0, lo = Math.min(ed.a, ed.b), hi = Math.max(ed.a, ed.b);
+    const ax = (lo - v0) / span * w, bx = (hi - v0) / span * w;
     edCtx.fillStyle = "rgba(196,163,255,0.14)"; edCtx.fillRect(ax, 0, Math.max(1, bx - ax), h);
-    const cols = Math.max(1, Math.floor(w)), step = n / cols;
+    const cols = Math.max(1, Math.floor(w)), step = span / cols;
     for (let x = 0; x < cols; x++) {
-      const i0 = Math.floor(x * step), i1 = Math.min(n, Math.floor((x + 1) * step) + 1);
+      const i0 = v0 + Math.floor(x * step), i1 = Math.min(n, v0 + Math.floor((x + 1) * step) + 1);
       const inc = Math.max(1, Math.floor((i1 - i0) / 200));
       let mn = 0, mx = 0;
       for (const c of ed.chans) for (let i = i0; i < i1; i += inc) { const v = c[i]; if (v < mn) mn = v; if (v > mx) mx = v; }
@@ -280,20 +283,21 @@
       edCtx.fillRect(Math.min(w - 12, Math.max(0, x - 6)), h - 14, 12, 14);
     });
     if (edSrc && ctx) {
-      const pos = edPlayFrom + (ctx.currentTime - edPlayStart) * ed.rate;
-      edCtx.fillStyle = "#ece7f7"; edCtx.fillRect(pos / n * w, 0, 1.5, h);
+      let pos = edPlayFrom + (ctx.currentTime - edPlayStart) * ed.rate;
+      if (edSrc.loop && edSrc.__len) pos = edPlayFrom + ((pos - edPlayFrom) % edSrc.__len);
+      edCtx.fillStyle = "#ece7f7"; edCtx.fillRect((pos - v0) / span * w, 0, 1.5, h);
     }
   }
   let edDrag = null;
   function edPos(e) {
-    const r = edWave.getBoundingClientRect(), px = e.clientX - r.left;
-    return { px, w: r.width, s: Math.round(Math.max(0, Math.min(1, px / r.width)) * edLen()) };
+    const r = edWave.getBoundingClientRect(), px = e.clientX - r.left, [v0, v1] = edView();
+    return { px, w: r.width, s: Math.round(v0 + Math.max(0, Math.min(1, px / r.width)) * (v1 - v0)) };
   }
   edWave.addEventListener("pointerdown", e => {
     if (!ed.chans) return;
     e.preventDefault(); edWave.setPointerCapture(e.pointerId);
-    const { px, w, s } = edPos(e), n = edLen();
-    const lo = Math.min(ed.a, ed.b), hi = Math.max(ed.a, ed.b), ax = lo / n * w, bx = hi / n * w;
+    const { px, w, s } = edPos(e), [v0, v1] = edView();
+    const lo = Math.min(ed.a, ed.b), hi = Math.max(ed.a, ed.b), ax = (lo - v0) / (v1 - v0) * w, bx = (hi - v0) / (v1 - v0) * w;
     const da = Math.abs(px - ax), db = Math.abs(px - bx);
     if (da <= 22 && da <= db) { ed.a = hi; ed.b = lo; edDrag = { id: e.pointerId, handle: true, moved: false }; }
     else if (db <= 22) { ed.a = lo; ed.b = hi; edDrag = { id: e.pointerId, handle: true, moved: false }; }
@@ -303,7 +307,7 @@
     if (!edDrag || e.pointerId !== edDrag.id) return;
     const { s } = edPos(e);
     if (!edDrag.handle) {
-      if (!edDrag.moved && Math.abs(s - edDrag.anchor) < edLen() * 0.004) return;
+      if (!edDrag.moved && Math.abs(s - edDrag.anchor) < (edView()[1] - edView()[0]) * 0.004) return;
       ed.a = edDrag.anchor;
     }
     edDrag.moved = true; ed.b = s; edRefresh();
@@ -312,6 +316,7 @@
     if (!edDrag || e.pointerId !== edDrag.id) return;
     if (!edDrag.moved && !edDrag.handle) { ed.a = 0; ed.b = edLen(); }
     const lo = Math.min(ed.a, ed.b), hi = Math.max(ed.a, ed.b); ed.a = lo; ed.b = hi;
+    if (typeof window.__edSnap === "function" && hi - lo >= 32) try { window.__edSnap(); } catch (er) {}   // (187: the Linux editor's zero-crossing snap)
     edDrag = null; edRefresh();
   };
   edWave.addEventListener("pointerup", edUp);

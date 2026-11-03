@@ -281,19 +281,32 @@
   let wavesCache = null;
   function getWaves() {
     if (wavesCache) return wavesCache;
-    const N = 48, make = fn => {
-      const real = new Float32Array(N), imag = new Float32Array(N);
-      for (let n = 1; n < N; n++) imag[n] = fn(n);
-      return ctx.createPeriodicWave(real, imag);
-    };
-    wavesCache = [
+    wavesCache = morphSpectra().map(imag => ctx.createPeriodicWave(new Float32Array(imag.length), imag));
+    return wavesCache;
+  }
+  // the Morph Pad's tables as harmonic amplitudes (the native engine builds the same tables from these: 810)
+  function morphSpectra() {
+    const N = 48, make = fn => { const imag = new Float32Array(N); for (let n = 1; n < N; n++) imag[n] = fn(n); return imag; };
+    return [
       make(n => n === 1 ? 1 : n === 2 ? 0.3 : n === 4 ? 0.15 : n === 8 ? 0.06 : 0),          // glass
       make(n => Math.pow(n, -1.7)),                                                           // warm
       make(n => n % 2 ? 1 / n : 0),                                                           // hollow
       make(n => Math.exp(-Math.pow(n - 3, 2) / 2) + 0.7 * Math.exp(-Math.pow(n - 7, 2) / 3) + 0.3 / n), // vocal
       make(n => Math.pow(n, -0.85)),                                                          // bright
     ];
-    return wavesCache;
+  }
+  // the Spectral Drone's two spectra (plain, and with a formant-like peak at harmonic shiftPeak)
+  function zebSpectrum(p, shiftPeak) {
+    const N = 64, imag = new Float32Array(N);
+    const tilt = 2.3 - p.bright * 1.9, b = p.oddeven;
+    const oddW = Math.max(0.3, Math.min(1, (1 - b) * 2)), evenW = Math.min(1, b * 2);
+    for (let n = 1; n < N; n++) {
+      let a = Math.pow(n, -tilt) * (n % 2 ? oddW : evenW);
+      if (n === 1) a = 1;
+      if (shiftPeak) a *= 1 + 2.5 * Math.exp(-Math.pow(n - shiftPeak, 2) / 6);
+      imag[n] = a;
+    }
+    return imag;
   }
 
   function activeLayers() {
@@ -560,18 +573,7 @@
     }
 
     if (id === "zeb") {
-      const spectrum = (shiftPeak) => {
-        const N = 64, real = new Float32Array(N), imag = new Float32Array(N);
-        const tilt = 2.3 - p.bright * 1.9, b = p.oddeven;
-        const oddW = Math.max(0.3, Math.min(1, (1 - b) * 2)), evenW = Math.min(1, b * 2);
-        for (let n = 1; n < N; n++) {
-          let a = Math.pow(n, -tilt) * (n % 2 ? oddW : evenW);
-          if (n === 1) a = 1;
-          if (shiftPeak) a *= 1 + 2.5 * Math.exp(-Math.pow(n - shiftPeak, 2) / 6);
-          imag[n] = a;
-        }
-        return ctx.createPeriodicWave(real, imag);
-      };
+      const spectrum = (shiftPeak) => { const imag = zebSpectrum(p, shiftPeak); return ctx.createPeriodicWave(new Float32Array(imag.length), imag); };
       const wA = spectrum(0), wB = spectrum(5 + Math.round(p.bright * 6));
       const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 9000; lp.connect(out);
       const gA = ctx.createGain(), gB = ctx.createGain(); gA.gain.value = 0.6; gB.gain.value = 0.4;

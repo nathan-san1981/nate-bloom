@@ -16,6 +16,7 @@ function setup({ app, ipcMain, dialog, getWin, log }) {
     return {
       vst3: [...new Set([path.join(home, ".vst3"), "/usr/lib/vst3", "/usr/local/lib/vst3", "/usr/lib64/vst3", "/usr/local/lib64/vst3", ...env("VST3_PATH"), ...own])],
       clap: [...new Set([path.join(home, ".clap"), "/usr/lib/clap", "/usr/local/lib/clap", "/usr/lib64/clap", "/usr/local/lib64/clap", ...env("CLAP_PATH"), ...own])],
+      lv2: [...new Set([path.join(home, ".lv2"), "/usr/lib/lv2", "/usr/local/lib/lv2", "/usr/lib/x86_64-linux-gnu/lv2", "/usr/lib64/lv2", "/usr/local/lib64/lv2", ...env("LV2_PATH"), ...own])],   // (182)
       own,
     };
   }
@@ -30,10 +31,11 @@ function setup({ app, ipcMain, dialog, getWin, log }) {
         if (e.isSymbolicLink()) { try { const s = await fsp.stat(p); isDir = s.isDirectory(); isFile = s.isFile(); } catch (er) { continue; } }
         if (/\.vst3$/i.test(e.name) && (isDir || isFile)) { if (!seen.has(p)) { seen.add(p); out.push(["vst3", p]); } continue; }
         if (/\.clap$/i.test(e.name) && isFile) { if (!seen.has(p)) { seen.add(p); out.push(["clap", p]); } continue; }
+        if (/\.lv2$/i.test(e.name) && isDir) { if (!seen.has(p)) { seen.add(p); out.push(["lv2", p]); } continue; }   // (182: a bundle, its Turtle files)
         if (isDir && depth < 4 && !e.name.startsWith(".")) await walk(p, depth + 1);
       }
     }
-    for (const d of new Set([...F.vst3, ...F.clap])) await walk(d, 0);
+    for (const d of new Set([...F.vst3, ...F.clap, ...F.lv2])) await walk(d, 0);
     return out;
   }
   const stampOf = async p => { try { const s = await fsp.stat(p); let t = s.mtimeMs;

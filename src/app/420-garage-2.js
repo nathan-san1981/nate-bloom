@@ -1251,6 +1251,10 @@
     }
     window.__gb_ml = () => ({ curTr, ctlGroups, gbDo, saveSong, song: () => S, SMART, chordsOf, chordDown, chordUp, liveOn, lit, kitPads, applyLevels, renderInst,
       select(i) { if (!S || !S.tracks[i]) return; S.sel = i; if (S.view === "inst") renderInst(); else renderTracks(); paintBar(); saveSong(); },
+      // (186) the KeyLab's knob 9 (the song's tempo), its transport keys
+      tempo(v) { if (!S) return; v = clamp(Math.round(v), 40, 240); if (v === S.bpm) return; if (TP.on && ctx) { const now = ctx.currentTime, b = beatAt(now); TP.t0 = now; TP.b0 = b; } S.bpm = v; saveSong(); paintBar(); },
+      playing: () => !!TP.on, stop() { if (TP.on) stop(); }, metro() { if (!S) return; S.metro = !S.metro; saveSong(); paintBar(); gbSay(S.metro ? "Metronome on" : "Metronome off"); },
+      undo() { const b = $("gbUndo"); if (b && !b.disabled) b.click(); }, open: () => gbOpen(), close: () => gbClose(), isOpen: () => !!V.open,
       seekBy(d) { if (!S || TP.on) return; S.ph = Math.max(0, Math.round(S.ph / S.sig + d) * S.sig); placePh(); paintPos(); },
       cycle() { const b = [...document.querySelectorAll("#gbTbar button")].find(x => x.textContent.includes("Cycle")); if (b) { b.click(); return; } gbDo(); S.cyc.on = !S.cyc.on; if (S.cyc.on && !(S.cyc.b > S.cyc.a)) { S.cyc.a = 0; S.cyc.b = 4 * S.sig; } saveSong(); gbSay(S.cyc.on ? "Cycle on" : "Cycle off"); } });
     window.__gb = { get ml() { return window.__gb_ml(); }, capture: gbCapture, exportSheet, importFiles, audioStems, mini: gbMini, playAlong, clipSheet, vaSched, laneAdd, laneRun, migrateTracks, NBR, VA, put: gbPut, snapSong: () => JSON.stringify(S), song: () => S, idx: () => IDX, TP, AU, REC, ED, V, AP, UNDO, play, stop, liveOn, liveOff, addTrack, setView, renderTracks, openEditor, chordsOf, voicing, soundsFor, defaultSound, soundName, beatNow, saveNow, loopNotes, addLoop, switchSong, newSong, readSong, kitPads, placeRegion, songEndBeat, ABUF, expStart, open: gbOpen, close: gbClose, liveAllOff, gbKeys };

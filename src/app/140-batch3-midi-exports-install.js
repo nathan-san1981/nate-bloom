@@ -146,11 +146,60 @@
     if (!p) return true;
     const m = md.opt.keysFrom || {}, k = mdKey("in", p);
     if (Object.prototype.hasOwnProperty.call(m, k)) return !!m[k];
-    return !mdIsKO(p) && !/minilogue/i.test(p.name || "");   // (173) the Minilogue's keys play the Minilogue; Keys ✓ makes them play the stack too
+    return !mdIsKO(p) && !/minilogue/i.test(p.name || "") && !(window.__hw && window.__hw.isSynthIn && window.__hw.isSynthIn(p));   // (173) the Minilogue's keys play the Minilogue (187: any known hardware synth's do); Keys ✓ makes them play the stack too
   }
   // how hard you play → how loud: 100 plays as the screen does, 127 a little louder
   const MD_VEL = { off: 0, light: 0.7, normal: 1.3, firm: 2 };
   function mdVelGain(v) { const k = MD_VEL[md.opt.vel || "normal"]; return k ? Math.min(1.3, Math.pow(Math.max(1, v) / 100, k)) : 1; }
+  // (184) which sound each controller plays: what's playing (the stack, as before), nothing (pads, clock and learned
+  // knobs only), or one sound of its own (a synth, a library sound or plugin, the instrument, a sampler slot, the
+  // hardware synth), whatever the rest of the stack is. Several controllers can play the same sound. A controller
+  // that plays a plugin also sends it its knobs, wheels and pressure, so the plugin's own MIDI learn takes them.
+  function mdRoute(p) {
+    const r = (md.opt.routes || {})[mdKey("in", p)];
+    if (r) return r;
+    return mdKeysFrom(p) ? "stack" : "none";
+  }
+  function mdRouteSet(p, r) {
+    md.opt.routes = Object.assign({}, md.opt.routes, { [mdKey("in", p)]: r });
+    md.opt.keysFrom = Object.assign({}, md.opt.keysFrom, { [mdKey("in", p)]: r !== "none" });
+    saveMd();
+  }
+  const libIdx = id => state.lib.parts.findIndex((pt, i) => pt && pt.id === id && libInsts[i]);
+  function mdRouteOptions() {
+    const o = [["stack", "What's playing"], ["none", "Nothing (pads, clock, knobs)"]];
+    Object.keys(ENGINES).forEach(id => { if (id !== "fm" || (typeof betaOn !== "undefined" && betaOn)) o.push(["e:" + id, ENGINES[id].short || ENGINES[id].name]); });
+    state.lib.parts.forEach((pt, i) => { if (pt && pt.id && libInsts[i]) o.push(["l:" + pt.id, pt.name || "Library sound " + (i + 1)]); });
+    if (curInst) o.push(["inst", "Instrument · " + (curInst.name || "")]);
+    for (let i = 0; i < NSLOTS; i++) if (sampBuf[i]) o.push(["s:" + i, "Sampler S" + (i + 1) + " · " + baseName(state.samp.slots[i].name).slice(0, 20)]);
+    if (window.__hw && window.__hw.shown && window.__hw.shown()) o.push(["hw", window.__hw.name]);
+    return o;
+  }
+  function mdRouteVoices(r, m, scale) {
+    const out = [];
+    try {
+      if (r.startsWith("e:")) { const id = r.slice(2); if (ENGINES[id]) { const v = makeVoice(m, id, ((state.layers[id] && state.layers[id].level) || 0.8) * 1.25 * scale); if (v) out.push(v); } }
+      else if (r.startsWith("l:")) { const i = libIdx(r.slice(2)); if (i >= 0) { const pt = state.lib.parts[i]; if (m >= (pt.lo ?? 0) && m <= (pt.hi ?? 127)) { const P = pt.sus ? Object.assign({}, state.lib.p, { decay: 1 }) : state.lib.p, k0 = LVK; LVK = "l:" + i; try { const v = makeInstVoice(m + 12 * (pt.oct || 0), undefined, scale * 0.8 * 1.25, libInsts[i], P); if (v) out.push(v); } finally { LVK = k0; } } } }
+      else if (r === "inst") { const v = makeInstVoice(m, undefined, scale); if (v) out.push(v); }
+      else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), undefined, scale); if (v) out.push(v); }
+      else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m); if (v) out.push(v); }
+    } catch (er) {}
+    return out;
+  }
+  const MDR = { v: new Map(), sus: new Map() };   // (port:ch:note → its voices; the port's sustain pedal and the notes it holds)
+  // the plugins a controller plays (in the Linux app): the one its route names, or every plugin in the stack
+  function mdRoutePlugs(r) {
+    const PLm = window.__nbPlug; if (!PLm || !PLm.live || !PLm.live.size) return [];
+    const keys = new Set();
+    if (r === "stack") state.lib.parts.forEach((pt, i) => { if (pt && pt.on && pt.id && libInsts[i] && pt.id.startsWith("wam:")) keys.add(pt.id.slice(4)); });
+    else if (r.startsWith("l:") && r.slice(2).startsWith("wam:")) keys.add(r.slice(6));
+    return [...PLm.live.values()].filter(P => !P.fx && keys.has(P.key));
+  }
+  function mdToPlugs(r, bytes) {
+    const ps = mdRoutePlugs(r); if (!ps.length) return false;
+    ps.forEach(P => { try { P.node.scheduleEvents({ type: "wam-midi", time: P.ctx.currentTime, data: { bytes } }); } catch (er) {} });
+    return true;
+  }
   function onMidi(e) {
     if (!md.ins.has(e.target.id)) return;
     const [st, d1, d2] = e.data, cmd = st & 0xf0;
@@ -168,7 +217,30 @@
     if (st === 0xfc && md.opt.clockIn) { if (typeof bpMidiTransport === "function") bpMidiTransport(false); if (playing) stopSeq(); return; }
     if ((cmd === 0x90 || cmd === 0x80) && md.opt.padsIn && typeof bpMidiNote === "function" && bpMidiNote(d1, cmd === 0x90 ? d2 : 0)) return;
     if (cmd === 0xb0 && typeof nbCC === "function" && nbCC(st & 15, d1, d2)) return;
-    if (!md.opt.noteIn || !mdKeysFrom(e.target)) return;
+    if (!md.opt.noteIn) return;
+    const route = mdRoute(e.target);
+    if (route === "none") return;
+    // (184) its knobs (not learned for anything here), wheels and pressure go to the plugin(s) it plays as well
+    if ((cmd === 0xb0 && d1 !== 64 && d1 !== 120 && d1 !== 123) || cmd === 0xe0 || cmd === 0xd0 || cmd === 0xa0) { const sent = mdToPlugs(route, [st, d1, d2 == null ? 0 : d2]); if (sent && cmd === 0xb0 && d1 !== 1) return; }
+    if (route !== "stack" && (cmd === 0x90 || cmd === 0x80 || (cmd === 0xb0 && (d1 === 64 || d1 === 123 || d1 === 120)))) {
+      const pid = e.target.id, k = pid + ":" + (st & 15) + ":" + d1;
+      if (cmd === 0xb0) {
+        if (d1 === 64) { const on = d2 >= 64, held = MDR.sus.get(pid); if (on) { if (!held) MDR.sus.set(pid, new Set()); } else if (held) { MDR.sus.delete(pid); held.forEach(kk => { const vs = MDR.v.get(kk); if (vs && vs.off) { MDR.v.delete(kk); vs.forEach(v => { try { v.stop(); } catch (er) {} }); } }); } }
+        else { MDR.v.forEach((vs, kk) => { if (kk.startsWith(pid + ":")) { vs.forEach(v => { try { v.stop(); } catch (er) {} }); MDR.v.delete(kk); } }); MDR.sus.delete(pid); }
+        return;
+      }
+      if (cmd === 0x90 && d2 > 0) {
+        start();
+        const old = MDR.v.get(k); if (old) old.forEach(v => { try { v.stop(); } catch (er) {} });
+        NB_VEL7 = d2; let vs; try { vs = mdRouteVoices(route, d1, mdVelGain(d2)); } finally { NB_VEL7 = 100; }
+        MDR.v.set(k, vs);
+      } else {
+        const vs = MDR.v.get(k); if (!vs) return;
+        const held = MDR.sus.get(pid); if (held) { vs.off = true; held.add(k); return; }
+        MDR.v.delete(k); vs.forEach(v => { try { v.stop(); } catch (er) {} });
+      }
+      return;
+    }
     if (cmd === 0xe0) { pm.bend = Math.max(-1, Math.min(1, ((d2 << 7) | d1) / 8192 - 1)); if (WHEEL_DRAW.bend) WHEEL_DRAW.bend(); applyPitch(); return; }
     if (cmd === 0xd0) { MODSRC.press = d1 / 127 * 0.8; pm.mod = Math.max(MODSRC.wheel, MODSRC.press); if (WHEEL_DRAW.mod) WHEEL_DRAW.mod(); applyPitch(); return; }
     if (cmd === 0xb0) {
@@ -180,6 +252,7 @@
     if (cmd === 0x90 && d2 > 0) { start(); NB_VEL = mdVelGain(d2); NB_VEL7 = d2; try { state.hold ? press(d1) : noteOn(d1); } finally { NB_VEL = 1; NB_VEL7 = 100; } }
     else if (cmd === 0x80 || (cmd === 0x90 && d2 === 0)) { if (!state.hold) nbSusOff(d1); }
   }
+  window.__nbMidiDbg = { route: p => mdRoute(p), setRoute: (p, r) => mdRouteSet(p, r), opts: () => mdRouteOptions(), feed: e => onMidi(e), md };   // (184: tests feed it messages)
   function renderMidi() {
     mdPorts.innerHTML = "";
     if (!md.access) return;
@@ -199,12 +272,15 @@
           ck.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); md.opt.clockTo = Object.assign({}, md.opt.clockTo, { [mdKey("out", p)]: !mdClockTo(p) }); saveMd(); renderMidi(); });
           row.appendChild(ck);
         }
-        if (kind === "in" && set.has(p.id)) {   // (159: whether this input plays the keys; the K.O. II's notes are its pads, not keys)
-          const kb = document.createElement("button"); kb.type = "button"; kb.className = "btn md-clk md-keys"; const on = mdKeysFrom(p);
-          kb.textContent = on ? "Keys ✓" : "Keys"; kb.setAttribute("aria-pressed", String(on));
-          kb.title = on ? "Its notes play the keys (the sound stack)" : "Its notes don't play the keys: pads, clock and learned knobs only";
-          kb.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); md.opt.keysFrom = Object.assign({}, md.opt.keysFrom, { [mdKey("in", p)]: !mdKeysFrom(p) }); saveMd(); renderMidi(); });
-          row.appendChild(kb);
+        if (kind === "in" && set.has(p.id)) {   // (159: whether this input plays the keys; 184: which sound it plays)
+          const sel = document.createElement("select"); sel.className = "md-route"; sel.setAttribute("aria-label", "What " + p.name + " plays");
+          const cur = mdRoute(p), opts = mdRouteOptions();
+          if (!opts.some(o => o[0] === cur)) opts.push([cur, "(not loaded now) " + cur.replace(/^[a-z]:/, "")]);
+          opts.forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = (v === "stack" || v === "none" ? "" : "Plays ") + t; sel.appendChild(o); });
+          sel.value = cur; sel.title = "What this controller's keys play: what's playing, nothing, or one sound of its own (several controllers can play the same one)";
+          ["click", "mousedown", "pointerdown"].forEach(ev => sel.addEventListener(ev, e2 => e2.stopPropagation()));
+          sel.addEventListener("change", () => { mdRouteSet(p, sel.value); });
+          row.appendChild(sel);
         }
         mdPorts.appendChild(row);
       });

@@ -21,7 +21,7 @@
   "build": {
     "appId": "com.natebloom.desktop",
     "productName": "Nate Bloom",
-    "files": ["main.js", "preload.js", "link.js", "plugins.js", "plugscan.js", "xspan.py", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node", "native/build/Release/nbplug.node"],
+    "files": ["main.js", "preload.js", "link.js", "plugins.js", "plugscan.js", "plughost.js", "xspan.py", "package.json", "build/icon.png", "native/build/Release/nbfastpads.node", "native/build/Release/nbplug.node"],
     "asarUnpack": ["native/build/Release/nbfastpads.node", "native/build/Release/nbplug.node"],
     "extraResources": [{ "from": "site", "to": "site" }],
     "linux": {
@@ -32,7 +32,7 @@
       "synopsis": "Synths, Studio instruments, Beat Pads and DJ",
       "description": "Nate Bloom as a Linux app: works offline, USB MIDI, fast Beat Pads, saves to Downloads/Nate Bloom."
     },
-    "deb": { "priority": "optional" },
+    "deb": { "priority": "optional", "recommends": ["liblilv-0-0"] },
     "artifactName": "NateBloom-${version}.${ext}"
   }
 }

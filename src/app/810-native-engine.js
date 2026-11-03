@@ -70,10 +70,22 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return b;
     }
     // the synths the engine plays, each from the same settings and formulas as its browser version (020, 170)
-    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells"]);
+    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells", "vital", "zeb", "choir", "fm"]);
+    const TABLE_IDS = new Set(["vital", "zeb", "fm"]);   // (185: these need the engine's wavetables, eng_table)
+    // (185) a wavetable in the engine for a list of harmonic amplitudes, made once each (the same list, the same table)
+    const natTabs = new Map(); let natTabN = 0;
+    function natTable(imag) {
+      let k = ""; for (let i = 1; i < imag.length; i++) k += (Math.round(imag[i] * 1e6) / 1e6) + ",";
+      let id = natTabs.get(k); if (id != null) { natTabs.delete(k); natTabs.set(k, id); return id; }
+      id = ++natTabN; if (!NAT.table(id, Float64Array.from(imag))) return -1;
+      natTabs.set(k, id);
+      // (the least recently used go when there are many, the Drone's knobs make new ones; a note still sounding keeps its own)
+      while (natTabs.size > 200) { const [k0, id0] = natTabs.entries().next().value; natTabs.delete(k0); try { NAT.table(id0, null); } catch (e) {} }
+      return id;
+    }
     let natMonoLast = null;
     function natParams(id, p, midi, t) {
-      const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(128);
+      const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(160);
       const AN = typeof NBAN !== "undefined" && NBAN.on, drift = (AN && NBAN.drift >= 0.01) ? (Math.random() * 2 - 1) * NBAN.drift * 4 : 0;
       // (177) the Analog bar, as the browser's voices have it (310): Drive, Drift's wander and each note's filter a little
       // different; with the Analog core off, the browser's plain 12 dB filter (no saturation, no ladder)
@@ -98,6 +110,26 @@ registerProcessor("nb-native-out", NBNativeOut);`;
           parts.push([r, 0, lv0, dec]); if (p.shimmer >= 0.02) parts.push([r, p.shimmer * 14, lv0 * 0.6, dec]); });
         a[0] = 3; a[1] = parts.length; parts.forEach((q, k) => a.set(q, 2 + k * 4));
         a[60] = p.hardness * 0.25; a[61] = 2000 + p.hardness * 5000; a[71] = release; a[72] = drift; anSet();
+        return { a, chorus: null };
+      }
+      if (id === "fm") {   // (185) the FM synth (090's fmVoice): six operators, the algorithm's links and carriers, the feedback table
+        const P = fmPatch(), [links, carriers, fbOp] = FM_ALGS[(P.alg | 0) % 32];
+        const bright = 0.25 + p.bright * 1.75, atk = 1 + p.attack * 12, rel = 0.4 + p.release * 2.2;
+        const fbAmt = Math.min(7, (P.fb | 0) + Math.round((p.feedback - 0.3) * 6));
+        let relMax = 0.1; a[0] = 4; a[1] = 6;
+        for (let k = 0; k < 6; k++) {
+          const o = P.ops[k], fixed = !!o[12];
+          const ratio = fixed ? 0 : (o[0] === 0 ? 0.5 : o[0]) * (1 + o[1] / 100);
+          const freq = fixed ? Math.pow(10, o[0] % 4) * Math.pow(10, o[1] / 100) : f * ratio;
+          const isCar = carriers.includes(k + 1), amp = outAmp(o[3]), scale = isCar ? amp : amp * 4.2 * bright * Math.max(20, freq);
+          const [r1, r2, r3, r4] = [o[4], o[5], o[6], o[7]], [l1, l2, l3, l4] = [o[8], o[9], o[10], o[11]];
+          const t1 = egTime(r1) * atk * 0.25, t2 = t1 + egTime(r2) * 0.5, t3 = t2 + egTime(r3) * 0.5;
+          relMax = Math.max(relMax, egTime(r4) * 0.5 * rel);
+          a.set([freq, (o[2] - 7) * 1.4 + (k % 2 ? 1 : -1) * p.spread * 9 * (k + 1) / 3, k + 1 === fbOp && fbAmt > 0 ? natTable(fbSpectrum(fbAmt / 7 * 0.95)) : -1, isCar ? 1 : 0,
+            egAmp(l4) * scale, t1, egAmp(l1) * scale, t2, egAmp(l2) * scale, t3, egAmp(l3) * scale + 1e-6], 2 + k * 12);
+        }
+        a[80] = Math.min(16, links.length); links.slice(0, 16).forEach(([fr, to], j) => { a[81 + j * 2] = fr; a[82 + j * 2] = to; });
+        a[120] = 0.32 / Math.sqrt(carriers.length); a[121] = Math.min(8, relMax);
         return { a, chorus: null };
       }
       a[0] = 2; a[72] = drift;
@@ -143,6 +175,26 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
         a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
         filt(1, 1.2, 0, expMap(p.bite, 500, 15000)); amp(attack, 0.5, -1, 0.4, 0);
+      } else if (id === "vital") {   // (185) the Morph Pad: two neighbouring tables (two detuned copies each), motion trading them and breathing the filter
+        const S = morphSpectra(), pos = p.morph * (S.length - 1), i0 = Math.min(S.length - 2, Math.floor(pos)), frac = pos - i0;
+        const cut = expMap(p.tone, 400, 14000), depth = p.motion * Math.min(0.5, Math.max(frac, 1 - frac)), tA = natTable(S[i0]), tB = natTable(S[i0 + 1]);
+        if (tA < 0 || tB < 0) return null;
+        osc([[tA, -7, 1 - frac], [tA, 7, 1 - frac], [tB, -7, frac], [tB, 7, frac]].map(([tb, det, g]) => ({ w: 5, det: det + (Math.random() - 0.5) * 4, g: 0.24 * g, ph: tb })));
+        a[108] = 0.08 + p.motion * 1.1; a[109] = p.motion * cut * 0.45; a[110] = a[111] = -0.24 * depth; a[112] = a[113] = 0.24 * depth;
+        filt(1, 0.6, 0, cut); amp(attack, 0.42, -1, 0.4, 0);
+      } else if (id === "zeb") {   // (185) the Spectral Drone: the plain spectrum (two detuned) and the peaked one, evolve trading them, a sine sub
+        const tA = natTable(zebSpectrum(p, 0)), tB = natTable(zebSpectrum(p, 5 + Math.round(p.bright * 6)));
+        if (tA < 0 || tB < 0) return null;
+        osc([{ w: 5, det: -5, g: 0.26 * 0.6, ph: tA }, { w: 5, det: 5, g: 0.26 * 0.6, ph: tA }, { w: 5, g: 0.26 * 0.4, ph: tB }, { w: 3, mul: 0.5, g: 0.12 }]);
+        a[108] = 0.03 + p.evolve * 0.3; a[110] = a[111] = -p.evolve * 0.4 * 0.26; a[112] = p.evolve * 0.4 * 0.26;
+        a[80] = 9000; a[81] = Math.pow(10, 1 / 20); amp(attack, 0.42, -1, 0.4, 0);
+      } else if (id === "choir") {   // (185) the Ghost Choir: three saws and breath through three formants of the vowel, vibrato
+        const x = p.vowel * 4, i0 = Math.min(3, Math.floor(x)), fr = x - i0;
+        osc([{ w: SAW, det: -7, g: 0.22 }, { w: SAW, det: 6, g: 0.22 }, { w: SAW, det: 1203, g: 0.06 }]);
+        a[118] = 1; [0, 1, 2].forEach(k => { a[119 + k] = VOWELS[i0][k] * (1 - fr) + VOWELS[i0 + 1][k] * fr; a[122 + k] = [8, 11, 13][k]; a[125 + k] = [1, 0.6, 0.35][k] * 3.4; });
+        a[128] = p.breath * 0.35; a[129] = 700;
+        a[87] = p.vib * 26; a[88] = 0.001; a[89] = 5.0 + Math.random() * 0.6;
+        amp(attack, 0.42, -1, 0.4, 0);
       } else return null;
       a[71] = release;
       anSet();
@@ -151,7 +203,7 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return { a, chorus };
     }
     window.__nbNativeVoice = (midi, id, mix, when, dest) => {
-      if (!NATIVE_IDS.has(id) || !NE.ok || !NE.on || NE.ctx !== ctx || !dest) return null;
+      if (!NATIVE_IDS.has(id) || !NE.ok || !NE.on || NE.ctx !== ctx || !dest || (TABLE_IDS.has(id) && typeof NAT.table !== "function")) return null;
       const t = when == null ? ctx.currentTime : when;
       const np = natParams(id, state.params[id], midi, t); if (!np) return null;
       const b = busFor(dest); if (b < 0) return null;

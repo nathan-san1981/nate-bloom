@@ -35,9 +35,9 @@
 registerProcessor("nb-plug-io", NBPlugIO);`;
       const mods = new WeakMap();
       const addMod = c => { if (!mods.has(c)) mods.set(c, c.audioWorklet.addModule(URL.createObjectURL(new Blob([SRC], { type: "text/javascript" })))); return mods.get(c); };
-      const fmtName = f => f === "clap" ? "CLAP" : "VST3";
+      const fmtName = f => f === "clap" ? "CLAP" : f === "lv2" ? "LV2" : "VST3";
       const keyOf = f => "vst:" + f.fmt + ":" + f.uid + "@" + f.path;
-      const parse = key => { const m = /^vst:(clap|vst3):([^@]*)@(.+)$/.exec(key); return m ? { fmt: m[1], uid: m[2], path: m[3] } : null; };
+      const parse = key => { const m = /^vst:(clap|vst3|lv2):([^@]*)@(.+)$/.exec(key); return m ? { fmt: m[1], uid: m[2], path: m[3] } : null; };
       const base = p => String(p).split("/").filter(Boolean).pop().replace(/\.(vst3|clap)$/i, "");
       const catOf = f => ({ key: keyOf(f), name: f.name, vendor: f.vendor || fmtName(f.fmt), kind: f.kind === "instrument" ? "instrument" : "effect", type: fmtName(f.fmt) + " on this computer",
         desc: [fmtName(f.fmt), f.version ? "v" + f.version : "", f.features ? f.features.split(/[|,]/).filter(x => !/^(fx|instrument|audio-effect|stereo|mono)$/i.test(x)).slice(0, 3).join(", ").toLowerCase() : "", "in " + f.path.replace(/^\/home\/[^/]+/, "~")].filter(Boolean).join(" · "),
@@ -117,13 +117,16 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         return inst;
       };
       // a plugin's window closed by itself, and the controls it changed (so automation and the panel keep up)
-      setInterval(() => { if (!PL.live.size) return; let n = []; try { n = NP.notices() || []; } catch (e) {} n.forEach(s => { const m = /^closed:(\d+)$/.exec(s); if (m) { const P = PL.live.get(+m[1]); if (P) P.open = false; } }); }, 1000);
+      setInterval(() => { if (!PL.live.size) return; let n = []; try { n = NP.notices() || []; } catch (e) {} n.forEach(s => { const m = /^closed:(\d+)$/.exec(s); if (m) { const P = PL.live.get(+m[1]); if (P) P.open = false; }
+        const c = /^crashed:(\d+)$/.exec(s); if (c) { const P = PL.live.get(+c[1]); if (P) { P.crashed = true; P.open = false;   // (184) it crashed in its own process: the page carried on
+          PL.msg = P.name + " crashed (in its own process, so Nate Bloom carried on) and is silent now. Remove it and add it again to bring it back.";
+          try { if (typeof betaToast === "function") betaToast(P.name + " crashed; Nate Bloom carried on"); } catch (e) {} try { window.__nbAdd && window.__nbAdd("plugin", P.name + " crashed in its own process"); } catch (e) {} W.paint(); } } }); }, 1000);
       // the tempo and whether the sequencer plays, for plugins that follow them (arpeggiators, synced delays)
       setInterval(() => { try { NP.transport(state.seq.bpm, false); } catch (e) {} }, 1000);
       // ---- looking for plugins ----
       async function refresh(full) {
         PL.scanning = true; PL.msg = ""; W.paint();
-        try { fill(await NP.scan(!!full)); PL.msg = PL.plugins.length ? "" : "No VST3 or CLAP plugins found yet."; } catch (e) { PL.msg = "Couldn't look for plugins: " + (e && e.message || e); }
+        try { fill(await NP.scan(!!full)); PL.msg = PL.plugins.length ? "" : "No VST3, CLAP or LV2 plugins found yet."; } catch (e) { PL.msg = "Couldn't look for plugins: " + (e && e.message || e); }
         PL.scanning = false; try { PL.suspects = await NP.suspects() || {}; } catch (e) {}
         W.paint();
       }
@@ -132,14 +135,21 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
       NP.suspects().then(s => { PL.suspects = s || {}; }).catch(() => {});
       // ---- in the Plugins sheet (340 calls this) ----
       window.__nbPlugPaint = ({ list, head, note, row, btn, repaint }) => {
-        head("VST3 and CLAP on this computer");
+        head("VST3, CLAP and LV2 on this computer");
         const ni = PL.plugins.filter(f => f.kind === "instrument").length, ne = PL.plugins.length - ni;
-        const F = PL.folders, where = F ? [...new Set([...F.vst3.slice(0, 1), ...F.clap.slice(0, 1)])].map(x => x.replace(/^\/home\/[^/]+/, "~")).join(" and ") : "~/.vst3 and ~/.clap";
+        const F = PL.folders, where = F ? [...new Set([...F.vst3.slice(0, 1), ...F.clap.slice(0, 1), ...(F.lv2 || []).slice(0, 1)])].map(x => x.replace(/^\/home\/[^/]+/, "~")).join(" and ") : "~/.vst3, ~/.clap and ~/.lv2";
         note(PL.scanning ? "Looking for plugins…" : PL.plugins.length
           ? ni + " instrument" + (ni === 1 ? "" : "s") + " (first under Instruments) and " + ne + " effect" + (ne === 1 ? "" : "s") + " (first under + Add an effect). They're looked for in " + where + ", the system's plugin folders and the folders you add."
-          : "Put .vst3 and .clap plugins (Linux builds) in " + where + ", or add the folder they're in, then Look again. Each runs on a thread of its own, its controls in a window of its own.", true);
+          : "Put .vst3, .clap and .lv2 plugins (Linux builds) in " + where + ", or add the folder they're in, then Look again. Each runs on a thread of its own, its controls in a window of its own.", true);
         const bar = document.createElement("div"); bar.className = "wam-tg";
         bar.append(btn(PL.scanning ? "Looking…" : "Look again", () => { if (!PL.scanning) refresh(false); }), btn("Add a folder…", async () => { PL.scanning = true; repaint(); try { const r = await NP.addFolder(); if (r) fill(r); } catch (e) {} PL.scanning = false; repaint(); }));
+        let o = { on: false, next: false }; try { if (typeof NP.oop === "function") o = NP.oop(); } catch (e) {}
+        if (o.on || o.next) {   // (184) each plugin in its own process: held back (in testing it took the app's helper processes down); shown only where it was switched on
+
+          const b = btn((o.next ? "✓ " : "") + "Each in its own process", () => { NP.setOop(!o.next); repaint(); }, null, "A plugin that crashes then takes only itself down. Takes effect the next time Nate Bloom opens.");
+          b.setAttribute("aria-pressed", String(!!o.next)); bar.append(b);
+          if (o.next !== o.on) note(o.next ? "Plugins run in their own processes the next time Nate Bloom opens." : "Plugins run inside Nate Bloom again the next time it opens.");
+        }
         if (PL.folders && PL.folders.own && PL.folders.own.length) PL.folders.own.forEach(f => bar.append(btn("✕ " + f.replace(/^\/home\/[^/]+/, "~"), async () => { fill(await NP.removeFolder(f)); repaint(); }, null, "Stop looking in " + f)));
         list.appendChild(bar);
         const sus = Object.keys(PL.suspects || {});
@@ -155,9 +165,10 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         }
         if (PL.msg) note(PL.msg);
         if (!PL.shown && !PL.at && !PL.scanning) { PL.shown = true; refresh(false); }
+        if (window.__nbInputPaint) window.__nbInputPaint({ list, head, note, row, btn, repaint });   // (183) your inputs through plugins (840)
       };
       // Settings › App and the report: what's loaded and how hard each one works
-      PL.state = () => [...PL.live.values()].map(P => { let s = null; try { s = NP.stats(P.id); } catch (e) {} return { name: P.name, fmt: P.fmt, fx: P.fx, open: P.open, underruns: P.node.__hdr ? P.node.__hdr[2] : 0, delayMs: P.fx && P.node.__hdr ? Math.round(P.node.__hdr[6] / P.ctx.sampleRate * 1000) : 0, blockUs: s ? Math.round(s.blockUs) : null, budgetUs: s ? Math.round(s.budgetUs) : null }; });
+      PL.state = () => [...PL.live.values()].map(P => { let s = null; try { s = NP.stats(P.id); } catch (e) {} return { name: P.name, fmt: P.fmt, fx: P.fx, open: P.open, crashed: !!P.crashed, underruns: P.node.__hdr ? P.node.__hdr[2] : 0, delayMs: P.fx && P.node.__hdr ? Math.round(P.node.__hdr[6] / P.ctx.sampleRate * 1000) : 0, blockUs: s ? Math.round(s.blockUs) : null, budgetUs: s ? Math.round(s.budgetUs) : null }; });
     };
     PL.state = () => [];
     if (NP) { if (window.__nbw) setup(); else { let n = 0; const iv = setInterval(() => { if (window.__nbw) { clearInterval(iv); setup(); } else if (++n > 100) { clearInterval(iv); PL.why = "the Plugins sheet isn't here"; } }, 300); } }

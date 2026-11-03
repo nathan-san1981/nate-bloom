@@ -23,6 +23,7 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 | SIMD Everywhere (SIMDe) | fetched at build time into `native/nbsynth/simde` | MIT |
 | CLAP, the plugin format's headers, free-audio | fetched at build time into `linux/native/third_party/clap` (github.com/free-audio/clap); the Linux app's plugin host | MIT |
 | VST 3 interfaces, © Steinberg Media Technologies GmbH | fetched at build time into `linux/native/third_party/vst3/pluginterfaces` (github.com/steinbergmedia/vst3_pluginterfaces); the Linux app's plugin host. VST is a registered trademark of Steinberg Media Technologies GmbH | MIT |
+| LV2, the plugin format's headers, and lilv's header, © David Robillard and others | fetched at build time into `linux/native/third_party/lv2` and `lilv` (github.com/lv2/lv2, github.com/lv2/lilv); the Linux app's plugin host opens the system's lilv library when it runs | ISC |
 | miniaudio, David Reid | `linux/native/miniaudio.h` | Public domain (Unlicense) or MIT-0 |
 | Electron (Chromium, Node.js) | the Linux app | MIT, and Chromium's own licences |
 | AndroidX, Kotlin standard library | the Android app | Apache-2.0 |
