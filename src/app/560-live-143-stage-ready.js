@@ -146,10 +146,10 @@
     const DJK = {   // key -> [what, hold?]
       KeyZ: ["A ▶ ❚❚", () => djTapB(djQ(0, ".dj-play"))], KeyX: ["A Cue (hold)", () => djQ(0, ".dj-cue"), true],
       Digit1: ["A hot cue 1", () => djQ(0, '.dj-cues .btn[data-c="0"]'), true], Digit2: ["A hot cue 2", () => djQ(0, '.dj-cues .btn[data-c="1"]'), true], Digit3: ["A hot cue 3", () => djQ(0, '.dj-cues .btn[data-c="2"]'), true], Digit4: ["A hot cue 4", () => djQ(0, '.dj-cues .btn[data-c="3"]'), true],
-      KeyQ: ["A loop 4", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyW: ["A loop 8", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))],
+      KeyQ: ["A loop 4", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyW: ["A loop 8", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))], KeyE: ["A loop the song", () => djTapB(djQ(0, ".dj-lsong"))],
       KeyM: ["B ▶ ❚❚", () => djTapB(djQ(1, ".dj-play"))], Comma: ["B Cue (hold)", () => djQ(1, ".dj-cue"), true],
       Digit7: ["B hot cue 1", () => djQ(1, '.dj-cues .btn[data-c="0"]'), true], Digit8: ["B hot cue 2", () => djQ(1, '.dj-cues .btn[data-c="1"]'), true], Digit9: ["B hot cue 3", () => djQ(1, '.dj-cues .btn[data-c="2"]'), true], Digit0: ["B hot cue 4", () => djQ(1, '.dj-cues .btn[data-c="3"]'), true],
-      KeyO: ["B loop 4", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyP: ["B loop 8", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))],
+      KeyO: ["B loop 4", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyP: ["B loop 8", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))], KeyI: ["B loop the song", () => djTapB(djQ(1, ".dj-lsong"))],
       Space: ["▶ Both", () => djTapB($id("djBothPlay"))], KeyS: ["Auto sync", () => djTapB($id("djAuto"))],
       BracketLeft: ["Nudge: slow the other song (hold)", () => $id("djNudgeL"), true], BracketRight: ["Nudge: push the other song (hold)", () => $id("djNudgeR"), true],
       KeyR: ["● Rec the mix", () => djTapB($id("djRec"))], KeyG: ["Log", () => djLog.click()],
@@ -169,13 +169,13 @@
     window.addEventListener("keyup", e => { const c = e.code || ""; if (!djHeld.has(c)) return; const b = djHeld.get(c); djHeld.delete(c); if (b) djUp(b); stopKey(e); }, true);
     window.addEventListener("blur", () => { djHeld.forEach(b => { if (b) djUp(b); }); djHeld.clear(); });
     // the keys on the controls, once a keyboard is used, and a list of them
-    const KCAP = { KeyZ: "Z", KeyX: "X", KeyQ: "Q", KeyW: "W", KeyM: "M", Comma: ",", KeyO: "O", KeyP: "P", Digit1: "1", Digit2: "2", Digit3: "3", Digit4: "4", Digit7: "7", Digit8: "8", Digit9: "9", Digit0: "0" };
+    const KCAP = { KeyZ: "Z", KeyX: "X", KeyQ: "Q", KeyW: "W", KeyM: "M", Comma: ",", KeyO: "O", KeyP: "P", KeyE: "E", KeyI: "I", Digit1: "1", Digit2: "2", Digit3: "3", Digit4: "4", Digit7: "7", Digit8: "8", Digit9: "9", Digit0: "0" };
     function paintDjCaps() {
       djv.classList.toggle("dj-kbd", num(() => capsOn(), false));
       const put = (el, k) => { if (el) el.dataset.kc = k; };
       put(djQ(0, ".dj-play"), "Z"); put(djQ(0, ".dj-cue"), "X"); put(djQ(1, ".dj-play"), "M"); put(djQ(1, ".dj-cue"), ",");
       [0, 1, 2, 3].forEach(i => { put(djQ(0, '.dj-cues .btn[data-c="' + i + '"]'), String(i + 1)); put(djQ(1, '.dj-cues .btn[data-c="' + i + '"]'), String((i + 7) % 10)); });
-      put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "Q"); put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "W"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "O"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "P");
+      put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "Q"); put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "W"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "O"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "P"); put(djQ(0, ".dj-lsong"), "E"); put(djQ(1, ".dj-lsong"), "I");
       put($id("djBothPlay"), "Space"); put($id("djAuto"), "S"); put($id("djRec"), "R"); put(djLog, "G"); put($id("djNudgeL"), "["); put($id("djNudgeR"), "]");
       const xf = $id("djXf"); if (xf && xf.parentElement) xf.parentElement.dataset.kc = "← →";
     }

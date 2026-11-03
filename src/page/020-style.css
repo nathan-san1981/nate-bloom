@@ -919,6 +919,9 @@ body.trk-open { overflow: hidden; }
 .dj-cues .btn[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
 .dj-loops span { font-family: var(--font-mono); font-size: 0.62rem; color: var(--dim); width: 50px; flex: none; }
 .dj-loops .btn { flex: 1; padding: 0; }
+/* (175) the loop row: 1 2 4 8 16 32 and Song (a little wider); on the three-column DJ (900–1199 px) the label narrows */
+.dj-loops .btn.dj-lsong { flex: 1.5; }
+@media (min-width: 900px) and (max-width: 1199px) { .dj-loops:not(.dj-cues) { gap: 4px; } .dj-loops:not(.dj-cues) span { width: 34px; } }
 .dj-eq { display: grid; grid-template-columns: 1fr; gap: 2px; }
 @media (min-width: 560px) and (max-width: 899px) { .dj-eq { grid-template-columns: 1fr 1fr; column-gap: 14px; } }
 .dj-mid { align-items: stretch; }

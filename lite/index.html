@@ -939,6 +939,9 @@ body.trk-open { overflow: hidden; }
 .dj-cues .btn[aria-pressed="true"] { background: #7fd6c2; border-color: #7fd6c2; color: var(--panel); }
 .dj-loops span { font-family: var(--font-mono); font-size: 0.62rem; color: var(--dim); width: 50px; flex: none; }
 .dj-loops .btn { flex: 1; padding: 0; }
+/* (175) the loop row: 1 2 4 8 16 32 and Song (a little wider); on the three-column DJ (900–1199 px) the label narrows */
+.dj-loops .btn.dj-lsong { flex: 1.5; }
+@media (min-width: 900px) and (max-width: 1199px) { .dj-loops:not(.dj-cues) { gap: 4px; } .dj-loops:not(.dj-cues) span { width: 34px; } }
 .dj-eq { display: grid; grid-template-columns: 1fr; gap: 2px; }
 @media (min-width: 560px) and (max-width: 899px) { .dj-eq { grid-template-columns: 1fr 1fr; column-gap: 14px; } }
 .dj-mid { align-items: stretch; }
@@ -4072,7 +4075,7 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Load</b> a song on each deck (a file, or anything already in a sampler slot or the bank). The tempo (BPM) and the beat grid are found automatically. If the BPM looks doubled or halved, use <b>½×</b> / <b>2×</b>; if it's wrong, tap <b>Tap</b> along with 4+ beats.</p>
       <p><b>AUTO SYNC</b> matches the other song's tempo to the lead song and lines up the beats, starting it if it's stopped. While it's lit, the songs stay locked: change the lead's tempo and the other follows.</p>
       <p><b>By hand:</b> the <b>sync dial</b> sets the other song's tempo (slow turns are fine, fast turns are big moves; it clicks into place when the tempos match). The ring inside shows the beats: dot at the top and green = in time. Hold <b>◀◀ slow</b> or <b>▶▶ push</b> to drag the other song back or forward into place, or jump a whole beat. The strip on top shows both songs' beat lines; stacked lines mean they're in time.</p>
-      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it). To clear one, hold it, or tap <b>✕</b> at the end of the row and then the cue; hold <b>✕</b> to clear all four. Hot cues only ever move their own deck: with sync on, the jump lands on the other song's beat and the other song carries on untouched. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
+      <p><b>Decks:</b> the big number is the song's BPM as it plays. <b>Speed</b> (the slider, − / +, tap the % to reset) changes how fast it plays. <b>½× 2× Tap</b> only fix the BPM number when it was found wrong (double, half, or no beat): tap Tap four or more times along with the beat. Tap the wave to jump anywhere; <b>Cue</b> works like a CDJ: stopped, tap it to set the cue point (it snaps to the beat; a new song's cue starts on its first beat), hold it to hear the song from the cue until you let go (press ▶ while holding to keep playing); playing, Cue goes back to the cue point and stops, ready to drop. <b>⏮</b> restarts the song from its first beat. The four coloured <b>hot cues</b> each remember a spot: tap an empty one to set it where the song is; tap a set one to jump there (with <b>Q</b> on, a playing deck jumps on the next beat so the rhythm carries on; a stopped deck starts from it). To clear one, hold it, or tap <b>✕</b> at the end of the row and then the cue; hold <b>✕</b> to clear all four. Hot cues only ever move their own deck: with sync on, the jump lands on the other song's beat and the other song carries on untouched. <b>Loop beats</b> 1, 2, 4, 8, 16 or 32 loops that many beats from the beat the deck is on (tap it again to play on); a hot cue tapped inside the loop keeps it, one outside it ends it. <b>Song</b> loops the whole song on that deck: from its first beat to the end of its last whole bar, so it goes round on the beat and stays locked with the other deck (the intro plays only the first time). Tap Song again to let the song end; on a keyboard, E does it for A and I for B. Auto DJ waits while a deck loops its song. <b>▶ Both</b> starts both decks at the same moment (the other song comes in on the lead's beat) and stops both when both play; <b>⏮ Both</b> starts both from their first beats together. With <b>Link</b> on, starting a deck (⏮, ▶ or a hot cue) within 1.5 seconds of the other joins it as if you had pressed both at once, so two quick restarts land together. <b>Loop 1 2 4 8</b> loops that many beats. <b>High / Mid / Low</b> pull a band out (all the way left kills it), <b>Filter</b> sweeps low-pass (left) or high-pass (right).</p>
       <p><b>Sample bank:</b> choose where to grab from and how many beats, then tap an empty pad: it captures exactly that many beats, in time, from the next beat (Mix grabs both decks through the crossfader and EQ). Tap a full pad to play it; with <b>In time</b> on it starts on the beat at the current tempo. Hold a pad to send it to the sampler or the pads, put it on a deck, save a WAV, or clear it. The bank and the decks are kept on this device.</p>
       <p><b>Phrase</b> on a deck marks where a musical phrase starts (the first beat of a chorus): mixes into that deck then wait for its next 8-bar line and the next song starts from its own phrase mark; without one, mixes start on the next bar line.</p>
       <p><b>Key lock</b> keeps a song's pitch when its speed changes (turn it off for the vinyl-style pitch shift). <b>Keep</b> saves the last 90 seconds you heard, after the fact — no need to press Rec first — and the take bar can export it as WAV or a small MP3.</p>
@@ -13945,9 +13948,11 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     p = Math.max(0, Math.min(p, d.buf.duration - 0.05));
     const o = DJ.decks[1 - d.i];
     if (d.playing && DJ.sync && o.playing && o.bpm0 && d.bpm0) p = djInPhase(d, o, p, ctx.currentTime + 0.01);   // stay locked by landing on the other song's beat; the other song is never moved
-    if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+    if (djOutOfLoop(d, p)) djLoop(d, 0);
     if (d.playing) djStartSrc(d, ctx.currentTime + 0.01, p); else d.p0 = p;
   }
+  // (175) a beat loop ends when the song jumps out of it; the song loop (n "song") goes round whatever it jumps to
+  const djOutOfLoop = (d, p) => !!d.loop && d.loop.n !== "song" && (p < d.loop.a || p >= d.loop.b);
   const djBeatFloor = (d, p) => d.bpm0 ? d.off + Math.floor((p - d.off) / djPer(d) + 1e-6) * djPer(d) : p;
   function djLoop(d, n) {
     if (!d.buf) return;
@@ -13961,6 +13966,24 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       d.loop = { a, b, n };
       if (d.src) { d.src.loopStart = a; d.src.loopEnd = b; d.src.loop = true; }
     }
+    djPaintDeck(d);
+  }
+  // (175) loop the whole song on a deck: with a beat grid, from its first beat to the end of its last whole bar, so it goes
+  // round on the beat (and stays locked with the other deck); without one, start to end. The intro plays the first time.
+  function djLoopSong(d) {
+    if (!d.buf) return;
+    if (d.loop && d.loop.n === "song") { djLoop(d, 0); djMsg("Deck " + "AB"[d.i] + " plays on to the end of the song"); return; }
+    if (d.playing) djRebase(d);
+    const dur = d.buf.duration; let a = 0, b = dur;
+    if (d.bpm0) {
+      const per = djPer(d), bar = 4 * per;
+      a = ((d.off % per) + per) % per;
+      const nb = Math.floor((dur - a) / bar + 1e-6);
+      if (nb >= 1) b = a + nb * bar; else a = 0;
+    }
+    d.loop = { a, b, n: "song" };
+    if (d.src) { d.src.loopStart = a; d.src.loopEnd = b; d.src.loop = true; }
+    djMsg("Deck " + "AB"[d.i] + " loops the song" + (d.bpm0 ? " (" + djFmt(a) + " to " + djFmt(b) + ", whole bars, on the beat)" : "") + " · tap Song again to let it end");
     djPaintDeck(d);
   }
   function djCue(d) {
@@ -13994,7 +14017,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const posNow = F.playing ? djPos(F) + lead * F.rate * F.bend : F.p0, pF = djPer(F);
     let k = Math.round((posNow - F.off) / pF - phL), target = F.off + (k + phL) * pF;
     if (target < 0) target += pF; if (target > F.buf.duration - 0.1) target -= pF * Math.ceil((target - F.buf.duration + 0.1) / pF);
-    if (F.loop && (target < F.loop.a || target >= F.loop.b)) { F.loop = null; }
+    if (djOutOfLoop(F, target)) { F.loop = null; }
     F.rate = r; F.bend = 1;
     djStartSrc(F, at, target);
     return true;
@@ -14194,7 +14217,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     </div>
     <div class="dj-speed"><span>Speed</span><button class="btn sm dj-spd" data-s="-0.5" aria-label="Slower">−</button><input type="range" class="dj-tempo" min="-25" max="25" step="0.05" value="0" aria-label="Speed"><button class="btn sm dj-spd" data-s="0.5" aria-label="Faster">+</button><output>0.0%</output></div>
     <div class="dj-loops dj-cues"><span>Hot cues</span><button class="btn" data-c="0" title="Empty: tap to set a cue here · Set: tap to jump there · hold to clear">1</button><button class="btn" data-c="1">2</button><button class="btn" data-c="2">3</button><button class="btn" data-c="3">4</button></div>
-    <div class="dj-loops"><span>Loop beats</span><button class="btn" data-n="1">1</button><button class="btn" data-n="2">2</button><button class="btn" data-n="4">4</button><button class="btn" data-n="8">8</button></div>
+    <div class="dj-loops"><span>Loop beats</span><button class="btn" data-n="1">1</button><button class="btn" data-n="2">2</button><button class="btn" data-n="4">4</button><button class="btn" data-n="8">8</button><button class="btn" data-n="16">16</button><button class="btn" data-n="32">32</button><button class="btn dj-lsong" title="Loop the whole song: from its last whole bar it goes round to its first beat, on the beat, until you tap it again">Song</button></div>
     <div class="dj-eq">
       <label class="dj-sl"><span>High</span><input type="range" data-eq="hi" min="-26" max="6" step="0.5" value="0" aria-label="High"><output></output></label>
       <label class="dj-sl"><span>Mid</span><input type="range" data-eq="mid" min="-26" max="6" step="0.5" value="0" aria-label="Mid"><output></output></label>
@@ -14234,7 +14257,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     });
     tempo.addEventListener("dblclick", () => { tempo.value = 0; tempo.dispatchEvent(new Event("input")); });
     q(".dj-speed output").addEventListener("click", () => { tempo.value = 0; tempo.dispatchEvent(new Event("input")); djMsg("Speed back to normal on " + "AB"[d.i]); });
-    el.querySelectorAll(".dj-loops .btn").forEach(b => b.addEventListener("click", () => djLoop(d, +b.dataset.n)));
+    el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.addEventListener("click", () => djLoop(d, +b.dataset.n)));
+    q(".dj-lsong").addEventListener("click", () => djLoopSong(d));
     el.querySelectorAll("[data-eq]").forEach(r => {
       r.addEventListener("input", () => { d.eq[r.dataset.eq] = +r.value; if (djBuild()) djApplyEq(d); djPaintDeck(d); });
       r.addEventListener("dblclick", () => { r.value = r.dataset.eq === "vol" ? 0.9 : 0; r.dispatchEvent(new Event("input")); });
@@ -14251,7 +14275,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     const el = deckEls[d.i], q = s => el.querySelector(s);
     el.classList.toggle("lead", DJ.lead === d.i);
     q(".dj-name b").textContent = d.buf ? baseName(d.name) : "Empty";
-    q(".dj-name small").textContent = d.buf ? djFmt(djPos(d)) + " / " + djFmt(d.buf.duration) + (d.loop ? " · looping " + d.loop.n : "") + (DJ.lead === d.i ? " · lead" : "") : "Tap Load… for a song";
+    q(".dj-name small").textContent = d.buf ? djFmt(djPos(d)) + " / " + djFmt(d.buf.duration) + (d.loop ? " · looping " + (d.loop.n === "song" ? "the song" : d.loop.n) : "") + (DJ.lead === d.i ? " · lead" : "") : "Tap Load… for a song";
     const pb = q(".dj-play"); pb.textContent = d.playing ? "❚❚" : "▶"; pb.setAttribute("aria-pressed", String(d.playing));
     q(".dj-bpm b").textContent = d.bpm0 ? (djEff(d) * d.bend).toFixed(1) : "—";
     q(".dj-bpm small").textContent = d.bpm0 ? (Math.abs(d.rate - 1) > 0.0004 ? "from " + d.bpm0.toFixed(1) : "BPM") : "BPM";
@@ -14260,6 +14284,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     q(".dj-speed output").textContent = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
     el.querySelectorAll(".dj-cues .btn[data-c]").forEach(b => { const v = d.cues[+b.dataset.c]; b.setAttribute("aria-pressed", String(v != null)); b.textContent = v != null ? (+b.dataset.c + 1) + " · " + djFmt(v) : String(+b.dataset.c + 1); });
     el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.setAttribute("aria-pressed", String(!!d.loop && d.loop.n === +b.dataset.n)));
+    q(".dj-lsong").setAttribute("aria-pressed", String(!!d.loop && d.loop.n === "song")); q(".dj-lsong").disabled = !d.buf;
     el.querySelectorAll("[data-eq]").forEach(r => {
       const k = r.dataset.eq, v = d.eq[k]; r.value = v;
       r.nextElementSibling.textContent = k === "vol" ? Math.round(v * 100) + "%" : k === "filt" ? (Math.abs(v) < 0.02 ? "off" : v < 0 ? "low-p" : "high-p") : v <= -25.5 ? "kill" : (v > 0 ? "+" : "") + v + " dB";
@@ -14919,7 +14944,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         const plan = djPlan();
         if (plan.it && plan.it.bpm) {
           const left = (from.buf.duration - djPos(from)) / (from.rate * from.bend), need = plan.bars * 4 * (60 / (djEff(from) * from.bend)) + 1.5;
-          if (left <= need) djStartMix(plan);
+          if (left <= need && !(from.loop && from.loop.n === "song")) djStartMix(plan);   // (175) a deck looping its song holds the mix
         }
       } else if (!DJ.decks.some(d => d.playing)) { const plan = djPlan(); if (plan.it) { djLoadCrate(plan.to, plan.idx, true); djMsg("Auto DJ: " + plan.it.name + " starts on " + "AB"[plan.to.i]); } }
     }
@@ -17425,14 +17450,14 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const now = ctx.currentTime + 0.03;
       if (now - lastStart[o.i] > LINK_WIN) return false;
       const at = Math.max(now, lastStart[o.i]), ahead = Math.max(0, at - lastStart[o.i]) * d.rate * d.bend, p = Math.min(from + ahead, d.buf.duration - 0.05);
-      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, p)) djLoop(d, 0);
       if (locked(d, o)) inOnBeat(d, o, p); else djStartSrc(d, at, p);
       lastStart[d.i] = lastStart[o.i];
       djMsg("Deck " + "AB"[d.i] + " joined " + "AB"[o.i] + ": started together" + (ahead > 0.02 ? " (caught up " + ahead.toFixed(2) + " s)" : ""));
       return true;
     }
     const startDeck = (d, from, msg) => {
-      if (d.loop && (from < d.loop.a || from >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, from)) djLoop(d, 0);
       if (!joinOther(d, from)) {
         const o = DJ.decks[1 - d.i];
         if (o.playing && locked(d, o)) inOnBeat(d, o, from); else djStartSrc(d, ctx.currentTime + 0.02, from);
@@ -17455,7 +17480,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
     function hotJump(d, p, k) {
       if (!djBuild()) return;
       if (!d.playing) { startDeck(d, p, "Deck " + "AB"[d.i] + " from hot cue " + (k + 1) + " (" + djFmt(p) + ")"); djPaintAll(); return; }
-      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, p)) djLoop(d, 0);
       const o = DJ.decks[1 - d.i], locked = DJ.sync && o.playing && o.bpm0 && d.bpm0;
       let at = ctx.currentTime + 0.01;
       if (DJ.quant && d.bpm0) { const ref = locked ? o : d, per = djPer(ref), sp = ref.rate * ref.bend; let wait = (1 - djPhaseAt(ref, 0)) * per / sp; if (wait < 0.03) wait += per / sp; at = ctx.currentTime + wait; }
@@ -17514,7 +17539,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const fromOf = d => top ? topOf(d) : d.playing ? djPos(d) + (at - ctx.currentTime) * d.rate * d.bend : (d.p0 >= d.buf.duration - 0.05 ? 0 : d.p0);
       const fL = fromOf(L); let fF = fromOf(F);
       if (!top && grids) { const phL = frac((fL - L.off) / djPer(L)), pF = djPer(F); fF = F.off + (Math.round((fF - F.off) / pF - phL) + phL) * pF; if (fF < 0) fF += pF; }   // in on the lead's beat
-      const go = (d, f) => { d.cuePrev = false; if (d.loop && (f < d.loop.a || f >= d.loop.b)) djLoop(d, 0); djStartSrc(d, at, Math.min(f, d.buf.duration - 0.05)); lastStart[d.i] = at; };
+      const go = (d, f) => { d.cuePrev = false; if (djOutOfLoop(d, f)) djLoop(d, 0); djStartSrc(d, at, Math.min(f, d.buf.duration - 0.05)); lastStart[d.i] = at; };
       if (top || !L.playing) go(L, fL);
       go(F, fF);
       if (DJ.auto) djTickOn();
@@ -31278,10 +31303,10 @@ registerProcessor("nb-rec", NBRec);`;
     const DJK = {   // key -> [what, hold?]
       KeyZ: ["A ▶ ❚❚", () => djTapB(djQ(0, ".dj-play"))], KeyX: ["A Cue (hold)", () => djQ(0, ".dj-cue"), true],
       Digit1: ["A hot cue 1", () => djQ(0, '.dj-cues .btn[data-c="0"]'), true], Digit2: ["A hot cue 2", () => djQ(0, '.dj-cues .btn[data-c="1"]'), true], Digit3: ["A hot cue 3", () => djQ(0, '.dj-cues .btn[data-c="2"]'), true], Digit4: ["A hot cue 4", () => djQ(0, '.dj-cues .btn[data-c="3"]'), true],
-      KeyQ: ["A loop 4", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyW: ["A loop 8", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))],
+      KeyQ: ["A loop 4", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyW: ["A loop 8", () => djTapB(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))], KeyE: ["A loop the song", () => djTapB(djQ(0, ".dj-lsong"))],
       KeyM: ["B ▶ ❚❚", () => djTapB(djQ(1, ".dj-play"))], Comma: ["B Cue (hold)", () => djQ(1, ".dj-cue"), true],
       Digit7: ["B hot cue 1", () => djQ(1, '.dj-cues .btn[data-c="0"]'), true], Digit8: ["B hot cue 2", () => djQ(1, '.dj-cues .btn[data-c="1"]'), true], Digit9: ["B hot cue 3", () => djQ(1, '.dj-cues .btn[data-c="2"]'), true], Digit0: ["B hot cue 4", () => djQ(1, '.dj-cues .btn[data-c="3"]'), true],
-      KeyO: ["B loop 4", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyP: ["B loop 8", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))],
+      KeyO: ["B loop 4", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'))], KeyP: ["B loop 8", () => djTapB(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'))], KeyI: ["B loop the song", () => djTapB(djQ(1, ".dj-lsong"))],
       Space: ["▶ Both", () => djTapB($id("djBothPlay"))], KeyS: ["Auto sync", () => djTapB($id("djAuto"))],
       BracketLeft: ["Nudge: slow the other song (hold)", () => $id("djNudgeL"), true], BracketRight: ["Nudge: push the other song (hold)", () => $id("djNudgeR"), true],
       KeyR: ["● Rec the mix", () => djTapB($id("djRec"))], KeyG: ["Log", () => djLog.click()],
@@ -31301,13 +31326,13 @@ registerProcessor("nb-rec", NBRec);`;
     window.addEventListener("keyup", e => { const c = e.code || ""; if (!djHeld.has(c)) return; const b = djHeld.get(c); djHeld.delete(c); if (b) djUp(b); stopKey(e); }, true);
     window.addEventListener("blur", () => { djHeld.forEach(b => { if (b) djUp(b); }); djHeld.clear(); });
     // the keys on the controls, once a keyboard is used, and a list of them
-    const KCAP = { KeyZ: "Z", KeyX: "X", KeyQ: "Q", KeyW: "W", KeyM: "M", Comma: ",", KeyO: "O", KeyP: "P", Digit1: "1", Digit2: "2", Digit3: "3", Digit4: "4", Digit7: "7", Digit8: "8", Digit9: "9", Digit0: "0" };
+    const KCAP = { KeyZ: "Z", KeyX: "X", KeyQ: "Q", KeyW: "W", KeyM: "M", Comma: ",", KeyO: "O", KeyP: "P", KeyE: "E", KeyI: "I", Digit1: "1", Digit2: "2", Digit3: "3", Digit4: "4", Digit7: "7", Digit8: "8", Digit9: "9", Digit0: "0" };
     function paintDjCaps() {
       djv.classList.toggle("dj-kbd", num(() => capsOn(), false));
       const put = (el, k) => { if (el) el.dataset.kc = k; };
       put(djQ(0, ".dj-play"), "Z"); put(djQ(0, ".dj-cue"), "X"); put(djQ(1, ".dj-play"), "M"); put(djQ(1, ".dj-cue"), ",");
       [0, 1, 2, 3].forEach(i => { put(djQ(0, '.dj-cues .btn[data-c="' + i + '"]'), String(i + 1)); put(djQ(1, '.dj-cues .btn[data-c="' + i + '"]'), String((i + 7) % 10)); });
-      put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "Q"); put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "W"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "O"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "P");
+      put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "Q"); put(djQ(0, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "W"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="4"]'), "O"); put(djQ(1, '.dj-loops:not(.dj-cues) .btn[data-n="8"]'), "P"); put(djQ(0, ".dj-lsong"), "E"); put(djQ(1, ".dj-lsong"), "I");
       put($id("djBothPlay"), "Space"); put($id("djAuto"), "S"); put($id("djRec"), "R"); put(djLog, "G"); put($id("djNudgeL"), "["); put($id("djNudgeR"), "]");
       const xf = $id("djXf"); if (xf && xf.parentElement) xf.parentElement.dataset.kc = "← →";
     }
@@ -32443,7 +32468,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 174;
+    window.NB_BUILD = 175;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];

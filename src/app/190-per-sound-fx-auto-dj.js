@@ -460,7 +460,7 @@
         const plan = djPlan();
         if (plan.it && plan.it.bpm) {
           const left = (from.buf.duration - djPos(from)) / (from.rate * from.bend), need = plan.bars * 4 * (60 / (djEff(from) * from.bend)) + 1.5;
-          if (left <= need) djStartMix(plan);
+          if (left <= need && !(from.loop && from.loop.n === "song")) djStartMix(plan);   // (175) a deck looping its song holds the mix
         }
       } else if (!DJ.decks.some(d => d.playing)) { const plan = djPlan(); if (plan.it) { djLoadCrate(plan.to, plan.idx, true); djMsg("Auto DJ: " + plan.it.name + " starts on " + "AB"[plan.to.i]); } }
     }
