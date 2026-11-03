@@ -87,6 +87,12 @@ jobs:
           gh release edit linux-latest --title "Nate Bloom for Linux (latest: $NB_VERSION)" --notes-file ../RELEASE_NOTES.md --latest=false
           gh release upload linux-latest NateBloom-linux.deb NateBloom-linux.AppImage --clobber
 
+      - name: Across both screens (two virtual monitors, no window manager and Cinnamon's)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 10
+        run: bash linux/ci/wide_check.sh /tmp/nb-logs/wide
+
       - name: Publish logs to the ci-logs-linux branch
         if: always()
         run: |

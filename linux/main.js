@@ -7,6 +7,7 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
+const { execFile } = require("child_process");
 const { createLink } = require("./link");
 
 const SITE = "https://nathan-san1981.github.io/nate-bloom/";
@@ -104,27 +105,101 @@ async function checkForUpdate(win) {
 let win = null, blocker = null;
 // (173) Across both screens: the window spans every screen side by side (their common height), and the page uses the
 // whole width (the 61 keys of the KeyLab across both). View › Across Both Screens or Ctrl+Shift+F; it reopens that way.
-let WIDE = false, wideBack = null;
+// (175) Cinnamon (and GNOME) keep an ordinary window on one screen when a program sizes it across two. So on X11 it
+// goes fullscreen over the screens: xspan.py tells the desktop which screens (_NET_WM_FULLSCREEN_MONITORS). If the
+// desktop doesn't take that, the window loses its title bar (a window without one isn't held to one screen) and is
+// sized across them; the title bar comes back when it's off. If it still ends up on one screen, it says so.
+let WIDE = false, wideBack = null, wideMax = false, wideHow = "", wideInfo = {}, wideSeq = 0, ownFs = 0, wideBare = false;
 function spanBounds() {
   const a = screen.getAllDisplays().map(d => d.workArea);
   const x = Math.min(...a.map(r => r.x)), y = Math.max(...a.map(r => r.y));
   return { x, y, width: Math.max(...a.map(r => r.x + r.width)) - x, height: Math.max(400, Math.min(...a.map(r => r.y + r.height)) - y) };
 }
-function setWide(on) {
+const fullSpan = () => { const a = screen.getAllDisplays().map(d => d.bounds); const x = Math.min(...a.map(r => r.x)); return Math.max(...a.map(r => r.x + r.width)) - x; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let XSPAN = null;
+function xSpan(mode) {   // "on" | "off" (fullscreen over the screens) | "bare" | "framed" (the title bar)
+  return new Promise(res => {
+    if (process.platform !== "linux" || !process.env.DISPLAY || process.env.XDG_SESSION_TYPE === "wayland" || !win || win.isDestroyed()) return res({ ok: false, why: "not X11" });
+    let xid;
+    try { const h = win.getNativeWindowHandle(); xid = h.length >= 8 ? Number(h.readBigUInt64LE(0)) : h.readUInt32LE(0); } catch (e) { return res({ ok: false, why: "no window id" }); }
+    try { if (XSPAN == null) XSPAN = fs.readFileSync(path.join(__dirname, "xspan.py"), "utf8"); } catch (e) { return res({ ok: false, why: "no xspan.py" }); }
+    execFile("python3", ["-c", XSPAN, String(xid), mode], { timeout: 6000 }, (err, out, eout) => {
+      if (err) return res({ ok: false, why: String(eout || err.message).trim().slice(-240) });
+      try { res(JSON.parse(String(out).trim().split("\n").pop())); } catch (e) { res({ ok: false, why: "odd reply: " + String(out).slice(0, 160) }); }
+    });
+  });
+}
+const unmax = () => new Promise(r => { if (!win.isMaximized()) return r(); let done = false; const go = () => { if (!done) { done = true; setTimeout(r, 150); } }; win.once("unmaximize", go); win.unmaximize(); setTimeout(go, 800); });
+const leaveFs = () => new Promise(r => { if (!win.isFullScreen()) return r(); ownFs = Date.now(); let done = false; const go = () => { if (!done) { done = true; setTimeout(r, 200); } }; win.once("leave-full-screen", go); win.setFullScreen(false); setTimeout(go, 1200); });
+function wideTell() {
   if (!win || win.isDestroyed()) return;
-  WIDE = !!on;
-  if (WIDE) {
-    if (!wideBack) wideBack = win.isMaximized() || win.isFullScreen() ? null : win.getBounds();
-    if (win.isFullScreen()) win.setFullScreen(false);
-    if (win.isMaximized()) win.unmaximize();
-    if (screen.getAllDisplays().length > 1) win.setBounds(spanBounds()); else win.maximize();   // (one screen: as wide as it goes)
-  } else {
-    if (win.isMaximized()) win.unmaximize();
-    if (wideBack && Number.isFinite(wideBack.x) && Number.isFinite(wideBack.y)) win.setBounds(wideBack); else { win.setSize(1280, 800); win.center(); }
-    wideBack = null;
-  }
   win.webContents.send("nb:wide", WIDE);
   try { buildMenu(); } catch (e) {}
+}
+// sized across the screens' work areas, without a title bar where X11 lets it take that off
+async function wideSized(seq) {
+  wideHow = "sized";
+  if (win.isFullScreen()) await leaveFs();
+  await unmax();
+  if (seq !== wideSeq || !WIDE) return;
+  const b = await xSpan("bare"); wideInfo.bare = b; wideBare = !!b.ok;
+  if (b.ok) await wait(350);
+  if (seq !== wideSeq || !WIDE) return;
+  const want = spanBounds(); wideInfo.want = want;
+  win.setBounds(want);
+  await wait(700);
+  if (seq === wideSeq && WIDE && win.getBounds().width < want.width * 0.9) win.setBounds(want);
+  setTimeout(() => wideCheck(seq), 1500);
+}
+async function setWide(on) {
+  if (!win || win.isDestroyed()) return;
+  const seq = ++wideSeq;
+  WIDE = !!on;
+  wideTell();
+  const n = screen.getAllDisplays().length;
+  if (WIDE) {
+    if (!wideHow && !win.isFullScreen()) { wideMax = win.isMaximized(); wideBack = wideMax ? null : win.getBounds(); }
+    if (n < 2) { wideHow = "one screen"; wideInfo = { screens: n }; if (win.isFullScreen()) await leaveFs(); if (!win.isMaximized()) win.maximize(); return; }
+    const x = await xSpan("on");
+    if (seq !== wideSeq) return;
+    wideInfo = { screens: n, want: spanBounds(), x11: x };
+    if (x.ok && x.fsm) {
+      wideHow = "fullscreen";
+      if (wideBare) { await xSpan("framed"); wideBare = false; }
+      if (!win.isFullScreen()) { ownFs = Date.now(); win.setFullScreen(true); }
+      // (some desktops take the hint only once the window is fullscreen: it's sent again)
+      setTimeout(() => { if (seq === wideSeq && WIDE && wideHow === "fullscreen") xSpan("on"); }, 500);
+      setTimeout(() => wideCheck(seq), 2200);
+    } else await wideSized(seq);
+  } else {
+    const was = wideHow; wideHow = "";
+    xSpan("off");
+    if (win.isFullScreen()) await leaveFs();
+    if (seq !== wideSeq) return;
+    if (was !== "one screen" || !wideMax) await unmax();
+    if (wideMax) win.maximize();
+    else if (wideBack && Number.isFinite(wideBack.x) && Number.isFinite(wideBack.y)) win.setBounds(wideBack);
+    else { win.setSize(1280, 800); win.center(); }
+    if (wideBare) { await wait(200); await xSpan("framed"); wideBare = false; }
+    wideBack = null; wideMax = false;
+  }
+}
+// (175) it checks: fullscreen that stayed on one screen tries the sized way; if that's held to one screen too, it says so
+let wideWarned = false;
+function wideCheck(seq) {
+  if (seq !== wideSeq || !WIDE || !win || win.isDestroyed() || screen.getAllDisplays().length < 2) return;
+  const b = win.getBounds(), want = wideHow === "fullscreen" ? fullSpan() : (wideInfo.want || spanBounds()).width;
+  wideInfo.got = b;
+  if (b.width >= want * 0.9) return;
+  if (wideHow === "fullscreen") { xSpan("off"); wideSized(seq); return; }
+  if (wideWarned) return;
+  wideWarned = true;
+  const x = wideInfo.x11 || {}, w = wideInfo.want || spanBounds();
+  dialog.showMessageBox(win, { type: "warning", title: "Across both screens", message: "Your desktop kept Nate Bloom on one screen",
+    detail: `Asked for ${w.width}×${w.height} across ${wideInfo.screens} screens and got ${b.width}×${b.height}.\n` +
+      `Window manager: ${x.wm || "unknown"} · spanning hint: ${x.fsm === true ? "supported" : x.fsm === false ? "not supported" : "unknown"}${x.why ? " · " + x.why : ""} · title bar off: ${wideBare ? "yes" : "no"}\n` +
+      `Screens X sees: ${(x.mons || []).map(m => m[3] + "×" + m[4] + " at " + m[1] + "," + m[2]).join(" · ") || "unknown"}` });
 }
 
 function createWindow() {
@@ -138,10 +213,26 @@ function createWindow() {
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false },
   });
   if (st.max && !st.wide) win.maximize();
-  win.once("ready-to-show", () => { win.show(); if (st.wide) { wideBack = Number.isFinite(st.x) ? { x: st.x, y: st.y, width: st.width, height: st.height } : null; setWide(true); } });
-  const saveState = () => { try { const b = WIDE && wideBack ? wideBack : win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: !WIDE && win.isMaximized(), wide: WIDE })); } catch (e) {} };
+  win.once("ready-to-show", () => {
+    win.show();
+    if (st.wide) {
+      wideMax = !!st.max; wideBack = !wideMax && Number.isFinite(st.x) ? { x: st.x, y: st.y, width: st.width, height: st.height } : null;
+      wideHow = "starting"; setTimeout(() => setWide(true), 600);   // (once the desktop has the window)
+    }
+  });
+  const saveState = () => { try { const b = WIDE ? (wideBack || { width: 1280, height: 800 }) : win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: WIDE ? wideMax : win.isMaximized(), wide: WIDE })); } catch (e) {} };
   win.webContents.on("did-finish-load", () => { if (WIDE) win.webContents.send("nb:wide", true); });
-  for (const ev of ["display-added", "display-removed", "display-metrics-changed"]) screen.on(ev, () => { if (WIDE && win && !win.isDestroyed()) setTimeout(() => { if (WIDE) setWide(true); }, 500); });
+  // screens plugged in or out while it's across them: it fits what's there now (not on every small change)
+  let lastScreens = "";
+  const screensKey = () => screen.getAllDisplays().map(d => [d.bounds.x, d.bounds.y, d.bounds.width, d.bounds.height].join(",")).join(" ");
+  lastScreens = screensKey();
+  for (const ev of ["display-added", "display-removed", "display-metrics-changed"]) screen.on(ev, () => {
+    setTimeout(() => { const k = screensKey(); if (k === lastScreens) return; lastScreens = k; if (WIDE && win && !win.isDestroyed()) setWide(true); }, 600);
+  });
+  // F11 (or the desktop) taking it out of fullscreen while it's across the screens: that's across both screens off
+  win.on("leave-full-screen", () => { if (WIDE && wideHow === "fullscreen" && Date.now() - ownFs > 1500) { WIDE = false; wideHow = ""; ++wideSeq; xSpan("off"); wideBack = null; wideMax = false; wideTell(); } });
+  // Ctrl+Shift+F works with the menu bar hidden too (and only once)
+  win.webContents.on("before-input-event", (e, i) => { if (i.type === "keyDown" && i.control && i.shift && !i.alt && !i.meta && i.code === "KeyF") { e.preventDefault(); setWide(!WIDE); } });
   win.on("close", saveState);
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
@@ -185,7 +276,8 @@ function linkUp() {
 }
 ipcMain.on("nb:link-out", (e, s) => { if (link) link.out(String(s)); });
 ipcMain.on("nb:set-wide", (e, on) => setWide(!!on));
-ipcMain.handle("nb:wide", () => ({ wide: WIDE, screens: screen.getAllDisplays().length }));
+ipcMain.handle("nb:wide", () => ({ wide: WIDE, screens: screen.getAllDisplays().length, how: wideHow, info: wideInfo, bounds: win && !win.isDestroyed() ? win.getBounds() : null,
+  displays: screen.getAllDisplays().map(d => ({ bounds: d.bounds, workArea: d.workArea, scale: d.scaleFactor })) }));
 ipcMain.handle("nb:link-status", () => linkUp().status());
 ipcMain.handle("nb:link-enable", (e, on) => { linkUp().enable(!!on); return linkUp().status(); });
 app.on("before-quit", () => { try { link && link.stop(); } catch (e) {} });

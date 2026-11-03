@@ -16,6 +16,7 @@ What the app adds to the website:
 - **Plugin effects anywhere:** on the whole mix, on one sound, or on Send A and Send B that every sound can feed.
 - **Saves go to Downloads/Nate Bloom** (backups, WAVs, stems, MIDI files); the menu's **Open the Saves Folder** opens it.
 - **Keeps playing when minimised**, and keeps the computer from sleeping while it plays.
+- **Across both screens** (**Ctrl+Shift+F**, ⚙ Settings › App › Screens, or View → Across Both Screens): the app goes full screen over all your screens side by side, and the keys run across them. On a desktop that won't do that, it takes its title bar off and stretches across the screens instead. The same switch turns it off and puts the window back.
 - Full screen with **F11**; **View → Version** switches between Nate Bloom and Nate Bloom Lite.
 
 Nate Bloom is free software under the GNU GPL, version 3 or later (it includes Ableton Link, © Ableton AG, GPL version 2 or later). The source and the licences are in the repository: `LICENSE` and `NOTICE.md`.
