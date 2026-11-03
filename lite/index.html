@@ -24403,7 +24403,8 @@ registerProcessor("nb-wave", NBWave);
       return null;
     }
     const isMuted = it => { const h = muteHome(it); return !!(h && h.mute); };
-    function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute; }
+    function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute;
+      if (on && it.t === "hw") { try { h.allOff(); } catch (e) {} } }   // (183) the Minilogue's held notes stop too (its sound also reaches the headphones without us)
     function toggleMute(it) {
       start();
       const on = !isMuted(it); setMute(it, on);
@@ -32608,7 +32609,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 182;
+    window.NB_BUILD = 183;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -34170,6 +34171,9 @@ registerProcessor("nb-rec", NBRec);`;
       const hwAt = when => { if (when == null || !ctx) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
       // ---- a voice: a note on now (or when it's due), a note off when it stops ----
       H.voice = function (m, when) {
+        // (183) muted: no notes go to it at all. Silencing its input wasn't enough: the Volt's own monitoring (or the
+        // synth's own outputs) still played it in the headphones, so the speaker button looked broken
+        if (H.mute) return { midi: m, hw: true, stop() {} };
         const p = hwPort(); if (!p) return null;
         const ch = (H.ch - 1) & 15, n = m & 127, vel = Math.max(1, Math.min(127, Math.round(NB_VEL7 || 100))), at = hwAt(when);
         try { p.send([0x90 | ch, n, vel], at); } catch (e) { return null; }

@@ -37,6 +37,9 @@
       const hwAt = when => { if (when == null || !ctx) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
       // ---- a voice: a note on now (or when it's due), a note off when it stops ----
       H.voice = function (m, when) {
+        // (183) muted: no notes go to it at all. Silencing its input wasn't enough: the Volt's own monitoring (or the
+        // synth's own outputs) still played it in the headphones, so the speaker button looked broken
+        if (H.mute) return { midi: m, hw: true, stop() {} };
         const p = hwPort(); if (!p) return null;
         const ch = (H.ch - 1) & 15, n = m & 127, vel = Math.max(1, Math.min(127, Math.round(NB_VEL7 || 100))), at = hwAt(when);
         try { p.send([0x90 | ch, n, vel], at); } catch (e) { return null; }

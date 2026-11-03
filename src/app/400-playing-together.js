@@ -87,7 +87,8 @@
       return null;
     }
     const isMuted = it => { const h = muteHome(it); return !!(h && h.mute); };
-    function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute; }
+    function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute;
+      if (on && it.t === "hw") { try { h.allOff(); } catch (e) {} } }   // (183) the Minilogue's held notes stop too (its sound also reaches the headphones without us)
     function toggleMute(it) {
       start();
       const on = !isMuted(it); setMute(it, on);
