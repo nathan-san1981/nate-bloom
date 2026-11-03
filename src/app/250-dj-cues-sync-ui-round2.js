@@ -22,14 +22,14 @@
       const now = ctx.currentTime + 0.03;
       if (now - lastStart[o.i] > LINK_WIN) return false;
       const at = Math.max(now, lastStart[o.i]), ahead = Math.max(0, at - lastStart[o.i]) * d.rate * d.bend, p = Math.min(from + ahead, d.buf.duration - 0.05);
-      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, p)) djLoop(d, 0);
       if (locked(d, o)) inOnBeat(d, o, p); else djStartSrc(d, at, p);
       lastStart[d.i] = lastStart[o.i];
       djMsg("Deck " + "AB"[d.i] + " joined " + "AB"[o.i] + ": started together" + (ahead > 0.02 ? " (caught up " + ahead.toFixed(2) + " s)" : ""));
       return true;
     }
     const startDeck = (d, from, msg) => {
-      if (d.loop && (from < d.loop.a || from >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, from)) djLoop(d, 0);
       if (!joinOther(d, from)) {
         const o = DJ.decks[1 - d.i];
         if (o.playing && locked(d, o)) inOnBeat(d, o, from); else djStartSrc(d, ctx.currentTime + 0.02, from);
@@ -52,7 +52,7 @@
     function hotJump(d, p, k) {
       if (!djBuild()) return;
       if (!d.playing) { startDeck(d, p, "Deck " + "AB"[d.i] + " from hot cue " + (k + 1) + " (" + djFmt(p) + ")"); djPaintAll(); return; }
-      if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+      if (djOutOfLoop(d, p)) djLoop(d, 0);
       const o = DJ.decks[1 - d.i], locked = DJ.sync && o.playing && o.bpm0 && d.bpm0;
       let at = ctx.currentTime + 0.01;
       if (DJ.quant && d.bpm0) { const ref = locked ? o : d, per = djPer(ref), sp = ref.rate * ref.bend; let wait = (1 - djPhaseAt(ref, 0)) * per / sp; if (wait < 0.03) wait += per / sp; at = ctx.currentTime + wait; }
@@ -111,7 +111,7 @@
       const fromOf = d => top ? topOf(d) : d.playing ? djPos(d) + (at - ctx.currentTime) * d.rate * d.bend : (d.p0 >= d.buf.duration - 0.05 ? 0 : d.p0);
       const fL = fromOf(L); let fF = fromOf(F);
       if (!top && grids) { const phL = frac((fL - L.off) / djPer(L)), pF = djPer(F); fF = F.off + (Math.round((fF - F.off) / pF - phL) + phL) * pF; if (fF < 0) fF += pF; }   // in on the lead's beat
-      const go = (d, f) => { d.cuePrev = false; if (d.loop && (f < d.loop.a || f >= d.loop.b)) djLoop(d, 0); djStartSrc(d, at, Math.min(f, d.buf.duration - 0.05)); lastStart[d.i] = at; };
+      const go = (d, f) => { d.cuePrev = false; if (djOutOfLoop(d, f)) djLoop(d, 0); djStartSrc(d, at, Math.min(f, d.buf.duration - 0.05)); lastStart[d.i] = at; };
       if (top || !L.playing) go(L, fL);
       go(F, fF);
       if (DJ.auto) djTickOn();

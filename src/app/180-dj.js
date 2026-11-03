@@ -189,9 +189,11 @@
     p = Math.max(0, Math.min(p, d.buf.duration - 0.05));
     const o = DJ.decks[1 - d.i];
     if (d.playing && DJ.sync && o.playing && o.bpm0 && d.bpm0) p = djInPhase(d, o, p, ctx.currentTime + 0.01);   // stay locked by landing on the other song's beat; the other song is never moved
-    if (d.loop && (p < d.loop.a || p >= d.loop.b)) djLoop(d, 0);
+    if (djOutOfLoop(d, p)) djLoop(d, 0);
     if (d.playing) djStartSrc(d, ctx.currentTime + 0.01, p); else d.p0 = p;
   }
+  // (175) a beat loop ends when the song jumps out of it; the song loop (n "song") goes round whatever it jumps to
+  const djOutOfLoop = (d, p) => !!d.loop && d.loop.n !== "song" && (p < d.loop.a || p >= d.loop.b);
   const djBeatFloor = (d, p) => d.bpm0 ? d.off + Math.floor((p - d.off) / djPer(d) + 1e-6) * djPer(d) : p;
   function djLoop(d, n) {
     if (!d.buf) return;
@@ -205,6 +207,24 @@
       d.loop = { a, b, n };
       if (d.src) { d.src.loopStart = a; d.src.loopEnd = b; d.src.loop = true; }
     }
+    djPaintDeck(d);
+  }
+  // (175) loop the whole song on a deck: with a beat grid, from its first beat to the end of its last whole bar, so it goes
+  // round on the beat (and stays locked with the other deck); without one, start to end. The intro plays the first time.
+  function djLoopSong(d) {
+    if (!d.buf) return;
+    if (d.loop && d.loop.n === "song") { djLoop(d, 0); djMsg("Deck " + "AB"[d.i] + " plays on to the end of the song"); return; }
+    if (d.playing) djRebase(d);
+    const dur = d.buf.duration; let a = 0, b = dur;
+    if (d.bpm0) {
+      const per = djPer(d), bar = 4 * per;
+      a = ((d.off % per) + per) % per;
+      const nb = Math.floor((dur - a) / bar + 1e-6);
+      if (nb >= 1) b = a + nb * bar; else a = 0;
+    }
+    d.loop = { a, b, n: "song" };
+    if (d.src) { d.src.loopStart = a; d.src.loopEnd = b; d.src.loop = true; }
+    djMsg("Deck " + "AB"[d.i] + " loops the song" + (d.bpm0 ? " (" + djFmt(a) + " to " + djFmt(b) + ", whole bars, on the beat)" : "") + " · tap Song again to let it end");
     djPaintDeck(d);
   }
   function djCue(d) {
@@ -238,7 +258,7 @@
     const posNow = F.playing ? djPos(F) + lead * F.rate * F.bend : F.p0, pF = djPer(F);
     let k = Math.round((posNow - F.off) / pF - phL), target = F.off + (k + phL) * pF;
     if (target < 0) target += pF; if (target > F.buf.duration - 0.1) target -= pF * Math.ceil((target - F.buf.duration + 0.1) / pF);
-    if (F.loop && (target < F.loop.a || target >= F.loop.b)) { F.loop = null; }
+    if (djOutOfLoop(F, target)) { F.loop = null; }
     F.rate = r; F.bend = 1;
     djStartSrc(F, at, target);
     return true;
@@ -438,7 +458,7 @@
     </div>
     <div class="dj-speed"><span>Speed</span><button class="btn sm dj-spd" data-s="-0.5" aria-label="Slower">−</button><input type="range" class="dj-tempo" min="-25" max="25" step="0.05" value="0" aria-label="Speed"><button class="btn sm dj-spd" data-s="0.5" aria-label="Faster">+</button><output>0.0%</output></div>
     <div class="dj-loops dj-cues"><span>Hot cues</span><button class="btn" data-c="0" title="Empty: tap to set a cue here · Set: tap to jump there · hold to clear">1</button><button class="btn" data-c="1">2</button><button class="btn" data-c="2">3</button><button class="btn" data-c="3">4</button></div>
-    <div class="dj-loops"><span>Loop beats</span><button class="btn" data-n="1">1</button><button class="btn" data-n="2">2</button><button class="btn" data-n="4">4</button><button class="btn" data-n="8">8</button></div>
+    <div class="dj-loops"><span>Loop beats</span><button class="btn" data-n="1">1</button><button class="btn" data-n="2">2</button><button class="btn" data-n="4">4</button><button class="btn" data-n="8">8</button><button class="btn" data-n="16">16</button><button class="btn" data-n="32">32</button><button class="btn dj-lsong" title="Loop the whole song: from its last whole bar it goes round to its first beat, on the beat, until you tap it again">Song</button></div>
     <div class="dj-eq">
       <label class="dj-sl"><span>High</span><input type="range" data-eq="hi" min="-26" max="6" step="0.5" value="0" aria-label="High"><output></output></label>
       <label class="dj-sl"><span>Mid</span><input type="range" data-eq="mid" min="-26" max="6" step="0.5" value="0" aria-label="Mid"><output></output></label>
@@ -478,7 +498,8 @@
     });
     tempo.addEventListener("dblclick", () => { tempo.value = 0; tempo.dispatchEvent(new Event("input")); });
     q(".dj-speed output").addEventListener("click", () => { tempo.value = 0; tempo.dispatchEvent(new Event("input")); djMsg("Speed back to normal on " + "AB"[d.i]); });
-    el.querySelectorAll(".dj-loops .btn").forEach(b => b.addEventListener("click", () => djLoop(d, +b.dataset.n)));
+    el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.addEventListener("click", () => djLoop(d, +b.dataset.n)));
+    q(".dj-lsong").addEventListener("click", () => djLoopSong(d));
     el.querySelectorAll("[data-eq]").forEach(r => {
       r.addEventListener("input", () => { d.eq[r.dataset.eq] = +r.value; if (djBuild()) djApplyEq(d); djPaintDeck(d); });
       r.addEventListener("dblclick", () => { r.value = r.dataset.eq === "vol" ? 0.9 : 0; r.dispatchEvent(new Event("input")); });
@@ -495,7 +516,7 @@
     const el = deckEls[d.i], q = s => el.querySelector(s);
     el.classList.toggle("lead", DJ.lead === d.i);
     q(".dj-name b").textContent = d.buf ? baseName(d.name) : "Empty";
-    q(".dj-name small").textContent = d.buf ? djFmt(djPos(d)) + " / " + djFmt(d.buf.duration) + (d.loop ? " · looping " + d.loop.n : "") + (DJ.lead === d.i ? " · lead" : "") : "Tap Load… for a song";
+    q(".dj-name small").textContent = d.buf ? djFmt(djPos(d)) + " / " + djFmt(d.buf.duration) + (d.loop ? " · looping " + (d.loop.n === "song" ? "the song" : d.loop.n) : "") + (DJ.lead === d.i ? " · lead" : "") : "Tap Load… for a song";
     const pb = q(".dj-play"); pb.textContent = d.playing ? "❚❚" : "▶"; pb.setAttribute("aria-pressed", String(d.playing));
     q(".dj-bpm b").textContent = d.bpm0 ? (djEff(d) * d.bend).toFixed(1) : "—";
     q(".dj-bpm small").textContent = d.bpm0 ? (Math.abs(d.rate - 1) > 0.0004 ? "from " + d.bpm0.toFixed(1) : "BPM") : "BPM";
@@ -504,6 +525,7 @@
     q(".dj-speed output").textContent = (pct >= 0 ? "+" : "") + pct.toFixed(1) + "%";
     el.querySelectorAll(".dj-cues .btn[data-c]").forEach(b => { const v = d.cues[+b.dataset.c]; b.setAttribute("aria-pressed", String(v != null)); b.textContent = v != null ? (+b.dataset.c + 1) + " · " + djFmt(v) : String(+b.dataset.c + 1); });
     el.querySelectorAll(".dj-loops .btn[data-n]").forEach(b => b.setAttribute("aria-pressed", String(!!d.loop && d.loop.n === +b.dataset.n)));
+    q(".dj-lsong").setAttribute("aria-pressed", String(!!d.loop && d.loop.n === "song")); q(".dj-lsong").disabled = !d.buf;
     el.querySelectorAll("[data-eq]").forEach(r => {
       const k = r.dataset.eq, v = d.eq[k]; r.value = v;
       r.nextElementSibling.textContent = k === "vol" ? Math.round(v * 100) + "%" : k === "filt" ? (Math.abs(v) < 0.02 ? "off" : v < 0 ? "low-p" : "high-p") : v <= -25.5 ? "kill" : (v > 0 ? "+" : "") + v + " dB";
