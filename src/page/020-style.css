@@ -1946,6 +1946,19 @@ canvas.wv-wt { width: 100%; height: 132px; background: radial-gradient(120% 140%
 .stk-chip .sc-g, .stk-chip .sc-x { width: 40px; flex: none; border-left: 1px solid var(--line); color: var(--dim); font-size: 1rem; }
 .stk-chip .sc-g:hover, .stk-chip .sc-x:hover { color: var(--ink); }
 .stk-add { min-height: 46px; border-style: dashed; font-weight: 600; }
+.stk-chip .sc-c { flex: none; border-left: 1px solid var(--line); color: var(--dim); font: 600 0.68rem var(--font-mono); padding: 0 9px; white-space: nowrap; max-width: 34vw; overflow: hidden; text-overflow: ellipsis; }
+.stk-chip .sc-c.set { color: var(--amber); }
+.stk-chip .sc-c:hover { color: var(--ink); }
+.nb-ctlpop { position: fixed; z-index: 60; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 6px; }
+.nb-ctlpop .ncp-h { display: flex; flex-direction: column; margin-bottom: 2px; }
+.nb-ctlpop .ncp-h b { font: 600 0.9rem var(--font-body); }
+.nb-ctlpop .ncp-h small, .nb-ctlpop .ncp-row small { font: 0.64rem var(--font-mono); color: var(--dim); }
+.nb-ctlpop .ncp-row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-radius: 8px; cursor: pointer; }
+.nb-ctlpop .ncp-row:hover { background: var(--raised); }
+.nb-ctlpop .ncp-row input { width: 18px; height: 18px; accent-color: var(--amber); flex: none; }
+.nb-ctlpop .ncp-row span { display: flex; flex-direction: column; }
+.nb-ctlpop .ncp-row b { font: 600 0.82rem var(--font-body); }
+.nb-ctlpop .ncp-note { font: 0.7rem/1.4 var(--font-body); color: var(--dim); margin: 2px 0 0; }
 .stk-help { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 0.76rem/1.4 var(--font-body); color: var(--dim); flex: 1 1 220px; justify-content: flex-end; }
 .qk { flex: 1 1 100%; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .qk-lab { font: 600 0.62rem var(--font-mono); letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; flex: none; }

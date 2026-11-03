@@ -191,7 +191,7 @@
   function mdRoutePlugs(r) {
     const PLm = window.__nbPlug; if (!PLm || !PLm.live || !PLm.live.size) return [];
     const keys = new Set();
-    if (r === "stack") state.lib.parts.forEach((pt, i) => { if (pt && pt.on && pt.id && libInsts[i] && pt.id.startsWith("wam:")) keys.add(pt.id.slice(4)); });
+    if (r === "stack") state.lib.parts.forEach((pt, i) => { if (pt && pt.on && pt.id && libInsts[i] && pt.id.startsWith("wam:") && (!window.__nbCtl || window.__nbCtl.allows("l:" + pt.id, window.__nbSrc, window.__nbSrcStack))) keys.add(pt.id.slice(4)); });   // (185: only the ones this controller plays)
     else if (r.startsWith("l:") && r.slice(2).startsWith("wam:")) keys.add(r.slice(6));
     return [...PLm.live.values()].filter(P => !P.fx && keys.has(P.key));
   }
@@ -218,8 +218,13 @@
     if ((cmd === 0x90 || cmd === 0x80) && md.opt.padsIn && typeof bpMidiNote === "function" && bpMidiNote(d1, cmd === 0x90 ? d2 : 0)) return;
     if (cmd === 0xb0 && typeof nbCC === "function" && nbCC(st & 15, d1, d2)) return;
     if (!md.opt.noteIn) return;
-    const route = mdRoute(e.target);
+    let route = mdRoute(e.target);
+    // (185) the sound chips say which controller plays them: a controller picked there plays those sounds even when
+    // it plays nothing else (the MicroFreak's keys: its own sound, and the plugin picked for it)
+    const srcKey = mdKey("in", e.target), assigned = !!(window.__nbCtl && window.__nbCtl.assignedTo(srcKey));
+    if (route === "none" && assigned) route = "stack";
     if (route === "none") return;
+    window.__nbSrc = srcKey; window.__nbSrcStack = mdRoute(e.target) === "stack"; queueMicrotask(() => { window.__nbSrc = null; });   // (only for what this message plays)
     // (184) its knobs (not learned for anything here), wheels and pressure go to the plugin(s) it plays as well
     if ((cmd === 0xb0 && d1 !== 64 && d1 !== 120 && d1 !== 123) || cmd === 0xe0 || cmd === 0xd0 || cmd === 0xa0) { const sent = mdToPlugs(route, [st, d1, d2 == null ? 0 : d2]); if (sent && cmd === 0xb0 && d1 !== 1) return; }
     if (route !== "stack" && (cmd === 0x90 || cmd === 0x80 || (cmd === 0xb0 && (d1 === 64 || d1 === 123 || d1 === 120)))) {
@@ -249,9 +254,15 @@
       else if (d1 === 123 || d1 === 120) { nbSustain(false); allOff(); }
       return;
     }
-    if (cmd === 0x90 && d2 > 0) { start(); NB_VEL = mdVelGain(d2); NB_VEL7 = d2; try { state.hold ? press(d1) : noteOn(d1); } finally { NB_VEL = 1; NB_VEL7 = 100; } }
+    if (cmd === 0x90 && d2 > 0) { start(); NB_VEL = mdVelGain(d2); NB_VEL7 = d2; try { state.hold ? press(d1) : noteOn(d1); } finally { NB_VEL = 1; NB_VEL7 = 100; window.__nbSrc = null; } }
     else if (cmd === 0x80 || (cmd === 0x90 && d2 === 0)) { if (!state.hold) nbSusOff(d1); }
   }
+  // (185) the controllers that are on, for the sound chips' menus: key, a short name, whether they play what's playing
+  window.__nbCtlList = () => {
+    if (!md.access) return [];
+    return [...md.access.inputs.values()].filter(p => md.ins.has(p.id) && !/mcu|hui|alv|din\s*thru|midi through|^through/i.test(p.name || ""))
+      .map(p => ({ key: mdKey("in", p), name: (p.name || "MIDI").replace(/^KL\b/i, "KeyLab").replace(/^Arturia\s+/i, "").replace(/\s*(MIDI(\s*\d+)?|mk\s*3|Essential)\s*/gi, " ").replace(/\s*_\s*/g, " ").replace(/\s+/g, " ").trim() || p.name, full: p.name, stack: mdRoute(p) === "stack" }));
+  };
   window.__nbMidiDbg = { route: p => mdRoute(p), setRoute: (p, r) => mdRouteSet(p, r), opts: () => mdRouteOptions(), feed: e => onMidi(e), md };   // (184: tests feed it messages)
   function renderMidi() {
     mdPorts.innerHTML = "";

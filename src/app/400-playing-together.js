@@ -40,6 +40,39 @@
       if (eng !== state.engine || !grp(eng)) return vc0.apply(this, arguments);
       return stackComps(eng);
     };
+    // ---- (185) which controller plays each sound: picked on its chip. A sound with none picked plays from every
+    // keyboard that plays what's playing; one with controllers picked plays only from those (and from the screen's
+    // keys and the sequencer, as always). A controller picked for a sound plays it even if it plays nothing else
+    // (the MicroFreak: its own sound through pass-through, and a plugin from its keys and knobs). ----
+    const CTLK = "nightbloom-ctlmap"; let CTL = {}; try { CTL = JSON.parse(localStorage.getItem(CTLK) || "{}") || {}; } catch (e) {}
+    const ctlSave = () => { try { localStorage.setItem(CTLK, JSON.stringify(CTL)); } catch (e) {} };
+    const itKey = it => it.t === "syn" ? "e:" + it.id : it.t === "lib" ? "l:" + it.id : it.t === "samp" ? "samp" : it.t;
+    const compKey = c => ENGINES[c.key] ? "e:" + c.key : /^lib\d+$/.test(c.key || "") ? "l:" + ((state.lib.parts[+c.key.slice(3)] || {}).id || "") : c.key;
+    function ctlAllows(k, src, srcStack) { const L = CTL[k]; if (!L || !L.length) return src == null || srcStack !== false; return src == null || L.includes(src); }
+    window.__nbCtl = { allows: ctlAllows, get: k => CTL[k] || [], set(k, L) { if (L && L.length) CTL[k] = L.slice(); else delete CTL[k]; ctlSave(); try { paint(); } catch (e) {} },
+      assignedTo: src => Object.values(CTL).some(L => Array.isArray(L) && L.includes(src)), keyOf: it => itKey(it) };
+    { const vcS = voiceComponents; voiceComponents = function () {
+        const r = vcS.apply(this, arguments), src = window.__nbSrc;
+        return src == null ? r : r.filter(c => ctlAllows(compKey(c), src, window.__nbSrcStack));
+      }; }
+    const ctlPop = document.createElement("div"); ctlPop.className = "nb-ctlpop"; ctlPop.hidden = true; ctlPop.setAttribute("role", "dialog"); ctlPop.setAttribute("aria-label", "Which controller plays it"); document.body.appendChild(ctlPop);
+    document.addEventListener("pointerdown", e => { if (!ctlPop.hidden && !ctlPop.contains(e.target) && !(e.target.closest && e.target.closest(".sc-c"))) ctlPop.hidden = true; });
+    const ctlName = k => { const c = (window.__nbCtlList ? window.__nbCtlList() : []).find(x => x.key === k); return c ? c.name : (k.replace(/^in:/, "").split("|")[0] || "a controller").replace(/\s*MIDI.*$/i, ""); };
+    function ctlLabel(it) { const L = CTL[itKey(it)]; return !L || !L.length ? "Any keys" : L.map(ctlName).join(" + "); }
+    function openCtlPop(it, btn, rc0) {
+      const k = itKey(it), list = window.__nbCtlList ? window.__nbCtlList() : [], L = new Set(CTL[k] || []);
+      ctlPop.innerHTML = "";
+      const h = el("div", "ncp-h"); h.innerHTML = "<b></b><small>which controller plays it</small>"; h.querySelector("b").textContent = it.name; ctlPop.appendChild(h);
+      const row = (label, sub, on, fn) => { const r = el("label", "ncp-row"); const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = on; cb.addEventListener("change", () => fn(cb.checked)); const t = el("span"); t.innerHTML = "<b></b><small></small>"; t.querySelector("b").textContent = label; t.querySelector("small").textContent = sub; r.append(cb, t); ctlPop.appendChild(r); return cb; };
+      const rc = rc0 || btn.getBoundingClientRect(), again = () => openCtlPop(it, null, rc);
+      row("Any keys", "every keyboard that plays what's playing", !L.size, on => { if (on) { delete CTL[k]; ctlSave(); paint(); } again(); });
+      if (!list.length) { const n = el("p", "ncp-note", "No MIDI controllers are on. Plug one in (Settings › MIDI › Connect), then pick it here."); ctlPop.appendChild(n); }
+      list.forEach(c => row(c.name, c.stack ? "plays what's playing too" : "plays only what's picked for it", L.has(c.key), on => { if (on) L.add(c.key); else L.delete(c.key); if (L.size) CTL[k] = [...L]; else delete CTL[k]; ctlSave(); paint(); again(); }));
+      const n2 = el("p", "ncp-note", "Several can play the same sound. Its knobs, wheels and pressure reach a plugin it plays."); ctlPop.appendChild(n2);
+      ctlPop.hidden = false;
+      const w = Math.min(320, innerWidth - 16); ctlPop.style.width = w + "px";
+      ctlPop.style.left = Math.max(8, Math.min(innerWidth - w - 8, rc.left)) + "px"; ctlPop.style.top = Math.min(innerHeight - 40, rc.bottom + 6) + "px";
+    }
     { const mvp = melodicVoices;
       melodicVoices = function (m, when, scale = 1) {
         const e = ["drum", "pads"].includes(state.engine) ? melo() : state.engine, f = grp(e);
@@ -345,6 +378,7 @@
         m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
         m.addEventListener("click", () => { start(); focusOn(it); });
         c.appendChild(m);
+        { const L = CTL[itKey(it)], cb = el("button", "sc-c" + (L && L.length ? " set" : ""), "🎹 " + ctlLabel(it) + " ▾"); cb.title = "Which controller plays " + it.name; cb.setAttribute("aria-label", cb.title + ": " + ctlLabel(it)); cb.addEventListener("click", e => { e.stopPropagation(); start(); openCtlPop(it, cb); }); c.appendChild(cb); }   // (185)
         if (it.t === "lib" && PLUG(it.id) && NBW_OK()) { const g = el("button", "sc-g", "⚙"); g.title = it.name + "'s own controls"; g.setAttribute("aria-label", g.title); g.addEventListener("click", () => { start(); __wam.instrument(it.id).then(W => __wam.openGui(W)).catch(() => {}); }); c.appendChild(g); }
         // (172) the speaker mutes it and brings it back; ✕ takes it out of what's playing (+ in Quick sounds adds it again)
         c.appendChild(muteBtn("sc-m", it));   // (173) even the only one: it can be muted, or taken out and nothing plays

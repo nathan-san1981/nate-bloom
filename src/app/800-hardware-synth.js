@@ -185,6 +185,8 @@
         <div class="sp-lab"><span>Which synth</span></div>
         <div class="ly-quick"><select id="hwModel" aria-label="Which synth" style="flex:1;min-width:0"></select></div>
         <div class="ly-quick"><button class="btn" id="hwThru" aria-pressed="false" style="flex:1">Pass-through: hear it all the time</button><button class="btn" id="hwFxOn" aria-pressed="false" style="flex:1">Nate Bloom's effects on it</button></div>
+        <div class="sp-lab"><span>Its keys and knobs also play</span></div>
+        <div id="hwPlays" style="display:flex;flex-wrap:wrap;gap:6px"></div>
         <span class="ed-info" style="text-align:left" id="hwThruInfo">With pass-through on, its own presets, keys, sequencer and arp, and any pedal after it, come through Nate Bloom whether or not Nate Bloom is playing it, so Takes, the Garage and Live's recorder have it too. Its own effects come through as they are; Nate Bloom's go on top only when you switch them on (the Effects knobs; plugin effects can go on it from the Plugins sheet).</span>
         <div class="sp-lab"><span>MIDI to it</span></div>
         <div class="ly-quick"><select id="hwOut" aria-label="MIDI output" style="flex:1;min-width:0"></select><select id="hwCh" aria-label="MIDI channel"></select></div>
@@ -219,6 +221,14 @@
           MODELS.forEach(m => add(ms, m.id, m.id === "other" ? "Another synth (pick its MIDI output below)" : m.name + (plugged.includes(m) ? " · plugged in" : "")));
           ms.value = H.model || ""; }
         $h("hwTitle").textContent = H.name;
+        // (185) its keys as a controller too: the sounds playing that they play (the chips' 🎹 menus say the same)
+        { const box = $h("hwPlays"); box.innerHTML = ""; const C = window.__nbCtl, list = window.__nbCtlList ? window.__nbCtlList() : [], m = model();
+          const me = list.find(c => m.re.test(c.full || c.name)) || (H.model === "other" ? null : null);
+          const its = (() => { try { return window.__stk.items().filter(x => x.t !== "hw"); } catch (e) { return []; } })();
+          if (!me) { const n = document.createElement("span"); n.className = "ed-info"; n.style.textAlign = "left"; n.textContent = md.access ? "Its MIDI input isn't on: switch it on in Settings › MIDI (it's listed as " + H.name + ")." : "Connect MIDI first."; box.appendChild(n); }
+          else if (!its.length) { const n = document.createElement("span"); n.className = "ed-info"; n.textContent = "Nothing else is playing. Add a sound (a plugin, say), then tick it here."; box.appendChild(n); }
+          else its.forEach(it => { const k = C.keyOf(it), L = C.get(k), on = L.includes(me.key); const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = (on ? "✓ " : "") + it.name; b.setAttribute("aria-pressed", String(on));
+            b.addEventListener("click", () => { const L2 = C.get(k).filter(x => x !== me.key); if (!on) L2.push(me.key); C.set(k, L2); hwSheetPaint(); }); box.appendChild(b); }); }
         $h("hwThru").setAttribute("aria-pressed", String(!!H.thru)); $h("hwFxOn").setAttribute("aria-pressed", String(hwFxIs()));
         $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : H.thru ? (H.ready() ? "pass-through: you hear it" : H.why()) : "plugged in · not playing";
         const m = $h("hwMsg");
