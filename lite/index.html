@@ -32591,7 +32591,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 180;
+    window.NB_BUILD = 182;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -34129,6 +34129,7 @@ registerProcessor("nb-rec", NBRec);`;
         ["out", "dev", "pick"].forEach(k => { if (typeof o[k] === "string") H[k] = o[k]; });
         if (o.ch >= 1 && o.ch <= 16) H.ch = o.ch; if (Number.isFinite(o.level)) H.level = o.level; H.seen = !!o.seen;
       } catch (e) {}
+      try { H.hadIf = localStorage.getItem("nightbloom-hw-if") === "1"; } catch (e) {}
       const hwSave = () => { try { localStorage.setItem(HW_KEY, JSON.stringify({ out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, seen: H.seen })); } catch (e) {} };
       const outs = () => md.access ? [...md.access.outputs.values()] : [];
       const isHW = p => HW_RE.test(((p && p.name) || "") + " " + ((p && p.manufacturer) || ""));
@@ -34176,7 +34177,7 @@ registerProcessor("nb-rec", NBRec);`;
       function hwCloseInput() {
         try { if (H.src) H.src.disconnect(); if (H.split) H.split.disconnect(); if (H.merge) H.merge.disconnect(); } catch (e) {}
         if (H.stream) H.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
-        H.stream = H.src = H.split = H.merge = H.an = H.bus = H.dest = null;
+        H.stream = H.src = H.split = H.merge = H.an = H.bus = H.dest = null; H.standIn = false; H.inId = "";
       }
       function hwPick() {
         if (!H.split || !H.merge) return;
@@ -34220,6 +34221,12 @@ registerProcessor("nb-rec", NBRec);`;
           H.an = ctx.createAnalyser(); H.an.fftSize = 1024; H.merge.connect(H.an);
           hwWire();
           const tr = st.getAudioTracks()[0]; H.label = tr ? tr.label : "";
+          // (182) which input this really is: the one asked for, or a stand-in (the system's Default) because it wasn't there
+          let gotId = ""; try { gotId = (tr && tr.getSettings().deviceId) || ""; } catch (e) {}
+          // (a setup without a Volt is never a stand-in: Default is its input. Only once the Volt has been the input here)
+          if (!H.dev && IF_RE.test(H.label)) { H.hadIf = true; try { localStorage.setItem("nightbloom-hw-if", "1"); } catch (e) {} }
+          H.inId = gotId; H.standIn = H.dev ? gotId !== H.dev : (H.hadIf && !IF_RE.test(H.label));
+          try { window.__nbAdd && window.__nbAdd("hw", "sound in from " + (H.label || "?") + (H.standIn ? " (stand-in: " + (H.dev ? "the input you picked" : "the Volt") + " wasn't there)" : "")); } catch (e) {}
           if (tr) tr.addEventListener("ended", () => { if (H.stream !== st) return; H.err = "the audio input went away"; hwCloseInput(); paintAll(); });
           return true;
         })();
@@ -34233,13 +34240,28 @@ registerProcessor("nb-rec", NBRec);`;
         else if (!on && (H.src || H.stream)) { hwCloseInput(); H.allOff(); paintAll(); }
         if (on && H.src) hwWire();   // (keeps its chain awake: its own keys and sequencer make sound Nate Bloom didn't ask for)
       }, 1000);
-      try { navigator.mediaDevices.addEventListener("devicechange", () => { if (inStack() && H.err) { H.err = ""; hwOpen(true); } if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
+      // (182) a device came or went. Unplugging the Volt used to leave the Minilogue on the system's Default input (the
+      // computer's own mic, or nothing) after the Volt came back: the headphones had it through the Volt's own
+      // monitoring, Takes, Tracks and resampling didn't. Now: lost or on a stand-in, it goes back to the real input as
+      // soon as that's there (the events come in pairs, so a short wait first).
+      let hwDcT = 0;
+      async function hwRecheck() {
+        if (!inStack() || H.opening) return;
+        if (H.err) { H.err = ""; hwOpen(true); return; }
+        if (!H.src || !H.standIn) return;
+        const devs = await inputs();
+        const real = H.dev ? devs.find(d => d.deviceId === H.dev) : devs.find(d => IF_RE.test(d.label || ""));
+        if (real && real.deviceId !== H.inId) { try { window.__nbAdd && window.__nbAdd("hw", "back on " + (real.label || "the input")); } catch (e) {} hwOpen(true); }
+      }
+      H.recheck = hwRecheck;
+      try { navigator.mediaDevices.addEventListener("devicechange", () => { clearTimeout(hwDcT); hwDcT = setTimeout(hwRecheck, 400); if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
+      setInterval(() => { if (H.standIn && H.src) hwRecheck(); }, 5000);   // (and if the event never came)
       // ---- the ports came or went: the Quick row shows it once it's been seen ----
       { const op = md.onPorts; md.onPorts = function () { if (op) op.apply(this, arguments); if (H.present() && !H.seen) { H.seen = true; hwSave(); } paintAll(); }; }
       // ---- in the Mixer ----
       { const mc = mixChannels; mixChannels = function () {
           const ch = mc.apply(this, arguments);
-          if (H.shown()) ch.push({ group: "Hardware", name: H.name, sub: inStack() ? (H.ready() ? "playing now · " + (H.label || "audio in") : H.why()) : "add it from Quick sounds",
+          if (H.shown()) ch.push({ group: "Hardware", name: H.name, sub: inStack() ? (H.ready() ? "playing now · " + (H.label || "audio in") + (H.standIn ? " · not the Volt: Takes won't have it" : "") : H.why()) : "add it from Quick sounds",
             get: () => H.level, set: v => { H.level = v; hwSave(); try { lvApply(); } catch (e) {} }, dflt: 0.8, live: true });
           return ch;
         }; }
@@ -34278,7 +34300,7 @@ registerProcessor("nb-rec", NBRec);`;
         $h("hwIn").textContent = on ? "Take it out" : "+ Play it with the rest";
         $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : "plugged in · not playing";
         const m = $h("hwMsg");
-        m.textContent = !md.access ? "Connect MIDI first (MIDI › Connect)." : !H.present() ? "Plug the Minilogue XD in over USB, or pick the MIDI output it's on (the Volt's MIDI out, say)." : H.err ? H.err.charAt(0).toUpperCase() + H.err.slice(1) + ". Pick the input and tap ↻." : on && H.src ? "Coming in from " + (H.label || "the input") + "." : "";
+        m.textContent = !md.access ? "Connect MIDI first (MIDI › Connect)." : !H.present() ? "Plug the Minilogue XD in over USB, or pick the MIDI output it's on (the Volt's MIDI out, say)." : H.err ? H.err.charAt(0).toUpperCase() + H.err.slice(1) + ". Pick the input and tap ↻." : on && H.src ? "Coming in from " + (H.label || "the input") + "." + (H.standIn ? " That isn't " + (H.dev ? "the input you picked" : "the Volt") + ", so Takes and Tracks won't have the Minilogue: plug it in and it switches back, or pick the input here." : "") : "";
         meter();
       }
       function meter() {
