@@ -135,8 +135,14 @@
           return;
         }
         if (H.dest === analyser) { try { H.merge.disconnect(H.bus); H.bus.disconnect(); } catch (e) {} H.bus = null; H.dest = null; }
-        let c = null; try { c = fxcGet("hw"); } catch (e) {}
-        const dest = c ? c.input : fx.input; if (!dest) return;
+        // (189) clean unless Nate Bloom's effects are switched on for it: straight to the safety limiter (-3 dBFS), past
+        // the effects chain (its tape-drive stage saturates even at Drive 0), the master volume and the master
+        // compressor (soft-kneed from about -29 dBFS, 4:1, 5 ms attack: that's what ate the Minilogue's low-end punch).
+        // The Mixer's fader and mute still work on it.
+        let c = null; if (H.fxOn) { try { c = fxcGet("hw"); } catch (e) {} }
+        // (at the Mixer's 0 dB, 0.8, it comes out at the level the interface gives it: the limiter's trim is made up)
+        if (!H.fxOn && fx.limiter && (!H.mk || H.mk.context !== ctx || H.mkTo !== fx.limiter)) { H.mk = ctx.createGain(); H.mk.gain.value = (1 / 0.8) / Math.pow(10, -(3 - 3 / 20) * 0.6 / 20); H.mk.connect(fx.limiter); H.mkTo = fx.limiter; }
+        const dest = H.fxOn ? (c ? c.input : fx.input) : (fx.limiter ? H.mk : fx.input); if (!dest) return;
         if (H.dest === dest && H.bus) return;
         if (H.bus) { try { H.merge.disconnect(H.bus); } catch (e) {} }
         H.bus = lvBus("hw", dest); H.merge.connect(H.bus); H.dest = dest;
