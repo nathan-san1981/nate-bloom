@@ -276,8 +276,9 @@ function linkUp() {
 }
 ipcMain.on("nb:link-out", (e, s) => { if (link) link.out(String(s)); });
 ipcMain.on("nb:set-wide", (e, on) => setWide(!!on));
-ipcMain.handle("nb:wide", () => ({ wide: WIDE, screens: screen.getAllDisplays().length, how: wideHow, info: wideInfo, bounds: win && !win.isDestroyed() ? win.getBounds() : null,
-  displays: screen.getAllDisplays().map(d => ({ bounds: d.bounds, workArea: d.workArea, scale: d.scaleFactor })) }));
+ipcMain.handle("nb:wide", async () => ({ wide: WIDE, screens: screen.getAllDisplays().length, how: wideHow, info: wideInfo, bounds: win && !win.isDestroyed() ? win.getBounds() : null,
+  displays: screen.getAllDisplays().map(d => ({ bounds: d.bounds, workArea: d.workArea, scale: d.scaleFactor })),
+  probe: process.env.NB_DEBUG ? await xSpan("probe") : undefined }));   // (the CI check: the helper works from inside the app)
 ipcMain.handle("nb:link-status", () => linkUp().status());
 ipcMain.handle("nb:link-enable", (e, on) => { linkUp().enable(!!on); return linkUp().status(); });
 app.on("before-quit", () => { try { link && link.stop(); } catch (e) {} });

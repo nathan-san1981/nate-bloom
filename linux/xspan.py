@@ -4,7 +4,7 @@
 # what it found: the window manager, whether it supports the hint, and the screens X knows. "bare"/"framed" take the
 # window's title bar off and put it back (_MOTIF_WM_HINTS): a window without one isn't held to a single screen, the
 # fallback for a desktop that doesn't take the hint. Run by main.js through python3 -c (Mint always has python3 and
-# libX11). usage: xspan.py XID on|off|bare|framed
+# libX11). usage: xspan.py XID on|off|bare|framed|probe
 import ctypes as C, sys, json
 xid = int(sys.argv[1]); mode = sys.argv[2]; on = mode == "on"
 out = {"ok": False}
@@ -59,6 +59,8 @@ try:
 except OSError:
     pass
 out.update(mons=mons)
+if mode == "probe":   # what it would work with, nothing sent
+    X.XCloseDisplay(d); done(ok=True)
 if mode in ("bare", "framed"):
     X.XChangeProperty.argtypes = [V, UL, UL, UL, I, I, V, I]
     mwm = X.XInternAtom(d, b"_MOTIF_WM_HINTS", 0)
