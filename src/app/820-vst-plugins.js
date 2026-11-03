@@ -23,10 +23,10 @@
       h[0] = f0 + n;
       const rf = f0 - this.lat;
       if (rf >= 0 && h[1] >= rf + n) { const r0 = rf % cap; for (let i = 0; i < n; i++) { const k = (r0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
-      else if (rf >= 0 && h[1] > 0) { h[2]++; if (this.lat < 2048) { this.lat += 128; h[6] = this.lat; } }   // (it wasn't ready: a little more room from now on)
+      else if (rf >= 0 && h[1] > 0) { h[2]++; if (this.lat < 2048 && f0 - (this.bump || 0) > 4800) { this.lat += 128; h[6] = this.lat; this.bump = f0; } }   // (it wasn't ready: a little more room from now on)
     } else {
       if (h[1] >= f0 + n) { const i0 = f0 % cap; for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
-      else if (h[1] > 0) { h[2]++; if (h[5] < 2048) h[5] += 128; }
+      else if (h[1] > 0) { h[2]++; if (h[5] < 2048 && f0 - (this.bump || 0) > 4800) { h[5] += 128; this.bump = f0; } }
       h[0] = f0 + n;
     }
     return this.live;
@@ -62,7 +62,7 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         try {
           await addMod(c);
           const hdr = new SharedArrayBuffer(64), inR = new SharedArrayBuffer(CAP * 8), outR = new SharedArrayBuffer(CAP * 8), h = new Float64Array(hdr);
-          h[0] = Math.floor(c.currentTime * c.sampleRate); h[3] = CAP; h[4] = fx ? 2 : 1; h[5] = 256; h[6] = 384;   // (an effect's output plays 384 frames, 8 ms, after its input; more if it needs it)
+          h[0] = Math.floor(c.currentTime * c.sampleRate); h[3] = CAP; h[4] = fx ? 2 : 1; h[5] = window.__nbAhead ? window.__nbAhead(c) : 256; h[6] = Math.max(384, h[5] + 128);   // (180: past the browser's burst, as the engine)   // (an effect's output plays 384 frames, 8 ms, after its input; more if it needs it)
           node = new AudioWorkletNode(c, "nb-plug-io", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: "explicit", processorOptions: { hdr, inR, outR, cap: CAP, fx } });
           const ans = await new Promise(res => {
             const tok = Math.random().toString(36).slice(2), to = setTimeout(() => { removeEventListener("message", on); res({ ok: false, why: "the app didn't answer" }); }, 3000);

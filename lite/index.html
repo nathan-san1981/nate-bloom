@@ -32578,7 +32578,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 179;
+    window.NB_BUILD = 180;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -34324,6 +34324,11 @@ registerProcessor("nb-rec", NBRec);`;
     const NE = window.__ne = { ok: false, on: true, why: NAT ? "" : "not the Linux app", busy: false, node: null, hdr: null, sr: 48000, ctx: null, id: 0, buses: [], notes: 0, byKind: {} };
     try { if (localStorage.getItem("nightbloom-native") === "off") NE.on = false; } catch (e) {}
     const CAP = 8192, BUSES = 8, AHEAD = 256;
+    // (180) how far ahead of the worklet the engine keeps: more than the browser takes in one go. Linux's sound server
+    // has it work out ~10 ms (480 frames) at once, back to back, so 256 frames ran out mid-burst (238 dropouts in a
+    // minute, at 1% of a core): now the burst plus two blocks, and more if it still runs short
+    const nbAhead = c => Math.max(AHEAD, Math.min(2048, Math.ceil(((c.baseLatency || 0) * c.sampleRate) / 128) * 128 + 256));
+    window.__nbAhead = nbAhead;
     const SRC = `class NBNativeOut extends AudioWorkletProcessor {
   constructor(o) { super(); const p = o.processorOptions; this.h = new Float64Array(p.hdr); this.r = new Float32Array(p.ring); this.cap = p.cap; this.nb = p.buses; this.live = true; this.port.onmessage = e => { if (e.data === "stop") this.live = false; }; }
   process(inputs, outputs) {
@@ -34332,7 +34337,7 @@ registerProcessor("nb-rec", NBRec);`;
       const i0 = f0 % cap;
       for (let b = 0; b < this.nb; b++) { const o = outputs[b]; if (!o || !o[0]) continue; const L = o[0], R = o[1] || o[0], bl = b * 2 * cap, br = bl + cap;
         for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; L[i] = r[bl + k]; R[i] = r[br + k]; } }
-    } else if (h[1] > 0) h[2]++;   // the engine hadn't got this far: silence, counted
+    } else if (h[1] > 0) { h[2]++; if (h[5] < 2048 && f0 - (this.bump || 0) > 4800) { h[5] += 128; this.bump = f0; } }   // the engine hadn't got this far: silence, counted, and (180) it keeps further ahead from now on
     h[0] = f0 + n;
     return this.live;
   }
@@ -34344,7 +34349,7 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       NE.busy = true;
       try {
         const hdr = new SharedArrayBuffer(64), ring = new SharedArrayBuffer(BUSES * 2 * CAP * 4), h = new Float64Array(hdr);
-        h[0] = Math.floor(ctx.currentTime * ctx.sampleRate); h[3] = CAP; h[4] = BUSES; h[5] = AHEAD;
+        h[0] = Math.floor(ctx.currentTime * ctx.sampleRate); h[3] = CAP; h[4] = BUSES; h[5] = nbAhead(ctx);
         await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([SRC], { type: "text/javascript" })));
         const node = new AudioWorkletNode(ctx, "nb-native-out", { numberOfInputs: 0, numberOfOutputs: BUSES, outputChannelCount: Array(BUSES).fill(2), processorOptions: { hdr, ring, cap: CAP, buses: BUSES } });
         const keep = ctx.createGain(); keep.gain.value = 0; node.connect(keep, 0).connect(ctx.destination);   // (keeps it running with nothing else connected)
@@ -34353,7 +34358,7 @@ registerProcessor("nb-native-out", NBNativeOut);`;
           const id = Math.random().toString(36).slice(2), to = setTimeout(() => { window.removeEventListener("message", on); res({ ok: false, why: "the app didn't answer" }); }, 3000);
           const on = e => { const d = e.data && e.data.nbEngAttached; if (!d || d.id !== id) return; clearTimeout(to); window.removeEventListener("message", on); res(d); };
           window.addEventListener("message", on);
-          window.postMessage({ nbEngAttach: { id, hdr, ring, sr: ctx.sampleRate, buses: BUSES, cap: CAP, ahead: AHEAD } }, location.origin);
+          window.postMessage({ nbEngAttach: { id, hdr, ring, sr: ctx.sampleRate, buses: BUSES, cap: CAP, ahead: h[5] } }, location.origin);
         });
         if (!ans.ok) { NE.why = "the engine didn't start: " + (ans.why || "?"); try { node.disconnect(); } catch (e) {} return; }
         Object.assign(NE, { node, keep, hdr: h, sr: ctx.sampleRate, ctx, ok: true, why: "", buses: [] });
@@ -34506,10 +34511,10 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       h[0] = f0 + n;
       const rf = f0 - this.lat;
       if (rf >= 0 && h[1] >= rf + n) { const r0 = rf % cap; for (let i = 0; i < n; i++) { const k = (r0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
-      else if (rf >= 0 && h[1] > 0) { h[2]++; if (this.lat < 2048) { this.lat += 128; h[6] = this.lat; } }   // (it wasn't ready: a little more room from now on)
+      else if (rf >= 0 && h[1] > 0) { h[2]++; if (this.lat < 2048 && f0 - (this.bump || 0) > 4800) { this.lat += 128; h[6] = this.lat; this.bump = f0; } }   // (it wasn't ready: a little more room from now on)
     } else {
       if (h[1] >= f0 + n) { const i0 = f0 % cap; for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
-      else if (h[1] > 0) { h[2]++; if (h[5] < 2048) h[5] += 128; }
+      else if (h[1] > 0) { h[2]++; if (h[5] < 2048 && f0 - (this.bump || 0) > 4800) { h[5] += 128; this.bump = f0; } }
       h[0] = f0 + n;
     }
     return this.live;
@@ -34545,7 +34550,7 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         try {
           await addMod(c);
           const hdr = new SharedArrayBuffer(64), inR = new SharedArrayBuffer(CAP * 8), outR = new SharedArrayBuffer(CAP * 8), h = new Float64Array(hdr);
-          h[0] = Math.floor(c.currentTime * c.sampleRate); h[3] = CAP; h[4] = fx ? 2 : 1; h[5] = 256; h[6] = 384;   // (an effect's output plays 384 frames, 8 ms, after its input; more if it needs it)
+          h[0] = Math.floor(c.currentTime * c.sampleRate); h[3] = CAP; h[4] = fx ? 2 : 1; h[5] = window.__nbAhead ? window.__nbAhead(c) : 256; h[6] = Math.max(384, h[5] + 128);   // (180: past the browser's burst, as the engine)   // (an effect's output plays 384 frames, 8 ms, after its input; more if it needs it)
           node = new AudioWorkletNode(c, "nb-plug-io", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: "explicit", processorOptions: { hdr, inR, outR, cap: CAP, fx } });
           const ans = await new Promise(res => {
             const tok = Math.random().toString(36).slice(2), to = setTimeout(() => { removeEventListener("message", on); res({ ok: false, why: "the app didn't answer" }); }, 3000);

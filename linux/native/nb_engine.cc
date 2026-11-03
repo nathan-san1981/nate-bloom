@@ -426,6 +426,7 @@ struct Engine {
       const int64_t rf = (int64_t)rfd;
       if (wf < rf) { late.fetch_add(1); wf = rf - (rf % BLOCK); }   // fell behind (or just started): catch up
       int guard = 0;
+      { const double a = hdr[5]; if (a >= 128 && a <= 4096) ahead = (int)a; }   // (180) the page raises it when the browser takes its sound in bigger bursts
       while (wf < rf + ahead && guard++ < 64) {
         timespec a, b; clock_gettime(CLOCK_MONOTONIC, &a);
         renderBlock();
