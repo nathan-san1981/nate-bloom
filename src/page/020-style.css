@@ -1742,6 +1742,11 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
 .wam-add input { flex: 1; min-width: 180px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); padding: 0 10px; font: inherit; font-size: 0.85rem; }
 .wam-msg { font: 0.72rem var(--font-mono); color: var(--amber); min-height: 1em; margin: 2px; line-height: 1.4; }
 .wam-msg.dim { color: var(--dim); }
+/* (177) VST3 and CLAP: the panel for a plugin's own window, and the files that couldn't be used */
+.nbp-gui { display: flex; flex-direction: column; gap: 10px; padding: 8px 4px; }
+.nbp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.nbp-err { margin: 2px; }
+.nbp-err summary { cursor: pointer; font: 0.72rem var(--font-mono); color: var(--dim); padding: 4px 0; }
 .wam-msg a { color: #7fd6c2; }
 /* a plugin's controls dock at the top and leave the rest of the app playable (keys, pads, the computer keyboard) */
 .wam-dock { position: fixed; z-index: 31; left: 0; right: 0; top: max(8px, env(safe-area-inset-top, 0px)); display: flex; justify-content: center;

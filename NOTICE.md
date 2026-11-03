@@ -21,6 +21,8 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 | asio (standalone), Christopher M. Kohlhoff | with Ableton Link | Boost Software License 1.0 |
 | wasm2c runtime (WABT), the WebAssembly Community Group | `native/nbsynth/wasm-rt*` | Apache-2.0 |
 | SIMD Everywhere (SIMDe) | fetched at build time into `native/nbsynth/simde` | MIT |
+| CLAP, the plugin format's headers, free-audio | fetched at build time into `linux/native/third_party/clap` (github.com/free-audio/clap); the Linux app's plugin host | MIT |
+| VST 3 interfaces, © Steinberg Media Technologies GmbH | fetched at build time into `linux/native/third_party/vst3/pluginterfaces` (github.com/steinbergmedia/vst3_pluginterfaces); the Linux app's plugin host. VST is a registered trademark of Steinberg Media Technologies GmbH | MIT |
 | miniaudio, David Reid | `linux/native/miniaudio.h` | Public domain (Unlicense) or MIT-0 |
 | Electron (Chromium, Node.js) | the Linux app | MIT, and Chromium's own licences |
 | AndroidX, Kotlin standard library | the Android app | Apache-2.0 |
@@ -36,8 +38,8 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 The Apache-2.0 parts are why Nate Bloom is under version 3 of the GPL: Apache-2.0 code can go into a GPL-3.0 program,
 not a GPL-2.0-only one. Ableton Link's "version 2 or later" allows version 3.
 
-The source for every release of the apps is this repository at the release's commit, plus Ableton Link and SIMDe at
-the versions the build workflows (`.github/workflows/android.yml`, `linux.yml`) fetch.
+The source for every release of the apps is this repository at the release's commit, plus Ableton Link, SIMDe and the
+CLAP and VST 3 headers at the versions the build workflows (`.github/workflows/android.yml`, `linux.yml`) fetch.
 
 ## The CMU Pronouncing Dictionary
 

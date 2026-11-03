@@ -16,7 +16,7 @@ run() {   # LABEL XVFB-ARGS…
   if [ "$L" = randr ]; then xrandr --setmonitor A 1920/508x1080/286+0+0 screen >> "$OUT/xrandr_$L.txt" 2>&1; xrandr --setmonitor B 1920/508x1080/286+1920+0 none >> "$OUT/xrandr_$L.txt" 2>&1; fi
   xrandr --listmonitors >> "$OUT/xrandr_$L.txt" 2>&1
   rm -f "$HOME/.config/Nate Bloom/window.json"
-  NB_FASTPADS_NULL=1 NB_DEBUG=1 "$BIN" --no-sandbox --remote-debugging-port=9334 > "$OUT/app_$L.txt" 2>&1 & APP=$!
+  NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 "$BIN" --no-sandbox --remote-debugging-port=9334 > "$OUT/app_$L.txt" 2>&1 & APP=$!
   sleep 8
   timeout 90 python3 linux/ci/wide_check.py 9334 "$OUT" "$L" >> "$OUT/checks.txt" 2>&1
   kill $APP 2>/dev/null; pkill -f "^/opt/Nate Bloom/nate-bloom" 2>/dev/null; sleep 2; kill $XV 2>/dev/null; sleep 1

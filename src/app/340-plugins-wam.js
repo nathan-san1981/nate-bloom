@@ -14,7 +14,7 @@
     const NBW_SITE = "https://nathan-san1981.github.io/nate-bloom/";
     const nbwBase = () => new URL((window.NB_LITE ? "../" : "") + "wam/", location.href).href;
     const nbwSpec = key => key.startsWith("url:") ? { key, url: key.slice(4), name: decodeURIComponent(key.slice(4).split("/").slice(-2, -1)[0] || "Plugin"), link: true }
-      : (NBW_CAT.find(c => c.key === key) || { key, url: key + "/index.js", name: key });
+      : (NBW_CAT.find(c => c.key === key) || (key.startsWith("vst:") && window.__nbPlugSpec && window.__nbPlugSpec(key)) || { key, url: key + "/index.js", name: key });   // (177: vst: the Linux app's VST3 and CLAP, 820)
     const nbwUrl = sp => /^https?:/.test(sp.url) ? sp.url : nbwBase() + sp.url;
     const nbwSay = m => { if (typeof betaToast === "function") betaToast(m); };
     let nbwTok = 0;
@@ -38,6 +38,7 @@
       return NBW.init;
     }
     async function nbwCreate(sp) {
+      if (sp.native) { if (!window.__nbPlugCreate) throw new Error("VST3 and CLAP plugins load in the Linux app"); while (!ctx) await new Promise(r => setTimeout(r, 300)); return window.__nbPlugCreate(sp, ctx); }   // (177)
       await nbwHost();
       const mod = await import(nbwUrl(sp)), WAM = mod && mod.default;
       if (!WAM || typeof WAM.createInstance !== "function") throw new Error("that isn't a Web Audio Module");
@@ -318,6 +319,7 @@
       return out;
     }
     window.__wamTargets = () => nbwTargets();
+    window.__nbw = { CAT: NBW_CAT, paint: () => nbwPaint(), spec: k => nbwSpec(k), target: () => NBW.target, addFx: (k, t) => nbwAddFx(k, true, null, false, t || NBW.target), together: c => nbwTogether(c), entryOf: c => entryOf(c), targetName: t => nbwTargetName(t) };   // (177, for 820)
     function nbwPaint() {
       if (sheet.hidden) return;
       list.innerHTML = "";
@@ -325,6 +327,7 @@
         const p = note("Plugins load on the Nate Bloom site and in the Android and Linux apps. This copy can't load plugin files, so here they're listed only. ", false);
         const a = document.createElement("a"); a.href = NBW_SITE; a.target = "_blank"; a.rel = "noopener"; a.textContent = "nathan-san1981.github.io/nate-bloom"; p.appendChild(a);
       }
+      if (window.__nbPlugPaint) window.__nbPlugPaint({ list, head, note, row, btn, repaint: () => nbwPaint() });   // (177) VST3 and CLAP on this computer (820): first, their plugins first in each list
       const using = usedParts();
       head("Instruments");
       if (NBW_HERE) note("Play alone plays just that plugin. + Together plays it with what's already playing: other plugins, Nate Bloom's engines, Studio instruments. The Playing row (Synths) lists them all; ✕ there stops one.", true);

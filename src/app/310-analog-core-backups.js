@@ -86,7 +86,7 @@ registerProcessor("nb-vcf", NBVcf);`;
     if (!NBAN.on || !ctx) return ctx.createBiquadFilter();
     if (!NBAN.ok) { nbAnLoad(); return ctx.createBiquadFilter(); }
     nbanCount();
-    if (NBAN.alive >= NBAN_MAX) { NBAN.plain++; return ctx.createBiquadFilter(); }
+    if (NBAN.alive >= (performance.now() < NB_HOT ? 16 : NBAN_MAX)) { NBAN.plain++; return ctx.createBiquadFilter(); }   // (175) fewer while the sound is dropping out
     const model = NBAN.model === "auto" ? def : NBAN.model;
     let n;
     try { n = new AudioWorkletNode(ctx, "nb-vcf", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 1, channelCountMode: "explicit", processorOptions: { model, drive: NBAN.drive, drift: NBAN.drift } }); }

@@ -1762,6 +1762,11 @@ body.learn-on .knob, body.learn-on input[type=range], body.learn-on #xyPad { out
 .wam-add input { flex: 1; min-width: 180px; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); padding: 0 10px; font: inherit; font-size: 0.85rem; }
 .wam-msg { font: 0.72rem var(--font-mono); color: var(--amber); min-height: 1em; margin: 2px; line-height: 1.4; }
 .wam-msg.dim { color: var(--dim); }
+/* (177) VST3 and CLAP: the panel for a plugin's own window, and the files that couldn't be used */
+.nbp-gui { display: flex; flex-direction: column; gap: 10px; padding: 8px 4px; }
+.nbp-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.nbp-err { margin: 2px; }
+.nbp-err summary { cursor: pointer; font: 0.72rem var(--font-mono); color: var(--dim); padding: 4px 0; }
 .wam-msg a { color: #7fd6c2; }
 /* a plugin's controls dock at the top and leave the rest of the app playable (keys, pads, the computer keyboard) */
 .wam-dock { position: fixed; z-index: 31; left: 0; right: 0; top: max(8px, env(safe-area-inset-top, 0px)); display: flex; justify-content: center;
@@ -4520,6 +4525,7 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Piano roll</b> (Notes → Roll): the same melody as the staff on a grid of pitches and steps. Tap to add a note of the chosen length, drag a note to move it, drag its right end to change its length, tap it to erase it. The lane underneath sets velocity: drag a note's bar (the note you last touched, or the whole chord that starts there). Drag empty space to scroll. ↶ undoes moves, lengths and velocity too.</p>
       <p><b>Sound out</b> (in MIDI, on a computer, a Chromebook or the Linux app): pick the output Nate Bloom plays through, such as a USB audio interface, headphones or HDMI. The Linux app's fast pads follow it. On the tablet, Android decides (the last thing plugged in).</p>
       <p><b>Plugins</b> (☰): Web Audio Modules, the web's plugin format, so they run on the iPhone, Android, Chromebook and Linux alike. <b>Instruments</b> (Nate Bloom's physical models: Marimba, Nylon Guitar, Violin, Flute, Clarinet and Voice; plus Synth-101, Spectrum: Modal and the DRM-16 drum sampler) are sounds: they're under <b>Plugins</b> in the sound browser and in Play together, and the keys, sequencer, arp, chords and MIDI play them. <b>Effects</b> (Nate Bloom's Hall, Plate, Cloud, Tape Echo, Ensemble, Juno Chorus, Tape, Lo-Fi, Ladder Filter, Bus Compressor, Auto-Pan and Ring Mod, plus amps, fuzz, phasers, EQ and more; each of Nate Bloom's has presets) run on the whole mix, after Nate Bloom's own effects; turn each one on or off, move it up the chain, or remove it. <b>Controls</b> opens a plugin's own panel; its settings are kept. <b>Add by link</b> loads any other Web Audio Module from the address of its index.js. Effects go on the <b>Whole mix</b>, on any one sound (pick it in the row above the list: each synth, Drums, Library, Beat Pads, a plugin instrument…), or on <b>Send A</b> and <b>Send B</b>: shared effects that every sound feeds at its own Send level, the way a studio shares one reverb. Plugins are in everything you record: takes, Keep 90s, Tracks and stems (the sends are stems of their own). Fast pads pause while a plugin effect is on the mix or on Beat Pads.</p>
+      <p><b>VST3 and CLAP</b> (the Linux app): the plugins on your computer, in <code>~/.vst3</code> and <code>~/.clap</code>, the system's plugin folders (<code>/usr/lib/vst3</code>, <code>/usr/lib/clap</code> and the like) and any folder you add, are listed first in <b>Plugins</b> and under Plugins in the sound browser. Their instruments play alone or together with what's playing, from the keys, chords, the arp, the sequencer and MIDI; their effects go wherever Nate Bloom's do (the whole mix, a sound, a send, another plugin). <b>Controls</b> opens the plugin's own window beside Nate Bloom's; what you change there is kept with the plugin, and MIDI learn and Tracks automation reach its parameters. Each plugin runs on a thread of its own, outside the browser's one audio thread, and its sound comes back through Nate Bloom's mixer, effects and recording. An effect plays about 8 ms after what goes into it (more if a plugin needs it). <b>Look again</b> finds new ones; a plugin that's looked at in a process of its own can't take the app down, and one that was loaded when the app closed unexpectedly waits until you choose <b>Load anyway</b>. Plugins need Linux builds (x86-64); Windows and Mac ones won't load.</p>
       <p><b>⚙ Settings and Find</b> (on the strip): <b>Settings</b> is the rig in one place: Sound check (where the sound goes, volume, buffer, dropouts, a test tone), MIDI, Gear, Pixelbook, Projects, App and this Help. <b>Find</b> (also the <kbd>/</kbd> key or Ctrl-K) searches everything: type two letters and get settings, sounds, songs, pad sets, help and actions such as FX off or Rescan MIDI; Enter runs the first one. <b>The strip</b> across the top shows the tempo, key and bar, dots for the MiniLab, the K.O. II and the Pixelbook, where the sound goes, dropouts, Log and Find, and the three spaces: <b>Play</b> (the performance surface), <b>Build</b> (Sounds · Beats · Rhythm · Samples · Songs · Tracks · DJ, with one transport, the Sounds browser and the Mixer as drawers) and <b>⚙ Settings</b>.</p>
       <p><b>☰</b> (top right) holds Settings, Find, Live, Projects, Plugins, My sounds, Export, MIDI, Gear (what's plugged in and the sound buffer), Link, Install, History, Help and Exit. The <b>Motion</b> tab (Sound · FX · Arp · Motion · Jam) morphs between snapshots and has Mutate and macros; <b>LFOs · XY</b> there opens the two LFOs, the XY pad and drift. <b>▾</b> at the end of the tabs hides the sliders.</p>
       <p>Tap the <b>bpm readout</b> in time to set a tempo. <b>♩</b> turns on a click. <b>Drummer</b> (Seq view) makes any beat change by itself: fills, breakdowns and half-time in 16-bar phrases. <b>Song</b> (in Seq, next to Beats…) chains your own patterns A–D into an arrangement.</p>
@@ -5656,7 +5662,98 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     return on.length ? on : ["saw"];
   }
 
+  // (175) one chorus per channel for the Juno and the Hoover, after the voices (as on a real Juno: one chorus for the
+  // whole instrument), instead of two or three delay lines and LFOs built on every note. A fast arp across a few layers
+  // had dozens of choruses running at once on the one audio thread. Each voice sends its finished sound (after its
+  // envelope and level) in; the wet gains are divided by the voice's dry level so the mix comes out as it did. A chorus
+  // nothing has used for 15 s is taken down.
+  const NB_SHCH = new Map();
+  function nbSharedChorus(kind, mode, dest, dryG) {
+    let byDest = NB_SHCH.get(dest); if (!byDest) NB_SHCH.set(dest, byDest = new Map());
+    const key = kind + ":" + mode + ":" + dryG.toFixed(3);
+    let c = byDest.get(key);
+    if (c && c.ctx === ctx) { c.used = performance.now(); return c; }
+    const input = ctx.createGain(), merger = ctx.createChannelMerger(2), lfos = [], t = ctx.currentTime;
+    if (kind === "juno") {
+      // the Juno's chorus I / II / I+II: left and right swept against each other, and a centre voice for I+II; the wet path high-passed below 60 Hz
+      const chAmt = 0.85, cRate = mode === 2 ? 0.86 : 0.51, cDepth = mode === 2 ? 0.0024 : 0.0033;
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 60; hp.Q.value = 0.5; input.connect(hp);
+      [[0, 0, chAmt], [1, 1 / 2, chAmt], [2, 1 / 4, mode === 3 ? 0.6 : 0]].forEach(([k, ph, wetG]) => {
+        if (!wetG) return;
+        const lfo = ctx.createOscillator(); lfo.frequency.value = k === 2 && mode === 3 ? 0.86 : cRate;
+        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
+        const dep = ctx.createGain(); dep.gain.value = cDepth; lfo.connect(dep).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = wetG / dryG;
+        hp.connect(d).connect(wet);
+        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
+        lfos.push(lfo);
+      });
+    } else {   // the Hoover's: two delays swept in opposite directions, left and right
+      const cl = ctx.createOscillator(); cl.frequency.value = 0.8;
+      [[0, 1], [1, -1]].forEach(([chn, sign]) => {
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.006;
+        const dp = ctx.createGain(); dp.gain.value = 0.0025 * sign; cl.connect(dp).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = 0.6 / dryG; input.connect(d).connect(wet).connect(merger, 0, chn);
+      });
+      lfos.push(cl);
+    }
+    merger.connect(dest);
+    lfos.forEach(o => o.start(t));
+    c = { ctx, input, merger, lfos, used: performance.now() };
+    byDest.set(key, c);
+    return c;
+  }
+  setInterval(() => {
+    const now = performance.now();
+    for (const [dest, byDest] of NB_SHCH) {
+      for (const [key, c] of byDest) if (now - c.used > 15000 || c.ctx !== ctx) { try { c.lfos.forEach(o => o.stop()); } catch (e) {} try { c.input.disconnect(); c.merger.disconnect(); } catch (e) {} byDest.delete(key); }
+      if (!byDest.size) NB_SHCH.delete(dest);
+    }
+  }, 5000);
+  // (175) the Juno's noise: one second of it made once, not on every note
+  let NB_NOISE1 = null;
+  const nbNoise1 = () => { if (!NB_NOISE1 || NB_NOISE1.sampleRate !== ctx.sampleRate) { NB_NOISE1 = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const nd = NB_NOISE1.getChannelData(0); for (let k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1; } return NB_NOISE1; };
+
+  // (175) released notes still ringing on a synth layer. A released note fades toward silence for 1.6 × its release, and
+  // the last half of that is far below hearing but costs the audio thread as much as the start: a fast arp with a long
+  // release kept twenty of them per layer. With more than 8 ringing on a layer, any that has faded 30 dB is let go; past
+  // 24 the oldest goes. When the sound has just dropped out (Chrome's playout stats say so), 4, −20 dB and 12, and new
+  // voices get the browser's own filter past 16 modelled ones (310). A cut is a 12 ms fade, so it doesn't click.
+  const NB_REL = new Map();   // layer id -> [{ at, tau, end, cut }]
+  let NB_HOT = 0;
+  function nbRelTrack(id, at, release, cut) {
+    let L = NB_REL.get(id); if (!L) NB_REL.set(id, L = []);
+    L.push({ at, tau: Math.max(0.005, release / 4), end: at + release * 1.6 + 0.1, cut });
+    nbRelTrim(id);
+  }
+  function nbRelTrim(id) {
+    const L = NB_REL.get(id); if (!L || !ctx) return;
+    const now = ctx.currentTime, hot = performance.now() < NB_HOT;
+    for (let i = L.length - 1; i >= 0; i--) if (L[i].end <= now) L.splice(i, 1);
+    const ringing = () => L.filter(v => v.at <= now).sort((a, b) => a.at - b.at);   // (a release set up ahead, for an arp note, hasn't started)
+    let r = ringing();
+    if (r.length > (hot ? 4 : 8)) {
+      const quiet = hot ? 0.1 : 0.032;
+      r.forEach(v => { if (Math.exp(-(now - v.at) / v.tau) < quiet) { v.cut(now); L.splice(L.indexOf(v), 1); } });
+      r = ringing();
+    }
+    const cap = hot ? 12 : 24;
+    while (r.length > cap) { const v = r.shift(); v.cut(now); L.splice(L.indexOf(v), 1); }
+  }
+  setInterval(() => { for (const id of NB_REL.keys()) nbRelTrim(id); }, 250);
+  window.__nbRel = () => { const o = {}, now = ctx ? ctx.currentTime : 0; NB_REL.forEach((L, id) => { o[id] = L.filter(v => v.at <= now).length; }); return { ringing: o, hot: performance.now() < NB_HOT, choruses: [...NB_SHCH.values()].reduce((n, m) => n + m.size, 0) }; };   // (what Log and the checks read)
+  { let lastFb = null; setInterval(() => { try { const s = ctx && ctx.playoutStats; if (!s || s.fallbackFramesEvents == null) return; if (lastFb != null && s.fallbackFramesEvents > lastFb) NB_HOT = performance.now() + 5000; lastFb = s.fallbackFramesEvents; } catch (e) {} }, 500); }
+  // a voice's release cut short: hold where the fade has got to, then 12 ms to silence, and stop its oscillators
+  const nbCutter = (g, oscs) => when => {
+    try { if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(when); else { g.cancelScheduledValues(when); g.setValueAtTime(Math.max(0.0001, g.value), when); } } catch (e) {}
+    g.setTargetAtTime(0.0001, when, 0.012);
+    oscs.forEach(o => { try { o.stop(when + 0.08); } catch (e) {} });
+  };
+
   function makeVoice(midi, id, mix, when) {
+    // (176) the Linux app's native engine plays this synth when it's running and knows it (810); otherwise the browser's, below
+    if (window.__nbNativeVoice) { const nv = window.__nbNativeVoice(midi, id, mix, when, fx.input); if (nv) return nv; }
     const p = state.params[id], f = mtof(midi), t = when ?? ctx.currentTime;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = mix;
@@ -5756,32 +5853,18 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const hpf = ctx.createBiquadFilter(); hpf.type = "highpass"; hpf.frequency.value = Math.max(10, hpfHz); hpf.Q.value = 0.6;
       const dcoOut = hpfHz ? hpf : filt; if (hpfHz) hpf.connect(filt);
       sub.connect(subG).connect(dcoOut); sum.connect(dcoOut); sawG.connect(dcoOut);
-      if (mNse > 0.001) { const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), nd = nb.getChannelData(0); for (let k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1; const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true; const ng = ctx.createGain(); ng.gain.value = mNse; ns.connect(ng).connect(dcoOut); ns.start(t); oscs.push(ns); }
+      if (mNse > 0.001) { const ns = ctx.createBufferSource(); ns.buffer = nbNoise1(); ns.loop = true; const ng = ctx.createGain(); ng.gain.value = mNse; ns.connect(ng).connect(dcoOut); ns.start(t); oscs.push(ns); }
       // Juno-style stereo chorus: short delays swept against each other. (166) Three voices: left and right swept against each other as the Juno's two lines are, and a centre voice a quarter-cycle between them
       // (left, right, and a centre voice that comes in as the knob goes up: the Juno's I+II, and JS80P's chorus 1),
       // the wet path high-passed below 60 Hz so the sub stays put (the sweep itself is full-band, as the Juno's is)
       // (168) the 106's chorus buttons: I (slow, wide), II (faster, shallower), I+II (both at once, the "crunchy" one); off below the first step
       const chMode = p.chorus < 0.12 ? 0 : p.chorus < 0.55 ? 1 : p.chorus < 0.88 ? 2 : 3;
-      const chAmt = chMode ? 0.85 : 0;
-      const dry = ctx.createGain(); dry.gain.value = 1 - chAmt * 0.35;
+      const chAmt = chMode ? 0.85 : 0, dryG = 1 - chAmt * 0.35;
+      const dry = ctx.createGain(); dry.gain.value = dryG;
       filt.connect(dry).connect(out);
-      const merger = ctx.createChannelMerger(2);
-      const cRate = chMode === 2 ? 0.86 : 0.51, cDepth = chMode === 2 ? 0.0024 : 0.0033;
-      const wetHp = ctx.createBiquadFilter(); wetHp.type = "highpass"; wetHp.frequency.value = 60; wetHp.Q.value = 0.5; filt.connect(wetHp);
-      const chLfos = [];
-      [[0, 0, chAmt], [1, 1 / 2, chAmt], [2, 1 / 4, chMode === 3 ? 0.6 : 0]].forEach(([k, ph, wetG]) => {
-        const lfo = ctx.createOscillator(); lfo.frequency.value = k === 2 && chMode === 3 ? 0.86 : cRate;
-        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
-        const dep = ctx.createGain(); dep.gain.value = cDepth;
-        lfo.connect(dep).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = wetG;
-        wetHp.connect(d).connect(wet);
-        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
-        chLfos.push(lfo);
-      });
-      merger.connect(out);
-      [saw, pwmLfo, sub, ...chLfos].forEach(o => { o.start(t); oscs.push(o); });
+      // (175) the chorus: the channel's one Juno chorus, fed the finished voice
+      if (chMode) lvl.connect(nbSharedChorus("juno", chMode, fx.input, dryG).input);
+      [saw, pwmLfo, sub].forEach(o => { o.start(t); oscs.push(o); });
       ampEnv(out, t, attack, 0.5);
       out.gain.setTargetAtTime(0.42, t + attack, 0.5);
     }
@@ -5914,6 +5997,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         const end = at + release * 1.6 + 0.1;
         oscs.forEach(o => { try { o.stop(end); } catch (e) {} });
         setTimeout(() => { out.disconnect(); lvl.disconnect(); }, (end - now) * 1000 + 200);
+        nbRelTrack(id, at, release, nbCutter(g, oscs));   // (175)
       },
     };
   }
@@ -13148,6 +13232,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   let monoLast = null;   // the previous Mono note, for glide
   function newEngineVoice(midi, id, mix, when) {
     if (id === "wave") return wvVoice ? wvVoice(midi, mix, when) : { midi, stop() {} };
+    if (window.__nbNativeVoice) { const nv = window.__nbNativeVoice(midi, id, mix, when, fx.input); if (nv) return nv; }   // (176) the Linux app's native engine (810)
     const p = state.params[id], f = mtof(midi), t = when ?? ctx.currentTime;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = mix;
@@ -13209,13 +13294,8 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       lfo.connect(dep).connect(dl.delayTime); lfo.start(t); oscs.push(lfo);
       bus.connect(lp); bus.connect(dl).connect(inv).connect(lp);
       const dry = ctx.createGain(); dry.gain.value = 0.7; lp.connect(dry).connect(out);
-      const merger = ctx.createChannelMerger(2), cl = ctx.createOscillator(); cl.frequency.value = 0.8;
-      [[0, 1], [1, -1]].forEach(([ch, sign]) => {
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.006;
-        const dp = ctx.createGain(); dp.gain.value = 0.0025 * sign; cl.connect(dp).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = 0.6; lp.connect(d).connect(wet).connect(merger, 0, ch);
-      });
-      cl.start(t); oscs.push(cl); merger.connect(out);
+      // (175) the chorus: the channel's one Hoover chorus, fed the finished voice (not two delays and an LFO on every note)
+      lvl.connect(nbSharedChorus("hoover", 0, fx.input, 0.7).input);
       ampEnv(out, t, attack, 0.4);
     }
 
@@ -13248,6 +13328,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
         const end = at + release * 1.6 + 0.1;
         oscs.forEach(o => { try { o.stop(end); } catch (e) {} });
         setTimeout(() => { out.disconnect(); lvl.disconnect(); }, (end - now) * 1000 + 200);
+        nbRelTrack(id, at, release, nbCutter(g, oscs));   // (175)
       },
     };
   }
@@ -15878,6 +15959,9 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       const r = { app: "Nate Bloom", made: new Date().toString(), page: location.href.split("?")[0], whatWentWrong: REPORT_NOTE };
       r.device = { ua: navigator.userAgent, screen: screen.width + "x" + screen.height, window: innerWidth + "x" + innerHeight, dpr: devicePixelRatio, cores: navigator.hardwareConcurrency, memoryGB: navigator.deviceMemory,
         installed: matchMedia("(display-mode: standalone)").matches, online: navigator.onLine, touch: navigator.maxTouchPoints, language: navigator.language };
+      try { if (window.__ne) r.nativeEngine = window.__ne.state(); } catch (e) {}   // (176)
+      try { if (window.__nbPlug && window.__nbPlug.ok) r.vstPlugins = { loaded: window.__nbPlug.state ? window.__nbPlug.state() : [], found: window.__nbPlug.plugins.length, errors: window.__nbPlug.errors.length, suspects: Object.keys(window.__nbPlug.suspects || {}) }; } catch (e) {}   // (177)
+      try { if (window.__nbRel) r.ringing = window.__nbRel(); } catch (e) {}
       try { if (performance.memory) r.device.jsHeapMB = Math.round(performance.memory.usedJSHeapSize / 1048576) + " of " + Math.round(performance.memory.jsHeapSizeLimit / 1048576); } catch (e) {}
       try { const est = await navigator.storage.estimate(); r.device.storageMB = Math.round(est.usage / 1048576) + " of " + Math.round(est.quota / 1048576); r.device.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) {}
       try { const a = navigator.gpu ? await navigator.gpu.requestAdapter() : null; r.device.gpu = a ? (a.info ? { vendor: a.info.vendor, arch: a.info.architecture, device: a.info.device, desc: a.info.description } : "available") : "none"; } catch (e) { r.device.gpu = "error " + e.message; }
@@ -19872,7 +19956,7 @@ registerProcessor("nb-vcf", NBVcf);`;
     if (!NBAN.on || !ctx) return ctx.createBiquadFilter();
     if (!NBAN.ok) { nbAnLoad(); return ctx.createBiquadFilter(); }
     nbanCount();
-    if (NBAN.alive >= NBAN_MAX) { NBAN.plain++; return ctx.createBiquadFilter(); }
+    if (NBAN.alive >= (performance.now() < NB_HOT ? 16 : NBAN_MAX)) { NBAN.plain++; return ctx.createBiquadFilter(); }   // (175) fewer while the sound is dropping out
     const model = NBAN.model === "auto" ? def : NBAN.model;
     let n;
     try { n = new AudioWorkletNode(ctx, "nb-vcf", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1], channelCount: 1, channelCountMode: "explicit", processorOptions: { model, drive: NBAN.drive, drift: NBAN.drift } }); }
@@ -21183,7 +21267,7 @@ registerProcessor("nb-verb", NBVerb);`;
     const NBW_SITE = "https://nathan-san1981.github.io/nate-bloom/";
     const nbwBase = () => new URL((window.NB_LITE ? "../" : "") + "wam/", location.href).href;
     const nbwSpec = key => key.startsWith("url:") ? { key, url: key.slice(4), name: decodeURIComponent(key.slice(4).split("/").slice(-2, -1)[0] || "Plugin"), link: true }
-      : (NBW_CAT.find(c => c.key === key) || { key, url: key + "/index.js", name: key });
+      : (NBW_CAT.find(c => c.key === key) || (key.startsWith("vst:") && window.__nbPlugSpec && window.__nbPlugSpec(key)) || { key, url: key + "/index.js", name: key });   // (177: vst: the Linux app's VST3 and CLAP, 820)
     const nbwUrl = sp => /^https?:/.test(sp.url) ? sp.url : nbwBase() + sp.url;
     const nbwSay = m => { if (typeof betaToast === "function") betaToast(m); };
     let nbwTok = 0;
@@ -21207,6 +21291,7 @@ registerProcessor("nb-verb", NBVerb);`;
       return NBW.init;
     }
     async function nbwCreate(sp) {
+      if (sp.native) { if (!window.__nbPlugCreate) throw new Error("VST3 and CLAP plugins load in the Linux app"); while (!ctx) await new Promise(r => setTimeout(r, 300)); return window.__nbPlugCreate(sp, ctx); }   // (177)
       await nbwHost();
       const mod = await import(nbwUrl(sp)), WAM = mod && mod.default;
       if (!WAM || typeof WAM.createInstance !== "function") throw new Error("that isn't a Web Audio Module");
@@ -21487,6 +21572,7 @@ registerProcessor("nb-verb", NBVerb);`;
       return out;
     }
     window.__wamTargets = () => nbwTargets();
+    window.__nbw = { CAT: NBW_CAT, paint: () => nbwPaint(), spec: k => nbwSpec(k), target: () => NBW.target, addFx: (k, t) => nbwAddFx(k, true, null, false, t || NBW.target), together: c => nbwTogether(c), entryOf: c => entryOf(c), targetName: t => nbwTargetName(t) };   // (177, for 820)
     function nbwPaint() {
       if (sheet.hidden) return;
       list.innerHTML = "";
@@ -21494,6 +21580,7 @@ registerProcessor("nb-verb", NBVerb);`;
         const p = note("Plugins load on the Nate Bloom site and in the Android and Linux apps. This copy can't load plugin files, so here they're listed only. ", false);
         const a = document.createElement("a"); a.href = NBW_SITE; a.target = "_blank"; a.rel = "noopener"; a.textContent = "nathan-san1981.github.io/nate-bloom"; p.appendChild(a);
       }
+      if (window.__nbPlugPaint) window.__nbPlugPaint({ list, head, note, row, btn, repaint: () => nbwPaint() });   // (177) VST3 and CLAP on this computer (820): first, their plugins first in each list
       const using = usedParts();
       head("Instruments");
       if (NBW_HERE) note("Play alone plays just that plugin. + Together plays it with what's already playing: other plugins, Nate Bloom's engines, Studio instruments. The Playing row (Synths) lists them all; ✕ there stops one.", true);
@@ -32209,7 +32296,9 @@ registerProcessor("nb-rec", NBRec);`;
       const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
       if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
       if (window.NB_BIG && bufWant() === "fast") return ["The sound is dropping out" + where + ". This computer has room for it: switch the sound buffer to Steady (Settings › Sound check) and reload; it gives the sound twice the slack for about 10 ms more delay."];   // (174)
-      if (vs >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": a lot plays at once (" + vs + (vs === 1 ? " voice" : " voices") + " across " + lay + (lay === 1 ? " layer" : " layers") + "). Fewer layers or effects help; Stop all (■) clears anything that got stuck."];
+      // (175) released notes still ringing count too (an arp's tails were most of it, and the message said "2 voices")
+      const ring = nbsTry(() => { let k = 0; const now = ctx.currentTime; NB_REL.forEach(L => L.forEach(v => { if (v.at <= now) k++; })); return k; }, 0), all = vs + ring;
+      if (all >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": " + all + (all === 1 ? " note" : " notes") + " sounding across " + lay + (lay === 1 ? " layer" : " layers") + (ring ? " (" + ring + " of them released and still ringing)" : "") + ". One audio thread works out all of it, however many cores the computer has; Nate Bloom is letting the quietest tails go first. Fewer layers, a shorter Release, or Shimmer and Density off help; Stop all (■) clears anything stuck."];
       return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Settings → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
     }
     function nbsRead() {   // today's objects, read into the document's shape
@@ -32325,7 +32414,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 175;
+    window.NB_BUILD = 177;
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
     const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
@@ -32428,6 +32517,8 @@ registerProcessor("nb-rec", NBRec);`;
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
         ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && window.NB_NATIVE.platform === "linux" ? " · Linux app " + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
+        ${window.NBEngine ? suRow("Native engine", `<button type="button" class="btn" id="suNat" aria-pressed="${!!(window.__ne && window.__ne.on)}">${window.__ne && window.__ne.on ? "On" : "Off"}</button><span class="su-note" id="suNatNote">the synths worked out on several cores, not the one audio thread</span>`, "suNatRow") : ""}
+        ${window.NBPlug ? suRow("VST3 and CLAP", `<button type="button" class="btn" id="suVst">Plugins…</button><span class="su-note" id="suVstNote">plugins on this computer, each on a thread of its own</span>`, "suVstRow") : ""}
         ${window.NB_NATIVE && window.NB_NATIVE.setWide ? suRow("Screens", `<button type="button" class="btn" id="suWide" aria-pressed="${document.body.classList.contains("nb-wide")}">Across both screens</button><span class="su-note">the window spans your screens side by side and the page uses the whole width (61 keys across both) · Ctrl+Shift+F</span>`, "suWideRow") : ""}
         ${suRow("Keys and letters", '<button type="button" class="btn" id="suKeys">In Help…</button><span class="su-note">letters on the keys, the keyboard layout, hints, vibration</span>', "suKeysRow")}`;
     }
@@ -32435,6 +32526,13 @@ registerProcessor("nb-rec", NBRec);`;
       $id("suInstall").addEventListener("click", () => $id("installBtn").click());
       $id("suKeys").addEventListener("click", () => suOpen("help", "#kbdLabBtn"));
       { const w = $id("suWide"); if (w) w.addEventListener("click", () => window.NB_NATIVE.setWide(!document.body.classList.contains("nb-wide"))); }
+      { const v = $id("suVst"), nt = $id("suVstNote"), P = window.__nbPlug; if (v && P) {   // (177)
+          v.addEventListener("click", () => { const b = $id("wamBtn"); if (b) b.click(); });
+          const n = P.plugins.length, l = P.live.size; nt.textContent = (n ? n + " found" + (l ? " · " + l + " loaded" : "") : "none found yet") + " · in " + (P.folders ? [...new Set([P.folders.vst3[0], P.folders.clap[0]])].map(x => x.replace(/^\/home\/[^/]+/, "~")).join(" and ") : "~/.vst3 and ~/.clap") + " and the system's plugin folders"; } }
+      { const b = $id("suNat"), nt = $id("suNatNote"); if (b && window.__ne) {
+          const paint = () => { const st = window.__ne.state(); b.setAttribute("aria-pressed", String(st.on)); b.textContent = st.on ? "On" : "Off";
+            nt.textContent = !st.on ? "off: the synths play on the browser's one audio thread" : st.running ? "Juno, Supersaw, Analog, Hoover, Mono, Pluck and Tyrell worked out on " + ((st.engine && st.engine.threads) || 1) + (((st.engine && st.engine.threads) || 1) === 1 ? " thread" : " threads") + (st.engine ? " · " + st.engine.voices + " sounding · " + Math.round(st.engine.blockUs / st.engine.budgetUs * 100) + "% of its time" : "") : "not running" + (st.why ? ": " + st.why : "") + " (the browser's synths play)"; };
+          b.addEventListener("click", () => { window.__ne.set(!window.__ne.on); setTimeout(paint, 300); }); paint(); const iv = setInterval(() => { if (!document.body.contains(b)) clearInterval(iv); else paint(); }, 1000); } }
     }
     // ---- the space ----
     function suShow(sec) {
@@ -34049,6 +34147,338 @@ registerProcessor("nb-rec", NBRec);`;
       setInterval(() => { const kl = ML.dev === "kl" && !!(window.__klHere && window.__klHere()); document.querySelectorAll('.sh-dot[data-k="minilab"]').forEach(d => { const t = kl ? "KeyLab" : "MiniLab"; if (d.textContent !== t) d.textContent = t; }); }, 1500);
       window.__hwDbg = { hwPort, inLatMs, hwAt, hwWire, hwOpen };
     }
+  // ======================================================================
+  // (176) The Linux app's native engine: the Juno, Supersaw, Analog, Hoover, Mono, Pluck and Tyrell worked out in compiled code on a pool of threads (nb_engine.cc), not
+  // on the browser's one audio thread. The engine writes finished audio into shared memory; the AudioWorklet here
+  // ("nb-native-out") plays it into the Juno's own channel, so its chorus, effects, level, mute, recording and Log
+  // carry on as before. Notes keep their times (an arp or Seq note set up ahead lands on its frame; a key played now
+  // sounds ~5 ms later than the browser's synths). Anywhere else (the website, the tablet, Lite, or if the engine
+  // can't start) the Juno is the browser's, as before. Settings › App switches it.
+  // ======================================================================
+  {
+    const NAT = window.NBEngine || null;
+    const NE = window.__ne = { ok: false, on: true, why: NAT ? "" : "not the Linux app", busy: false, node: null, hdr: null, sr: 48000, ctx: null, id: 0, buses: [], notes: 0, byKind: {} };
+    try { if (localStorage.getItem("nightbloom-native") === "off") NE.on = false; } catch (e) {}
+    const CAP = 8192, BUSES = 8, AHEAD = 256;
+    const SRC = `class NBNativeOut extends AudioWorkletProcessor {
+  constructor(o) { super(); const p = o.processorOptions; this.h = new Float64Array(p.hdr); this.r = new Float32Array(p.ring); this.cap = p.cap; this.nb = p.buses; this.live = true; this.port.onmessage = e => { if (e.data === "stop") this.live = false; }; }
+  process(inputs, outputs) {
+    const h = this.h, r = this.r, cap = this.cap, f0 = currentFrame, n = outputs[0][0].length;
+    if (h[1] >= f0 + n) {
+      const i0 = f0 % cap;
+      for (let b = 0; b < this.nb; b++) { const o = outputs[b]; if (!o || !o[0]) continue; const L = o[0], R = o[1] || o[0], bl = b * 2 * cap, br = bl + cap;
+        for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; L[i] = r[bl + k]; R[i] = r[br + k]; } }
+    } else if (h[1] > 0) h[2]++;   // the engine hadn't got this far: silence, counted
+    h[0] = f0 + n;
+    return this.live;
+  }
+}
+registerProcessor("nb-native-out", NBNativeOut);`;
+    async function neInit() {
+      if (NE.ok || NE.busy || !NAT || !NE.on || window.NB_LITE || !ctx) return;
+      if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") { NE.why = "no shared memory here (not cross-origin isolated)"; return; }
+      NE.busy = true;
+      try {
+        const hdr = new SharedArrayBuffer(64), ring = new SharedArrayBuffer(BUSES * 2 * CAP * 4), h = new Float64Array(hdr);
+        h[0] = Math.floor(ctx.currentTime * ctx.sampleRate); h[3] = CAP; h[4] = BUSES; h[5] = AHEAD;
+        await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([SRC], { type: "text/javascript" })));
+        const node = new AudioWorkletNode(ctx, "nb-native-out", { numberOfInputs: 0, numberOfOutputs: BUSES, outputChannelCount: Array(BUSES).fill(2), processorOptions: { hdr, ring, cap: CAP, buses: BUSES } });
+        const keep = ctx.createGain(); keep.gain.value = 0; node.connect(keep, 0).connect(ctx.destination);   // (keeps it running with nothing else connected)
+        // the shared memory goes to the engine through the window (the app's bridge can't carry it); the app answers
+        const ans = await new Promise(res => {
+          const id = Math.random().toString(36).slice(2), to = setTimeout(() => { window.removeEventListener("message", on); res({ ok: false, why: "the app didn't answer" }); }, 3000);
+          const on = e => { const d = e.data && e.data.nbEngAttached; if (!d || d.id !== id) return; clearTimeout(to); window.removeEventListener("message", on); res(d); };
+          window.addEventListener("message", on);
+          window.postMessage({ nbEngAttach: { id, hdr, ring, sr: ctx.sampleRate, buses: BUSES, cap: CAP, ahead: AHEAD } }, location.origin);
+        });
+        if (!ans.ok) { NE.why = "the engine didn't start: " + (ans.why || "?"); try { node.disconnect(); } catch (e) {} return; }
+        Object.assign(NE, { node, keep, hdr: h, sr: ctx.sampleRate, ctx, ok: true, why: "", buses: [] });
+        // the engine should be writing within a moment; if not, the browser's Juno takes over again
+        setTimeout(() => { if (NE.ok && NE.hdr[1] <= 0) { NE.ok = false; NE.why = "the engine wrote nothing (shared memory didn't reach it)"; } }, 1500);
+        nePitch();
+      } catch (e) { NE.why = String(e && e.message || e).slice(0, 160); }
+      finally { NE.busy = false; }
+    }
+    function neOff(why) {
+      if (NE.node) { try { NE.node.port.postMessage("stop"); NE.node.disconnect(); } catch (e) {} }
+      try { NAT && NAT.stop(); } catch (e) {}
+      Object.assign(NE, { ok: false, node: null, buses: [], why: why || "" });
+    }
+    { const ba = buildAudio; buildAudio = function () { const r = ba.apply(this, arguments); setTimeout(neInit, 50); return r; }; }
+    if (ctx) setTimeout(neInit, 50);
+    setInterval(() => { if (NE.ok && NE.ctx !== ctx) { neOff("the sound restarted"); neInit(); } else if (!NE.ok && !NE.busy && NE.on && ctx && NAT && !NE.tried) { NE.tried = true; neInit(); } }, 1000);
+    // a bus per channel the Juno plays into (a sound's own channel, its level bus): output b of the worklet goes there
+    function busFor(dest) {
+      let b = NE.buses.findIndex(x => x && x.dest === dest);
+      if (b < 0) { b = NE.buses.findIndex(x => !x); if (b < 0) b = NE.buses.length; if (b >= BUSES) return -1; NE.buses[b] = { dest, chorus: null }; NE.node.connect(dest, b); }
+      return b;
+    }
+    // the synths the engine plays, each from the same settings and formulas as its browser version (020, 170)
+    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell"]);
+    let natMonoLast = null;
+    function natParams(id, p, midi, t) {
+      const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(96);
+      const AN = typeof NBAN !== "undefined" && NBAN.on, drift = (AN && NBAN.drift >= 0.01) ? (Math.random() * 2 - 1) * NBAN.drift * 4 : 0;
+      // (177) the Analog bar, as the browser's voices have it (310): Drive, Drift's wander and each note's filter a little
+      // different; with the Analog core off, the browser's plain 12 dB filter (no saturation, no ladder)
+      const anSet = () => { a[91] = AN ? 1 + 3 * Math.max(0, Math.min(1, NBAN.drive)) : 0.05; a[92] = AN ? Math.max(0.0001, NBAN.drift) : 0; a[93] = AN ? 1 + (Math.random() * 2 - 1) * 0.035 * NBAN.drift : 1; a[94] = AN && NBAN.model !== "svf" ? 0 : 1; };
+      const attack = p.attack != null ? expMap(p.attack, 0.004, 4) : 0.003;
+      let release = expMap(p.release == null ? 0.3 : p.release, 0.05, 6);
+      if (id === "juno") {
+        const cut = expMap(p.cutoff, 180, 14000), sweep = 0.8 + 1.1 * (1 - p.cutoff), fa = Math.max(0.012, attack * 0.8), fd = 0.35 + 0.9 * p.release;
+        const dco = p.dco == null ? 0.35 : p.dco, lv = x => Math.max(0, 1 - Math.abs(x));
+        const hpfV = p.hpf == null ? 0 : p.hpf, hpfHz = hpfV < 0.2 ? 0 : hpfV < 0.5 ? 90 : hpfV < 0.8 ? 230 : 520;
+        const chMode = p.chorus < 0.12 ? 0 : p.chorus < 0.55 ? 1 : p.chorus < 0.88 ? 2 : 3, dryG = 1 - (chMode ? 0.85 : 0) * 0.35;
+        a.set([1, cut, Math.min(16000, cut * Math.pow(2, sweep)), Math.min(16000, cut * Math.pow(2, sweep * 0.3)), fa, fd, attack, release,
+          lv(dco / 0.45) * 0.36, lv((dco - 0.5) / 0.5) * 0.26 + (dco > 0.2 && dco < 0.8 ? 0.04 : 0), lv((dco - 0.8) / 0.35) * 0.2, Math.max(0, dco - 0.75) * 0.8,
+          p.pwm * 0.42, 0.55 + Math.random() * 0.1, hpfHz, dryG, drift]);
+        anSet();
+        return { a, chorus: chMode ? ["juno", chMode, dryG] : null };
+      }
+      a[0] = 2; a[72] = drift;
+      const osc = list => { a[1] = list.length; list.forEach((o, i) => { const b = 2 + i * 7; a[b] = o.w; a[b + 1] = o.mul || 1; a[b + 2] = o.det || 0; a[b + 3] = o.det0 != null ? o.det0 : (o.det || 0); a[b + 4] = o.ramp || 0; a[b + 5] = o.g; a[b + 6] = o.ph || 0; }); };
+      const filt = (type, q, mode, base, peak, settle, t1, tau, dr) => { a[58] = type; a[59] = q; a[60] = mode; a[61] = base; a[62] = peak; a[63] = settle; a[64] = t1; a[65] = tau; a[90] = dr || (type === 2 ? 1.25 : 1); };
+      const amp = (atk, peak, sus, tau, mode) => { a[66] = atk; a[67] = peak; a[68] = sus; a[69] = tau; a[70] = mode; };
+      const SAW = 0, SQR = 1, TRI = 2;
+      let chorus = null;
+      if (id === "saw") {
+        const spread = p.detune * 45, ph = 0;   // (all from phase 0, like the browser's oscillators: the start of the note and how the mix compressor hears it match)
+        osc([-1, -0.62, -0.28, 0, 0.28, 0.62, 1].map((o, i) => ({ w: SAW, det: o * spread, g: i === 3 ? 0.16 : 0.11, ph })));
+        filt(1, 0.5 + p.res * 14, 0, expMap(p.cutoff, 180, 14000)); amp(attack, 0.32, -1, 0.4, 0);
+      } else if (id === "analog") {
+        const base = expMap(p.cutoff, 120, 9000), top = Math.min(16000, base * (1 + p.env * 18));
+        osc([{ w: SAW, det: -6, g: 0.22 }, { w: SQR, det: 7, g: 0.12 }, { w: TRI, mul: 0.5, g: 0.18 }]);
+        filt(1, 0.7 + p.res * 16, 1, base, top, base * 1.3, Math.max(0.005, attack * 0.6), 0.35); amp(attack, 0.5, 0.38, 0.4, 1);
+      } else if (id === "hoover") {
+        const diveC = p.dive * 1100, diveT = 0.08 + p.dive * 0.4, spread = 8 + p.detune * 30;
+        osc([[-1, 1, 0.16], [0, 1, 0.18], [1, 1, 0.16], [0, 0.5, 0.2], [0.5, 2, 0.06]].map(([k, mul, g]) => ({ w: SAW, mul, det: k * spread, det0: k * spread + diveC, ramp: diveT, g })));
+        a[75] = 1; a[76] = Math.min(0.045, 0.35 / f); a[77] = Math.min(0.02, p.width * 0.3 / f); a[78] = 3 + p.width * 4; a[79] = -0.7; a[80] = 9500; a[81] = 0.5; a[82] = 0.7;
+        amp(attack, 0.4, -1, 0.4, 0); chorus = ["hoover", 0, 0.7];
+      } else if (id === "mono") {
+        release = expMap(p.release, 0.04, 2.5);
+        const base = expMap(p.cutoff, 60, 8000), peak = Math.min(16000, base * (1 + p.env * 24)), dec = 0.04 + expMap(p.release, 0.05, 1.2) * 0.45;
+        const glideT = p.glide > 0.03 && natMonoLast && t - natMonoLast.t < 2 && Math.abs(natMonoLast.f - f) > 1 ? expMap(p.glide, 0.02, 0.6) : 0;
+        if (glideT) { a[73] = natMonoLast.f / f; a[74] = glideT; }
+        natMonoLast = { f, t };
+        osc([{ w: SAW, g: 0.3 }, { w: SQR, det: -5, g: 0.16 }, { w: SQR, mul: 0.5, g: 0.22 }]);
+        filt(2, 0.5 + p.res * 11, 2, base, peak, base, 0.004, dec); amp(0.004, 0.55, -1, 0.4, 0);
+      } else if (id === "pluck") {
+        const dec = expMap(p.decay, 0.06, 1.6), top = expMap(p.bright, 900, 16000), floor = 120 + p.body * 500;
+        osc([{ w: SAW, det: -6, g: 0.22 }, { w: SAW, det: 6, g: 0.22 }, { w: SQR, det: 1200, g: 0.05 + p.bright * 0.08 }, { w: TRI, det: -1200, g: 0.12 }]);
+        filt(1, 0.7 + p.body * 7, 2, floor, top, floor, 0.003, dec * 0.45);
+        a[83] = p.pick * 0.5; a[84] = 2500 + p.pick * 4000; a[85] = 1.5; a[86] = 0.015 + p.pick * 0.02;
+        amp(0.003, 0.6, -1, dec / 2.5, 2); release = Math.min(release, dec);
+      } else if (id === "tyrell") {
+        const peak = Math.min(16000, 240 * (2 + p.bite * 16)), swell = expMap(p.swell, 0.03, 1.5);
+        osc([{ w: SAW, det: -8, det0: -36, ramp: 0.08, g: 0.2 }, { w: SAW, det: 8, det0: -20, ramp: 0.08, g: 0.2 }, { w: SQR, det: 0, det0: -28, ramp: 0.08, g: 0.1 }]);
+        filt(2, 0.5 + p.bite * 6, 1, 240, peak, peak * 0.45, swell, 0.6); amp(attack, 0.48, -1, 0.4, 0);
+        a[87] = p.vibrato * 22; a[88] = 0.75; a[89] = 5.6;
+      } else return null;
+      a[71] = release;
+      anSet();
+      if (a[58] && (!AN || NBAN.model === "svf")) { a[58] = 1; a[90] = 1; }   // (no Analog core: the browser's biquad; or the model picked on the Analog bar)
+      else if (a[58] && AN && NBAN.model === "ladder") { a[58] = 2; a[90] = 1.25; }
+      return { a, chorus };
+    }
+    window.__nbNativeVoice = (midi, id, mix, when, dest) => {
+      if (!NATIVE_IDS.has(id) || !NE.ok || !NE.on || NE.ctx !== ctx || !dest) return null;
+      const t = when == null ? ctx.currentTime : when;
+      const np = natParams(id, state.params[id], midi, t); if (!np) return null;
+      const b = busFor(dest); if (b < 0) return null;
+      const vid = ++NE.id;
+      if (!NAT.note(vid, b, Math.round(t * NE.sr), midi, mix, np.a)) return null;
+      NE.notes++; NE.byKind[id] = (NE.byKind[id] || 0) + 1;
+      // its chorus (the Juno's, the Hoover's): the channel's one shared chorus (020), fed from this bus
+      const bus = NE.buses[b];
+      if (np.chorus) { const c = nbSharedChorus(np.chorus[0], np.chorus[1], dest, np.chorus[2]); if (bus.chorus !== c) { if (bus.chorus) { try { NE.node.disconnect(bus.chorus.input, b); } catch (e) {} } NE.node.connect(c.input, b); bus.chorus = c; } }
+      else if (bus.chorus) { try { NE.node.disconnect(bus.chorus.input, b); } catch (e) {} bus.chorus = null; }
+      return { midi, native: true, oscs: [], stop(at) { try { NAT.off(vid, Math.round((at == null ? ctx.currentTime : at) * NE.sr)); } catch (e) {} } };
+    };
+    // the wheels: bend and vibrato reach the engine's notes too
+    function nePitch() { if (NE.ok) try { NAT.pitch(pm.bend * pm.range * 100, pm.mod * pm.mod * 55); } catch (e) {} }
+    { const ap = applyPitch; applyPitch = function () { const r = ap.apply(this, arguments); nePitch(); return r; }; }
+    // Stop and Stop all reach it
+    ["panic", "stopAll"].forEach(idn => { const el = document.getElementById(idn); if (el) el.addEventListener("click", () => { if (NE.ok) try { NAT.kill(-1); } catch (e) {} }); });
+    // what Settings and Log show
+    NE.state = () => { let s = null; try { s = NE.ok ? NAT.stats() : null; } catch (e) {} return { on: NE.on, running: NE.ok, why: NE.why, notes: NE.notes, byKind: NE.byKind, buses: NE.buses.filter(Boolean).length, underruns: NE.hdr ? NE.hdr[2] : 0, ahead: NE.hdr ? Math.round((NE.hdr[1] - NE.hdr[0]) / NE.sr * 1000 * 10) / 10 : null, engine: s }; };
+    NE.set = on => { NE.on = !!on; try { localStorage.setItem("nightbloom-native", on ? "on" : "off"); } catch (e) {} if (on) neInit(); else neOff("switched off"); };
+  }
+  // ======================================================================
+  // (177) VST3 and CLAP plugins in the Linux app. The app finds the plugins on this computer (~/.vst3, ~/.clap, the
+  // system folders and any you add) and lists them in Plugins with the others: an instrument plays alone or together
+  // with what's playing (the stack, chords, Hold, the arp, the sequencer), an effect goes on the mix, a send, a sound's
+  // channel or another plugin. Each one runs in the app's native plugin host (nb_plug.cc) on a thread of its own,
+  // through shared memory this AudioWorklet ("nb-plug-io") reads and writes, so its sound goes through Nate Bloom's
+  // mixer, effects, recording and Log like any other. Its own controls open in a window of its own.
+  // Anywhere else (the website, the tablet, Lite) none of this is here.
+  // ======================================================================
+  {
+    const NP = window.NBPlug || null;
+    const PL = window.__nbPlug = { ok: !!NP, plugins: [], errors: [], folders: null, at: null, scanning: false, suspects: {}, live: new Map(), msg: "", shown: false };
+    const setup = () => {
+      const CAP = 8192, W = window.__nbw;
+      const SRC = `class NBPlugIO extends AudioWorkletProcessor {
+  constructor(o) { super(); const p = o.processorOptions; this.h = new Float64Array(p.hdr); this.i = new Float32Array(p.inR); this.o = new Float32Array(p.outR); this.cap = p.cap; this.fx = p.fx; this.lat = this.h[6] || 384; this.live = true;
+    this.port.onmessage = e => { if (e.data === "stop") this.live = false; }; }
+  process(inputs, outputs) {
+    const h = this.h, cap = this.cap, f0 = currentFrame, out = outputs[0], L = out[0], R = out[1] || out[0], n = L.length;
+    if (this.fx) {
+      const a = inputs[0] && inputs[0][0], b = inputs[0] && (inputs[0][1] || inputs[0][0]), i0 = f0 % cap;
+      for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; this.i[k] = a ? a[i] : 0; this.i[cap + k] = b ? b[i] : 0; }
+      h[0] = f0 + n;
+      const rf = f0 - this.lat;
+      if (rf >= 0 && h[1] >= rf + n) { const r0 = rf % cap; for (let i = 0; i < n; i++) { const k = (r0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
+      else if (rf >= 0 && h[1] > 0) { h[2]++; if (this.lat < 2048) { this.lat += 128; h[6] = this.lat; } }   // (it wasn't ready: a little more room from now on)
+    } else {
+      if (h[1] >= f0 + n) { const i0 = f0 % cap; for (let i = 0; i < n; i++) { const k = (i0 + i) % cap; L[i] = this.o[k]; R[i] = this.o[cap + k]; } }
+      else if (h[1] > 0) { h[2]++; if (h[5] < 2048) h[5] += 128; }
+      h[0] = f0 + n;
+    }
+    return this.live;
+  }
+}
+registerProcessor("nb-plug-io", NBPlugIO);`;
+      const mods = new WeakMap();
+      const addMod = c => { if (!mods.has(c)) mods.set(c, c.audioWorklet.addModule(URL.createObjectURL(new Blob([SRC], { type: "text/javascript" })))); return mods.get(c); };
+      const fmtName = f => f === "clap" ? "CLAP" : "VST3";
+      const keyOf = f => "vst:" + f.fmt + ":" + f.uid + "@" + f.path;
+      const parse = key => { const m = /^vst:(clap|vst3):([^@]*)@(.+)$/.exec(key); return m ? { fmt: m[1], uid: m[2], path: m[3] } : null; };
+      const base = p => String(p).split("/").filter(Boolean).pop().replace(/\.(vst3|clap)$/i, "");
+      const catOf = f => ({ key: keyOf(f), name: f.name, vendor: f.vendor || fmtName(f.fmt), kind: f.kind === "instrument" ? "instrument" : "effect", type: fmtName(f.fmt) + " on this computer",
+        desc: [fmtName(f.fmt), f.version ? "v" + f.version : "", f.features ? f.features.split(/[|,]/).filter(x => !/^(fx|instrument|audio-effect|stereo|mono)$/i.test(x)).slice(0, 3).join(", ").toLowerCase() : "", "in " + f.path.replace(/^\/home\/[^/]+/, "~")].filter(Boolean).join(" · "),
+        native: true, fmt: f.fmt, path: f.path, uid: f.uid });
+      function fill(r) {
+        if (!r) return;
+        PL.plugins = r.plugins || []; PL.errors = r.errors || []; PL.folders = r.folders || null; PL.at = r.at || null;
+        for (let i = W.CAT.length - 1; i >= 0; i--) if (W.CAT[i].native) W.CAT.splice(i, 1);
+        W.CAT.unshift(...PL.plugins.map(catOf).sort((a, b) => a.fmt.localeCompare(b.fmt) || a.name.localeCompare(b.name)));   // (yours first in each list, CLAP then VST3)
+      }
+      window.__nbPlugSpec = key => {
+        const c = W.CAT.find(x => x.key === key); if (c) return c;
+        const p = parse(key); if (!p) return null;
+        return { key, name: base(p.path), vendor: fmtName(p.fmt), kind: "instrument", type: fmtName(p.fmt) + " on this computer", desc: "", native: true, ...p };   // (not found in the last look: tried anyway)
+      };
+      // ---- an instance, looking like a Web Audio Module to the rest of Plugins (340) ----
+      window.__nbPlugCreate = async (sp, c) => {
+        if (PL.suspects[sp.key]) throw new Error(sp.name + " was loaded when Nate Bloom crashed, so it waits: load it again from Plugins (Load anyway)");
+        const info = await NP.load(sp.fmt, sp.path, sp.uid, c.sampleRate, sp.key);
+        const id = info.id, fx = !info.instrument;
+        let node = null;
+        try {
+          await addMod(c);
+          const hdr = new SharedArrayBuffer(64), inR = new SharedArrayBuffer(CAP * 8), outR = new SharedArrayBuffer(CAP * 8), h = new Float64Array(hdr);
+          h[0] = Math.floor(c.currentTime * c.sampleRate); h[3] = CAP; h[4] = fx ? 2 : 1; h[5] = 256; h[6] = 384;   // (an effect's output plays 384 frames, 8 ms, after its input; more if it needs it)
+          node = new AudioWorkletNode(c, "nb-plug-io", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: "explicit", processorOptions: { hdr, inR, outR, cap: CAP, fx } });
+          const ans = await new Promise(res => {
+            const tok = Math.random().toString(36).slice(2), to = setTimeout(() => { removeEventListener("message", on); res({ ok: false, why: "the app didn't answer" }); }, 3000);
+            const on = e => { const d = e.data && e.data.nbPlugAttached; if (!d || d.id !== tok) return; clearTimeout(to); removeEventListener("message", on); res(d); };
+            addEventListener("message", on);
+            postMessage({ nbPlugAttach: { id: tok, inst: id, hdr, inR, outR, cap: CAP } }, location.origin);
+          });
+          if (!ans.ok) throw new Error(ans.why || "its sound couldn't be connected");
+          if (!fx) { const keep = c.createGain(); keep.gain.value = 0; node.connect(keep).connect(c.destination); node.__keep = keep; }   // (it keeps running while nothing else listens)
+          node.__hdr = h;
+        } catch (e) { try { node && node.port.postMessage("stop"); } catch (er) {} NP.unload(id).catch(() => {}); throw e; }
+        let params = info.params || [];
+        const P = { id, fx, name: info.name, vendor: info.vendor, gui: info.gui, key: sp.key, fmt: sp.fmt, node, ctx: c, params, open: false };
+        PL.live.set(id, P);
+        const fr = t => Math.round((t == null ? c.currentTime : Math.max(c.currentTime, t)) * c.sampleRate);
+        const norm = (p, v) => p.max > p.min ? (v - p.min) / (p.max - p.min) : 0, plain = (p, n) => p.min + n * (p.max - p.min);
+        const pById = pid => params.find(p => String(p.id) === String(pid));
+        Object.assign(node, {
+          scheduleEvents: (...evs) => evs.flat().forEach(ev => { if (ev && ev.type === "wam-midi" && ev.data && ev.data.bytes) { const b = ev.data.bytes; NP.midi(id, fr(ev.time), b[0] | 0, b[1] | 0, b[2] | 0); } }),
+          clearEvents: () => NP.flush(id),
+          getState: async () => ({ nbplug: 1, fmt: sp.fmt, uid: sp.uid, state: await NP.getState(id) }),
+          setState: async s => { if (s && s.nbplug && s.state) await NP.setState(id, s.state); },
+          getParameterInfo: async () => { try { params = await NP.params(id); P.params = params; } catch (e) {} const o = {};
+            params.filter(p => p.auto !== false).forEach(p => { o[String(p.id)] = { id: String(p.id), label: p.name, type: p.steps ? "int" : "float", minValue: 0, maxValue: 1, defaultValue: norm(p, p.def), discreteStep: p.steps ? 1 / p.steps : 0 }; }); return o; },
+          getParameterValues: async (normalized, ...ids) => { try { params = await NP.params(id); P.params = params; } catch (e) {} const o = {};
+            params.forEach(p => { if (ids.length && !ids.map(String).includes(String(p.id))) return; o[String(p.id)] = { id: String(p.id), value: normalized ? norm(p, p.value) : p.value, normalized: !!normalized }; }); return o; },
+          setParameterValues: async obj => { for (const k in obj) { const p = pById(k), x = obj[k]; if (!p || !x) continue; const v = x.normalized === false ? x.value : plain(p, Math.max(0, Math.min(1, x.value))); NP.param(id, p.id, v); } },
+          destroy: () => { PL.live.delete(id); try { node.port.postMessage("stop"); } catch (e) {} try { node.disconnect(); } catch (e) {} if (node.__keep) try { node.__keep.disconnect(); } catch (e) {} NP.unload(id).catch(() => {}); },
+        });
+        const inst = {
+          descriptor: { name: info.name, vendor: info.vendor },
+          audioNode: node,
+          // its own controls: a window of its own beside Nate Bloom's (this panel says so, and can bring it back or close it)
+          createGui: async () => {
+            const box = document.createElement("div"); box.className = "nbp-gui";
+            const p = document.createElement("p"); p.className = "wam-msg"; box.appendChild(p);
+            const row = document.createElement("div"); row.className = "nbp-row"; box.appendChild(row);
+            const b = (t, fn) => { const x = document.createElement("button"); x.className = "btn"; x.textContent = t; x.addEventListener("click", fn); row.appendChild(x); return x; };
+            const show = async () => {
+              if (!info.gui) { p.textContent = info.name + " has no window of its own. Its controls are under MIDI learn and Tracks automation."; return; }
+              p.textContent = "Opening " + info.name + "'s window…";
+              let r = null; try { r = await NP.gui(id, true, info.name + " · Nate Bloom"); } catch (e) { r = { open: false, why: String(e && e.message || e) }; }
+              P.open = !!(r && r.open);
+              p.textContent = P.open ? info.name + "'s own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin." : "Its window didn't open" + (r && r.why ? ": " + r.why : "") + ".";
+            };
+            b("Show its window", show); b("Close its window", async () => { try { await NP.gui(id, false); } catch (e) {} P.open = false; p.textContent = "Closed. Show its window opens it again."; });
+            show();
+            return box;
+          },
+          destroyGui: () => {},
+        };
+        return inst;
+      };
+      // a plugin's window closed by itself, and the controls it changed (so automation and the panel keep up)
+      setInterval(() => { if (!PL.live.size) return; let n = []; try { n = NP.notices() || []; } catch (e) {} n.forEach(s => { const m = /^closed:(\d+)$/.exec(s); if (m) { const P = PL.live.get(+m[1]); if (P) P.open = false; } }); }, 1000);
+      // the tempo and whether the sequencer plays, for plugins that follow them (arpeggiators, synced delays)
+      setInterval(() => { try { NP.transport(state.seq.bpm, false); } catch (e) {} }, 1000);
+      // ---- looking for plugins ----
+      async function refresh(full) {
+        PL.scanning = true; PL.msg = ""; W.paint();
+        try { fill(await NP.scan(!!full)); PL.msg = PL.plugins.length ? "" : "No VST3 or CLAP plugins found yet."; } catch (e) { PL.msg = "Couldn't look for plugins: " + (e && e.message || e); }
+        PL.scanning = false; try { PL.suspects = await NP.suspects() || {}; } catch (e) {}
+        W.paint();
+      }
+      NP.list().then(r => { fill(r); refresh(false); }).catch(() => {});   // (what was found last time at once, then a quick look for new or changed files)
+      PL.refresh = full => refresh(full);
+      NP.suspects().then(s => { PL.suspects = s || {}; }).catch(() => {});
+      // ---- in the Plugins sheet (340 calls this) ----
+      window.__nbPlugPaint = ({ list, head, note, row, btn, repaint }) => {
+        head("VST3 and CLAP on this computer");
+        const ni = PL.plugins.filter(f => f.kind === "instrument").length, ne = PL.plugins.length - ni;
+        const F = PL.folders, where = F ? [...new Set([...F.vst3.slice(0, 1), ...F.clap.slice(0, 1)])].map(x => x.replace(/^\/home\/[^/]+/, "~")).join(" and ") : "~/.vst3 and ~/.clap";
+        note(PL.scanning ? "Looking for plugins…" : PL.plugins.length
+          ? ni + " instrument" + (ni === 1 ? "" : "s") + " (first under Instruments) and " + ne + " effect" + (ne === 1 ? "" : "s") + " (first under + Add an effect). They're looked for in " + where + ", the system's plugin folders and the folders you add."
+          : "Put .vst3 and .clap plugins (Linux builds) in " + where + ", or add the folder they're in, then Look again. Each runs on a thread of its own, its controls in a window of its own.", true);
+        const bar = document.createElement("div"); bar.className = "wam-tg";
+        bar.append(btn(PL.scanning ? "Looking…" : "Look again", () => { if (!PL.scanning) refresh(false); }), btn("Add a folder…", async () => { PL.scanning = true; repaint(); try { const r = await NP.addFolder(); if (r) fill(r); } catch (e) {} PL.scanning = false; repaint(); }));
+        if (PL.folders && PL.folders.own && PL.folders.own.length) PL.folders.own.forEach(f => bar.append(btn("✕ " + f.replace(/^\/home\/[^/]+/, "~"), async () => { fill(await NP.removeFolder(f)); repaint(); }, null, "Stop looking in " + f)));
+        list.appendChild(bar);
+        const sus = Object.keys(PL.suspects || {});
+        sus.forEach(k => {
+          const sp = window.__nbPlugSpec(k), r = row("", sp ? sp.name : k, "It was loaded when Nate Bloom closed unexpectedly, so it doesn't load by itself. Load anyway lets it again.");
+          r.append(btn("Load anyway", async () => { try { PL.suspects = await NP.trust(k) || {}; } catch (e) {} repaint(); }, null, "Let " + (sp ? sp.name : "it") + " load again"));
+          list.appendChild(r);
+        });
+        if (PL.errors.length) {
+          const d = document.createElement("details"); d.className = "nbp-err"; const s = document.createElement("summary"); s.textContent = PL.errors.length + " file" + (PL.errors.length === 1 ? "" : "s") + " couldn't be used"; d.appendChild(s);
+          PL.errors.forEach(e => { const p = document.createElement("p"); p.className = "wam-msg dim"; p.textContent = e.path.replace(/^\/home\/[^/]+/, "~") + ": " + e.error; d.appendChild(p); });
+          list.appendChild(d);
+        }
+        if (PL.msg) note(PL.msg);
+        if (!PL.shown && !PL.at && !PL.scanning) { PL.shown = true; refresh(false); }
+      };
+      // Settings › App and the report: what's loaded and how hard each one works
+      PL.state = () => [...PL.live.values()].map(P => { let s = null; try { s = NP.stats(P.id); } catch (e) {} return { name: P.name, fmt: P.fmt, fx: P.fx, open: P.open, underruns: P.node.__hdr ? P.node.__hdr[2] : 0, delayMs: P.fx && P.node.__hdr ? Math.round(P.node.__hdr[6] / P.ctx.sampleRate * 1000) : 0, blockUs: s ? Math.round(s.blockUs) : null, budgetUs: s ? Math.round(s.budgetUs) : null }; });
+    };
+    PL.state = () => [];
+    if (NP) { if (window.__nbw) setup(); else { let n = 0; const iv = setInterval(() => { if (window.__nbw) { clearInterval(iv); setup(); } else if (++n > 100) { clearInterval(iv); PL.why = "the Plugins sheet isn't here"; } }, 300); } }
+    // (177) the Log's timeline (Live › Log): how hard the native engine and the plugins work, each second
+  setInterval(() => {
+    const L = window.__live5; if (!L || !L.TL || !L.TL.length || !(window.NBEngine || window.NBPlug)) return;   // (the Linux app only)
+    const K = ["native_eng_pct", "native_voices", "native_underruns", "vst_loaded", "vst_pct", "vst_underruns"], H = L.TL_HEAD;
+    K.forEach(k => { if (!H.includes(k)) H.push(k); });
+    const row = L.TL[L.TL.length - 1]; if (!row || row.__nb177) return; row.__nb177 = 1;
+    let e = null, p = []; try { e = window.__ne && window.__ne.ok ? window.__ne.state() : null; } catch (er) {} try { p = window.__nbPlug && window.__nbPlug.state ? window.__nbPlug.state() : []; } catch (er) {}
+    const pct = (u, b) => u != null && b ? Math.round(u / b * 1000) / 10 : "";
+    const i0 = H.indexOf(K[0]); while (row.length < i0) row.push("");
+    row.splice(i0, K.length, e && e.engine ? pct(e.engine.blockUs, e.engine.budgetUs) : "", e && e.engine ? e.engine.voices : "", e ? e.underruns : "",
+      p.length || "", p.length ? Math.round(p.reduce((a, x) => a + (x.blockUs && x.budgetUs ? x.blockUs / x.budgetUs * 100 : 0), 0) * 10) / 10 : "", p.length ? p.reduce((a, x) => a + (x.underruns || 0), 0) : "");
+  }, 1000);
+}
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
   }

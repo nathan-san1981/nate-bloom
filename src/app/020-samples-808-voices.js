@@ -301,7 +301,98 @@
     return on.length ? on : ["saw"];
   }
 
+  // (175) one chorus per channel for the Juno and the Hoover, after the voices (as on a real Juno: one chorus for the
+  // whole instrument), instead of two or three delay lines and LFOs built on every note. A fast arp across a few layers
+  // had dozens of choruses running at once on the one audio thread. Each voice sends its finished sound (after its
+  // envelope and level) in; the wet gains are divided by the voice's dry level so the mix comes out as it did. A chorus
+  // nothing has used for 15 s is taken down.
+  const NB_SHCH = new Map();
+  function nbSharedChorus(kind, mode, dest, dryG) {
+    let byDest = NB_SHCH.get(dest); if (!byDest) NB_SHCH.set(dest, byDest = new Map());
+    const key = kind + ":" + mode + ":" + dryG.toFixed(3);
+    let c = byDest.get(key);
+    if (c && c.ctx === ctx) { c.used = performance.now(); return c; }
+    const input = ctx.createGain(), merger = ctx.createChannelMerger(2), lfos = [], t = ctx.currentTime;
+    if (kind === "juno") {
+      // the Juno's chorus I / II / I+II: left and right swept against each other, and a centre voice for I+II; the wet path high-passed below 60 Hz
+      const chAmt = 0.85, cRate = mode === 2 ? 0.86 : 0.51, cDepth = mode === 2 ? 0.0024 : 0.0033;
+      const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 60; hp.Q.value = 0.5; input.connect(hp);
+      [[0, 0, chAmt], [1, 1 / 2, chAmt], [2, 1 / 4, mode === 3 ? 0.6 : 0]].forEach(([k, ph, wetG]) => {
+        if (!wetG) return;
+        const lfo = ctx.createOscillator(); lfo.frequency.value = k === 2 && mode === 3 ? 0.86 : cRate;
+        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
+        const dep = ctx.createGain(); dep.gain.value = cDepth; lfo.connect(dep).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = wetG / dryG;
+        hp.connect(d).connect(wet);
+        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
+        lfos.push(lfo);
+      });
+    } else {   // the Hoover's: two delays swept in opposite directions, left and right
+      const cl = ctx.createOscillator(); cl.frequency.value = 0.8;
+      [[0, 1], [1, -1]].forEach(([chn, sign]) => {
+        const d = ctx.createDelay(0.05); d.delayTime.value = 0.006;
+        const dp = ctx.createGain(); dp.gain.value = 0.0025 * sign; cl.connect(dp).connect(d.delayTime);
+        const wet = ctx.createGain(); wet.gain.value = 0.6 / dryG; input.connect(d).connect(wet).connect(merger, 0, chn);
+      });
+      lfos.push(cl);
+    }
+    merger.connect(dest);
+    lfos.forEach(o => o.start(t));
+    c = { ctx, input, merger, lfos, used: performance.now() };
+    byDest.set(key, c);
+    return c;
+  }
+  setInterval(() => {
+    const now = performance.now();
+    for (const [dest, byDest] of NB_SHCH) {
+      for (const [key, c] of byDest) if (now - c.used > 15000 || c.ctx !== ctx) { try { c.lfos.forEach(o => o.stop()); } catch (e) {} try { c.input.disconnect(); c.merger.disconnect(); } catch (e) {} byDest.delete(key); }
+      if (!byDest.size) NB_SHCH.delete(dest);
+    }
+  }, 5000);
+  // (175) the Juno's noise: one second of it made once, not on every note
+  let NB_NOISE1 = null;
+  const nbNoise1 = () => { if (!NB_NOISE1 || NB_NOISE1.sampleRate !== ctx.sampleRate) { NB_NOISE1 = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const nd = NB_NOISE1.getChannelData(0); for (let k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1; } return NB_NOISE1; };
+
+  // (175) released notes still ringing on a synth layer. A released note fades toward silence for 1.6 × its release, and
+  // the last half of that is far below hearing but costs the audio thread as much as the start: a fast arp with a long
+  // release kept twenty of them per layer. With more than 8 ringing on a layer, any that has faded 30 dB is let go; past
+  // 24 the oldest goes. When the sound has just dropped out (Chrome's playout stats say so), 4, −20 dB and 12, and new
+  // voices get the browser's own filter past 16 modelled ones (310). A cut is a 12 ms fade, so it doesn't click.
+  const NB_REL = new Map();   // layer id -> [{ at, tau, end, cut }]
+  let NB_HOT = 0;
+  function nbRelTrack(id, at, release, cut) {
+    let L = NB_REL.get(id); if (!L) NB_REL.set(id, L = []);
+    L.push({ at, tau: Math.max(0.005, release / 4), end: at + release * 1.6 + 0.1, cut });
+    nbRelTrim(id);
+  }
+  function nbRelTrim(id) {
+    const L = NB_REL.get(id); if (!L || !ctx) return;
+    const now = ctx.currentTime, hot = performance.now() < NB_HOT;
+    for (let i = L.length - 1; i >= 0; i--) if (L[i].end <= now) L.splice(i, 1);
+    const ringing = () => L.filter(v => v.at <= now).sort((a, b) => a.at - b.at);   // (a release set up ahead, for an arp note, hasn't started)
+    let r = ringing();
+    if (r.length > (hot ? 4 : 8)) {
+      const quiet = hot ? 0.1 : 0.032;
+      r.forEach(v => { if (Math.exp(-(now - v.at) / v.tau) < quiet) { v.cut(now); L.splice(L.indexOf(v), 1); } });
+      r = ringing();
+    }
+    const cap = hot ? 12 : 24;
+    while (r.length > cap) { const v = r.shift(); v.cut(now); L.splice(L.indexOf(v), 1); }
+  }
+  setInterval(() => { for (const id of NB_REL.keys()) nbRelTrim(id); }, 250);
+  window.__nbRel = () => { const o = {}, now = ctx ? ctx.currentTime : 0; NB_REL.forEach((L, id) => { o[id] = L.filter(v => v.at <= now).length; }); return { ringing: o, hot: performance.now() < NB_HOT, choruses: [...NB_SHCH.values()].reduce((n, m) => n + m.size, 0) }; };   // (what Log and the checks read)
+  { let lastFb = null; setInterval(() => { try { const s = ctx && ctx.playoutStats; if (!s || s.fallbackFramesEvents == null) return; if (lastFb != null && s.fallbackFramesEvents > lastFb) NB_HOT = performance.now() + 5000; lastFb = s.fallbackFramesEvents; } catch (e) {} }, 500); }
+  // a voice's release cut short: hold where the fade has got to, then 12 ms to silence, and stop its oscillators
+  const nbCutter = (g, oscs) => when => {
+    try { if (g.cancelAndHoldAtTime) g.cancelAndHoldAtTime(when); else { g.cancelScheduledValues(when); g.setValueAtTime(Math.max(0.0001, g.value), when); } } catch (e) {}
+    g.setTargetAtTime(0.0001, when, 0.012);
+    oscs.forEach(o => { try { o.stop(when + 0.08); } catch (e) {} });
+  };
+
   function makeVoice(midi, id, mix, when) {
+    // (176) the Linux app's native engine plays this synth when it's running and knows it (810); otherwise the browser's, below
+    if (window.__nbNativeVoice) { const nv = window.__nbNativeVoice(midi, id, mix, when, fx.input); if (nv) return nv; }
     const p = state.params[id], f = mtof(midi), t = when ?? ctx.currentTime;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = mix;
@@ -401,32 +492,18 @@
       const hpf = ctx.createBiquadFilter(); hpf.type = "highpass"; hpf.frequency.value = Math.max(10, hpfHz); hpf.Q.value = 0.6;
       const dcoOut = hpfHz ? hpf : filt; if (hpfHz) hpf.connect(filt);
       sub.connect(subG).connect(dcoOut); sum.connect(dcoOut); sawG.connect(dcoOut);
-      if (mNse > 0.001) { const nb = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), nd = nb.getChannelData(0); for (let k = 0; k < nd.length; k++) nd[k] = Math.random() * 2 - 1; const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true; const ng = ctx.createGain(); ng.gain.value = mNse; ns.connect(ng).connect(dcoOut); ns.start(t); oscs.push(ns); }
+      if (mNse > 0.001) { const ns = ctx.createBufferSource(); ns.buffer = nbNoise1(); ns.loop = true; const ng = ctx.createGain(); ng.gain.value = mNse; ns.connect(ng).connect(dcoOut); ns.start(t); oscs.push(ns); }
       // Juno-style stereo chorus: short delays swept against each other. (166) Three voices: left and right swept against each other as the Juno's two lines are, and a centre voice a quarter-cycle between them
       // (left, right, and a centre voice that comes in as the knob goes up: the Juno's I+II, and JS80P's chorus 1),
       // the wet path high-passed below 60 Hz so the sub stays put (the sweep itself is full-band, as the Juno's is)
       // (168) the 106's chorus buttons: I (slow, wide), II (faster, shallower), I+II (both at once, the "crunchy" one); off below the first step
       const chMode = p.chorus < 0.12 ? 0 : p.chorus < 0.55 ? 1 : p.chorus < 0.88 ? 2 : 3;
-      const chAmt = chMode ? 0.85 : 0;
-      const dry = ctx.createGain(); dry.gain.value = 1 - chAmt * 0.35;
+      const chAmt = chMode ? 0.85 : 0, dryG = 1 - chAmt * 0.35;
+      const dry = ctx.createGain(); dry.gain.value = dryG;
       filt.connect(dry).connect(out);
-      const merger = ctx.createChannelMerger(2);
-      const cRate = chMode === 2 ? 0.86 : 0.51, cDepth = chMode === 2 ? 0.0024 : 0.0033;
-      const wetHp = ctx.createBiquadFilter(); wetHp.type = "highpass"; wetHp.frequency.value = 60; wetHp.Q.value = 0.5; filt.connect(wetHp);
-      const chLfos = [];
-      [[0, 0, chAmt], [1, 1 / 2, chAmt], [2, 1 / 4, chMode === 3 ? 0.6 : 0]].forEach(([k, ph, wetG]) => {
-        const lfo = ctx.createOscillator(); lfo.frequency.value = k === 2 && chMode === 3 ? 0.86 : cRate;
-        const a = ph * Math.PI * 2; lfo.setPeriodicWave(ctx.createPeriodicWave(new Float32Array([0, Math.sin(a)]), new Float32Array([0, Math.cos(a)]), { disableNormalization: true }));
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.0045 + k * 0.0009;
-        const dep = ctx.createGain(); dep.gain.value = cDepth;
-        lfo.connect(dep).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = wetG;
-        wetHp.connect(d).connect(wet);
-        if (k < 2) wet.connect(merger, 0, k); else { wet.connect(merger, 0, 0); wet.connect(merger, 0, 1); }
-        chLfos.push(lfo);
-      });
-      merger.connect(out);
-      [saw, pwmLfo, sub, ...chLfos].forEach(o => { o.start(t); oscs.push(o); });
+      // (175) the chorus: the channel's one Juno chorus, fed the finished voice
+      if (chMode) lvl.connect(nbSharedChorus("juno", chMode, fx.input, dryG).input);
+      [saw, pwmLfo, sub].forEach(o => { o.start(t); oscs.push(o); });
       ampEnv(out, t, attack, 0.5);
       out.gain.setTargetAtTime(0.42, t + attack, 0.5);
     }
@@ -559,6 +636,7 @@
         const end = at + release * 1.6 + 0.1;
         oscs.forEach(o => { try { o.stop(end); } catch (e) {} });
         setTimeout(() => { out.disconnect(); lvl.disconnect(); }, (end - now) * 1000 + 200);
+        nbRelTrack(id, at, release, nbCutter(g, oscs));   // (175)
       },
     };
   }

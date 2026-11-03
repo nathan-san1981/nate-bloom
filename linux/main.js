@@ -54,6 +54,9 @@ async function fetchTo(url, dest) {
   return buf;
 }
 
+// (176) cross-origin isolated, so the page can share memory (a SharedArrayBuffer) with the native synth engine's
+// threads; "credentialless" keeps the fonts and other outside files loading as before
+const COI = { "cross-origin-opener-policy": "same-origin", "cross-origin-embedder-policy": "credentialless", "cross-origin-resource-policy": "cross-origin" };
 async function serve(req) {
   const u = new URL(req.url);
   let rel = decodeURIComponent(u.pathname).replace(/^\/+/, "");
@@ -62,7 +65,7 @@ async function serve(req) {
   if (rel === "sw.js" || rel === "lite/sw.js") return new Response("", { status: 404 });   // no service worker: the app is its own offline copy
   for (const root of [CACHE, BUNDLED]) {
     const p = inside(root, rel);
-    if (p && await exists(p)) return new Response(fs.createReadStream(p), { headers: { "content-type": typeOf(p), "cache-control": "no-cache" } });
+    if (p && await exists(p)) return new Response(fs.createReadStream(p), { headers: { "content-type": typeOf(p), "cache-control": "no-cache", ...COI } });
   }
   // not here yet: instruments come from the website, library sounds from their home; both are kept for offline use
   try {
@@ -73,7 +76,7 @@ async function serve(req) {
     else if (/^(inst|wam)\//.test(rel) || /\.(png|webmanifest)$/.test(rel)) src = SITE + rel;   // (plugins added to the website later)
     if (!src) return new Response("", { status: 404 });
     const buf = await fetchTo(src, dest);
-    return new Response(buf, { headers: { "content-type": typeOf(rel) } });
+    return new Response(buf, { headers: { "content-type": typeOf(rel), ...COI } });
   } catch (e) {
     return new Response("", { status: 404 });
   }
@@ -81,6 +84,7 @@ async function serve(req) {
 
 // a newer website: fetched quietly, used the next time the app opens
 async function checkForUpdate(win) {
+  if (process.env.NB_NO_UPDATE) return;   // (CI: a test build checks its own page, not the website's)
   const pages = ["index.html", "lite/index.html"];
   let changed = 0;
   for (const rel of pages) {
@@ -210,7 +214,7 @@ function createWindow() {
     width: st.width, height: st.height, x: st.x, y: st.y, minWidth: 360, minHeight: 560, show: false,
     title: "Nate Bloom", backgroundColor: "#13111b", autoHideMenuBar: true,
     icon: path.join(__dirname, "build", "icon.png"),
-    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false },
+    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false, additionalArguments: ["--nb-userdata=" + app.getPath("userData")] },
   });
   if (st.max && !st.wide) win.maximize();
   win.once("ready-to-show", () => {
@@ -236,7 +240,17 @@ function createWindow() {
   win.on("close", saveState);
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
-  win.webContents.on("render-process-gone", (e, d) => { if (d.reason !== "clean-exit") setTimeout(() => { if (!win.isDestroyed()) win.reload(); }, 800); });
+  // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off
+  // (preload reads engine-crash.json), so a fault in it can never keep the app from working. 10 minutes without one clears it.
+  const crashPath = path.join(app.getPath("userData"), "engine-crash.json");
+  win.webContents.on("did-start-loading", () => { if (plugs) plugs.pageReset(); });   // (177)
+  win.webContents.on("render-process-gone", (e, d) => {
+    if (d.reason === "clean-exit") return;
+    const byPlugin = plugs && /crashed|abnormal|oom/.test(d.reason) && plugs.pageCrashed();   // (177) plugins were loaded: put down to them (they don't load by themselves next time), not the engine
+    if (!byPlugin) try { let c = { n: 0, t: 0 }; try { c = JSON.parse(fs.readFileSync(crashPath, "utf8")); } catch (er) {} const now = Date.now(); c = { n: now - c.t < 120000 ? c.n + 1 : 1, t: now, reason: d.reason }; fs.writeFileSync(crashPath, JSON.stringify(c)); } catch (er) {}
+    setTimeout(() => { if (!win.isDestroyed()) win.reload(); }, 800);
+  });
+  setTimeout(() => { try { const c = JSON.parse(fs.readFileSync(crashPath, "utf8")); if (Date.now() - c.t > 600000 && c.n < 2) fs.unlinkSync(crashPath); } catch (er) {} }, 600000);
   win.loadURL(ORIGIN + "/");
   win.webContents.once("did-finish-load", () => setTimeout(() => checkForUpdate(win), 4000));
 }
@@ -322,5 +336,9 @@ ipcMain.on("nb:playing", (e, on) => {
 });
 ipcMain.on("nb:toast", (e, msg) => { if (Notification.isSupported()) new Notification({ title: "Nate Bloom", body: String(msg).slice(0, 200), silent: true }).show(); });
 ipcMain.handle("nb:version", () => app.getVersion());
+// (177) VST3 and CLAP plugins (plugins.js: finding them, the scan in its own process, crash notes)
+let plugs = null;
+try { plugs = require("./plugins.js").setup({ app, ipcMain, dialog, getWin: () => win, log: m => { if (process.env.NB_DEBUG) console.log("[nb]", m); } }); } catch (e) { console.warn("plugins:", e && e.message); }
+ipcMain.handle("nb:xid", () => { try { const b = win.getNativeWindowHandle(); return b.length >= 8 ? Number(b.readBigUInt64LE(0)) : b.readUInt32LE(0); } catch (e) { return 0; } });
 
 app.on("window-all-closed", () => app.quit());

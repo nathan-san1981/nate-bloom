@@ -68,6 +68,7 @@
   let monoLast = null;   // the previous Mono note, for glide
   function newEngineVoice(midi, id, mix, when) {
     if (id === "wave") return wvVoice ? wvVoice(midi, mix, when) : { midi, stop() {} };
+    if (window.__nbNativeVoice) { const nv = window.__nbNativeVoice(midi, id, mix, when, fx.input); if (nv) return nv; }   // (176) the Linux app's native engine (810)
     const p = state.params[id], f = mtof(midi), t = when ?? ctx.currentTime;
     const out = ctx.createGain(); out.gain.value = 0.0001;
     const lvl = ctx.createGain(); lvl.gain.value = mix;
@@ -129,13 +130,8 @@
       lfo.connect(dep).connect(dl.delayTime); lfo.start(t); oscs.push(lfo);
       bus.connect(lp); bus.connect(dl).connect(inv).connect(lp);
       const dry = ctx.createGain(); dry.gain.value = 0.7; lp.connect(dry).connect(out);
-      const merger = ctx.createChannelMerger(2), cl = ctx.createOscillator(); cl.frequency.value = 0.8;
-      [[0, 1], [1, -1]].forEach(([ch, sign]) => {
-        const d = ctx.createDelay(0.05); d.delayTime.value = 0.006;
-        const dp = ctx.createGain(); dp.gain.value = 0.0025 * sign; cl.connect(dp).connect(d.delayTime);
-        const wet = ctx.createGain(); wet.gain.value = 0.6; lp.connect(d).connect(wet).connect(merger, 0, ch);
-      });
-      cl.start(t); oscs.push(cl); merger.connect(out);
+      // (175) the chorus: the channel's one Hoover chorus, fed the finished voice (not two delays and an LFO on every note)
+      lvl.connect(nbSharedChorus("hoover", 0, fx.input, 0.7).input);
       ampEnv(out, t, attack, 0.4);
     }
 
@@ -168,6 +164,7 @@
         const end = at + release * 1.6 + 0.1;
         oscs.forEach(o => { try { o.stop(end); } catch (e) {} });
         setTimeout(() => { out.disconnect(); lvl.disconnect(); }, (end - now) * 1000 + 200);
+        nbRelTrack(id, at, release, nbCutter(g, oscs));   // (175)
       },
     };
   }

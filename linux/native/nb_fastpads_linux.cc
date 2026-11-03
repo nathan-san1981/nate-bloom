@@ -29,6 +29,8 @@
 #define NB_HAS_ABLINK 1
 #endif
 
+extern "C" napi_value nb_engine_init(napi_env env, napi_value exports);   // (176) nb_engine.cc
+
 namespace {
 
 nbsh::Host gSynth;   // Nathan's plugin instruments, played here when the page turns fast plugins on
@@ -352,6 +354,7 @@ napi_value Init(napi_env env, napi_value exports) {
 #endif
     };
     napi_define_properties(env, exports, sizeof props / sizeof props[0], props);
+    nb_engine_init(env, exports);   // (176) the native synth engine (nb_engine.cc)
     return exports;
 }
 

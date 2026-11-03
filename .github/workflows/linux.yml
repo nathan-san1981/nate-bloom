@@ -53,12 +53,20 @@ jobs:
           git -C native/ablink/link submodule update -q --init --depth 1 modules/asio-standalone
           ls native/ablink/link/include/ableton/Link.hpp native/ablink/link/modules/asio-standalone/asio/include/asio.hpp
 
+      - name: Fetch the plugin formats' headers (CLAP and VST3, both MIT) for the plugin host (linux/native/nb_plug*.cc)
+        run: |
+          git clone -q --depth 1 https://github.com/free-audio/clap.git linux/native/third_party/clap
+          git clone -q --depth 1 --branch v3.8.1_build_84 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces || git clone -q --depth 1 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces
+          ls linux/native/third_party/clap/include/clap/clap.h linux/native/third_party/vst3/pluginterfaces/base/funknown.cpp
+          dpkg -s libx11-dev >/dev/null 2>&1 || sudo apt-get install -y libx11-dev
+
       - name: Build the fast-pad engine
         id: native
         run: |
           set -o pipefail
           cd linux/native && npx --no-install node-gyp rebuild 2>&1 | tee /tmp/nb-logs/native.log
           node -e "const f = require('./build/Release/nbfastpads.node'); console.log(Object.keys(f).join(' '), '| Ableton Link:', typeof f.ablState)" | tee -a /tmp/nb-logs/native.log
+          node -e "const p = require('./build/Release/nbplug.node'); console.log('plugin host:', Object.keys(p).join(' '))" | tee -a /tmp/nb-logs/native.log
 
       - name: Package (.deb and AppImage)
         id: build
@@ -73,7 +81,7 @@ jobs:
         run: bash linux/ci/smoke.sh /tmp/nb-logs/smoke
 
       - name: Release
-        if: steps.build.outcome == 'success'
+        if: steps.build.outcome == 'success' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -87,11 +95,25 @@ jobs:
           gh release edit linux-latest --title "Nate Bloom for Linux (latest: $NB_VERSION)" --notes-file ../RELEASE_NOTES.md --latest=false
           gh release upload linux-latest NateBloom-linux.deb NateBloom-linux.AppImage --clobber
 
+      - name: Native synth engine (shared memory, the Juno on it)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 6
+        run: bash linux/ci/native_check.sh /tmp/nb-logs/native
+
       - name: Across both screens (two virtual monitors, no window manager and Cinnamon's)
         if: steps.build.outcome == 'success'
         continue-on-error: true
         timeout-minutes: 10
         run: bash linux/ci/wide_check.sh /tmp/nb-logs/wide
+
+      - name: VST3 and CLAP plugins (test plugins and Surge XT, in the app)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash linux/ci/plug_check.sh /tmp/nb-logs/plug
 
       - name: Publish logs to the ci-logs-linux branch
         if: always()

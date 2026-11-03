@@ -4,6 +4,7 @@
       "target_name": "nbfastpads",
       "sources": [
         "nb_fastpads_linux.cc",
+        "nb_engine.cc",
         "../../native/nbsynth/nbsynth.c",
         "../../native/nbsynth/wasm-rt-impl.c",
         "../../native/nbsynth/wasm-rt-mem-impl.c",
@@ -53,6 +54,42 @@
         "-lpthread",
         "-lm",
         "-latomic"
+      ]
+    },
+    {
+      "target_name": "nbplug",
+      "sources": [
+        "nb_plug.cc",
+        "nb_plug_clap.cc",
+        "nb_plug_vst3.cc",
+        "third_party/vst3/pluginterfaces/base/funknown.cpp"
+      ],
+      "include_dirs": [
+        "third_party/clap/include",
+        "third_party/vst3"
+      ],
+      "defines": [
+        "NAPI_VERSION=8"
+      ],
+      "cflags": [
+        "-O2"
+      ],
+      "cflags_cc": [
+        "-std=c++17",
+        "-O2",
+        "-fexceptions",
+        "-frtti",
+        "-Wno-delete-non-virtual-dtor",
+        "-Wno-misleading-indentation"
+      ],
+      "cflags_cc!": [
+        "-fno-exceptions",
+        "-fno-rtti"
+      ],
+      "libraries": [
+        "-lX11",
+        "-ldl",
+        "-lpthread"
       ]
     }
   ]

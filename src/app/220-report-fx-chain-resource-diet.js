@@ -53,6 +53,9 @@
       const r = { app: "Nate Bloom", made: new Date().toString(), page: location.href.split("?")[0], whatWentWrong: REPORT_NOTE };
       r.device = { ua: navigator.userAgent, screen: screen.width + "x" + screen.height, window: innerWidth + "x" + innerHeight, dpr: devicePixelRatio, cores: navigator.hardwareConcurrency, memoryGB: navigator.deviceMemory,
         installed: matchMedia("(display-mode: standalone)").matches, online: navigator.onLine, touch: navigator.maxTouchPoints, language: navigator.language };
+      try { if (window.__ne) r.nativeEngine = window.__ne.state(); } catch (e) {}   // (176)
+      try { if (window.__nbPlug && window.__nbPlug.ok) r.vstPlugins = { loaded: window.__nbPlug.state ? window.__nbPlug.state() : [], found: window.__nbPlug.plugins.length, errors: window.__nbPlug.errors.length, suspects: Object.keys(window.__nbPlug.suspects || {}) }; } catch (e) {}   // (177)
+      try { if (window.__nbRel) r.ringing = window.__nbRel(); } catch (e) {}
       try { if (performance.memory) r.device.jsHeapMB = Math.round(performance.memory.usedJSHeapSize / 1048576) + " of " + Math.round(performance.memory.jsHeapSizeLimit / 1048576); } catch (e) {}
       try { const est = await navigator.storage.estimate(); r.device.storageMB = Math.round(est.usage / 1048576) + " of " + Math.round(est.quota / 1048576); r.device.persisted = navigator.storage.persisted ? await navigator.storage.persisted() : null; } catch (e) {}
       try { const a = navigator.gpu ? await navigator.gpu.requestAdapter() : null; r.device.gpu = a ? (a.info ? { vendor: a.info.vendor, arch: a.info.architecture, device: a.info.device, desc: a.info.description } : "available") : "none"; } catch (e) { r.device.gpu = "error " + e.message; }

@@ -26,7 +26,9 @@
       const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
       if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
       if (window.NB_BIG && bufWant() === "fast") return ["The sound is dropping out" + where + ". This computer has room for it: switch the sound buffer to Steady (Settings › Sound check) and reload; it gives the sound twice the slack for about 10 ms more delay."];   // (174)
-      if (vs >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": a lot plays at once (" + vs + (vs === 1 ? " voice" : " voices") + " across " + lay + (lay === 1 ? " layer" : " layers") + "). Fewer layers or effects help; Stop all (■) clears anything that got stuck."];
+      // (175) released notes still ringing count too (an arp's tails were most of it, and the message said "2 voices")
+      const ring = nbsTry(() => { let k = 0; const now = ctx.currentTime; NB_REL.forEach(L => L.forEach(v => { if (v.at <= now) k++; })); return k; }, 0), all = vs + ring;
+      if (all >= 6 || lay >= 3) return ["The sound is dropping out" + where + ": " + all + (all === 1 ? " note" : " notes") + " sounding across " + lay + (lay === 1 ? " layer" : " layers") + (ring ? " (" + ring + " of them released and still ringing)" : "") + ". One audio thread works out all of it, however many cores the computer has; Nate Bloom is letting the quietest tails go first. Fewer layers, a shorter Release, or Shimmer and Density off help; Stop all (■) clears anything stuck."];
       return ["The sound is dropping out" + where + " with little playing. " + (bufWant() === "fast" && !window.NB_LITE ? "Switch the sound buffer to Steady (Settings → Sound check), or try another headphone output: the hub's own jack may not keep up." : "Try another headphone output: this one may not keep up even on Steady.")];
     }
     function nbsRead() {   // today's objects, read into the document's shape

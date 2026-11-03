@@ -26,6 +26,31 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
   onWide: cb => ipcRenderer.on("nb:wide", (e, on) => { try { cb(!!on); } catch (er) {} }),
 });
 
+// (176) the native synth engine (nb_engine.cc): voices worked out on a pool of threads, into shared memory the page's
+// AudioWorklet plays from. attach() takes the page's shared Float64Array header and Float32Array ring.
+let engineOK = true;   // (176) off after two page crashes close together (main.js writes engine-crash.json)
+try { const ud = (process.argv.find(a => a.startsWith("--nb-userdata=")) || "").slice(14); if (ud) { const c = JSON.parse(require("fs").readFileSync(path.join(ud, "engine-crash.json"), "utf8")); if (c && c.n >= 2) engineOK = false; } } catch (e) {}
+if (fp && fp.eng_attach && engineOK && !process.env.NB_NO_ENGINE) {
+  // the page posts { nbEngAttach: { id, hdr, ring, sr, buses, cap, ahead } } to its own window (structured clone shares
+  // SharedArrayBuffers there, which the bridge won't); this answers { nbEngAttached: { id, ok, why } }
+  window.addEventListener("message", e => {
+    const d = e.data && e.data.nbEngAttach; if (!d || e.source !== window) return;
+    let ok = false, why = "";
+    try { ok = !!fp.eng_attach(new Float64Array(d.hdr), new Float32Array(d.ring), d.sr, d.buses, d.cap, d.ahead); if (!ok) why = "the engine refused the memory"; } catch (er) { why = String(er && er.message || er); }
+    window.postMessage({ nbEngAttached: { id: d.id, ok, why } }, "*");
+  });
+}
+if (fp && fp.eng_attach && engineOK && !process.env.NB_NO_ENGINE) contextBridge.exposeInMainWorld("NBEngine", {
+  // (the shared memory can't cross this bridge: the page posts it to the window, and the listener below hands it to the engine)
+  attach: () => false,
+  note: (id, bus, frame, midi, mix, params) => fp.eng_note(id, bus, frame, midi, mix, params),
+  off: (id, frame) => fp.eng_off(id, frame),
+  kill: id => fp.eng_kill(id == null ? -1 : id),
+  pitch: (bend, vib) => fp.eng_pitch(bend, vib),
+  stats: () => fp.eng_stats(),
+  stop: () => fp.eng_stop(),
+});
+
 if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   start: () => fp.start(),
   sleep: () => fp.sleep(),
@@ -48,6 +73,45 @@ if (fp) contextBridge.exposeInMainWorld("NBFastPads", {
   synthTempo: (bpm, playing) => fp.synthTempo && fp.synthTempo(+bpm, playing ? 1 : 0),
   synthGain: (i, g) => fp.synthGain && fp.synthGain(i | 0, +g),
 });
+
+// (177) VST3 and CLAP plugins (native/nb_plug.cc, nbplug.node): the page loads one, then posts its shared memory
+// ({ nbPlugAttach: { id, inst, hdr, inR, outR, cap } }, like the engine's); everything else goes over this bridge.
+// Promises answer with JSON text. Which plugins are loaded is told to the app, so a crash is put down to them.
+let pl = null;
+for (const p of [path.join(__dirname, "native", "build", "Release", "nbplug.node"), path.join(__dirname.replace(/app\.asar$/, "app.asar.unpacked"), "native", "build", "Release", "nbplug.node")]) {
+  try { pl = require(p); break; } catch (e) {}
+}
+if (pl && !process.env.NB_NO_PLUGINS) {
+  window.addEventListener("message", e => {
+    const d = e.data && e.data.nbPlugAttach; if (!d || e.source !== window) return;
+    let ok = false, why = "";
+    try { ok = !!pl.plug_attach(d.inst, new Float64Array(d.hdr), new Float32Array(d.inR), new Float32Array(d.outR), d.cap); if (!ok) why = "the plugin host refused the memory"; } catch (er) { why = String(er && er.message || er); }
+    window.postMessage({ nbPlugAttached: { id: d.id, ok, why } }, "*");
+  });
+  const keys = new Map();   // instance -> its key, for the crash note
+  contextBridge.exposeInMainWorld("NBPlug", {
+    list: () => ipcRenderer.invoke("nb:plug-list"),
+    scan: full => ipcRenderer.invoke("nb:plug-scan", !!full),
+    addFolder: () => ipcRenderer.invoke("nb:plug-folder"),
+    removeFolder: p => ipcRenderer.invoke("nb:plug-unfolder", String(p)),
+    suspects: () => ipcRenderer.invoke("nb:plug-suspects"),
+    trust: key => ipcRenderer.invoke("nb:plug-trust", String(key)),
+    load: (fmt, file, uid, sr, key) => { ipcRenderer.send("nb:plug-live", String(key), true);
+      return pl.plug_load(String(fmt), String(file), String(uid || ""), +sr || 48000).then(j => { const o = JSON.parse(j); keys.set(o.id, String(key)); return o; },
+        e => { ipcRenderer.send("nb:plug-live", String(key), false); throw new Error(String(e)); }); },
+    midi: (id, frame, a, b, c) => pl.plug_midi(id | 0, +frame, a | 0, b | 0, c | 0),
+    flush: id => pl.plug_flush(id | 0),
+    param: (id, pid, v, frame) => frame == null ? pl.plug_param(id | 0, pid >>> 0, +v) : pl.plug_param(id | 0, pid >>> 0, +v, +frame),
+    params: id => pl.plug_params(id | 0).then(j => JSON.parse(j)),
+    getState: id => pl.plug_get_state(id | 0),
+    setState: (id, b64) => pl.plug_set_state(id | 0, String(b64)).then(j => j === "true"),
+    gui: async (id, open, title) => { let xid = 0; try { xid = await ipcRenderer.invoke("nb:xid"); } catch (e) {} return JSON.parse(await pl.plug_gui(id | 0, !!open, String(title || "Plugin"), +xid || 0)); },
+    unload: id => { const k = keys.get(id | 0); keys.delete(id | 0); return pl.plug_unload(id | 0).then(() => { if (k) ipcRenderer.send("nb:plug-live", k, false); return true; }); },
+    transport: (bpm, playing) => pl.plug_transport(+bpm, !!playing),
+    stats: id => id == null ? pl.plug_stats() : pl.plug_stats(id | 0),
+    notices: () => pl.plug_notices(),
+  });
+}
 
 // Ableton Link (native/ablink, in the same native module): Bitwig and the other Link apps on the network
 if (fp && fp.ablState) contextBridge.exposeInMainWorld("NBAbleton", {
