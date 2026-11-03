@@ -140,8 +140,7 @@
         // compressor (soft-kneed from about -29 dBFS, 4:1, 5 ms attack: that's what ate the Minilogue's low-end punch).
         // The Mixer's fader and mute still work on it.
         let c = null; if (H.fxOn) { try { c = fxcGet("hw"); } catch (e) {} }
-        // (at the Mixer's 0 dB, 0.8, it comes out at the level the interface gives it: the limiter's trim is made up)
-        if (!H.fxOn && fx.limiter && (!H.mk || H.mk.context !== ctx || H.mkTo !== fx.limiter)) { H.mk = ctx.createGain(); H.mk.gain.value = (1 / 0.8) / Math.pow(10, -(3 - 3 / 20) * 0.6 / 20); H.mk.connect(fx.limiter); H.mkTo = fx.limiter; }
+        if (!H.fxOn && fx.limiter && (!H.mk || H.mk.context !== ctx || H.mkTo !== fx.limiter)) { H.mk = ctx.createGain(); H.mk.gain.value = 1;   /* (190) unity: the level bus is already 1 at the Mixer's 0 dB and the trim after the limiter undoes its make-up; 189 counted both (+3.6 dB, enough to push its attacks into the limiter) */ H.mk.connect(fx.limiter); H.mkTo = fx.limiter; }
         const dest = H.fxOn ? (c ? c.input : fx.input) : (fx.limiter ? H.mk : fx.input); if (!dest) return;
         if (H.dest === dest && H.bus) return;
         if (H.bus) { try { H.merge.disconnect(H.bus); } catch (e) {} }
