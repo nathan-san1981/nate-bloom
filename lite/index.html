@@ -21762,7 +21762,7 @@ registerProcessor("nb-verb", NBVerb);`;
       NBW_CAT.filter(c => c.kind === "instrument").forEach(c => {
         const inUse = using.find(([p]) => p.id === "wam:" + c.key), r = row(inUse && inUse[0].on && (state.engine === "lib" || !!(state.stack && state.stack.lib)) ? "on" : "", c.name, subOf(c), ownOf(c));
         if (NBW_HERE) {
-          r.append(btn("Play alone", () => { sheet.hidden = true; chooseEntry(entryOf(c), false); }, null, "Play " + c.name + " alone (stops the others)"),
+          r.append(btn("Play alone", () => { sheet.hidden = true; (window.__nbAlone || (f => f()))(() => chooseEntry(entryOf(c), false)); }, null, "Play " + c.name + " alone (stops the others)"),
             btn("+ Together", async () => { if (window.__nbTogether) { await window.__nbTogether(entryOf(c)); nbwPaint(); } else nbwTogether(c); }, null, "Play " + c.name + " together with what's playing"));
           if (inUse) r.append(btn("Controls", async () => { try { nbwOpenGui(await nbwInstrument(inUse[0].id)); } catch (e) { msg = "Couldn't open it: " + (e && e.message || e); nbwPaint(); } }, null, c.name + " controls"));
         }
@@ -24573,6 +24573,8 @@ registerProcessor("nb-wave", NBWave);
     async function swap(e, preview) {
       const it = items().find(isSel); if (!it) return ce0(e, preview);
       const id = e.id;
+      // (182) Inst with nothing loaded yet: its loader opens and what's playing stays (it used to be taken out first, and nothing came in)
+      if (id === "e:inst" && !curInst) { keepFocusPlaying(); return ce0(e, preview); }
       if (it.t === "syn" && id.startsWith("e:") && isSyn(id.slice(2))) {
         const k = id.slice(2); if (k !== it.id) { state.layers[it.id].on = false; state.layers[k].on = true; }
         state.engine = k; state.melodic = k; state.cur = { id, cat: e.cat }; renderEngine(); save(); if (preview) previewSound(); return;
@@ -24582,11 +24584,26 @@ registerProcessor("nb-wave", NBWave);
       drop(it, true); return together(e);
     }
     const ce0 = chooseEntry;
+    // (182) a sound picked while others play (the Sounds list, a Quick sound's name, the MiniLab, Find) takes the place of the
+    // highlighted one and the rest play on, as Live's Sounds panel already did (159). Nathan's report: picking the Grand
+    // Piano took Analog Poly, Juno Strings, Blade Brass and the Minilogue out with no word. Alone is still a tap away
+    // (Only … in Playing, Play alone in Plugins); window.__nbAlone(fn) runs fn the old way.
+    let aloneN = 0;
+    window.__nbAlone = async fn => { aloneN++; try { return await fn(); } finally { aloneN--; } };
+    async function swapSay(e, preview) {
+      const before = items(), it = before.find(isSel);
+      const r = await swap(e, preview);
+      const now = items(), rest = now.filter(x => !isSel(x)).map(x => x.name);
+      if (it && rest.length && !(e.id === "e:inst" && !curInst)) say(e.name + (it.name !== e.name ? " in for " + it.name : "") + " · " + rest.join(", ") + " play on · Only " + e.name + " is in Playing");
+      return r;
+    }
     chooseEntry = async function (e, preview = true) {
       if (!e || typeof e.id !== "string") return ce0.apply(this, arguments);
       if (ADD.on && !brEl.hidden) { const r = await together(e); if (!brEl.hidden) renderBrowser(false); return r; }
       if (e.id.startsWith("w:wam:")) preview = false;   // plugins don't play a note by themselves
       if (melodicPick(e.id)) {
+        if (e.id === "e:inst" && !curInst && items().length) { keepFocusPlaying(); return ce0.call(this, e, preview); }   // (182: the loader opens, nothing goes)
+        if (!aloneN && items().length > 1) return swapSay(e, preview);
         if (swapping && items().length > 1) return swap(e, preview);
         const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1; s.off = false; if (s.hw) { s.hw = false; try { HWX().allOff(); } catch (e) {} }   // alone: the others stop
         const k = e.id.startsWith("e:") ? e.id.slice(2) : "";
@@ -24770,7 +24787,7 @@ registerProcessor("nb-wave", NBWave);
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
         const t = el("div", "qk-t" + (on ? " on" : "") + (cur ? " cur" : "") + (mu ? " muted" : ""));
         const m = el("button", "qm"); m.innerHTML = "<b></b><small></small>"; m.querySelector("b").textContent = q.name; m.querySelector("small").textContent = mu ? "muted" : q.sub;
-        m.title = "Play " + q.name + " alone"; m.setAttribute("aria-label", m.title);
+        m.title = many && !on ? "Play " + q.name + " in place of the highlighted sound (the others play on)" : "Play " + q.name; m.setAttribute("aria-label", m.title);
         m.addEventListener("click", () => qkAlone(q));
         t.appendChild(m);
         if (it && (many || mu)) t.appendChild(muteBtn("qs", it));   // (172) mute right on the tile while it plays with others

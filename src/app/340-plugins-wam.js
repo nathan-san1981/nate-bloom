@@ -334,7 +334,7 @@
       NBW_CAT.filter(c => c.kind === "instrument").forEach(c => {
         const inUse = using.find(([p]) => p.id === "wam:" + c.key), r = row(inUse && inUse[0].on && (state.engine === "lib" || !!(state.stack && state.stack.lib)) ? "on" : "", c.name, subOf(c), ownOf(c));
         if (NBW_HERE) {
-          r.append(btn("Play alone", () => { sheet.hidden = true; chooseEntry(entryOf(c), false); }, null, "Play " + c.name + " alone (stops the others)"),
+          r.append(btn("Play alone", () => { sheet.hidden = true; (window.__nbAlone || (f => f()))(() => chooseEntry(entryOf(c), false)); }, null, "Play " + c.name + " alone (stops the others)"),
             btn("+ Together", async () => { if (window.__nbTogether) { await window.__nbTogether(entryOf(c)); nbwPaint(); } else nbwTogether(c); }, null, "Play " + c.name + " together with what's playing"));
           if (inUse) r.append(btn("Controls", async () => { try { nbwOpenGui(await nbwInstrument(inUse[0].id)); } catch (e) { msg = "Couldn't open it: " + (e && e.message || e); nbwPaint(); } }, null, c.name + " controls"));
         }
