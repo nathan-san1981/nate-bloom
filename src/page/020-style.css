@@ -3479,3 +3479,34 @@ body.nb-wide .knobs { max-width: 1600px; }
 .ep-c.on b::before { content: "▶ "; font-size: 0.62rem; }
 .ep-fold { align-items: center; color: var(--dim); }
 .ep-none { margin: 6px 2px 0; font: 0.74rem/1.4 var(--font-body); color: var(--dim); }
+/* (208) the engine side panel, right of the page when there's room */
+.es { position: fixed; z-index: 20; bottom: 12px; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; padding: 10px 8px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); scrollbar-width: thin; }
+.es[hidden] { display: none; }
+body.es-on #epStrip { display: none; }
+.es-top { display: flex; align-items: baseline; gap: 8px; padding: 0 6px 8px; }
+.es-top b { font: 600 0.92rem var(--font-body); color: var(--ink); }
+.es-top small, .es-sec { font: 0.62rem var(--font-mono); color: var(--dim); }
+.es-sec { letter-spacing: 0.12em; text-transform: uppercase; padding: 14px 6px 6px; }
+.es-e { border-radius: 10px; }
+.es-e + .es-e { margin-top: 2px; }
+.es-e.open { background: rgba(255,255,255,0.025); padding-bottom: 6px; }
+.es-h, .es-p { appearance: none; display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; border: 0; background: none; color: var(--ink); cursor: pointer; text-align: left; font: inherit; border-radius: 9px; }
+.es-h { padding: 7px 8px; }
+.es-h:hover, .es-p:hover { background: rgba(180,160,255,0.08); }
+.es-h::before { content: "▸"; color: var(--dim); font-size: 0.7rem; width: 10px; flex: none; }
+.es-e.open > .es-h::before { content: "▾"; color: var(--lilac); }
+.es-t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.es-t b { font: 600 0.84rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.es-t small { font: 0.58rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.es-e.playing > .es-h b { color: var(--lilac); }
+.es-e.playing > .es-h b::after { content: " ●"; font-size: 0.55rem; vertical-align: middle; }
+.es-n { font: normal 0.62rem var(--font-mono); color: var(--dim); flex: none; }
+.es-ps { display: flex; flex-direction: column; gap: 1px; padding: 0 4px 0 22px; }
+.es-p { padding: 5px 8px; border-left: 2px solid var(--line); border-radius: 0 8px 8px 0; }
+.es-p .es-t b { font-weight: 500; font-size: 0.8rem; }
+.es-p.on { background: #261f38; border-left-color: var(--lilac); }
+.es-p.on .es-t b { color: var(--lilac); }
+.es-p.on .es-t b::before { content: "▶ "; font-size: 0.6rem; }
+.es-none { margin: 4px 8px; font: 0.72rem/1.4 var(--font-body); color: var(--dim); }
+.es-more { appearance: none; display: block; width: 100%; margin-top: 12px; padding: 8px; border: 1px solid var(--line); border-radius: 9px; background: none; color: var(--ink); font: 0.76rem var(--font-body); cursor: pointer; }
+.es-more:hover { border-color: var(--lilac); }

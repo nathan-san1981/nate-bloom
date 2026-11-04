@@ -3503,6 +3503,37 @@ body.nb-wide .knobs { max-width: 1600px; }
 .ep-c.on b::before { content: "▶ "; font-size: 0.62rem; }
 .ep-fold { align-items: center; color: var(--dim); }
 .ep-none { margin: 6px 2px 0; font: 0.74rem/1.4 var(--font-body); color: var(--dim); }
+/* (208) the engine side panel, right of the page when there's room */
+.es { position: fixed; z-index: 20; bottom: 12px; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; padding: 10px 8px 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); scrollbar-width: thin; }
+.es[hidden] { display: none; }
+body.es-on #epStrip { display: none; }
+.es-top { display: flex; align-items: baseline; gap: 8px; padding: 0 6px 8px; }
+.es-top b { font: 600 0.92rem var(--font-body); color: var(--ink); }
+.es-top small, .es-sec { font: 0.62rem var(--font-mono); color: var(--dim); }
+.es-sec { letter-spacing: 0.12em; text-transform: uppercase; padding: 14px 6px 6px; }
+.es-e { border-radius: 10px; }
+.es-e + .es-e { margin-top: 2px; }
+.es-e.open { background: rgba(255,255,255,0.025); padding-bottom: 6px; }
+.es-h, .es-p { appearance: none; display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; border: 0; background: none; color: var(--ink); cursor: pointer; text-align: left; font: inherit; border-radius: 9px; }
+.es-h { padding: 7px 8px; }
+.es-h:hover, .es-p:hover { background: rgba(180,160,255,0.08); }
+.es-h::before { content: "▸"; color: var(--dim); font-size: 0.7rem; width: 10px; flex: none; }
+.es-e.open > .es-h::before { content: "▾"; color: var(--lilac); }
+.es-t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.es-t b { font: 600 0.84rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.es-t small { font: 0.58rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.es-e.playing > .es-h b { color: var(--lilac); }
+.es-e.playing > .es-h b::after { content: " ●"; font-size: 0.55rem; vertical-align: middle; }
+.es-n { font: normal 0.62rem var(--font-mono); color: var(--dim); flex: none; }
+.es-ps { display: flex; flex-direction: column; gap: 1px; padding: 0 4px 0 22px; }
+.es-p { padding: 5px 8px; border-left: 2px solid var(--line); border-radius: 0 8px 8px 0; }
+.es-p .es-t b { font-weight: 500; font-size: 0.8rem; }
+.es-p.on { background: #261f38; border-left-color: var(--lilac); }
+.es-p.on .es-t b { color: var(--lilac); }
+.es-p.on .es-t b::before { content: "▶ "; font-size: 0.6rem; }
+.es-none { margin: 4px 8px; font: 0.72rem/1.4 var(--font-body); color: var(--dim); }
+.es-more { appearance: none; display: block; width: 100%; margin-top: 12px; padding: 8px; border: 1px solid var(--line); border-radius: 9px; background: none; color: var(--ink); font: 0.76rem var(--font-body); cursor: pointer; }
+.es-more:hover { border-color: var(--lilac); }
 </style>
 </head>
 <body class="lite">
@@ -32991,7 +33022,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 207;
+    window.NB_BUILD = 208;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -37344,6 +37375,114 @@ registerProcessor("nb-aw", NBAwProc);
     setInterval(() => { if (!document.hidden) epPaint(false); }, 600);
     setTimeout(() => epPaint(true), 0);
     window.__ep = { paint: () => epPaint(true) };
+  }
+
+  // ======================================================================
+  // (208) The engine side panel. When the window is wide enough, the empty space right of the page holds every engine
+  // and plugin as a list: tap one to open its presets under it, tap a preset to play it. The engine that's playing is
+  // open and marked. (The Presets strip under the Quick row is for narrow windows, where there's no room beside.)
+  // ======================================================================
+  {
+    const EB = () => window.__eb, appEl = document.querySelector(".app");
+    const es = document.createElement("aside"); es.className = "es"; es.id = "engSide"; es.setAttribute("aria-label", "Engines and their presets"); es.hidden = true;
+    document.body.appendChild(es);
+    const esOpen = new Set(); let esKey = "", esLastEng = null, esShown = false;
+    const catL = () => (window.__nbw && window.__nbw.CAT) || [];
+
+    function esFits() {
+      if (!appEl || !qkVisible() || document.body.classList.contains("live-on")) return null;
+      const r = appEl.getBoundingClientRect(), gap = innerWidth - r.right;
+      if (gap < 250) return null;
+      const strip = document.getElementById("miniStrip"), bars = [document.getElementById("shell"), document.getElementById("buildBar"), strip];
+      let top = 0; bars.forEach(b => { if (b && b.offsetHeight && getComputedStyle(b).position === "fixed") { const br = b.getBoundingClientRect(); if (br.height && br.bottom > top && br.top < 200) top = br.bottom; } });
+      return { left: Math.round(r.right + 10), top: Math.round(top + 10), width: Math.min(420, Math.round(gap - 22)) };
+    }
+    function qkVisible() { const q = document.getElementById("qk"); if (!q) return false; const r = q.getBoundingClientRect(); return !!(q.offsetParent && r.width > 0); }
+
+    function esRow(cls, name, sub, on, onClick, extra) {
+      const b = document.createElement("button"); b.className = cls + (on ? " on" : "");
+      const t = document.createElement("span"); t.className = "es-t";
+      const n = document.createElement("b"); n.textContent = name; t.appendChild(n);
+      if (sub) { const sm = document.createElement("small"); sm.textContent = sub; t.appendChild(sm); }
+      b.appendChild(t); if (extra) b.appendChild(extra);
+      b.addEventListener("click", onClick); return b;
+    }
+    function esSection(title) { const h = document.createElement("div"); h.className = "es-sec"; h.textContent = title; es.appendChild(h); }
+    function esPick(fn) { return async ev => { const b = ev.currentTarget; es.querySelectorAll(".es-p.on").forEach(x => x.classList.remove("on")); b.classList.add("on"); try { await fn(); } catch (e) {} esPaint(true); }; }
+
+    function esEngine(id, cur, curEng) {
+      const E = ENGINES[id]; if (!E) return;
+      const k = "e:" + id, L = EB().presetsOf(id), open = esOpen.has(k), playing = curEng === k;
+      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : "");
+      const cnt = document.createElement("i"); cnt.className = "es-n"; cnt.textContent = L.length ? String(L.length) : "";
+      wrap.appendChild(esRow("es-h", E.short || E.name, (E.short && E.short !== E.name ? E.name + " · " : "") + (E.after || ""), false, () => { open ? esOpen.delete(k) : esOpen.add(k); esPaint(true); }, cnt));
+      if (open) {
+        const box = document.createElement("div"); box.className = "es-ps";
+        const plain = { id: k, name: E.name, sub: "the engine as it is", cat: "engines" };
+        box.appendChild(esRow("es-p", "As it is", "no preset", cur === k, esPick(() => chooseEntry(plain, true))));
+        const by = new Map(allEntries().map(e => [e.id, e]));
+        L.forEach(([p, i]) => {
+          const eid = "n:" + i, e = by.get(eid) || { id: eid, name: p[0], sub: "", cat: "nb" }, st = EB().engOfPreset(i);
+          const sub = st.length > 1 ? "+ " + st.filter(x => x !== id).map(x => ENGINES[x] ? ENGINES[x].short || ENGINES[x].name : x).join(" + ") : "";
+          box.appendChild(esRow("es-p", p[0], sub, cur === eid, esPick(() => chooseEntry(e, true))));
+        });
+        wrap.appendChild(box);
+      }
+      es.appendChild(wrap);
+    }
+    function esPlugin(c, cur, curEng) {
+      const k = "w:" + c.key, open = esOpen.has(k), playing = curEng === k, m = EB().plugPresets ? null : null;
+      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : "");
+      wrap.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, () => { open ? esOpen.delete(k) : esOpen.add(k); esPaint(true); }));
+      if (open) {
+        const box = document.createElement("div"); box.className = "es-ps"; wrap.appendChild(box);
+        const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+        box.appendChild(esRow("es-p", "As it is", c.native ? "its presets are in its own window" : "its default sound", cur === plainE.id, esPick(() => chooseEntry(plainE, false))));
+        const note = document.createElement("p"); note.className = "es-none"; note.textContent = "Loading its presets…"; box.appendChild(note);
+        EB().plugPresets(c.key).then(m => {
+          note.remove();
+          if (!m || !m.list || !m.list.length) { if (!c.native) { note.textContent = "No preset list: its sounds come from its own controls."; box.appendChild(note); } return; }
+          m.list.forEach((pr, i) => box.appendChild(esRow("es-p", pr.name, "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)))));
+          if (playing) { const on = box.querySelector(".es-p.on"); if (on) on.scrollIntoView({ block: "nearest" }); }
+        });
+      }
+      es.appendChild(wrap);
+    }
+    function esPaint(force) {
+      const eb = EB(); if (!eb) return;
+      let curEng = null; try { curEng = eb.engineOfCur(); } catch (e) {}
+      if (curEng !== esLastEng) { if (curEng) esOpen.add(curEng); esLastEng = curEng; force = true; }
+      const cur = state.cur && state.cur.id || "", key = cur + "|" + [...esOpen].join(",") + "|" + catL().length;
+      if (!force && key === esKey) return; esKey = key;
+      const st = es.scrollTop; es.innerHTML = "";
+      const head = document.createElement("div"); head.className = "es-top";
+      const ht = document.createElement("b"); ht.textContent = "Engines"; head.appendChild(ht);
+      const hs = document.createElement("small"); hs.textContent = "tap one for its presets"; head.appendChild(hs);
+      es.appendChild(head);
+      let ids = []; try { ids = window.__qkLive.items().filter(q => q.eng).map(q => q.eng); } catch (e) {}
+      if (!ids.length) ids = Object.keys(ENGINES).filter(id => ENGINES[id].short);
+      ids.forEach(id => esEngine(id, cur, curEng));
+      const P = catL().filter(c => c.kind === "instrument");
+      const nb = P.filter(c => /^natebloom\//.test(c.url || "")), other = P.filter(c => !/^natebloom\//.test(c.url || ""));
+      if (nb.length) { esSection("Nate Bloom plugins"); nb.forEach(c => esPlugin(c, cur, curEng)); }
+      if (other.length) { esSection("Other plugins"); other.forEach(c => esPlugin(c, cur, curEng)); }
+      const more = document.createElement("button"); more.className = "es-more"; more.textContent = "Drum kits and everything else…";
+      more.addEventListener("click", () => { try { eb.open(null); } catch (e) {} }); es.appendChild(more);
+      es.scrollTop = st;
+      if (force && curEng) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
+    }
+    function esPlace() {
+      const f = esFits();
+      if (!f) { if (esShown) { es.hidden = true; document.body.classList.remove("es-on"); esShown = false; } return; }
+      es.style.left = f.left + "px"; es.style.top = f.top + "px"; es.style.width = f.width + "px";
+      if (!esShown) { es.hidden = false; document.body.classList.add("es-on"); esShown = true; esPaint(true); }
+      else esPaint(false);
+    }
+    addEventListener("resize", esPlace);
+    { const st = setSoundText; setSoundText = function () { const r = st.apply(this, arguments); setTimeout(esPlace, 0); return r; }; }
+    setInterval(() => { if (!document.hidden) esPlace(); }, 500);
+    setTimeout(esPlace, 0);
+    window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
