@@ -95,10 +95,13 @@
       return p.id.startsWith("nb-") ? "studio" : "library";
     }
     const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
+    const NB_COPY_OK = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");   // (214) two sounds on one engine
     function items() {
       const g = groupsOn(), out = [];
-      if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => out.push({ t: "syn", id, name: ENGINES[id].name, kind: "synth" })); }
-      if (g.lib) state.lib.parts.forEach((p, i) => { if (p && p.id) out.push({ t: "lib", i, id: p.id, name: p.name, kind: kindOf(p), off: !p.on, wait: !libInsts[i] }); });
+      if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => { const pn = state.layers[id].pname; out.push({ t: "syn", id, name: pn || ENGINES[id].name, sub: pn ? ENGINES[id].name : "", kind: "synth" }); }); }   // (214) a preset's name, the engine under it
+      // (214, Linux) a second sound on the same engine: its own preset's settings, played by another set of that engine's voices
+      if (g.syn && NB_COPY_OK) for (const id of synOn()) (state.layers[id].copies || []).forEach((c, ci) => out.push({ t: "syn2", id, ci, name: c.pname || ENGINES[id].name, sub: (ENGINES[id].short || ENGINES[id].name) + " · 2nd", kind: "synth" }));
+      if (g.lib) state.lib.parts.forEach((p, i) => { if (p && p.id) out.push({ t: "lib", i, id: p.id, name: p.pname || p.name, sub: p.pname ? p.name : "", kind: kindOf(p), off: !p.on, wait: !libInsts[i] }); });
       if (g.inst) out.push({ t: "inst", name: curInst ? curInst.name : "My instrument", kind: "instrument", wait: !curInst });
       if (g.samp >= 0) { const sl = state.samp.slots[g.samp]; out.push({ t: "samp", slot: g.samp, name: "Sampler S" + (g.samp + 1) + (sl && sl.name ? " · " + baseName(sl.name) : ""), kind: "sampler" }); }
       if (g.hw) { const H = HWX(); out.push({ t: "hw", name: H.name, kind: "hardware", wait: !H.ready(), why: H.why() }); }
@@ -107,12 +110,13 @@
     const libSelOn = () => { const ps = state.lib.parts; return ps[libSel] && ps[libSel].id ? libSel : ps.findIndex(p => p && p.id); };
     if (Number.isInteger(S().ls)) libSel = S().ls;   // (the highlighted library sound, kept across a reload)
     const isSel = it => it.t === "syn" ? state.engine === it.id : it.t === "lib" ? state.engine === "lib" && it.i === libSelOn() : it.t === "inst" ? state.engine === "inst" : false;
-    const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : true);
+    const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : a.t === "syn2" ? a.id === b.id && a.ci === b.ci : true);
     let toastT = 0;
     function say(msg) { const el = document.getElementById("uiToast"); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2800); }
     // ---- (172) mute: the sound stays in what's playing, silent, until it's unmuted (its bus does it, see lvMuted) ----
     function muteHome(it) {
       if (it.t === "syn") return state.layers[it.id];
+      if (it.t === "syn2") return (state.layers[it.id].copies || [])[it.ci] || null;
       if (it.t === "lib") return state.lib.parts[it.i];
       if (it.t === "inst") return state.inst;
       if (it.t === "samp") return state.samp.slots[it.slot];
@@ -154,6 +158,17 @@
     function keepFocusPlaying() { const g = grp(state.engine) || grp(S().f); if (g && !S().off) S()[g] = true; }   // what had the controls plays on
     function focusOn(it) {
       const s = S();
+      // (214) a second sound on an engine: tapping it swaps it with the first, so its knobs are the ones below
+      if (it.t === "syn2") {
+        const L = state.layers[it.id], c = L.copies && L.copies[it.ci]; if (!c) return;
+        const p0 = Object.assign({}, state.params[it.id]), n0 = L.pname, m0 = L.mute, lv0 = L.level;
+        Object.assign(state.params[it.id], c.params); L.pname = c.pname; if (c.mute) L.mute = true; else delete L.mute; L.level = c.level ?? lv0;
+        const cur0 = state.cur && state.cur.id && state.cur.id.startsWith("n:") ? state.cur.id : null;
+        L.copies[it.ci] = { params: p0, pname: n0, mute: m0, level: lv0, cur: cur0 };
+        if (c.cur) state.cur = { id: c.cur, cat: "nb" };
+        try { setSoundText(c.pname || ENGINES[it.id].name, ENGINES[it.id].name + " · tap to browse"); } catch (e) {}
+        it = { t: "syn", id: it.id };
+      }
       if (it.t !== "samp" && it.t !== "hw") s.off = false;
       if (it.t === "samp") { say(it.name + " plays along with the keys. Its sample and settings are in Samples."); return; }
       if (it.t === "hw") { const H = HWX(); if (H) H.open(); return; }
@@ -174,6 +189,7 @@
       try { if (!layersEl.hidden) renderLayers(); } catch (e) {}
     }
     function drop(it, quiet) {
+      if (it.t === "syn2") { const L = state.layers[it.id].copies || []; L.splice(it.ci, 1); if (!L.length) delete state.layers[it.id].copies; renderEngine(); save(); if (!quiet) say(it.name + " is out"); return true; }
       const all = items(), rest = all.filter(x => !same(x, it)), s = S();
       const along = x => x.t === "samp" || x.t === "hw";   // (they play along; something of Nate Bloom's has the controls)
       if (!along(it) && !rest.some(x => !along(x))) {   // (173) the last of Nate Bloom's sounds: out, and the keys play nothing (or only what plays along)
@@ -231,7 +247,7 @@
         if (isSyn(k)) {
           if (g.syn && state.layers[k].on) { say(ENGINES[k].name + " is already playing"); return false; }
           if (!g.syn) for (const x in state.layers) state.layers[x].on = false;
-          keepFocusPlaying(); state.layers[k].on = true; s.syn = false;
+          keepFocusPlaying(); state.layers[k].on = true; delete state.layers[k].pname; s.syn = false;
           state.engine = k; state.melodic = k; state.cur = { id, cat: "engines" };
           renderEngine(); save(); say(ENGINES[k].name + " added · playing together"); return true;
         }
@@ -255,6 +271,21 @@
       }
       if (id.startsWith("n:")) {   // a Nate Bloom preset: its engines join the others
         const g = groupsOn(), prev = g.syn ? synOn() : [];
+        // (214, Linux) an engine that's already playing keeps its sound: the preset comes in as a second set of its voices
+        if (NB_COPY_OK && prev.length) {
+          const P = NB_PRESETS[Number(id.slice(2))], stack = P ? (Array.isArray(P[1]) ? P[1] : [P[1]]) : [];
+          if (stack.some(k => prev.includes(k))) {
+            if (stack.some(k => prev.includes(k) && (state.layers[k].copies || []).length >= 3)) { say("Four sounds on one engine is the most"); return false; }
+            if (stack.every(k => prev.includes(k) && (state.layers[k].pname === P[0] || (state.layers[k].copies || []).some(c => c.pname === P[0])))) { say(P[0] + " is already playing"); return false; }
+            keepFocusPlaying();
+            for (const k of stack) {
+              const full = Object.assign(Object.fromEntries(ENGINES[k].knobs.map(([q, , v]) => [q, v])), P[2][k] || {});
+              if (prev.includes(k)) (state.layers[k].copies = state.layers[k].copies || []).push({ params: full, pname: P[0], level: 0.8, cur: id });
+              else { state.layers[k].on = true; Object.assign(state.params[k], full); state.layers[k].level = 0.8; state.layers[k].pname = P[0]; }
+            }
+            s.syn = false; renderEngine(); save(); say(P[0] + " added · playing together"); return true;
+          }
+        }
         const keepArp = {}; prev.forEach(k => { if (state.arp[k]) keepArp[k] = Object.assign({}, state.arp[k]); });   // (170) a classic sound sets its own arp, not theirs
         keepFocusPlaying();
         applyPreset(Number(id.slice(2)));
@@ -294,7 +325,7 @@
       // (182) Inst with nothing loaded yet: its loader opens and what's playing stays (it used to be taken out first, and nothing came in)
       if (id === "e:inst" && !curInst) { keepFocusPlaying(); return ce0(e, preview); }
       if (it.t === "syn" && id.startsWith("e:") && isSyn(id.slice(2))) {
-        const k = id.slice(2); if (k !== it.id) { state.layers[it.id].on = false; state.layers[k].on = true; }
+        const k = id.slice(2); if (k !== it.id) { state.layers[it.id].on = false; state.layers[k].on = true; } delete state.layers[k].pname;
         state.engine = k; state.melodic = k; state.cur = { id, cat: e.cat }; renderEngine(); save(); if (preview) previewSound(); return;
       }
       if (it.t === "syn" && id.startsWith("n:")) return ce0(e, preview);   // (a preset sets the engines; the rest play on)
@@ -374,7 +405,7 @@
         const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
         if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
-        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = it.kind + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
+        m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = (it.sub || it.kind) + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
         m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
         m.addEventListener("click", () => { start(); focusOn(it); });
         c.appendChild(m);

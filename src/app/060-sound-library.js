@@ -146,7 +146,7 @@
     for (const id of Object.keys(ENGINES)) state.layers[id].on = stack.includes(id);
     for (const id of stack) {
       Object.assign(state.params[id], Object.fromEntries(ENGINES[id].knobs.map(([k, , v]) => [k, v])), params[id] || {});
-      state.layers[id].level = 0.8;
+      state.layers[id].level = 0.8; state.layers[id].pname = name;   // (214) the Playing row shows the preset's name
     }
     state.engine = stack[0];
     state.cur = { id: "n:" + i, cat: "nb" };
@@ -182,6 +182,7 @@
       const anyOther = Object.keys(ENGINES).some(x => x !== id && state.layers[x].on);
       if (!anyOther || !state.layers[id].on) { for (const x in state.layers) state.layers[x].on = x === id; }
     }
+    if (state.layers[id]) delete state.layers[id].pname;
     state.engine = id; state.cur = { id: "e:" + id, cat: "engines" };
     renderEngine(); save();
   }

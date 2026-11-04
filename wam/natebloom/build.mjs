@@ -77,8 +77,15 @@ console.log("Faust", faust.version());
 const idOf = label => label.toLowerCase().replace(/[^a-z0-9]+/g, "");
 const walk = (items, out) => { for (const it of items) { if (it.items) walk(it.items, out); else out.push(it); } return out; };
 const catalog = [], ONLY = process.env.ONLY ? process.env.ONLY.split(",") : null;   // ONLY=violin,flute rebuilds just those
+// (214) these four now run C++ ports (Airwindows, KR-106) built in portsrc/; the Faust originals stay in src/ for reference
+const PORTED = ["junochorus", "tapeecho", "tape", "lofi"];
 for (const S of SPEC) {
   if (ONLY && !ONLY.includes(S.id)) continue;
+  if (PORTED.includes(S.id) && !process.env.FAUST_ORIGINALS) {
+    const M = JSON.parse(fs.readFileSync(path.join(HERE, S.id, "meta.json"), "utf8"));
+    catalog.push({ key: "natebloom/" + S.id, name: M.name, vendor: "Nate Bloom", kind: "effect", type: S.type, desc: M.description, url: "natebloom/" + S.id + "/index.js", site: "https://nathan-san1981.github.io/nate-bloom/" });
+    continue;
+  }
   const dsp = fs.readFileSync(path.join(HERE, "src", S.id + ".dsp"), "utf8");
   let r;
   try { r = faust.createDSPFactory(S.id, dsp, "-ftz 2", false); }

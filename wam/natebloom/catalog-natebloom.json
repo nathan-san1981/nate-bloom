@@ -35,7 +35,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Delay",
-  "desc": "Repeats that darken, saturate and wobble like worn tape, bouncing left and right. Push Feedback past 100% for runaway echoes.",
+  "desc": "Airwindows TapeDelay2 (Chris Johnson, MIT): a varispeed tape loop, so moving Time bends the repeats like a real machine, with a resonant filter in the loop and flutter that follows the sound. Ping-pong and saturation in the loop; past 100% feedback it runs away.",
   "url": "natebloom/tapeecho/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -55,7 +55,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Modulation",
-  "desc": "The Juno-60's bucket-brigade chorus: I, II, or both at once for the fast, shimmering vibrato.",
+  "desc": "The Juno-60's MN3009 bucket-brigade chorus, from Ultramaster KR-106 (Karl LaRocca, GPL-3): modelled from hardware measurements, with the BBD's filters, its triangle LFO (sine in I+II), compander noise and clock leakage. Mode I, II or both.",
   "url": "natebloom/junochorus/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -65,7 +65,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Saturation",
-  "desc": "A tape machine: soft saturation, a low-end bump, rolled-off highs, wow and flutter and a little hiss. Age takes it from fresh to worn.",
+  "desc": "Airwindows ToTape6 (Chris Johnson, MIT): tape saturation with a real machine's head bump, top-end softening and flutter. Age wears the tape; Hiss adds its noise.",
   "url": "natebloom/tape/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -75,7 +75,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Saturation",
-  "desc": "Fewer bits, a lower sample rate, a worn-record wobble, crackle and a dark filter.",
+  "desc": "The crush is Airwindows DeRez2 (Chris Johnson, MIT): sample-rate reduction that interpolates instead of aliasing harshly, and true bit reduction; then a worn-record wobble, dust and a dark filter.",
   "url": "natebloom/lofi/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },

@@ -390,3 +390,27 @@
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
   }
+
+  // (214, Linux) the second (third, fourth) sound on an engine plays as another set of that engine's voices, each with its
+  // own preset's settings: every note (and the arp) plays the engine again with the copy's settings swapped in for that note.
+  // It rides on the engine's own part of what the keys play, so it follows that engine's controller, zones and arp.
+  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+    const vc0 = voiceComponents;
+    voiceComponents = function () {
+      const r = vc0.apply(this, arguments);
+      if (!Array.isArray(r) || !r.length) return r;
+      const out = r.slice();
+      for (const c of r) {
+        const id = c.key, L = ENGINES[id] && state.layers[id]; if (!L || !L.copies || !L.copies.length) continue;
+        L.copies.forEach((cp, ci) => {
+          if (cp.mute) return;
+          out.push({ key: id, name: cp.pname || ENGINES[id].name, accepts: c.accepts, copy: ci,
+            make: (m, when, scale = 1) => {
+              const keep = state.params[id]; state.params[id] = Object.assign({}, keep, cp.params);
+              try { return makeVoice(m, id, (cp.level ?? 0.8) * 1.25 * scale / Math.sqrt(r.length + 1), when); } finally { state.params[id] = keep; }
+            } });
+        });
+      }
+      return out;
+    };
+  }

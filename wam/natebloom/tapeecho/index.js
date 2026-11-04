@@ -1,3 +1,2 @@
-// Tape Echo: Nate Bloom's own plugin (Faust, src/tapeecho.dsp)
-import { make } from "../lib/nbfaust.js";
+import { make } from "../lib/nbport.js";
 export default make(import.meta.url);

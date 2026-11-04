@@ -130,7 +130,7 @@
       if (tok !== libTokens[pi]) return;
       const prev = state.lib.parts[pi];
       state.lib.parts[pi] = Object.assign({ on: true, lo: 0, hi: 127, oct: 0, level: 0.8 }, prev || {},
-        { id: stem, name: entry.name, sub: entry.sub, sus: entry.sus ? 1 : 0 });
+        { id: stem, name: entry.name, sub: entry.sub, sus: entry.sus ? 1 : 0, pname: undefined });
       libInsts[pi] = { name: entry.name, sub: entry.sub, regions: inst.regions };
       if (pi === 0) { libInst = libInsts[0]; state.lib.id = stem; }
       state.engine = "lib";
@@ -166,9 +166,9 @@
   function libLabel() {
     const on = state.lib.parts.filter(p => p && p.on && p.id);
     if (!on.length) return ["Library", "Tap to browse sounds"];
-    if (on.length === 1) return [on[0].name, on[0].sub + " · tap to browse"];
+    if (on.length === 1) return [on[0].pname || on[0].name, (on[0].pname ? on[0].name : on[0].sub) + " · tap to browse"];
     const split = on.some(p => p.lo > 0 || p.hi < 127);
-    return [on.map(p => p.name).join(" + "), on.length + (split ? " zones" : " layers") + " · tap to browse"];
+    return [on.map(p => p.pname || p.name).join(" + "), on.length + (split ? " zones" : " layers") + " · tap to browse"];
   }
 
   // ---------- keyboard zone strips ----------

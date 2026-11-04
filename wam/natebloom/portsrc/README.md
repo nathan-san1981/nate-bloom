@@ -9,3 +9,8 @@ Changes for WebAssembly: standard tuning only (no Scala files, no MTS-ESP), no c
 filter, BBD chorus and half-band resamplers (Karl LaRocca, GPL-3; the headers are in `kr106/`), Airwindows Galactic3
 (Chris Johnson, MIT; `unicorn_dream/galactic3.h`) and jc303's diode ladder (midilab, GPL-3; `fuzz_bass/dfl_*`).
 Build with `build-port.sh unicorn_dream` or `build-port.sh fuzz_bass`.
+
+`junochorus/`, `tapeecho/`, `tape/` and `lofi/` (build 214) are the Juno Chorus on KR-106's BBD chorus, and Tape Echo,
+Tape and Lo-Fi on Airwindows TapeDelay2, ToTape6 and DeRez2 (Chris Johnson, MIT). The `aw_*.h` headers are generated
+from the Airwindows sources by `aw/awgen.py` (members, constructor and processReplacing unchanged; the float dither
+dropped); TapeDelay2's two feedback lines are edited for ping-pong and in-loop saturation, marked in the header.

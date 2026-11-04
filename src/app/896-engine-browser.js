@@ -57,7 +57,7 @@
     async function choosePlugPreset(c, pr, i) {
       const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
       await chooseEntry(e, false);
-      await plugApply(c, pr);
+      await plugApply(c, pr); plugName(c, pr.name);
       state.cur = { id: "pp:" + c.key + "#" + i, cat: "engines" }; save();
       try { setSoundText(pr.name, c.name); } catch (er) {}
     }
@@ -66,8 +66,10 @@
       const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
       const have = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
       if (!have) { const ok = await window.__nbTogether(e); if (!ok) return false; }
-      await plugPresets(c.key); await plugApply(c, pr); return true;
+      await plugPresets(c.key); await plugApply(c, pr); plugName(c, pr.name); save(); return true;
     }
+    // (214) the Playing row shows the plugin's preset name over the plugin's
+    function plugName(c, nm) { const pt = (state.lib.parts || []).find(p => p && p.id === "wam:" + c.key); if (pt) pt.pname = nm; try { window.__stk.paint(); } catch (e) {} }
 
     // ---------- drawing ----------
     function ebRow(name, sub, onPick, opts) {
