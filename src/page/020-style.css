@@ -3531,3 +3531,29 @@ body.es-on #epStrip { display: none; }
 .fx-chip.mix { border-style: dashed; }
 .fx-chip.all { color: var(--dim); }
 .fx-chip:disabled { opacity: 0.5; }
+/* (216) the sound notebook */
+.nbk .ed-card { max-width: 860px; }
+.nbk-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nbk-head strong { flex: 1; }
+.nbk-lab { font: 600 0.62rem var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.nbk-name, .nbk-notes { width: 100%; box-sizing: border-box; background: var(--raised, #221d30); border: 1px solid var(--line); border-radius: 9px; color: var(--ink); font: 0.9rem var(--font-body); padding: 8px 10px; resize: vertical; }
+.nbk-xd { display: flex; align-items: center; gap: 6px; font: 0.86rem var(--font-body); }
+.nbk-info { font: 0.78rem/1.45 var(--font-body); color: var(--dim); margin: 2px 0; }
+.nbk-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 70vh; }
+.nbk-e { border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,0.02); }
+.nbk-e.open { border-color: var(--lilac); }
+.nbk-eh { appearance: none; width: 100%; text-align: left; background: none; border: 0; color: var(--ink); padding: 9px 12px; cursor: pointer; font: inherit; display: flex; }
+.nbk-eh .es-t small { white-space: normal; }
+.nbk-body { display: none; padding: 0 12px 12px; flex-direction: column; gap: 8px; }
+.nbk-e.open .nbk-body { display: flex; }
+.nbk-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.nbk-sec h4 { margin: 6px 0 4px; font: 600 0.82rem var(--font-body); color: var(--lilac); }
+.nbk-snd { padding: 3px 0; }
+.nbk-snd small { color: var(--dim); font: 0.68rem var(--font-mono); }
+.nbk-kn { display: flex; flex-wrap: wrap; gap: 4px 10px; font: 0.7rem var(--font-mono); color: var(--dim); margin-top: 2px; }
+.nbk-fx { font: 0.74rem var(--font-body); color: var(--dim); }
+.nbk-xdg { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.nbk-xb { border: 1px solid var(--line); border-radius: 9px; padding: 6px 8px; }
+.nbk-xb h5 { margin: 0 0 4px; font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.nbk-xr { display: flex; justify-content: space-between; gap: 8px; font: 0.74rem var(--font-body); padding: 1px 0; }
+.nbk-xr b { font-weight: 600; text-align: right; }
