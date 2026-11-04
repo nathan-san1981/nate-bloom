@@ -95,7 +95,7 @@
     const EB = () => window.__eb, appEl = document.querySelector(".app");
     const es = document.createElement("aside"); es.className = "es"; es.id = "engSide"; es.setAttribute("aria-label", "Engines and their presets"); es.hidden = true;
     document.body.appendChild(es);
-    const esOpen = new Set(); let esKey = "", esLastEng = null, esShown = false;
+    const esOpen = new Set(); let esBusy = 0, esKey = "", esLastEng = null, esShown = false;
     const catL = () => (window.__nbw && window.__nbw.CAT) || [];
 
     function esFits() {
@@ -117,14 +117,26 @@
       b.addEventListener("click", onClick); return b;
     }
     function esSection(title) { const h = document.createElement("div"); h.className = "es-sec"; h.textContent = title; es.appendChild(h); }
-    function esPick(fn) { return async ev => { const b = ev.currentTarget; es.querySelectorAll(".es-p.on").forEach(x => x.classList.remove("on")); b.classList.add("on"); try { await fn(); } catch (e) {} esPaint(true); }; }
+    // a tap in the panel plays the sound and marks it where it is: the panel isn't redrawn, so nothing moves under the pointer
+    function esPick(fn) { return async ev => {
+      const b = ev.currentTarget, w = b.closest(".es-e");
+      es.querySelectorAll(".es-p.on").forEach(x => x.classList.remove("on")); b.classList.add("on");
+      es.querySelectorAll(".es-e.playing").forEach(x => x.classList.remove("playing")); if (w) w.classList.add("playing");
+      esBusy++; try { await fn(); } catch (e) {} finally { esBusy--; }
+      esSync();
+    }; }
+    function esSync() {
+      let ce = null; try { ce = EB().engineOfCur(); } catch (e) {}
+      esLastEng = ce;
+      esKey = (state.cur && state.cur.id || "") + "|" + [...esOpen].join(",") + "|" + catL().length;
+    }
 
     function esEngine(id, cur, curEng) {
       const E = ENGINES[id]; if (!E) return;
       const k = "e:" + id, L = EB().presetsOf(id), open = esOpen.has(k), playing = curEng === k;
-      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : "");
+      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
       const cnt = document.createElement("i"); cnt.className = "es-n"; cnt.textContent = L.length ? String(L.length) : "";
-      wrap.appendChild(esRow("es-h", E.short || E.name, (E.short && E.short !== E.name ? E.name + " · " : "") + (E.after || ""), false, () => { open ? esOpen.delete(k) : esOpen.add(k); esPaint(true); }, cnt));
+      wrap.appendChild(esRow("es-h", E.short || E.name, (E.short && E.short !== E.name ? E.name + " · " : "") + (E.after || ""), false, ev => esToggle(k, ev), cnt));
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps";
         const plain = { id: k, name: E.name, sub: "the engine as it is", cat: "engines" };
@@ -141,8 +153,8 @@
     }
     function esPlugin(c, cur, curEng) {
       const k = "w:" + c.key, open = esOpen.has(k), playing = curEng === k, m = EB().plugPresets ? null : null;
-      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : "");
-      wrap.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, () => { open ? esOpen.delete(k) : esOpen.add(k); esPaint(true); }));
+      const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
+      wrap.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, ev => esToggle(k, ev)));
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps"; wrap.appendChild(box);
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
@@ -152,13 +164,19 @@
           note.remove();
           if (!m || !m.list || !m.list.length) { if (!c.native) { note.textContent = "No preset list: its sounds come from its own controls."; box.appendChild(note); } return; }
           m.list.forEach((pr, i) => box.appendChild(esRow("es-p", pr.name, "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)))));
-          if (playing) { const on = box.querySelector(".es-p.on"); if (on) on.scrollIntoView({ block: "nearest" }); }
         });
       }
       es.appendChild(wrap);
     }
-    function esPaint(force) {
-      const eb = EB(); if (!eb) return;
+    function esToggle(k, ev) {
+      const y0 = ev.currentTarget.getBoundingClientRect().top;
+      esOpen.has(k) ? esOpen.delete(k) : esOpen.add(k);
+      esPaint(true, true);
+      const h = [...es.querySelectorAll(".es-e")].find(w => w.dataset.k === k);
+      if (h) es.scrollTop += h.getBoundingClientRect().top - y0;
+    }
+    function esPaint(force, noScroll) {
+      const eb = EB(); if (!eb || (esBusy && !noScroll)) return;
       let curEng = null; try { curEng = eb.engineOfCur(); } catch (e) {}
       if (curEng !== esLastEng) { if (curEng) esOpen.add(curEng); esLastEng = curEng; force = true; }
       const cur = state.cur && state.cur.id || "", key = cur + "|" + [...esOpen].join(",") + "|" + catL().length;
@@ -178,7 +196,7 @@
       const more = document.createElement("button"); more.className = "es-more"; more.textContent = "Drum kits and everything else…";
       more.addEventListener("click", () => { try { eb.open(null); } catch (e) {} }); es.appendChild(more);
       es.scrollTop = st;
-      if (force && curEng) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
+      if (force && curEng && !noScroll) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
     }
     function esPlace() {
       const f = esFits();
