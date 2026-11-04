@@ -32860,7 +32860,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 192;
+    window.NB_BUILD = 193;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -34469,7 +34469,10 @@ registerProcessor("nb-rec", NBRec);`;
       // Bloom's own sounds come out ~baseLatency + outputLatency after their time: a note goes out that much LATE, so
       // the two meet in the headphones. Otherwise it goes out early by the input's delay, so its sound comes back in on time.
       const outLatMs = () => ctx ? ((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000 : 0;
-      const hwAt = when => { if (!ctx) return 0; if (H.direct) { const ms = ((when == null ? ctx.currentTime : when) - ctx.currentTime) * 1000 + outLatMs(); return ms > 1 ? performance.now() + ms : 0; }
+      // (193) a note played live (from the KeyLab, say) goes out the moment it's played, never held back: held back by the
+      // output latency (~60 ms) it lost its hit, the way a key that answers late feels soft. Only notes scheduled ahead
+      // (sequencer, arp, Rhythm Creator) are lined up with Nate Bloom's own sounds.
+      const hwAt = when => { if (!ctx) return 0; if (H.direct) { if (when == null || when - ctx.currentTime < 0.03) return 0; const ms = (when - ctx.currentTime) * 1000 + outLatMs(); return ms > 1 ? performance.now() + ms : 0; }
         if (when == null) return 0; const ms = (when - ctx.currentTime) * 1000 - inLatMs(); return ms > 1 ? performance.now() + ms : 0; };
       // ---- a voice: a note on now (or when it's due), a note off when it stops ----
       H.voice = function (m, when) {
@@ -34681,7 +34684,7 @@ registerProcessor("nb-rec", NBRec);`;
           else its.forEach(it => { const k = C.keyOf(it), L = C.get(k), on = L.includes(me.key); const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = (on ? "✓ " : "") + it.name; b.setAttribute("aria-pressed", String(on));
             b.addEventListener("click", () => { const L2 = C.get(k).filter(x => x !== me.key); if (!on) L2.push(me.key); C.set(k, L2); hwSheetPaint(); }); box.appendChild(b); }); }
         $h("hwDirect").setAttribute("aria-pressed", String(!!H.direct));
-        $h("hwDirectInfo").textContent = H.direct ? "On: Nate Bloom doesn't play it back to you (the interface already does, so it isn't doubled). It records it raw, at full level and lined up the way you hear it: recordings match your headphones. The notes go out about " + Math.round(outLatMs()) + " ms later, so it meets Nate Bloom's own sounds in your ears." : "Off: Nate Bloom plays it back through its mix. Switch the interface's own direct monitoring off, or you hear it twice: the raw copy, then Nate Bloom's about 50 ms later, which thins out the low end. On the Volt 2 that's its Direct Monitoring button, unlit. (Or turn the Volt's button on, orange or blue, and this switch on: one copy, the interface's.)";
+        $h("hwDirectInfo").textContent = H.direct ? "On: Nate Bloom doesn't play it back to you (the interface already does, so it isn't doubled). It records it raw, at full level and lined up the way you hear it: recordings match your headphones. Notes you play go out the moment you play them; the sequencer's go out about " + Math.round(outLatMs()) + " ms later, so they meet Nate Bloom's own sounds in your ears." : "Off: Nate Bloom plays it back through its mix. Switch the interface's own direct monitoring off, or you hear it twice: the raw copy, then Nate Bloom's about 50 ms later, which thins out the low end. On the Volt 2 that's its Direct Monitoring button, unlit. (Or turn the Volt's button on, orange or blue, and this switch on: one copy, the interface's.)";
         $h("hwThru").setAttribute("aria-pressed", String(!!H.thru)); $h("hwFxOn").setAttribute("aria-pressed", String(hwFxIs()));
         $h("hwState").textContent = !md.access ? "MIDI isn't connected" : !H.present() ? "not plugged in" : on ? (H.ready() ? "playing with the rest" : H.why()) : H.thru ? (H.ready() ? "pass-through: you hear it" : H.why()) : "plugged in · not playing";
         const m = $h("hwMsg");
