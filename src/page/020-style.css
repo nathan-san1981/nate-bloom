@@ -3557,3 +3557,18 @@ body.es-on #epStrip { display: none; }
 .nbk-xb h5 { margin: 0 0 4px; font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
 .nbk-xr { display: flex; justify-content: space-between; gap: 8px; font: 0.74rem var(--font-body); padding: 1px 0; }
 .nbk-xr b { font-weight: 600; text-align: right; }
+/* (217) the hardware panel, left of the page */
+.hws .hw-card { border: 1px solid var(--line); border-radius: 11px; padding: 8px 10px 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; }
+.hw-h { display: flex; align-items: center; gap: 7px; }
+.hw-h b { font: 600 0.9rem var(--font-body); }
+.hw-h small { font: 0.62rem var(--font-mono); color: var(--dim); }
+.hw-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); flex: none; }
+.hw-dot.on { background: #6fd18b; box-shadow: 0 0 6px #6fd18b88; }
+.hw-prog { display: flex; flex-direction: column; }
+.hw-prog b { font: 600 1.05rem var(--font-body); color: var(--lilac); }
+.hw-prog small { font: 0.62rem var(--font-mono); color: var(--dim); }
+.hw-g { display: flex; flex-direction: column; }
+.hw-acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.hw-nm { font-size: 0.8rem; padding: 5px 8px; }
+.hw-xg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.hw-xg .nbk-xr { font-size: 0.7rem; }
