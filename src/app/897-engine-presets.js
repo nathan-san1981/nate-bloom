@@ -117,9 +117,10 @@
       b.addEventListener("click", onClick); return b;
     }
     // (212) a preset row: tap the name to play it alone, + to play it together with what's playing
-    function esPRow(name, sub, on, onPick, onAdd) {
+    function esPRow(name, sub, on, onPick, onAdd, tags) {
       const r = document.createElement("div"); r.className = "es-pr";
       const b = esRow("es-p", name, sub, on, onPick); r.appendChild(b);
+      if (ESF.tags) { const tg = tags || esTagsFor(name, sub); if (tg.length) { const t = document.createElement("span"); t.className = "es-tags"; t.textContent = tg.join(" · "); b.querySelector(".es-t").appendChild(t); } }
       if (onAdd) {
         const a = document.createElement("button"); a.className = "es-add"; a.textContent = "+";
         a.title = "Play " + name + " together with what's playing"; a.setAttribute("aria-label", a.title);
@@ -356,8 +357,23 @@
       sel.value = esMode;
       sel.addEventListener("change", () => { esMode = sel.value; try { localStorage.setItem(ES_MODE_KEY, esMode); } catch (e) {} es.scrollTop = 0; esPaint(true, true); });
       head.appendChild(sel);
+      const fb = document.createElement("button"); fb.className = "es-fb" + (ESF.on ? " on" : ""); fb.textContent = "Find"; fb.title = "Find a sound by its name or what it is (dark, 80s, bass, FM…)"; fb.setAttribute("aria-pressed", String(ESF.on));
+      fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
+      head.appendChild(fb);
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
+      if (ESF.on && esMode !== "fx") {
+        const row = document.createElement("div"); row.className = "es-find";
+        const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
+        const tg = document.createElement("button"); tg.className = "es-tg" + (ESF.tags ? " on" : ""); tg.textContent = "Attributes"; tg.title = "Show each sound's attributes (what Find matches on)"; tg.setAttribute("aria-pressed", String(ESF.tags));
+        tg.addEventListener("click", () => { ESF.tags = !ESF.tags; try { localStorage.setItem("nightbloom-es-tags", ESF.tags ? "1" : ""); } catch (e) {} esPaint(true, true); });
+        row.append(q, tg); es.appendChild(row);
+        const res = document.createElement("div"); res.className = "es-res"; es.appendChild(res);
+        q.addEventListener("input", () => { ESF.q = q.value; esFindPaint(res); });
+        q.addEventListener("keydown", e => { if (e.key === "Escape") { ESF.on = false; ESF.q = ""; esPaint(true, true); } e.stopPropagation(); });
+        q.addEventListener("keyup", e => e.stopPropagation());
+        if (ESF.q.trim()) { esFindPaint(res); if (ESF.focus) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } es.scrollTop = st; return; }
+      }
       if (esMode === "fx" && ES_LINUX) { hs.textContent = "tap an effect · pick the sounds it goes on"; esFxView(); es.scrollTop = st; return; }
       if (esMode === "type") {
         esTypeView(cur);
@@ -377,6 +393,68 @@
       es.scrollTop = st;
       if (force && curEng && !noScroll) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
     }
+    // ---------- (220) Find: every sound by its exact name or its attributes. Each sound gets attributes from what it
+    // is (its kind, the engine or plugin, the library's category) and from its name and description (dark, bright, warm,
+    // 80s, analog, FM…); they stay hidden unless Attributes is on. "Quotes" find an exact name. ----------
+    const ESF = { on: false, q: "", tags: (() => { try { return !!localStorage.getItem("nightbloom-es-tags"); } catch (e) { return false; } })(), focus: false };
+    const ES_ATTR = [
+      ["dark", /dark|deep|night|shadow|ghost|spooky|black|cave|moody|haunt|horror|abyss|low/i], ["bright", /bright|glass|crystal|shimmer|sparkl|shine|sun|clear|air/i],
+      ["warm", /warm|soft|mellow|velvet|silk|smooth|round|lush|tape/i], ["aggressive", /growl|scream|distort|fuzz|hard|acid|reese|dirty|grit|rave|hoover|nasty|rage/i],
+      ["ambient", /pad|drone|cloud|space|wash|dream|fog|haze|ether|atmos|evolv|swell|cosmic|star/i], ["80s", /juno|dx-?7|cs-?80|jupiter|prophet|oberheim|ob-?x|\b80s?\b|8\d\b|retro|synthwave|vangelis|stab/i],
+      ["analog", /analog|moog|juno|sh-?101|minimoog|ladder|mono|poly ?d|polysynth|virtual analog|303/i], ["FM", /\bfm\b|dx-?7|operator|6-op|bell|e\.? ?piano|tine/i],
+      ["vintage", /vintage|old|classic|lo-?fi|tape|vinyl|worn|retro|mellotron|organ/i], ["percussive", /pluck|stab|hit|perc|mallet|marimba|kalimba|staccato|pizz|drum/i],
+      ["sustained", /pad|string|choir|drone|organ|sustain|swell|bow/i], ["lead", /lead|solo|sync|saw|square|whistle/i], ["bass", /bass(?!oon| clarinet)|sub\b|808|303|low end/i],
+      ["acoustic", /piano|guitar|violin|cello|flute|clarinet|sax|trumpet|horn|harp|acoustic|nylon|upright|grand|marimba/i], ["vocal", /choir|voice|vox|vowel|aah|ooh|speech|sing|formant/i],
+      ["electric", /electric|rhodes|wurli|e\.? ?piano|clav|organ|guitar/i], ["cinematic", /cinematic|epic|orchestra|film|hall|timpani|brass|ensemble/i], ["sample-based", /generaluser|studio|salamander|sampled|soundfont|sf2/i],
+    ];
+    const esTagMemo = new Map();
+    function esTagsFor(name, sub, extra) {
+      const k = name + "|" + (sub || "") + "|" + (extra || ""); let t = esTagMemo.get(k); if (t) return t;
+      const txt = name + " " + (sub || "") + " " + (extra || ""), out = [];
+      const ty = esTypeOf(name, sub); if (ty !== "Other") out.push(ty.toLowerCase());
+      for (const [a, re] of ES_ATTR) if (re.test(txt) && !out.includes(a)) out.push(a);
+      if (sub && sub.length <= 28) out.push(sub.replace(/^Stack · /, "").toLowerCase());
+      if (!out.length) out.push("synth");
+      esTagMemo.set(k, out); return out;
+    }
+    function esFindItems() {
+      const L = [], seen = new Set(), cur = state.cur && state.cur.id || "";
+      const add = (id, name, sub, extra, pick, addf, kind) => { if (seen.has(id)) return; seen.add(id); L.push({ id, name, sub, tags: esTagsFor(name, sub, extra), pick, addf, on: cur === id, kind }); };
+      const CATN = { nb: "Nate Bloom preset", engines: "engine", kits: "drum kit", mine: "your instrument", keys: "keys", strings: "strings", winds: "winds & brass", bells: "bells & mallets", gtrbass: "guitar & bass", leads: "synth lead", pads: "pad", world: "world", perc: "percussion", drums: "drums", classic: "classic synth" };
+      for (const e of allEntries()) {
+        const sub = e.cat === "nb" ? e.sub : e.id.startsWith("w:nb-") ? "Studio" : e.sub;
+        add(e.id, e.name, sub, (CATN[e.cat] || e.cat || "") + (e.id.startsWith("e:") && ENGINES[e.id.slice(2)] ? " " + (ENGINES[e.id.slice(2)].after || "") : ""), () => chooseEntry(e, !e.id.startsWith("w:wam:")), togE(e), CATN[e.cat] || "sound");
+      }
+      for (const c of catL().filter(c => c.kind === "instrument")) {
+        const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+        add(plainE.id, c.name, c.vendor === "Nathan" ? "your plugin" : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
+        const m = esPlugCache(c.key);
+        if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name, c.type || "", () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
+      }
+      return L;
+    }
+    function esFindPaint(res) {
+      res.innerHTML = ""; const raw = ESF.q.trim(); if (!raw) return;
+      const exact = /^".*"$/.test(raw), q = raw.replace(/^"|"$/g, "").toLowerCase(), words = q.split(/\s+/).filter(Boolean);
+      const scored = [];
+      for (const it of esFindItems()) {
+        const n = it.name.toLowerCase(), hay = n + " " + (it.sub || "").toLowerCase() + " " + it.tags.join(" ");
+        let sc = 0;
+        if (exact) { if (n === q) sc = 100; else continue; }
+        else if (n === q) sc = 100; else if (n.startsWith(q)) sc = 80; else if (n.includes(q)) sc = 60;
+        else if (words.every(w => hay.includes(w))) sc = 30 + words.filter(w => n.includes(w)).length * 5 + words.filter(w => it.tags.includes(w)).length * 3;
+        else continue;
+        scored.push([sc, it]);
+      }
+      scored.sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name));
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = scored.length ? scored.length + (scored.length === 1 ? " sound" : " sounds") + (scored.length > 150 ? " · the first 150" : "") : "Nothing matches “" + raw + "”"; res.appendChild(h);
+      scored.slice(0, 150).forEach(([, it]) => { const r = esPRow(it.name, (it.sub || "") + (it.kind && it.sub !== it.kind ? " · " + it.kind : ""), it.on, esPick(async () => { ESF.focus = false; await it.pick(); }), it.addf, it.tags); res.appendChild(r); });
+      if (!scored.length) { const p = document.createElement("p"); p.className = "es-none"; p.textContent = "Try part of a name, or what it is: bass, pad, bright, dark, 80s, FM, choir, plugin…"; res.appendChild(p); }
+    }
+    es.addEventListener("focusin", e => { if (e.target.classList && e.target.classList.contains("es-q")) ESF.focus = true; });
+    es.addEventListener("focusout", e => { if (e.target.classList && e.target.classList.contains("es-q")) setTimeout(() => { if (!es.contains(document.activeElement) || !document.activeElement.classList.contains("es-q")) ESF.focus = false; }, 0); });
+    // the plugins' presets are searched too: fetched once Find opens
+    setInterval(() => { if (ESF.on && esShown) esLoadPlugs(); }, 2000);
     function esPlace() {
       const f = esFits();
       if (!f) { if (esShown) { es.hidden = true; document.body.classList.remove("es-on"); esShown = false; } return; }

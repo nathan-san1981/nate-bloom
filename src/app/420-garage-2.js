@@ -679,7 +679,7 @@
     function songsSheet() {
       openSheet("My Songs", "kept on this device, and in your projects", box => {
         const top = gbEl("div", "gb-chips");
-        top.append(btnE("+ New song", () => { switchSong(newSong()); closeSheet(); setView("browse"); }, "primary"), btnE("Export " + S.name, exportSheet));
+        top.append(btnE("+ New song", () => { switchSong(newSong()); closeSheet(); setView("browse"); }, "primary"), btnE("Import a MIDI song…", () => window.__gbMidi.pick()), btnE("Export " + S.name, exportSheet));
         box.append(top);
         IDX.songs.forEach(e => {
           const cur = e.id === S.id, n = cur ? S.tracks.length : e.n;
@@ -1234,6 +1234,165 @@
       return song.id;
     }
     { const mid = migrateTracks(); if (mid) setTimeout(() => gbSay("What was in Tracks is now a song in the Garage, called Tracks"), 2500); }
+    // ======================================================================
+    // 220: MIDI songs in. A .mid (or .midi, .kar, .rmi) becomes a new song: each part on its own track (a type-0 file's
+    // channels split apart), the drums (channel 10) on a kit, every other part on the library sound its General MIDI
+    // program names, or on the Minilogue XD or the MicroFreak. The file's own timing and velocities are kept (tempo
+    // changes included: notes land when the file says, at its first tempo); Swing and Humanize loosen a file that was
+    // typed in on a grid.
+    // ======================================================================
+    function parseMidi(buf) {
+      let d = new Uint8Array(buf), p = 0;
+      const str = (a, n) => String.fromCharCode(...d.subarray(a, a + n));
+      if (str(0, 4) === "RIFF" && str(8, 4) === "RMID") {   // (.rmi: a MIDI file in a RIFF wrapper)
+        for (let q = 12; q + 8 <= d.length;) { const id = str(q, 4), n = d[q + 4] | (d[q + 5] << 8) | (d[q + 6] << 16) | (d[q + 7] << 24); if (id === "data") { d = d.subarray(q + 8, q + 8 + n); break; } q += 8 + n + (n & 1); }
+      }
+      const u32 = a => ((d[a] << 24) | (d[a + 1] << 16) | (d[a + 2] << 8) | d[a + 3]) >>> 0, u16 = a => (d[a] << 8) | d[a + 1];
+      const h = str(0, 4) === "MThd" ? 0 : (() => { for (let i = 0; i < Math.min(d.length - 4, 4096); i++) if (str(i, 4) === "MThd") return i; return -1; })();
+      if (h < 0) throw new Error("not a MIDI file");
+      const fmt = u16(h + 8), ntr = u16(h + 10), div = u16(h + 12);
+      if (div & 0x8000) throw new Error("SMPTE-timed MIDI files aren't supported");
+      p = h + 8 + u32(h + 4);
+      const tracks = [], tempos = [], meta = { sig: null, key: null, title: "" };
+      for (let t = 0; t < ntr && p + 8 <= d.length; t++) {
+        if (str(p, 4) !== "MTrk") { p += 8 + u32(p + 4); t--; if (p >= d.length) break; continue; }
+        const end = Math.min(d.length, p + 8 + u32(p + 4)); let q = p + 8, tick = 0, run = 0;
+        const T = { name: "", ev: [] };
+        const vlq = () => { let v = 0, b; do { b = d[q++]; v = (v << 7) | (b & 0x7f); } while (b & 0x80 && q < end); return v; };
+        while (q < end) {
+          tick += vlq(); let st = d[q];
+          if (st & 0x80) { q++; if (st < 0xf0) run = st; } else st = run;
+          if (st === 0xff) { const ty = d[q++], n = vlq(), a = q; q += n;
+            if (ty === 0x51 && n === 3) tempos.push([tick, (d[a] << 16) | (d[a + 1] << 8) | d[a + 2]]);
+            else if (ty === 0x58 && !meta.sig) meta.sig = [d[a], 1 << d[a + 1]];
+            else if (ty === 0x59 && !meta.key) meta.key = [(d[a] << 24) >> 24, d[a + 1]];
+            else if ((ty === 0x03 || ty === 0x01) && !T.name && n) { try { T.name = new TextDecoder().decode(d.subarray(a, a + n)).replace(/[\x00-\x1f]/g, "").trim().slice(0, 40); } catch (e) {} }
+            continue; }
+          if (st === 0xf0 || st === 0xf7) { q += vlq(); continue; }
+          const ty = st & 0xf0, ch = st & 15, a = d[q++], b = (ty === 0xc0 || ty === 0xd0) ? 0 : d[q++];
+          T.ev.push([tick, ty, ch, a, b]);
+        }
+        tracks.push(T); p = end;
+      }
+      if (t0Name(tracks)) meta.title = t0Name(tracks);
+      return { fmt, div, tracks, tempos: tempos.sort((a, b) => a[0] - b[0]), meta };
+    }
+    const t0Name = trs => trs.length && trs[0].name && !trs[0].ev.some(e => e[1] === 0x90) ? trs[0].name : "";
+    // ticks → seconds through the tempo map, then seconds → beats at the song's (first) tempo
+    function midiParts(M) {
+      const tm = M.tempos.length ? M.tempos : [[0, 500000]], bpm0 = 60000000 / (M.tempos.length && M.tempos[0][0] === 0 ? M.tempos[0][1] : 500000);
+      const segs = []; let sec = 0, last = 0, us = 500000;
+      for (const [tk, u] of tm) { sec += (tk - last) / M.div * us / 1e6; segs.push([tk, sec, u]); last = tk; us = u; }
+      if (!segs.length || segs[0][0] > 0) segs.unshift([0, 0, 500000]);
+      const secAt = tk => { let s = segs[0]; for (const x of segs) { if (x[0] <= tk) s = x; else break; } return s[1] + (tk - s[0]) / M.div * s[2] / 1e6; };
+      const beatAt = tk => secAt(tk) * bpm0 / 60;
+      const parts = new Map();   // "track:channel" → { name, ch, prog, notes }
+      M.tracks.forEach((T, ti) => {
+        const prog = new Array(16).fill(0), on = new Map(), sus = new Array(16).fill(false), held = new Map();
+        const part = ch => { const k = ti + ":" + ch; let P = parts.get(k); if (!P) parts.set(k, P = { name: T.name, ch, prog: prog[ch], notes: [], ti }); return P; };
+        const close = (ch, m, tk) => { const k = ch * 128 + m, o = on.get(k); if (!o) return; on.delete(k); const b0 = beatAt(o[0]), b1 = beatAt(tk); part(ch).notes.push([b0, m, Math.max(0.03, b1 - b0), o[1] / 127]); };
+        for (const [tk, ty, ch, a, b] of T.ev) {
+          if (ty === 0xc0) { prog[ch] = a; const P = parts.get(ti + ":" + ch); if (P && !P.notes.length) P.prog = a; }
+          else if (ty === 0x90 && b > 0) { if (on.has(ch * 128 + a)) close(ch, a, tk); on.set(ch * 128 + a, [tk, b]); part(ch); }
+          else if (ty === 0x80 || ty === 0x90) { if (sus[ch]) { held.set(ch * 128 + a, 1); continue; } close(ch, a, tk); }
+          else if (ty === 0xb0 && a === 64) { sus[ch] = b >= 64; if (!sus[ch]) { for (const k of [...held.keys()]) if ((k >> 7) === ch) { held.delete(k); close(ch, k & 127, tk); } } }
+        }
+        const lastTk = T.ev.length ? T.ev[T.ev.length - 1][0] : 0; for (const k of [...on.keys()]) close(k >> 7, k & 127, lastTk + M.div);
+      });
+      return { bpm: bpm0, parts: [...parts.values()].filter(P => P.notes.length).map(P => (P.notes.sort((a, b) => a[0] - b[0]), P)) };
+    }
+    // a part's track: the kind from its General MIDI program family, the library sound with that program number
+    const GM_FAM = ["Piano", "Chromatic percussion", "Organ", "Guitar", "Bass", "Strings", "Ensemble", "Brass", "Reed", "Pipe", "Synth lead", "Synth pad", "Synth effects", "Ethnic", "Percussive", "Sound effects"];
+    function gmKind(P) { if (P.ch === 9) return "drums"; const f = P.prog >> 3; return f === 3 ? "guitar" : f === 4 ? "bass" : (f === 5 || f === 6) && P.prog < 52 ? "strings" : f >= 10 && f <= 12 ? "synth" : "keys"; }
+    function gmSound(P) {
+      if (P.ch === 9) return "kit:studio";
+      const E = entries().filter(e => e.id.startsWith("w:") && !e.id.startsWith("w:nb-") && !e.id.startsWith("w:wam:") && (e.prog | 0) === P.prog && e.cat !== "drums");
+      const e = E.find(x => /GeneralUser/i.test(x.sub || "")) || E[0];
+      return e ? "lib:" + e.id.slice(2) : defaultSound(gmKind(P));
+    }
+    const gmName = P => P.ch === 9 ? "Drums" : (() => { const e = entryById("w:" + gmSound(P).slice(4)); return e ? e.name : GM_FAM[P.prog >> 3]; })();
+    function feel(notes, swing, human, bpm) {
+      const sb = 60 / bpm; let seed = 7;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1; };
+      return notes.map(n => {
+        let [b, m, du, v] = n;
+        if (swing > 0.5) { const s = b * 4, k = Math.round(s); if (Math.abs(s - k) < 0.08 && k % 2) { const sh = (swing - 0.5) * 0.5; b += sh; du = Math.max(0.03, du - sh * 0.5); } }
+        if (human > 0) { b = Math.max(0, b + rnd() * human * 0.012 / sb); v = clamp(v * (1 + rnd() * 0.15 * human), 0.05, 1); }
+        return [+b.toFixed(4), m, +du.toFixed(4), +v.toFixed(3)];
+      });
+    }
+    function midiSheet(file, M, R) {
+      const parts = R.parts.slice(0, 32), keySig = M.meta.key, sig = M.meta.sig && M.meta.sig[1] === 4 && M.meta.sig[0] >= 2 && M.meta.sig[0] <= 7 ? M.meta.sig[0] : 4;
+      const hwOpts = () => { const o = []; const H = window.__hw; if (H && H.shown && H.shown()) o.push(["hw", H.name]); if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => o.push(["hwx:" + X.id, X.name])); return o; };
+      const pick = parts.map(P => gmSound(P));
+      let bpm = clamp(Math.round(R.bpm * 10) / 10, 40, 240), swing = 0.5, human = 0;
+      const total = Math.max(...parts.map(P => { const n = P.notes[P.notes.length - 1]; return n[0] + n[2]; }));
+      const name = (M.meta.title || (file.name || "MIDI song").replace(/\.[^.]+$/, "")).slice(0, 40);
+      openSheet("Import " + name, parts.length + (parts.length === 1 ? " part · " : " parts · ") + Math.round(total * 60 / R.bpm) + " s · " + Math.round(R.bpm) + " BPM in the file", box => {
+        groupH(box, "Each part becomes a track");
+        parts.forEach((P, i) => {
+          const r = row2(box, P.name || (P.ch === 9 ? "Drums" : GM_FAM[P.prog >> 3]), "channel " + (P.ch + 1) + " · " + P.notes.length + " notes" + (P.ch === 9 ? " · General MIDI drums" : ""));
+          const sel = document.createElement("select"); sel.className = "gb-in"; sel.setAttribute("aria-label", "Sound for " + (P.name || "part " + (i + 1)));
+          const opt = (v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o); };
+          opt(gmSound(P), P.ch === 9 ? "Studio drum kit" : gmName(P));
+          if (P.ch !== 9) hwOpts().forEach(([v, t]) => opt(v, t));
+          opt("", "Leave this part out");
+          sel.value = pick[i]; sel.addEventListener("change", () => { pick[i] = sel.value; });
+          r.append(sel);
+        });
+        groupH(box, "Feel");
+        let row = row2(box, "", ""); row.firstChild.remove();
+        const sl = (lab, min, max, step, val, txt, set) => { row.append(gbEl("span", "gb-lab", lab)); const inp = document.createElement("input"); inp.type = "range"; inp.min = min; inp.max = max; inp.step = step; inp.value = val; inp.setAttribute("aria-label", lab); const v = gbEl("span", "gb-v", txt(val)); inp.addEventListener("input", () => { set(+inp.value); v.textContent = txt(+inp.value); }); row.append(inp, v); };
+        sl("Tempo", 40, 240, 1, bpm, v => v + " BPM", v => { bpm = v; });
+        row = row2(box, "", ""); row.firstChild.remove();
+        sl("Swing", 50, 75, 1, 50, v => v === 50 ? "straight" : v + "%", v => { swing = v / 100; });
+        row = row2(box, "", ""); row.firstChild.remove();
+        sl("Humanize", 0, 100, 5, 0, v => v ? v + "%" : "off", v => { human = v / 100; });
+        box.append(gbEl("p", "gb-p", "The file's own timing and velocities are kept. Swing pushes the off-beat 16ths late (MPC-style: 50% is straight, 66% a triplet shuffle); Humanize moves notes a few milliseconds and varies how hard they're hit. Hardware synths play over MIDI on the channel set in their sheet."));
+        const go = gbEl("div", "gb-midi-go");
+        go.append(btnE("Make the song", () => {
+          const song = newSong(name); song.bpm = Math.round(bpm); song.sig = sig;
+          if (keySig) { const sf = keySig[0], minor = keySig[1] === 1; song.minor = minor; song.key = (((sf * 7) % 12) + 12 + (minor ? 9 : 0)) % 12; }
+          switchSong(song);
+          let n = 0;
+          parts.forEach((P, i) => {
+            if (!pick[i]) return;
+            const kind = gmKind(P), tr = addTrack(kind, { stay: true }); if (!tr) return;
+            tr.name = (P.name || (P.ch === 9 ? "Drums" : gmName(P))).slice(0, 40); tr.snd = pick[i]; tr.mode = "notes"; prep(tr);
+            const notes = feel(P.notes, swing, human, bpm).map(x => [x[0], x[1], x[2], x[3]]);
+            const endB = notes.reduce((a, x) => Math.max(a, x[0] + x[2]), 0), len = Math.max(sig, Math.ceil(endB / sig - 1e-6) * sig);
+            placeRegion(tr, { id: uid(), start: 0, len, rep: 1, notes }, false); n++;
+          });
+          S.view = "tracks"; fitLen(); dirty(); saveNow(); closeSheet();
+          if (!V.open) gbOpen(); setView("tracks"); paintBar();
+          gbSay(n + (n === 1 ? " track" : " tracks") + " from " + name + " · press ▶");
+        }, "primary big"));
+        box.append(go);
+      });
+    }
+    let midIn = null;
+    async function midiFiles(files) {
+      for (const f of files) {
+        let M, R; try { M = parseMidi(await f.arrayBuffer()); R = midiParts(M); } catch (e) { gbSay("Couldn't read " + f.name + ": " + (e && e.message || "not a MIDI file")); continue; }
+        if (!R.parts.length) { gbSay(f.name + " has no notes"); continue; }
+        start(); ensureSong(); if (!V.open) gbOpen();
+        midiSheet(f, M, R); return true;
+      }
+      return false;
+    }
+    window.__gbMidi = {
+      pick() {
+        start();
+        if (!midIn) { midIn = document.createElement("input"); midIn.type = "file"; midIn.accept = ".mid,.midi,.kar,.rmi,audio/midi,audio/x-midi"; midIn.hidden = true; document.body.append(midIn);
+          midIn.addEventListener("change", () => { const fs = [...midIn.files]; midIn.value = ""; if (fs.length) midiFiles(fs); }); }
+        midIn.click();
+      },
+      files: midiFiles, parse: parseMidi, parts: midiParts,
+    };
+    // a .mid dropped anywhere opens it here
+    const isMid = f => /\.(midi?|kar|rmi)$/i.test(f.name || "") || /midi/i.test(f.type || "");
+    addEventListener("dragover", e => { const it = e.dataTransfer && [...(e.dataTransfer.items || [])]; if (it && it.some(x => x.kind === "file" && /midi/i.test(x.type || ""))) e.preventDefault(); });
+    addEventListener("drop", e => { const fs = e.dataTransfer && [...(e.dataTransfer.files || [])].filter(isMid); if (!fs || !fs.length) return; e.preventDefault(); e.stopPropagation(); midiFiles(fs); }, true);
     window.__gbAudio = gbAudioIn; window.__gbSay = gbSay;
     // Capture (Live, 136): what was just played, as a new track in the current song
     function gbCapture(o) {

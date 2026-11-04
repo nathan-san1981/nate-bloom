@@ -126,6 +126,11 @@
         cat("leads").forEach(e => lib(e, "Synth leads")); cat("pads").forEach(e => lib(e, "Pads & atmos"));
       }
       if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? "yours" : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? "Your plugins" : "Nate Bloom's plugins"));
+      // (220) the hardware synths plugged in (the Minilogue XD, the MicroFreak): any melodic track can play one over MIDI
+      if (!["drums", "audio", "sampler"].includes(kind)) {
+        const H = window.__hw; if (H && H.shown && H.shown()) add("hw", H.name, H.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths");
+        if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => add("hwx:" + X.id, X.name, X.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths"));
+      }
       if (kind === "drums") Object.keys(RC_KITS).filter(k => k !== "analog").forEach(k => add("kit:" + k, RC_KITS[k][0], "drum kit", "Kits"));
       if (kind === "sampler") for (let i = 0; i < NSLOTS; i++) add("smp:" + i, "S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"), sampBuf[i] ? "sampler slot" : "load or record a sample", "Sampler slots");
       return out;
@@ -156,6 +161,8 @@
       if (ref.startsWith("smp:")) { const i = +ref.slice(4); return "Sampler S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"); }
       if (ref === "sf2") return curInst ? curInst.name : "My instrument";
       if (ref === "audio") return "Audio";
+      if (ref === "hw") return (window.__hw && window.__hw.name) || "Hardware synth";
+      if (ref.startsWith("hwx:")) { const X = window.__hwx && window.__hwx.get(ref.slice(4)); return X ? X.name : "Hardware synth"; }
       return "Sound";
     }
 
@@ -264,6 +271,11 @@
       }
       if (r === "sf2") return curInst ? routeTo(tr, () => makeInstVoice(m, t, sc)) : null;
       if (r.startsWith("smp:")) return routeTo(tr, () => makeSampleVoice(m, +r.slice(4), t, sc));
+      if (r === "hw" || r.startsWith("hwx:")) {   // (220) a hardware synth: the note goes out over MIDI at its time, with its velocity
+        const X = r === "hw" ? window.__hw : window.__hwx && window.__hwx.get(r.slice(4)); if (!X || tr.mute || (soloOn() && !tr.solo)) return null;
+        const k7 = NB_VEL7; NB_VEL7 = clamp(Math.round(clamp(vel, 0, 1) * 127), 1, 127);
+        try { return X.voice(clamp(Math.round(m), 0, 127), t); } finally { NB_VEL7 = k7; }
+      }
       if (r.startsWith("wam:")) {
         const P = AU.plug.get(tr.id); if (!P || !P.node) { plugFor(tr); return null; }
         const note = clamp(Math.round(m), 0, 127), v7 = clamp(Math.round(sc * 118), 1, 127);
@@ -693,6 +705,9 @@
       { const ib = gbEl("button", "gb-card gb-import"); ib.style.setProperty("--cg", "linear-gradient(150deg, #2e5d6b, #10232a)"); ib.dataset.kind = "import";
         ib.innerHTML = '<span class="gi">' + ICON.audio + "</span>"; ib.append(gbEl("b", "", "Import audio"), gbEl("small", "", "WAV, MP3, M4A, AIFF or FLAC files onto new audio tracks, at the playhead"));
         ib.addEventListener("click", () => importPick(null)); box.append(ib); }
+      { const mb = gbEl("button", "gb-card gb-import"); mb.style.setProperty("--cg", "linear-gradient(150deg, #5a3d7a, #1d1230)"); mb.dataset.kind = "midi";
+        mb.innerHTML = '<span class="gi">' + ICON.keys + "</span>"; mb.append(gbEl("b", "", "Import a MIDI song"), gbEl("small", "", "A .mid file becomes a song: each part on its own track, with a matching sound or your hardware synths"));
+        mb.addEventListener("click", () => { try { window.__gbMidi.pick(); } catch (e) {} }); box.append(mb); }
     }
     function addTrack(kind, opt) {
       if (S.tracks.length >= 32) { gbSay("A song holds 32 tracks"); return null; }

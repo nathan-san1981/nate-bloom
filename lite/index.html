@@ -3596,6 +3596,16 @@ body.es-on #epStrip { display: none; }
 .hw-nm { font-size: 0.8rem; padding: 5px 8px; }
 .hw-xg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .hw-xg .nbk-xr { font-size: 0.7rem; }
+
+/* (220) the right-hand panel's Find and attributes */
+.es-fb{flex:0 0 auto;height:30px;padding:0 12px;border-radius:9px;border:1px solid var(--line,#3a3350);background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.es-fb.on{background:var(--lilac,#c9a6ff);color:#1a1424;border-color:transparent}
+.es-find{display:flex;gap:6px;margin:0 0 8px}
+.es-q{flex:1;min-width:0;height:34px;border-radius:9px;border:1px solid var(--line,#3a3350);background:#0f0d16;color:inherit;padding:0 10px;font:inherit;font-size:14px}
+.es-tg{flex:0 0 auto;height:34px;padding:0 10px;border-radius:9px;border:1px solid var(--line,#3a3350);background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer}
+.es-tg.on{border-color:var(--lilac,#c9a6ff);color:var(--lilac,#c9a6ff)}
+.es-tags{display:block;font-size:11px;opacity:.6;margin-top:2px;white-space:normal}
+.gb-midi-go{display:flex;margin:10px 0 4px}.gb-midi-go .btn{flex:1;height:48px;font-size:16px}
 </style>
 </head>
 <body class="lite">
@@ -25457,6 +25467,11 @@ registerProcessor("nb-wave", NBWave);
         cat("leads").forEach(e => lib(e, "Synth leads")); cat("pads").forEach(e => lib(e, "Pads & atmos"));
       }
       if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? "yours" : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? "Your plugins" : "Nate Bloom's plugins"));
+      // (220) the hardware synths plugged in (the Minilogue XD, the MicroFreak): any melodic track can play one over MIDI
+      if (!["drums", "audio", "sampler"].includes(kind)) {
+        const H = window.__hw; if (H && H.shown && H.shown()) add("hw", H.name, H.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths");
+        if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => add("hwx:" + X.id, X.name, X.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths"));
+      }
       if (kind === "drums") Object.keys(RC_KITS).filter(k => k !== "analog").forEach(k => add("kit:" + k, RC_KITS[k][0], "drum kit", "Kits"));
       if (kind === "sampler") for (let i = 0; i < NSLOTS; i++) add("smp:" + i, "S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"), sampBuf[i] ? "sampler slot" : "load or record a sample", "Sampler slots");
       return out;
@@ -25487,6 +25502,8 @@ registerProcessor("nb-wave", NBWave);
       if (ref.startsWith("smp:")) { const i = +ref.slice(4); return "Sampler S" + (i + 1) + (sampBuf[i] ? " · " + baseName(state.samp.slots[i].name || "sample") : " (empty)"); }
       if (ref === "sf2") return curInst ? curInst.name : "My instrument";
       if (ref === "audio") return "Audio";
+      if (ref === "hw") return (window.__hw && window.__hw.name) || "Hardware synth";
+      if (ref.startsWith("hwx:")) { const X = window.__hwx && window.__hwx.get(ref.slice(4)); return X ? X.name : "Hardware synth"; }
       return "Sound";
     }
 
@@ -25595,6 +25612,11 @@ registerProcessor("nb-wave", NBWave);
       }
       if (r === "sf2") return curInst ? routeTo(tr, () => makeInstVoice(m, t, sc)) : null;
       if (r.startsWith("smp:")) return routeTo(tr, () => makeSampleVoice(m, +r.slice(4), t, sc));
+      if (r === "hw" || r.startsWith("hwx:")) {   // (220) a hardware synth: the note goes out over MIDI at its time, with its velocity
+        const X = r === "hw" ? window.__hw : window.__hwx && window.__hwx.get(r.slice(4)); if (!X || tr.mute || (soloOn() && !tr.solo)) return null;
+        const k7 = NB_VEL7; NB_VEL7 = clamp(Math.round(clamp(vel, 0, 1) * 127), 1, 127);
+        try { return X.voice(clamp(Math.round(m), 0, 127), t); } finally { NB_VEL7 = k7; }
+      }
       if (r.startsWith("wam:")) {
         const P = AU.plug.get(tr.id); if (!P || !P.node) { plugFor(tr); return null; }
         const note = clamp(Math.round(m), 0, 127), v7 = clamp(Math.round(sc * 118), 1, 127);
@@ -26024,6 +26046,9 @@ registerProcessor("nb-wave", NBWave);
       { const ib = gbEl("button", "gb-card gb-import"); ib.style.setProperty("--cg", "linear-gradient(150deg, #2e5d6b, #10232a)"); ib.dataset.kind = "import";
         ib.innerHTML = '<span class="gi">' + ICON.audio + "</span>"; ib.append(gbEl("b", "", "Import audio"), gbEl("small", "", "WAV, MP3, M4A, AIFF or FLAC files onto new audio tracks, at the playhead"));
         ib.addEventListener("click", () => importPick(null)); box.append(ib); }
+      { const mb = gbEl("button", "gb-card gb-import"); mb.style.setProperty("--cg", "linear-gradient(150deg, #5a3d7a, #1d1230)"); mb.dataset.kind = "midi";
+        mb.innerHTML = '<span class="gi">' + ICON.keys + "</span>"; mb.append(gbEl("b", "", "Import a MIDI song"), gbEl("small", "", "A .mid file becomes a song: each part on its own track, with a matching sound or your hardware synths"));
+        mb.addEventListener("click", () => { try { window.__gbMidi.pick(); } catch (e) {} }); box.append(mb); }
     }
     function addTrack(kind, opt) {
       if (S.tracks.length >= 32) { gbSay("A song holds 32 tracks"); return null; }
@@ -27051,7 +27076,7 @@ registerProcessor("nb-wave", NBWave);
     function songsSheet() {
       openSheet("My Songs", "kept on this device, and in your projects", box => {
         const top = gbEl("div", "gb-chips");
-        top.append(btnE("+ New song", () => { switchSong(newSong()); closeSheet(); setView("browse"); }, "primary"), btnE("Export " + S.name, exportSheet));
+        top.append(btnE("+ New song", () => { switchSong(newSong()); closeSheet(); setView("browse"); }, "primary"), btnE("Import a MIDI song…", () => window.__gbMidi.pick()), btnE("Export " + S.name, exportSheet));
         box.append(top);
         IDX.songs.forEach(e => {
           const cur = e.id === S.id, n = cur ? S.tracks.length : e.n;
@@ -27606,6 +27631,165 @@ registerProcessor("nb-wave", NBWave);
       return song.id;
     }
     { const mid = migrateTracks(); if (mid) setTimeout(() => gbSay("What was in Tracks is now a song in the Garage, called Tracks"), 2500); }
+    // ======================================================================
+    // 220: MIDI songs in. A .mid (or .midi, .kar, .rmi) becomes a new song: each part on its own track (a type-0 file's
+    // channels split apart), the drums (channel 10) on a kit, every other part on the library sound its General MIDI
+    // program names, or on the Minilogue XD or the MicroFreak. The file's own timing and velocities are kept (tempo
+    // changes included: notes land when the file says, at its first tempo); Swing and Humanize loosen a file that was
+    // typed in on a grid.
+    // ======================================================================
+    function parseMidi(buf) {
+      let d = new Uint8Array(buf), p = 0;
+      const str = (a, n) => String.fromCharCode(...d.subarray(a, a + n));
+      if (str(0, 4) === "RIFF" && str(8, 4) === "RMID") {   // (.rmi: a MIDI file in a RIFF wrapper)
+        for (let q = 12; q + 8 <= d.length;) { const id = str(q, 4), n = d[q + 4] | (d[q + 5] << 8) | (d[q + 6] << 16) | (d[q + 7] << 24); if (id === "data") { d = d.subarray(q + 8, q + 8 + n); break; } q += 8 + n + (n & 1); }
+      }
+      const u32 = a => ((d[a] << 24) | (d[a + 1] << 16) | (d[a + 2] << 8) | d[a + 3]) >>> 0, u16 = a => (d[a] << 8) | d[a + 1];
+      const h = str(0, 4) === "MThd" ? 0 : (() => { for (let i = 0; i < Math.min(d.length - 4, 4096); i++) if (str(i, 4) === "MThd") return i; return -1; })();
+      if (h < 0) throw new Error("not a MIDI file");
+      const fmt = u16(h + 8), ntr = u16(h + 10), div = u16(h + 12);
+      if (div & 0x8000) throw new Error("SMPTE-timed MIDI files aren't supported");
+      p = h + 8 + u32(h + 4);
+      const tracks = [], tempos = [], meta = { sig: null, key: null, title: "" };
+      for (let t = 0; t < ntr && p + 8 <= d.length; t++) {
+        if (str(p, 4) !== "MTrk") { p += 8 + u32(p + 4); t--; if (p >= d.length) break; continue; }
+        const end = Math.min(d.length, p + 8 + u32(p + 4)); let q = p + 8, tick = 0, run = 0;
+        const T = { name: "", ev: [] };
+        const vlq = () => { let v = 0, b; do { b = d[q++]; v = (v << 7) | (b & 0x7f); } while (b & 0x80 && q < end); return v; };
+        while (q < end) {
+          tick += vlq(); let st = d[q];
+          if (st & 0x80) { q++; if (st < 0xf0) run = st; } else st = run;
+          if (st === 0xff) { const ty = d[q++], n = vlq(), a = q; q += n;
+            if (ty === 0x51 && n === 3) tempos.push([tick, (d[a] << 16) | (d[a + 1] << 8) | d[a + 2]]);
+            else if (ty === 0x58 && !meta.sig) meta.sig = [d[a], 1 << d[a + 1]];
+            else if (ty === 0x59 && !meta.key) meta.key = [(d[a] << 24) >> 24, d[a + 1]];
+            else if ((ty === 0x03 || ty === 0x01) && !T.name && n) { try { T.name = new TextDecoder().decode(d.subarray(a, a + n)).replace(/[\x00-\x1f]/g, "").trim().slice(0, 40); } catch (e) {} }
+            continue; }
+          if (st === 0xf0 || st === 0xf7) { q += vlq(); continue; }
+          const ty = st & 0xf0, ch = st & 15, a = d[q++], b = (ty === 0xc0 || ty === 0xd0) ? 0 : d[q++];
+          T.ev.push([tick, ty, ch, a, b]);
+        }
+        tracks.push(T); p = end;
+      }
+      if (t0Name(tracks)) meta.title = t0Name(tracks);
+      return { fmt, div, tracks, tempos: tempos.sort((a, b) => a[0] - b[0]), meta };
+    }
+    const t0Name = trs => trs.length && trs[0].name && !trs[0].ev.some(e => e[1] === 0x90) ? trs[0].name : "";
+    // ticks → seconds through the tempo map, then seconds → beats at the song's (first) tempo
+    function midiParts(M) {
+      const tm = M.tempos.length ? M.tempos : [[0, 500000]], bpm0 = 60000000 / (M.tempos.length && M.tempos[0][0] === 0 ? M.tempos[0][1] : 500000);
+      const segs = []; let sec = 0, last = 0, us = 500000;
+      for (const [tk, u] of tm) { sec += (tk - last) / M.div * us / 1e6; segs.push([tk, sec, u]); last = tk; us = u; }
+      if (!segs.length || segs[0][0] > 0) segs.unshift([0, 0, 500000]);
+      const secAt = tk => { let s = segs[0]; for (const x of segs) { if (x[0] <= tk) s = x; else break; } return s[1] + (tk - s[0]) / M.div * s[2] / 1e6; };
+      const beatAt = tk => secAt(tk) * bpm0 / 60;
+      const parts = new Map();   // "track:channel" → { name, ch, prog, notes }
+      M.tracks.forEach((T, ti) => {
+        const prog = new Array(16).fill(0), on = new Map(), sus = new Array(16).fill(false), held = new Map();
+        const part = ch => { const k = ti + ":" + ch; let P = parts.get(k); if (!P) parts.set(k, P = { name: T.name, ch, prog: prog[ch], notes: [], ti }); return P; };
+        const close = (ch, m, tk) => { const k = ch * 128 + m, o = on.get(k); if (!o) return; on.delete(k); const b0 = beatAt(o[0]), b1 = beatAt(tk); part(ch).notes.push([b0, m, Math.max(0.03, b1 - b0), o[1] / 127]); };
+        for (const [tk, ty, ch, a, b] of T.ev) {
+          if (ty === 0xc0) { prog[ch] = a; const P = parts.get(ti + ":" + ch); if (P && !P.notes.length) P.prog = a; }
+          else if (ty === 0x90 && b > 0) { if (on.has(ch * 128 + a)) close(ch, a, tk); on.set(ch * 128 + a, [tk, b]); part(ch); }
+          else if (ty === 0x80 || ty === 0x90) { if (sus[ch]) { held.set(ch * 128 + a, 1); continue; } close(ch, a, tk); }
+          else if (ty === 0xb0 && a === 64) { sus[ch] = b >= 64; if (!sus[ch]) { for (const k of [...held.keys()]) if ((k >> 7) === ch) { held.delete(k); close(ch, k & 127, tk); } } }
+        }
+        const lastTk = T.ev.length ? T.ev[T.ev.length - 1][0] : 0; for (const k of [...on.keys()]) close(k >> 7, k & 127, lastTk + M.div);
+      });
+      return { bpm: bpm0, parts: [...parts.values()].filter(P => P.notes.length).map(P => (P.notes.sort((a, b) => a[0] - b[0]), P)) };
+    }
+    // a part's track: the kind from its General MIDI program family, the library sound with that program number
+    const GM_FAM = ["Piano", "Chromatic percussion", "Organ", "Guitar", "Bass", "Strings", "Ensemble", "Brass", "Reed", "Pipe", "Synth lead", "Synth pad", "Synth effects", "Ethnic", "Percussive", "Sound effects"];
+    function gmKind(P) { if (P.ch === 9) return "drums"; const f = P.prog >> 3; return f === 3 ? "guitar" : f === 4 ? "bass" : (f === 5 || f === 6) && P.prog < 52 ? "strings" : f >= 10 && f <= 12 ? "synth" : "keys"; }
+    function gmSound(P) {
+      if (P.ch === 9) return "kit:studio";
+      const E = entries().filter(e => e.id.startsWith("w:") && !e.id.startsWith("w:nb-") && !e.id.startsWith("w:wam:") && (e.prog | 0) === P.prog && e.cat !== "drums");
+      const e = E.find(x => /GeneralUser/i.test(x.sub || "")) || E[0];
+      return e ? "lib:" + e.id.slice(2) : defaultSound(gmKind(P));
+    }
+    const gmName = P => P.ch === 9 ? "Drums" : (() => { const e = entryById("w:" + gmSound(P).slice(4)); return e ? e.name : GM_FAM[P.prog >> 3]; })();
+    function feel(notes, swing, human, bpm) {
+      const sb = 60 / bpm; let seed = 7;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1; };
+      return notes.map(n => {
+        let [b, m, du, v] = n;
+        if (swing > 0.5) { const s = b * 4, k = Math.round(s); if (Math.abs(s - k) < 0.08 && k % 2) { const sh = (swing - 0.5) * 0.5; b += sh; du = Math.max(0.03, du - sh * 0.5); } }
+        if (human > 0) { b = Math.max(0, b + rnd() * human * 0.012 / sb); v = clamp(v * (1 + rnd() * 0.15 * human), 0.05, 1); }
+        return [+b.toFixed(4), m, +du.toFixed(4), +v.toFixed(3)];
+      });
+    }
+    function midiSheet(file, M, R) {
+      const parts = R.parts.slice(0, 32), keySig = M.meta.key, sig = M.meta.sig && M.meta.sig[1] === 4 && M.meta.sig[0] >= 2 && M.meta.sig[0] <= 7 ? M.meta.sig[0] : 4;
+      const hwOpts = () => { const o = []; const H = window.__hw; if (H && H.shown && H.shown()) o.push(["hw", H.name]); if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => o.push(["hwx:" + X.id, X.name])); return o; };
+      const pick = parts.map(P => gmSound(P));
+      let bpm = clamp(Math.round(R.bpm * 10) / 10, 40, 240), swing = 0.5, human = 0;
+      const total = Math.max(...parts.map(P => { const n = P.notes[P.notes.length - 1]; return n[0] + n[2]; }));
+      const name = (M.meta.title || (file.name || "MIDI song").replace(/\.[^.]+$/, "")).slice(0, 40);
+      openSheet("Import " + name, parts.length + (parts.length === 1 ? " part · " : " parts · ") + Math.round(total * 60 / R.bpm) + " s · " + Math.round(R.bpm) + " BPM in the file", box => {
+        groupH(box, "Each part becomes a track");
+        parts.forEach((P, i) => {
+          const r = row2(box, P.name || (P.ch === 9 ? "Drums" : GM_FAM[P.prog >> 3]), "channel " + (P.ch + 1) + " · " + P.notes.length + " notes" + (P.ch === 9 ? " · General MIDI drums" : ""));
+          const sel = document.createElement("select"); sel.className = "gb-in"; sel.setAttribute("aria-label", "Sound for " + (P.name || "part " + (i + 1)));
+          const opt = (v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o); };
+          opt(gmSound(P), P.ch === 9 ? "Studio drum kit" : gmName(P));
+          if (P.ch !== 9) hwOpts().forEach(([v, t]) => opt(v, t));
+          opt("", "Leave this part out");
+          sel.value = pick[i]; sel.addEventListener("change", () => { pick[i] = sel.value; });
+          r.append(sel);
+        });
+        groupH(box, "Feel");
+        let row = row2(box, "", ""); row.firstChild.remove();
+        const sl = (lab, min, max, step, val, txt, set) => { row.append(gbEl("span", "gb-lab", lab)); const inp = document.createElement("input"); inp.type = "range"; inp.min = min; inp.max = max; inp.step = step; inp.value = val; inp.setAttribute("aria-label", lab); const v = gbEl("span", "gb-v", txt(val)); inp.addEventListener("input", () => { set(+inp.value); v.textContent = txt(+inp.value); }); row.append(inp, v); };
+        sl("Tempo", 40, 240, 1, bpm, v => v + " BPM", v => { bpm = v; });
+        row = row2(box, "", ""); row.firstChild.remove();
+        sl("Swing", 50, 75, 1, 50, v => v === 50 ? "straight" : v + "%", v => { swing = v / 100; });
+        row = row2(box, "", ""); row.firstChild.remove();
+        sl("Humanize", 0, 100, 5, 0, v => v ? v + "%" : "off", v => { human = v / 100; });
+        box.append(gbEl("p", "gb-p", "The file's own timing and velocities are kept. Swing pushes the off-beat 16ths late (MPC-style: 50% is straight, 66% a triplet shuffle); Humanize moves notes a few milliseconds and varies how hard they're hit. Hardware synths play over MIDI on the channel set in their sheet."));
+        const go = gbEl("div", "gb-midi-go");
+        go.append(btnE("Make the song", () => {
+          const song = newSong(name); song.bpm = Math.round(bpm); song.sig = sig;
+          if (keySig) { const sf = keySig[0], minor = keySig[1] === 1; song.minor = minor; song.key = (((sf * 7) % 12) + 12 + (minor ? 9 : 0)) % 12; }
+          switchSong(song);
+          let n = 0;
+          parts.forEach((P, i) => {
+            if (!pick[i]) return;
+            const kind = gmKind(P), tr = addTrack(kind, { stay: true }); if (!tr) return;
+            tr.name = (P.name || (P.ch === 9 ? "Drums" : gmName(P))).slice(0, 40); tr.snd = pick[i]; tr.mode = "notes"; prep(tr);
+            const notes = feel(P.notes, swing, human, bpm).map(x => [x[0], x[1], x[2], x[3]]);
+            const endB = notes.reduce((a, x) => Math.max(a, x[0] + x[2]), 0), len = Math.max(sig, Math.ceil(endB / sig - 1e-6) * sig);
+            placeRegion(tr, { id: uid(), start: 0, len, rep: 1, notes }, false); n++;
+          });
+          S.view = "tracks"; fitLen(); dirty(); saveNow(); closeSheet();
+          if (!V.open) gbOpen(); setView("tracks"); paintBar();
+          gbSay(n + (n === 1 ? " track" : " tracks") + " from " + name + " · press ▶");
+        }, "primary big"));
+        box.append(go);
+      });
+    }
+    let midIn = null;
+    async function midiFiles(files) {
+      for (const f of files) {
+        let M, R; try { M = parseMidi(await f.arrayBuffer()); R = midiParts(M); } catch (e) { gbSay("Couldn't read " + f.name + ": " + (e && e.message || "not a MIDI file")); continue; }
+        if (!R.parts.length) { gbSay(f.name + " has no notes"); continue; }
+        start(); ensureSong(); if (!V.open) gbOpen();
+        midiSheet(f, M, R); return true;
+      }
+      return false;
+    }
+    window.__gbMidi = {
+      pick() {
+        start();
+        if (!midIn) { midIn = document.createElement("input"); midIn.type = "file"; midIn.accept = ".mid,.midi,.kar,.rmi,audio/midi,audio/x-midi"; midIn.hidden = true; document.body.append(midIn);
+          midIn.addEventListener("change", () => { const fs = [...midIn.files]; midIn.value = ""; if (fs.length) midiFiles(fs); }); }
+        midIn.click();
+      },
+      files: midiFiles, parse: parseMidi, parts: midiParts,
+    };
+    // a .mid dropped anywhere opens it here
+    const isMid = f => /\.(midi?|kar|rmi)$/i.test(f.name || "") || /midi/i.test(f.type || "");
+    addEventListener("dragover", e => { const it = e.dataTransfer && [...(e.dataTransfer.items || [])]; if (it && it.some(x => x.kind === "file" && /midi/i.test(x.type || ""))) e.preventDefault(); });
+    addEventListener("drop", e => { const fs = e.dataTransfer && [...(e.dataTransfer.files || [])].filter(isMid); if (!fs || !fs.length) return; e.preventDefault(); e.stopPropagation(); midiFiles(fs); }, true);
     window.__gbAudio = gbAudioIn; window.__gbSay = gbSay;
     // Capture (Live, 136): what was just played, as a new track in the current song
     function gbCapture(o) {
@@ -33130,7 +33314,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 219;
+    window.NB_BUILD = 220;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -37670,9 +37854,10 @@ registerProcessor("nb-aw", NBAwProc);
       b.addEventListener("click", onClick); return b;
     }
     // (212) a preset row: tap the name to play it alone, + to play it together with what's playing
-    function esPRow(name, sub, on, onPick, onAdd) {
+    function esPRow(name, sub, on, onPick, onAdd, tags) {
       const r = document.createElement("div"); r.className = "es-pr";
       const b = esRow("es-p", name, sub, on, onPick); r.appendChild(b);
+      if (ESF.tags) { const tg = tags || esTagsFor(name, sub); if (tg.length) { const t = document.createElement("span"); t.className = "es-tags"; t.textContent = tg.join(" · "); b.querySelector(".es-t").appendChild(t); } }
       if (onAdd) {
         const a = document.createElement("button"); a.className = "es-add"; a.textContent = "+";
         a.title = "Play " + name + " together with what's playing"; a.setAttribute("aria-label", a.title);
@@ -37909,8 +38094,23 @@ registerProcessor("nb-aw", NBAwProc);
       sel.value = esMode;
       sel.addEventListener("change", () => { esMode = sel.value; try { localStorage.setItem(ES_MODE_KEY, esMode); } catch (e) {} es.scrollTop = 0; esPaint(true, true); });
       head.appendChild(sel);
+      const fb = document.createElement("button"); fb.className = "es-fb" + (ESF.on ? " on" : ""); fb.textContent = "Find"; fb.title = "Find a sound by its name or what it is (dark, 80s, bass, FM…)"; fb.setAttribute("aria-pressed", String(ESF.on));
+      fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
+      head.appendChild(fb);
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
+      if (ESF.on && esMode !== "fx") {
+        const row = document.createElement("div"); row.className = "es-find";
+        const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
+        const tg = document.createElement("button"); tg.className = "es-tg" + (ESF.tags ? " on" : ""); tg.textContent = "Attributes"; tg.title = "Show each sound's attributes (what Find matches on)"; tg.setAttribute("aria-pressed", String(ESF.tags));
+        tg.addEventListener("click", () => { ESF.tags = !ESF.tags; try { localStorage.setItem("nightbloom-es-tags", ESF.tags ? "1" : ""); } catch (e) {} esPaint(true, true); });
+        row.append(q, tg); es.appendChild(row);
+        const res = document.createElement("div"); res.className = "es-res"; es.appendChild(res);
+        q.addEventListener("input", () => { ESF.q = q.value; esFindPaint(res); });
+        q.addEventListener("keydown", e => { if (e.key === "Escape") { ESF.on = false; ESF.q = ""; esPaint(true, true); } e.stopPropagation(); });
+        q.addEventListener("keyup", e => e.stopPropagation());
+        if (ESF.q.trim()) { esFindPaint(res); if (ESF.focus) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } es.scrollTop = st; return; }
+      }
       if (esMode === "fx" && ES_LINUX) { hs.textContent = "tap an effect · pick the sounds it goes on"; esFxView(); es.scrollTop = st; return; }
       if (esMode === "type") {
         esTypeView(cur);
@@ -37930,6 +38130,68 @@ registerProcessor("nb-aw", NBAwProc);
       es.scrollTop = st;
       if (force && curEng && !noScroll) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
     }
+    // ---------- (220) Find: every sound by its exact name or its attributes. Each sound gets attributes from what it
+    // is (its kind, the engine or plugin, the library's category) and from its name and description (dark, bright, warm,
+    // 80s, analog, FM…); they stay hidden unless Attributes is on. "Quotes" find an exact name. ----------
+    const ESF = { on: false, q: "", tags: (() => { try { return !!localStorage.getItem("nightbloom-es-tags"); } catch (e) { return false; } })(), focus: false };
+    const ES_ATTR = [
+      ["dark", /dark|deep|night|shadow|ghost|spooky|black|cave|moody|haunt|horror|abyss|low/i], ["bright", /bright|glass|crystal|shimmer|sparkl|shine|sun|clear|air/i],
+      ["warm", /warm|soft|mellow|velvet|silk|smooth|round|lush|tape/i], ["aggressive", /growl|scream|distort|fuzz|hard|acid|reese|dirty|grit|rave|hoover|nasty|rage/i],
+      ["ambient", /pad|drone|cloud|space|wash|dream|fog|haze|ether|atmos|evolv|swell|cosmic|star/i], ["80s", /juno|dx-?7|cs-?80|jupiter|prophet|oberheim|ob-?x|\b80s?\b|8\d\b|retro|synthwave|vangelis|stab/i],
+      ["analog", /analog|moog|juno|sh-?101|minimoog|ladder|mono|poly ?d|polysynth|virtual analog|303/i], ["FM", /\bfm\b|dx-?7|operator|6-op|bell|e\.? ?piano|tine/i],
+      ["vintage", /vintage|old|classic|lo-?fi|tape|vinyl|worn|retro|mellotron|organ/i], ["percussive", /pluck|stab|hit|perc|mallet|marimba|kalimba|staccato|pizz|drum/i],
+      ["sustained", /pad|string|choir|drone|organ|sustain|swell|bow/i], ["lead", /lead|solo|sync|saw|square|whistle/i], ["bass", /bass(?!oon| clarinet)|sub\b|808|303|low end/i],
+      ["acoustic", /piano|guitar|violin|cello|flute|clarinet|sax|trumpet|horn|harp|acoustic|nylon|upright|grand|marimba/i], ["vocal", /choir|voice|vox|vowel|aah|ooh|speech|sing|formant/i],
+      ["electric", /electric|rhodes|wurli|e\.? ?piano|clav|organ|guitar/i], ["cinematic", /cinematic|epic|orchestra|film|hall|timpani|brass|ensemble/i], ["sample-based", /generaluser|studio|salamander|sampled|soundfont|sf2/i],
+    ];
+    const esTagMemo = new Map();
+    function esTagsFor(name, sub, extra) {
+      const k = name + "|" + (sub || "") + "|" + (extra || ""); let t = esTagMemo.get(k); if (t) return t;
+      const txt = name + " " + (sub || "") + " " + (extra || ""), out = [];
+      const ty = esTypeOf(name, sub); if (ty !== "Other") out.push(ty.toLowerCase());
+      for (const [a, re] of ES_ATTR) if (re.test(txt) && !out.includes(a)) out.push(a);
+      if (sub && sub.length <= 28) out.push(sub.replace(/^Stack · /, "").toLowerCase());
+      if (!out.length) out.push("synth");
+      esTagMemo.set(k, out); return out;
+    }
+    function esFindItems() {
+      const L = [], seen = new Set(), cur = state.cur && state.cur.id || "";
+      const add = (id, name, sub, extra, pick, addf, kind) => { if (seen.has(id)) return; seen.add(id); L.push({ id, name, sub, tags: esTagsFor(name, sub, extra), pick, addf, on: cur === id, kind }); };
+      const CATN = { nb: "Nate Bloom preset", engines: "engine", kits: "drum kit", mine: "your instrument", keys: "keys", strings: "strings", winds: "winds & brass", bells: "bells & mallets", gtrbass: "guitar & bass", leads: "synth lead", pads: "pad", world: "world", perc: "percussion", drums: "drums", classic: "classic synth" };
+      for (const e of allEntries()) {
+        const sub = e.cat === "nb" ? e.sub : e.id.startsWith("w:nb-") ? "Studio" : e.sub;
+        add(e.id, e.name, sub, (CATN[e.cat] || e.cat || "") + (e.id.startsWith("e:") && ENGINES[e.id.slice(2)] ? " " + (ENGINES[e.id.slice(2)].after || "") : ""), () => chooseEntry(e, !e.id.startsWith("w:wam:")), togE(e), CATN[e.cat] || "sound");
+      }
+      for (const c of catL().filter(c => c.kind === "instrument")) {
+        const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+        add(plainE.id, c.name, c.vendor === "Nathan" ? "your plugin" : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
+        const m = esPlugCache(c.key);
+        if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name, c.type || "", () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
+      }
+      return L;
+    }
+    function esFindPaint(res) {
+      res.innerHTML = ""; const raw = ESF.q.trim(); if (!raw) return;
+      const exact = /^".*"$/.test(raw), q = raw.replace(/^"|"$/g, "").toLowerCase(), words = q.split(/\s+/).filter(Boolean);
+      const scored = [];
+      for (const it of esFindItems()) {
+        const n = it.name.toLowerCase(), hay = n + " " + (it.sub || "").toLowerCase() + " " + it.tags.join(" ");
+        let sc = 0;
+        if (exact) { if (n === q) sc = 100; else continue; }
+        else if (n === q) sc = 100; else if (n.startsWith(q)) sc = 80; else if (n.includes(q)) sc = 60;
+        else if (words.every(w => hay.includes(w))) sc = 30 + words.filter(w => n.includes(w)).length * 5 + words.filter(w => it.tags.includes(w)).length * 3;
+        else continue;
+        scored.push([sc, it]);
+      }
+      scored.sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name));
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = scored.length ? scored.length + (scored.length === 1 ? " sound" : " sounds") + (scored.length > 150 ? " · the first 150" : "") : "Nothing matches “" + raw + "”"; res.appendChild(h);
+      scored.slice(0, 150).forEach(([, it]) => { const r = esPRow(it.name, (it.sub || "") + (it.kind && it.sub !== it.kind ? " · " + it.kind : ""), it.on, esPick(async () => { ESF.focus = false; await it.pick(); }), it.addf, it.tags); res.appendChild(r); });
+      if (!scored.length) { const p = document.createElement("p"); p.className = "es-none"; p.textContent = "Try part of a name, or what it is: bass, pad, bright, dark, 80s, FM, choir, plugin…"; res.appendChild(p); }
+    }
+    es.addEventListener("focusin", e => { if (e.target.classList && e.target.classList.contains("es-q")) ESF.focus = true; });
+    es.addEventListener("focusout", e => { if (e.target.classList && e.target.classList.contains("es-q")) setTimeout(() => { if (!es.contains(document.activeElement) || !document.activeElement.classList.contains("es-q")) ESF.focus = false; }, 0); });
+    // the plugins' presets are searched too: fetched once Find opens
+    setInterval(() => { if (ESF.on && esShown) esLoadPlugs(); }, 2000);
     function esPlace() {
       const f = esFits();
       if (!f) { if (esShown) { es.hidden = true; document.body.classList.remove("es-on"); esShown = false; } return; }

@@ -3572,3 +3572,13 @@ body.es-on #epStrip { display: none; }
 .hw-nm { font-size: 0.8rem; padding: 5px 8px; }
 .hw-xg { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
 .hw-xg .nbk-xr { font-size: 0.7rem; }
+
+/* (220) the right-hand panel's Find and attributes */
+.es-fb{flex:0 0 auto;height:30px;padding:0 12px;border-radius:9px;border:1px solid var(--line,#3a3350);background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.es-fb.on{background:var(--lilac,#c9a6ff);color:#1a1424;border-color:transparent}
+.es-find{display:flex;gap:6px;margin:0 0 8px}
+.es-q{flex:1;min-width:0;height:34px;border-radius:9px;border:1px solid var(--line,#3a3350);background:#0f0d16;color:inherit;padding:0 10px;font:inherit;font-size:14px}
+.es-tg{flex:0 0 auto;height:34px;padding:0 10px;border-radius:9px;border:1px solid var(--line,#3a3350);background:transparent;color:inherit;font:inherit;font-size:12px;cursor:pointer}
+.es-tg.on{border-color:var(--lilac,#c9a6ff);color:var(--lilac,#c9a6ff)}
+.es-tags{display:block;font-size:11px;opacity:.6;margin-top:2px;white-space:normal}
+.gb-midi-go{display:flex;margin:10px 0 4px}.gb-midi-go .btn{flex:1;height:48px;font-size:16px}
