@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 199;
+    window.NB_BUILD = 200;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -197,6 +197,7 @@
     function fdIndex() {
       const A = [], add = (g, t, s, run, k) => A.push({ g, t, s: s || "", k: (k || "").toLowerCase(), run });
       const act = (t, s, run, k) => add("Actions", t, s, run, k);
+      (window.__nbFindMore || []).forEach(f => { try { f(add); } catch (e) {} });   // (200) Favorites and the like
       act("Effects off / on", "every effect, Effects and FX Lab · the ` key", () => fxKeyToggle(), "fx lab");
       act("Get free plugins", "open-source synths, samplers and effects for the Linux app", () => { try { document.getElementById("wamBtn").click(); setTimeout(() => { const h = [...document.querySelectorAll("#wamList *")].find(e => e.textContent === "Get free plugins"); if (h) h.scrollIntoView({ block: "start" }); }, 300); } catch (e) {} }, "plugins vst clap install download surge vital dexed reverb");
       act("Hardware synth (Minilogue)", "its sheet: Direct monitoring, pass-through, its effects, input and level", () => { try { window.__hw && window.__hw.open(); } catch (e) {} }, "minilogue microfreak direct monitoring pass-through hardware synth volt");

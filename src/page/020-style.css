@@ -3428,3 +3428,18 @@ body.nb-wide .knobs { max-width: 1600px; }
 /* (195) where the recording goes, beside Build's ● */
 .bd-recto { height: 32px; max-width: 92px; margin-left: 4px; border-radius: 8px; background: var(--card, #1b1a22); color: inherit; border: 1px solid rgba(255,255,255,.14); font: inherit; font-size: 12px; padding: 0 4px; }
 .bd-recto.away { border-color: #e0a63a; color: #f2c46b; }
+
+/* (200) Favorites (Linux app): the row above Quick, ★ Save, and their popover */
+.fav-row .qk-lab { color: var(--amber, #ffb65c); }
+.fv-t.cur { outline: 1px solid var(--amber, #ffb65c); }
+.fv-none { font-size: 12px; opacity: .6; align-self: center; white-space: nowrap; }
+.fv-more { align-self: stretch; min-width: 34px; }
+.fv-save { color: var(--amber, #ffb65c); height: 34px; padding: 0 12px; align-self: center; white-space: nowrap; }
+.nb-favpop { position: fixed; z-index: 9000; background: var(--card, #1b1a22); border: 1px solid rgba(255,255,255,.16); border-radius: 12px; padding: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 8px; }
+.nb-favpop > b { font-size: 14px; }
+.nb-favpop input { height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.25); color: inherit; padding: 0 10px; font: inherit; }
+.nb-favpop .fv-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.nb-favpop .fv-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,.05); border: 0; color: inherit; font: inherit; cursor: pointer; }
+.nb-favpop .fv-item:hover { background: rgba(255,255,255,.1); }
+.nb-favpop .fv-item small { opacity: .6; font-size: 11px; }
+.nb-favpop .fv-item.danger { color: #ff8a8a; }

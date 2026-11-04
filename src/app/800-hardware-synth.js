@@ -216,6 +216,7 @@
         if (real && real.deviceId !== H.inId) { try { window.__nbAdd && window.__nbAdd("hw", "back on " + (real.label || "the input")); } catch (e) {} hwOpen(true); }
       }
       H.recheck = hwRecheck;
+      H.save = () => hwSave();   // (200) Favorites put a hardware synth's settings back
       try { navigator.mediaDevices.addEventListener("devicechange", () => { clearTimeout(hwDcT); hwDcT = setTimeout(hwRecheck, 400); if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
       setInterval(() => { if (H.standIn && H.src) hwRecheck(); }, 5000);   // (and if the event never came)
       // ---- the ports came or went: the Quick row shows it once it's been seen ----
