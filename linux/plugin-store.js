@@ -35,7 +35,7 @@ const CATALOG = [
   { id: "actuate", name: "Actuate", kind: "fx", repo: "ardura/Actuate", bundle: /actuate/i, pre: true, formats: ["vst3", "clap"], licence: "GPL-3.0",
     blurb: "Granular sampler and texture machine" },
   // (205) more from the plan: drums made from scratch, the SFZ player (for the free libraries), a granular effect
-  { id: "geonkick", name: "Geonkick", kind: "synth", repo: "Geonkick-Synthesizer/geonkick", bundle: /geonkick/i, licence: "GPL-3.0",
+  { id: "geonkick", name: "Geonkick", kind: "synth", repo: "Geonkick-Synthesizer/geonkick", bundle: /geonkick/i, formats: ["lv2", "vst3"], licence: "GPL-3.0",   // (its VST3 crashed the scan)
     blurb: "Percussion synth: 808, 909 and CR-78-style kicks, snares and hats, built from scratch" },
   { id: "sfizz", name: "sfizz", kind: "sampler", repo: "sfztools/sfizz-ui", bundle: /sfizz/i, licence: "BSD-2-Clause",
     blurb: "Plays SFZ sample libraries: free orchestras, pianos, guitars, choirs" },
