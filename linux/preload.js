@@ -26,6 +26,13 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
   // (179) the CPU meter: real measurements of the computer and of Nate Bloom's audio threads (main.js)
   cpu: () => ipcRenderer.invoke("nb:cpu"),
   onWide: cb => ipcRenderer.on("nb:wide", (e, on) => { try { cb(!!on); } catch (er) {} }),
+  // (193) the low-latency output: frames this start uses (0 = off), the choice for the next start, a restart to apply it
+  lowLatency: {
+    frames: (() => { try { return +ipcRenderer.sendSync("nb:ll-active") || 0; } catch (e) { return 0; } })(),
+    get: () => ipcRenderer.invoke("nb:low-latency"),
+    set: on => ipcRenderer.invoke("nb:low-latency", { on: !!on, frames: 256 }),
+    restart: () => ipcRenderer.invoke("nb:restart"),
+  },
 });
 
 // (176) the native synth engine (nb_engine.cc): voices worked out on a pool of threads, into shared memory the page's

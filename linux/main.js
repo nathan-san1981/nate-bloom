@@ -31,7 +31,9 @@ app.commandLine.appendSwitch("enable-features", "AudioWorkletRealtimeThread,Audi
 {
   let ll = null;
   try { ll = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "low-latency.json"), "utf8")); } catch (e) {}
-  const frames = process.env.NB_LOW_LATENCY ? +process.env.NB_LOW_LATENCY || 256 : ll && ll.on ? (+ll.frames || 256) : 0;
+  // (193) on unless switched off: 256 frames took a key-to-sound from about 47 ms to about 16 ms here
+  const frames = process.env.NB_LOW_LATENCY ? +process.env.NB_LOW_LATENCY || 256 : !ll || ll.on ? (+(ll && ll.frames) || 256) : 0;
+  global.NB_LL_ACTIVE = frames >= 64 && frames <= 2048 ? frames : 0;
   if (frames >= 64 && frames <= 2048) {
     app.commandLine.appendSwitch("audio-buffer-size", String(frames));
     if (!process.env.PULSE_LATENCY_MSEC) process.env.PULSE_LATENCY_MSEC = String(Math.max(3, Math.round(frames / 48)));
@@ -348,6 +350,15 @@ ipcMain.on("nb:playing", (e, on) => {
 });
 ipcMain.on("nb:toast", (e, msg) => { if (Notification.isSupported()) new Notification({ title: "Nate Bloom", body: String(msg).slice(0, 200), silent: true }).show(); });
 ipcMain.handle("nb:version", () => app.getVersion());
+// (193) the low-latency output: what this start uses, the choice for the next start, and a restart to apply it
+const llFile = () => path.join(app.getPath("userData"), "low-latency.json");
+ipcMain.on("nb:ll-active", e => { e.returnValue = global.NB_LL_ACTIVE || 0; });
+ipcMain.handle("nb:low-latency", (e, set) => {
+  if (set && typeof set === "object") { try { fs.writeFileSync(llFile(), JSON.stringify({ on: !!set.on, frames: Math.max(64, Math.min(2048, +set.frames || 256)) })); } catch (er) {} }
+  let ll = null; try { ll = JSON.parse(fs.readFileSync(llFile(), "utf8")); } catch (er) {}
+  return { active: global.NB_LL_ACTIVE || 0, next: !ll || ll.on ? (+(ll && ll.frames) || 256) : 0 };
+});
+ipcMain.handle("nb:restart", () => { app.relaunch(); app.exit(0); });
 // (177) VST3 and CLAP plugins (plugins.js: finding them, the scan in its own process, crash notes)
 let plugs = null;
 try { plugs = require("./plugins.js").setup({ app, ipcMain, dialog, getWin: () => win, log: m => { if (process.env.NB_DEBUG) console.log("[nb]", m); } }); } catch (e) { console.warn("plugins:", e && e.message); }
