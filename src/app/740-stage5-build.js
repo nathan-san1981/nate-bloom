@@ -50,7 +50,7 @@
       el.innerHTML = `<div class="bd-tabs" role="tablist" aria-label="Build">${BD_TABS.map(([id, nm, sub]) => `<button type="button" role="tab" class="bd-tab" data-t="${id}" title="${sub}">${nm}</button>`).join("")}</div>
         <div class="bd-sub" id="bdSub"></div>
         <div class="bd-right"><button type="button" class="btn" id="bdSnd" title="Every sound, to play alone or layer (the browser)">Sounds…</button><button type="button" class="btn" id="bdMix" title="The mixer, as a drawer">Mixer</button>
-          <span class="bd-tr"><button type="button" class="btn bd-play" id="bdPlay" title="Play what this tab is (Space in Live)">▶</button><button type="button" class="btn bd-stop" id="bdStop" title="Stop everything">■</button><button type="button" class="btn bd-rec" id="bdRec" title="Record what you play">●</button>
+          <span class="bd-tr"><button type="button" class="btn bd-play" id="bdPlay" title="Play what this tab is (Space in Live)">▶</button><button type="button" class="btn bd-stop" id="bdStop" title="Stop everything">■</button><button type="button" class="btn bd-rec" id="bdRec" title="Record what you play">●</button><select class="bd-recto" id="bdRecTo" aria-label="Where the recording goes" title="Where the recording goes when you stop"></select>
           <button type="button" class="btn bd-bpm" id="bdBpmDn" title="Slower">−</button><b id="bdBpm">—</b><button type="button" class="btn bd-bpm" id="bdBpmUp" title="Faster">+</button><button type="button" class="btn" id="bdUndo" title="Undo the last change">↶</button></span></div>`;
       document.body.appendChild(el); BD.el = el;
       el.querySelectorAll(".bd-tab").forEach(b => b.addEventListener("click", () => bdGo(b.dataset.t)));
@@ -59,6 +59,13 @@
       $id("bdPlay").addEventListener("click", bdPlay);
       $id("bdStop").addEventListener("click", () => tap("stopAll"));
       $id("bdRec").addEventListener("click", () => tap("takeBtn"));
+      // (195) where the recording goes, beside ●: the top bar's own choice is off screen in this layout, so a take that
+      // went straight into a sampler slot (no take bar, no Export) couldn't be set back to → Take
+      { const bs = $id("bdRecTo"), src = () => $id("recTo");
+        const mirror = () => { const r = src(); if (!r || !bs) return; if (bs.innerHTML !== r.innerHTML) bs.innerHTML = r.innerHTML; bs.value = r.value; bs.title = r.title || "Where the recording goes"; bs.classList.toggle("away", r.value !== "take"); };
+        bs.addEventListener("focus", () => { const r = src(); if (r) r.dispatchEvent(new Event("focus")); mirror(); });
+        bs.addEventListener("change", () => { const r = src(); if (!r) return; r.value = bs.value; r.dispatchEvent(new Event("change")); mirror(); });
+        mirror(); setInterval(mirror, 1000); }
       $id("bdBpmDn").addEventListener("click", () => tap("bpmDown")); $id("bdBpmUp").addEventListener("click", () => tap("bpmUp"));
       $id("bdUndo").addEventListener("click", () => tap("hisUndoP"));
       $id("bdSub").addEventListener("click", e => { const b = e.target.closest("button[data-sub]"); if (b) bdGo(BD.tab, b.dataset.sub === "main" ? "" : b.dataset.sub); });

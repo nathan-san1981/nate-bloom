@@ -3424,3 +3424,7 @@ body.nb-wide .knobs { max-width: 1600px; }
 .nbi-meter { display: block; width: 100%; height: 8px; border-radius: 4px; background: #ffffff10; margin: 6px 0 2px; }
 .nb-bw { display: inline-flex; align-items: center; gap: 2px; padding: 0 10px; }
 .nb-bw.on b { color: var(--amber); }
+
+/* (195) where the recording goes, beside Build's ● */
+.bd-recto { height: 32px; max-width: 92px; margin-left: 4px; border-radius: 8px; background: var(--card, #1b1a22); color: inherit; border: 1px solid rgba(255,255,255,.14); font: inherit; font-size: 12px; padding: 0 4px; }
+.bd-recto.away { border-color: #e0a63a; color: #f2c46b; }
