@@ -390,6 +390,28 @@ ipcMain.handle("nb:store-install", async (e, id) => {
   catch (er) { send({ id, stage: "failed", error: String(er && er.message || er) }); return { ok: false, error: String(er && er.message || er) }; }
   finally { storeBusy.delete(id); }
 });
+// (205) a factory preset from an installed plugin's own data folder (~/.local/share/<its folder>), for the doorways:
+// the file's bytes as base64, or null. Only .fxp/.vstpreset/.xml/.syx/.sfz under those folders, at most 8 MB.
+ipcMain.handle("nb:plug-preset", async (e, rel) => {
+  try {
+    const fsp = require("fs").promises, base = path.join(require("os").homedir(), ".local", "share");
+    const full = path.resolve(base, String(rel || ""));
+    if (!full.startsWith(base + path.sep) || !/\.(fxp|vstpreset|xml|syx|sfz)$/i.test(full)) return null;
+    const st = await fsp.stat(full); if (!st.isFile() || st.size > 8 * 1024 * 1024) return null;
+    return (await fsp.readFile(full)).toString("base64");
+  } catch (er) { return null; }
+});
+// (205) the names of the presets in one of those folders (for the doorway banks), up to 2000
+ipcMain.handle("nb:plug-presets", async (e, rel) => {
+  try {
+    const fsp = require("fs").promises, base = path.join(require("os").homedir(), ".local", "share");
+    const root = path.resolve(base, String(rel || "")); if (!root.startsWith(base + path.sep)) return [];
+    const out = [];
+    async function walk(d, depth) { if (depth > 4 || out.length > 2000) return; let ents = []; try { ents = await fsp.readdir(d, { withFileTypes: true }); } catch (er) { return; }
+      for (const x of ents) { const f = path.join(d, x.name); if (x.isDirectory()) await walk(f, depth + 1); else if (/\.(fxp|vstpreset|xml|syx|sfz)$/i.test(x.name)) out.push(path.relative(base, f)); } }
+    await walk(root, 0); return out;
+  } catch (er) { return []; }
+});
 ipcMain.handle("nb:store-remove", async (e, id) => store ? store.remove(String(id), { cfgDir: app.getPath("userData") }) : false);
 ipcMain.handle("nb:levels", () => paLevels());
 ipcMain.handle("nb:levels-fix", async () => {

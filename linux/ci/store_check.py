@@ -67,9 +67,11 @@ async def main():
             if f["name"] in seen: continue
             seen.add(f["name"])
             await ev("document.getElementById('wamBtn').click()"); await pg.wait_for_timeout(800)
-            ok = await ev("""(nm => { const r = [...document.querySelectorAll('#wamList .wam-row')].find(x => x.querySelector('b') && x.querySelector('b').firstChild && x.querySelector('b').firstChild.textContent === nm);
+            ok = await ev("""(nm => { const r = [...document.querySelectorAll('#wamList .wam-row')].find(x => x.querySelector('b') && x.querySelector('b').firstChild && x.querySelector('b').firstChild.textContent === nm && [...x.querySelectorAll('button')].some(y => y.textContent === 'Play alone'));   // (205: the store's own row of the same name comes first)
               if (!r) return false; const bt = [...r.querySelectorAll('button')].find(x => x.textContent === 'Play alone'); if (!bt) return false; bt.click(); return true; })""", f["name"])
-            if not ok: print("FAIL " + f["name"] + ": no Play alone row"); await ev("document.getElementById('wamDone') && document.getElementById('wamDone').click()"); continue
+            if not ok:
+                seen_rows = await ev("""(() => ({ hidden: document.getElementById('wamSheet').hidden, rows: [...document.querySelectorAll('#wamList .wam-row')].map(r => (r.querySelector('b') && r.querySelector('b').firstChild ? r.querySelector('b').firstChild.textContent : '?') + ' [' + [...r.querySelectorAll('button')].map(x => x.textContent).join('|') + ']').slice(0, 14) }))()""")
+                print("FAIL " + f["name"] + ": no Play alone row · " + json.dumps(seen_rows)[:700]); await ev("document.getElementById('wamDone') && document.getElementById('wamDone').click()"); continue
             await pg.wait_for_timeout(4000)
             lv = await chord(pg, 1500)
             st = await ev("window.__nbPlug.state()")

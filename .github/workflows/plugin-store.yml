@@ -6,7 +6,7 @@ name: Plugin store check
 on:
   push:
     branches: [store-check]
-    paths: ["linux/plugin-store.js", "linux/ci/store_check.py", ".github/workflows/plugin-store.yml"]
+    paths: ["linux/plugin-store.js", "linux/ci/store_check.py", "linux/ci/doorway_probe.py", ".github/workflows/plugin-store.yml"]
   workflow_dispatch:
 
 permissions:
@@ -59,6 +59,7 @@ jobs:
           NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 "$BIN" --no-sandbox --disable-gpu --remote-debugging-port=9336 > /tmp/nb-store/app.txt 2>&1 &
           sleep 12
           timeout 1500 python3 linux/ci/store_check.py 9336 /tmp/nb-store /tmp/nbcfg/plugin-store.json 2>&1 | tee /tmp/nb-store/checks.txt
+          timeout 600 python3 linux/ci/doorway_probe.py 9336 /tmp/nb-store 2>&1 | tee /tmp/nb-store/doorways.txt || true
           pkill -f "nate-bloom" || true
           echo "== summary"; grep -E "^(PASS|FAIL)" /tmp/nb-store/checks.txt | sort | uniq -c | sort -rn | head -80
       - uses: actions/upload-artifact@v4

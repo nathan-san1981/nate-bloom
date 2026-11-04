@@ -7,7 +7,7 @@
   // ======================================================================
   if (window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !window.NB_LITE && window.NBEngine) {
     ENGINES.alpha = { name: "Alpha Juno", short: "Alpha", after: "after Roland Alpha Juno · its DCO from jc303",
-      knobs: [["wave", "Wave", 0.45], ["pw", "PW", 0.5], ["pwm", "PWM", 0.6], ["sub", "Sub", 0.5], ["dive", "Dive", 0.5], ["chorus", "Chorus", 0.9], ["cutoff", "Cutoff", 0.75], ["res", "Reso", 0.15], ["attack", "Attack", 0.02], ["release", "Release", 0.45]] };
+      knobs: [["wave", "Wave", 0.45], ["pw", "PW", 0.5], ["pwm", "PWM", 0.9], ["sub", "Sub", 0.3], ["dive", "Dive", 0.5], ["chorus", "Chorus", 0.9], ["cutoff", "Cutoff", 0.75], ["res", "Reso", 0.15], ["attack", "Attack", 0.02], ["release", "Release", 0.45]] };
     NEW_ENGINES.alpha = ENGINES.alpha; TAB_SUB.alpha = "Alpha Juno";
     if (ENGINES.hoover) { ENGINES.hoover.name = "Hoover (classic)"; TAB_SUB.hoover = "classic"; }
     {
@@ -26,7 +26,7 @@
       }; }
     // presets in Classic Synths: the hoover family and the Alpha Juno's own sounds
     CLASSIC_PRESETS.push(
-      ["Hoover · Alpha Juno", "alpha", { alpha: { wave: 0.45, pw: 0.55, pwm: 0.7, sub: 0.6, dive: 0.55, chorus: 0.95, cutoff: 0.9, res: 0.1, attack: 0.01, release: 0.5 } }, { sub: "the WhatThe hoover · Dominator, rave", oct: 0, fx: { drive: 0.1, wobble: 0, echo: 0.15, space: 0.35 } }],
+      ["Hoover · Alpha Juno", "alpha", { alpha: { wave: 0.45, pw: 0.55, pwm: 0.9, sub: 0.3, dive: 0.55, chorus: 0.95, cutoff: 0.9, res: 0.1, attack: 0.01, release: 0.5 } }, { sub: "the WhatThe hoover · Dominator, rave", oct: 0, fx: { drive: 0.1, wobble: 0, echo: 0.15, space: 0.35 } }],
       ["Hoover Soft", "alpha", { alpha: { wave: 0.45, pw: 0.45, pwm: 0.45, sub: 0.35, dive: 0.25, chorus: 0.7, cutoff: 0.55, res: 0.1, attack: 0.06, release: 0.6 } }, { sub: "gentler hoover, less dive", oct: 0, fx: { drive: 0.05, wobble: 0.05, echo: 0.25, space: 0.45 } }],
       ["Alpha Strings", "alpha", { alpha: { wave: 0.25, pw: 0.5, pwm: 0.35, sub: 0.15, dive: 0, chorus: 0.95, cutoff: 0.5, res: 0.05, attack: 0.45, release: 0.7 } }, { sub: "slow PWM strings with the Juno chorus", oct: 0, fx: { drive: 0, wobble: 0.1, echo: 0.2, space: 0.6 } }],
       ["Alpha Bass", "alpha", { alpha: { wave: 0.1, pw: 0.5, pwm: 0, sub: 0.8, dive: 0.05, chorus: 0, cutoff: 0.35, res: 0.25, attack: 0, release: 0.2 } }, { sub: "saw and sub, punchy", oct: -1, fx: { drive: 0.15, wobble: 0, echo: 0, space: 0.08 } }],

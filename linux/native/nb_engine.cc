@@ -217,7 +217,9 @@ struct Gen {
         if (ajOn) { double d = ajDuty; if (ajDepth > 0 && ajRate > 0) { d += ajDepth * 0.5 * sin(2 * M_PI * ajPh); ajPh += ajRate * 16 * isr; if (ajPh >= 1) ajPh -= 1; } for (int o = 0; o < nosc; o++) if ((int)wave[o] == 6) aj[o].setDuty(d); }
         sRat = sR1 + (sR0 - sR1) * exp(-t / sT);
         for (int o = 0; o < nosc; o++) {
-          const double d = (detT[o] > 0 && t < detT[o]) ? det0[o] + (det[o] - det0[o]) * (t / detT[o]) : det[o];
+          const double d = (detT[o] > 0 && t < detT[o]) ? det0[o] + (det[o] - det0[o]) * (t / detT[o])
+            : detT[o] < 0 ? det[o] + (det0[o] - det[o]) * exp(t / detT[o])   // (205) a negative time: an exponential glide, -detT its time constant (the Alpha Juno's pitch envelope)
+            : det[o];
           inc[o] = f * mul[o] * gl * exp2((common + d) / 1200.0) * isr;
         }
       }
@@ -678,7 +680,7 @@ static napi_value TableN(napi_env env, napi_callback_info info) {
 static napi_value Stats(napi_env env, napi_callback_info info) {
   napi_value o; napi_create_object(env, &o);
   auto set = [&](const char* k, double v) { napi_set_named_property(env, o, k, num(env, v)); };
-  set("caps", 204);   // (204) what this engine can play: 204 = the sync oscillator (wave 7)
+  set("caps", 205);   // what this engine can play: 204 = the sync oscillator (wave 7), 205 = exponential pitch glides (detT < 0)
   if (!E) { set("running", 0); return o; }
   set("running", E->run.load() ? 1 : 0); set("voices", E->nVoices.load()); set("peakVoices", E->peakVoices.load()); set("threads", E->nwork + 1);
   set("blockUs", E->renderUs.load()); set("blockMaxUs", E->renderMaxUs.load()); set("blocks", (double)E->blocks.load()); set("caughtUp", (double)E->late.load());

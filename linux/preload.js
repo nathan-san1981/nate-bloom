@@ -131,6 +131,8 @@ if (pl && !process.env.NB_NO_PLUGINS) {
     // (199) free, open-source plugins from their projects' own releases
     store: { list: () => ipcRenderer.invoke("nb:store-list"), install: id => ipcRenderer.invoke("nb:store-install", String(id)), remove: id => ipcRenderer.invoke("nb:store-remove", String(id)),
       onProgress: cb => ipcRenderer.on("nb:store-progress", (e, m) => { try { cb(m); } catch (er) {} }) },
+    preset: rel => ipcRenderer.invoke("nb:plug-preset", String(rel)),   // (205) a factory preset file, base64
+    presets: rel => ipcRenderer.invoke("nb:plug-presets", String(rel)),
     list: () => ipcRenderer.invoke("nb:plug-list"),
     scan: full => ipcRenderer.invoke("nb:plug-scan", !!full),
     addFolder: () => ipcRenderer.invoke("nb:plug-folder"),
