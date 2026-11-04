@@ -174,6 +174,7 @@
     if (curInst) o.push(["inst", "Instrument · " + (curInst.name || "")]);
     for (let i = 0; i < NSLOTS; i++) if (sampBuf[i]) o.push(["s:" + i, "Sampler S" + (i + 1) + " · " + baseName(state.samp.slots[i].name).slice(0, 20)]);
     if (window.__hw && window.__hw.shown && window.__hw.shown()) o.push(["hw", window.__hw.name]);
+    if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => o.push(["hwx:" + X.id, X.name]));   // (219)
     return o;
   }
   function mdRouteVoices(r, m, scale, when) {
@@ -184,6 +185,7 @@
       else if (r === "inst") { const v = makeInstVoice(m, when, scale); if (v) out.push(v); }
       else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), when, scale); if (v) out.push(v); }
       else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m, when); if (v) out.push(v); }
+      else if (r.startsWith("hwx:") && window.__hwx) { const X = window.__hwx.get(r.slice(4)); const v = X && X.voice(m, when); if (v) out.push(v); }
       else if (r === "stack") { (melodicVoices(m, when, scale) || []).forEach(v => { if (v) out.push(v); }); }   // (187: a bridge playing what's playing)
     } catch (er) {}
     return out;

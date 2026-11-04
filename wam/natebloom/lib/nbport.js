@@ -14,11 +14,14 @@ class NBPortProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() { return DESC; }
   constructor(o) {
     super(o);
-    const { module, kind } = o.processorOptions, env = {};
+    const { module, kind, snap, pages } = o.processorOptions, env = {};
     for (const im of WebAssembly.Module.imports(module)) if (im.kind === "function") env[im.name] = MATHS[im.name] || (() => 0);
     this.ex = new WebAssembly.Instance(module, { env }).exports;
-    if (this.ex.__wasm_call_ctors) this.ex.__wasm_call_ctors();
-    this.ex.nb_init(sampleRate);
+    // (219) the engine's start-up was worked out in a background thread: its memory is copied in, so the sound thread
+    // doesn't stop for it (the Juno 106's took a quarter of a second here, and every sound dropped out meanwhile)
+    let ready = false;
+    if (snap && pages) { try { const m = this.ex.memory, cur = m.buffer.byteLength / 65536; if (pages > cur) m.grow(pages - cur); new Uint8Array(m.buffer).set(new Uint8Array(snap)); ready = true; } catch (e) {} }
+    if (!ready) { if (this.ex.__wasm_call_ctors) this.ex.__wasm_call_ctors(); this.ex.nb_init(sampleRate); }
     this.fx = kind === "effect"; this.n = this.ex.nb_count(); this.last = new Float32Array(DESC.length).fill(NaN);
     this.q = []; this.dead = false; this.views();
     this.port.onmessage = e => { const d = e.data;
@@ -77,9 +80,48 @@ const assets = new Map();
 function loadAssets(base) {
   if (!assets.has(base)) assets.set(base, (async () => {
     const [meta, wasm] = await Promise.all([fetch(base + "meta.json").then(r => r.json()), fetch(base + "dsp.wasm").then(r => r.arrayBuffer())]);
-    return { meta, module: await WebAssembly.compile(wasm) };
+    return { meta, base, module: await WebAssembly.compile(wasm) };
   })().catch(e => { assets.delete(base); throw e; }));
   return assets.get(base);
+}
+// (219) a plugin's start-up (nb_init: its tables, its voices) in a background thread, at this sample rate: the memory it
+// leaves is what a new instance copies in. Then the same thread plays it for a moment (notes, or sound through an
+// effect), so the code the first notes need is compiled before they come.
+const WARM = String.raw`
+const MATHS = { sin: Math.sin, cos: Math.cos, tan: Math.tan, exp: Math.exp, exp2: x => Math.pow(2, x), log: Math.log, log2: Math.log2, log10: Math.log10, pow: Math.pow,
+  tanh: Math.tanh, atan: Math.atan, atan2: Math.atan2, asin: Math.asin, acos: Math.acos, sinh: Math.sinh, cosh: Math.cosh, asinf: Math.asin, acosf: Math.acos,
+  expm1: Math.expm1, log1p: Math.log1p, cbrt: Math.cbrt, hypot: Math.hypot };
+onmessage = e => {
+  const { id, module, sr, fx, init } = e.data;
+  try {
+    const env = {}; for (const im of WebAssembly.Module.imports(module)) if (im.kind === "function") env[im.name] = MATHS[im.name] || (() => 0);
+    const ex = new WebAssembly.Instance(module, { env }).exports;
+    if (ex.__wasm_call_ctors) ex.__wasm_call_ctors(); ex.nb_init(sr);
+    const u = new Uint8Array(ex.memory.buffer); let end = u.length; while (end > 0 && u[end - 1] === 0) end--;
+    const snap = u.slice(0, end).buffer, pages = u.length / 65536;
+    postMessage({ id, snap, pages }, [snap]);
+    const P = new Float32Array(ex.memory.buffer, ex.nb_params(), ex.nb_count()); (init || []).forEach(([k, v]) => { P[k] = v; });
+    for (let b = 0; b < 400; b++) {
+      if (fx) { const L = new Float32Array(ex.memory.buffer, ex.nb_in(0), 128), R = new Float32Array(ex.memory.buffer, ex.nb_in(1), 128); for (let i = 0; i < 128; i++) { L[i] = R[i] = Math.sin((b * 128 + i) * 0.031) * 0.4 * (b % 60 < 40 ? 1 : 0); } }
+      else { if (b % 60 === 0) for (let k = 0; k < 8; k++) ex.nb_midi(0x90, 36 + k * 5 + (b / 60 % 3), 60 + k * 8); if (b % 60 === 40) for (let k = 0; k < 8; k++) ex.nb_midi(0x80, 36 + k * 5 + ((b - 40) / 60 % 3), 0);
+        if (b === 100) ex.nb_midi(0xE0, 0, 96); if (b === 140) ex.nb_midi(0xE0, 0, 64); if (b === 160) ex.nb_midi(0xB0, 1, 90); if (b === 200) ex.nb_midi(0xB0, 64, 127); if (b === 260) ex.nb_midi(0xB0, 64, 0); }
+      ex.nb_render(128);
+    }
+  } catch (er) { postMessage({ id, err: String(er && er.message || er) }); }
+};`;
+let warmW = null, warmN = 0;
+const warmCbs = new Map(), snaps = new Map();
+function snapFor(base, A, sr) {
+  const k = base + "@" + sr;
+  if (!snaps.has(k)) snaps.set(k, new Promise(res => {
+    try {
+      if (!warmW) { warmW = new Worker(URL.createObjectURL(new Blob([WARM], { type: "text/javascript" }))); warmW.onmessage = e => { const f = warmCbs.get(e.data.id); if (f) { warmCbs.delete(e.data.id); f(e.data); } }; }
+      const id = ++warmN, to = setTimeout(() => { warmCbs.delete(id); res(null); }, 5000);
+      warmCbs.set(id, d => { clearTimeout(to); res(d && d.snap ? d : null); });
+      warmW.postMessage({ id, module: A.module, sr, fx: A.meta.kind !== "instrument", init: A.meta.params.map(p => [p.index, p.init]) });
+    } catch (e) { res(null); }
+  }));
+  return snaps.get(k).then(d => { if (!d) snaps.delete(k); return d; });
 }
 const procName = M => "nb-port-" + M.id + "-" + M.build;
 async function ensureProcessor(ctx, M) {
@@ -150,8 +192,8 @@ export function make(moduleUrl) {
     }
     async createAudioNode(initialState) {
       const ctx = this.audioContext, A = this._A, M = A.meta;
-      await ensureProcessor(ctx, M);
-      const w = new AudioWorkletNode(ctx, procName(M), { numberOfInputs: M.kind === "instrument" ? 0 : 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { module: A.module, kind: M.kind } });
+      const [, S] = await Promise.all([ensureProcessor(ctx, M), snapFor(A.base, A, ctx.sampleRate)]);
+      const w = new AudioWorkletNode(ctx, procName(M), { numberOfInputs: M.kind === "instrument" ? 0 : 1, numberOfOutputs: 1, outputChannelCount: [2], processorOptions: { module: A.module, kind: M.kind, snap: S ? S.snap : null, pages: S ? S.pages : 0 } });
       const pm = await ParamMgrFactory.create(this, { internalParamsConfig: Object.fromEntries(w.parameters) });
       const node = new NBPortNode(ctx); node._hasInput = M.kind !== "instrument"; node._M = M; node._pidx = Object.fromEntries(M.params.map(p => [p.id, p.index])); node.setup(w, pm);
       if (initialState) { try { await node.setState(initialState); } catch (e) {} }

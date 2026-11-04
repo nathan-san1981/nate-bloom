@@ -1,0 +1,63 @@
+  // ======================================================================
+  // 219: a sound taken out of Playing stops sounding, its held notes too. Hold off used to leave the notes it had
+  // latched ringing ("Hold: Off · 7 ringing"), on whatever sound they were played with, after that sound was taken
+  // out (Only, ✕, swapping it for another): seven Hoover notes kept playing under the Supersaw. Every note a sound
+  // plays is noted with the sound it belongs to; when that sound is no longer in Playing its notes stop, and a held
+  // note with nothing left sounding is let go. (Sounds still playing keep their held notes, as before.)
+  // ======================================================================
+  {
+    const REG = new Map();   // tag → the voices of that sound still sounding
+    let making = null;       // the voices made for the note being made right now
+    const tagOf = c => {
+      if (!c) return "";
+      if (ENGINES[c.key]) return "e:" + c.key + (c.copy != null ? "#" + c.copy : "");
+      if (/^lib\d+$/.test(c.key || "")) { const pt = state.lib.parts[+c.key.slice(3)]; return "l:" + (pt && pt.id || c.key); }
+      return String(c.key || "");
+    };
+    const tagOfItem = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    function track(tag, v) {
+      if (!v || typeof v.stop !== "function" || v.__sg) return v;
+      v.__sg = tag; let s = REG.get(tag); if (!s) REG.set(tag, s = new Set()); s.add(v);
+      const st = v.stop; v.stop = function () { s.delete(v); if (v.__gone) return; v.__gone = true; return st.apply(this, arguments); };
+      if (making) making.push(v);
+      return v;
+    }
+    const vcG = voiceComponents;
+    voiceComponents = function () {
+      const r = vcG.apply(this, arguments);
+      if (!Array.isArray(r)) return r;
+      return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make;
+        return Object.assign({}, c, { __sg: 1, make() { return track(tag, mk.apply(this, arguments)); } }); });
+    };
+    // which voices each key's note (and each held note) is made of
+    const mnG = makeNote;
+    makeNote = function () {
+      const outer = making, mine = []; making = mine;
+      let n; try { n = mnG.apply(this, arguments); } finally { making = outer; if (outer) outer.push(...mine); }
+      if (n && typeof n === "object") n.__parts = mine;
+      return n;
+    };
+    function sweep() {
+      let its; try { its = window.__stk.items(); } catch (e) { return; }
+      const keep = new Set(its.map(tagOfItem)); let n = 0;
+      for (const [tag, s] of REG) {
+        if (!s.size) { REG.delete(tag); continue; }
+        const base = tag.replace(/#\d+$/, "");
+        if (keep.has(tag) || (tag.startsWith("e:") && !tag.includes("#") && keep.has(base))) continue;
+        for (const v of [...s]) { try { v.stop(); } catch (e) {} n++; }
+        REG.delete(tag);
+      }
+      // an arp left running on a sound that's gone (it carried on after a switch): it stops too
+      try { for (const p of PARTS.slice()) { const ls = (p.layers && p.layers.length ? p.layers : [p.eng]).filter(id => ENGINES[id]); if (ls.length && !ls.some(id => keep.has("e:" + id))) { dropPart(p, true); n++; } } } catch (e) {}
+      if (!n) return;
+      // held notes with nothing left sounding: let go, so Hold and the Still playing strip say what's really there
+      let let_ = 0;
+      for (const [root, h] of [...heldVoices]) { const ps = h && h.__parts; if (ps && ps.length && ps.every(v => v.__gone)) { heldVoices.delete(root); try { markTones(h.tones, markHeld, false); } catch (e) {} let_++; } }
+      if (let_) { try { updateHoldBtn(); } catch (e) {} }
+      try { window.__nbAdd && window.__nbAdd("gone", n + " notes stopped with the sound taken out" + (let_ ? " · " + let_ + " held let go" : "")); } catch (e) {}
+    }
+    window.__nbSweep = sweep;
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); setTimeout(sweep, 0); return r; }; }
+    setInterval(sweep, 1000);   // (and changes that don't redraw the screen)
+    window.__nbVoiceReg = () => [...REG].map(([t, s]) => [t, s.size]);
+  }

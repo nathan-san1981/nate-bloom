@@ -357,4 +357,5 @@
       // the strip's controller dot says which one it is (the KeyLab or the MiniLab)
       setInterval(() => { const kl = ML.dev === "kl" && !!(window.__klHere && window.__klHere()); document.querySelectorAll('.sh-dot[data-k="minilab"]').forEach(d => { const t = kl ? "KeyLab" : "MiniLab"; if (d.textContent !== t) d.textContent = t; }); }, 1500);
       window.__hwDbg = { hwPort, inLatMs, hwAt, hwWire, hwOpen };
+      Object.assign(H, { models: MODELS, modelOf, modelId: () => model().id, outsAll: outs, at: hwAt, pname });   // (219) for the other synths plugged in (801)
     }

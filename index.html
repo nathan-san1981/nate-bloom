@@ -12482,6 +12482,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     if (curInst) o.push(["inst", "Instrument · " + (curInst.name || "")]);
     for (let i = 0; i < NSLOTS; i++) if (sampBuf[i]) o.push(["s:" + i, "Sampler S" + (i + 1) + " · " + baseName(state.samp.slots[i].name).slice(0, 20)]);
     if (window.__hw && window.__hw.shown && window.__hw.shown()) o.push(["hw", window.__hw.name]);
+    if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => o.push(["hwx:" + X.id, X.name]));   // (219)
     return o;
   }
   function mdRouteVoices(r, m, scale, when) {
@@ -12492,6 +12493,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       else if (r === "inst") { const v = makeInstVoice(m, when, scale); if (v) out.push(v); }
       else if (r.startsWith("s:")) { const v = makeSampleVoice(m, +r.slice(2), when, scale); if (v) out.push(v); }
       else if (r === "hw" && window.__hw) { const v = window.__hw.voice(m, when); if (v) out.push(v); }
+      else if (r.startsWith("hwx:") && window.__hwx) { const X = window.__hwx.get(r.slice(4)); const v = X && X.voice(m, when); if (v) out.push(v); }
       else if (r === "stack") { (melodicVoices(m, when, scale) || []).forEach(v => { if (v) out.push(v); }); }   // (187: a bridge playing what's playing)
     } catch (er) {}
     return out;
@@ -24580,6 +24582,7 @@ registerProcessor("nb-wave", NBWave);
   {
     const NOSTK = () => ({ syn: false, lib: false, inst: false, samp: -1, hw: false, off: false, f: "" });   // (173) off: the last sound was taken out, nothing plays from the keys
     const HWX = () => window.__hw || null;   // (173) the hardware synth (800): played over MIDI, heard through the audio input
+    const XHW = id => (window.__hwx && window.__hwx.get(id)) || null;   // (219) the other hardware synths plugged in (801): the MicroFreak beside the Minilogue
     if (!state.stack || typeof state.stack !== "object") state.stack = NOSTK();
     const S = () => state.stack || (state.stack = NOSTK());
     const isSyn = id => !!ENGINES[id] && (id !== "fm" || betaOn);
@@ -24590,7 +24593,7 @@ registerProcessor("nb-wave", NBWave);
     let libSel = 0;
     const ADD = { on: false }, pend = new Set();   // (library slots a sound is loading into)
     function groupsOn(e = melo()) {
-      const s = S(), g = { syn: !!s.syn, lib: !!s.lib, inst: !!s.inst, samp: Number.isInteger(s.samp) ? s.samp : -1, hw: !!s.hw && !!HWX() };
+      const s = S(), g = { syn: !!s.syn, lib: !!s.lib, inst: !!s.inst, samp: Number.isInteger(s.samp) ? s.samp : -1, hw: !!s.hw && !!HWX(), hwx: (Array.isArray(s.hwx) ? s.hwx : []).filter(id => XHW(id)) };
       const f = grp(e);
       // (173) after the last sound went out, anything that turns a synth on again (an engine tab, the Live screen, a
       // controller) or loads a library sound brings the keys back
@@ -24609,6 +24612,7 @@ registerProcessor("nb-wave", NBWave);
       if (g.inst) out.push(...vc0("inst"));
       if (g.samp >= 0) { const sl = g.samp; out.push({ key: "samp", name: "Sampler", accepts: () => true, make: (m, when, scale = 1) => makeSampleVoice(m, sl, when, scale) }); }
       if (g.hw) { const H = HWX(); out.push({ key: "hw", name: H.name, accepts: () => true, make: (m, when, scale = 1) => H.voice(m, when, scale) }); }
+      g.hwx.forEach(id => { const X = XHW(id); out.push({ key: "hwx:" + id, name: X.name, accepts: () => true, make: (m, when) => X.voice(m, when) }); });
       return out;
     }
     voiceComponents = function (eng = state.engine) {
@@ -24621,7 +24625,7 @@ registerProcessor("nb-wave", NBWave);
     // (the MicroFreak: its own sound through pass-through, and a plugin from its keys and knobs). ----
     const CTLK = "nightbloom-ctlmap"; let CTL = {}; try { CTL = JSON.parse(localStorage.getItem(CTLK) || "{}") || {}; } catch (e) {}
     const ctlSave = () => { try { localStorage.setItem(CTLK, JSON.stringify(CTL)); } catch (e) {} };
-    const itKey = it => it.t === "syn" ? "e:" + it.id : it.t === "lib" ? "l:" + it.id : it.t === "samp" ? "samp" : it.t;
+    const itKey = it => it.t === "syn" ? "e:" + it.id : it.t === "lib" ? "l:" + it.id : it.t === "samp" ? "samp" : it.t === "hwx" ? "hwx:" + it.id : it.t;
     const compKey = c => ENGINES[c.key] ? "e:" + c.key : /^lib\d+$/.test(c.key || "") ? "l:" + ((state.lib.parts[+c.key.slice(3)] || {}).id || "") : c.key;
     function ctlAllows(k, src, srcStack) { const L = CTL[k]; if (!L || !L.length) return src == null || srcStack !== false; return src == null || L.includes(src); }
     window.__nbCtl = { allows: ctlAllows, get: k => CTL[k] || [], set(k, L) { if (L && L.length) CTL[k] = L.slice(); else delete CTL[k]; ctlSave(); try { paint(); } catch (e) {} },
@@ -24680,12 +24684,13 @@ registerProcessor("nb-wave", NBWave);
       if (g.inst) out.push({ t: "inst", name: curInst ? curInst.name : "My instrument", kind: "instrument", wait: !curInst });
       if (g.samp >= 0) { const sl = state.samp.slots[g.samp]; out.push({ t: "samp", slot: g.samp, name: "Sampler S" + (g.samp + 1) + (sl && sl.name ? " · " + baseName(sl.name) : ""), kind: "sampler" }); }
       if (g.hw) { const H = HWX(); out.push({ t: "hw", name: H.name, kind: "hardware", wait: !H.ready(), why: H.why() }); }
+      g.hwx.forEach(id => { const X = XHW(id); out.push({ t: "hwx", id, name: X.name, kind: "hardware", wait: !X.ready(), why: X.why() }); });
       return out;
     }
     const libSelOn = () => { const ps = state.lib.parts; return ps[libSel] && ps[libSel].id ? libSel : ps.findIndex(p => p && p.id); };
     if (Number.isInteger(S().ls)) libSel = S().ls;   // (the highlighted library sound, kept across a reload)
     const isSel = it => it.t === "syn" ? state.engine === it.id : it.t === "lib" ? state.engine === "lib" && it.i === libSelOn() : it.t === "inst" ? state.engine === "inst" : false;
-    const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : a.t === "syn2" ? a.id === b.id && a.ci === b.ci : true);
+    const same = (a, b) => a.t === b.t && (a.t === "syn" ? a.id === b.id : a.t === "lib" ? a.i === b.i : a.t === "syn2" ? a.id === b.id && a.ci === b.ci : a.t === "hwx" ? a.id === b.id : true);
     let toastT = 0;
     function say(msg) { const el = document.getElementById("uiToast"); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2800); }
     // ---- (172) mute: the sound stays in what's playing, silent, until it's unmuted (its bus does it, see lvMuted) ----
@@ -24696,11 +24701,12 @@ registerProcessor("nb-wave", NBWave);
       if (it.t === "inst") return state.inst;
       if (it.t === "samp") return state.samp.slots[it.slot];
       if (it.t === "hw") return HWX();
+      if (it.t === "hwx") return XHW(it.id);
       return null;
     }
     const isMuted = it => { const h = muteHome(it); return !!(h && h.mute); };
     function setMute(it, on) { const h = muteHome(it); if (!h) return; if (on) h.mute = true; else delete h.mute;
-      if (on && it.t === "hw") { try { h.allOff(); } catch (e) {} } }   // (183) the Minilogue's held notes stop too (its sound also reaches the headphones without us)
+      if (on && (it.t === "hw" || it.t === "hwx")) { try { h.allOff(); } catch (e) {} } }   // (183) the Minilogue's held notes stop too (its sound also reaches the headphones without us)
     function toggleMute(it) {
       start();
       const on = !isMuted(it); setMute(it, on);
@@ -24717,6 +24723,7 @@ registerProcessor("nb-wave", NBWave);
       if (state.inst && state.inst.mute && !has(x => x.t === "inst")) { delete state.inst.mute; n++; }
       state.samp.slots.forEach((sl, i) => { if (sl && sl.mute && !has(x => x.t === "samp" && x.slot === i)) { delete sl.mute; n++; } });
       { const H = HWX(); if (H && H.mute && !has(x => x.t === "hw")) { delete H.mute; n++; } }
+      if (window.__hwx) window.__hwx.all().forEach(X => { if (X.mute && !has(x => x.t === "hwx" && x.id === X.id)) { delete X.mute; n++; } });
       if (n) { try { lvApply(); } catch (e) {} }
     }
     const SPK = muted => '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M3 9.5h4l5-4.2v13.4l-5-4.2H3z" fill="currentColor"/>' +
@@ -24744,9 +24751,10 @@ registerProcessor("nb-wave", NBWave);
         try { setSoundText(c.pname || ENGINES[it.id].name, ENGINES[it.id].name + " · tap to browse"); } catch (e) {}
         it = { t: "syn", id: it.id };
       }
-      if (it.t !== "samp" && it.t !== "hw") s.off = false;
+      if (it.t !== "samp" && it.t !== "hw" && it.t !== "hwx") s.off = false;
       if (it.t === "samp") { say(it.name + " plays along with the keys. Its sample and settings are in Samples."); return; }
       if (it.t === "hw") { const H = HWX(); if (H) H.open(); return; }
+      if (it.t === "hwx") { const X = XHW(it.id); if (X) X.open(); return; }
       const f0 = grp(state.engine), f1 = it.t;
       if (f0 && f0 !== f1) s[f0] = true;
       s[f1] = false;
@@ -24766,7 +24774,7 @@ registerProcessor("nb-wave", NBWave);
     function drop(it, quiet) {
       if (it.t === "syn2") { const L = state.layers[it.id].copies || []; L.splice(it.ci, 1); if (!L.length) delete state.layers[it.id].copies; renderEngine(); save(); if (!quiet) say(it.name + " is out"); return true; }
       const all = items(), rest = all.filter(x => !same(x, it)), s = S();
-      const along = x => x.t === "samp" || x.t === "hw";   // (they play along; something of Nate Bloom's has the controls)
+      const along = x => x.t === "samp" || x.t === "hw" || x.t === "hwx";   // (they play along; something of Nate Bloom's has the controls)
       if (!along(it) && !rest.some(x => !along(x))) {   // (173) the last of Nate Bloom's sounds: out, and the keys play nothing (or only what plays along)
         setMute(it, false); s.off = true;
         if (it.t === "syn") { state.layers[it.id].on = false; s.syn = false; }
@@ -24783,6 +24791,7 @@ registerProcessor("nb-wave", NBWave);
       else if (it.t === "lib") { removePart(it.i); if (!state.lib.parts.some(p => p && p.id)) s.lib = false; }
       else if (it.t === "inst") s.inst = false;
       else if (it.t === "hw") { s.hw = false; try { HWX().allOff(); } catch (e) {} }
+      else if (it.t === "hwx") { s.hwx = (s.hwx || []).filter(x => x !== it.id); try { XHW(it.id).allOff(); } catch (e) {} }
       else s.samp = -1;
       const gone = it.t === "syn" ? !synOn().length : it.t === "lib" ? !state.lib.parts.some(p => p && p.id) : it.t === "inst";
       if (wasSel || (gone && grp(state.engine) === it.t)) {
@@ -24806,6 +24815,7 @@ registerProcessor("nb-wave", NBWave);
     }
     function only(it) {
       const s = S(); s.syn = s.lib = s.inst = false; s.samp = -1; if (s.hw) { s.hw = false; try { HWX().allOff(); } catch (e) {} }
+      if (s.hwx && s.hwx.length) { s.hwx.forEach(id => { try { XHW(id).allOff(); } catch (e) {} }); s.hwx = []; }
       setMute(it, false); s.off = false;   // (172) "Only" means hear it
       if (it.t === "syn") { for (const k in state.layers) state.layers[k].on = k === it.id; state.engine = it.id; state.melodic = it.id; }
       else if (it.t === "lib") { for (let k = MAX_PARTS - 1; k >= 0; k--) if (k !== it.i && state.lib.parts[k]) removePart(k); libSel = 0; state.lib.parts.forEach(p => { if (p) p.on = true; }); state.engine = "lib"; }
@@ -25072,17 +25082,20 @@ registerProcessor("nb-wave", NBWave);
       Object.keys(ENGINES).forEach(id => { if (isSyn(id) && !(tabCfg.hidden || []).includes(id)) out.push({ id: "e:" + id, eng: id, name: ENGINES[id].short || ENGINES[id].name, sub: (typeof TAB_SUB !== "undefined" && TAB_SUB[id]) || "" }); });
       out.push({ id: "e:inst", name: "Inst", sub: "SF2 · SFZ" });
       { const H = HWX(); if (H && H.shown()) out.splice((tabCfg.sounds || []).length, 0, { id: "hw:1", hw: true, name: H.short || H.name, sub: H.present() ? "hardware" : "not plugged in" }); }   // (173)
+      if (window.__hwx) { let at = (tabCfg.sounds || []).length + (out.some(q => q.hw) ? 1 : 0); window.__hwx.all().filter(X => X.shown()).forEach(X => out.splice(at++, 0, { id: "hwx:" + X.id, hwx: X.id, name: X.short, sub: X.present() ? "hardware" : "not plugged in" })); }   // (219) the MicroFreak too
       return out;
     }
     const qkEntry = q => q.id.startsWith("e:") ? { id: q.id, name: q.eng ? ENGINES[q.eng].name : "My instrument", cat: "engines" } : entryById(q.id);
     function qkPlaying(q) {
       if (q.hw) return groupsOn().hw;
+      if (q.hwx) return groupsOn().hwx.includes(q.hwx);
       if (q.id.startsWith("e:") || q.id.startsWith("w:")) return inStack(q.id);
       if (q.id.startsWith("m:")) return groupsOn().inst && state.cur && state.cur.id === q.id;
       return false;
     }
     async function qkAlone(q) {
       start();
+      if (q.hwx) { const X = XHW(q.hwx); if (X) X.open(); return; }
       if (q.hw) { const H = HWX(); if (H) H.open(); return; }   // (it can't play alone: a sound of Nate Bloom's always has the controls)
       if (q.id.startsWith("my:")) { try { useSoundTab(q.id); } catch (e) {} return; }
       const e = qkEntry(q); if (!e) return;
@@ -25091,7 +25104,7 @@ registerProcessor("nb-wave", NBWave);
       paint();
     }
     // (172) the playing sound a Quick tile stands for
-    const qkItemOf = (q, its) => its.find(x => (q.hw && x.t === "hw") || (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
+    const qkItemOf = (q, its) => its.find(x => (q.hw && x.t === "hw") || (q.hwx && x.t === "hwx" && x.id === q.hwx) || (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
     async function qkToggle(q) {
       start();
       if (qkPlaying(q)) {
@@ -25099,6 +25112,7 @@ registerProcessor("nb-wave", NBWave);
         if (it) drop(it); return;
       }
       if (q.hw) { S().hw = true; keepFocusPlaying(); renderEngine(); save(); const H = HWX(); if (H) H.added(); return; }
+      if (q.hwx) { const s = S(); s.hwx = (s.hwx || []).filter(x => x !== q.hwx).concat(q.hwx); keepFocusPlaying(); renderEngine(); save(); const X = XHW(q.hwx); if (X) X.added(); return; }
       const e = qkEntry(q); if (!e) return;
       await together(e); paint();
     }
@@ -25106,7 +25120,7 @@ registerProcessor("nb-wave", NBWave);
     function paintQuick() {
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
-      const togOn = q => q.hw || (!q.id.startsWith("my:") && togOK(q.id));
+      const togOn = q => q.hw || q.hwx || (!q.id.startsWith("my:") && togOK(q.id));
       const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
@@ -32973,7 +32987,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 218;
+    window.NB_BUILD = 219;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -34888,6 +34902,148 @@ registerProcessor("nb-rec", NBRec);`;
       // the strip's controller dot says which one it is (the KeyLab or the MiniLab)
       setInterval(() => { const kl = ML.dev === "kl" && !!(window.__klHere && window.__klHere()); document.querySelectorAll('.sh-dot[data-k="minilab"]').forEach(d => { const t = kl ? "KeyLab" : "MiniLab"; if (d.textContent !== t) d.textContent = t; }); }, 1500);
       window.__hwDbg = { hwPort, inLatMs, hwAt, hwWire, hwOpen };
+      Object.assign(H, { models: MODELS, modelOf, modelId: () => model().id, outsAll: outs, at: hwAt, pname });   // (219) for the other synths plugged in (801)
+    }
+    // ======================================================================
+    // 219: every hardware synth that's plugged in gets its own Quick sound, not only the one the Minilogue sheet is set
+    // to: the MicroFreak beside the Minilogue XD. Each plays over its own USB MIDI port with whatever else is playing
+    // (keys, chords, Hold, the Arp, the sequencer), with its own channel, mute and ✕ in Playing. Its sound reaches you
+    // from its own outputs (a mixer, the interface's direct monitoring); if it comes into the computer, pick that input
+    // in its sheet and Nate Bloom mixes it in and records it.
+    // ======================================================================
+    {
+      const H = window.__hw;
+      if (H && H.models) {
+        const KEY = "nightbloom-hwx"; let CFG = {};
+        try { CFG = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) {}
+        const cfgSave = () => { try { localStorage.setItem(KEY, JSON.stringify(CFG)); } catch (e) {} };
+        const outs = () => H.outsAll();
+        const INST = new Map();
+        const outMs = () => ctx ? ((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000 : 0;
+        const inMs = () => 12 + (ctx && ctx.baseLatency ? ctx.baseLatency * 1000 : 0);
+        function make(m) {
+          const c = CFG[m.id] || (CFG[m.id] = { ch: 1, out: "", dev: "", pick: "12", level: 0.8, seen: false });
+          const X = { id: m.id, name: m.name, short: m.short, cfg: c, notes: new Map(), mute: false, src: null, stream: null, bus: null, err: "", label: "" };
+          X.port = () => {
+            const all = outs(); if (c.out) { const o = all.find(o => mdKey("out", o) === c.out); if (o) return o; }
+            const xs = all.filter(o => m.re.test(H.pname(o)));
+            return (m.port && xs.find(o => m.port.test(o.name || ""))) || (m.skip && xs.find(o => !m.skip.test(o.name || ""))) || xs[0] || null;
+          };
+          X.present = () => !!X.port();
+          X.shown = () => X.present() || !!c.seen;
+          X.ready = () => X.present();
+          X.why = () => !md.access ? "connect MIDI" : !X.present() ? "not plugged in" : "";
+          // when a note goes out: played live, at once; lined up by the sequencer, so it meets Nate Bloom's own sounds
+          // (heard from its own outputs: that much later; through Nate Bloom's input: that much earlier)
+          const at = when => { if (!ctx || when == null) return 0; const ahead = (when - ctx.currentTime) * 1000; if (ahead < 30) return 0; const ms = ahead + (c.dev && !H.direct ? -inMs() : outMs()); return ms > 1 ? performance.now() + ms : 0; };
+          X.voice = (n0, when) => {
+            if (X.mute) return { midi: n0, hw: true, stop() {} };
+            const p = X.port(); if (!p) return null;
+            const ch = (c.ch - 1) & 15, n = n0 & 127, vel = Math.max(1, Math.min(127, Math.round(NB_VEL7 || 100))), t = at(when);
+            try { p.send([0x90 | ch, n, vel], t); } catch (e) { return null; }
+            X.notes.set(n, (X.notes.get(n) || 0) + 1);
+            let done = false;
+            return { midi: n0, hw: true, stop(tt) {
+              if (done) return; done = true;
+              const k = (X.notes.get(n) || 1) - 1; if (k > 0) { X.notes.set(n, k); return; } X.notes.delete(n);
+              const off = tt == null ? 0 : at(tt);
+              try { p.send([0x80 | ch, n, 0], off && t ? Math.max(off, t + 1) : off); } catch (e) {}
+            } };
+          };
+          X.allOff = () => { const p = X.port(); if (!p) return; const ch = (c.ch - 1) & 15; try { X.notes.forEach((k, n) => p.send([0x80 | ch, n, 0])); p.send([0xb0 | ch, 123, 0]); } catch (e) {} X.notes.clear(); };
+          X.added = () => { c.seen = true; cfgSave(); if (!X.present()) toast(X.name + " added · plug it in over USB and it plays"); wire(X); };
+          X.open = () => openSheet(X);
+          return X;
+        }
+        function toast(t) { const e = document.getElementById("uiToast"); if (!e) return; e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { e.hidden = true; }, 2800); }
+        // the synths this covers: every known one plugged in (or added before) that the Minilogue sheet isn't set to
+        function all() {
+          const main = H.modelId(), plugged = new Set(outs().map(H.modelOf).filter(Boolean).map(m => m.id));
+          return H.models.filter(m => m.id !== "other" && m.id !== main && (plugged.has(m.id) || (CFG[m.id] && CFG[m.id].seen)))
+            .map(m => { if (!INST.has(m.id)) INST.set(m.id, make(m)); return INST.get(m.id); });
+        }
+        window.__hwx = { all, get: id => all().find(X => X.id === id) || null };
+        const inStack = X => { try { return (window.__stk.S().hwx || []).includes(X.id); } catch (e) { return false; } };
+        // ---- its sound in (optional): an input of the interface, into the mix (or, with direct monitoring, the recorders) ----
+        function closeIn(X) { try { if (X.src) X.src.disconnect(); if (X.bus) X.bus.disconnect(); } catch (e) {} if (X.stream) X.stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); X.src = X.stream = X.bus = null; X.dest = null; X.label = ""; }
+        async function openIn(X) {
+          if (X.opening || !ctx || !X.cfg.dev) return;
+          X.opening = true; X.err = "";
+          try {
+            const st = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: X.cfg.dev }, echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: { ideal: 2 }, latency: { ideal: 0.005 } } });
+            closeIn(X); X.stream = st; X.src = ctx.createMediaStreamSource(st); X.label = (st.getAudioTracks()[0] || {}).label || "";
+            const sp = ctx.createChannelSplitter(2), mg = ctx.createChannelMerger(2); X.src.connect(sp);
+            const L = X.cfg.pick === "2" ? 1 : 0, R = X.cfg.pick === "12" ? 1 : L; sp.connect(mg, L, 0); sp.connect(mg, R, 1);
+            X.bus = ctx.createGain(); mg.connect(X.bus); X.merge = mg;
+          } catch (e) { X.err = "the input didn't open (" + (e && e.name || "error") + ")"; }
+          X.opening = false; route(X);
+        }
+        function route(X) {
+          if (!X.bus || !fx) return;
+          X.bus.gain.value = X.mute ? 0 : X.cfg.level / 0.8;
+          const dest = H.direct ? analyser : (fx.limiter || fx.input); if (!dest || X.dest === dest) return;
+          try { X.bus.disconnect(); } catch (e) {} X.bus.connect(dest); X.dest = dest;
+        }
+        function wire(X) { const want = !!X.cfg.dev && inStack(X) && X.present(); if (want && !X.src && !X.opening && !X.err) openIn(X); else if (!want && X.src) closeIn(X); else if (X.src) route(X); }
+        setInterval(() => { if (!ctx) return; all().forEach(wire); }, 1000);
+        // ---- the ports came or went: the Quick row has it once it's been plugged in ----
+        { const op = md.onPorts; md.onPorts = function () { if (op) op.apply(this, arguments); let ch = false; all().forEach(X => { if (X.present() && !X.cfg.seen) { X.cfg.seen = true; ch = true; } }); if (ch) cfgSave(); try { window.__stk.paint(); } catch (e) {} }; }
+        // ---- its sheet ----
+        const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "hwxSheet"; sh.hidden = true;
+        sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Hardware synth">
+          <div class="ed-head"><strong id="hxTitle"></strong><span class="ed-info" id="hxState"></span></div>
+          <span class="ed-info" style="text-align:left">Nate Bloom plays it over USB MIDI with whatever else is playing. Its sound reaches you from its own outputs; if it also comes into this computer, pick that input below and it's mixed in and recorded too.</span>
+          <div class="sp-lab"><span>MIDI to it</span></div>
+          <div class="ly-quick"><select id="hxOut" aria-label="MIDI output" style="flex:1;min-width:0"></select><select id="hxCh" aria-label="MIDI channel"></select></div>
+          <div class="sp-lab"><span>Its sound comes in from</span></div>
+          <div class="ly-quick"><select id="hxDev" aria-label="Audio input" style="flex:1;min-width:0"></select><select id="hxPick" aria-label="Which inputs"><option value="12">Inputs 1+2 (stereo)</option><option value="1">Input 1</option><option value="2">Input 2</option></select></div>
+          <div class="ly-quick" id="hxLvlRow"><span class="dj-lab" style="min-width:44px">Level</span><input type="range" id="hxLvl" min="0" max="125" style="flex:1" aria-label="Level"><span class="dj-lab" id="hxLvlV" style="min-width:48px;text-align:right"></span></div>
+          <span class="ed-info" id="hxMsg" style="text-align:left"></span>
+          <div class="ed-foot sheet-foot"><button class="btn big" id="hxTest">Test note</button><button class="btn big" id="hxIn"></button><button class="btn big primary" id="hxDone">Done</button></div>
+        </div>`;
+        document.body.appendChild(sh);
+        const $x = id => document.getElementById(id);
+        for (let c = 1; c <= 16; c++) { const o = document.createElement("option"); o.value = c; o.textContent = "Ch " + c; $x("hxCh").appendChild(o); }
+        let cur = null;
+        const add = (sel, v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
+        async function paintSheet() {
+          const X = cur; if (!X) return; const c = X.cfg;
+          $x("hxTitle").textContent = X.name;
+          const out = $x("hxOut"); out.innerHTML = ""; const p = X.port();
+          add(out, "", "Automatic · " + (p && !c.out ? p.name : "the " + X.name + " when it's plugged in"));
+          outs().forEach(o => add(out, mdKey("out", o), o.name + (o.manufacturer ? " · " + o.manufacturer : "")));
+          out.value = c.out && outs().some(o => mdKey("out", o) === c.out) ? c.out : "";
+          $x("hxCh").value = c.ch; $x("hxPick").value = c.pick;
+          const dev = $x("hxDev"); dev.innerHTML = ""; add(dev, "", "Not through Nate Bloom (its own outputs)");
+          let devs = []; try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === "audioinput"); } catch (e) {}
+          devs.forEach((d, i) => add(dev, d.deviceId, d.label || "Input " + (i + 1)));
+          dev.value = c.dev && devs.some(d => d.deviceId === c.dev) ? c.dev : "";
+          $x("hxPick").hidden = $x("hxLvlRow").hidden = !c.dev;
+          $x("hxLvl").value = Math.round(c.level / 0.8 * 100); $x("hxLvlV").textContent = mxDb(c.level, 0.8);
+          const on = inStack(X); $x("hxIn").textContent = on ? "Take it out" : "+ Play it with the rest";
+          $x("hxState").textContent = !md.access ? "MIDI isn't connected" : !X.present() ? "not plugged in" : on ? "playing with the rest" : "plugged in · not playing";
+          $x("hxMsg").textContent = !md.access ? "Connect MIDI first (Settings › MIDI)." : !X.present() ? "Plug the " + X.name + " in over USB, or pick the MIDI output it's on." : X.err ? X.err.charAt(0).toUpperCase() + X.err.slice(1) + "." : X.src ? "Coming in from " + (X.label || "the input") + "." : "";
+        }
+        function openSheet(X) { start(); if (!md.access) { try { connectMidi(); } catch (e) {} } cur = X; sh.hidden = false; paintSheet(); }
+        const ch = fn => e => { if (!cur) return; fn(cur, e); cfgSave(); paintSheet(); try { window.__stk.paint(); } catch (er) {} };
+        $x("hxOut").addEventListener("change", ch((X, e) => { X.allOff(); X.cfg.out = e.target.value; }));
+        $x("hxCh").addEventListener("change", ch((X, e) => { X.allOff(); X.cfg.ch = +e.target.value; }));
+        $x("hxDev").addEventListener("change", ch((X, e) => { X.cfg.dev = e.target.value; X.err = ""; closeIn(X); wire(X); }));
+        $x("hxPick").addEventListener("change", ch((X, e) => { X.cfg.pick = e.target.value; closeIn(X); wire(X); }));
+        $x("hxLvl").addEventListener("input", e => { if (!cur) return; cur.cfg.level = (+e.target.value / 100) * 0.8; $x("hxLvlV").textContent = mxDb(cur.cfg.level, 0.8); cfgSave(); route(cur); });
+        $x("hxTest").addEventListener("click", () => { if (!cur) return; start(); const v = cur.voice(60); if (!v) { $x("hxMsg").textContent = "No MIDI output for it yet."; return; } setTimeout(() => v.stop(), 600); });
+        $x("hxIn").addEventListener("click", () => {
+          const X = cur, st = window.__stk; if (!X || !st) return; start();
+          if (inStack(X)) { const it = st.items().find(x => x.t === "hwx" && x.id === X.id); if (it) st.drop(it); }
+          else { const s = st.S(); s.hwx = (s.hwx || []).filter(x => x !== X.id).concat(X.id); renderEngine(); save(); X.added(); }
+          setTimeout(paintSheet, 50);
+        });
+        $x("hxDone").addEventListener("click", () => { sh.hidden = true; });
+        ["panic", "stopAll"].forEach(id => { const b = document.getElementById(id); if (b) b.addEventListener("click", () => all().forEach(X => X.allOff())); });
+        addEventListener("pagehide", () => all().forEach(X => X.allOff()));
+        // the mute button (it stays in, silent): no notes go to it, and its input goes quiet
+        setInterval(() => all().forEach(X => { if (X.bus) X.bus.gain.value = X.mute ? 0 : X.cfg.level / 0.8; }), 500);
+      }
     }
   // ======================================================================
   // (176) The Linux app's native engine: the Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell, Sync Lead and Comb Bells worked out in compiled code on a pool of threads (nb_engine.cc), not
@@ -38064,6 +38220,69 @@ registerProcessor("nb-aw", NBAwProc);
     // the notebook keeps the MicroFreak's part too
     { const ss = saveSound; saveSound = async function () { const e = await ss.apply(this, arguments); if (e && HW.mf.pc) { let r = null; try { r = await mfRead(HW.mf.pc, true); } catch (er) {} e.mf = { preset: HW.mf.pc, name: (r && r.name) || HW.mf.name || HW.names["mf:" + HW.mf.pc] || "", cat: r && r.cat != null && MF_CAT[r.cat] ? MF_CAT[r.cat] : "", cc: Object.assign({}, HW.mf.cc), raw: r && r.raw || null }; nbSave(); } return e; }; }
     window.__nbk = { openSave, openBook, read: xdRead, list: () => NOTES, decode: xdDecode, unpack7, pack7 };
+  }
+  // ======================================================================
+  // 219: a sound taken out of Playing stops sounding, its held notes too. Hold off used to leave the notes it had
+  // latched ringing ("Hold: Off · 7 ringing"), on whatever sound they were played with, after that sound was taken
+  // out (Only, ✕, swapping it for another): seven Hoover notes kept playing under the Supersaw. Every note a sound
+  // plays is noted with the sound it belongs to; when that sound is no longer in Playing its notes stop, and a held
+  // note with nothing left sounding is let go. (Sounds still playing keep their held notes, as before.)
+  // ======================================================================
+  {
+    const REG = new Map();   // tag → the voices of that sound still sounding
+    let making = null;       // the voices made for the note being made right now
+    const tagOf = c => {
+      if (!c) return "";
+      if (ENGINES[c.key]) return "e:" + c.key + (c.copy != null ? "#" + c.copy : "");
+      if (/^lib\d+$/.test(c.key || "")) { const pt = state.lib.parts[+c.key.slice(3)]; return "l:" + (pt && pt.id || c.key); }
+      return String(c.key || "");
+    };
+    const tagOfItem = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    function track(tag, v) {
+      if (!v || typeof v.stop !== "function" || v.__sg) return v;
+      v.__sg = tag; let s = REG.get(tag); if (!s) REG.set(tag, s = new Set()); s.add(v);
+      const st = v.stop; v.stop = function () { s.delete(v); if (v.__gone) return; v.__gone = true; return st.apply(this, arguments); };
+      if (making) making.push(v);
+      return v;
+    }
+    const vcG = voiceComponents;
+    voiceComponents = function () {
+      const r = vcG.apply(this, arguments);
+      if (!Array.isArray(r)) return r;
+      return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make;
+        return Object.assign({}, c, { __sg: 1, make() { return track(tag, mk.apply(this, arguments)); } }); });
+    };
+    // which voices each key's note (and each held note) is made of
+    const mnG = makeNote;
+    makeNote = function () {
+      const outer = making, mine = []; making = mine;
+      let n; try { n = mnG.apply(this, arguments); } finally { making = outer; if (outer) outer.push(...mine); }
+      if (n && typeof n === "object") n.__parts = mine;
+      return n;
+    };
+    function sweep() {
+      let its; try { its = window.__stk.items(); } catch (e) { return; }
+      const keep = new Set(its.map(tagOfItem)); let n = 0;
+      for (const [tag, s] of REG) {
+        if (!s.size) { REG.delete(tag); continue; }
+        const base = tag.replace(/#\d+$/, "");
+        if (keep.has(tag) || (tag.startsWith("e:") && !tag.includes("#") && keep.has(base))) continue;
+        for (const v of [...s]) { try { v.stop(); } catch (e) {} n++; }
+        REG.delete(tag);
+      }
+      // an arp left running on a sound that's gone (it carried on after a switch): it stops too
+      try { for (const p of PARTS.slice()) { const ls = (p.layers && p.layers.length ? p.layers : [p.eng]).filter(id => ENGINES[id]); if (ls.length && !ls.some(id => keep.has("e:" + id))) { dropPart(p, true); n++; } } } catch (e) {}
+      if (!n) return;
+      // held notes with nothing left sounding: let go, so Hold and the Still playing strip say what's really there
+      let let_ = 0;
+      for (const [root, h] of [...heldVoices]) { const ps = h && h.__parts; if (ps && ps.length && ps.every(v => v.__gone)) { heldVoices.delete(root); try { markTones(h.tones, markHeld, false); } catch (e) {} let_++; } }
+      if (let_) { try { updateHoldBtn(); } catch (e) {} }
+      try { window.__nbAdd && window.__nbAdd("gone", n + " notes stopped with the sound taken out" + (let_ ? " · " + let_ + " held let go" : "")); } catch (e) {}
+    }
+    window.__nbSweep = sweep;
+    { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); setTimeout(sweep, 0); return r; }; }
+    setInterval(sweep, 1000);   // (and changes that don't redraw the screen)
+    window.__nbVoiceReg = () => [...REG].map(([t, s]) => [t, s.size]);
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
