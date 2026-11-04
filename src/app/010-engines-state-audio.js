@@ -267,9 +267,13 @@
     // in Settings › Sound check.
     try { if (!window.NB_LITE && window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !localStorage.getItem("nightbloom-buffer-lx174")) { localStorage.setItem("nightbloom-buffer", JSON.stringify("steady")); localStorage.setItem("nightbloom-buffer-lx174", "1"); } } catch (e) {}
     let nbSteady = false; try { nbSteady = !window.NB_LITE && JSON.parse(localStorage.getItem("nightbloom-buffer") || "null") === "steady"; } catch (e) {}
+    // (194) the Linux app's low-latency output (a 256-frame buffer to the sound server, set when the app starts): the
+    // quickest path, so Steady's bigger buffer doesn't put the delay back
+    let nbLowest = false; try { nbLowest = !window.NB_LITE && !!(window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && window.NB_NATIVE.lowLatency && window.NB_NATIVE.lowLatency.frames > 0); } catch (e) {}
+    if (nbLowest) nbSteady = false;
     if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
     else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
-    ctx.__nbBuf = nbSteady ? "steady" : "fast";
+    ctx.__nbBuf = nbLowest ? "lowest" : nbSteady ? "steady" : "fast";
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
     analyser.connect(ctx.destination);
     const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
