@@ -3530,6 +3530,15 @@ body.es-on #epStrip { display: none; }
 .es-none { margin: 4px 8px; font: 0.72rem/1.4 var(--font-body); color: var(--dim); }
 .es-more { appearance: none; display: block; width: 100%; margin-top: 12px; padding: 8px; border: 1px solid var(--line); border-radius: 9px; background: none; color: var(--ink); font: 0.76rem var(--font-body); cursor: pointer; }
 .es-more:hover { border-color: var(--lilac); }
+/* (212) the side panel's view menu and the + on each sound */
+.es-top { flex-wrap: wrap; }
+.es-mode { appearance: none; background: var(--raised, #221d30) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a99bd6'/%3E%3C/svg%3E") no-repeat right 9px center; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); font: 600 0.86rem var(--font-body); padding: 6px 28px 6px 10px; cursor: pointer; max-width: 100%; }
+.es-mode:focus-visible { outline: 2px solid var(--lilac); outline-offset: 1px; }
+.es-pr { display: flex; align-items: stretch; gap: 2px; }
+.es-pr .es-p { flex: 1; min-width: 0; }
+.es-add { appearance: none; flex: none; width: 30px; border: 1px solid transparent; border-radius: 8px; background: none; color: var(--lilac); font-size: 1.05rem; cursor: pointer; }
+.es-add:hover { border-color: var(--line); background: rgba(180,160,255,0.08); }
+.es-add.ok { color: var(--amber); }
 </style>
 </head>
 <body>
@@ -32879,7 +32888,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 211;
+    window.NB_BUILD = 212;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -37000,9 +37009,7 @@ registerProcessor("nb-aw", NBAwProc);
         const out = { params: M.params || [], list }; ebMeta.set(key, out); return out;
       } catch (e) { ebMeta.set(key, false); return false; }
     }
-    async function choosePlugPreset(c, pr, i) {
-      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
-      await chooseEntry(e, false);
+    async function plugApply(c, pr) {
       const W = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
       const meta = ebMeta.get(c.key);
       if (W && W.node && meta) {
@@ -37012,8 +37019,20 @@ registerProcessor("nb-aw", NBAwProc);
         else for (const k in pr.values) vals[k] = { id: k, value: pr.values[k], normalized: false };
         try { await W.node.setParameterValues(vals); } catch (er) {}
       }
+    }
+    async function choosePlugPreset(c, pr, i) {
+      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+      await chooseEntry(e, false);
+      await plugApply(c, pr);
       state.cur = { id: "pp:" + c.key + "#" + i, cat: "engines" }; save();
       try { setSoundText(pr.name, c.name); } catch (er) {}
+    }
+    // (212) a plugin preset added to what's playing: the plugin joins (if it isn't playing already), then the preset is set on it
+    async function plugTogether(c, pr) {
+      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+      const have = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
+      if (!have) { const ok = await window.__nbTogether(e); if (!ok) return false; }
+      await plugPresets(c.key); await plugApply(c, pr); return true;
     }
 
     // ---------- drawing ----------
@@ -37144,7 +37163,7 @@ registerProcessor("nb-aw", NBAwProc);
         if (e && e.id && e.id.startsWith("pp:")) { const [key, i] = e.id.slice(3).split("#"), c = cat().find(x => x.key === key), m = await plugPresets(key); if (c && m && m.list[+i]) return choosePlugPreset(c, m.list[+i], +i); return; }
         return ce.apply(this, arguments);
       }; }
-    window.__eb = { choosePlugPreset, engOfPreset, open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
+    window.__eb = { cache: k => ebMeta.has(k) ? ebMeta.get(k) : undefined, choosePlugPreset, plugTogether, engOfPreset, open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
   }
   // ======================================================================
   // (207) Presets right on the screen. The Quick row wraps so every engine shows at once, and under it a Presets
@@ -37264,6 +37283,25 @@ registerProcessor("nb-aw", NBAwProc);
       b.appendChild(t); if (extra) b.appendChild(extra);
       b.addEventListener("click", onClick); return b;
     }
+    // (212) a preset row: tap the name to play it alone, + to play it together with what's playing
+    function esPRow(name, sub, on, onPick, onAdd) {
+      const r = document.createElement("div"); r.className = "es-pr";
+      const b = esRow("es-p", name, sub, on, onPick); r.appendChild(b);
+      if (onAdd) {
+        const a = document.createElement("button"); a.className = "es-add"; a.textContent = "+";
+        a.title = "Play " + name + " together with what's playing"; a.setAttribute("aria-label", a.title);
+        a.addEventListener("click", async ev => {
+          ev.stopPropagation(); a.disabled = true; a.textContent = "…"; let ok = false;
+          esBusy++; try { ok = await onAdd(); } catch (e) {} finally { esBusy--; }
+          a.textContent = ok === false ? "+" : "✓"; a.classList.toggle("ok", ok !== false); a.disabled = false;
+          setTimeout(() => { a.textContent = "+"; a.classList.remove("ok"); }, 1600);
+          esSync();
+        });
+        r.appendChild(a);
+      }
+      return r;
+    }
+    const togE = e => () => window.__nbTogether(e);
     function esSection(title) { const h = document.createElement("div"); h.className = "es-sec"; h.textContent = title; es.appendChild(h); }
     // a tap in the panel plays the sound and marks it where it is: the panel isn't redrawn, so nothing moves under the pointer
     function esPick(fn) { return async ev => {
@@ -37276,7 +37314,7 @@ registerProcessor("nb-aw", NBAwProc);
     function esSync() {
       let ce = null; try { ce = EB().engineOfCur(); } catch (e) {}
       esLastEng = ce;
-      esKey = (state.cur && state.cur.id || "") + "|" + [...esOpen].join(",") + "|" + catL().length;
+      esKey = esMode + "|" + (state.cur && state.cur.id || "") + "|" + [...esOpen].join(",") + "|" + catL().length;
     }
 
     function esEngine(id, cur, curEng) {
@@ -37288,12 +37326,12 @@ registerProcessor("nb-aw", NBAwProc);
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps";
         const plain = { id: k, name: E.name, sub: "the engine as it is", cat: "engines" };
-        box.appendChild(esRow("es-p", "As it is", "no preset", cur === k, esPick(() => chooseEntry(plain, true))));
+        box.appendChild(esPRow("As it is", "no preset", cur === k, esPick(() => chooseEntry(plain, true)), togE(plain)));
         const by = new Map(allEntries().map(e => [e.id, e]));
         L.forEach(([p, i]) => {
           const eid = "n:" + i, e = by.get(eid) || { id: eid, name: p[0], sub: "", cat: "nb" }, st = EB().engOfPreset(i);
           const sub = st.length > 1 ? "+ " + st.filter(x => x !== id).map(x => ENGINES[x] ? ENGINES[x].short || ENGINES[x].name : x).join(" + ") : "";
-          box.appendChild(esRow("es-p", p[0], sub, cur === eid, esPick(() => chooseEntry(e, true))));
+          box.appendChild(esPRow(p[0], sub, cur === eid, esPick(() => chooseEntry(e, true)), togE(e)));
         });
         wrap.appendChild(box);
       }
@@ -37306,16 +37344,82 @@ registerProcessor("nb-aw", NBAwProc);
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps"; wrap.appendChild(box);
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
-        box.appendChild(esRow("es-p", "As it is", c.native ? "its presets are in its own window" : "its default sound", cur === plainE.id, esPick(() => chooseEntry(plainE, false))));
+        box.appendChild(esPRow("As it is", c.native ? "its presets are in its own window" : "its default sound", cur === plainE.id, esPick(() => chooseEntry(plainE, false)), togE(plainE)));
         const note = document.createElement("p"); note.className = "es-none"; note.textContent = "Loading its presets…"; box.appendChild(note);
         EB().plugPresets(c.key).then(m => {
           note.remove();
           if (!m || !m.list || !m.list.length) { if (!c.native) { note.textContent = "No preset list: its sounds come from its own controls."; box.appendChild(note); } return; }
-          m.list.forEach((pr, i) => box.appendChild(esRow("es-p", pr.name, "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)))));
+          m.list.forEach((pr, i) => box.appendChild(esPRow(pr.name, "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)), () => EB().plugTogether(c, pr))));
         });
       }
       es.appendChild(wrap);
     }
+    // ---------- (212) by sound type: every preset of every engine and plugin, sorted into kinds of sound ----------
+    const ES_MODE_KEY = "nightbloom-engside-mode";
+    let esMode = (() => { try { return localStorage.getItem(ES_MODE_KEY) === "type" ? "type" : "engine"; } catch (e) { return "engine"; } })();
+    const ES_TYPES = [
+      ["Drums", /\b(drum|snare|hi-?hat|kick|kit|timpani|percussion)\b/i],
+      ["Bass", /bass(?!oon| clarinet)|\bsub\b|303|acid|reese|growl|wobble|neuro|boom|tuba/i],
+      ["Choir & Voices", /choir|\baa?h\b|\booh\b|chant|vowel|voice|ghost|vocal|speech|robot|formant|soprano|vox/i],
+      ["Strings", /string|violin|violine|pizzicato|ensemble|cello/i],
+      ["Brass & Stabs", /brass|horn|trumpet|stab|orch hit|chord|\bcz\b/i],
+      ["Bells & Mallets", /bell|kalimba|marimba|glass|glock|xylophone|celesta|music box|chime|mallet|crystal|tine(?!s? piano)/i],
+      ["Keys & Organs", /piano|keys|\bclav|harpsi|organ|grand|rhodes|wurli|\btines\b/i],
+      ["Winds", /flute|clarinet|oboe|reed|harmonica|english horn|pipe/i],
+      ["Plucks & Arps", /pluck|\barp\b|arp\b|guitar|harp|popcorn|nylon/i],
+      ["Leads", /lead|sync|screamer|hoover|laser|solo|8-bit|chiptune|square|saw\b|supersaw|anthem/i],
+      ["Pads", /pad|fog|evolv|dream|cloud|starlight|moon|swell|sweep|poly|warm|haze|rain|wash|morph|wavetable|motion|space|dawn|silk/i],
+      ["Drones & FX", /drone|hum|bloom|dust|shepard|noise|particle|swarm|rise|cave|terrain|funny|cosmic|spooky|fx/i],
+    ];
+    const esTypeOf = (name, sub) => { const t = name + " " + (sub || ""); for (const [k, re] of ES_TYPES) if (re.test(name)) return k; for (const [k, re] of ES_TYPES) if (re.test(t)) return k; return "Other"; };
+    let esPlugLoad = null;
+    function esLoadPlugs() {   // the plugins' preset lists, fetched once
+      if (esPlugLoad) return esPlugLoad;
+      const P = catL().filter(c => c.kind === "instrument" && !c.native);
+      return (esPlugLoad = Promise.all(P.map(c => EB().plugPresets(c.key).catch(() => null))).then(() => { esPaint(true, true); }));
+    }
+    function esTypeItems(cur) {
+      const by = new Map(allEntries().map(e => [e.id, e])), out = {}, seen = new Set();
+      const add = (t, it) => (out[t] = out[t] || []).push(it);
+      let ids = []; try { ids = window.__qkLive.items().filter(q => q.eng).map(q => q.eng); } catch (e) {}
+      for (const id of ids) for (const [p, i] of EB().presetsOf(id)) {
+        if (seen.has(i)) continue; seen.add(i);
+        const eid = "n:" + i, e = by.get(eid) || { id: eid, name: p[0], sub: "", cat: "nb" }, st = EB().engOfPreset(i);
+        const src = st.map(x => ENGINES[x] ? ENGINES[x].short || ENGINES[x].name : x).join(" + ");
+        add(esTypeOf(p[0], p[3] && p[3].sub), { name: p[0], sub: src, on: cur === eid, pick: () => chooseEntry(e, true), addf: togE(e) });
+      }
+      return out;
+    }
+    function esTypeView(cur) {
+      const items = esTypeItems(cur);
+      // the plugins' presets, from the lists already fetched
+      const P = catL().filter(c => c.kind === "instrument" && !c.native);
+      let pending = false;
+      for (const c of P) {
+        const m = esPlugCache(c.key); if (m === undefined) { pending = true; continue; }
+        if (!m || !m.list) continue;
+        m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; const nm = pr.name.replace(/^(60|106) · [A-Z]\d\d /, ""); (items[esTypeOf(nm, c.type)] = items[esTypeOf(nm, c.type)] || []).push({ name: pr.name, sub: c.name, on: cur === "pp:" + c.key + "#" + i, pick: () => EB().choosePlugPreset(c, pr, i), addf: () => EB().plugTogether(c, pr) }); });
+      }
+      if (pending) esLoadPlugs();
+      const order = ES_TYPES.map(t => t[0]).concat(["Other"]);
+      for (const t of order) {
+        const L = items[t]; if (!L || !L.length) continue;
+        const k = "t:" + t, open = esOpen.has(k), playing = L.some(x => x.on);
+        const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
+        const cnt = document.createElement("i"); cnt.className = "es-n"; cnt.textContent = String(L.length);
+        wrap.appendChild(esRow("es-h", t, "", false, ev => esToggle(k, ev), cnt));
+        if (open) {
+          const box = document.createElement("div"); box.className = "es-ps";
+          const FOLD = 40, long = L.length > FOLD + 5 && !esOpen.has(k + "!");
+          (long ? L.slice(0, FOLD) : L).forEach(x => box.appendChild(esPRow(x.name, x.sub, x.on, esPick(x.pick), x.addf)));
+          if (long) { const m = document.createElement("button"); m.className = "es-more"; m.textContent = "Show all " + L.length; m.addEventListener("click", ev => { esOpen.add(k + "!"); esToggle(k, ev); esOpen.add(k); esPaint(true, true); }); box.appendChild(m); }
+          wrap.appendChild(box);
+        }
+        es.appendChild(wrap);
+      }
+      if (pending) { const n = document.createElement("p"); n.className = "es-none"; n.textContent = "Loading the plugins' presets…"; es.appendChild(n); }
+    }
+    const esPlugCache = key => { try { return window.__eb.cache(key); } catch (e) { return undefined; } };
     function esToggle(k, ev) {
       const y0 = ev.currentTarget.getBoundingClientRect().top;
       esOpen.has(k) ? esOpen.delete(k) : esOpen.add(k);
@@ -37326,14 +37430,24 @@ registerProcessor("nb-aw", NBAwProc);
     function esPaint(force, noScroll) {
       const eb = EB(); if (!eb || (esBusy && !noScroll)) return;
       let curEng = null; try { curEng = eb.engineOfCur(); } catch (e) {}
-      if (curEng !== esLastEng) { if (curEng) esOpen.add(curEng); esLastEng = curEng; force = true; }
-      const cur = state.cur && state.cur.id || "", key = cur + "|" + [...esOpen].join(",") + "|" + catL().length;
+      if (curEng !== esLastEng) { if (curEng && esMode === "engine") esOpen.add(curEng); esLastEng = curEng; force = true; }
+      const cur = state.cur && state.cur.id || "", key = esMode + "|" + cur + "|" + [...esOpen].join(",") + "|" + catL().length;
       if (!force && key === esKey) return; esKey = key;
       const st = es.scrollTop; es.innerHTML = "";
       const head = document.createElement("div"); head.className = "es-top";
-      const ht = document.createElement("b"); ht.textContent = "Engines"; head.appendChild(ht);
-      const hs = document.createElement("small"); hs.textContent = "tap one for its presets"; head.appendChild(hs);
+      const sel = document.createElement("select"); sel.className = "es-mode"; sel.setAttribute("aria-label", "Show sounds by");
+      [["engine", "By engine"], ["type", "By sound: bass, leads, pads…"]].forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); });
+      sel.value = esMode;
+      sel.addEventListener("change", () => { esMode = sel.value; try { localStorage.setItem(ES_MODE_KEY, esMode); } catch (e) {} es.scrollTop = 0; esPaint(true, true); });
+      head.appendChild(sel);
+      const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
+      if (esMode === "type") {
+        esTypeView(cur);
+        const more = document.createElement("button"); more.className = "es-more"; more.textContent = "Drum kits and everything else…";
+        more.addEventListener("click", () => { try { eb.open(null); } catch (e) {} }); es.appendChild(more);
+        es.scrollTop = st; return;
+      }
       let ids = []; try { ids = window.__qkLive.items().filter(q => q.eng).map(q => q.eng); } catch (e) {}
       if (!ids.length) ids = Object.keys(ENGINES).filter(id => ENGINES[id].short);
       ids.forEach(id => esEngine(id, cur, curEng));

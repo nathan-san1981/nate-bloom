@@ -43,9 +43,7 @@
         const out = { params: M.params || [], list }; ebMeta.set(key, out); return out;
       } catch (e) { ebMeta.set(key, false); return false; }
     }
-    async function choosePlugPreset(c, pr, i) {
-      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
-      await chooseEntry(e, false);
+    async function plugApply(c, pr) {
       const W = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
       const meta = ebMeta.get(c.key);
       if (W && W.node && meta) {
@@ -55,8 +53,20 @@
         else for (const k in pr.values) vals[k] = { id: k, value: pr.values[k], normalized: false };
         try { await W.node.setParameterValues(vals); } catch (er) {}
       }
+    }
+    async function choosePlugPreset(c, pr, i) {
+      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+      await chooseEntry(e, false);
+      await plugApply(c, pr);
       state.cur = { id: "pp:" + c.key + "#" + i, cat: "engines" }; save();
       try { setSoundText(pr.name, c.name); } catch (er) {}
+    }
+    // (212) a plugin preset added to what's playing: the plugin joins (if it isn't playing already), then the preset is set on it
+    async function plugTogether(c, pr) {
+      const e = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
+      const have = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
+      if (!have) { const ok = await window.__nbTogether(e); if (!ok) return false; }
+      await plugPresets(c.key); await plugApply(c, pr); return true;
     }
 
     // ---------- drawing ----------
@@ -187,5 +197,5 @@
         if (e && e.id && e.id.startsWith("pp:")) { const [key, i] = e.id.slice(3).split("#"), c = cat().find(x => x.key === key), m = await plugPresets(key); if (c && m && m.list[+i]) return choosePlugPreset(c, m.list[+i], +i); return; }
         return ce.apply(this, arguments);
       }; }
-    window.__eb = { choosePlugPreset, engOfPreset, open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
+    window.__eb = { cache: k => ebMeta.has(k) ? ebMeta.get(k) : undefined, choosePlugPreset, plugTogether, engOfPreset, open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
   }
