@@ -194,7 +194,52 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
         if (PL.msg) note(PL.msg);
         if (!PL.shown && !PL.at && !PL.scanning) { PL.shown = true; refresh(false); }
         if (window.__nbInputPaint) window.__nbInputPaint({ list, head, note, row, btn, repaint });   // (183) your inputs through plugins (840)
+        storePaint({ list, head, note, row, btn, repaint });
       };
+      // ---- (199) Get free plugins: open-source instruments and effects, each from its own project's latest Linux release,
+      // installed into ~/.clap, ~/.vst3 or ~/.lv2 (no password), then found by the scan like any other ----
+      const ST = { items: null, busy: new Map(), err: {}, all: false };
+      const SP = NP.store || null;
+      async function storeLoad() { if (!SP) return; try { ST.items = await SP.list(); } catch (e) { ST.items = []; } }
+      if (SP) { storeLoad(); SP.onProgress(m => { if (!m || !m.id) return; if (m.stage === "failed") { ST.busy.delete(m.id); ST.err[m.id] = m.error; } else ST.busy.set(m.id, m); try { W.paint(); } catch (e) {} }); }
+      async function storeGet(id) {
+        delete ST.err[id]; ST.busy.set(id, { id, stage: "starting", frac: 0 }); W.paint();
+        let r = null; try { r = await SP.install(id); } catch (e) { r = { ok: false, error: String(e && e.message || e) }; }
+        ST.busy.delete(id); if (!r || !r.ok) ST.err[id] = (r && r.error) || "didn't install";
+        await storeLoad(); return !!(r && r.ok);
+      }
+      async function storeGetAll() {
+        if (ST.all || !ST.items) return; ST.all = true; W.paint();
+        for (const it of ST.items) if (!it.installed && !ST.busy.has(it.id)) await storeGet(it.id);
+        ST.all = false; await refresh(false); W.paint();
+      }
+      function storePaint({ list, head, note, row, btn, repaint }) {
+        if (!SP) return;
+        head("Get free plugins");
+        if (!ST.items) { note("Loading the list…"); storeLoad().then(repaint); return; }
+        const left = ST.items.filter(x => !x.installed).length;
+        note("Free, open-source instruments and effects. Each comes from its own project's latest Linux release and goes into your home folder (~/.clap, ~/.vst3 or ~/.lv2), so Bitwig finds them too. Synths and samplers then show under Instruments; effects under + Add an effect.", true);
+        const bar = document.createElement("div"); bar.className = "wam-tg";
+        bar.append(btn(ST.all ? "Installing…" : left ? "Get all " + left : "All installed ✓", () => storeGetAll(), null, "Download and install every plugin below that isn't installed yet"));
+        list.appendChild(bar);
+        const kinds = [["synth", "Synths"], ["sampler", "Samplers"], ["fx", "Effects"]];
+        kinds.forEach(([k, label]) => {
+          const its = ST.items.filter(x => x.kind === k); if (!its.length) return;
+          const h = document.createElement("div"); h.className = "wam-msg dim"; h.textContent = label; list.appendChild(h);
+          its.forEach(it => {
+            const b = ST.busy.get(it.id), er = ST.err[it.id];
+            const sub = b ? (b.stage + (b.frac && b.frac < 1 ? " · " + Math.round(b.frac * 100) + "%" : "")) : er ? "Couldn't install: " + er : it.installed ? "Installed · " + it.installed.tag + " · " + it.installed.fmt.toUpperCase() + " · " + it.licence : it.blurb + " · " + it.licence;
+            const r = row("", it.name, sub);
+            if (b) { /* in progress */ }
+            else if (it.installed) {
+              r.append(btn("Update", async () => { await storeGet(it.id); await refresh(false); repaint(); }, null, "Get " + it.name + "'s latest release again"));
+              r.append(btn("Remove", async () => { try { await SP.remove(it.id); } catch (e) {} await storeLoad(); await refresh(false); repaint(); }, null, "Delete " + it.name + "'s files from your home folder"));
+            } else r.append(btn(er ? "Try again" : "Get", async () => { const ok = await storeGet(it.id); if (ok) await refresh(false); repaint(); }, null, "Download and install " + it.name));
+            list.appendChild(r);
+          });
+        });
+      }
+      window.__nbStore = { ST, load: storeLoad, get: storeGet, getAll: storeGetAll };
       // Settings › App and the report: what's loaded and how hard each one works
       PL.state = () => [...PL.live.values()].map(P => { let s = null; try { s = NP.stats(P.id); } catch (e) {} return { name: P.name, fmt: P.fmt, fx: P.fx, open: P.open, crashed: !!P.crashed, underruns: P.node.__hdr ? P.node.__hdr[2] : 0, delayMs: P.fx && P.node.__hdr ? Math.round(P.node.__hdr[6] / P.ctx.sampleRate * 1000) : 0, blockUs: s ? Math.round(s.blockUs) : null, budgetUs: s ? Math.round(s.budgetUs) : null }; });
     };

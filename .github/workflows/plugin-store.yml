@@ -1,0 +1,68 @@
+name: Plugin store check
+
+# (199) Every plugin in linux/plugin-store.js's catalog, the way the app gets it: its project's latest Linux release,
+# downloaded, unpacked and installed into ~/.clap, ~/.vst3 or ~/.lv2. Then the latest Nate Bloom for Linux finds each
+# one, plays each instrument and puts each effect on the mix (linux/ci/store_check.py).
+on:
+  push:
+    branches: [store-check]
+    paths: ["linux/plugin-store.js", "linux/ci/store_check.py", ".github/workflows/plugin-store.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Which release file each plugin comes from
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          node linux/plugin-store.js --resolve
+          sudo apt-get install -y -q p7zip-full > /dev/null 2>&1 || true
+      - name: Install them all into the home folder
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/nbcfg /tmp/nb-store
+          node linux/plugin-store.js --install-all /tmp/nbcfg | tee /tmp/nb-store/install.txt
+          cp /tmp/nbcfg/plugin-store.json /tmp/nb-store/ || true
+          ls -la ~/.clap ~/.vst3 ~/.lv2 2>&1 | tee /tmp/nb-store/bundles.txt
+          du -sh ~/.clap ~/.vst3 ~/.lv2 ~/.local/share/* 2>/dev/null | tee -a /tmp/nb-store/bundles.txt
+      - name: The latest Nate Bloom for Linux
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(gh api "repos/${{ github.repository }}/releases?per_page=20" --jq '[.[] | select(.tag_name | test("^linux-v"))][0].tag_name')
+          echo "app: $TAG"
+          gh release download "$TAG" -R "${{ github.repository }}" -p '*.deb' -D /tmp/nbapp
+          sudo apt-get update -q > /dev/null
+          sudo apt-get install -y -q /tmp/nbapp/*.deb xvfb imagemagick > /tmp/nb-store/app_install.txt 2>&1 || tail -20 /tmp/nb-store/app_install.txt
+          pip install -q playwright
+          # this branch's page, as if the app had fetched it as an update
+          python3 build.py /tmp/nbpage > /dev/null
+          C="$HOME/.config/Nate Bloom/site"; mkdir -p "$C/lite"
+          cp /tmp/nbpage/index.html "$C/index.html"; cp /tmp/nbpage/lite/index.html "$C/lite/index.html" 2>/dev/null || true
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$C/FETCHED.txt"
+      - name: Each plugin in Nate Bloom
+        run: |
+          BIN=$(command -v nate-bloom || echo "/opt/Nate Bloom/nate-bloom")
+          Xvfb :57 -screen 0 1600x1000x24 -nolisten tcp > /tmp/nb-store/xvfb.txt 2>&1 &
+          sleep 2; export DISPLAY=:57
+          NB_NO_UPDATE=1 NB_FASTPADS_NULL=1 NB_DEBUG=1 "$BIN" --no-sandbox --disable-gpu --remote-debugging-port=9336 > /tmp/nb-store/app.txt 2>&1 &
+          sleep 12
+          timeout 1500 python3 linux/ci/store_check.py 9336 /tmp/nb-store /tmp/nbcfg/plugin-store.json 2>&1 | tee /tmp/nb-store/checks.txt
+          pkill -f "nate-bloom" || true
+          echo "== summary"; grep -E "^(PASS|FAIL)" /tmp/nb-store/checks.txt | sort | uniq -c | sort -rn | head -80
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plugin-store-check
+          path: /tmp/nb-store

@@ -377,6 +377,20 @@ async function paLevels() {
   const mine = J(si).filter(x => { const p = x.properties || {}; return /nate.?bloom|electron|chrom/i.test((p["application.name"] || "") + " " + (p["application.process.binary"] || "")); });
   return { source: one(pick(J(src))), sink: one(pick(J(snk))), streams: mine.map(x => ({ id: x.index, pct: paPct(x.volume), mute: !!x.mute, app: (x.properties || {})["application.name"] || "" })) };
 }
+// (199) the plugin store: free, open-source plugins fetched from their projects' own Linux releases into ~/.clap,
+// ~/.vst3 or ~/.lv2 (plugin-store.js). Progress goes to the page as nb:store-progress.
+let store = null; try { store = require("./plugin-store.js"); } catch (e) { console.warn("plugin store:", e && e.message); }
+const storeBusy = new Set();
+ipcMain.handle("nb:store-list", () => store ? store.list(app.getPath("userData")) : []);
+ipcMain.handle("nb:store-install", async (e, id) => {
+  if (!store) return { ok: false, error: "the plugin store isn't in this app" };
+  id = String(id); if (storeBusy.has(id)) return { ok: false, error: "already installing" }; storeBusy.add(id);
+  const send = m => { try { if (win && !win.isDestroyed()) win.webContents.send("nb:store-progress", m); } catch (er) {} };
+  try { const r = await store.install(id, { cfgDir: app.getPath("userData"), onProgress: send }); return { ok: true, ...r }; }
+  catch (er) { send({ id, stage: "failed", error: String(er && er.message || er) }); return { ok: false, error: String(er && er.message || er) }; }
+  finally { storeBusy.delete(id); }
+});
+ipcMain.handle("nb:store-remove", async (e, id) => store ? store.remove(String(id), { cfgDir: app.getPath("userData") }) : false);
 ipcMain.handle("nb:levels", () => paLevels());
 ipcMain.handle("nb:levels-fix", async () => {
   const L = await paLevels(); if (L.err) return L;

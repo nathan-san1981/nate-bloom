@@ -128,6 +128,9 @@ if (pl && !process.env.NB_NO_PLUGINS) {
   contextBridge.exposeInMainWorld("NBPlug", {
     oop: () => ({ on: oopOn, next: (() => { try { return JSON.parse(require("fs").readFileSync(OOPF, "utf8")).on === true; } catch (e) { return false; } })() }),   // (187)
     setOop: on => { try { require("fs").writeFileSync(OOPF, JSON.stringify({ on: !!on })); return true; } catch (e) { return false; } },
+    // (199) free, open-source plugins from their projects' own releases
+    store: { list: () => ipcRenderer.invoke("nb:store-list"), install: id => ipcRenderer.invoke("nb:store-install", String(id)), remove: id => ipcRenderer.invoke("nb:store-remove", String(id)),
+      onProgress: cb => ipcRenderer.on("nb:store-progress", (e, m) => { try { cb(m); } catch (er) {} }) },
     list: () => ipcRenderer.invoke("nb:plug-list"),
     scan: full => ipcRenderer.invoke("nb:plug-scan", !!full),
     addFolder: () => ipcRenderer.invoke("nb:plug-folder"),

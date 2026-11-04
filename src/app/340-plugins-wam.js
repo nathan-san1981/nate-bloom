@@ -319,7 +319,7 @@
       return out;
     }
     window.__wamTargets = () => nbwTargets();
-    window.__nbw = { CAT: NBW_CAT, paint: () => nbwPaint(), spec: k => nbwSpec(k), target: () => NBW.target, addFx: (k, t) => nbwAddFx(k, true, null, false, t || NBW.target), together: c => nbwTogether(c), entryOf: c => entryOf(c), targetName: t => nbwTargetName(t) };   // (177, for 820)
+    window.__nbw = { CAT: NBW_CAT, paint: () => nbwPaint(), spec: k => nbwSpec(k), target: () => NBW.target, addFx: (k, t) => nbwAddFx(k, true, null, false, t || NBW.target), removeFx: F => nbwRemoveFx(F), together: c => nbwTogether(c), entryOf: c => entryOf(c), targetName: t => nbwTargetName(t) };   // (177, for 820)
     function nbwPaint() {
       if (sheet.hidden) return;
       list.innerHTML = "";
