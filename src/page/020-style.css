@@ -3588,3 +3588,4 @@ body.es-on #epStrip { display: none; }
 .kz-q{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.kz-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-top:1px solid rgba(255,255,255,.06)}
 .kz-n{flex:1 1 140px;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600}.kz-n i{width:10px;height:10px;border-radius:3px;display:inline-block}.kz-row .hw-sel{flex:1 1 180px}.kz-row .kz-nt{flex:0 0 76px}
 .kz-n{background:transparent;border:1px solid transparent;border-radius:8px;color:inherit;font:inherit;padding:4px 6px;text-align:left;cursor:pointer}.kz-row.act .kz-n{border-color:var(--lilac,#c9a6ff);background:rgba(201,166,255,.12)}
+.hw-seg{display:flex;gap:4px;margin:8px 0 4px}.hw-seg .btn{flex:1;height:34px;font-size:12px;padding:0 6px}.hw-seg .btn.on{background:var(--lilac,#c9a6ff);color:#1a1424;border-color:transparent}

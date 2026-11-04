@@ -78,7 +78,9 @@
           const dest = H.direct ? analyser : (fx.limiter || fx.input); if (!dest || X.dest === dest) return;
           try { X.bus.disconnect(); } catch (e) {} X.bus.connect(dest); X.dest = dest;
         }
-        function wire(X) { const want = !!X.cfg.dev && inStack(X) && X.present(); if (want && !X.src && !X.opening && !X.err) openIn(X); else if (!want && X.src) closeIn(X); else if (X.src) route(X); }
+        const ownMF = X => X.id === "mf" && window.__mfMode && window.__mfMode() === "own";   // (222) its own sounds: its input passes straight in
+        window.__hwxCfgSave = cfgSave; window.__hwxRepaint = () => { if (!sh.hidden) paintSheet(); };
+        function wire(X) { const want = !!X.cfg.dev && (inStack(X) || ownMF(X)) && X.present() && !(X.id === "mf" && window.__mfMode && window.__mfMode() === "nb"); if (want && !X.src && !X.opening && !X.err) openIn(X); else if (!want && X.src) closeIn(X); else if (X.src) route(X); }
         setInterval(() => { if (!ctx) return; all().forEach(wire); }, 1000);
         // ---- the ports came or went: the Quick row has it once it's been plugged in ----
         { const op = md.onPorts; md.onPorts = function () { if (op) op.apply(this, arguments); let ch = false; all().forEach(X => { if (X.present() && !X.cfg.seen) { X.cfg.seen = true; ch = true; } }); if (ch) cfgSave(); try { window.__stk.paint(); } catch (e) {} }; }
@@ -104,7 +106,8 @@
         async function paintSheet() {
           const X = cur; if (!X) return; const c = X.cfg;
           $x("hxTitle").textContent = X.name;
-          { const b = $x("hxMf"); b.innerHTML = ""; if (X.id === "mf" && window.__mfCtl) { const l = document.createElement("div"); l.className = "sp-lab"; l.innerHTML = "<span>What it plays: its own presets and engines</span>"; b.appendChild(l); window.__mfCtl(b); } }
+          { const b = $x("hxMf"); b.innerHTML = ""; if (X.id === "mf" && window.__mfCtl) { window.__mfCtl(b); } }
+          { const mf = X.id === "mf" && !!window.__mfCtl; sh.querySelectorAll(".ed-card > .sp-lab, .ed-card > .ly-quick, #hxIn, #hxTest, .ed-card > .ed-info").forEach(e => { e.hidden = mf; }); }
           const out = $x("hxOut"); out.innerHTML = ""; const p = X.port();
           add(out, "", "Automatic · " + (p && !c.out ? p.name : "the " + X.name + " when it's plugged in"));
           outs().forEach(o => add(out, mdKey("out", o), o.name + (o.manufacturer ? " · " + o.manufacturer : "")));

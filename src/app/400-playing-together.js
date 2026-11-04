@@ -544,7 +544,7 @@
     function paintQuick() {
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
-      const togOn = q => q.hw || q.hwx || (!q.id.startsWith("my:") && togOK(q.id));
+      const togOn = q => q.hw || (q.hwx && !(q.hwx === "mf" && window.__mfMode)) || (!q.id.startsWith("my:") && togOK(q.id));
       const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
