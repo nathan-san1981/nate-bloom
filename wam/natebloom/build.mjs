@@ -78,7 +78,7 @@ const idOf = label => label.toLowerCase().replace(/[^a-z0-9]+/g, "");
 const walk = (items, out) => { for (const it of items) { if (it.items) walk(it.items, out); else out.push(it); } return out; };
 const catalog = [], ONLY = process.env.ONLY ? process.env.ONLY.split(",") : null;   // ONLY=violin,flute rebuilds just those
 // (214) these four now run C++ ports (Airwindows, KR-106) built in portsrc/; the Faust originals stay in src/ for reference
-const PORTED = ["junochorus", "tapeecho", "tape", "lofi"];
+const PORTED = ["junochorus", "tapeecho", "tape", "lofi", "cloud"];
 for (const S of SPEC) {
   if (ONLY && !ONLY.includes(S.id)) continue;
   if (PORTED.includes(S.id) && !process.env.FAUST_ORIGINALS) {

@@ -25,7 +25,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Granular",
-  "desc": "Grains of what you play, scattered in time and pitch and fed back into themselves. Set Pitch to 0 / +12 for shimmering clouds.",
+  "desc": "Mutable Instruments Clouds' granular engine (Émilie Gillet, MIT) at its own 32 kHz: grains of what you play, scattered in time and pitch, with Clouds' window shapes, diffuser, feedback and reverb. Freeze holds the buffer.",
   "url": "natebloom/cloud/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },

@@ -14,3 +14,7 @@ Build with `build-port.sh unicorn_dream` or `build-port.sh fuzz_bass`.
 Tape and Lo-Fi on Airwindows TapeDelay2, ToTape6 and DeRez2 (Chris Johnson, MIT). The `aw_*.h` headers are generated
 from the Airwindows sources by `aw/awgen.py` (members, constructor and processReplacing unchanged; the float dither
 dropped); TapeDelay2's two feedback lines are edited for ping-pong and in-loop saturation, marked in the header.
+
+`cloud/` (build 215) is Cloud on Mutable Instruments Clouds' GranularProcessor (Émilie Gillet, MIT), built against
+https://github.com/pichenettes/eurorack (`clouds/dsp/*`, `clouds/resources.cc`) and stmlib with `-DTEST=1`; the
+wrapper adds the 32 kHz ⇄ host-rate windowed-sinc resampler and the dry/wet mix.

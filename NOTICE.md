@@ -29,6 +29,7 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 | AndroidX, Kotlin standard library | the Android app | Apache-2.0 |
 | Faust libraries (reverbs, physical models, filters) | in Nate Bloom's own plugins, `wam/natebloom/` | per library: MIT-style (STK-4.3), LGPL with exception, and others, as declared in each `.dsp` |
 | Sequencer Party plugins, Tom Burns | `wam/burns-audio/` | MIT |
+| Clouds (the granular processor), © Emilie Gillet (Mutable Instruments) | compiled into `wam/natebloom/cloud/dsp.wasm` (Cloud); wrapper in `wam/natebloom/portsrc/cloud/` | MIT |
 | Plaits (the macro oscillator) and stmlib, © Emilie Gillet (Mutable Instruments) | compiled into `wam/natebloom/twist/dsp.wasm` (Twist); the Rhythm Creator's Analog drum models are after its drum engines | MIT |
 | Ultramaster KR-106's engine, © Karl LaRocca (Kayrock) | compiled into `wam/natebloom/juno106/dsp.wasm` (Juno 106), with its 256 factory patches; its IR3109 filter, BBD chorus and resamplers also in Unicorn Dream, Fuzz Bass and the Juno Chorus effect (headers in `wam/natebloom/portsrc/kr106/`) | GPL-3.0 |
 | jc303's diode ladder filter (after Will Pirkle's AN-6), © midilab | compiled into `wam/natebloom/fuzz_bass/dsp.wasm` (Fuzz Bass); source in `wam/natebloom/portsrc/fuzz_bass/` | GPL-3.0 |
