@@ -35,6 +35,20 @@ const SPEC = [
     presets: { "Mix glue": { threshold: -14, ratio: 2, attack: 20, release: 200, makeup: 3, mix: 100 }, "Punchy": { threshold: -20, ratio: 4, attack: 15, release: 120, makeup: 6, mix: 100 }, "New York": { threshold: -30, ratio: 8, attack: 3, release: 100, makeup: 10, mix: 40 } } },
   { id: "autopan", type: "Modulation", blurb: "Tremolo (Pan at 0) or auto-pan (Pan at 100): smooth or choppy." },
   { id: "ringmod", type: "Modulation", blurb: "A ring modulator for bells, metallic shimmer and alien drones, with a slow drift on the carrier." },
+  // (203) the Linux app's builds of four of these (src/*hq.dsp); not in the catalog: the Linux app points the originals' keys at them
+  { id: "ladderhq", hidden: true, type: "Equalizer & Filter", blurb: "The Moog ladder as Huovilainen modelled it: it drives, squelches and self-oscillates. An LFO, free or in time with the song, and an envelope follower move it.",
+    menus: { lfosync: [["Free", 0], ["1 bar", 1], ["1/2", 2], ["1/4", 3], ["1/8", 4], ["1/16", 5], ["1/4 dotted", 6], ["1/8 dotted", 7], ["1/4 triplet", 8], ["1/8 triplet", 9]], lfoshape: [["Sine", 0], ["Triangle", 1], ["Saw up", 2], ["Saw down", 3], ["Random", 4]] },
+    presets: { "Slow sweep": { cutoff: 900, resonance: 45, lforate: 0.08, lfodepth: 70, envelope: 0, drive: 3, mix: 100 }, "Envelope wah": { cutoff: 400, resonance: 60, lforate: 0.5, lfodepth: 0, envelope: 80, drive: 2, mix: 100 },
+      "Dark": { cutoff: 700, resonance: 15, lforate: 0.2, lfodepth: 10, envelope: 0, drive: 0, mix: 100 }, "Acid squelch": { cutoff: 500, resonance: 88, lforate: 1, lfodepth: 35, envelope: 60, drive: 10, mix: 100, lfosync: 4, lfoshape: 0 },
+      "1/8 gate wobble": { cutoff: 600, resonance: 55, lforate: 1, lfodepth: 85, envelope: 0, drive: 4, mix: 100, lfosync: 4, lfoshape: 1 }, "Self-oscillating": { cutoff: 880, resonance: 100, lforate: 0.1, lfodepth: 0, envelope: 0, drive: 0, mix: 100 } } },
+  { id: "compressorhq", hidden: true, type: "Dynamics", blurb: "Glue for the whole mix on Airwindows Pressure4's gain computer, with Console saturation. Lower Mix for parallel (New York) compression.",
+    presets: { "Mix glue": { threshold: -14, ratio: 2, release: 200, makeup: 3, console: 30, mix: 100 }, "Punchy": { threshold: -20, ratio: 4, release: 120, makeup: 6, console: 40, mix: 100 }, "New York": { threshold: -30, ratio: 8, release: 100, makeup: 10, console: 20, mix: 40 }, "Clean": { threshold: -16, ratio: 2.5, release: 250, makeup: 3, console: 0, mix: 100 } } },
+  { id: "autopanhq", hidden: true, type: "Modulation", blurb: "Tremolo (Pan at 0) or auto-pan (Pan at 100), free or in time with the song; five waves, smooth or choppy.",
+    menus: { sync: [["Free", 0], ["1 bar", 1], ["1/2", 2], ["1/4", 3], ["1/8", 4], ["1/16", 5], ["1/4 dotted", 6], ["1/8 dotted", 7], ["1/4 triplet", 8], ["1/8 triplet", 9]], wave: [["Sine", 0], ["Triangle", 1], ["Saw up", 2], ["Saw down", 3], ["Random", 4]] },
+    presets: { "1/8 tremolo": { rate: 2, depth: 80, shape: 30, pan: 0, sync: 4, wave: 0 }, "1/4 auto-pan": { rate: 2, depth: 90, shape: 0, pan: 100, sync: 3, wave: 1 }, "1/16 chop": { rate: 2, depth: 100, shape: 100, pan: 0, sync: 5, wave: 0 }, "Random steps": { rate: 4, depth: 70, shape: 0, pan: 100, sync: 5, wave: 4 } } },
+  { id: "ringmodhq", hidden: true, type: "Modulation", blurb: "A ring modulator for bells, metallic shimmer and alien drones: four carrier waves and a sweep, free or in time with the song.",
+    menus: { wave: [["Sine", 0], ["Triangle", 1], ["Square", 2], ["Saw", 3]], sync: [["Free", 0], ["1 bar", 1], ["1/2", 2], ["1/4", 3], ["1/8", 4], ["1/16", 5], ["1/4 dotted", 6], ["1/8 dotted", 7], ["1/4 triplet", 8], ["1/8 triplet", 9]] },
+    presets: { "Bells": { frequency: 440, drift: 10, mix: 45, wave: 0, sweep: 0 }, "Robot": { frequency: 60, drift: 0, mix: 70, wave: 2, sweep: 0 }, "1 bar sweep": { frequency: 300, drift: 10, mix: 50, wave: 1, sweep: 60, sync: 1 }, "Alien drone": { frequency: 150, drift: 60, mix: 60, wave: 3, sweep: 40, sweeprate: 0.1, sync: 0 } } },
   { id: "marimba", type: "Physical model", kind: "instrument", voices: 8, blurb: "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone.",
     presets: { "Soft mallets": { mallet: 15, decay: 2, brightness: 3500, strikeposition: 1, level: 85 }, "Hard mallets": { mallet: 85, decay: 1.2, brightness: 12000, strikeposition: 2, level: 75 }, "Ringing": { mallet: 40, decay: 5, brightness: 7000, strikeposition: 0, level: 75 } } },
   { id: "nylon", type: "Physical model", kind: "instrument", voices: 8, blurb: "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth." },
@@ -72,9 +86,10 @@ for (const S of SPEC) {
   const n = r.data.size(), bytes = new Uint8Array(n); for (let i = 0; i < n; i++) bytes[i] = r.data.get(i); r.data.delete();
   const J = JSON.parse(r.json), meta = Object.assign({}, ...J.meta);
   const widgets = walk(J.ui, []), inst = S.kind === "instrument";
-  const poly = inst ? { freq: -1, gain: -1, gate: -1 } : null, params = [];
+  const poly = inst ? { freq: -1, gain: -1, gate: -1 } : null, params = []; let tempoIndex = -1;
   for (const w of widgets) {
     if (inst && ["freq", "gain", "gate"].includes(w.label)) { poly[w.label] = w.index; continue; }
+    if (w.label === "bpm") { tempoIndex = w.index; continue; }   // (203) set from the song's tempo by lib/nbfaust.js
     const m = Object.assign({}, ...(w.meta || [])), id = idOf(w.label);
     const p = { id, label: w.label, index: w.index, min: w.min ?? 0, max: w.max ?? 1, init: w.init ?? 0, step: w.step ?? 1 };
     if (m.unit) p.unit = m.unit; if (m.scale) p.scale = m.scale;
@@ -90,9 +105,10 @@ for (const S of SPEC) {
   const name = meta.name || S.id, description = (meta.description || "").replace(/-s /g, "'s ");
   const M2 = { id: S.id, build: BUILD, name, kind: inst ? "instrument" : "effect", type: S.type, description, blurb: S.blurb, voices: inst ? S.voices || 8 : 1, poly,
     params, presets: Object.entries(S.presets || {}).map(([name, values]) => ({ name, values })), faust: faust.version() };
+  if (tempoIndex >= 0) M2.tempo = tempoIndex;
   fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify(M2, null, 1));
   fs.writeFileSync(path.join(out, "index.js"), `// ${name}: Nate Bloom's own plugin (Faust, src/${S.id}.dsp)\nimport { make } from "../lib/nbfaust.js";\nexport default make(import.meta.url);\n`);
-  catalog.push({ key: "natebloom/" + S.id, name, vendor: "Nate Bloom", kind: M2.kind, type: S.type, desc: S.blurb, url: "natebloom/" + S.id + "/index.js", site: "https://nathan-san1981.github.io/nate-bloom/" });
+  if (!S.hidden) catalog.push({ key: "natebloom/" + S.id, name, vendor: "Nate Bloom", kind: M2.kind, type: S.type, desc: S.blurb, url: "natebloom/" + S.id + "/index.js", site: "https://nathan-san1981.github.io/nate-bloom/" });
   console.log(S.id.padEnd(11), (bytes.length / 1024).toFixed(1).padStart(6), "KB wasm,", (J.size / 1024).toFixed(0).padStart(5), "KB state,", params.length, "controls" + (inst ? ", " + M2.voices + " voices" : ""));
 }
 if (!ONLY) fs.writeFileSync(path.join(HERE, "catalog-natebloom.json"), JSON.stringify(catalog, null, 1));

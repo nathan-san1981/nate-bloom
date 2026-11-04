@@ -1,0 +1,190 @@
+{
+ "id": "ringmodhq",
+ "build": 1,
+ "name": "Ring Mod",
+ "kind": "effect",
+ "type": "Modulation",
+ "description": "A ring modulator for bells, metallic shimmer and alien drones: a sine, triangle, square or saw carrier with a slow drift, and a sweep that moves it, free or in time with the song",
+ "blurb": "A ring modulator for bells, metallic shimmer and alien drones: four carrier waves and a sweep, free or in time with the song.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "frequency",
+   "label": "Frequency",
+   "index": 524332,
+   "min": 1,
+   "max": 3000,
+   "init": 220,
+   "step": 0.1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "drift",
+   "label": "Drift",
+   "index": 524384,
+   "min": 0,
+   "max": 100,
+   "init": 15,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 524300,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "wave",
+   "label": "Wave",
+   "index": 524324,
+   "min": 0,
+   "max": 3,
+   "init": 0,
+   "step": 1,
+   "menu": [
+    [
+     "Sine",
+     0
+    ],
+    [
+     "Triangle",
+     1
+    ],
+    [
+     "Square",
+     2
+    ],
+    [
+     "Saw",
+     3
+    ]
+   ]
+  },
+  {
+   "id": "sweep",
+   "label": "Sweep",
+   "index": 524372,
+   "min": 0,
+   "max": 100,
+   "init": 0,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "sweeprate",
+   "label": "Sweep rate",
+   "index": 524348,
+   "min": 0.02,
+   "max": 12,
+   "init": 0.5,
+   "step": 0.01,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "sync",
+   "label": "Sync",
+   "index": 524344,
+   "min": 0,
+   "max": 9,
+   "init": 0,
+   "step": 1,
+   "menu": [
+    [
+     "Free",
+     0
+    ],
+    [
+     "1 bar",
+     1
+    ],
+    [
+     "1/2",
+     2
+    ],
+    [
+     "1/4",
+     3
+    ],
+    [
+     "1/8",
+     4
+    ],
+    [
+     "1/16",
+     5
+    ],
+    [
+     "1/4 dotted",
+     6
+    ],
+    [
+     "1/8 dotted",
+     7
+    ],
+    [
+     "1/4 triplet",
+     8
+    ],
+    [
+     "1/8 triplet",
+     9
+    ]
+   ]
+  }
+ ],
+ "presets": [
+  {
+   "name": "Bells",
+   "values": {
+    "frequency": 440,
+    "drift": 10,
+    "mix": 45,
+    "wave": 0,
+    "sweep": 0
+   }
+  },
+  {
+   "name": "Robot",
+   "values": {
+    "frequency": 60,
+    "drift": 0,
+    "mix": 70,
+    "wave": 2,
+    "sweep": 0
+   }
+  },
+  {
+   "name": "1 bar sweep",
+   "values": {
+    "frequency": 300,
+    "drift": 10,
+    "mix": 50,
+    "wave": 1,
+    "sweep": 60,
+    "sync": 1
+   }
+  },
+  {
+   "name": "Alien drone",
+   "values": {
+    "frequency": 150,
+    "drift": 60,
+    "mix": 60,
+    "wave": 3,
+    "sweep": 40,
+    "sweeprate": 0.1,
+    "sync": 0
+   }
+  }
+ ],
+ "faust": "2.90.17",
+ "tempo": 524352
+}

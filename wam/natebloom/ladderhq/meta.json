@@ -1,0 +1,247 @@
+{
+ "id": "ladderhq",
+ "build": 1,
+ "name": "Ladder Filter",
+ "kind": "effect",
+ "type": "Equalizer & Filter",
+ "description": "The Moog ladder as Antti Huovilainen modelled it: four saturating transistor stages with the feedback taken half a sample late, run at twice the sample rate, so it drives, squelches and self-oscillates like the real one. An LFO (free or in time with the song) and an envelope follower move the cutoff",
+ "blurb": "The Moog ladder as Huovilainen modelled it: it drives, squelches and self-oscillates. An LFO, free or in time with the song, and an envelope follower move it.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "cutoff",
+   "label": "Cutoff",
+   "index": 36,
+   "min": 40,
+   "max": 18000,
+   "init": 1200,
+   "step": 1,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "resonance",
+   "label": "Resonance",
+   "index": 168,
+   "min": 0,
+   "max": 100,
+   "init": 35,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "lforate",
+   "label": "LFO rate",
+   "index": 60,
+   "min": 0.02,
+   "max": 12,
+   "init": 0.25,
+   "step": 0.01,
+   "unit": "Hz",
+   "scale": "log"
+  },
+  {
+   "id": "lfodepth",
+   "label": "LFO depth",
+   "index": 116,
+   "min": 0,
+   "max": 100,
+   "init": 40,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "envelope",
+   "label": "Envelope",
+   "index": 128,
+   "min": -100,
+   "max": 100,
+   "init": 0,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "drive",
+   "label": "Drive",
+   "index": 156,
+   "min": 0,
+   "max": 18,
+   "init": 0,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "lfosync",
+   "label": "LFO sync",
+   "index": 56,
+   "min": 0,
+   "max": 9,
+   "init": 0,
+   "step": 1,
+   "menu": [
+    [
+     "Free",
+     0
+    ],
+    [
+     "1 bar",
+     1
+    ],
+    [
+     "1/2",
+     2
+    ],
+    [
+     "1/4",
+     3
+    ],
+    [
+     "1/8",
+     4
+    ],
+    [
+     "1/16",
+     5
+    ],
+    [
+     "1/4 dotted",
+     6
+    ],
+    [
+     "1/8 dotted",
+     7
+    ],
+    [
+     "1/4 triplet",
+     8
+    ],
+    [
+     "1/8 triplet",
+     9
+    ]
+   ]
+  },
+  {
+   "id": "lfoshape",
+   "label": "LFO shape",
+   "index": 48,
+   "min": 0,
+   "max": 4,
+   "init": 0,
+   "step": 1,
+   "menu": [
+    [
+     "Sine",
+     0
+    ],
+    [
+     "Triangle",
+     1
+    ],
+    [
+     "Saw up",
+     2
+    ],
+    [
+     "Saw down",
+     3
+    ],
+    [
+     "Random",
+     4
+    ]
+   ]
+  }
+ ],
+ "presets": [
+  {
+   "name": "Slow sweep",
+   "values": {
+    "cutoff": 900,
+    "resonance": 45,
+    "lforate": 0.08,
+    "lfodepth": 70,
+    "envelope": 0,
+    "drive": 3,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Envelope wah",
+   "values": {
+    "cutoff": 400,
+    "resonance": 60,
+    "lforate": 0.5,
+    "lfodepth": 0,
+    "envelope": 80,
+    "drive": 2,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Dark",
+   "values": {
+    "cutoff": 700,
+    "resonance": 15,
+    "lforate": 0.2,
+    "lfodepth": 10,
+    "envelope": 0,
+    "drive": 0,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Acid squelch",
+   "values": {
+    "cutoff": 500,
+    "resonance": 88,
+    "lforate": 1,
+    "lfodepth": 35,
+    "envelope": 60,
+    "drive": 10,
+    "mix": 100,
+    "lfosync": 4,
+    "lfoshape": 0
+   }
+  },
+  {
+   "name": "1/8 gate wobble",
+   "values": {
+    "cutoff": 600,
+    "resonance": 55,
+    "lforate": 1,
+    "lfodepth": 85,
+    "envelope": 0,
+    "drive": 4,
+    "mix": 100,
+    "lfosync": 4,
+    "lfoshape": 1
+   }
+  },
+  {
+   "name": "Self-oscillating",
+   "values": {
+    "cutoff": 880,
+    "resonance": 100,
+    "lforate": 0.1,
+    "lfodepth": 0,
+    "envelope": 0,
+    "drive": 0,
+    "mix": 100
+   }
+  }
+ ],
+ "faust": "2.90.17",
+ "tempo": 64
+}

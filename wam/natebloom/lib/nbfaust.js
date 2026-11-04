@@ -20,7 +20,8 @@ class NBFaustProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() { return DESC; }
   constructor(o) {
     super(o);
-    const { module, json, voices, poly } = o.processorOptions;
+    const { module, json, voices, poly, tempo } = o.processorOptions;
+    this.tempoIdx = tempo == null ? -1 : tempo;
     const J = JSON.parse(json), B = 128, al = n => (n + 63) & ~63;
     this.nIn = J.inputs; this.nOut = J.outputs; this.V = Math.max(1, voices | 0); this.poly = poly || null;
     const S = al(J.size); this.dsp = []; for (let v = 0; v < this.V; v++) this.dsp.push(v * S);
@@ -36,6 +37,7 @@ class NBFaustProcessor extends AudioWorkletProcessor {
     this.outV = [];
     for (let v = 0; v < this.V; v++) { const ch = []; for (let c = 0; c < this.nOut; c++) { const a = this.outBuf[v] + c * B * 4; H32[(this.outPtrs[v] >> 2) + c] = a; ch.push(new Float32Array(buf, a, B)); } this.outV.push(ch); }
     for (const d of this.dsp) this.ex.init(d, sampleRate);
+    if (this.tempoIdx >= 0) for (const d of this.dsp) this.ex.setParamValue(d, this.tempoIdx, 120);
     this.last = new Float32Array(DESC.length).fill(NaN);
     this.vs = Array.from({ length: this.V }, (_, i) => ({ i, note: -1, on: false, live: false, quiet: 0, age: 0, retrig: false, pan: 0, f: 440, sus: false }));
     this.age = 0; this.q = []; this.dead = false;
@@ -45,6 +47,7 @@ class NBFaustProcessor extends AudioWorkletProcessor {
       else if (d.bend != null) { this.bend = Math.pow(2, d.bend / 12); this.pitchMoved = true; }
       else if (d.mod != null) { this.mod = d.mod; this.pitchMoved = true; }
       else if (d.clear) { this.q.length = 0; if (this.poly) this.allOff(true); else for (const x of this.dsp) this.ex.instanceClear(x); }   // (an effect: its tail goes)
+      else if (d.tempo != null) { if (this.tempoIdx >= 0) for (const x of this.dsp) this.ex.setParamValue(x, this.tempoIdx, d.tempo); }   // (203) the song's tempo, for synced LFOs
       else if (d.destroy) this.dead = true; };
   }
   setAll(idx, v) { for (const d of this.dsp) this.ex.setParamValue(d, idx, v); }
@@ -134,7 +137,7 @@ class NBFaustNode extends CompositeAudioNode {
   // notes go straight to the voices, stamped with their audio time
   scheduleEvents(...events) {
     const rest = [];
-    for (const e of events) { if (e && e.type === "wam-midi" && e.data && e.data.bytes) this._faust.port.postMessage({ midi: Array.from(e.data.bytes), time: e.time || 0 }); else rest.push(e); }
+    for (const e of events) { if (e && e.type === "wam-midi" && e.data && e.data.bytes) this._faust.port.postMessage({ midi: Array.from(e.data.bytes), time: e.time || 0 }); else { if (e && e.type === "wam-transport" && e.data && e.data.tempo) this._faust.port.postMessage({ tempo: e.data.tempo }); rest.push(e); } }
     if (rest.length) return this._wamNode.scheduleEvents(...rest);
   }
   clearEvents() { this._faust.port.postMessage({ clear: true }); return this._wamNode.clearEvents(); }
@@ -158,7 +161,7 @@ export function make(moduleUrl) {
       const ctx = this.audioContext, A = this._A, M = A.meta;
       await ensureProcessor(ctx, M);
       const faust = new AudioWorkletNode(ctx, procName(M), { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2],
-        processorOptions: { module: A.module, json: A.json, voices: M.voices || 1, poly: M.poly || null } });
+        processorOptions: { module: A.module, json: A.json, voices: M.voices || 1, poly: M.poly || null, tempo: M.tempo == null ? -1 : M.tempo } });
       const pm = await ParamMgrFactory.create(this, { internalParamsConfig: Object.fromEntries(faust.parameters) });
       const node = new NBFaustNode(ctx); node.setup(faust, pm);
       if (initialState) { try { await node.setState(initialState); } catch (e) {} }

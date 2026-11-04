@@ -502,6 +502,7 @@
       }
       const la = learnApply;
       learnApply = function (t, v) { if (t && t.k === "wam") return wlSet(t.ref, t.pid, v); return la.apply(this, arguments); };
+      try { window.__nbw.pick = wlPick; window.__nbw.wlGet = wlGet; } catch (e) {}   // (203, for Motion: any plugin control as a target)
     }
 
     // Tracks: automation lanes for plugin controls

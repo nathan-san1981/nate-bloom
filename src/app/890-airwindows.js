@@ -577,6 +577,17 @@ registerProcessor("nb-aw", NBAwProc);
         } catch (e) {}
         return r;
       }; }
+    // (203) four of Nate Bloom's plugins have Linux builds: same names and keys (saved chains load into them), new insides
+    try {
+      const HQ = {
+        "natebloom/ladder": ["natebloom/ladderhq/index.js", "The Moog ladder as Antti Huovilainen modelled it: it drives, squelches and self-oscillates. An LFO, free or in time with the song, and an envelope follower move it."],
+        "natebloom/compressor": ["natebloom/compressorhq/index.js", "Glue for the whole mix on Airwindows Pressure4's gain computer, with Console saturation. Lower Mix for parallel (New York) compression."],
+        "natebloom/autopan": ["natebloom/autopanhq/index.js", "Tremolo (Pan at 0) or auto-pan (Pan at 100), free or in time with the song; five waves, smooth or choppy."],
+        "natebloom/ringmod": ["natebloom/ringmodhq/index.js", "A ring modulator for bells, metallic shimmer and alien drones: four carrier waves and a sweep, free or in time with the song."],
+      };
+      const cat = window.__nbw && window.__nbw.CAT;
+      if (cat) cat.forEach(e => { const h = HQ[e.key]; if (h) { e.url = h[0]; e.desc = h[1]; e.hq = true; } });
+    } catch (e) {}
     // FX Lab labels say what's running now
     try {
       BFX_ROWS.forEach(r => { if (r[0] === "densOn") r[2] = "Airwindows Density: sine saturation, mixed in"; if (r[0] === "lofiOn") r[2] = "Airwindows DeRez2: Bits crushes, Tone lowers the sample rate"; if (r[0] === "hallOn") r[2] = "Airwindows Galactic: a huge, smooth hall"; });

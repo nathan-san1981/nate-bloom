@@ -1,0 +1,120 @@
+{
+ "id": "compressorhq",
+ "build": 1,
+ "name": "Bus Compressor",
+ "kind": "effect",
+ "type": "Dynamics",
+ "description": "Glue for the whole mix on Airwindows Pressure4's gain computer (Chris Johnson, MIT): its program-dependent attack, which clamps faster the harder it is hit, then the release you set, Ratio, Makeup, an Airwindows Console-style saturation and a parallel Mix",
+ "blurb": "Glue for the whole mix on Airwindows Pressure4's gain computer, with Console saturation. Lower Mix for parallel (New York) compression.",
+ "voices": 1,
+ "poly": null,
+ "params": [
+  {
+   "id": "threshold",
+   "label": "Threshold",
+   "index": 32,
+   "min": -40,
+   "max": 0,
+   "init": -18,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "ratio",
+   "label": "Ratio",
+   "index": 64,
+   "min": 1,
+   "max": 12,
+   "init": 3,
+   "step": 0.1
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 40,
+   "min": 30,
+   "max": 1200,
+   "init": 160,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
+  },
+  {
+   "id": "makeup",
+   "label": "Makeup",
+   "index": 68,
+   "min": 0,
+   "max": 18,
+   "init": 4,
+   "step": 0.1,
+   "unit": "dB"
+  },
+  {
+   "id": "console",
+   "label": "Console",
+   "index": 80,
+   "min": 0,
+   "max": 100,
+   "init": 30,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "mix",
+   "label": "Mix",
+   "index": 12,
+   "min": 0,
+   "max": 100,
+   "init": 100,
+   "step": 1,
+   "unit": "%"
+  }
+ ],
+ "presets": [
+  {
+   "name": "Mix glue",
+   "values": {
+    "threshold": -14,
+    "ratio": 2,
+    "release": 200,
+    "makeup": 3,
+    "console": 30,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Punchy",
+   "values": {
+    "threshold": -20,
+    "ratio": 4,
+    "release": 120,
+    "makeup": 6,
+    "console": 40,
+    "mix": 100
+   }
+  },
+  {
+   "name": "New York",
+   "values": {
+    "threshold": -30,
+    "ratio": 8,
+    "release": 100,
+    "makeup": 10,
+    "console": 20,
+    "mix": 40
+   }
+  },
+  {
+   "name": "Clean",
+   "values": {
+    "threshold": -16,
+    "ratio": 2.5,
+    "release": 250,
+    "makeup": 3,
+    "console": 0,
+    "mix": 100
+   }
+  }
+ ],
+ "faust": "2.90.17"
+}
