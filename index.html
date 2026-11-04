@@ -4560,6 +4560,7 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Airwindows effects</b> (the Linux app): the FX Lab's <b>Density</b>, <b>Lo-fi</b> and <b>Hall+</b>, each sound's Effects <b>Drive</b> and the master compressor run Chris Johnson's Airwindows code (Density, DeRez2, Galactic, ToTape6, Pressure4), ported sample for sample. Same knobs as before: Lo-fi's <b>Bits</b> sets the bit depth and <b>Tone</b> the sample rate; Hall+'s Decay, Size, Damping and Width drive Galactic. <b>Drive</b> is ToTape6, the tape machine with its head bump (the low-end lift): at 0 it's fully out of the way, turned up it saturates without getting louder. <b>Mixer → Master compressor</b> switches Pressure4 off or on; after it, always, a true-peak limiter holds the master under −1.5 dBTP, with 1.6 ms of look-ahead, so peaks are caught before they arrive. A hardware synth on its clean path meets only that limiter.</p>
       <p><b>Plugins rebuilt for the Linux app:</b> the <b>Ladder Filter</b> is now the Moog ladder as Antti Huovilainen modelled it (four saturating stages at twice the sample rate): Drive pushes it, and Resonance at 100% makes it sing on its own at the cutoff; its LFO has <b>LFO sync</b> and <b>LFO shape</b>. The <b>Bus Compressor</b> runs Airwindows Pressure4's gain computer, which clamps faster the harder it's hit, then your Release, Ratio and Makeup, a <b>Console</b> saturation and Mix (Attack is gone: Pressure4 sets its own). <b>Auto-Pan</b> gets <b>Sync</b> and <b>Wave</b> (sine, triangle, ramps, random steps); <b>Ring Mod</b> gets a <b>Wave</b> for its carrier and a <b>Sweep</b> that moves it, with its own rate and <b>Sync</b>. Synced rates follow the tempo. Saved chains load into them with their settings.</p>
       <p><b>Motion</b> (the Linux app): each LFO has <b>Sync</b> (free, or 4 bars down to 1/16, dotted and triplet) and two more shapes, <b>Ramp down</b> and <b>Random steps</b>. <b>Moves → Any knob…</b> lets it move anything: touch a knob or slider anywhere in the app, or <b>Plugin control…</b> for a plugin's, and the LFO swings it around where it was (Depth is how far). Switching the LFO off puts the control back.</p>
+      <p><b>Sync Lead</b> (the Linux app, on its native engine): a slave sawtooth hard-synced to the master, with every step band-limited where it lands. <b>Sweep</b> starts it high and slides it down to the ratio <b>Sync</b> sets (the classic sync scream); <b>Cross</b> is the Jupiter-8's cross-mod, the master bending the slave's pitch at audio rate for a harder, metallic edge. Two presets in Classic Synths use it: Sync Lead · Jupiter and Sync Screamer. <b>FM Glass</b> is no longer beta: it plays six operators and all 32 DX7 algorithms on the native engine.</p>
       <p><b>Favorites</b> (the Linux app): <b>★ Save</b> on the Playing row keeps what's playing under a name: one sound or a stack, every knob, its Effects knobs and each sound's effects switch, Analog, each plugin instrument's own settings, the plugin effects on each of those sounds (in order, with their settings) and their sends, which controller plays each one, and the hardware synth's settings. The <b>★ Favorites</b> row above Quick loads one; loading touches only the sounds it holds. Saving under a name that's already there updates it, and <b>⋯</b> on a favorite updates, renames, undoes the last update (the five saves before are kept) or deletes it. <b>⋯</b> at the end of the row exports them all as a file or imports one. Find (Ctrl-K) finds them by name. They stay across projects, like My sounds. A favorite whose plugin isn't installed loads the rest and says which one to get.</p>
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays. <b>Oct − / Oct +</b> move the MiniLab's own keys (it sends nothing for them), and the screen follows the notes they send: the keys, Play's Octave buttons and the strip move once a note lands outside the window they were on. <b>Shift + pads 13–16</b> (loop, stop, play, record) drive ▶ ■ ● on the screen you're on.</p>
@@ -32810,7 +32811,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 203;
+    window.NB_BUILD = 204;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -34811,6 +34812,8 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return id;
     }
     let natMonoLast = null;
+    // (204) what the engine can play (the app and the page update separately): 204 = the sync oscillator
+    const natCaps = () => { if (natCaps.v == null) { try { natCaps.v = (window.NBEngine && window.NBEngine.stats().caps) || 0; } catch (e) { natCaps.v = 0; } } return natCaps.v; };
     function natParams(id, p, midi, t) {
       const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(160);
       const AN = typeof NBAN !== "undefined" && NBAN.on, drift = (AN && NBAN.drift >= 0.01) ? (Math.random() * 2 - 1) * NBAN.drift * 4 : 0;
@@ -34908,8 +34911,13 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         a[87] = p.vibrato * 22; a[88] = 0.75; a[89] = 5.6;
       } else if (id === "sync") {   // (178) three hard-synced waves crossfaded from a high ratio down to the resting one, a sub saw, the svf
         const rEnd = 1 + p.sync * 3, rStart = rEnd * (1 + p.sweep * 1.6), rMid = Math.sqrt(rStart * rEnd), sweepT = 0.05 + p.sweep * 0.5;
-        osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
-        a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
+        if (natCaps() >= 204) {   // (204) one slave that really sweeps, every step band-limited where it lands; Cross: the master FMs it (Jupiter-8)
+          osc([{ w: 7, mul: 1, g: 0.36 }, { w: SAW, det: -7, g: 0.1 }]);
+          a[141] = rStart; a[142] = rEnd; a[143] = sweepT / 3; a[144] = (p.cross || 0) * 0.9;
+        } else {
+          osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
+          a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
+        }
         filt(1, 1.2, 0, expMap(p.bite, 500, 15000)); amp(attack, 0.5, -1, 0.4, 0);
       } else if (id === "vital") {   // (185) the Morph Pad: two neighbouring tables (two detuned copies each), motion trading them and breathing the filter
         const S = morphSpectra(), pos = p.morph * (S.length - 1), i0 = Math.min(S.length - 2, Math.floor(pos)), frac = pos - i0;
@@ -36853,6 +36861,28 @@ registerProcessor("nb-aw", NBAwProc);
     });
     setTimeout(() => { try { mpCtlStart(); } catch (e) {} }, 1500);
     window.__mp = { mo, run: mpRun, hz: mpHz, pick: mpPick, picked: mpPicked, apply: () => motionApply() };
+  }
+  // ======================================================================
+  // (204) Sync Lead and FM Glass, in the Linux app. Sync Lead: on the native engine, one slave saw that really sweeps
+  // down to its resting ratio, hard-synced to the master with every step band-limited where it lands, and Cross:
+  // the master modulating the slave's frequency, the Jupiter-8's cross-mod. FM Glass: six operators and all 32
+  // algorithms on the native engine since 185, so it's no longer beta.
+  // ======================================================================
+  if (window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !window.NB_LITE) {
+    if (ENGINES.sync && !ENGINES.sync.knobs.some(k => k[0] === "cross")) {
+      ENGINES.sync.knobs.push(["cross", "Cross", 0]);
+      if (state.params.sync && state.params.sync.cross == null) {
+        let saved = null; try { saved = JSON.parse(localStorage.getItem("nightbloom") || "null"); } catch (e) {}
+        const v = saved && saved.params && saved.params.sync && saved.params.sync.cross;
+        state.params.sync.cross = typeof v === "number" ? v : 0;
+      }
+    }
+    if (ENGINES.fm) ENGINES.fm.after = String(ENGINES.fm.after || "").replace(/\s*·\s*beta\b/i, "");
+    try { document.querySelectorAll('.tab[data-engine="fm"]').forEach(t => { t.parentElement.classList.remove("betaonly"); t.querySelectorAll("small, em").forEach(x => { x.textContent = x.textContent.replace(/\s*·?\s*beta\b/i, ""); }); }); } catch (e) {}
+    CLASSIC_PRESETS.push(
+      ["Sync Lead · Jupiter", "sync", { sync: { sync: 0.45, sweep: 0.6, bite: 0.7, attack: 0.02, release: 0.35, cross: 0.35 } }, { sub: "sync sweep with cross-mod · Jupiter-8", oct: 0, fx: { drive: 0.1, wobble: 0, echo: 0.3, space: 0.3 } }],
+      ["Sync Screamer", "sync", { sync: { sync: 0.8, sweep: 0.9, bite: 0.8, attack: 0, release: 0.3, cross: 0.6 } }, { sub: "wide sweep, hard cross-mod", oct: 0, fx: { drive: 0.25, wobble: 0, echo: 0.25, space: 0.25 } }]
+    );
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };

@@ -84,6 +84,8 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return id;
     }
     let natMonoLast = null;
+    // (204) what the engine can play (the app and the page update separately): 204 = the sync oscillator
+    const natCaps = () => { if (natCaps.v == null) { try { natCaps.v = (window.NBEngine && window.NBEngine.stats().caps) || 0; } catch (e) { natCaps.v = 0; } } return natCaps.v; };
     function natParams(id, p, midi, t) {
       const f = 440 * Math.pow(2, (midi - 69) / 12), a = new Float64Array(160);
       const AN = typeof NBAN !== "undefined" && NBAN.on, drift = (AN && NBAN.drift >= 0.01) ? (Math.random() * 2 - 1) * NBAN.drift * 4 : 0;
@@ -181,8 +183,13 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         a[87] = p.vibrato * 22; a[88] = 0.75; a[89] = 5.6;
       } else if (id === "sync") {   // (178) three hard-synced waves crossfaded from a high ratio down to the resting one, a sub saw, the svf
         const rEnd = 1 + p.sync * 3, rStart = rEnd * (1 + p.sweep * 1.6), rMid = Math.sqrt(rStart * rEnd), sweepT = 0.05 + p.sweep * 0.5;
-        osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
-        a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
+        if (natCaps() >= 204) {   // (204) one slave that really sweeps, every step band-limited where it lands; Cross: the master FMs it (Jupiter-8)
+          osc([{ w: 7, mul: 1, g: 0.36 }, { w: SAW, det: -7, g: 0.1 }]);
+          a[141] = rStart; a[142] = rEnd; a[143] = sweepT / 3; a[144] = (p.cross || 0) * 0.9;
+        } else {
+          osc([{ w: 4, mul: rStart, g: 0.3 }, { w: 4, mul: rMid, g: 0.3 }, { w: 4, mul: rEnd, g: 0.3 }, { w: SAW, det: -7, g: 0.1 }]);
+          a[99] = sweepT; a[100] = 1; a[101] = 2; a[102] = 3;
+        }
         filt(1, 1.2, 0, expMap(p.bite, 500, 15000)); amp(attack, 0.5, -1, 0.4, 0);
       } else if (id === "vital") {   // (185) the Morph Pad: two neighbouring tables (two detuned copies each), motion trading them and breathing the filter
         const S = morphSpectra(), pos = p.morph * (S.length - 1), i0 = Math.min(S.length - 2, Math.floor(pos)), frac = pos - i0;

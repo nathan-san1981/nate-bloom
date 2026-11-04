@@ -100,6 +100,35 @@ static inline double tableAt(const Table* T, double ph, double f, double sr) {
 // band-limited with a 2-point polyBLEP. Waves 0-4 = SAW01-05 (SAW03: chopped at +1 octave by the pulse width, the
 // hoover's wave), 5 = the pulse at that width. The pulse width moves at audio rate (PWM): its edges are rebuilt
 // every 16 samples when it changes.
+// (204) hard sync, anti-aliased: a slave saw reset by the master. Every step in it (the slave's own wraps and each
+// master reset, where it jumps from wherever it was back to the start) is band-limited with a 2-point polyBLEP placed
+// at its exact position inside the sample; the output runs one sample late so the correction can reach both sides of
+// the step. xm is Jupiter-8 cross-mod: the master's saw moves the slave's frequency (audio-rate FM).
+struct SyncOsc {
+  double ps = 0, prev = 0, dx = 0, dy = 0;
+  void reset() { ps = 0; prev = 0; dx = dy = 0; }
+  // pm: the master's phase after this sample's step (0..1), dm: its step; ratio: slave / master frequency
+  inline double step(double pm, double dm, double ratio, double xm) {
+    const double mv = 2 * pm - 1;
+    double ds = dm * ratio * (1 + xm * mv); if (ds < 0) ds = 0; if (ds > 0.49) ds = 0.49;
+    double cP = 0, cC = 0;   // corrections: to the previous sample, to this one
+    if (dm > 0 && pm < dm) {   // the master wrapped inside this sample, tau of a sample ago
+      const double tau = pm / dm;
+      double pr = ps + ds * (1 - tau);   // the slave's phase when it was reset
+      if (pr >= 1) { pr -= 1; const double tw = ds > 0 ? tau + pr / ds : tau; cP += -tw * tw; cC += (1 - tw) * (1 - tw); }   // it wrapped first (a step of -2)
+      const double h = -2 * pr;   // the reset: from 2pr-1 down to -1
+      cP += 0.5 * h * tau * tau; cC += -0.5 * h * (1 - tau) * (1 - tau);
+      ps = ds * tau;
+    } else {
+      ps += ds;
+      if (ps >= 1) { ps -= 1; const double tw = ds > 0 ? ps / ds : 0; cP += -tw * tw; cC += (1 - tw) * (1 - tw); }
+    }
+    const double out = prev + cP;
+    prev = 2 * ps - 1 + cC;
+    const double y = out - dx + 0.9995 * dy; dx = out; dy = y;   // (sync leaves a DC offset that moves with the ratio)
+    return y;
+  }
+};
 struct AJOsc {
   int wave = 2, n = 0; double duty = 0.5, ep[16], ej[16];
   static inline double fr(double x) { return x - std::floor(x); }
@@ -141,6 +170,7 @@ struct Gen {
   std::shared_ptr<Table> tbl[8]; double lfoRate = 0, lfoPh = 0, lfoF = 0, lfoG[8] = {};
   bool form = false; Biquad2 fb[3]; double fl[3] = {}; double brG = 0; Biquad brHp;
   AJOsc aj[8]; bool ajOn = false; double ajDuty = 0.5, ajDepth = 0, ajRate = 0, ajPh = 0;   // (201) Alpha Juno DCOs (wave 6) and their PWM
+  SyncOsc so[8]; double sR0 = 1, sR1 = 1, sT = 0.1, sXm = 0, sRat = 1;   // (204) hard-sync slaves (wave 7): the ratio sweeps from sR0 to sR1 over sT, sXm cross-mod
   uint32_t rng = 7;
   inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
   void setup(const double* p, double sr, uint32_t seed) {
@@ -153,6 +183,8 @@ struct Gen {
     for (int i = 0; i < nosc; i++) if ((int)wave[i] == 5) { std::lock_guard<std::mutex> lk(gTabMu); auto it = gTabs.find((int)p[2 + i * 7 + 6]); if (it != gTabs.end()) tbl[i] = it->second; ph[i] = 0; if (!tbl[i]) wave[i] = 3; }
     ajOn = false; ajDuty = p[138] > 0 ? p[138] : 0.5; ajDepth = p[139]; ajRate = p[140]; ajPh = 0;   // (201) p[130+i] each DCO's wave, p[138] width, p[139] PWM depth, p[140] PWM rate
     for (int i = 0; i < nosc; i++) if ((int)wave[i] == 6) { ajOn = true; aj[i].wave = std::max(0, std::min(5, (int)p[130 + i])); aj[i].duty = std::max(0.04, std::min(0.96, ajDuty)); aj[i].build(); }
+    sR0 = p[141] > 0 ? p[141] : 1; sR1 = p[142] > 0 ? p[142] : 1; sT = p[143] > 0 ? p[143] : 0.1; sXm = p[144]; sRat = sR0;   // (204) p[141] start ratio, p[142] end, p[143] sweep time, p[144] cross-mod
+    for (int i = 0; i < nosc; i++) if ((int)wave[i] == 7) { so[i].reset(); ph[i] = 0; }
     lfoRate = p[108]; lfoF = p[109]; for (int i = 0; i < 8; i++) lfoG[i] = p[110 + i];
     form = p[118] > 0; if (form) for (int j = 0; j < 3; j++) { fb[j].set(1, p[119 + j], p[122 + j] > 0 ? p[122 + j] : 1, sr); fl[j] = p[125 + j]; }
     brG = p[128]; if (brG > 0) brHp.highpass(p[129] > 0 ? p[129] : 700, 1.12, sr);
@@ -183,6 +215,7 @@ struct Gen {
         const double common = driftC + driftDepth * sin(2 * M_PI * driftPh) + bendC + vibC * sin(vibPh0 + 2 * M_PI * 5.6 * i * isr) + vib;
         const double gl = (gT > 0 && t < gT) ? gFrom * pow(1 / gFrom, t / gT) : 1;
         if (ajOn) { double d = ajDuty; if (ajDepth > 0 && ajRate > 0) { d += ajDepth * 0.5 * sin(2 * M_PI * ajPh); ajPh += ajRate * 16 * isr; if (ajPh >= 1) ajPh -= 1; } for (int o = 0; o < nosc; o++) if ((int)wave[o] == 6) aj[o].setDuty(d); }
+        sRat = sR1 + (sR0 - sR1) * exp(-t / sT);
         for (int o = 0; o < nosc; o++) {
           const double d = (detT[o] > 0 && t < detT[o]) ? det0[o] + (det[o] - det0[o]) * (t / detT[o]) : det[o];
           inc[o] = f * mul[o] * gl * exp2((common + d) / 1200.0) * isr;
@@ -203,6 +236,7 @@ struct Gen {
         }
         else if (wv == 5 && tbl[o]) v = tableAt(tbl[o].get(), ph[o], inc[o] * sr, sr);
         else if (wv == 6) v = aj[o].at(ph[o], dt);
+        else if (wv == 7) v = so[o].step(ph[o], dt, sRat, sXm);
         else v = sin(2 * M_PI * ph[o]);
         double fg = 1;
         if (fade[o]) { const double T = fadeT, u = t / T; fg = fade[o] == 1 ? std::max(0.0, 1 - u) : fade[o] == 3 ? std::min(1.0, u) : (u < 0.5 ? u * 2 : std::max(0.0, 2 - u * 2)); }
@@ -644,6 +678,7 @@ static napi_value TableN(napi_env env, napi_callback_info info) {
 static napi_value Stats(napi_env env, napi_callback_info info) {
   napi_value o; napi_create_object(env, &o);
   auto set = [&](const char* k, double v) { napi_set_named_property(env, o, k, num(env, v)); };
+  set("caps", 204);   // (204) what this engine can play: 204 = the sync oscillator (wave 7)
   if (!E) { set("running", 0); return o; }
   set("running", E->run.load() ? 1 : 0); set("voices", E->nVoices.load()); set("peakVoices", E->peakVoices.load()); set("threads", E->nwork + 1);
   set("blockUs", E->renderUs.load()); set("blockMaxUs", E->renderMaxUs.load()); set("blocks", (double)E->blocks.load()); set("caughtUp", (double)E->late.load());
