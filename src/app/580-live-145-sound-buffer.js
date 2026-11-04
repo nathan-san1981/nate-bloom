@@ -32,4 +32,4 @@
       }, true);
     }
     (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ soundBuffer: { now: bufNow(), chosen: bufWant(), keyToSoundMs: bufMs(), lowLatencyFrames: LL ? LL.frames : null } }));
-    window.__live11 = { bufHTML, bufWant, bufNow };
+    window.__live11 = { bufHTML, bufWant, bufNow, setLowest: on => { llNext = !!on; } };   // (206: Settings › Sound check sets it too)

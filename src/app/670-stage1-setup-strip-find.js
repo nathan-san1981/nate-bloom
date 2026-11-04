@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 205;
+    window.NB_BUILD = 206;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -58,7 +58,7 @@
       return `<div class="su-h">Sound check</div>
         ${suRow("Sound goes to", `<span id="suOut"></span>${sink ? ' <button type="button" class="btn" id="suSink">Choose…</button>' : ""}`, "suOutRow")}
         ${android ? suRow("Media volume", '<span id="suVol"></span>', "suVolRow") : ""}
-        ${window.NB_LITE ? "" : suRow("Sound buffer", `<div class="seg su-buf" role="group" aria-label="Sound buffer"><button type="button" data-b="fast" aria-pressed="${bufWant() === "fast"}">Fast</button><button type="button" data-b="steady" aria-pressed="${bufWant() === "steady"}">Steady</button></div><span id="suBuf" class="su-note"></span>`, "suBufRow")}
+        ${window.NB_LITE ? "" : suRow("Sound buffer", `<div class="seg su-buf" role="group" aria-label="Sound buffer">${window.NB_NATIVE && NB_NATIVE.lowLatency ? `<button type="button" data-b="lowest" aria-pressed="${bufWant() === "lowest"}">Lowest</button>` : ""}<button type="button" data-b="fast" aria-pressed="${bufWant() === "fast"}">Fast</button><button type="button" data-b="steady" aria-pressed="${bufWant() === "steady"}">Steady</button></div><span id="suBuf" class="su-note"></span>`, "suBufRow")}
         ${suRow("Dropouts", '<span id="suDrops"></span>', "suDropsRow")}
         ${suRow("Test tone", '<button type="button" class="btn" id="suTone">▶ One second at 440 Hz</button><span class="su-note">through the same output as everything else</span>', "suToneRow")}
         ${suRow("No sound?", '<button type="button" class="btn" id="suFix">Fix sound</button><span class="su-note">reopens the sound on whatever is plugged in now</span>', "suFixRow")}
@@ -71,7 +71,7 @@
       const buf = $id("suBuf"); if (buf) {
         const want = bufWant(), now = bufNow(), ms = bufMs();
         nbT(buf, "now " + (now === "steady" ? "Steady" : "Fast") + (ms != null ? " · " + ms + " ms from a key to its sound" : "") + (want !== now ? " · reload to make it " + (want === "steady" ? "Steady" : "Fast") : ""));
-        if (want !== now && !$id("suReload")) { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.id = "suReload"; b.textContent = "Reload now"; b.addEventListener("click", () => { add139("setup", "reload for the sound buffer"); location.reload(); }); buf.parentNode.appendChild(b); }
+        if (want !== now && !$id("suReload")) { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.id = "suReload"; b.textContent = window.NB_NATIVE && NB_NATIVE.lowLatency ? "Restart now" : "Reload now"; b.addEventListener("click", () => { add139("setup", "reload for the sound buffer"); const LLx = window.NB_NATIVE && NB_NATIVE.lowLatency; if (LLx && LLx.restart) { try { LLx.restart(); return; } catch (er) {} } location.reload(); }); buf.parentNode.appendChild(b); }
         if (want === now && $id("suReload")) $id("suReload").remove();
       }
       const dr = $id("suDrops"); if (dr) nbT(dr, h.dropouts == null ? "not measured yet" : h.dropouts + " in the last minute");
@@ -86,7 +86,8 @@
       add139("setup", "test tone");
     }
     function suSoundWire() {
-      SU.pane.querySelectorAll(".su-buf button").forEach(b => b.addEventListener("click", () => { lsSet("nightbloom-buffer", b.dataset.b); SU.pane.querySelectorAll(".su-buf button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); add139("setup", "sound buffer → " + b.dataset.b + " (after a reload)"); suSoundPaint(); }));
+      SU.pane.querySelectorAll(".su-buf button").forEach(b => b.addEventListener("click", () => { const LLx = window.NB_NATIVE && NB_NATIVE.lowLatency; if (LLx) { try { LLx.set(b.dataset.b === "lowest"); window.__live11 && __live11.setLowest && __live11.setLowest(b.dataset.b === "lowest"); } catch (er) {} }   // (206) Lowest is the app's own setting: Fast and Steady switch it off
+        if (b.dataset.b !== "lowest") lsSet("nightbloom-buffer", b.dataset.b); else lsSet("nightbloom-buffer", "fast"); SU.pane.querySelectorAll(".su-buf button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); add139("setup", "sound buffer → " + b.dataset.b + " (after a reload)"); suSoundPaint(); }));
       const t = $id("suTone"); if (t) t.addEventListener("click", suTone);
       const f = $id("suFix"); if (f) f.addEventListener("click", () => { const h = $id("helpFixSound"); if (h) h.click(); nbT(f, "Done"); setTimeout(() => nbT(f, "Fix sound"), 1500); });
       const s = $id("suSink"); if (s) s.addEventListener("click", () => suOpen("midi", "#sinkRow"));

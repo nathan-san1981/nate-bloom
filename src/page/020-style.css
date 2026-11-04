@@ -3443,3 +3443,17 @@ body.nb-wide .knobs { max-width: 1600px; }
 .nb-favpop .fv-item:hover { background: rgba(255,255,255,.1); }
 .nb-favpop .fv-item small { opacity: .6; font-size: 11px; }
 .nb-favpop .fv-item.danger { color: #ff8a8a; }
+/* (206) sounds by engine: the engines as tiles, then one engine's presets */
+.eb-head { margin: 12px 4px 6px; }
+.eb-head small { color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.eb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; padding: 0 4px; }
+.eb-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 8px 10px; min-height: 58px;
+  border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.03); color: var(--ink); cursor: pointer; }
+.eb-tile:hover { border-color: var(--lilac); }
+.eb-tile.on { border-color: var(--lilac); background: rgba(199,168,255,0.12); }
+.eb-tile b { font-size: 0.9rem; }
+.eb-tile small { font-size: 0.68rem; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.eb-tile i { font-style: normal; font-size: 0.66rem; color: var(--lilac); font-family: var(--font-mono); }
+.eb-bar { display: flex; align-items: center; gap: 10px; padding: 4px 4px 8px; position: sticky; top: 0; background: var(--panel); z-index: 1; }
+.eb-title { display: flex; flex-direction: column; min-width: 0; }
+.eb-title small { color: var(--dim); font-size: 0.72rem; }
