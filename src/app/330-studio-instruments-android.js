@@ -199,7 +199,7 @@
   // the end of the master chain (compressor, limiter, trim, clipper), copied from the live one
   function nfpMaster(c) {
     const comp = c.createDynamicsCompressor(), lim = c.createDynamicsCompressor(), trim = c.createGain(), safe = c.createWaveShaper();
-    const lc = fx && fx.comp, ll = fx && fx.limiter, cn = (fx && fx.chainNodes) || [], li = ll ? cn.indexOf(ll) : -1, lt = li >= 0 ? cn[li + 1] : null, ls = li >= 0 ? cn[li + 2] : null;
+    const lc = fx && (fx.__awComp0 || fx.comp), ll = fx && (fx.__awLim0 || fx.limiter), cn = (fx && fx.chainNodes) || [], li = ll ? cn.indexOf(ll) : -1, lt = li >= 0 ? cn[li + 1] : null, ls = li >= 0 ? cn[li + 2] : null;
     const cp = (a, b, k, d) => { a[k].value = b ? b[k].value : d; };
     cp(comp, lc, "threshold", -14); cp(comp, lc, "ratio", 4); cp(comp, lc, "knee", 30); cp(comp, lc, "attack", 0.005); cp(comp, lc, "release", 0.2);
     cp(lim, ll, "threshold", -3); cp(lim, ll, "ratio", 20); cp(lim, ll, "knee", 0); cp(lim, ll, "attack", 0.001); cp(lim, ll, "release", 0.1);

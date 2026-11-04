@@ -287,12 +287,13 @@
       const lofiTone = ctx.createBiquadFilter(); lofiTone.type = "lowpass"; lofiTone.frequency.value = 20000; lofiWet.gain.value = 0;
       const hallIn = ctx.createGain(), hall = ctx.createConvolver(), hallWet = ctx.createGain(); hallWet.gain.value = 0;
       const betaOut = ctx.createGain();
-      const dcB = ctx.createBiquadFilter(); dcB.type = "highpass"; dcB.frequency.value = 10; dcB.Q.value = 0.707; m.connect(dcB).connect(densIn); densIn.connect(densDry).connect(lofiIn);   // (146: no DC offset into Density and the crush) densIn.connect(densShaper).connect(densWet).connect(lofiIn);
+      const dcB = ctx.createBiquadFilter(); dcB.type = "highpass"; dcB.frequency.value = 10; dcB.Q.value = 0.707; m.connect(dcB).connect(densIn); densIn.connect(densDry).connect(lofiIn);   // (146: no DC offset into Density and the crush)
+      densIn.connect(densShaper).connect(densWet).connect(lofiIn);   // (202: this had slipped into the comment above, so Density's wet half was never heard)
       lofiIn.connect(lofiDry).connect(hallIn); lofiIn.connect(bitShaper).connect(lofiTone).connect(lofiWet).connect(hallIn);
       const hallDry = ctx.createGain(); hallIn.connect(hallDry).connect(betaOut); hallIn.connect(hall).connect(hallWet).connect(betaOut);
       betaOut.connect(comp);
       const trackBus = ctx.createGain(); trackBus.__soloGroup = "trk"; trackBus.connect(comp);
-      B = { densIn, densShaper, densDry, densWet, bitShaper, lofiTone, lofiDry, lofiWet, hall, hallWet, hallDry, betaOut, trackBus };
+      B = { densIn, densShaper, densDry, densWet, lofiIn, bitShaper, lofiTone, lofiDry, lofiWet, hallIn, hall, hallWet, hallDry, betaOut, trackBus };
       applyBfx(false);
     };
   }

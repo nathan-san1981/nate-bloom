@@ -201,7 +201,7 @@
   const stamp = () => { const d = new Date(), p = x => String(x).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
 
   // ---------- Projects ----------
-  const KEEP_KEYS = ["nightbloom-ui", "nightbloom-beta", "nightbloom-favorites"];   // (200) favorites stay across projects, like My sounds
+  const KEEP_KEYS = ["nightbloom-ui", "nightbloom-beta", "nightbloom-favorites", "nightbloom-mastercomp"];   // (200) favorites stay across projects, like My sounds; (202) so does the Master compressor switch
   const prEl = document.getElementById("projects"), prList = document.getElementById("prList"), prInfo = document.getElementById("prInfo"), prName = document.getElementById("prName");
   async function storeAll(name) {
     const db = await idb();
