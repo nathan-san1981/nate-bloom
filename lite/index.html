@@ -3673,6 +3673,7 @@ body.nb-wide .knobs { max-width: 1600px; }
   </div>
   <div class="takebar" id="takeBar" hidden>
     <div class="tinfo" id="takeInfo">Take ready</div>
+    <button class="btn" id="takePlay" title="Play the take as recorded, straight to the output">▶ Play</button>
     <button class="btn" id="takeExport">Export WAV</button>
     <button class="btn" id="takeMp3" title="A small file for Messenger, iMessage or email">Export MP3</button>
     <button class="btn" id="takeToSlot">Send to sampler</button>
@@ -22294,21 +22295,47 @@ registerProcessor("nb-verb", NBVerb);`;
   const fmtClock = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
   const toI16 = f => { const o = new Int16Array(f.length); for (let i = 0; i < f.length; i++) { const v = f[i] < -1 ? -1 : f[i] > 1 ? 1 : f[i]; o[i] = v * 0x7fff; } return o; };
 
+  // (197) the take is captured on the audio thread (an AudioWorklet), not on the page's thread in 85 ms chunks the
+  // way a ScriptProcessor does: nothing the page is doing can glitch it, and it keeps up with the app's low-latency
+  // output. The ScriptProcessor stays as the fallback where worklets aren't there.
+  const REC_SRC = `class R extends AudioWorkletProcessor { constructor() { super(); this.n = 0; this.L = new Int16Array(4096); this.R = new Int16Array(4096); this.on = true; this.port.onmessage = e => { if (e.data === "stop") { this.flush(); this.on = false; } }; }
+    flush() { if (!this.n) return; const L = this.L.slice(0, this.n), R = this.R.slice(0, this.n); this.port.postMessage({ L, R }, [L.buffer, R.buffer]); this.n = 0; }
+    process(inp) { if (!this.on) return false; const i = inp[0]; if (!i || !i.length) return true; const l = i[0], r = i.length > 1 ? i[1] : i[0];
+      for (let k = 0; k < l.length; k++) { let a = l[k], b = r[k]; a = a < -1 ? -1 : a > 1 ? 1 : a; b = b < -1 ? -1 : b > 1 ? 1 : b; this.L[this.n] = a * 0x7fff; this.R[this.n] = b * 0x7fff; if (++this.n === 4096) this.flush(); }
+      return true; } }
+    registerProcessor("nb-take", R);`;
+  let recMod = null;   // the context the worklet module is loaded into
+  function recModule() {
+    if (!ctx || !ctx.audioWorklet) return null;
+    if (recMod && recMod.ctx === ctx) return recMod.p;
+    const url = URL.createObjectURL(new Blob([REC_SRC], { type: "text/javascript" }));
+    recMod = { ctx, p: ctx.audioWorklet.addModule(url).then(() => true, () => false) };
+    return recMod.p;
+  }
+  { const pre = setInterval(() => { if (ctx) { clearInterval(pre); recModule(); } }, 500); }   // ready before the first take
   function startTake() {
     start();
     if (take.rec || !analyser) return;
     take.L = []; take.R = []; take.len = 0; take.done = null; takeBar.hidden = true;
-    const node = ctx.createScriptProcessor(4096, 2, 2), mute = ctx.createGain(); mute.gain.value = 0;
-    node.onaudioprocess = ev => {
-      if (!take.rec) return;
-      const ib = ev.inputBuffer;
-      take.L.push(toI16(ib.getChannelData(0)));
-      take.R.push(toI16(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0)));
-      take.len += ib.length;
-      if (take.len >= ctx.sampleRate * MAX_TAKE_SEC) stopTake();
+    const mute = ctx.createGain(); mute.gain.value = 0;
+    const push = (L, R) => { if (!take.rec) return; take.L.push(L); take.R.push(R); take.len += L.length; if (take.len >= ctx.sampleRate * MAX_TAKE_SEC) stopTake(); };
+    const spNode = () => {
+      const node = ctx.createScriptProcessor(4096, 2, 2);
+      node.onaudioprocess = ev => { const ib = ev.inputBuffer; push(toI16(ib.getChannelData(0)), toI16(ib.numberOfChannels > 1 ? ib.getChannelData(1) : ib.getChannelData(0))); };
+      return node;
     };
-    analyser.connect(node); node.connect(mute).connect(ctx.destination);
-    take.node = node; take.mute = mute; take.rec = true; take.startedAt = ctx.currentTime;
+    const wire = node => { analyser.connect(node); node.connect(mute).connect(ctx.destination); take.node = node; };
+    take.mute = mute; take.rec = true; take.startedAt = ctx.currentTime; take.kind = "";
+    const mod = recModule(), mine = take.startedAt;
+    const useSp = () => { if (take.rec && take.startedAt === mine && !take.node) { wire(spNode()); take.kind = "script"; } };
+    if (!mod) useSp();
+    else mod.then(ok => {
+      if (!take.rec || take.startedAt !== mine || take.node) return;
+      if (!ok) return useSp();
+      try { const w = new AudioWorkletNode(ctx, "nb-take", { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2], channelCount: 2, channelCountMode: "explicit" });
+        w.port.onmessage = e => { if (e.data && e.data.L) push(e.data.L, e.data.R); }; wire(w); take.kind = "worklet"; }
+      catch (e) { useSp(); }
+    });
     takeBtn.classList.add("live");
     const tickT = () => { takeBtn.textContent = "■ " + fmtClock(ctx.currentTime - take.startedAt); };
     tickT(); take.timer = setInterval(tickT, 250);
@@ -22316,7 +22343,9 @@ registerProcessor("nb-verb", NBVerb);`;
   function stopTake() {
     if (!take.rec) return;
     take.rec = false; clearInterval(take.timer);
+    try { if (take.node && take.node.port) take.node.port.postMessage("stop"); } catch (e) {}
     try { analyser.disconnect(take.node); take.node.disconnect(); take.mute.disconnect(); } catch (e) {}
+    take.node = null;
     takeBtn.classList.remove("live"); takeBtn.textContent = "● Rec";
     if (take.len < ctx.sampleRate * 0.2) { takeInfo.textContent = "Take too short to keep."; takeBar.hidden = false; takeBar.dataset.empty = "1"; return; }
     take.done = { L: take.L, R: take.R, len: take.len, rate: ctx.sampleRate };
@@ -22327,6 +22356,19 @@ registerProcessor("nb-verb", NBVerb);`;
     takeBar.hidden = false;
   }
   takeBtn.addEventListener("click", () => (take.rec ? stopTake() : startTake()));
+  // (197) Play: the take as recorded, straight to the output, so live and recorded can be compared on the same speakers at
+  // the same volume without exporting
+  const takePlay = document.getElementById("takePlay"); let tpSrc = null;
+  function takePlayStop() { if (tpSrc) { try { tpSrc.stop(); } catch (e) {} tpSrc = null; } if (takePlay) takePlay.textContent = "▶ Play"; }
+  if (takePlay) takePlay.addEventListener("click", () => {
+    if (tpSrc) return takePlayStop();
+    if (!take.done || !ctx) return; start();
+    const t = take.done, buf = ctx.createBuffer(2, t.len, t.rate), L = buf.getChannelData(0), R = buf.getChannelData(1); let o = 0;
+    for (let c = 0; c < t.L.length && o < t.len; c++) { const l = t.L[c], r = t.R[c]; for (let i = 0; i < l.length && o < t.len; i++, o++) { L[o] = l[i] / 0x8000; R[o] = r[i] / 0x8000; } }
+    const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination); s.onended = () => { if (tpSrc === s) takePlayStop(); }; s.start(); tpSrc = s; takePlay.textContent = "■ Stop";
+  });
+  { const st0 = startTake; startTake = function () { takePlayStop(); return st0.apply(this, arguments); }; }
+  window.__takePlay = { stop: takePlayStop };
 
   function takeWav(t) {
     const n = t.len, ab = new ArrayBuffer(44 + n * 4), v = new DataView(ab);
@@ -22392,7 +22434,7 @@ registerProcessor("nb-verb", NBVerb);`;
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
   document.getElementById("takeExport").addEventListener("click", exportTake);
-  document.getElementById("takeDiscard").addEventListener("click", () => { take.done = null; takeBar.hidden = true; });
+  document.getElementById("takeDiscard").addEventListener("click", () => { takePlayStop(); take.done = null; takeBar.hidden = true; });
   document.getElementById("takeToSlot").addEventListener("click", async () => {
     if (!take.done) return;
     const wav = takeWav(take.done), i = state.samp.slot, auto = !!window.__nbTakeAuto;   // (196) read before the await
@@ -32886,7 +32928,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 196;
+    window.NB_BUILD = 197;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
