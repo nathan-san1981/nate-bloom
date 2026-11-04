@@ -34,6 +34,13 @@ const CATALOG = [
     blurb: "Analog tape: saturation, wow and flutter" },
   { id: "actuate", name: "Actuate", kind: "fx", repo: "ardura/Actuate", bundle: /actuate/i, pre: true, formats: ["vst3", "clap"], licence: "GPL-3.0",
     blurb: "Granular sampler and texture machine" },
+  // (205) more from the plan: drums made from scratch, the SFZ player (for the free libraries), a granular effect
+  { id: "geonkick", name: "Geonkick", kind: "synth", repo: "Geonkick-Synthesizer/geonkick", bundle: /geonkick/i, licence: "GPL-3.0",
+    blurb: "Percussion synth: 808, 909 and CR-78-style kicks, snares and hats, built from scratch" },
+  { id: "sfizz", name: "sfizz", kind: "sampler", repo: "sfztools/sfizz-ui", bundle: /sfizz/i, licence: "BSD-2-Clause",
+    blurb: "Plays SFZ sample libraries: free orchestras, pianos, guitars, choirs" },
+  { id: "argotlunar", name: "Argotlunar", kind: "fx", repo: "mourednik/argotlunar", bundle: /argotlunar/i, licence: "GPL-2.0",
+    blurb: "Real-time granular effect: smears, stutters and shimmering clouds" },
   { id: "airwindows", name: "Airwindows Consolidated", kind: "fx", repo: "baconpaul/airwin2rack", bundle: /airwin/i, pre: true, licence: "MIT",
     blurb: "Hundreds of small, excellent effects in one plugin" },
 ];
