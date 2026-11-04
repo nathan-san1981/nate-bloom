@@ -107,15 +107,16 @@
   document.getElementById("takeDiscard").addEventListener("click", () => { take.done = null; takeBar.hidden = true; });
   document.getElementById("takeToSlot").addEventListener("click", async () => {
     if (!take.done) return;
-    const wav = takeWav(take.done), i = state.samp.slot;
+    const wav = takeWav(take.done), i = state.samp.slot, auto = !!window.__nbTakeAuto;   // (196) read before the await
     try {
       const buf = trimBuffer(await decode(wav.slice(0)));
       const nm = "Resampled take " + fmtClock(take.done.len / take.done.rate);
       setSample(i, buf, nm);
       if (state.samp.slots[i].mode === "grain") state.samp.slots[i].mode = "play";
       storeSample(i, nm, wav);
-      state.engine = "samp"; renderEngine(); save();
-      takeInfo.textContent = "Loaded into sampler slot S" + (i + 1);
+      if (!auto) { state.engine = "samp"; renderEngine(); }   // (196) sent by hand: show the sampler; delivered by the setting: stay put
+      save();
+      takeInfo.textContent = (auto ? "Recorded into sampler slot S" : "Loaded into sampler slot S") + (i + 1) + " · " + fmtClock(take.done.len / take.done.rate);
     } catch (e) { takeInfo.textContent = "Couldn't load that take into the sampler."; }
   });
 

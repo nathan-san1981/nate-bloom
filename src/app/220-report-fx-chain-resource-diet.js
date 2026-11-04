@@ -28,9 +28,13 @@
       clearInterval(timer); bn.hidden = true; document.body.classList.remove("recording");
       const r = sp0(); const where = recTo;
       if (take.done && where !== "take") {
-        if (where === "trk") document.getElementById("takeToTracks").click();
-        else { const j = +where.slice(1); state.samp.slot = j; document.getElementById("takeToSlot").click(); setTimeout(() => { fillSels(); noteMsg("Recorded into S" + (j + 1)); if (typeof djMsg === "function" && !document.getElementById("djView").hidden) djMsg("Recorded into sampler slot S" + (j + 1)); }, 400); }
-        takeBar.hidden = true;   // it's been delivered: no take bar or "what to do with it" menu
+        // (196) delivered where it was set to go, and the take bar stays (Export WAV/MP3 still there), without the
+        // screen jumping to the sampler
+        window.__nbTakeAuto = true;
+        try {
+          if (where === "trk") document.getElementById("takeToTracks").click();
+          else { const j = +where.slice(1); state.samp.slot = j; document.getElementById("takeToSlot").click(); setTimeout(() => { fillSels(); noteMsg("Recorded into S" + (j + 1)); if (typeof djMsg === "function" && !document.getElementById("djView").hidden) djMsg("Recorded into sampler slot S" + (j + 1)); }, 400); }
+        } finally { setTimeout(() => { window.__nbTakeAuto = false; }, 0); }
       }
       return r;
     };

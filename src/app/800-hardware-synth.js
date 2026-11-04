@@ -114,7 +114,13 @@
         const bridgeSpk = !!(window.__nbBridge && __nbBridge.spk && __nbBridge.spkCtx === ctx);
         if (H.direct && H.src) {
           const d = Math.min(0.9, Math.max(0, (outLatMs() + inLatMs()) / 1000));
-          if (OUT.on && OUT.ctx === ctx && OUT.a === analyser && OUT.safe === fx.safe) { if (Math.abs(OUT.del.delayTime.value - d) > 0.002) OUT.del.delayTime.setTargetAtTime(d, ctx.currentTime, 0.05); return; }
+          // (196) the delay only feeds the recorders. It used to ramp to each new latency reading (every second, and the
+          // readings drift): a ramping delay line bends the pitch, so recordings warbled while the speakers (before it)
+          // didn't. Now it never moves while anything records, and when it does move it jumps.
+          if (OUT.on && OUT.ctx === ctx && OUT.a === analyser && OUT.safe === fx.safe) {
+            let busy = false; try { busy = !!(window.__recShown && window.__recShown.recNow()); } catch (e) {}
+            if (!busy && Math.abs(OUT.del.delayTime.value - d) > 0.005) { OUT.del.delayTime.cancelScheduledValues(0); OUT.del.delayTime.setValueAtTime(d, ctx.currentTime); }
+            return; }
           const pre = ctx.createGain(), del = ctx.createDelay(1); del.delayTime.value = d;
           try { fx.safe.disconnect(analyser); } catch (e) {}
           fx.safe.connect(pre); pre.connect(del).connect(analyser);
