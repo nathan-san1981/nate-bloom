@@ -88,6 +88,7 @@
         if (f !== "inst" && g.inst) more.push(...vc0("inst"));
         if (g.samp >= 0) { const sl = g.samp; more.push({ accepts: () => true, make: (mm, w, sc) => makeSampleVoice(mm, sl, w, sc) }); }
         if (g.hw) { const H = HWX(); more.push({ accepts: () => true, make: (mm, w, sc) => H.voice(mm, w, sc) }); }
+        g.hwx.forEach(id => { const X = XHW(id); more.push({ accepts: () => true, make: (mm, w) => X.voice(mm, w) }); });   // (221) the sequencer plays the MicroFreak too
         for (const c of more) if (c.accepts(m)) { const v = c.make(m, when, scale); if (v) vs.push(v); }
         return vs;
       }; }

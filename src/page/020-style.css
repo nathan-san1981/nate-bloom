@@ -3582,3 +3582,9 @@ body.es-on #epStrip { display: none; }
 .es-tg.on{border-color:var(--lilac,#c9a6ff);color:var(--lilac,#c9a6ff)}
 .es-tags{display:block;font-size:11px;opacity:.6;margin-top:2px;white-space:normal}
 .gb-midi-go{display:flex;margin:10px 0 4px}.gb-midi-go .btn{flex:1;height:48px;font-size:16px}
+.hw-mfc{display:flex;gap:6px;margin:6px 0}.hw-mfc .btn{flex:0 0 auto;height:34px;padding:0 10px}
+.hw-sel{flex:1;min-width:0;height:34px;border-radius:9px;border:1px solid var(--line,#3a3350);background:#0f0d16;color:inherit;font:inherit;font-size:13px;padding:0 8px}
+.hw-mfn{display:block;opacity:.65;font-size:11px;margin:2px 0 4px}
+.kz-q{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.kz-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-top:1px solid rgba(255,255,255,.06)}
+.kz-n{flex:1 1 140px;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600}.kz-n i{width:10px;height:10px;border-radius:3px;display:inline-block}.kz-row .hw-sel{flex:1 1 180px}.kz-row .kz-nt{flex:0 0 76px}
+.kz-n{background:transparent;border:1px solid transparent;border-radius:8px;color:inherit;font:inherit;padding:4px 6px;text-align:left;cursor:pointer}.kz-row.act .kz-n{border-color:var(--lilac,#c9a6ff);background:rgba(201,166,255,.12)}

@@ -87,6 +87,7 @@
         sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Hardware synth">
           <div class="ed-head"><strong id="hxTitle"></strong><span class="ed-info" id="hxState"></span></div>
           <span class="ed-info" style="text-align:left">Nate Bloom plays it over USB MIDI with whatever else is playing. Its sound reaches you from its own outputs; if it also comes into this computer, pick that input below and it's mixed in and recorded too.</span>
+          <div id="hxMf"></div>
           <div class="sp-lab"><span>MIDI to it</span></div>
           <div class="ly-quick"><select id="hxOut" aria-label="MIDI output" style="flex:1;min-width:0"></select><select id="hxCh" aria-label="MIDI channel"></select></div>
           <div class="sp-lab"><span>Its sound comes in from</span></div>
@@ -103,6 +104,7 @@
         async function paintSheet() {
           const X = cur; if (!X) return; const c = X.cfg;
           $x("hxTitle").textContent = X.name;
+          { const b = $x("hxMf"); b.innerHTML = ""; if (X.id === "mf" && window.__mfCtl) { const l = document.createElement("div"); l.className = "sp-lab"; l.innerHTML = "<span>What it plays: its own presets and engines</span>"; b.appendChild(l); window.__mfCtl(b); } }
           const out = $x("hxOut"); out.innerHTML = ""; const p = X.port();
           add(out, "", "Automatic · " + (p && !c.out ? p.name : "the " + X.name + " when it's plugged in"));
           outs().forEach(o => add(out, mdKey("out", o), o.name + (o.manufacturer ? " · " + o.manufacturer : "")));

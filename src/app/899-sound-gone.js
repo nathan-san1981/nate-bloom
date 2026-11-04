@@ -22,12 +22,17 @@
       if (making) making.push(v);
       return v;
     }
+    // (221) key zones for any sound: each sound in Playing can have its own part of the keyboard
+    const ZK = "nightbloom-zones"; let ZONES = {};
+    try { ZONES = JSON.parse(localStorage.getItem(ZK) || "{}") || {}; } catch (e) {}
+    const zSave = () => { try { localStorage.setItem(ZK, JSON.stringify(ZONES)); } catch (e) {} };
+    const inZone = (tag, m) => { const z = ZONES[tag] || ZONES[tag.replace(/#\d+$/, "")]; return !z || (m >= z[0] && m <= z[1]); };
     const vcG = voiceComponents;
     voiceComponents = function () {
       const r = vcG.apply(this, arguments);
       if (!Array.isArray(r)) return r;
-      return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make;
-        return Object.assign({}, c, { __sg: 1, make() { return track(tag, mk.apply(this, arguments)); } }); });
+      return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make, acc = c.accepts || (() => true);
+        return Object.assign({}, c, { __sg: 1, accepts: m => acc(m) && inZone(tag, m), make() { return track(tag, mk.apply(this, arguments)); } }); });
     };
     // which voices each key's note (and each held note) is made of
     const mnG = makeNote;
@@ -59,5 +64,6 @@
     window.__nbSweep = sweep;
     { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); setTimeout(sweep, 0); return r; }; }
     setInterval(sweep, 1000);   // (and changes that don't redraw the screen)
+    window.__nbZonesReload = () => { try { ZONES = JSON.parse(localStorage.getItem(ZK) || "{}") || {}; } catch (e) {} };
     window.__nbVoiceReg = () => [...REG].map(([t, s]) => [t, s.size]);
   }

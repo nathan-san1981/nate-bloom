@@ -303,7 +303,9 @@
     }
     const mfOut = () => { const A = XD.access; return A ? [...A.outputs.values()].find(isMF) || null : null; };
     function mfAsk(bytes, kind, ms = 120) { return new Promise(res => { MFQ.want = { kind, res, ack: () => res(true) }; mfOut().send([0xf0, 0x00, 0x20, 0x6b, ...bytes, 0xf7]); setTimeout(() => { res(false); }, ms); }); }
-    async function mfRead(num, full) {
+    let mfQ = Promise.resolve();
+    const mfRead = (num, full) => (mfQ = mfQ.then(() => mfRead0(num, full)).catch(() => null));
+    async function mfRead0(num, full) {
       const out = mfOut(); if (!out || !num) return null;
       const bank = Math.floor((num - 1) / 128), pre = (num - 1) % 128;
       MFQ.name = ""; MFQ.cat = null; MFQ.data = [];
@@ -318,6 +320,59 @@
       }
       return { name: HW.mf.name, cat: HW.mf.cat };
     }
+    // ---------- (221) picking what the MicroFreak plays, from here: any of its presets (their names and categories read
+    // from it once, then kept), or its oscillator engine. It plays its own sound; Nate Bloom only tells it which. ----------
+    const MF_ENG = [["Basic Waves", 5, 5], ["SuperWave", 14, 11], ["Wavetable", 19, 17], ["Harmo", 25, 23], ["Karplus Strong", 30, 29], ["V. Analog", 36, 34], ["Waveshaper", 41, 40], ["Two Op. FM", 47, 46],
+      ["Formant", 52, 52], ["Chords", 58, 58], ["Speech", 63, 64], ["Modal", 69, 69], ["Noise", 74, 75], ["Bass", 80, 87], ["SawX", 85, 93], ["Harm", 91, 98], ["User Wavetable", 96, 104], ["Sample", 102, 110],
+      ["Scan Grains", 107, 116], ["Cloud Grains", 113, 122], ["Hit Grains", 118, 127], ["Vocoder", 124, 81]];   // (name, value it takes, value it sends)
+    const MFL = (() => { try { return JSON.parse(localStorage.getItem("nightbloom-mf-lib") || "null") || { names: [], cats: [] }; } catch (e) { return { names: [], cats: [] }; } })();
+    const mflSave = () => { try { localStorage.setItem("nightbloom-mf-lib", JSON.stringify(MFL)); } catch (e) {} };
+    const mfCh = () => { try { const X = window.__hwx && window.__hwx.get("mf"); if (X) return (X.cfg.ch - 1) & 15; const H = window.__hw; if (H && H.modelId && H.modelId() === "mf") return (H.ch - 1) & 15; } catch (e) {} return 0; };
+    function mfSelect(num) {
+      const out = mfOut(); if (!out) return false; const ch = mfCh(), bank = Math.floor((num - 1) / 128), pre = (num - 1) % 128;
+      try { out.send([0xb0 | ch, 0, bank]); out.send([0xb0 | ch, 32, 0]); out.send([0xc0 | ch, pre]); } catch (e) { return false; }
+      const M = HW.mf; M.bank = bank; M.pc = num; M.cc = {}; M.name = MFL.names[num - 1] || ""; M.cat = MFL.cats[num - 1] ?? null;
+      mfRead(num, false).then(hwPaintSoon); hwPaintSoon(); return true;
+    }
+    function mfEngine(i) { const out = mfOut(), e = MF_ENG[i]; if (!out || !e) return; try { out.send([0xb0 | mfCh(), 9, e[1]]); } catch (er) {} HW.mf.cc[9] = e[2]; hwPaintSoon(); }
+    const mfEngNow = () => { const v = HW.mf.cc[9]; if (v == null) return -1; let b = -1, d = 999; MF_ENG.forEach((e, i) => { const x = Math.abs(e[2] - v); if (x < d) { d = x; b = i; } }); return b; };
+    // its preset names, read once in the background (about a second per 50) and kept
+    const MFS = { on: false, n: 0 };
+    async function mfScan(force) {
+      if (MFS.on || !mfOut()) return; if (!force && MFL.names.filter(Boolean).length >= 500) return;
+      MFS.on = true; let miss = 0;
+      for (let n = 1; n <= 512; n++) {
+        if (!force && MFL.names[n - 1]) continue;
+        MFS.n = n; if (n % 16 === 0) hwPaintSoon();
+        const r = await (mfQ = mfQ.then(async () => { const bank = Math.floor((n - 1) / 128), pre = (n - 1) % 128; MFQ.name = ""; MFQ.cat = null; const ok = await mfAsk([0x07, 0x01, 0x00, 0x01, 0x19, bank, pre, 0x00], "name", 250); MFQ.want = null; return ok && MFQ.name ? { name: MFQ.name, cat: MFQ.cat } : null; }).catch(() => null));
+        if (r) { MFL.names[n - 1] = r.name; MFL.cats[n - 1] = r.cat; miss = 0; } else if (++miss >= 4) break;
+      }
+      MFL.at = Date.now(); mflSave(); MFS.on = false; hwPaintSoon();
+    }
+    // the two drop-downs (the hardware panel's MicroFreak card, and its sheet)
+    function mfCtl(box) {
+      const on = !!mfOut(), M = HW.mf, row = mk("div", "hw-mfc");
+      const ps = mk("select", "hw-sel"); ps.setAttribute("aria-label", "MicroFreak preset");
+      const o0 = mk("option", "", on ? (M.pc ? "" : "Pick a preset…") : "Plug the MicroFreak in"); o0.value = ""; ps.appendChild(o0);
+      const have = MFL.names.some(Boolean), groups = new Map();
+      for (let n = 1; n <= 512; n++) { const nm = MFL.names[n - 1]; if (have && !nm) continue; const c = have ? (MF_CAT[MFL.cats[n - 1]] || "Other") : "Presets"; if (!groups.has(c)) groups.set(c, []); groups.get(c).push([n, nm]); }
+      [...groups.keys()].sort((a, b) => a === "Presets" ? -1 : a.localeCompare(b)).forEach(c => { const g = mk("optgroup"); g.label = c; groups.get(c).forEach(([n, nm]) => { const o = mk("option", "", n + (nm ? " · " + nm : "")); o.value = n; g.appendChild(o); }); ps.appendChild(g); });
+      ps.value = M.pc ? String(M.pc) : ""; ps.disabled = !on;
+      ps.addEventListener("change", () => { const n = +ps.value; if (n) mfSelect(n); });
+      const prev = mk("button", "btn", "◀"), next = mk("button", "btn", "▶"); prev.title = "Previous preset"; next.title = "Next preset"; prev.disabled = next.disabled = !on;
+      prev.addEventListener("click", () => mfSelect(Math.max(1, (M.pc || 1) - 1))); next.addEventListener("click", () => mfSelect(Math.min(512, (M.pc || 0) + 1)));
+      row.append(prev, ps, next); box.appendChild(row);
+      const er = mk("div", "hw-mfc"); const es = mk("select", "hw-sel"); es.setAttribute("aria-label", "MicroFreak oscillator engine");
+      const e0 = mk("option", "", "Engine: as the preset has it"); e0.value = ""; es.appendChild(e0);
+      MF_ENG.forEach((e, i) => { const o = mk("option", "", "Engine: " + e[0]); o.value = i; es.appendChild(o); });
+      const ei = mfEngNow(); es.value = ei >= 0 ? String(ei) : ""; es.disabled = !on;
+      es.addEventListener("change", () => { if (es.value !== "") mfEngine(+es.value); });
+      er.append(es); box.appendChild(er);
+      const note = mk("small", "hw-mfn", MFS.on ? "Reading its preset names… " + MFS.n + " of 512" : have ? "" : on ? "Its preset names show once they're read." : "");
+      if (note.textContent) box.appendChild(note);
+      if (on && !MFS.on) setTimeout(() => mfScan(false), 400);
+    }
+    window.__mfCtl = mfCtl; window.__mfSel = mfSelect;
     async function hwReadXD() { const x = await xdRead(); if (!x.err) { HW.xd = x; HW.xdAt = Date.now(); HW.xdErr = ""; } else HW.xdErr = x.err; hwPaint(); }
     let hwPT = 0; const hwPaintSoon = () => { clearTimeout(hwPT); hwPT = setTimeout(hwPaint, 120); };
     const hs = mk("aside", "es hws"); hs.id = "hwSide"; hs.hidden = true; hs.setAttribute("aria-label", "Your hardware synths"); document.body.appendChild(hs);
@@ -371,6 +426,7 @@
       const key = "mf:" + (M.pc || 0);
       const pr = mk("div", "hw-prog"); pr.append(mk("b", "", M.pc ? (M.name || HW.names[key] || "Preset " + M.pc) : "Preset: change presets once and it shows"), mk("small", "", M.pc ? "preset " + M.pc + (M.cat != null && MF_CAT[M.cat] ? " · " + MF_CAT[M.cat] : "") : "(it tells Nate Bloom which preset when the preset changes)"));
       m.appendChild(pr);
+      mfCtl(m);
       if (M.pc && !M.name) {
         const nm = mk("input", "nbk-name hw-nm"); nm.placeholder = "Name this preset"; nm.value = HW.names[key] || "";
         nm.addEventListener("change", () => { HW.names[key] = nm.value.trim(); if (!HW.names[key]) delete HW.names[key]; try { localStorage.setItem("nightbloom-hwnames", JSON.stringify(HW.names)); } catch (e) {} hwPaint(); });
