@@ -31,6 +31,7 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 | Sequencer Party plugins, Tom Burns | `wam/burns-audio/` | MIT |
 | Plaits (the macro oscillator) and stmlib, © Emilie Gillet (Mutable Instruments) | compiled into `wam/natebloom/twist/dsp.wasm` (Twist); the Rhythm Creator's Analog drum models are after its drum engines | MIT |
 | Ultramaster KR-106's engine, © Karl LaRocca (Kayrock) | compiled into `wam/natebloom/juno106/dsp.wasm` (Juno 106), with its 256 factory patches | GPL-3.0 |
+| Dexed's DX7 engine: msfa, © 2012 Google Inc. and © 2016-2025 Pascal Gauthier (Apache-2.0); EngineMkI, © Pascal Gauthier (GPL-3.0) | compiled into `wam/natebloom/pop89/dsp.wasm` (Pop 89); source in `wam/natebloom/portsrc/dx7/` | Apache-2.0 / GPL-3.0 |
 | Galactic3, © Chris Johnson (Airwindows) | compiled into `wam/natebloom/galactic/dsp.wasm` (Galactic) | MIT |
 | Wimmics community plugins and the WAM SDK | `wam/wimmics/` | per plugin, as declared in its source (several GPL-3.0 and GPL-2.0-or-later, some MIT, STK-4.3, LGPL, CC0/BSL); the SDK is MIT |
 | Studio instrument recordings | `inst/v1/` | see `inst/v1/CREDITS.txt` (CC BY 3.0 and CC0 1.0) |
