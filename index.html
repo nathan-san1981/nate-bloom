@@ -32973,7 +32973,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 217;
+    window.NB_BUILD = 218;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -37685,8 +37685,14 @@ registerProcessor("nb-aw", NBAwProc);
 
     // ---------- the Minilogue XD ----------
     const XD = { access: null, prog: null, bank: 0, lastPC: null, wait: null };
-    const XD_FIELDS = [["program_name", 4, 12], ["octave", 16, 1], ["portamento", 17, 1], ["voice_mode_depth", 19, 2], ["voice_mode_type", 21, 1], ["vco_1_wave", 22, 1], ["vco_1_octave", 23, 1], ["vco_1_pitch", 24, 2], ["vco_1_shape", 26, 2], ["vco_2_wave", 28, 1], ["vco_2_octave", 29, 1], ["vco_2_pitch", 30, 2], ["vco_2_shape", 32, 2], ["sync", 34, 1], ["ring", 35, 1], ["cross_mod_depth", 36, 2], ["multi_type", 38, 1], ["select_noise", 39, 1], ["select_vpm", 40, 1], ["select_user", 41, 1], ["shape_noise", 42, 2], ["shape_vpm", 44, 2], ["shape_user", 46, 2], ["shift_shape_noise", 48, 2], ["shift_shape_vpm", 50, 2], ["shift_shape_user", 52, 2], ["vco_1_level", 54, 2], ["vco_2_level", 56, 2], ["multi_level", 58, 2], ["cutoff", 60, 2], ["resonance", 62, 2], ["cutoff_drive", 64, 1], ["cutoff_keyboard_track", 65, 1], ["amp_eg_attack", 66, 2], ["amp_eg_decay", 68, 2], ["amp_eg_sustain", 70, 2], ["amp_eg_release", 72, 2], ["eg_attack", 74, 2], ["eg_decay", 76, 2], ["eg_int", 78, 2], ["eg_target", 80, 1], ["lfo_wave", 81, 1], ["lfo_mode", 82, 1], ["lfo_rate", 83, 2], ["lfo_int", 85, 2], ["lfo_target", 87, 1], ["mod_fx_on_off", 88, 1], ["mod_fx_type", 89, 1], ["mod_fx_chorus", 90, 1], ["mod_fx_ensemble", 91, 1], ["mod_fx_phaser", 92, 1], ["mod_fx_flanger", 93, 1], ["mod_fx_user", 94, 1], ["mod_fx_time", 95, 2], ["mod_fx_depth", 97, 2], ["delay_on_off", 99, 1], ["delay_sub_type", 100, 1], ["delay_time", 101, 2], ["delay_depth", 103, 2], ["reverb_on_off", 105, 1], ["reverb_sub_type", 106, 1], ["reverb_time", 107, 2], ["reverb_depth", 109, 2], ["bend_range_plus", 111, 1], ["bend_range_minus", 112, 1], ["cutoff_velocity", 128, 1], ["amp_velocity", 129, 1], ["multi_octave", 130, 1], ["multi_routing", 131, 1], ["eg_legato", 132, 1], ["portamento_mode", 133, 1], ["program_level", 135, 1], ["vpm_param1_feedback", 136, 1], ["vpm_param2_noise_depth", 137, 1], ["vpm_param3_shapemodint", 138, 1], ["vpm_param4_mod_attack", 139, 1], ["vpm_param5_mod_decay", 140, 1], ["vpm_param6_modkeytrack", 141, 1], ["program_transpose", 150, 1], ["delay_dry_wet", 151, 2], ["reverb_dry_wet", 153, 2]];
+    const XD_FIELDS = [["program_name", 4, 12], ["octave", 16, 1], ["portamento", 17, 1], ["voice_mode_depth", 19, 2], ["voice_mode_type", 21, 1], ["vco_1_wave", 22, 1], ["vco_1_octave", 23, 1], ["vco_1_pitch", 24, 2], ["vco_1_shape", 26, 2], ["vco_2_wave", 28, 1], ["vco_2_octave", 29, 1], ["vco_2_pitch", 30, 2], ["vco_2_shape", 32, 2], ["sync", 34, 1], ["ring", 35, 1], ["cross_mod_depth", 36, 2], ["multi_type", 38, 1], ["select_noise", 39, 1], ["select_vpm", 40, 1], ["select_user", 41, 1], ["shape_noise", 42, 2], ["shape_vpm", 44, 2], ["shape_user", 46, 2], ["shift_shape_noise", 48, 2], ["shift_shape_vpm", 50, 2], ["shift_shape_user", 52, 2], ["vco_1_level", 54, 2], ["vco_2_level", 56, 2], ["multi_level", 58, 2], ["cutoff", 60, 2], ["resonance", 62, 2], ["cutoff_drive", 64, 1], ["cutoff_keyboard_track", 65, 1], ["amp_eg_attack", 66, 2], ["amp_eg_decay", 68, 2], ["amp_eg_sustain", 70, 2], ["amp_eg_release", 72, 2], ["eg_attack", 74, 2], ["eg_decay", 76, 2], ["eg_int", 78, 2], ["eg_target", 80, 1], ["lfo_wave", 81, 1], ["lfo_mode", 82, 1], ["lfo_rate", 83, 2], ["lfo_int", 85, 2], ["lfo_target", 87, 1], ["mod_fx_on_off", 88, 1], ["mod_fx_type", 89, 1], ["mod_fx_chorus", 90, 1], ["mod_fx_ensemble", 91, 1], ["mod_fx_phaser", 92, 1], ["mod_fx_flanger", 93, 1], ["mod_fx_user", 94, 1], ["mod_fx_time", 95, 2], ["mod_fx_depth", 97, 2], ["delay_on_off", 99, 1], ["delay_sub_type", 100, 1], ["delay_time", 101, 2], ["delay_depth", 103, 2], ["reverb_on_off", 105, 1], ["reverb_sub_type", 106, 1], ["reverb_time", 107, 2], ["reverb_depth", 109, 2], ["bend_range_plus", 111, 1], ["bend_range_minus", 112, 1], ["cutoff_velocity", 128, 1], ["amp_velocity", 129, 1], ["multi_octave", 130, 1], ["multi_routing", 131, 1], ["eg_legato", 132, 1], ["portamento_mode", 133, 1], ["program_level", 135, 1], ["vpm_param1_feedback", 136, 1], ["vpm_param2_noise_depth", 137, 1], ["vpm_param3_shapemodint", 138, 1], ["vpm_param4_mod_attack", 139, 1], ["vpm_param5_mod_decay", 140, 1], ["vpm_param6_modkeytrack", 141, 1], ["program_transpose", 150, 1], ["delay_dry_wet", 151, 2], ["reverb_dry_wet", 153, 2],
+      ["key_trig", 18, 1], ["joystick_assign_plus", 113, 1], ["joystick_range_plus", 114, 1], ["joystick_assign_minus", 115, 1], ["joystick_range_minus", 116, 1], ["cv_in_mode", 117, 1], ["cv_in_1_assign", 118, 1], ["cv_in_1_range", 119, 1], ["cv_in_2_assign", 120, 1], ["cv_in_2_range", 121, 1],
+      ["micro_tuning", 122, 1], ["scale_key", 123, 1], ["program_tuning", 124, 1], ["lfo_key_sync", 125, 1], ["lfo_voice_sync", 126, 1], ["lfo_target_osc", 127, 1], ["portamento_bpm_sync", 134, 1],
+      ["user_param1", 142, 1], ["user_param2", 143, 1], ["user_param3", 144, 1], ["user_param4", 145, 1], ["user_param5", 146, 1], ["user_param6", 147, 1], ["midi_after_touch_assign", 155, 1],
+      ["seq_active_steps", 162, 2], ["bpm", 164, 2], ["step_length", 166, 1], ["step_resolution", 167, 1], ["swing", 168, 1], ["default_gate_time", 169, 1], ["step_on", 170, 2], ["step_motion_on", 172, 2],
+      ["motion_1_param", 174, 1], ["motion_2_param", 176, 1], ["motion_3_param", 178, 1], ["motion_4_param", 180, 1], ["arp_gate_time", 1022, 1], ["arp_rate", 1023, 1]];
     const MF_NAMES = { 5: "Glide", 9: "Osc type", 10: "Wave", 12: "Timbre", 13: "Shape", 23: "Cutoff", 83: "Resonance", 26: "Filter amount", 102: "Cycling rise", 103: "Cycling fall", 28: "Cycling hold", 24: "Cycling amount", 105: "Env attack", 106: "Env decay", 29: "Env sustain", 91: "Arp/Seq rate", 93: "LFO rate" };
+    const NOTE = n => ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"][n % 12] + (Math.floor(n / 12) - 1);
     const W3 = ["SQR", "TRI", "SAW"], OCT = ["16'", "8'", "4'", "2'"];
     const pct = v => Math.round(v / 1023 * 100) + "% (" + v + ")";
     const SHOW = [   // [group, label, field, how]
@@ -37704,10 +37710,26 @@ registerProcessor("nb-aw", NBAwProc);
       ["Effects", "Mod FX", "mod_fx_on_off", v => v ? "On" : "Off"], ["Effects", "Mod FX type", "mod_fx_type", v => ({ 1: "Chorus", 2: "Ensemble", 3: "Phaser", 4: "Flanger", 5: "User" })[v] || v], ["Effects", "Mod FX time", "mod_fx_time", pct], ["Effects", "Mod FX depth", "mod_fx_depth", pct],
       ["Effects", "Delay", "delay_on_off", v => v ? "On" : "Off"], ["Effects", "Delay type", "delay_sub_type", v => v + 1], ["Effects", "Delay time", "delay_time", pct], ["Effects", "Delay depth", "delay_depth", pct], ["Effects", "Delay dry/wet", "delay_dry_wet", pct],
       ["Effects", "Reverb", "reverb_on_off", v => v ? "On" : "Off"], ["Effects", "Reverb type", "reverb_sub_type", v => v + 1], ["Effects", "Reverb time", "reverb_time", pct], ["Effects", "Reverb depth", "reverb_depth", pct], ["Effects", "Reverb dry/wet", "reverb_dry_wet", pct],
+      ["Voice", "Key trig", "key_trig", v => v ? "On" : "Off"], ["Voice", "Portamento mode", "portamento_mode", v => v ? "On" : "Auto"], ["Voice", "Portamento BPM sync", "portamento_bpm_sync", v => v ? "On" : "Off"], ["Voice", "EG legato", "eg_legato", v => v ? "On" : "Off"],
+      ["Multi engine", "Routing", "multi_routing", v => v ? "Post VCF" : "Pre VCF"],
+      ["Multi engine", "VPM feedback", "vpm_param1_feedback", v => (v - 100) + "%"], ["Multi engine", "VPM noise depth", "vpm_param2_noise_depth", v => (v - 100) + "%"], ["Multi engine", "VPM shape mod int", "vpm_param3_shapemodint", v => (v - 100) + "%"],
+      ["Multi engine", "VPM mod attack", "vpm_param4_mod_attack", v => (v - 100) + "%"], ["Multi engine", "VPM mod decay", "vpm_param5_mod_decay", v => (v - 100) + "%"], ["Multi engine", "VPM mod key track", "vpm_param6_modkeytrack", v => (v - 100) + "%"],
+      ["Multi engine", "User param 1", "user_param1", v => v], ["Multi engine", "User param 2", "user_param2", v => v], ["Multi engine", "User param 3", "user_param3", v => v], ["Multi engine", "User param 4", "user_param4", v => v], ["Multi engine", "User param 5", "user_param5", v => v], ["Multi engine", "User param 6", "user_param6", v => v],
+      ["LFO", "Key sync", "lfo_key_sync", v => v ? "On" : "Off"], ["LFO", "Voice sync", "lfo_voice_sync", v => v ? "On" : "Off"], ["LFO", "Target osc", "lfo_target_osc", v => ["All", "VCO 1+2", "VCO 2", "Multi"][v] ?? v],
+      ["Effects", "Chorus sub-type", "mod_fx_chorus", v => v + 1], ["Effects", "Ensemble sub-type", "mod_fx_ensemble", v => v + 1], ["Effects", "Phaser sub-type", "mod_fx_phaser", v => v + 1], ["Effects", "Flanger sub-type", "mod_fx_flanger", v => v + 1], ["Effects", "User FX slot", "mod_fx_user", v => v + 1],
+      ["Controls", "Joystick + assign", "joystick_assign_plus", v => v], ["Controls", "Joystick + range", "joystick_range_plus", v => (v - 100) + "%"], ["Controls", "Joystick − assign", "joystick_assign_minus", v => v], ["Controls", "Joystick − range", "joystick_range_minus", v => (v - 100) + "%"],
+      ["Controls", "Bend range −", "bend_range_minus", v => v], ["Controls", "Aftertouch assign", "midi_after_touch_assign", v => v], ["Controls", "CV in mode", "cv_in_mode", v => v], ["Controls", "CV in 1", "cv_in_1_assign", v => v], ["Controls", "CV in 2", "cv_in_2_assign", v => v],
+      ["Tuning", "Micro tuning", "micro_tuning", v => v], ["Tuning", "Scale key", "scale_key", v => (v - 12 > 0 ? "+" : "") + (v - 12)], ["Tuning", "Program tuning", "program_tuning", v => (v - 50 > 0 ? "+" : "") + (v - 50) + " cents"],
+      ["Arp & sequencer", "BPM", "bpm", v => (v / 10).toFixed(1)], ["Arp & sequencer", "Step length", "step_length", v => v], ["Arp & sequencer", "Step resolution", "step_resolution", v => ["1/16", "1/8", "1/4", "1/2", "1/1"][v] || v],
+      ["Arp & sequencer", "Swing", "swing", v => (v > 127 ? v - 256 : v) + "%"], ["Arp & sequencer", "Gate time", "default_gate_time", v => Math.round(v / 72 * 100) + "%"], ["Arp & sequencer", "Steps on", "step_on", v => [...Array(16)].map((_, i) => (v >> i) & 1 ? "■" : "□").join("")],
+      ["Arp & sequencer", "Arp gate", "arp_gate_time", v => Math.round(v / 72 * 100) + "%"], ["Arp & sequencer", "Arp rate", "arp_rate", v => v],
+      ["Arp & sequencer", "Motion 1", "motion_1_param", v => v || "—"], ["Arp & sequencer", "Motion 2", "motion_2_param", v => v || "—"], ["Arp & sequencer", "Motion 3", "motion_3_param", v => v || "—"], ["Arp & sequencer", "Motion 4", "motion_4_param", v => v || "—"],
       ["Program", "Level", "program_level", v => v], ["Program", "Transpose", "program_transpose", v => (v - 13 > 0 ? "+" : "") + (v - 13)], ["Program", "Amp velocity", "amp_velocity", v => v], ["Program", "Bend range +/−", "bend_range_plus", v => v],
     ];
     function xdDecode(bytes) {
       const o = {}, u8 = bytes;
+      o.steps = [];
+      for (let st = 0; st < 16; st++) { const b = 190 + st * 52, notes = []; for (let k = 0; k < 8; k++) { const nn = u8[b + k], vel = u8[b + 8 + k]; if (nn && vel) notes.push(NOTE(nn) + (vel < 127 ? "·" + vel : "")); } o.steps.push(notes); }
       for (const [n, off, sz] of XD_FIELDS) o[n] = n === "program_name" ? String.fromCharCode(...u8.slice(off, off + sz)).replace(/\0.*$/, "").trim() : sz === 2 ? u8[off] | (u8[off + 1] << 8) : u8[off];
       return o;
     }
@@ -37776,7 +37798,7 @@ registerProcessor("nb-aw", NBAwProc);
     let saveSound = async function (name, notes, wantXD) {
       const e = { id: "n" + Date.now().toString(36), name, notes: notes || "", at: Date.now(), nb: nbSummary() };
       try { e.snap = await window.__fav.capture(name); } catch (er) {}
-      if (wantXD) { const x = await xdRead(); if (x.err) e.xdErr = x.err; else e.xd = x; }
+      if (wantXD) { const x = await xdRead(); if (x.err) { if (HW.xd && Date.now() - HW.xdAt < 600000) e.xd = HW.xd; else if (!/isn't plugged in/.test(x.err)) e.xdErr = x.err; } else e.xd = x; }
       NOTES.unshift(e); if (!nbSave()) { NOTES.shift(); return null; }
       return e;
     };
@@ -37788,8 +37810,9 @@ registerProcessor("nb-aw", NBAwProc);
       if (e.xd) {
         L.push("", "MINILOGUE XD · " + e.xd.p.program_name + (e.xd.num ? " · program " + e.xd.num : ""));
         let g = ""; SHOW.forEach(([grp, label, f, how]) => { const v = e.xd.p[f]; if (v == null) return; if (grp !== g) { L.push(grp + ":"); g = grp; } L.push("    " + label + ": " + how(v)); });
+        if (e.xd.p.steps && e.xd.p.steps.some(x => x.length)) L.push("Sequence:", ...e.xd.p.steps.map((x, i) => x.length ? "    step " + (i + 1) + ": " + x.join(" ") : "").filter(Boolean));
       } else if (e.xdErr) L.push("", "Minilogue XD: " + e.xdErr);
-      if (e.mf) { L.push("", "MICROFREAK · " + (e.mf.name || "preset " + e.mf.preset) + (e.mf.name ? " (preset " + e.mf.preset + ")" : "")); Object.keys(e.mf.cc || {}).forEach(n => L.push("    " + (MF_NAMES[n] || "CC " + n) + ": " + e.mf.cc[n])); }
+      if (e.mf) { L.push("", "MICROFREAK · " + (e.mf.name || "preset " + e.mf.preset) + (e.mf.name ? " (preset " + e.mf.preset + ")" : "") + (e.mf.cat ? " · " + e.mf.cat : "")); if (Object.keys(e.mf.cc || {}).length) L.push("Knobs turned since the preset loaded:"); Object.keys(e.mf.cc || {}).forEach(n => L.push("    " + (MF_NAMES[n] || "CC " + n) + ": " + e.mf.cc[n])); }
       if (e.notes) L.push("", "NOTES", e.notes);
       return L.join("\n");
     }
@@ -37811,17 +37834,17 @@ registerProcessor("nb-aw", NBAwProc);
       card.innerHTML = "";
       let its = []; try { its = window.__stk.items(); } catch (e) {}
       card.appendChild(head("📓 Save sound"));
-      const nm = mk("input", "nbk-name"); nm.type = "text"; nm.value = its.map(i => i.name).join(" + ").slice(0, 60) || "My sound"; nm.setAttribute("aria-label", "Name");
+      const nm = mk("input", "nbk-name"); nm.type = "text"; nm.value = its.filter(i => i.t !== "hw").map(i => i.name).concat([HW.xd && HW.xd.p.program_name, HW.mf.pc && (HW.mf.name || "MicroFreak " + HW.mf.pc)].filter(Boolean)).join(" + ").slice(0, 80) || "My sound"; nm.setAttribute("aria-label", "Name");
       const nt = mk("textarea", "nbk-notes"); nt.placeholder = "Notes: what it's for, the song, what you'd change…"; nt.rows = 4;
-      const xdRow = mk("label", "nbk-xd"); const cb = mk("input"); cb.type = "checkbox"; cb.checked = true; xdRow.append(cb, mk("span", "", " Read what the Minilogue XD is on"));
-      const info = mk("p", "nbk-info", "Saves what Nate Bloom is playing (everything, so it reloads) and the XD's program: its name, number and every parameter.");
+      const cb = { checked: true }, xdRow = mk("span");
+      const info = mk("p", "nbk-info", "Saves everything Nate Bloom is playing (it reloads exactly), the Minilogue XD's whole program (name, number, every parameter, its sequence) and the MicroFreak's preset (name, number, category, the knobs you've turned, its saved data), read from them as you save. The name and notes are optional.");
       const go = mk("button", "btn big primary", "Save to notebook");
       go.addEventListener("click", async () => {
-        go.disabled = true; go.textContent = cb.checked ? "Reading the Minilogue XD…" : "Saving…";
+        go.disabled = true; go.textContent = "Reading your synths…";
         const e = await saveSound(nm.value.trim() || "My sound", nt.value, cb.checked);
         go.disabled = false; go.textContent = "Save to notebook";
         if (!e) return;
-        toast("Saved 📓 " + e.name + (e.xd ? " · XD: " + e.xd.p.program_name : e.xdErr ? " · " + e.xdErr : ""));
+        toast("Saved 📓 " + e.name + (e.xd ? " · XD: " + e.xd.p.program_name : "") + (e.mf ? " · MicroFreak: " + (e.mf.name || e.mf.preset) : ""));
         openBook(e.id);
       });
       const book = mk("button", "btn big", "Open notebook (" + NOTES.length + ")"); book.addEventListener("click", () => openBook());
@@ -37882,10 +37905,12 @@ registerProcessor("nb-aw", NBAwProc);
           const row = mk("div", "nbk-xr"); row.append(mk("span", "", label), mk("b", "", String(how(v)))); box.appendChild(row);
         });
         xs.appendChild(grid);
+        const sq = e.xd.p.steps || []; if (sq.some(x => x.length)) { const b = mk("div", "nbk-xb"); b.appendChild(mk("h5", "", "Sequence (notes per step)")); sq.forEach((x, i) => { if (x.length) { const r = mk("div", "nbk-xr"); r.append(mk("span", "", "Step " + (i + 1)), mk("b", "", x.join(" "))); b.appendChild(r); } }); xs.appendChild(b); }
       } else xs.appendChild(mk("p", "nbk-info", e.xdErr ? "Minilogue XD: " + e.xdErr : "No Minilogue XD part. Re-read XD adds it."));
       body.appendChild(xs);
       if (e.mf) {
-        const ms = mk("div", "nbk-sec"); ms.appendChild(mk("h4", "", "MicroFreak · " + (e.mf.name || "preset " + e.mf.preset) + (e.mf.name ? " · preset " + e.mf.preset : "")));
+        const ms = mk("div", "nbk-sec"); ms.appendChild(mk("h4", "", "MicroFreak · " + (e.mf.name || "preset " + e.mf.preset) + (e.mf.name ? " · preset " + e.mf.preset : "") + (e.mf.cat ? " · " + e.mf.cat : "")));
+        ms.appendChild(mk("p", "nbk-info", (Object.keys(e.mf.cc || {}).length ? "Knobs turned since the preset loaded (the rest are as the preset saved them)" : "No knobs turned since the preset loaded: it's the preset as saved") + (e.mf.raw ? " · its saved preset data is kept with this entry" : "")));
         const k = mk("div", "nbk-kn"); Object.keys(e.mf.cc || {}).forEach(n => k.appendChild(mk("span", "", (MF_NAMES[n] || "CC " + n) + " " + e.mf.cc[n]))); ms.appendChild(k); body.appendChild(ms);
       }
       w.appendChild(body);
@@ -37924,8 +37949,9 @@ registerProcessor("nb-aw", NBAwProc);
       }
       if (isMF(port)) {
         const M = HW.mf;
+        if (d[0] === 0xf0) { mfSysex(d); return; }
         if (st === 0xb0 && d[1] === 0) M.bank = d[2];
-        else if (st === 0xc0) { M.pc = M.bank * 128 + d[1] + 1; M.cc = {}; }
+        else if (st === 0xc0) { M.pc = M.bank * 128 + d[1] + 1; M.cc = {}; M.name = ""; M.cat = null; mfRead(M.pc, false).then(hwPaintSoon); }
         else if (st === 0xb0) M.cc[d[1]] = d[2];
         else return;
         hwPaintSoon(); return;
@@ -37934,6 +37960,33 @@ registerProcessor("nb-aw", NBAwProc);
       const o = HW.other.get(port.name) || { pc: null, cc: {} }; HW.other.set(port.name, o);
       if (st === 0xc0) o.pc = d[1] + 1; else o.cc[d[1]] = d[2];
       hwPaintSoon();
+    }
+    // the MicroFreak's preset name and category, and its saved preset data, over Arturia's SysEx (the messages Arturia's
+    // MIDI Control Center uses; as worked out by the MicroFreak Reader project). Read from the preset's saved copy:
+    // knobs turned since it loaded are the ones listed live.
+    const MF_CAT = ["Bass", "Brass", "Keys", "Lead", "Organ", "Pad", "Percussion", "Sequence", "SFX", "Strings", "Template", "Vocoder"];
+    const MFQ = { want: null, data: [] };
+    function mfSysex(d) {
+      if (!(d[1] === 0x00 && d[2] === 0x20 && d[3] === 0x6b) || !MFQ.want) return;
+      if (d[8] === 0x52) { const b = Array.from(d.slice(9, d.length - 1)); let nm = ""; for (let i = 12; i < b.length && b[i]; i++) nm += String.fromCharCode(b[i]); MFQ.name = nm.trim(); MFQ.cat = d[19]; const w = MFQ.want; if (w.kind === "name") { MFQ.want = null; w.res(true); } else w.ack && w.ack(); return; }
+      if ((d[8] === 0x16 || d[8] === 0x17) && d.length === 42) { MFQ.data.push(...Array.from(d.slice(9, d.length - 1))); const w = MFQ.want; if (w && w.ack) w.ack(); }
+    }
+    const mfOut = () => { const A = XD.access; return A ? [...A.outputs.values()].find(isMF) || null : null; };
+    function mfAsk(bytes, kind, ms = 120) { return new Promise(res => { MFQ.want = { kind, res, ack: () => res(true) }; mfOut().send([0xf0, 0x00, 0x20, 0x6b, ...bytes, 0xf7]); setTimeout(() => { res(false); }, ms); }); }
+    async function mfRead(num, full) {
+      const out = mfOut(); if (!out || !num) return null;
+      const bank = Math.floor((num - 1) / 128), pre = (num - 1) % 128;
+      MFQ.name = ""; MFQ.cat = null; MFQ.data = [];
+      const ok = await mfAsk([0x07, 0x01, 0x00, 0x01, 0x19, bank, pre, 0x00], "name", 300);
+      MFQ.want = null;
+      if (ok && MFQ.name) { HW.mf.name = MFQ.name; HW.mf.cat = MFQ.cat; }
+      if (full) {   // the saved preset's data, kept as it comes (40 blocks)
+        await mfAsk([0x07, 0x01, 0x01, 0x01, 0x19, bank, pre, 0x01], "head", 120);
+        for (let i = 0; i < 40; i++) { const got = await mfAsk([0x07, 0x01, i, 0x01, 0x18, 0x00], "data", 120); if (!got) break; }
+        MFQ.want = null;
+        return { name: HW.mf.name, cat: HW.mf.cat, raw: MFQ.data.length ? b64(MFQ.data) : null };
+      }
+      return { name: HW.mf.name, cat: HW.mf.cat };
     }
     async function hwReadXD() { const x = await xdRead(); if (!x.err) { HW.xd = x; HW.xdAt = Date.now(); HW.xdErr = ""; } else HW.xdErr = x.err; hwPaint(); }
     let hwPT = 0; const hwPaintSoon = () => { clearTimeout(hwPT); hwPT = setTimeout(hwPaint, 120); };
@@ -37986,9 +38039,9 @@ registerProcessor("nb-aw", NBAwProc);
       // the MicroFreak
       const mfOn = ins.some(isMF), M = HW.mf, m = hwCard("MicroFreak", mfOn ? "" : "not plugged in", mfOn);
       const key = "mf:" + (M.pc || 0);
-      const pr = mk("div", "hw-prog"); pr.append(mk("b", "", M.pc ? (HW.names[key] || "Preset " + M.pc) : "Preset: change presets once and it shows"), mk("small", "", M.pc ? "preset " + M.pc + (HW.names[key] ? "" : " · name it below") : "(the MicroFreak sends its preset number, not its name)"));
+      const pr = mk("div", "hw-prog"); pr.append(mk("b", "", M.pc ? (M.name || HW.names[key] || "Preset " + M.pc) : "Preset: change presets once and it shows"), mk("small", "", M.pc ? "preset " + M.pc + (M.cat != null && MF_CAT[M.cat] ? " · " + MF_CAT[M.cat] : "") : "(it tells Nate Bloom which preset when the preset changes)"));
       m.appendChild(pr);
-      if (M.pc) {
+      if (M.pc && !M.name) {
         const nm = mk("input", "nbk-name hw-nm"); nm.placeholder = "Name this preset"; nm.value = HW.names[key] || "";
         nm.addEventListener("change", () => { HW.names[key] = nm.value.trim(); if (!HW.names[key]) delete HW.names[key]; try { localStorage.setItem("nightbloom-hwnames", JSON.stringify(HW.names)); } catch (e) {} hwPaint(); });
         m.appendChild(nm);
@@ -38009,7 +38062,7 @@ registerProcessor("nb-aw", NBAwProc);
     window.__hws = { HW, paint: hwPaint, listen: hwListen, place: hwPlace };
     addEventListener("resize", hwPlace); setInterval(() => { if (!document.hidden) hwPlace(); }, 600); setTimeout(hwPlace, 0);
     // the notebook keeps the MicroFreak's part too
-    { const ss = saveSound; saveSound = async function () { const e = await ss.apply(this, arguments); if (e && HW.mf.pc) { e.mf = { preset: HW.mf.pc, name: HW.names["mf:" + HW.mf.pc] || "", cc: Object.assign({}, HW.mf.cc) }; nbSave(); } return e; }; }
+    { const ss = saveSound; saveSound = async function () { const e = await ss.apply(this, arguments); if (e && HW.mf.pc) { let r = null; try { r = await mfRead(HW.mf.pc, true); } catch (er) {} e.mf = { preset: HW.mf.pc, name: (r && r.name) || HW.mf.name || HW.names["mf:" + HW.mf.pc] || "", cat: r && r.cat != null && MF_CAT[r.cat] ? MF_CAT[r.cat] : "", cc: Object.assign({}, HW.mf.cc), raw: r && r.raw || null }; nbSave(); } return e; }; }
     window.__nbk = { openSave, openBook, read: xdRead, list: () => NOTES, decode: xdDecode, unpack7, pack7 };
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
