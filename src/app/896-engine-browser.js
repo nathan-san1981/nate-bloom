@@ -187,5 +187,5 @@
         if (e && e.id && e.id.startsWith("pp:")) { const [key, i] = e.id.slice(3).split("#"), c = cat().find(x => x.key === key), m = await plugPresets(key); if (c && m && m.list[+i]) return choosePlugPreset(c, m.list[+i], +i); return; }
         return ce.apply(this, arguments);
       }; }
-    window.__eb = { open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
+    window.__eb = { choosePlugPreset, engOfPreset, open: k => { brCat = "engines"; ebEng = k || null; openBrowser(); if (k) { ebEng = k; renderBrowser(true); } }, presetsOf, plugPresets, engineOfCur };
   }

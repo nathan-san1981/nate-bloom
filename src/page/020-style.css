@@ -3457,3 +3457,25 @@ body.nb-wide .knobs { max-width: 1600px; }
 .eb-bar { display: flex; align-items: center; gap: 10px; padding: 4px 4px 8px; position: sticky; top: 0; background: var(--panel); z-index: 1; }
 .eb-title { display: flex; flex-direction: column; min-width: 0; }
 .eb-title small { color: var(--dim); font-size: 0.72rem; }
+/* (207) the Quick row wraps (every engine in view) and the Presets strip under it */
+#qk { align-items: flex-start; }
+#qk .qk-lab { padding-top: 14px; }
+#qkRow { flex-wrap: wrap; overflow-x: visible; }
+#qkRow .qk-t { height: 40px; }
+.ep { flex: 1 1 100%; min-width: 0; margin: 4px 0 2px; padding: 8px 10px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.ep[hidden] { display: none; }
+.ep-h { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; }
+.ep-h > b { font: 600 0.86rem var(--font-body); color: var(--lilac); }
+.ep-h > small { font: 0.62rem var(--font-mono); color: var(--dim); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ep-more { margin-left: auto; appearance: none; background: none; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font: 0.72rem var(--font-body); padding: 3px 9px; cursor: pointer; }
+.ep-more:hover { border-color: var(--lilac); }
+.ep-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 6px; }
+.ep-c { appearance: none; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 36px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,0.025); color: var(--ink); cursor: pointer; text-align: left; font: inherit; min-width: 0; }
+.ep-c:hover { border-color: var(--lilac); background: rgba(180,160,255,0.08); }
+.ep-c b { font: 600 0.78rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ep-c small { font: 0.56rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ep-c.on { border-color: var(--lilac); background: #261f38; }
+.ep-c.on b { color: var(--lilac); }
+.ep-c.on b::before { content: "▶ "; font-size: 0.62rem; }
+.ep-fold { align-items: center; color: var(--dim); }
+.ep-none { margin: 6px 2px 0; font: 0.74rem/1.4 var(--font-body); color: var(--dim); }
