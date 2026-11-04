@@ -3519,3 +3519,15 @@ body.es-on #epStrip { display: none; }
 .es-add { appearance: none; flex: none; width: 30px; border: 1px solid transparent; border-radius: 8px; background: none; color: var(--lilac); font-size: 1.05rem; cursor: pointer; }
 .es-add:hover { border-color: var(--line); background: rgba(180,160,255,0.08); }
 .es-add.ok { color: var(--amber); }
+/* (213) the side panel's Effects view */
+.fx-row { padding: 2px 0 4px; border-radius: 9px; }
+.fx-row.used { padding: 6px 8px 8px; background: rgba(255,255,255,0.025); margin-bottom: 4px; }
+.fx-row.picked { background: rgba(180,160,255,0.06); }
+.fx-row .es-p { border-left: 2px solid var(--line); }
+.fx-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 6px 4px 2px 10px; }
+.fx-chip { appearance: none; border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ink); font: 0.74rem var(--font-body); padding: 4px 10px; cursor: pointer; }
+.fx-chip:hover { border-color: var(--lilac); }
+.fx-chip.on { background: #261f38; border-color: var(--lilac); color: var(--lilac); }
+.fx-chip.mix { border-style: dashed; }
+.fx-chip.all { color: var(--dim); }
+.fx-chip:disabled { opacity: 0.5; }

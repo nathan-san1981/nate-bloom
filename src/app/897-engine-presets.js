@@ -147,7 +147,7 @@
     function esSync() {
       let ce = null; try { ce = EB().engineOfCur(); } catch (e) {}
       esLastEng = ce;
-      esKey = esMode + "|" + (state.cur && state.cur.id || "") + "|" + [...esOpen].join(",") + "|" + catL().length;
+      esKey = esMode + "|" + (state.cur && state.cur.id || "") + "|" + [...esOpen].join(",") + "|" + catL().length + (esMode === "fx" ? "|" + fxSig() + "|" + fxPick : "");
     }
 
     function esEngine(id, cur, curEng) {
@@ -189,7 +189,7 @@
     }
     // ---------- (212) by sound type: every preset of every engine and plugin, sorted into kinds of sound ----------
     const ES_MODE_KEY = "nightbloom-engside-mode";
-    let esMode = (() => { try { return localStorage.getItem(ES_MODE_KEY) === "type" ? "type" : "engine"; } catch (e) { return "engine"; } })();
+    let esMode = (() => { try { const v = localStorage.getItem(ES_MODE_KEY); return v === "type" || v === "fx" ? v : "engine"; } catch (e) { return "engine"; } })();
     const ES_TYPES = [
       ["Drums", /\b(drum|snare|hi-?hat|kick|kit|timpani|percussion)\b/i],
       ["Bass", /bass(?!oon| clarinet)|\bsub\b|303|acid|reese|growl|wobble|neuro|boom|tuba/i],
@@ -252,6 +252,89 @@
       }
       if (pending) { const n = document.createElement("p"); n.className = "es-none"; n.textContent = "Loading the plugins' presets…"; es.appendChild(n); }
     }
+    // ---------- (213) Effects, Linux only: put an effect on the sounds you pick, and take it off one sound without the others ----------
+    const ES_LINUX = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");
+    const FX_GROUPS = [["Reverb", /reverb/i], ["Delay & Echo", /delay|echo/i], ["Chorus & Modulation", /modulation|chorus|phaser|flanger/i], ["Saturation & Tape", /saturation|tape/i],
+      ["Distortion & Amps", /distortion|fuzz|amp/i], ["Filters & EQ", /filter|equalizer|eq/i], ["Dynamics", /dynamics|compress/i], ["Granular & Glitch", /granular|glitch/i], ["Pitch", /pitch/i]];
+    const fxGroupOf = c => { for (const [g, re] of FX_GROUPS) if (re.test(c.type || "")) return g; return "Utility & Other"; };
+    const W_ = () => window.__wam;
+    // the sounds playing now, each with the place its effects go (a synth's own channel, a plugin's, the Library's)
+    function fxTargets() {
+      const out = [], seen = new Set(), add = (t, name) => { if (!seen.has(t)) { seen.add(t); out.push({ t, name }); } };
+      let its = []; try { its = window.__stk.items(); } catch (e) {}
+      for (const it of its) {
+        if (it.t === "syn") add("ch:" + it.id, ENGINES[it.id] ? ENGINES[it.id].short || it.name : it.name);
+        else if (it.t === "lib") { if (String(it.id).startsWith("wam:")) add("plug:" + it.id, it.name); else add("ch:inst", "Library"); }
+        else if (it.t === "inst") add("ch:inst", it.name);
+        else if (it.t === "samp") add("ch:samp", "Sampler");
+      }
+      add("mix", "Whole mix");
+      return out;
+    }
+    const fxChainOf = t => { try { return W_().chainOf(t) || []; } catch (e) { return []; } };
+    const fxHas = (key, t) => fxChainOf(t).some(F => F.key === key);
+    async function fxSet(key, t, on) {
+      const W = W_(); if (!W) return;
+      if (on) { if (!fxHas(key, t)) await W.addFx(key, true, null, true, t); }
+      else { const F = fxChainOf(t).find(F => F.key === key); if (F) W.removeFx(F); }
+    }
+    const fxSig = () => fxTargets().map(x => x.t + ":" + fxChainOf(x.t).map(F => F.key).join("+")).join("|");
+    let fxPick = null;   // the effect whose sound chips are open
+    // one effect's chips: a toggle per playing sound (and the whole mix), plus All
+    function fxChips(key, name) {
+      const T = fxTargets(), box = document.createElement("div"); box.className = "fx-chips";
+      const paintChip = (b, t) => { const on = fxHas(key, t); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); b.firstChild.textContent = on ? "✓ " : "+ "; };
+      for (const x of T) {
+        const b = document.createElement("button"); b.className = "fx-chip" + (x.t === "mix" ? " mix" : "");
+        b.appendChild(document.createTextNode("")); b.appendChild(document.createTextNode(x.name));
+        b.title = name + " on " + x.name + ": tap to " + (fxHas(key, x.t) ? "take it off" : "put it on"); paintChip(b, x.t);
+        b.addEventListener("click", async () => { b.disabled = true; esBusy++; try { await fxSet(key, x.t, !fxHas(key, x.t)); } catch (e) {} finally { esBusy--; } b.disabled = false; esPaint(true, true); });
+        box.appendChild(b);
+      }
+      const snd = T.filter(x => x.t !== "mix");
+      if (snd.length > 1) {
+        const all = snd.every(x => fxHas(key, x.t)), b = document.createElement("button"); b.className = "fx-chip all"; b.textContent = all ? "Off all" : "All sounds";
+        b.addEventListener("click", async () => { esBusy++; try { for (const x of snd) await fxSet(key, x.t, !all); } catch (e) {} finally { esBusy--; } esPaint(true, true); });
+        box.appendChild(b);
+      }
+      return box;
+    }
+    function esFxView() {
+      const W = W_(), effects = catL().filter(c => c.kind === "effect");
+      if (!W || !effects.length) { const n = document.createElement("p"); n.className = "es-none"; n.textContent = "Effects load when the sound starts."; es.appendChild(n); return; }
+      const T = fxTargets();
+      // in use: every effect on a playing sound or the mix, with its chips always showing
+      const used = []; const seenK = new Set();
+      for (const x of T) for (const F of fxChainOf(x.t)) if (!seenK.has(F.key)) { seenK.add(F.key); used.push(F); }
+      const hu = document.createElement("div"); hu.className = "es-sec"; hu.textContent = used.length ? "On your sounds now" : "Tap an effect, then the sounds it goes on"; es.appendChild(hu);
+      used.forEach(F => {
+        const c = catL().find(x => x.key === F.key) || { name: F.name, type: "" };
+        const r = document.createElement("div"); r.className = "fx-row used";
+        const t = document.createElement("div"); t.className = "es-t"; const b = document.createElement("b"); b.textContent = c.name; t.appendChild(b); const sm = document.createElement("small"); sm.textContent = c.type || ""; t.appendChild(sm);
+        r.appendChild(t); r.appendChild(fxChips(F.key, c.name)); es.appendChild(r);
+      });
+      const groups = {};
+      effects.forEach(c => (groups[fxGroupOf(c)] = groups[fxGroupOf(c)] || []).push(c));
+      FX_GROUPS.map(g => g[0]).concat(["Utility & Other"]).forEach(g => {
+        const L = groups[g]; if (!L) return;
+        const k = "f:" + g, open = esOpen.has(k);
+        const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (L.some(c => seenK.has(c.key)) ? " playing" : ""); wrap.dataset.k = k;
+        const cnt = document.createElement("i"); cnt.className = "es-n"; cnt.textContent = String(L.length);
+        wrap.appendChild(esRow("es-h", g, "", false, ev => esToggle(k, ev), cnt));
+        if (open) {
+          const box = document.createElement("div"); box.className = "es-ps";
+          L.forEach(c => {
+            const r = document.createElement("div"); r.className = "fx-row" + (fxPick === c.key ? " picked" : "");
+            const b = esRow("es-p fx-name", c.name, (c.vendor === "Nate Bloom" ? "" : c.vendor + " · ") + (c.desc || "").replace(/\. .*/, ""), seenK.has(c.key), () => { fxPick = fxPick === c.key ? null : c.key; esPaint(true, true); });
+            b.title = c.desc || c.name; r.appendChild(b);
+            if (fxPick === c.key) r.appendChild(fxChips(c.key, c.name));
+            box.appendChild(r);
+          });
+          wrap.appendChild(box);
+        }
+        es.appendChild(wrap);
+      });
+    }
     const esPlugCache = key => { try { return window.__eb.cache(key); } catch (e) { return undefined; } };
     function esToggle(k, ev) {
       const y0 = ev.currentTarget.getBoundingClientRect().top;
@@ -264,17 +347,18 @@
       const eb = EB(); if (!eb || (esBusy && !noScroll)) return;
       let curEng = null; try { curEng = eb.engineOfCur(); } catch (e) {}
       if (curEng !== esLastEng) { if (curEng && esMode === "engine") esOpen.add(curEng); esLastEng = curEng; force = true; }
-      const cur = state.cur && state.cur.id || "", key = esMode + "|" + cur + "|" + [...esOpen].join(",") + "|" + catL().length;
+      const cur = state.cur && state.cur.id || "", key = esMode + "|" + cur + "|" + [...esOpen].join(",") + "|" + catL().length + (esMode === "fx" ? "|" + fxSig() + "|" + fxPick : "");
       if (!force && key === esKey) return; esKey = key;
       const st = es.scrollTop; es.innerHTML = "";
       const head = document.createElement("div"); head.className = "es-top";
       const sel = document.createElement("select"); sel.className = "es-mode"; sel.setAttribute("aria-label", "Show sounds by");
-      [["engine", "By engine"], ["type", "By sound: bass, leads, pads…"]].forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); });
+      [["engine", "By engine"], ["type", "By sound: bass, leads, pads…"]].concat(ES_LINUX ? [["fx", "Effects: reverb, delay, chorus…"]] : []).forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); });
       sel.value = esMode;
       sel.addEventListener("change", () => { esMode = sel.value; try { localStorage.setItem(ES_MODE_KEY, esMode); } catch (e) {} es.scrollTop = 0; esPaint(true, true); });
       head.appendChild(sel);
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
+      if (esMode === "fx" && ES_LINUX) { hs.textContent = "tap an effect · pick the sounds it goes on"; esFxView(); es.scrollTop = st; return; }
       if (esMode === "type") {
         esTypeView(cur);
         const more = document.createElement("button"); more.className = "es-more"; more.textContent = "Drum kits and everything else…";
