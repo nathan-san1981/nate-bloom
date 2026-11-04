@@ -62,7 +62,10 @@
     take.done = { L: take.L, R: take.R, len: take.len, rate: ctx.sampleRate };
     take.L = []; take.R = [];
     const mb = (44 + take.done.len * 4) / 1048576;
-    takeInfo.textContent = "Take ready · " + fmtClock(take.done.len / take.done.rate) + " · " + mb.toFixed(1) + " MB WAV";
+    // (198) its peak, so a quiet capture shows for what it is
+    let pk = 0; for (const ch of take.done.L) for (let i = 0; i < ch.length; i++) { const v = ch[i] < 0 ? -ch[i] : ch[i]; if (v > pk) pk = v; } for (const ch of take.done.R) for (let i = 0; i < ch.length; i++) { const v = ch[i] < 0 ? -ch[i] : ch[i]; if (v > pk) pk = v; }
+    const pkDb = pk ? Math.round(20 * Math.log10(pk / 32768)) : -99;
+    takeInfo.textContent = "Take ready · " + fmtClock(take.done.len / take.done.rate) + " · " + mb.toFixed(1) + " MB WAV · peaks " + (pkDb <= -99 ? "silent" : pkDb + " dB" + (pkDb < -18 ? " (quiet)" : ""));
     delete takeBar.dataset.empty;
     takeBar.hidden = false;
   }

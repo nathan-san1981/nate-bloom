@@ -247,6 +247,7 @@
         <canvas id="hwMeter" aria-label="Input level" style="width:100%;height:14px;border-radius:7px;background:#0f0d16"></canvas>
         <div class="ly-quick"><span class="dj-lab" style="min-width:44px">Level</span><input type="range" id="hwLvl" min="0" max="125" style="flex:1" aria-label="Level"><span class="dj-lab" id="hwLvlV" style="min-width:48px;text-align:right"></span></div>
         <span class="ed-info" id="hwMsg" style="text-align:left"></span>
+        <div class="ly-quick" id="hwLxRow" hidden><span class="ed-info" id="hwLx" style="text-align:left;flex:1"></span><button class="btn" id="hwLxFix" hidden>Set to 100%</button></div>
         <div class="ed-foot sheet-foot"><button class="btn big" id="hwTest">Test note</button><button class="btn big" id="hwIn"></button><button class="btn big primary" id="hwDone">Done</button></div>
       </div>`;
       document.body.appendChild(sh);
@@ -304,7 +305,7 @@
         draw();
       }
       function paintAll() { try { window.__stk.paint(); } catch (e) {} if (!sh.hidden) hwSheetPaint(); }
-      H.open = () => { start(); if (!md.access) { try { connectMidi(); } catch (e) {} } sh.hidden = false; hwSheetPaint(); };
+      H.open = () => { start(); if (!md.access) { try { connectMidi(); } catch (e) {} } sh.hidden = false; hwSheetPaint(); try { lxPoll(); } catch (e) {} };
       H.added = () => {
         if (!H.present()) { try { (document.getElementById("uiToast") && (() => { const el = document.getElementById("uiToast"); el.textContent = H.name + " added · " + (md.access ? "plug it in over USB" : "connect MIDI") + " and it plays"; el.hidden = false; setTimeout(() => { el.hidden = true; }, 2800); })()); } catch (e) {} }
         if (ctx && !H.src) { H.err = ""; hwOpen(true); }
@@ -313,6 +314,23 @@
       function hwFxIs() { return !!H.fxOn; }
       function hwFx() { try { const p = fxcParams("hw"), want = !!H.fxOn; if ((p.on !== false) !== want) { p.on = want; try { localStorage.setItem("nightbloom-fxby", JSON.stringify(FXC)); } catch (e) {} if (fxChan.hw) fxcApply("hw"); } } catch (e) {} }
       $h("hwModel").addEventListener("change", e => { H.allOff(); H.model = e.target.value; setNames(); hwSave(); H.err = ""; if (wantIn()) hwOpen(true); hwSheetPaint(); paintAll(); });
+      // (198) Linux's own volumes for the interface (the Linux app): its input below 100% makes every recording quieter
+      // than the interface's direct monitoring, its output or this app's stream below 100% makes the playback quieter
+      const LX = window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && window.NB_NATIVE.levels ? window.NB_NATIVE.levels : null;
+      let lxLast = null;
+      function lxPaint(L) {
+        const row = $h("hwLxRow"), t = $h("hwLx"), b = $h("hwLxFix"); if (!row || !t || !b) return;
+        if (!LX || !L || L.err) { row.hidden = true; return; }
+        const bits = [], low = [];
+        const say = (what, x) => { if (!x) return; const v = x.mute ? "muted" : (x.pct == null ? "?" : x.pct + "%"); bits.push(what + " " + v); if (x.mute || (x.pct != null && x.pct < 100)) low.push(what); };
+        say("the interface's input", L.source); say("its output", L.sink); (L.streams || []).forEach((x, i) => say(i ? "Nate Bloom's stream " + (i + 1) : "Nate Bloom's stream", x));
+        if (!bits.length) { row.hidden = true; return; }
+        row.hidden = false; t.textContent = "Linux's levels: " + bits.join(" · ") + (low.length ? ". Below 100%, recordings and playback come out quieter than the interface's own monitoring, which sounds thin." : ".");
+        b.hidden = !low.length;
+      }
+      async function lxPoll() { if (!LX || sh.hidden) return; try { lxLast = await LX.get(); } catch (e) { lxLast = null; } lxPaint(lxLast); }
+      if (LX) { setInterval(lxPoll, 3000); $h("hwLxFix").addEventListener("click", async () => { try { lxLast = await LX.fix(); } catch (e) {} lxPaint(lxLast); try { window.__nbAdd && window.__nbAdd("hw", "Linux's levels set to 100%"); } catch (e) {} }); }
+      (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ linuxLevels: lxLast }));
       $h("hwDirect").addEventListener("click", () => { start(); H.allOff(); H.direct = !H.direct; hwSave(); try { hwWire(); } catch (e) {} hwSheetPaint(); paintAll(); });
       $h("hwThru").addEventListener("click", () => { start(); H.thru = !H.thru; hwSave(); H.err = ""; if (wantIn() && !H.src) hwOpen(true); hwSheetPaint(); paintAll(); });
       $h("hwFxOn").addEventListener("click", () => { H.fxOn = !H.fxOn; hwSave(); hwFx(); hwSheetPaint(); });

@@ -33,6 +33,8 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
     set: on => ipcRenderer.invoke("nb:low-latency", { on: !!on, frames: 256 }),
     restart: () => ipcRenderer.invoke("nb:restart"),
   },
+  // (198) Linux's volumes for the interface's input and output and this app's stream; fix sets them to 100%
+  levels: { get: () => ipcRenderer.invoke("nb:levels"), fix: () => ipcRenderer.invoke("nb:levels-fix") },
 });
 
 // (176) the native synth engine (nb_engine.cc): voices worked out on a pool of threads, into shared memory the page's

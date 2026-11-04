@@ -359,6 +359,33 @@ ipcMain.handle("nb:low-latency", (e, set) => {
   return { active: global.NB_LL_ACTIVE || 0, next: !ll || ll.on ? (+(ll && ll.frames) || 256) : 0 };
 });
 ipcMain.handle("nb:restart", () => { app.relaunch(); app.exit(0); });
+// (198) Linux's own volumes for the audio interface (PipeWire/PulseAudio, through pactl): the interface's input, its
+// output, and this app's own playback stream. Any of them below 100% makes recordings (and everything Nate Bloom
+// plays) quieter than the interface's direct monitoring, which reads as thin. nb:levels reads them, nb:levels-fix
+// sets them to 100% and unmutes.
+const PA_RE = /volt|interface|usb audio|scarlett|audiobox|motu|rme|komplete|steinberg|ur\d|behringer|presonus/i;
+function pactl(args) {
+  return new Promise(res => { try { require("child_process").execFile("pactl", args, { timeout: 4000, maxBuffer: 4 << 20 }, (e, out) => res(e ? null : String(out))); } catch (er) { res(null); } });
+}
+const paPct = v => { try { const vals = Object.values(v || {}).map(c => +String(c.value_percent || "").replace("%", "")).filter(n => Number.isFinite(n)); return vals.length ? Math.round(Math.max(...vals)) : null; } catch (e) { return null; } };
+async function paLevels() {
+  const [src, snk, si] = await Promise.all([pactl(["-f", "json", "list", "sources"]), pactl(["-f", "json", "list", "sinks"]), pactl(["-f", "json", "list", "sink-inputs"])]);
+  if (src == null && snk == null) return { err: "pactl isn't available" };
+  const J = t => { try { return JSON.parse(t || "[]"); } catch (e) { return []; } };
+  const pick = L => { const isIf = x => PA_RE.test((x.description || "") + " " + (x.name || "")); return L.find(x => isIf(x) && !/monitor/i.test(x.name || "")) || null; };
+  const one = x => x ? { name: x.description || x.name, pct: paPct(x.volume), mute: !!x.mute, id: x.index != null ? x.index : x.name } : null;
+  const mine = J(si).filter(x => { const p = x.properties || {}; return /nate.?bloom|electron|chrom/i.test((p["application.name"] || "") + " " + (p["application.process.binary"] || "")); });
+  return { source: one(pick(J(src))), sink: one(pick(J(snk))), streams: mine.map(x => ({ id: x.index, pct: paPct(x.volume), mute: !!x.mute, app: (x.properties || {})["application.name"] || "" })) };
+}
+ipcMain.handle("nb:levels", () => paLevels());
+ipcMain.handle("nb:levels-fix", async () => {
+  const L = await paLevels(); if (L.err) return L;
+  const jobs = [];
+  if (L.source) jobs.push(pactl(["set-source-volume", String(L.source.id), "100%"]), pactl(["set-source-mute", String(L.source.id), "0"]));
+  if (L.sink) jobs.push(pactl(["set-sink-volume", String(L.sink.id), "100%"]), pactl(["set-sink-mute", String(L.sink.id), "0"]));
+  for (const s of L.streams || []) jobs.push(pactl(["set-sink-input-volume", String(s.id), "100%"]), pactl(["set-sink-input-mute", String(s.id), "0"]));
+  await Promise.all(jobs); return paLevels();
+});
 // (177) VST3 and CLAP plugins (plugins.js: finding them, the scan in its own process, crash notes)
 let plugs = null;
 try { plugs = require("./plugins.js").setup({ app, ipcMain, dialog, getWin: () => win, log: m => { if (process.env.NB_DEBUG) console.log("[nb]", m); } }); } catch (e) { console.warn("plugins:", e && e.message); }
