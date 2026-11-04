@@ -70,7 +70,7 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return b;
     }
     // the synths the engine plays, each from the same settings and formulas as its browser version (020, 170)
-    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells", "vital", "zeb", "choir", "fm"]);
+    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells", "vital", "zeb", "choir", "fm", "alpha"]);
     const TABLE_IDS = new Set(["vital", "zeb", "fm"]);   // (185: these need the engine's wavetables, eng_table)
     // (185) a wavetable in the engine for a list of harmonic amplitudes, made once each (the same list, the same table)
     const natTabs = new Map(); let natTabN = 0;
@@ -151,6 +151,15 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         osc([[-1, 1, 0.16], [0, 1, 0.18], [1, 1, 0.16], [0, 0.5, 0.2], [0.5, 2, 0.06]].map(([k, mul, g]) => ({ w: SAW, mul, det: k * spread, det0: k * spread + diveC, ramp: diveT, g })));
         a[75] = 1; a[76] = Math.min(0.045, 0.35 / f); a[77] = Math.min(0.02, p.width * 0.3 / f); a[78] = 3 + p.width * 4; a[79] = -0.7; a[80] = 9500; a[81] = 0.5; a[82] = 0.7;
         amp(attack, 0.4, -1, 0.4, 0); chorus = ["hoover", 0, 0.7];
+      } else if (id === "alpha") {   // (201) the Alpha Juno (885): its DCO (wave 6, nb_engine.cc's AJOsc) with PWM, the sub an octave down, the dive, the 24 dB filter, the Juno chorus
+        const dv = p.dive || 0, diveC = dv * 1200, diveT = 0.05 + dv * 0.45;
+        osc([{ w: 6, g: 0.36, det: 0, det0: diveC, ramp: diveT }, { w: SQR, mul: 0.5, g: (p.sub || 0) * 0.5, det: 0, det0: diveC, ramp: diveT }]);
+        a[130] = Math.min(5, Math.floor((p.wave == null ? 0.45 : p.wave) * 6)); a[138] = 0.08 + (p.pw == null ? 0.5 : p.pw) * 0.84; a[139] = (p.pwm || 0) * 0.85; a[140] = 0.3 + (p.pwm || 0) * 5.7;
+        const base = expMap(p.cutoff == null ? 0.75 : p.cutoff, 90, 15000);
+        filt(2, 0.7 + (p.res || 0) * 16, 1, base, Math.min(16000, base * 2.2), base * 1.15, Math.max(0.005, attack * 0.6), 0.5);
+        amp(attack, 0.42, -1, 0.4, 0);
+        const ch = p.chorus == null ? 0.9 : p.chorus, cm = ch < 0.12 ? 0 : ch < 0.55 ? 1 : ch < 0.88 ? 2 : 3;
+        chorus = cm ? ["juno", cm, 0.8] : null;
       } else if (id === "mono") {
         release = expMap(p.release, 0.04, 2.5);
         const base = expMap(p.cutoff, 60, 8000), peak = Math.min(16000, base * (1 + p.env * 24)), dec = 0.04 + expMap(p.release, 0.05, 1.2) * 0.45;

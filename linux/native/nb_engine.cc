@@ -95,6 +95,38 @@ static inline double tableAt(const Table* T, double ph, double f, double sr) {
   const auto& c = T->mip[m]; const double x = ph * 2048; const int i0 = (int)x; const double fr = x - i0; return c[i0 & 2047] * (1 - fr) + c[(i0 + 1) & 2047] * fr;
 }
 
+// (201) The Roland Alpha Juno's DCO, after dfl_AlphaJunoOscillator (jc303, GPL-3, midilab/jc303 PR #80 by dfl): one
+// rising ramp chopped by gates at +1 and +3 octaves, derived from the hardware's binary counter, each value jump
+// band-limited with a 2-point polyBLEP. Waves 0-4 = SAW01-05 (SAW03: chopped at +1 octave by the pulse width, the
+// hoover's wave), 5 = the pulse at that width. The pulse width moves at audio rate (PWM): its edges are rebuilt
+// every 16 samples when it changes.
+struct AJOsc {
+  int wave = 2, n = 0; double duty = 0.5, ep[16], ej[16];
+  static inline double fr(double x) { return x - std::floor(x); }
+  static inline double blep(double t, double dt) { if (t < dt) { const double x = t / dt; return x + x - x * x - 1.0; } if (t > 1.0 - dt) { const double x = (t - 1.0) / dt; return x * x + x + x + 1.0; } return 0.0; }
+  inline bool open(double p) const {
+    switch (wave) { case 0: return true; case 1: return fr(2 * p) < 0.5; case 2: return fr(2 * p) < duty; case 3: return fr(8 * p) < 0.5; case 4: return fr(2 * p) < duty && fr(8 * p) < 0.5; default: return true; }
+  }
+  void add(double p, double j) { if (n < 16) { ep[n] = p - std::floor(p); ej[n] = j; n++; } }
+  void build() {
+    n = 0;
+    if (wave == 5) { add(0, 2); add(duty, -2); return; }
+    if (wave == 0) { add(0, -2); return; }
+    double b[16]; int m = 0;
+    if (wave == 1 || wave == 2) { const double d = wave == 1 ? 0.5 : duty; b[m++] = 0; b[m++] = d * 0.5; b[m++] = 0.5; b[m++] = 0.5 + d * 0.5; }
+    else if (wave == 3) { for (int k = 0; k < 8; k++) { b[m++] = k / 8.0; b[m++] = k / 8.0 + 1.0 / 16; } }
+    else { bool prev = open(15.5 / 16); for (int j = 0; j < 16 && m < 16; j++) { const bool cur = open((j + 0.5) / 16); if (cur != prev) b[m++] = j / 16.0; prev = cur; } }
+    for (int i = 0; i < m; i++) { const bool on = open(b[i] + 1e-9); const double r = 2 * b[i] - 1; add(b[i], on ? r : -r); }
+  }
+  void setDuty(double d) { d = std::max(0.04, std::min(0.96, d)); if (std::fabs(d - duty) > 1e-4) { duty = d; if (wave == 2 || wave == 4 || wave == 5) build(); } }
+  inline double at(double p, double dt) const {
+    double v;
+    if (wave == 5) v = p < duty ? 1.0 : -1.0; else v = open(p) ? 2 * p - 1 : 0.0;
+    for (int i = 0; i < n; i++) { double t = p - ep[i]; t -= std::floor(t); v += 0.5 * ej[i] * blep(t, dt); }
+    return v;
+  }
+};
+
 struct Gen {
   int nosc = 0; double wave[8], mul[8], det[8], det0[8], detT[8], gain[8], ph[8];
   double skey[8] = {}, sdc[8] = {}; int fade[8] = {}; double fadeT = 0.1;   // (178) hard-sync waves (wave 4: mul is the ratio) and crossfades between them
@@ -108,6 +140,7 @@ struct Gen {
   // (185) wavetable oscillators (wave 5), a shared LFO on oscillator levels and the cutoff (the Vital, the Zeb), formants and breath (the Choir)
   std::shared_ptr<Table> tbl[8]; double lfoRate = 0, lfoPh = 0, lfoF = 0, lfoG[8] = {};
   bool form = false; Biquad2 fb[3]; double fl[3] = {}; double brG = 0; Biquad brHp;
+  AJOsc aj[8]; bool ajOn = false; double ajDuty = 0.5, ajDepth = 0, ajRate = 0, ajPh = 0;   // (201) Alpha Juno DCOs (wave 6) and their PWM
   uint32_t rng = 7;
   inline double noise() { rng = rng * 1664525u + 1013904223u; return (double)(int32_t)rng / 2147483648.0; }
   void setup(const double* p, double sr, uint32_t seed) {
@@ -118,6 +151,8 @@ struct Gen {
         skey[i] = std::max(1.0, std::round(mul[i] * 12) / 12); mul[i] = 1; double m = 0; for (int k = 0; k < 512; k++) { const double x = k / 512.0 * skey[i]; m += (x - std::floor(x)) * 2 - 1; } sdc[i] = m / 512; } }
     fadeT = p[99] > 0 ? p[99] : 0.1;
     for (int i = 0; i < nosc; i++) if ((int)wave[i] == 5) { std::lock_guard<std::mutex> lk(gTabMu); auto it = gTabs.find((int)p[2 + i * 7 + 6]); if (it != gTabs.end()) tbl[i] = it->second; ph[i] = 0; if (!tbl[i]) wave[i] = 3; }
+    ajOn = false; ajDuty = p[138] > 0 ? p[138] : 0.5; ajDepth = p[139]; ajRate = p[140]; ajPh = 0;   // (201) p[130+i] each DCO's wave, p[138] width, p[139] PWM depth, p[140] PWM rate
+    for (int i = 0; i < nosc; i++) if ((int)wave[i] == 6) { ajOn = true; aj[i].wave = std::max(0, std::min(5, (int)p[130 + i])); aj[i].duty = std::max(0.04, std::min(0.96, ajDuty)); aj[i].build(); }
     lfoRate = p[108]; lfoF = p[109]; for (int i = 0; i < 8; i++) lfoG[i] = p[110 + i];
     form = p[118] > 0; if (form) for (int j = 0; j < 3; j++) { fb[j].set(1, p[119 + j], p[122 + j] > 0 ? p[122 + j] : 1, sr); fl[j] = p[125 + j]; }
     brG = p[128]; if (brG > 0) brHp.highpass(p[129] > 0 ? p[129] : 700, 1.12, sr);
@@ -147,6 +182,7 @@ struct Gen {
         if (vibD > 0) vibPh += 2 * M_PI * vibRate * 16 * isr;
         const double common = driftC + driftDepth * sin(2 * M_PI * driftPh) + bendC + vibC * sin(vibPh0 + 2 * M_PI * 5.6 * i * isr) + vib;
         const double gl = (gT > 0 && t < gT) ? gFrom * pow(1 / gFrom, t / gT) : 1;
+        if (ajOn) { double d = ajDuty; if (ajDepth > 0 && ajRate > 0) { d += ajDepth * 0.5 * sin(2 * M_PI * ajPh); ajPh += ajRate * 16 * isr; if (ajPh >= 1) ajPh -= 1; } for (int o = 0; o < nosc; o++) if ((int)wave[o] == 6) aj[o].setDuty(d); }
         for (int o = 0; o < nosc; o++) {
           const double d = (detT[o] > 0 && t < detT[o]) ? det0[o] + (det[o] - det0[o]) * (t / detT[o]) : det[o];
           inc[o] = f * mul[o] * gl * exp2((common + d) / 1200.0) * isr;
@@ -166,6 +202,7 @@ struct Gen {
           if (fr > 1e-6) v -= fr * polyblep(ph[o], dt);
         }
         else if (wv == 5 && tbl[o]) v = tableAt(tbl[o].get(), ph[o], inc[o] * sr, sr);
+        else if (wv == 6) v = aj[o].at(ph[o], dt);
         else v = sin(2 * M_PI * ph[o]);
         double fg = 1;
         if (fade[o]) { const double T = fadeT, u = t / T; fg = fade[o] == 1 ? std::max(0.0, 1 - u) : fade[o] == 3 ? std::min(1.0, u) : (u < 0.5 ? u * 2 : std::max(0.0, 2 - u * 2)); }

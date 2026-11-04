@@ -4696,6 +4696,7 @@ body.nb-wide .knobs { max-width: 1600px; }
       <p><b>Tabs</b> across the top pick a sound, in three groups: <b>Sounds</b> you've put there, the 13 <b>Engines</b> (the synths themselves, each with its own sliders), and <b>More</b>: Lib (hundreds of real instruments plus <b>Classic Synths</b>, 30 famous sounds ready to play), Smp for your own recordings and samples (its slots S1–S8 and Load sit just under the Sound · FX · Arp row, whichever of those is open), and Drums, three drum machines you can play together.</p>
       <p><b>Playing engines together:</b> tapping an engine tab switches to it. To stack two or more, tap the <b>+</b> badge on the corner of another engine's tab (it turns into an amber ✓), or long-press the tab and choose "Play together". The sound bar lists what's stacked.</p>
       <p><b>Jam (Sound · FX · Arp · Jam):</b> four <b>loops</b> record whatever you play (keys, drums, pads, with the sound you used), quantised, up to 4 bars, and go round in time — tap a loop to record, tap again to stop, tap to mute or play, ✕ to clear. The <b>Band</b> plays a bass line and a beat in a style you pick, following whatever chord you hold on the keys (the chord shows in the strip). Both run at the sequencer tempo, or the DJ tempo while a deck plays.</p>
+      <p><b>Alpha Juno</b> (the Linux app, on its native engine): Roland's Alpha Juno, its DCO ported from jc303's open-source model: <b>Wave</b> picks SAW01–05 (the sawtooth chopped at one and three octaves up; SAW03, chopped by the pulse width, is the hoover's) or the pulse; <b>PW</b> and <b>PWM</b> set and move that width; <b>Sub</b> adds a square an octave down; <b>Dive</b> starts each note high and swoops down to it; <b>Chorus</b> is the Juno chorus (off, I, II, I+II). Its presets are in Classic Synths: Hoover · Alpha Juno (the WhatThe hoover), Hoover Soft, Alpha Strings, Alpha Bass and Alpha Brass. With the native engine off it plays the classic Hoover, which stays as <b>Hoover (classic)</b>.</p>
       <p><b>Favorites</b> (the Linux app): <b>★ Save</b> on the Playing row keeps what's playing under a name: one sound or a stack, every knob, its Effects knobs and each sound's effects switch, Analog, each plugin instrument's own settings, the plugin effects on each of those sounds (in order, with their settings) and their sends, which controller plays each one, and the hardware synth's settings. The <b>★ Favorites</b> row above Quick loads one; loading touches only the sounds it holds. Saving under a name that's already there updates it, and <b>⋯</b> on a favorite updates, renames, undoes the last update (the five saves before are kept) or deletes it. <b>⋯</b> at the end of the row exports them all as a file or imports one. Find (Ctrl-K) finds them by name. They stay across projects, like My sounds. A favorite whose plugin isn't installed loads the rest and says which one to get.</p>
       <p><b>Analog</b> (Sound tab: <b>Analog</b> next to ▶ Demo opens it): the synths' filters are modelled analog circuits: a 24 dB ladder on Juno, Brass and Mono, a 12 dB state-variable filter on Supersaw, Analog, Morph, Sync and Pluck. <b>Drive</b> pushes them into warm saturation, <b>Drift</b> gives every note its own slowly wandering tuning like real oscillators, and <b>Filter</b> can put one model on every synth. <b>Off</b> goes back to the clean digital filters (Lite starts with it off to save the battery and CPU). Changes apply to the next notes you play.</p>
       <p><b>MiniLab 3 (Arturia):</b> plug it in (Chrome on the tablet or a Chromebook), MIDI → <b>Connect</b>, and every screen gives it a layout of its own: <b>knobs shape</b> what's on the screen (the sound's knobs on Synths; the track you hit on Rhythm; the pad you hit on Beats; the deck EQs on DJ; the selected track's Smart Controls in the Garage), <b>faders mix</b>, <b>pads play</b> (drums and chords in your key on Synths, the slots and pads on Samples, the 16 tracks on Grid, the 16 pads on Pads, deck A and deck B on DJ, the drums or chords of the selected Garage track) and the <b>big knob</b> picks: turn it for the next sound, track, pad or sequence, click it to play or stop; with Shift held, turn for tempo (or the bank, a deck's speed…) and click for ● Rec. Turn a knob and the screen says what it moved; K1–K8 and F1–F4 mark the controls; the tab at the right edge opens the map of the screen you're on. On the tablet the <b>strip</b> across the top shows all of them by name: drag a knob or fader there to move it by touch, tap a pad to play it, and hold one (or ✎, then tap it) to give it another job on this screen; the MiniLab follows (MIDI sheet: Strip at the top). The knobs pick up from wherever each control already is, so changing screens never makes anything jump. <b>MIDI learn</b> (MIDI sheet, or Learn in the map) gives a knob or fader another job on the screen you're on, and only there. On Beats the MiniLab's keys play the last pad you hit, in tune; on Rhythm, Shift + click the big knob and the pads write their hits into the grid while it plays. <b>Oct − / Oct +</b> move the MiniLab's own keys (it sends nothing for them), and the screen follows the notes they send: the keys, Play's Octave buttons and the strip move once a note lands outside the window they were on. <b>Shift + pads 13–16</b> (loop, stop, play, record) drive ▶ ■ ● on the screen you're on.</p>
@@ -32947,7 +32948,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 200;
+    window.NB_BUILD = 201;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -34934,7 +34935,7 @@ registerProcessor("nb-native-out", NBNativeOut);`;
       return b;
     }
     // the synths the engine plays, each from the same settings and formulas as its browser version (020, 170)
-    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells", "vital", "zeb", "choir", "fm"]);
+    const NATIVE_IDS = new Set(["juno", "saw", "analog", "hoover", "mono", "pluck", "tyrell", "sync", "bells", "vital", "zeb", "choir", "fm", "alpha"]);
     const TABLE_IDS = new Set(["vital", "zeb", "fm"]);   // (185: these need the engine's wavetables, eng_table)
     // (185) a wavetable in the engine for a list of harmonic amplitudes, made once each (the same list, the same table)
     const natTabs = new Map(); let natTabN = 0;
@@ -35015,6 +35016,15 @@ registerProcessor("nb-native-out", NBNativeOut);`;
         osc([[-1, 1, 0.16], [0, 1, 0.18], [1, 1, 0.16], [0, 0.5, 0.2], [0.5, 2, 0.06]].map(([k, mul, g]) => ({ w: SAW, mul, det: k * spread, det0: k * spread + diveC, ramp: diveT, g })));
         a[75] = 1; a[76] = Math.min(0.045, 0.35 / f); a[77] = Math.min(0.02, p.width * 0.3 / f); a[78] = 3 + p.width * 4; a[79] = -0.7; a[80] = 9500; a[81] = 0.5; a[82] = 0.7;
         amp(attack, 0.4, -1, 0.4, 0); chorus = ["hoover", 0, 0.7];
+      } else if (id === "alpha") {   // (201) the Alpha Juno (885): its DCO (wave 6, nb_engine.cc's AJOsc) with PWM, the sub an octave down, the dive, the 24 dB filter, the Juno chorus
+        const dv = p.dive || 0, diveC = dv * 1200, diveT = 0.05 + dv * 0.45;
+        osc([{ w: 6, g: 0.36, det: 0, det0: diveC, ramp: diveT }, { w: SQR, mul: 0.5, g: (p.sub || 0) * 0.5, det: 0, det0: diveC, ramp: diveT }]);
+        a[130] = Math.min(5, Math.floor((p.wave == null ? 0.45 : p.wave) * 6)); a[138] = 0.08 + (p.pw == null ? 0.5 : p.pw) * 0.84; a[139] = (p.pwm || 0) * 0.85; a[140] = 0.3 + (p.pwm || 0) * 5.7;
+        const base = expMap(p.cutoff == null ? 0.75 : p.cutoff, 90, 15000);
+        filt(2, 0.7 + (p.res || 0) * 16, 1, base, Math.min(16000, base * 2.2), base * 1.15, Math.max(0.005, attack * 0.6), 0.5);
+        amp(attack, 0.42, -1, 0.4, 0);
+        const ch = p.chorus == null ? 0.9 : p.chorus, cm = ch < 0.12 ? 0 : ch < 0.55 ? 1 : ch < 0.88 ? 2 : 3;
+        chorus = cm ? ["juno", cm, 0.8] : null;
       } else if (id === "mono") {
         release = expMap(p.release, 0.04, 2.5);
         const base = expMap(p.cutoff, 60, 8000), peak = Math.min(16000, base * (1 + p.env * 24)), dec = 0.04 + expMap(p.release, 0.05, 1.2) * 0.45;
@@ -36205,6 +36215,40 @@ registerProcessor("nb-bridge", NBBridgeP);`;
     (window.__nbFindMore = window.__nbFindMore || []).push(add => FAV.forEach(f => add("Sounds", "★ " + f.name, "Favorite · " + sumOf(f), () => fvApply(f), "favorite fav star " + f.name + " " + sumOf(f))));
     (window.__nbReportExtras = window.__nbReportExtras || []).push(() => ({ favorites: FAV.map(f => ({ name: f.name, items: sumOf(f), plugins: f.fav && f.fav.plug ? Object.keys(f.fav.plug.parts).length + Object.values(f.fav.plug.chains).reduce((a, c) => a + c.length, 0) : 0, hist: (f.hist || []).length })) }));
     window.__fav = { list: () => FAV, capture: fvCapture, apply: fvApply, add: fvNew, update: fvUpdate, undo: fvUndo, del: fvDelete, paint: fvPaint, dbg: { state: () => state, fxc: () => (typeof FXC !== "undefined" ? FXC : null) } };
+  }
+  // ======================================================================
+  // 201: the Alpha Juno (the Linux app's native engine). Roland's Alpha Juno DCO, ported from jc303 (GPL-3, the
+  // dfl_AlphaJunoOscillator by dfl): SAW01-05 (the sawtooth chopped by gates at +1 and +3 octaves) and the pulse,
+  // with audio-rate pulse width and PWM, a sub an octave down, a pitch dive into each note, the 24 dB ladder and the
+  // Juno chorus. The rave hoover is its SAW03 with PWM, sub, dive and chorus. Without the native engine it plays the
+  // classic Hoover; the old engine stays as "Hoover (classic)".
+  // ======================================================================
+  if (window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !window.NB_LITE && window.NBEngine) {
+    ENGINES.alpha = { name: "Alpha Juno", short: "Alpha", after: "after Roland Alpha Juno · its DCO from jc303",
+      knobs: [["wave", "Wave", 0.45], ["pw", "PW", 0.5], ["pwm", "PWM", 0.6], ["sub", "Sub", 0.5], ["dive", "Dive", 0.5], ["chorus", "Chorus", 0.9], ["cutoff", "Cutoff", 0.75], ["res", "Reso", 0.15], ["attack", "Attack", 0.02], ["release", "Release", 0.45]] };
+    NEW_ENGINES.alpha = ENGINES.alpha; TAB_SUB.alpha = "Alpha Juno";
+    if (ENGINES.hoover) { ENGINES.hoover.name = "Hoover (classic)"; TAB_SUB.hoover = "classic"; }
+    {
+      let saved = null; try { saved = JSON.parse(localStorage.getItem("nightbloom") || "null"); } catch (e) {}
+      state.params.alpha = Object.fromEntries(ENGINES.alpha.knobs.map(([k, , v]) => [k, v]));
+      if (saved && saved.params && saved.params.alpha) Object.assign(state.params.alpha, saved.params.alpha);
+      state.layers.alpha = { on: false, level: 0.8 };
+      if (saved && saved.layers && saved.layers.alpha) Object.assign(state.layers.alpha, saved.layers.alpha);
+      if (saved && saved.engine === "alpha") { state.engine = "alpha"; state.melodic = "alpha"; }
+    }
+    // the native engine plays it; without it (switched off, or not loaded), the classic Hoover does
+    { const nev = newEngineVoice; newEngineVoice = function (midi, id, mix, when) {
+        if (id !== "alpha") return nev.apply(this, arguments);
+        const nv = window.__nbNativeVoice ? window.__nbNativeVoice(midi, "alpha", mix, when, fx.input) : null;
+        return nv || nev(midi, "hoover", mix, when);
+      }; }
+    // presets in Classic Synths: the hoover family and the Alpha Juno's own sounds
+    CLASSIC_PRESETS.push(
+      ["Hoover · Alpha Juno", "alpha", { alpha: { wave: 0.45, pw: 0.55, pwm: 0.7, sub: 0.6, dive: 0.55, chorus: 0.95, cutoff: 0.9, res: 0.1, attack: 0.01, release: 0.5 } }, { sub: "the WhatThe hoover · Dominator, rave", oct: 0, fx: { drive: 0.1, wobble: 0, echo: 0.15, space: 0.35 } }],
+      ["Hoover Soft", "alpha", { alpha: { wave: 0.45, pw: 0.45, pwm: 0.45, sub: 0.35, dive: 0.25, chorus: 0.7, cutoff: 0.55, res: 0.1, attack: 0.06, release: 0.6 } }, { sub: "gentler hoover, less dive", oct: 0, fx: { drive: 0.05, wobble: 0.05, echo: 0.25, space: 0.45 } }],
+      ["Alpha Strings", "alpha", { alpha: { wave: 0.25, pw: 0.5, pwm: 0.35, sub: 0.15, dive: 0, chorus: 0.95, cutoff: 0.5, res: 0.05, attack: 0.45, release: 0.7 } }, { sub: "slow PWM strings with the Juno chorus", oct: 0, fx: { drive: 0, wobble: 0.1, echo: 0.2, space: 0.6 } }],
+      ["Alpha Bass", "alpha", { alpha: { wave: 0.1, pw: 0.5, pwm: 0, sub: 0.8, dive: 0.05, chorus: 0, cutoff: 0.35, res: 0.25, attack: 0, release: 0.2 } }, { sub: "saw and sub, punchy", oct: -1, fx: { drive: 0.15, wobble: 0, echo: 0, space: 0.08 } }],
+      ["Alpha Brass", "alpha", { alpha: { wave: 0.05, pw: 0.5, pwm: 0.1, sub: 0.3, dive: 0.1, chorus: 0.4, cutoff: 0.6, res: 0.15, attack: 0.12, release: 0.4 } }, { sub: "'80s synth brass", oct: 0, fx: { drive: 0.1, wobble: 0, echo: 0.2, space: 0.4 } }]);
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
