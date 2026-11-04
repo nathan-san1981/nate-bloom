@@ -30,9 +30,10 @@ Brogue keeps its own licence (`brogue/LICENSE.txt`).
 | Faust libraries (reverbs, physical models, filters) | in Nate Bloom's own plugins, `wam/natebloom/` | per library: MIT-style (STK-4.3), LGPL with exception, and others, as declared in each `.dsp` |
 | Sequencer Party plugins, Tom Burns | `wam/burns-audio/` | MIT |
 | Plaits (the macro oscillator) and stmlib, © Emilie Gillet (Mutable Instruments) | compiled into `wam/natebloom/twist/dsp.wasm` (Twist); the Rhythm Creator's Analog drum models are after its drum engines | MIT |
-| Ultramaster KR-106's engine, © Karl LaRocca (Kayrock) | compiled into `wam/natebloom/juno106/dsp.wasm` (Juno 106), with its 256 factory patches | GPL-3.0 |
+| Ultramaster KR-106's engine, © Karl LaRocca (Kayrock) | compiled into `wam/natebloom/juno106/dsp.wasm` (Juno 106), with its 256 factory patches; its IR3109 filter, BBD chorus and resamplers also in Unicorn Dream and Fuzz Bass (headers in `wam/natebloom/portsrc/kr106/`) | GPL-3.0 |
+| jc303's diode ladder filter (after Will Pirkle's AN-6), © midilab | compiled into `wam/natebloom/fuzz_bass/dsp.wasm` (Fuzz Bass); source in `wam/natebloom/portsrc/fuzz_bass/` | GPL-3.0 |
 | Dexed's DX7 engine: msfa, © 2012 Google Inc. and © 2016-2025 Pascal Gauthier (Apache-2.0); EngineMkI, © Pascal Gauthier (GPL-3.0) | compiled into `wam/natebloom/pop89/dsp.wasm` (Pop 89); source in `wam/natebloom/portsrc/dx7/` | Apache-2.0 / GPL-3.0 |
-| Galactic3, © Chris Johnson (Airwindows) | compiled into `wam/natebloom/galactic/dsp.wasm` (Galactic) | MIT |
+| Galactic3, © Chris Johnson (Airwindows) | compiled into `wam/natebloom/galactic/dsp.wasm` (Galactic) and Unicorn Dream's reverb | MIT |
 | Wimmics community plugins and the WAM SDK | `wam/wimmics/` | per plugin, as declared in its source (several GPL-3.0 and GPL-2.0-or-later, some MIT, STK-4.3, LGPL, CC0/BSL); the SDK is MIT |
 | Studio instrument recordings | `inst/v1/` | see `inst/v1/CREDITS.txt` (CC BY 3.0 and CC0 1.0) |
 | The CMU Pronouncing Dictionary, © 1993–2015 Carnegie Mellon University | packed into the web app (`index.html`, `lite/`) for Speech | BSD-2-Clause style, below |

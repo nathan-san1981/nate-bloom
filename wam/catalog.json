@@ -78,7 +78,7 @@
    "vendor": "Nathan",
    "kind": "instrument",
    "type": "Synth",
-   "desc": "A happy, sparkly rainbow synth: a detuned saw pad, music-box chimes an octave up, magic-dust bells sprinkled from the major pentatonic on a 1/16 grid, and a cloud reverb.",
+   "desc": "A happy, sparkly rainbow synth: a detuned saw pad through the Juno's IR3109 filter and bucket-brigade chorus, music-box chimes an octave up, magic-dust bells sprinkled from the major pentatonic on a 1/16 grid, all in Airwindows' Galactic reverb with an octave-up shimmer.",
    "url": "natebloom/unicorn_dream/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -88,7 +88,7 @@
    "vendor": "Nathan",
    "kind": "instrument",
    "type": "Bass",
-   "desc": "A blown-out mono analog-style bass: saw, detuned square and sub through a resonant ladder, then heavy fuzz. Play legato to glide.",
+   "desc": "A blown-out mono bass: saw, detuned square and sub through a TB-303-style diode ladder, then a 4x-oversampled two-stage fuzz with an octave-up rectifier and a Big Muff tone stack. Play legato to glide.",
    "url": "natebloom/fuzz_bass/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
