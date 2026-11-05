@@ -58,8 +58,8 @@ async def main():
         sm0 = glob.glob(os.path.join(APD, "Microsoft", "Windows", "Start Menu", "Programs", "**", "Nate Bloom*.lnk"), recursive=True)
         if sm0:
             lnk = sm0[0]
-            t = subprocess.run(["powershell", "-NoProfile", "-Command", "(New-Object -ComObject WScript.Shell).CreateShortcut('%s').TargetPath" % lnk], capture_output=True, text=True).stdout.strip()
-            if t and os.path.exists(t): exe = t; break
+            tp = subprocess.run(["powershell", "-NoProfile", "-Command", "(New-Object -ComObject WScript.Shell).CreateShortcut('%s').TargetPath" % lnk], capture_output=True, text=True).stdout.strip()
+            if tp and os.path.exists(tp): exe = tp; break
         time.sleep(1)
     print("INFO installed exe:", exe, "| Programs:", os.listdir(os.path.join(LAD, "Programs")) if os.path.isdir(os.path.join(LAD, "Programs")) else "none", flush=True)
     rep("PASS" if os.path.exists(exe) else "FAIL", "installer runs silently and installs to %s (%.0f s, exit %d)" % (os.path.dirname(exe), t, r.returncode))
