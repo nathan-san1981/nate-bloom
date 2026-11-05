@@ -125,7 +125,7 @@
   "vendor": "Nate Bloom",
   "kind": "instrument",
   "type": "Physical model",
-  "desc": "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone.",
+  "desc": "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone. Play harder and the mallet hits harder.",
   "url": "natebloom/marimba/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -135,7 +135,7 @@
   "vendor": "Nate Bloom",
   "kind": "instrument",
   "type": "Physical model",
-  "desc": "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth.",
+  "desc": "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth; letting go damps the string.",
   "url": "natebloom/nylon/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -145,7 +145,7 @@
   "vendor": "Nate Bloom",
   "kind": "instrument",
   "type": "Physical model",
-  "desc": "A bowed string: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
+  "desc": "A bowed string through a violin body: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
   "url": "natebloom/violin/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -155,7 +155,7 @@
   "vendor": "Nate Bloom",
   "kind": "instrument",
   "type": "Physical model",
-  "desc": "Breath, embouchure and vibrato: breathy and soft or bright and pure.",
+  "desc": "Breath, embouchure and vibrato that blooms as the note holds: breathy and soft or bright and pure.",
   "url": "natebloom/flute/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -165,7 +165,7 @@
   "vendor": "Nate Bloom",
   "kind": "instrument",
   "type": "Physical model",
-  "desc": "Reed stiffness and bell opening shape a woody, hollow tone.",
+  "desc": "Reed stiffness and bell opening shape a woody, hollow tone; vibrato comes in as the note holds.",
   "url": "natebloom/clarinet/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },

@@ -129,6 +129,50 @@
     "vibrato": 50,
     "level": 60
    }
+  },
+  {
+   "name": "Tenor choir",
+   "values": {
+    "voice": 1,
+    "vowel": 0.5,
+    "attack": 350,
+    "release": 1200,
+    "vibrato": 35,
+    "level": 70
+   }
+  },
+  {
+   "name": "Monk drone",
+   "values": {
+    "voice": 0,
+    "vowel": 3,
+    "attack": 800,
+    "release": 2500,
+    "vibrato": 10,
+    "level": 80
+   }
+  },
+  {
+   "name": "Alto ooh pad",
+   "values": {
+    "voice": 3,
+    "vowel": 4,
+    "attack": 900,
+    "release": 2000,
+    "vibrato": 30,
+    "level": 70
+   }
+  },
+  {
+   "name": "Countertenor",
+   "values": {
+    "voice": 2,
+    "vowel": 1,
+    "attack": 200,
+    "release": 900,
+    "vibrato": 50,
+    "level": 70
+   }
   }
  ],
  "faust": "2.90.17"

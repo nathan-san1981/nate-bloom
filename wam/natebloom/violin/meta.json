@@ -4,19 +4,19 @@
  "name": "Violin",
  "kind": "instrument",
  "type": "Physical model",
- "description": "A bowed-string physical model: the bow's pressure and position, a slow or sharp attack, and vibrato that grows as the note sustains",
- "blurb": "A bowed string: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
+ "description": "A bowed-string physical model through a violin body: the bow's pressure and position, a slow or sharp attack, and vibrato that grows as the note sustains",
+ "blurb": "A bowed string through a violin body: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
  "voices": 6,
  "poly": {
   "freq": 270372,
   "gain": 262144,
-  "gate": 270432
+  "gate": 270516
  },
  "params": [
   {
    "id": "attack",
    "label": "Attack",
-   "index": 278708,
+   "index": 278792,
    "min": 2,
    "max": 2000,
    "init": 90,
@@ -27,7 +27,7 @@
   {
    "id": "release",
    "label": "Release",
-   "index": 278712,
+   "index": 278796,
    "min": 10,
    "max": 4000,
    "init": 300,
@@ -38,7 +38,7 @@
   {
    "id": "bowpressure",
    "label": "Bow pressure",
-   "index": 278724,
+   "index": 278808,
    "min": 0,
    "max": 100,
    "init": 45,
@@ -48,7 +48,7 @@
   {
    "id": "bowposition",
    "label": "Bow position",
-   "index": 270464,
+   "index": 270548,
    "min": 5,
    "max": 95,
    "init": 70,
@@ -58,7 +58,7 @@
   {
    "id": "vibrato",
    "label": "Vibrato",
-   "index": 270412,
+   "index": 270496,
    "min": 0,
    "max": 100,
    "init": 45,
@@ -68,10 +68,20 @@
   {
    "id": "level",
    "label": "Level",
-   "index": 295164,
+   "index": 295344,
    "min": 0,
    "max": 100,
    "init": 75,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "body",
+   "label": "Body",
+   "index": 295248,
+   "min": 0,
+   "max": 100,
+   "init": 60,
    "step": 1,
    "unit": "%"
   }
@@ -80,7 +90,7 @@
   {
    "name": "Slow swell",
    "values": {
-    "attack": 700,
+    "attack": 600,
     "release": 900,
     "bowpressure": 40,
     "bowposition": 70,
@@ -91,12 +101,60 @@
   {
    "name": "Spiccato",
    "values": {
-    "attack": 8,
+    "attack": 4,
     "release": 60,
-    "bowpressure": 60,
+    "bowpressure": 65,
     "bowposition": 80,
     "vibrato": 0,
-    "level": 80
+    "level": 75
+   }
+  },
+  {
+   "name": "Solo violin",
+   "values": {
+    "attack": 120,
+    "release": 400,
+    "bowpressure": 50,
+    "bowposition": 70,
+    "vibrato": 60,
+    "level": 75,
+    "body": 70
+   }
+  },
+  {
+   "name": "Sul tasto",
+   "values": {
+    "attack": 250,
+    "release": 600,
+    "bowpressure": 30,
+    "bowposition": 35,
+    "vibrato": 35,
+    "level": 80,
+    "body": 60
+   }
+  },
+  {
+   "name": "Sul ponticello",
+   "values": {
+    "attack": 80,
+    "release": 300,
+    "bowpressure": 55,
+    "bowposition": 92,
+    "vibrato": 20,
+    "level": 70,
+    "body": 45
+   }
+  },
+  {
+   "name": "Fiddle",
+   "values": {
+    "attack": 30,
+    "release": 150,
+    "bowpressure": 60,
+    "bowposition": 75,
+    "vibrato": 25,
+    "level": 75,
+    "body": 55
    }
   }
  ],

@@ -1,5 +1,5 @@
 declare name "Clarinet";
-declare description "A physical model of a clarinet: reed stiffness and bell opening shape a woody, hollow tone";
+declare description "A physical model of a clarinet: reed stiffness and bell opening shape a woody, hollow tone; vibrato comes in as the note holds";
 import("stdfaust.lib");
 freq = hslider("freq", 440, 20, 8000, 0.01);
 gain = hslider("gain", 0.8, 0, 1, 0.01);
@@ -12,5 +12,6 @@ vib   = hslider("[4]Vibrato [unit:%]", 25, 0, 100, 1) / 100 : si.smoo;
 level = hslider("[5]Level [unit:%]", 70, 0, 100, 1) / 100 : si.smoo;
 env = en.asr(att, 1, rel, gate) * (0.55 + gain * 0.3);   // (blown much harder the reed squeals and drops out)
 vel = 0.4 + gain * 0.6;
-blow = pm.blower(env, 0.05, 2000, 5, vib * 0.012);
+vibEnv = en.asr(0.5, 1, 0.15, gate);
+blow = pm.blower(env, 0.05, 2000, 5, vib * 0.012 * vibEnv);
 process = pm.clarinetModel(freq : pm.f2l, blow, reed, bell) * level * vel * 1.05;

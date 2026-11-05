@@ -4,8 +4,8 @@
  "name": "Clarinet",
  "kind": "instrument",
  "type": "Physical model",
- "description": "A physical model of a clarinet: reed stiffness and bell opening shape a woody, hollow tone",
- "blurb": "Reed stiffness and bell opening shape a woody, hollow tone.",
+ "description": "A physical model of a clarinet: reed stiffness and bell opening shape a woody, hollow tone; vibrato comes in as the note holds",
+ "blurb": "Reed stiffness and bell opening shape a woody, hollow tone; vibrato comes in as the note holds.",
  "voices": 6,
  "poly": {
   "freq": 270392,
@@ -38,7 +38,7 @@
   {
    "id": "reed",
    "label": "Reed",
-   "index": 270544,
+   "index": 270552,
    "min": 0,
    "max": 100,
    "init": 50,
@@ -68,7 +68,7 @@
   {
    "id": "level",
    "label": "Level",
-   "index": 278764,
+   "index": 278772,
    "min": 0,
    "max": 100,
    "init": 70,
@@ -76,6 +76,62 @@
    "unit": "%"
   }
  ],
- "presets": [],
+ "presets": [
+  {
+   "name": "Clarinet",
+   "values": {
+    "attack": 30,
+    "release": 120,
+    "reed": 50,
+    "bell": 50,
+    "vibrato": 25,
+    "level": 70
+   }
+  },
+  {
+   "name": "Soft chalumeau",
+   "values": {
+    "attack": 80,
+    "release": 250,
+    "reed": 30,
+    "bell": 30,
+    "vibrato": 15,
+    "level": 75
+   }
+  },
+  {
+   "name": "Bright reed",
+   "values": {
+    "attack": 15,
+    "release": 100,
+    "reed": 75,
+    "bell": 80,
+    "vibrato": 30,
+    "level": 65
+   }
+  },
+  {
+   "name": "Klezmer",
+   "values": {
+    "attack": 20,
+    "release": 150,
+    "reed": 65,
+    "bell": 60,
+    "vibrato": 70,
+    "level": 70
+   }
+  },
+  {
+   "name": "Dark woodwind",
+   "values": {
+    "attack": 60,
+    "release": 200,
+    "reed": 35,
+    "bell": 15,
+    "vibrato": 10,
+    "level": 75
+   }
+  }
+ ],
  "faust": "2.90.17"
 }

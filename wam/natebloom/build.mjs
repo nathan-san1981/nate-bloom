@@ -49,16 +49,27 @@ const SPEC = [
   { id: "ringmodhq", hidden: true, type: "Modulation", blurb: "A ring modulator for bells, metallic shimmer and alien drones: four carrier waves and a sweep, free or in time with the song.",
     menus: { wave: [["Sine", 0], ["Triangle", 1], ["Square", 2], ["Saw", 3]], sync: [["Free", 0], ["1 bar", 1], ["1/2", 2], ["1/4", 3], ["1/8", 4], ["1/16", 5], ["1/4 dotted", 6], ["1/8 dotted", 7], ["1/4 triplet", 8], ["1/8 triplet", 9]] },
     presets: { "Bells": { frequency: 440, drift: 10, mix: 45, wave: 0, sweep: 0 }, "Robot": { frequency: 60, drift: 0, mix: 70, wave: 2, sweep: 0 }, "1 bar sweep": { frequency: 300, drift: 10, mix: 50, wave: 1, sweep: 60, sync: 1 }, "Alien drone": { frequency: 150, drift: 60, mix: 60, wave: 3, sweep: 40, sweeprate: 0.1, sync: 0 } } },
-  { id: "marimba", type: "Physical model", kind: "instrument", voices: 8, blurb: "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone.",
-    presets: { "Soft mallets": { mallet: 15, decay: 2, brightness: 3500, strikeposition: 1, level: 85 }, "Hard mallets": { mallet: 85, decay: 1.2, brightness: 12000, strikeposition: 2, level: 75 }, "Ringing": { mallet: 40, decay: 5, brightness: 7000, strikeposition: 0, level: 75 } } },
-  { id: "nylon", type: "Physical model", kind: "instrument", voices: 8, blurb: "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth." },
-  { id: "violin", type: "Physical model", kind: "instrument", voices: 6, blurb: "A bowed string: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
-    presets: { "Slow swell": { attack: 700, release: 900, bowpressure: 40, bowposition: 70, vibrato: 50, level: 75 }, "Spiccato": { attack: 8, release: 60, bowpressure: 60, bowposition: 80, vibrato: 0, level: 80 } } },
-  { id: "flute", type: "Physical model", kind: "instrument", voices: 6, blurb: "Breath, embouchure and vibrato: breathy and soft or bright and pure." },
-  { id: "clarinet", type: "Physical model", kind: "instrument", voices: 6, blurb: "Reed stiffness and bell opening shape a woody, hollow tone." },
+  { id: "marimba", type: "Physical model", kind: "instrument", voices: 8, blurb: "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone. Play harder and the mallet hits harder.",
+    presets: { "Soft mallets": { mallet: 20, decay: 1.8, brightness: 3500, strikeposition: 1, level: 80 }, "Hard mallets": { mallet: 85, decay: 1.2, brightness: 12000, strikeposition: 1, level: 75 }, "Ringing": { mallet: 50, decay: 4.5, brightness: 7000, strikeposition: 0, level: 75 },
+      "Concert marimba": { mallet: 40, decay: 2.2, brightness: 7500, strikeposition: 1, level: 80, velocity: 70, resonator: 100 }, "Xylophone-ish": { mallet: 95, decay: 0.45, brightness: 16000, strikeposition: 2, level: 70, velocity: 50, resonator: 40 },
+      "Mellow bass marimba": { mallet: 15, decay: 3.5, brightness: 2500, strikeposition: 1, level: 85, velocity: 50, resonator: 100 }, "Dry wood": { mallet: 60, decay: 0.3, brightness: 9000, strikeposition: 3, level: 80, velocity: 60, resonator: 0 },
+      "Kalimba-like": { mallet: 70, decay: 2.8, brightness: 10000, strikeposition: 4, level: 70, velocity: 60, resonator: 30 } } },
+  { id: "nylon", type: "Physical model", kind: "instrument", voices: 8, blurb: "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth; letting go damps the string.",
+    presets: { "Classical": { pluckposition: 80, tone: 7000, level: 80, body: 55, release: 400 }, "Warm fingers": { pluckposition: 55, tone: 3500, level: 85, body: 70, release: 600 }, "Ponticello": { pluckposition: 92, tone: 14000, level: 75, body: 35, release: 300 },
+      "Bossa": { pluckposition: 65, tone: 5000, level: 80, body: 65, release: 250 }, "Harp-like": { pluckposition: 45, tone: 9000, level: 75, body: 30, release: 2500 }, "Muted pluck": { pluckposition: 75, tone: 2500, level: 90, body: 50, release: 60 } } },
+  { id: "violin", type: "Physical model", kind: "instrument", voices: 6, blurb: "A bowed string through a violin body: bow pressure and position, slow or sharp attacks, and vibrato that grows as the note sustains.",
+    presets: { "Slow swell": { attack: 600, release: 900, bowpressure: 40, bowposition: 70, vibrato: 50, level: 75 }, "Spiccato": { attack: 4, release: 60, bowpressure: 65, bowposition: 80, vibrato: 0, level: 75 },
+      "Solo violin": { attack: 120, release: 400, bowpressure: 50, bowposition: 70, vibrato: 60, level: 75, body: 70 }, "Sul tasto": { attack: 250, release: 600, bowpressure: 30, bowposition: 35, vibrato: 35, level: 80, body: 60 },
+      "Sul ponticello": { attack: 80, release: 300, bowpressure: 55, bowposition: 92, vibrato: 20, level: 70, body: 45 }, "Fiddle": { attack: 30, release: 150, bowpressure: 60, bowposition: 75, vibrato: 25, level: 75, body: 55 } } },
+  { id: "flute", type: "Physical model", kind: "instrument", voices: 6, blurb: "Breath, embouchure and vibrato that blooms as the note holds: breathy and soft or bright and pure.",
+    presets: { "Concert flute": { attack: 40, release: 160, breath: 30, embouchure: 50, vibrato: 45, level: 75 }, "Breathy": { attack: 120, release: 300, breath: 75, embouchure: 45, vibrato: 30, level: 80 }, "Pan pipe": { attack: 20, release: 200, breath: 55, embouchure: 30, vibrato: 10, level: 80 },
+      "Piccolo bright": { attack: 15, release: 100, breath: 20, embouchure: 75, vibrato: 50, level: 65 }, "Shakuhachi-ish": { attack: 200, release: 400, breath: 90, embouchure: 40, vibrato: 70, level: 80 } } },
+  { id: "clarinet", type: "Physical model", kind: "instrument", voices: 6, blurb: "Reed stiffness and bell opening shape a woody, hollow tone; vibrato comes in as the note holds.",
+    presets: { "Clarinet": { attack: 30, release: 120, reed: 50, bell: 50, vibrato: 25, level: 70 }, "Soft chalumeau": { attack: 80, release: 250, reed: 30, bell: 30, vibrato: 15, level: 75 }, "Bright reed": { attack: 15, release: 100, reed: 75, bell: 80, vibrato: 30, level: 65 },
+      "Klezmer": { attack: 20, release: 150, reed: 65, bell: 60, vibrato: 70, level: 70 }, "Dark woodwind": { attack: 60, release: 200, reed: 35, bell: 15, vibrato: 10, level: 75 } } },
   { id: "voice", type: "Physical model", kind: "instrument", voices: 6, blurb: "A singing voice, bass to soprano, with vowels you can glide between: choirs and vocal pads.",
     menus: { voice: [["Bass", 0], ["Tenor", 1], ["Countertenor", 2], ["Alto", 3], ["Soprano", 4]] },
-    presets: { "Choir aah": { voice: 3, vowel: 0, attack: 400, release: 1200, vibrato: 35, level: 70 }, "Deep ooh": { voice: 0, vowel: 4, attack: 300, release: 1500, vibrato: 25, level: 75 }, "Soprano eee": { voice: 4, vowel: 2, attack: 200, release: 900, vibrato: 50, level: 60 } } },
+    presets: { "Choir aah": { voice: 3, vowel: 0, attack: 400, release: 1200, vibrato: 35, level: 70 }, "Deep ooh": { voice: 0, vowel: 4, attack: 300, release: 1500, vibrato: 25, level: 75 }, "Soprano eee": { voice: 4, vowel: 2, attack: 200, release: 900, vibrato: 50, level: 60 }, "Tenor choir": { voice: 1, vowel: 0.5, attack: 350, release: 1200, vibrato: 35, level: 70 }, "Monk drone": { voice: 0, vowel: 3, attack: 800, release: 2500, vibrato: 10, level: 80 }, "Alto ooh pad": { voice: 3, vowel: 4, attack: 900, release: 2000, vibrato: 30, level: 70 }, "Countertenor": { voice: 2, vowel: 1, attack: 200, release: 900, vibrato: 50, level: 70 } } },
 ];
 
 const js = path.join(LF, "libfaust-wasm.js");
@@ -112,6 +123,8 @@ for (const S of SPEC) {
   const name = meta.name || S.id, description = (meta.description || "").replace(/-s /g, "'s ");
   const M2 = { id: S.id, build: BUILD, name, kind: inst ? "instrument" : "effect", type: S.type, description, blurb: S.blurb, voices: inst ? S.voices || 8 : 1, poly,
     params, presets: Object.entries(S.presets || {}).map(([name, values]) => ({ name, values })), faust: faust.version() };
+  // (225) presets added to meta.json since (the effects' banks of 220) stay, as long as their controls are still there
+  try { const old = JSON.parse(fs.readFileSync(path.join(out, "meta.json"), "utf8")); for (const pr of old.presets || []) if (!M2.presets.some(x => x.name === pr.name) && Object.keys(pr.values || {}).every(k => params.some(p => p.id === k))) M2.presets.push(pr); } catch (e) {}
   if (tempoIndex >= 0) M2.tempo = tempoIndex;
   fs.writeFileSync(path.join(out, "meta.json"), JSON.stringify(M2, null, 1));
   fs.writeFileSync(path.join(out, "index.js"), `// ${name}: Nate Bloom's own plugin (Faust, src/${S.id}.dsp)\nimport { make } from "../lib/nbfaust.js";\nexport default make(import.meta.url);\n`);

@@ -4,19 +4,19 @@
  "name": "Marimba",
  "kind": "instrument",
  "type": "Physical model",
- "description": "A physical model of a marimba: a wooden bar with fifty vibrating modes over a tuned tube resonator, struck with a mallet you can soften or harden",
- "blurb": "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone.",
+ "description": "A physical model of a marimba: a wooden bar with fifty vibrating modes over a tuned tube resonator, struck with a mallet you can soften or harden; harder hits sound harder",
+ "blurb": "Wooden bars and tube resonators struck with a mallet. Hard mallets bring out the attack; soft ones the tone. Play harder and the mallet hits harder.",
  "voices": 8,
  "poly": {
-  "freq": 9208,
-  "gain": 9260,
-  "gate": 9340
+  "freq": 1024,
+  "gain": 1040,
+  "gate": 1124
  },
  "params": [
   {
    "id": "mallet",
    "label": "Mallet",
-   "index": 9336,
+   "index": 1120,
    "min": 0,
    "max": 100,
    "init": 45,
@@ -26,7 +26,7 @@
   {
    "id": "decay",
    "label": "Decay",
-   "index": 9244,
+   "index": 1020,
    "min": 0.15,
    "max": 6,
    "init": 1.4,
@@ -37,7 +37,7 @@
   {
    "id": "brightness",
    "label": "Brightness",
-   "index": 9264,
+   "index": 1044,
    "min": 400,
    "max": 18000,
    "init": 6500,
@@ -48,7 +48,7 @@
   {
    "id": "strikeposition",
    "label": "Strike position",
-   "index": 9256,
+   "index": 1036,
    "min": 0,
    "max": 4,
    "init": 1,
@@ -57,10 +57,30 @@
   {
    "id": "level",
    "label": "Level",
-   "index": 18764,
+   "index": 18784,
    "min": 0,
    "max": 100,
    "init": 80,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "velocity",
+   "label": "Velocity",
+   "index": 1048,
+   "min": 0,
+   "max": 100,
+   "init": 60,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "resonator",
+   "label": "Resonator",
+   "index": 2348,
+   "min": 0,
+   "max": 100,
+   "init": 100,
    "step": 1,
    "unit": "%"
   }
@@ -69,11 +89,11 @@
   {
    "name": "Soft mallets",
    "values": {
-    "mallet": 15,
-    "decay": 2,
+    "mallet": 20,
+    "decay": 1.8,
     "brightness": 3500,
     "strikeposition": 1,
-    "level": 85
+    "level": 80
    }
   },
   {
@@ -82,18 +102,78 @@
     "mallet": 85,
     "decay": 1.2,
     "brightness": 12000,
-    "strikeposition": 2,
+    "strikeposition": 1,
     "level": 75
    }
   },
   {
    "name": "Ringing",
    "values": {
-    "mallet": 40,
-    "decay": 5,
+    "mallet": 50,
+    "decay": 4.5,
     "brightness": 7000,
     "strikeposition": 0,
     "level": 75
+   }
+  },
+  {
+   "name": "Concert marimba",
+   "values": {
+    "mallet": 40,
+    "decay": 2.2,
+    "brightness": 7500,
+    "strikeposition": 1,
+    "level": 80,
+    "velocity": 70,
+    "resonator": 100
+   }
+  },
+  {
+   "name": "Xylophone-ish",
+   "values": {
+    "mallet": 95,
+    "decay": 0.45,
+    "brightness": 16000,
+    "strikeposition": 2,
+    "level": 70,
+    "velocity": 50,
+    "resonator": 40
+   }
+  },
+  {
+   "name": "Mellow bass marimba",
+   "values": {
+    "mallet": 15,
+    "decay": 3.5,
+    "brightness": 2500,
+    "strikeposition": 1,
+    "level": 85,
+    "velocity": 50,
+    "resonator": 100
+   }
+  },
+  {
+   "name": "Dry wood",
+   "values": {
+    "mallet": 60,
+    "decay": 0.3,
+    "brightness": 9000,
+    "strikeposition": 3,
+    "level": 80,
+    "velocity": 60,
+    "resonator": 0
+   }
+  },
+  {
+   "name": "Kalimba-like",
+   "values": {
+    "mallet": 70,
+    "decay": 2.8,
+    "brightness": 10000,
+    "strikeposition": 4,
+    "level": 70,
+    "velocity": 60,
+    "resonator": 30
    }
   }
  ],

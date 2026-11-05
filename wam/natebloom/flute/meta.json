@@ -4,19 +4,19 @@
  "name": "Flute",
  "kind": "instrument",
  "type": "Physical model",
- "description": "A physical model of a flute: breath, embouchure and vibrato; breathy and soft or bright and pure",
- "blurb": "Breath, embouchure and vibrato: breathy and soft or bright and pure.",
+ "description": "A physical model of a flute: breath, embouchure and vibrato that blooms as the note holds; breathy and soft or bright and pure",
+ "blurb": "Breath, embouchure and vibrato that blooms as the note holds: breathy and soft or bright and pure.",
  "voices": 6,
  "poly": {
   "freq": 270372,
   "gain": 262144,
-  "gate": 286860
+  "gate": 286856
  },
  "params": [
   {
    "id": "attack",
    "label": "Attack",
-   "index": 286856,
+   "index": 286892,
    "min": 2,
    "max": 1500,
    "init": 40,
@@ -27,7 +27,7 @@
   {
    "id": "release",
    "label": "Release",
-   "index": 286880,
+   "index": 286896,
    "min": 10,
    "max": 3000,
    "init": 160,
@@ -38,7 +38,7 @@
   {
    "id": "breath",
    "label": "Breath",
-   "index": 286936,
+   "index": 286944,
    "min": 0,
    "max": 100,
    "init": 35,
@@ -68,7 +68,7 @@
   {
    "id": "level",
    "label": "Level",
-   "index": 295172,
+   "index": 295180,
    "min": 0,
    "max": 100,
    "init": 75,
@@ -76,6 +76,62 @@
    "unit": "%"
   }
  ],
- "presets": [],
+ "presets": [
+  {
+   "name": "Concert flute",
+   "values": {
+    "attack": 40,
+    "release": 160,
+    "breath": 30,
+    "embouchure": 50,
+    "vibrato": 45,
+    "level": 75
+   }
+  },
+  {
+   "name": "Breathy",
+   "values": {
+    "attack": 120,
+    "release": 300,
+    "breath": 75,
+    "embouchure": 45,
+    "vibrato": 30,
+    "level": 80
+   }
+  },
+  {
+   "name": "Pan pipe",
+   "values": {
+    "attack": 20,
+    "release": 200,
+    "breath": 55,
+    "embouchure": 30,
+    "vibrato": 10,
+    "level": 80
+   }
+  },
+  {
+   "name": "Piccolo bright",
+   "values": {
+    "attack": 15,
+    "release": 100,
+    "breath": 20,
+    "embouchure": 75,
+    "vibrato": 50,
+    "level": 65
+   }
+  },
+  {
+   "name": "Shakuhachi-ish",
+   "values": {
+    "attack": 200,
+    "release": 400,
+    "breath": 90,
+    "embouchure": 40,
+    "vibrato": 70,
+    "level": 80
+   }
+  }
+ ],
  "faust": "2.90.17"
 }

@@ -4,19 +4,19 @@
  "name": "Nylon Guitar",
  "kind": "instrument",
  "type": "Physical model",
- "description": "A physical model of a classical guitar string and body; pluck it near the bridge for bite or near the middle for warmth",
- "blurb": "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth.",
+ "description": "A physical model of a classical guitar string and body; pluck it near the bridge for bite or near the middle for warmth; let go and the string is damped",
+ "blurb": "A classical guitar string and body. Pluck near the bridge for bite, toward the middle for warmth; letting go damps the string.",
  "voices": 8,
  "poly": {
-  "freq": 8232,
-  "gain": 8272,
+  "freq": 8236,
+  "gain": 12,
   "gate": 8308
  },
  "params": [
   {
    "id": "pluckposition",
    "label": "Pluck position",
-   "index": 8240,
+   "index": 8244,
    "min": 5,
    "max": 95,
    "init": 80,
@@ -26,7 +26,7 @@
   {
    "id": "tone",
    "label": "Tone",
-   "index": 16,
+   "index": 20,
    "min": 800,
    "max": 18000,
    "init": 7000,
@@ -37,14 +37,96 @@
   {
    "id": "level",
    "label": "Level",
-   "index": 32984,
+   "index": 33108,
    "min": 0,
    "max": 100,
    "init": 80,
    "step": 1,
    "unit": "%"
+  },
+  {
+   "id": "body",
+   "label": "Body",
+   "index": 32968,
+   "min": 0,
+   "max": 100,
+   "init": 50,
+   "step": 1,
+   "unit": "%"
+  },
+  {
+   "id": "release",
+   "label": "Release",
+   "index": 33096,
+   "min": 20,
+   "max": 4000,
+   "init": 400,
+   "step": 1,
+   "unit": "ms",
+   "scale": "log"
   }
  ],
- "presets": [],
+ "presets": [
+  {
+   "name": "Classical",
+   "values": {
+    "pluckposition": 80,
+    "tone": 7000,
+    "level": 80,
+    "body": 55,
+    "release": 400
+   }
+  },
+  {
+   "name": "Warm fingers",
+   "values": {
+    "pluckposition": 55,
+    "tone": 3500,
+    "level": 85,
+    "body": 70,
+    "release": 600
+   }
+  },
+  {
+   "name": "Ponticello",
+   "values": {
+    "pluckposition": 92,
+    "tone": 14000,
+    "level": 75,
+    "body": 35,
+    "release": 300
+   }
+  },
+  {
+   "name": "Bossa",
+   "values": {
+    "pluckposition": 65,
+    "tone": 5000,
+    "level": 80,
+    "body": 65,
+    "release": 250
+   }
+  },
+  {
+   "name": "Harp-like",
+   "values": {
+    "pluckposition": 45,
+    "tone": 9000,
+    "level": 75,
+    "body": 30,
+    "release": 2500
+   }
+  },
+  {
+   "name": "Muted pluck",
+   "values": {
+    "pluckposition": 75,
+    "tone": 2500,
+    "level": 90,
+    "body": 50,
+    "release": 60
+   }
+  }
+ ],
  "faust": "2.90.17"
 }
