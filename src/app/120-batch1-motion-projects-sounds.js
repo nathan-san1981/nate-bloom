@@ -61,14 +61,15 @@
       const shimSend = ctx.createGain(); shimSend.gain.value = 0;
       const ps = octaveUp(), shimVerb = ctx.createConvolver(), shimFb = ctx.createGain(), shimWet = ctx.createGain();
       shimFb.gain.value = 0; shimWet.gain.value = 0;
-      if (!shimIR) shimIR = normIR(hallIR(ctx.sampleRate, { hdecay: 0.6, hsize: 0.7, hdamp: 0.45, hwidth: 1, irMax: window.__nbMobile ? 4 : 0 }));
-      shimVerb.buffer = shimIR;
+      // (232) its reverb is made the first time shimmer is switched on (about 30 ms of work at every start, for an
+      // effect most sessions never use)
+      if (shimIR) shimVerb.buffer = shimIR;
       const shimHP = ctx.createBiquadFilter(); shimHP.type = "highpass"; shimHP.frequency.value = 300;
       B.betaOut.connect(shimSend).connect(ps.input); ps.output.connect(shimHP).connect(shimVerb);
       const shimLP = ctx.createBiquadFilter(); shimLP.type = "lowpass"; shimLP.frequency.value = 6000;
       const shimClip = ctx.createWaveShaper(); shimClip.curve = softClipCurve; shimClip.oversample = window.__nbMobile ? "none" : "2x";
       shimVerb.connect(shimWet).connect(fx.comp); shimVerb.connect(shimFb).connect(shimLP).connect(shimClip).connect(ps.input);
-      BM = { modFilter, modPan, modAmp, frzIn, frzWet, frzSum, fbs, lps, shimSend, shimFb, shimWet };
+      BM = { modFilter, modPan, modAmp, frzIn, frzWet, frzSum, fbs, lps, shimSend, shimFb, shimWet, shimVerb };
       applyFreeze(); motionApply();
     };
   }
@@ -84,6 +85,7 @@
     BM.frzWet.gain.setTargetAtTime(frozen ? 0.35 + (bfx.frzMix ?? 0.7) * 0.9 : 0, now, frozen ? 0.05 : 0.6);
     BM.lps.forEach(l => l.frequency.setTargetAtTime(800 + Math.pow(bfx.frzTone ?? 0.6, 2) * 12000, now, 0.05));
     const sOn = on && bfx.shimOn;
+    if (sOn && !BM.shimVerb.buffer) { if (!shimIR) shimIR = normIR(hallIR(ctx.sampleRate, { hdecay: 0.6, hsize: 0.7, hdamp: 0.45, hwidth: 1, irMax: window.__nbMobile ? 4 : 0 })); BM.shimVerb.buffer = shimIR; }
     BM.shimSend.gain.setTargetAtTime(sOn ? 0.15 + (bfx.shim ?? 0.4) * 0.6 : 0, now, 0.05);
     BM.shimWet.gain.setTargetAtTime(sOn ? 0.3 + (bfx.shim ?? 0.4) * 0.9 : 0, now, 0.05);
     BM.shimFb.gain.setTargetAtTime(sOn ? (bfx.shimFb ?? 0.5) * 0.45 : 0, now, 0.05);
@@ -216,7 +218,7 @@
     save(); trkSave && trkSave();
     await new Promise(r => setTimeout(r, 450));   // let the debounced save land
     const ls = {};
-    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("nightbloom") && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") ls[k] = localStorage.getItem(k); }
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if ((k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k)) && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") ls[k] = localStorage.getItem(k); }
     return { v: 1, name, date: stamp(), ls, samples: await storeAll("samples"), tracks: await storeAll("tracks") };
   }
   async function projDB(mode) { const db = await idb(); return db.transaction("projects", mode).objectStore("projects"); }
@@ -243,7 +245,7 @@
       await new Promise(res => { const t = db.transaction(st, "readwrite"), s = t.objectStore(st); s.clear(); (p[st] || []).forEach(([k, v]) => s.put(v, k)); t.oncomplete = res; t.onerror = res; });
     }
     const drop = [];
-    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("nightbloom") && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") drop.push(k); }
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if ((k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k)) && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") drop.push(k); }
     drop.forEach(k => localStorage.removeItem(k));
     Object.entries(p.ls || {}).forEach(([k, v]) => localStorage.setItem(k, v));
     prInfo.textContent = "Loading \"" + p.name + "\"…";

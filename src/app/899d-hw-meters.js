@@ -24,3 +24,34 @@
     }
     setInterval(tick, 90);
   }
+  // ======================================================================
+  // 232: each sound's chip in Playing says what's set on it, in small badges: its keys (C2–D3), soft or hard notes
+  // only, its level when it isn't at 0 dB, and for a hardware synth where its sound comes from (direct monitoring, no
+  // input, its own sounds or Nate Bloom's).
+  // ======================================================================
+  {
+    const nn = m => ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"][m % 12] + (Math.floor(m / 12) - 1);
+    const J = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+    const tagOf = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    function badges() {
+      const row = document.getElementById("stkRow"); if (document.hidden || !row || row.offsetParent === null) return;
+      let its = []; try { its = window.__stk.items(); } catch (e) { return; }
+      const Z = J("nightbloom-zones"), V = J("nightbloom-velsplit");
+      const chips = [...row.querySelectorAll(".stk-chip[data-k]")];
+      its.forEach((it, i) => {
+        const c = chips[i]; if (!c) return;
+        const tag = tagOf(it), base = tag.replace(/#\d+$/, ""), B = [];
+        const z = Z[tag] || Z[base]; if (z) B.push(nn(z[0]) + "–" + nn(z[1]));
+        const v = V[tag] || V[base]; if (v) B.push(v[0] > 1 ? "hard only" : "soft only");
+        try { const lr = window.__stk.lv(it); if (lr) { const g = lr.get(); if (g > 0.001 && Math.abs(g - 0.8) > 0.02) { const db = 20 * Math.log10(g / 0.8); B.push((db > 0 ? "+" : "−") + Math.abs(db).toFixed(Math.abs(db) < 10 ? 1 : 0) + " dB"); } } } catch (e) {}
+        try { if (it.t === "hw" && window.__hw) { const H = window.__hw; if (H.direct) B.push("heard via interface"); else if (!H.ready()) B.push("no input"); } } catch (e) {}
+        try { if (it.t === "hwx" && window.__hwx) { const X = window.__hwx.get(it.id); if (X && !X.cfg.dev) B.push("own outputs"); if (X && X.id === "mf" && window.__mfMode) B.push(window.__mfMode() === "nb" ? "plays Nate Bloom" : "own sounds"); } } catch (e) {}
+        const txt = B.join(" · ");
+        let b = c.querySelector(".sc-bdg");
+        if (!txt) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement("small"); b.className = "sc-bdg"; const sp = c.querySelector(".sc-main span"); if (!sp) return; sp.appendChild(b); }
+        if (b.textContent !== txt) { b.textContent = txt; b.title = it.name + ": " + txt; }
+      });
+    }
+    setInterval(badges, 600);
+  }

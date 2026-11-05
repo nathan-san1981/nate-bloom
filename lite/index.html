@@ -3651,6 +3651,7 @@ body.es-on #epStrip { display: none; }
 .hw-led.own { background: #6fb6ff; box-shadow: 0 0 6px #6fb6ff; } .hw-led.sent { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 .hw-mtr { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: #2a2533; overflow: hidden; }
 .hw-mtr u { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7fd6c2, #e0a43a 75%, #e06b6b); text-decoration: none; }
+.stk-chip .sc-bdg { display: block; font: 600 0.62rem var(--font-mono); color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22ch; }
 </style>
 </head>
 <body class="lite">
@@ -11975,14 +11976,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       const shimSend = ctx.createGain(); shimSend.gain.value = 0;
       const ps = octaveUp(), shimVerb = ctx.createConvolver(), shimFb = ctx.createGain(), shimWet = ctx.createGain();
       shimFb.gain.value = 0; shimWet.gain.value = 0;
-      if (!shimIR) shimIR = normIR(hallIR(ctx.sampleRate, { hdecay: 0.6, hsize: 0.7, hdamp: 0.45, hwidth: 1, irMax: window.__nbMobile ? 4 : 0 }));
-      shimVerb.buffer = shimIR;
+      // (232) its reverb is made the first time shimmer is switched on (about 30 ms of work at every start, for an
+      // effect most sessions never use)
+      if (shimIR) shimVerb.buffer = shimIR;
       const shimHP = ctx.createBiquadFilter(); shimHP.type = "highpass"; shimHP.frequency.value = 300;
       B.betaOut.connect(shimSend).connect(ps.input); ps.output.connect(shimHP).connect(shimVerb);
       const shimLP = ctx.createBiquadFilter(); shimLP.type = "lowpass"; shimLP.frequency.value = 6000;
       const shimClip = ctx.createWaveShaper(); shimClip.curve = softClipCurve; shimClip.oversample = window.__nbMobile ? "none" : "2x";
       shimVerb.connect(shimWet).connect(fx.comp); shimVerb.connect(shimFb).connect(shimLP).connect(shimClip).connect(ps.input);
-      BM = { modFilter, modPan, modAmp, frzIn, frzWet, frzSum, fbs, lps, shimSend, shimFb, shimWet };
+      BM = { modFilter, modPan, modAmp, frzIn, frzWet, frzSum, fbs, lps, shimSend, shimFb, shimWet, shimVerb };
       applyFreeze(); motionApply();
     };
   }
@@ -11998,6 +12000,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     BM.frzWet.gain.setTargetAtTime(frozen ? 0.35 + (bfx.frzMix ?? 0.7) * 0.9 : 0, now, frozen ? 0.05 : 0.6);
     BM.lps.forEach(l => l.frequency.setTargetAtTime(800 + Math.pow(bfx.frzTone ?? 0.6, 2) * 12000, now, 0.05));
     const sOn = on && bfx.shimOn;
+    if (sOn && !BM.shimVerb.buffer) { if (!shimIR) shimIR = normIR(hallIR(ctx.sampleRate, { hdecay: 0.6, hsize: 0.7, hdamp: 0.45, hwidth: 1, irMax: window.__nbMobile ? 4 : 0 })); BM.shimVerb.buffer = shimIR; }
     BM.shimSend.gain.setTargetAtTime(sOn ? 0.15 + (bfx.shim ?? 0.4) * 0.6 : 0, now, 0.05);
     BM.shimWet.gain.setTargetAtTime(sOn ? 0.3 + (bfx.shim ?? 0.4) * 0.9 : 0, now, 0.05);
     BM.shimFb.gain.setTargetAtTime(sOn ? (bfx.shimFb ?? 0.5) * 0.45 : 0, now, 0.05);
@@ -12130,7 +12133,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
     save(); trkSave && trkSave();
     await new Promise(r => setTimeout(r, 450));   // let the debounced save land
     const ls = {};
-    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("nightbloom") && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") ls[k] = localStorage.getItem(k); }
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if ((k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k)) && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") ls[k] = localStorage.getItem(k); }
     return { v: 1, name, date: stamp(), ls, samples: await storeAll("samples"), tracks: await storeAll("tracks") };
   }
   async function projDB(mode) { const db = await idb(); return db.transaction("projects", mode).objectStore("projects"); }
@@ -12157,7 +12160,7 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
       await new Promise(res => { const t = db.transaction(st, "readwrite"), s = t.objectStore(st); s.clear(); (p[st] || []).forEach(([k, v]) => s.put(v, k)); t.oncomplete = res; t.onerror = res; });
     }
     const drop = [];
-    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith("nightbloom") && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") drop.push(k); }
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if ((k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k)) && !KEEP_KEYS.includes(k) && k !== "nightbloom-mysounds") drop.push(k); }
     drop.forEach(k => localStorage.removeItem(k));
     Object.entries(p.ls || {}).forEach(([k, v]) => localStorage.setItem(k, v));
     prInfo.textContent = "Loading \"" + p.name + "\"…";
@@ -16567,7 +16570,7 @@ onmessage = e => { const { L, R, s } = e.data; const out = stretch(L, R, s, p =>
       r.openSheets = [...document.querySelectorAll(".editor:not([hidden]), .dj:not([hidden]), .trk:not([hidden]), .browser:not([hidden])")].map(e => e.id || e.className);
       try { r.rc = window.__rcSnap ? window.__rcSnap() : null; } catch (e) { r.rc = "error " + e.message; }
       r.settings = {};
-      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith("nightbloom")) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
+      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!(k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k))) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
       (window.__nbReportExtras || []).forEach(f => { try { Object.assign(r, f()); } catch (e) { r.extrasError = String(e && e.message || e); } });
       r.log = (window.__nbLog || []).map(([t, k, d]) => (t / 1000).toFixed(2) + "s  " + k.padEnd(13) + " " + d);
       return r;
@@ -33488,7 +33491,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 232;
+    window.NB_BUILD = 233;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -33681,6 +33684,7 @@ registerProcessor("nb-rec", NBRec);`;
       const act = (t, s, run, k) => add("Actions", t, s, run, k);
       (window.__nbFindMore || []).forEach(f => { try { f(add); } catch (e) {} });   // (200) Favorites and the like
       act("Effects off / on", "every effect, Effects and FX Lab · the ` key", () => fxKeyToggle(), "fx lab");
+      act("Plugins", "your plugin instruments and effects: Controls, presets, the plugin store", () => { const b = document.getElementById("wamBtn"); if (b) b.click(); }, "vst clap lv2 plugin instruments effects controls window");
       act("Get free plugins", "open-source synths, samplers and effects for the Linux app", () => { try { document.getElementById("wamBtn").click(); setTimeout(() => { const h = [...document.querySelectorAll("#wamList *")].find(e => e.textContent === "Get free plugins"); if (h) h.scrollIntoView({ block: "start" }); }, 300); } catch (e) {} }, "plugins vst clap install download surge vital dexed reverb");
       act("Hardware synth (Minilogue)", "its sheet: Direct monitoring, pass-through, its effects, input and level", () => { try { window.__hw && window.__hw.open(); } catch (e) {} }, "minilogue microfreak direct monitoring pass-through hardware synth volt");
       act("Stop everything", "sequencer, Rhythm, DJ, Jam, pads, held notes", () => $id("stopAll").click(), "stop all panic silence");
@@ -33725,7 +33729,7 @@ registerProcessor("nb-rec", NBRec);`;
       set("help", "Keys and shortcuts", "every key", ".help-grid", "keyboard shortcuts");
       set("help", "Letters on the keys", "and the keyboard layout", "#kbdLabBtn", "musical typing two rows");
       set("help", "Report a problem", "a zip to send for a fix", "#reportBtn", "bug");
-      try { allEntries().forEach(e => { if (/^e:(samp|pads|drum)$/.test(e.id)) return; const cat = (LIB_CATS.find(c => c[0] === e.cat) || ["", ""])[1]; add("Sounds", e.name, (e.sub ? e.sub + " · " : "") + cat, () => { start(); chooseEntry(e); try { if (!lv.hidden) { lvPaintTop(); lvPaintKnobs(); } } catch (x) {} }, cat); }); } catch (e) {}
+      try { allEntries().forEach(e => { if (/^e:(samp|pads|drum)$/.test(e.id)) return; if (window.__nbIsOff && window.__nbIsOff(e.id)) return;   /* (232) what's set aside (Hidden, Classic) stays out, as in the panel's Find */ const cat = (LIB_CATS.find(c => c[0] === e.cat) || ["", ""])[1]; add("Sounds", e.name, (e.sub ? e.sub + " · " : "") + cat, () => { start(); chooseEntry(e); try { if (!lv.hidden) { lvPaintTop(); lvPaintKnobs(); } } catch (x) {} }, cat); }); } catch (e) {}
       try { SL.songs.forEach((S, i) => add("Songs", S.name, "set list · " + (S.bpm ? S.bpm + " bpm" : "") + (i === SL.cur ? " · playing now" : ""), () => { if (lv.hidden) lvOpen(); songGo(i); }, "song set list")); } catch (e) {}
       try { PSETS.forEach(([id]) => add("Pads", psetName(id), "pad set in Live", () => { setPset(id); if (lv.hidden) lvOpen(); }, "pads bank")); } catch (e) {}
       try { document.querySelectorAll("#helpSheet .help-list p").forEach(p => { if (p.hidden) return; const b = p.querySelector("b"); if (!b) return; const t = b.textContent.replace(/[:.]\s*$/, "").trim(); if (!t || t.length > 60) return; add("Help", t, (p.textContent || "").replace(b.textContent, "").trim().slice(0, 90), () => { suOpen("help", p); }, (p.textContent || "").slice(0, 400)); }); } catch (e) {}
@@ -38278,10 +38282,12 @@ registerProcessor("nb-aw", NBAwProc);
     }
     const OFF = k => !!(HID[k] || clsBuild()[k]);
     window.__nbIsClassic = id => !!clsBuild()[id];
+    window.__nbIsOff = id => OFF(id);
     const ESC = { on: false };
-    function esClassicView() {
+    const asideCount = () => { const c = es.querySelector(".es-hb"); if (c) c.textContent = "Set aside · " + (Object.keys(HID).length + Object.keys(clsBuild()).length); };
+    function esClassicView(T = es) {
       const C = clsBuild(), ks = Object.keys(C);
-      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length + " classic sounds · older copies, kept for old projects · tap to play"; es.appendChild(h);
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length + " classic sounds · older copies, kept for old projects · tap to play"; T.appendChild(h);
       const groups = [["Engines and presets", k => /^[en]:/.test(k)], ["Second library copies", k => /^w:\d/.test(k)], ["Other", k => !/^[en]:|^w:\d/.test(k)]];
       let all = []; try { all = allEntries(); } catch (e) {}
       groups.forEach(([title, f]) => {
@@ -38291,16 +38297,16 @@ registerProcessor("nb-aw", NBAwProc);
           const x = C[k], e = all.find(y => y.id === k), r = document.createElement("div"); r.className = "es-pr";
           r.appendChild(esRow("es-p", x.name, (x.sub ? x.sub + " · " : "") + x.why, state.cur && state.cur.id === k, () => { if (e) chooseEntry(e, !k.startsWith("w:wam:")); }));
           const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back in the lists and Find";
-          b.addEventListener("click", () => { CLK[k] = 1; clkSave(); clsSig = ""; r.remove(); const c = es.querySelector(".es-cb"); if (c) c.textContent = "Classic · " + Object.keys(clsBuild()).length; });
+          b.addEventListener("click", () => { CLK[k] = 1; clkSave(); clsSig = ""; r.remove(); asideCount(); });
           r.appendChild(b); d.appendChild(r);
         });
-        es.appendChild(d);
+        T.appendChild(d);
       });
-      if (Object.keys(CLK).length) { const rs = document.createElement("button"); rs.className = "es-more"; rs.textContent = "Send the ones I brought back to Classic again"; rs.addEventListener("click", () => { CLK = {}; clkSave(); clsSig = ""; esPaint(true, true); }); es.appendChild(rs); }
+      if (Object.keys(CLK).length) { const rs = document.createElement("button"); rs.className = "es-more"; rs.textContent = "Send the ones I brought back to Classic again"; rs.addEventListener("click", () => { CLK = {}; clkSave(); clsSig = ""; esPaint(true, true); }); T.appendChild(rs); }
     }
     function esHideBtn(hk, name, sub, rowEl) {
       const h = document.createElement("button"); h.className = "es-hide"; h.textContent = "Hide"; h.title = "Hide " + name + " (it goes to the Hidden tab, not deleted)"; h.setAttribute("aria-label", h.title);
-      h.addEventListener("click", ev => { ev.stopPropagation(); HID[hk] = { name, sub: sub || "", t: Date.now() }; hidSave(); if (rowEl) rowEl.remove(); const c = es.querySelector(".es-hb"); if (c) c.textContent = "Hidden · " + Object.keys(HID).length; });
+      h.addEventListener("click", ev => { ev.stopPropagation(); HID[hk] = { name, sub: sub || "", t: Date.now() }; hidSave(); if (rowEl) rowEl.remove(); asideCount(); });
       return h;
     }
     function esRow(cls, name, sub, on, onClick, extra) {
@@ -38560,15 +38566,13 @@ registerProcessor("nb-aw", NBAwProc);
       const fb = document.createElement("button"); fb.className = "es-fb" + (ESF.on ? " on" : ""); fb.textContent = "Find"; fb.title = "Find a sound by its name or what it is (dark, 80s, bass, FM…)"; fb.setAttribute("aria-pressed", String(ESF.on));
       fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
       head.appendChild(fb);
-      const nh = Object.keys(HID).length, hb = document.createElement("button"); hb.className = "es-fb es-hb" + (ESH.on ? " on" : ""); hb.textContent = "Hidden · " + nh; hb.title = "What you've hidden: bring any of it back"; hb.setAttribute("aria-pressed", String(ESH.on));
-      hb.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) { ESF.on = false; ESC.on = false; } es.scrollTop = 0; esPaint(true, true); });
-      head.appendChild(hb);
-      { const nc = Object.keys(clsBuild()).length, cb = document.createElement("button"); cb.className = "es-fb es-cb" + (ESC.on ? " on" : ""); cb.textContent = "Classic · " + nc; cb.title = "Older copies of sounds that have a newer one: kept, not in the lists"; cb.setAttribute("aria-pressed", String(ESC.on));
-        cb.addEventListener("click", () => { ESC.on = !ESC.on; if (ESC.on) { ESF.on = false; ESH.on = false; } es.scrollTop = 0; esPaint(true, true); }); head.appendChild(cb); }
+      // (232) one place for what's set aside: Hidden, Classic and the key splits, each a drop-down
+      { const nh = Object.keys(HID).length, nc = Object.keys(clsBuild()).length, ab = document.createElement("button"); ab.className = "es-fb es-hb es-cb" + (ESH.on ? " on" : ""); ab.textContent = "Set aside · " + (nh + nc);
+        ab.title = "What's out of the lists: what you hid, the classic copies, the key splits"; ab.setAttribute("aria-pressed", String(ESH.on));
+        ab.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) ESF.on = false; es.scrollTop = 0; esPaint(true, true); }); head.appendChild(ab); }
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
-      if (ESH.on) { esHiddenView(); return; }
-      if (ESC.on) { esClassicView(); return; }
+      if (ESH.on) { esAsideView(); return; }
       if (ESF.on && esMode !== "fx") {
         const row = document.createElement("div"); row.className = "es-find";
         const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
@@ -38601,15 +38605,28 @@ registerProcessor("nb-aw", NBAwProc);
       es.scrollTop = st;
       if (force && curEng && !noScroll) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
     }
-    function esHiddenView() {
+    function esAsideView() {
+      const sec = (title, open, fill) => { const d = document.createElement("details"); d.className = "es-cls"; d.open = open; const sm = document.createElement("summary"); sm.textContent = title; d.appendChild(sm); const box = document.createElement("div"); d.appendChild(box); fill(box); es.appendChild(d); };
+      const nh = Object.keys(HID).length, nc = Object.keys(clsBuild()).length;
+      let Z = {}, V = {}; try { Z = JSON.parse(localStorage.getItem("nightbloom-zones") || "{}") || {}; V = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; } catch (e) {}
+      const nz = Object.keys(Z).length + Object.keys(V).length;
+      sec("Hidden · " + nh, nh > 0 && nh < 12, box => esHiddenView(box));
+      sec("Classic · " + nc, false, box => esClassicView(box));
+      sec("Key splits · " + nz, nz > 0, box => {
+        const p = document.createElement("p"); p.className = "es-none"; p.textContent = nz ? "Sounds on part of the keys or soft/hard only. Split keys (on the Playing row) changes them." : "No splits: every sound plays on every key."; box.appendChild(p);
+        if (nz) { const b = document.createElement("button"); b.className = "es-more"; b.textContent = "✕ Clear every split"; b.addEventListener("click", () => { try { window.__kz.clear(); } catch (e) {} esPaint(true, true); }); box.appendChild(b);
+          const o = document.createElement("button"); o.className = "es-more"; o.textContent = "Open Split keys"; o.addEventListener("click", () => { try { window.__kz.open(); } catch (e) {} }); box.appendChild(o); }
+      });
+    }
+    function esHiddenView(T = es) {
       const ks = Object.keys(HID).sort((a, b) => (HID[b].t || 0) - (HID[a].t || 0));
-      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length ? ks.length + " hidden · they never show while you scroll or in Find" : "Nothing hidden. Hide is on each sound, engine and plugin."; es.appendChild(h);
-      if (ks.length > 1) { const all = document.createElement("button"); all.className = "es-more"; all.textContent = "Bring them all back"; all.addEventListener("click", () => { HID = {}; hidSave(); ESH.on = false; esPaint(true, true); }); es.appendChild(all); }
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length ? ks.length + " hidden · they never show while you scroll or in Find" : "Nothing hidden. Hide is on each sound, engine and plugin."; T.appendChild(h);
+      if (ks.length > 1) { const all = document.createElement("button"); all.className = "es-more"; all.textContent = "Bring them all back"; all.addEventListener("click", () => { HID = {}; hidSave(); ESH.on = false; esPaint(true, true); }); T.appendChild(all); }
       ks.forEach(k => {
         const x = HID[k], r = document.createElement("div"); r.className = "es-pr";
         r.appendChild(esRow("es-p", x.name, (x.sub || "") + (k.startsWith("e:") ? " · the engine and its sounds" : k.startsWith("w:") ? " · the plugin and its presets" : ""), false, () => {}));
-        const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back where it was"; b.addEventListener("click", () => { delete HID[k]; hidSave(); r.remove(); const c = es.querySelector(".es-hb"); if (c) c.textContent = "Hidden · " + Object.keys(HID).length; });
-        r.appendChild(b); es.appendChild(r);
+        const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back where it was"; b.addEventListener("click", () => { delete HID[k]; hidSave(); r.remove(); asideCount(); });
+        r.appendChild(b); T.appendChild(r);
       });
     }
     // ---------- (220) Find: every sound by its exact name or its attributes. Each sound gets attributes from what it
@@ -38695,6 +38712,10 @@ registerProcessor("nb-aw", NBAwProc);
     setInterval(() => { if (!document.hidden) esPlace(); }, 500);
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
+    // (232) for the play-every-sound check (t/allsounds.py): pick any sound, play a note, read the output level
+    window.__nbTest = { entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
+      on: m => noteOn(m), off: m => noteOff(m), buf: null,
+      level() { if (!analyser) return -1; if (!this.buf || this.buf.length !== analyser.fftSize) this.buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(this.buf); let p = 0, s = 0; for (const x of this.buf) { const a = Math.abs(x); if (a > p) p = a; s += x * x; if (!Number.isFinite(x)) return NaN; } return [p, Math.sqrt(s / this.buf.length)]; } };
     window.__nbAll = () => ({ entries: allEntries(), nb: NB_PRESETS.map(p => [p[0], p[1]]), classic: (typeof CLASSIC_PRESETS !== 'undefined' ? CLASSIC_PRESETS : []).map(p => [p[0], p[1]]), engines: Object.keys(ENGINES).map(k => [k, ENGINES[k].name, ENGINES[k].after || '']) });   // (a look at every sound, for checks)
   }
 
@@ -39592,6 +39613,37 @@ registerProcessor("nb-aw", NBAwProc);
       });
     }
     setInterval(tick, 90);
+  }
+  // ======================================================================
+  // 232: each sound's chip in Playing says what's set on it, in small badges: its keys (C2–D3), soft or hard notes
+  // only, its level when it isn't at 0 dB, and for a hardware synth where its sound comes from (direct monitoring, no
+  // input, its own sounds or Nate Bloom's).
+  // ======================================================================
+  {
+    const nn = m => ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"][m % 12] + (Math.floor(m / 12) - 1);
+    const J = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+    const tagOf = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    function badges() {
+      const row = document.getElementById("stkRow"); if (document.hidden || !row || row.offsetParent === null) return;
+      let its = []; try { its = window.__stk.items(); } catch (e) { return; }
+      const Z = J("nightbloom-zones"), V = J("nightbloom-velsplit");
+      const chips = [...row.querySelectorAll(".stk-chip[data-k]")];
+      its.forEach((it, i) => {
+        const c = chips[i]; if (!c) return;
+        const tag = tagOf(it), base = tag.replace(/#\d+$/, ""), B = [];
+        const z = Z[tag] || Z[base]; if (z) B.push(nn(z[0]) + "–" + nn(z[1]));
+        const v = V[tag] || V[base]; if (v) B.push(v[0] > 1 ? "hard only" : "soft only");
+        try { const lr = window.__stk.lv(it); if (lr) { const g = lr.get(); if (g > 0.001 && Math.abs(g - 0.8) > 0.02) { const db = 20 * Math.log10(g / 0.8); B.push((db > 0 ? "+" : "−") + Math.abs(db).toFixed(Math.abs(db) < 10 ? 1 : 0) + " dB"); } } } catch (e) {}
+        try { if (it.t === "hw" && window.__hw) { const H = window.__hw; if (H.direct) B.push("heard via interface"); else if (!H.ready()) B.push("no input"); } } catch (e) {}
+        try { if (it.t === "hwx" && window.__hwx) { const X = window.__hwx.get(it.id); if (X && !X.cfg.dev) B.push("own outputs"); if (X && X.id === "mf" && window.__mfMode) B.push(window.__mfMode() === "nb" ? "plays Nate Bloom" : "own sounds"); } } catch (e) {}
+        const txt = B.join(" · ");
+        let b = c.querySelector(".sc-bdg");
+        if (!txt) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement("small"); b.className = "sc-bdg"; const sp = c.querySelector(".sc-main span"); if (!sp) return; sp.appendChild(b); }
+        if (b.textContent !== txt) { b.textContent = txt; b.title = it.name + ": " + txt; }
+      });
+    }
+    setInterval(badges, 600);
   }
   // ======================================================================
   // 232: less work while nothing happens. The channel list the KeyLab/MiniLab strip and the Mixer ask for (dozens of

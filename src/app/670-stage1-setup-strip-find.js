@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 232;
+    window.NB_BUILD = 233;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -200,6 +200,7 @@
       const act = (t, s, run, k) => add("Actions", t, s, run, k);
       (window.__nbFindMore || []).forEach(f => { try { f(add); } catch (e) {} });   // (200) Favorites and the like
       act("Effects off / on", "every effect, Effects and FX Lab · the ` key", () => fxKeyToggle(), "fx lab");
+      act("Plugins", "your plugin instruments and effects: Controls, presets, the plugin store", () => { const b = document.getElementById("wamBtn"); if (b) b.click(); }, "vst clap lv2 plugin instruments effects controls window");
       act("Get free plugins", "open-source synths, samplers and effects for the Linux app", () => { try { document.getElementById("wamBtn").click(); setTimeout(() => { const h = [...document.querySelectorAll("#wamList *")].find(e => e.textContent === "Get free plugins"); if (h) h.scrollIntoView({ block: "start" }); }, 300); } catch (e) {} }, "plugins vst clap install download surge vital dexed reverb");
       act("Hardware synth (Minilogue)", "its sheet: Direct monitoring, pass-through, its effects, input and level", () => { try { window.__hw && window.__hw.open(); } catch (e) {} }, "minilogue microfreak direct monitoring pass-through hardware synth volt");
       act("Stop everything", "sequencer, Rhythm, DJ, Jam, pads, held notes", () => $id("stopAll").click(), "stop all panic silence");
@@ -244,7 +245,7 @@
       set("help", "Keys and shortcuts", "every key", ".help-grid", "keyboard shortcuts");
       set("help", "Letters on the keys", "and the keyboard layout", "#kbdLabBtn", "musical typing two rows");
       set("help", "Report a problem", "a zip to send for a fix", "#reportBtn", "bug");
-      try { allEntries().forEach(e => { if (/^e:(samp|pads|drum)$/.test(e.id)) return; const cat = (LIB_CATS.find(c => c[0] === e.cat) || ["", ""])[1]; add("Sounds", e.name, (e.sub ? e.sub + " · " : "") + cat, () => { start(); chooseEntry(e); try { if (!lv.hidden) { lvPaintTop(); lvPaintKnobs(); } } catch (x) {} }, cat); }); } catch (e) {}
+      try { allEntries().forEach(e => { if (/^e:(samp|pads|drum)$/.test(e.id)) return; if (window.__nbIsOff && window.__nbIsOff(e.id)) return;   /* (232) what's set aside (Hidden, Classic) stays out, as in the panel's Find */ const cat = (LIB_CATS.find(c => c[0] === e.cat) || ["", ""])[1]; add("Sounds", e.name, (e.sub ? e.sub + " · " : "") + cat, () => { start(); chooseEntry(e); try { if (!lv.hidden) { lvPaintTop(); lvPaintKnobs(); } } catch (x) {} }, cat); }); } catch (e) {}
       try { SL.songs.forEach((S, i) => add("Songs", S.name, "set list · " + (S.bpm ? S.bpm + " bpm" : "") + (i === SL.cur ? " · playing now" : ""), () => { if (lv.hidden) lvOpen(); songGo(i); }, "song set list")); } catch (e) {}
       try { PSETS.forEach(([id]) => add("Pads", psetName(id), "pad set in Live", () => { setPset(id); if (lv.hidden) lvOpen(); }, "pads bank")); } catch (e) {}
       try { document.querySelectorAll("#helpSheet .help-list p").forEach(p => { if (p.hidden) return; const b = p.querySelector("b"); if (!b) return; const t = b.textContent.replace(/[:.]\s*$/, "").trim(); if (!t || t.length > 60) return; add("Help", t, (p.textContent || "").replace(b.textContent, "").trim().slice(0, 90), () => { suOpen("help", p); }, (p.textContent || "").slice(0, 400)); }); } catch (e) {}

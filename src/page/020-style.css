@@ -3627,3 +3627,4 @@ body.es-on #epStrip { display: none; }
 .hw-led.own { background: #6fb6ff; box-shadow: 0 0 6px #6fb6ff; } .hw-led.sent { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 .hw-mtr { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: #2a2533; overflow: hidden; }
 .hw-mtr u { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7fd6c2, #e0a43a 75%, #e06b6b); text-decoration: none; }
+.stk-chip .sc-bdg { display: block; font: 600 0.62rem var(--font-mono); color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22ch; }

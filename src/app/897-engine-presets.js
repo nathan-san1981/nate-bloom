@@ -146,10 +146,12 @@
     }
     const OFF = k => !!(HID[k] || clsBuild()[k]);
     window.__nbIsClassic = id => !!clsBuild()[id];
+    window.__nbIsOff = id => OFF(id);
     const ESC = { on: false };
-    function esClassicView() {
+    const asideCount = () => { const c = es.querySelector(".es-hb"); if (c) c.textContent = "Set aside · " + (Object.keys(HID).length + Object.keys(clsBuild()).length); };
+    function esClassicView(T = es) {
       const C = clsBuild(), ks = Object.keys(C);
-      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length + " classic sounds · older copies, kept for old projects · tap to play"; es.appendChild(h);
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length + " classic sounds · older copies, kept for old projects · tap to play"; T.appendChild(h);
       const groups = [["Engines and presets", k => /^[en]:/.test(k)], ["Second library copies", k => /^w:\d/.test(k)], ["Other", k => !/^[en]:|^w:\d/.test(k)]];
       let all = []; try { all = allEntries(); } catch (e) {}
       groups.forEach(([title, f]) => {
@@ -159,16 +161,16 @@
           const x = C[k], e = all.find(y => y.id === k), r = document.createElement("div"); r.className = "es-pr";
           r.appendChild(esRow("es-p", x.name, (x.sub ? x.sub + " · " : "") + x.why, state.cur && state.cur.id === k, () => { if (e) chooseEntry(e, !k.startsWith("w:wam:")); }));
           const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back in the lists and Find";
-          b.addEventListener("click", () => { CLK[k] = 1; clkSave(); clsSig = ""; r.remove(); const c = es.querySelector(".es-cb"); if (c) c.textContent = "Classic · " + Object.keys(clsBuild()).length; });
+          b.addEventListener("click", () => { CLK[k] = 1; clkSave(); clsSig = ""; r.remove(); asideCount(); });
           r.appendChild(b); d.appendChild(r);
         });
-        es.appendChild(d);
+        T.appendChild(d);
       });
-      if (Object.keys(CLK).length) { const rs = document.createElement("button"); rs.className = "es-more"; rs.textContent = "Send the ones I brought back to Classic again"; rs.addEventListener("click", () => { CLK = {}; clkSave(); clsSig = ""; esPaint(true, true); }); es.appendChild(rs); }
+      if (Object.keys(CLK).length) { const rs = document.createElement("button"); rs.className = "es-more"; rs.textContent = "Send the ones I brought back to Classic again"; rs.addEventListener("click", () => { CLK = {}; clkSave(); clsSig = ""; esPaint(true, true); }); T.appendChild(rs); }
     }
     function esHideBtn(hk, name, sub, rowEl) {
       const h = document.createElement("button"); h.className = "es-hide"; h.textContent = "Hide"; h.title = "Hide " + name + " (it goes to the Hidden tab, not deleted)"; h.setAttribute("aria-label", h.title);
-      h.addEventListener("click", ev => { ev.stopPropagation(); HID[hk] = { name, sub: sub || "", t: Date.now() }; hidSave(); if (rowEl) rowEl.remove(); const c = es.querySelector(".es-hb"); if (c) c.textContent = "Hidden · " + Object.keys(HID).length; });
+      h.addEventListener("click", ev => { ev.stopPropagation(); HID[hk] = { name, sub: sub || "", t: Date.now() }; hidSave(); if (rowEl) rowEl.remove(); asideCount(); });
       return h;
     }
     function esRow(cls, name, sub, on, onClick, extra) {
@@ -428,15 +430,13 @@
       const fb = document.createElement("button"); fb.className = "es-fb" + (ESF.on ? " on" : ""); fb.textContent = "Find"; fb.title = "Find a sound by its name or what it is (dark, 80s, bass, FM…)"; fb.setAttribute("aria-pressed", String(ESF.on));
       fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
       head.appendChild(fb);
-      const nh = Object.keys(HID).length, hb = document.createElement("button"); hb.className = "es-fb es-hb" + (ESH.on ? " on" : ""); hb.textContent = "Hidden · " + nh; hb.title = "What you've hidden: bring any of it back"; hb.setAttribute("aria-pressed", String(ESH.on));
-      hb.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) { ESF.on = false; ESC.on = false; } es.scrollTop = 0; esPaint(true, true); });
-      head.appendChild(hb);
-      { const nc = Object.keys(clsBuild()).length, cb = document.createElement("button"); cb.className = "es-fb es-cb" + (ESC.on ? " on" : ""); cb.textContent = "Classic · " + nc; cb.title = "Older copies of sounds that have a newer one: kept, not in the lists"; cb.setAttribute("aria-pressed", String(ESC.on));
-        cb.addEventListener("click", () => { ESC.on = !ESC.on; if (ESC.on) { ESF.on = false; ESH.on = false; } es.scrollTop = 0; esPaint(true, true); }); head.appendChild(cb); }
+      // (232) one place for what's set aside: Hidden, Classic and the key splits, each a drop-down
+      { const nh = Object.keys(HID).length, nc = Object.keys(clsBuild()).length, ab = document.createElement("button"); ab.className = "es-fb es-hb es-cb" + (ESH.on ? " on" : ""); ab.textContent = "Set aside · " + (nh + nc);
+        ab.title = "What's out of the lists: what you hid, the classic copies, the key splits"; ab.setAttribute("aria-pressed", String(ESH.on));
+        ab.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) ESF.on = false; es.scrollTop = 0; esPaint(true, true); }); head.appendChild(ab); }
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
-      if (ESH.on) { esHiddenView(); return; }
-      if (ESC.on) { esClassicView(); return; }
+      if (ESH.on) { esAsideView(); return; }
       if (ESF.on && esMode !== "fx") {
         const row = document.createElement("div"); row.className = "es-find";
         const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
@@ -469,15 +469,28 @@
       es.scrollTop = st;
       if (force && curEng && !noScroll) { const pw = es.querySelector(".es-e.playing .es-p.on") || es.querySelector(".es-e.playing"); if (pw) { const r = pw.getBoundingClientRect(), er = es.getBoundingClientRect(); if (r.top < er.top || r.bottom > er.bottom) pw.scrollIntoView({ block: "center" }); } }
     }
-    function esHiddenView() {
+    function esAsideView() {
+      const sec = (title, open, fill) => { const d = document.createElement("details"); d.className = "es-cls"; d.open = open; const sm = document.createElement("summary"); sm.textContent = title; d.appendChild(sm); const box = document.createElement("div"); d.appendChild(box); fill(box); es.appendChild(d); };
+      const nh = Object.keys(HID).length, nc = Object.keys(clsBuild()).length;
+      let Z = {}, V = {}; try { Z = JSON.parse(localStorage.getItem("nightbloom-zones") || "{}") || {}; V = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; } catch (e) {}
+      const nz = Object.keys(Z).length + Object.keys(V).length;
+      sec("Hidden · " + nh, nh > 0 && nh < 12, box => esHiddenView(box));
+      sec("Classic · " + nc, false, box => esClassicView(box));
+      sec("Key splits · " + nz, nz > 0, box => {
+        const p = document.createElement("p"); p.className = "es-none"; p.textContent = nz ? "Sounds on part of the keys or soft/hard only. Split keys (on the Playing row) changes them." : "No splits: every sound plays on every key."; box.appendChild(p);
+        if (nz) { const b = document.createElement("button"); b.className = "es-more"; b.textContent = "✕ Clear every split"; b.addEventListener("click", () => { try { window.__kz.clear(); } catch (e) {} esPaint(true, true); }); box.appendChild(b);
+          const o = document.createElement("button"); o.className = "es-more"; o.textContent = "Open Split keys"; o.addEventListener("click", () => { try { window.__kz.open(); } catch (e) {} }); box.appendChild(o); }
+      });
+    }
+    function esHiddenView(T = es) {
       const ks = Object.keys(HID).sort((a, b) => (HID[b].t || 0) - (HID[a].t || 0));
-      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length ? ks.length + " hidden · they never show while you scroll or in Find" : "Nothing hidden. Hide is on each sound, engine and plugin."; es.appendChild(h);
-      if (ks.length > 1) { const all = document.createElement("button"); all.className = "es-more"; all.textContent = "Bring them all back"; all.addEventListener("click", () => { HID = {}; hidSave(); ESH.on = false; esPaint(true, true); }); es.appendChild(all); }
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length ? ks.length + " hidden · they never show while you scroll or in Find" : "Nothing hidden. Hide is on each sound, engine and plugin."; T.appendChild(h);
+      if (ks.length > 1) { const all = document.createElement("button"); all.className = "es-more"; all.textContent = "Bring them all back"; all.addEventListener("click", () => { HID = {}; hidSave(); ESH.on = false; esPaint(true, true); }); T.appendChild(all); }
       ks.forEach(k => {
         const x = HID[k], r = document.createElement("div"); r.className = "es-pr";
         r.appendChild(esRow("es-p", x.name, (x.sub || "") + (k.startsWith("e:") ? " · the engine and its sounds" : k.startsWith("w:") ? " · the plugin and its presets" : ""), false, () => {}));
-        const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back where it was"; b.addEventListener("click", () => { delete HID[k]; hidSave(); r.remove(); const c = es.querySelector(".es-hb"); if (c) c.textContent = "Hidden · " + Object.keys(HID).length; });
-        r.appendChild(b); es.appendChild(r);
+        const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back where it was"; b.addEventListener("click", () => { delete HID[k]; hidSave(); r.remove(); asideCount(); });
+        r.appendChild(b); T.appendChild(r);
       });
     }
     // ---------- (220) Find: every sound by its exact name or its attributes. Each sound gets attributes from what it
@@ -563,6 +576,10 @@
     setInterval(() => { if (!document.hidden) esPlace(); }, 500);
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
+    // (232) for the play-every-sound check (t/allsounds.py): pick any sound, play a note, read the output level
+    window.__nbTest = { entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
+      on: m => noteOn(m), off: m => noteOff(m), buf: null,
+      level() { if (!analyser) return -1; if (!this.buf || this.buf.length !== analyser.fftSize) this.buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(this.buf); let p = 0, s = 0; for (const x of this.buf) { const a = Math.abs(x); if (a > p) p = a; s += x * x; if (!Number.isFinite(x)) return NaN; } return [p, Math.sqrt(s / this.buf.length)]; } };
     window.__nbAll = () => ({ entries: allEntries(), nb: NB_PRESETS.map(p => [p[0], p[1]]), classic: (typeof CLASSIC_PRESETS !== 'undefined' ? CLASSIC_PRESETS : []).map(p => [p[0], p[1]]), engines: Object.keys(ENGINES).map(k => [k, ENGINES[k].name, ENGINES[k].after || '']) });   // (a look at every sound, for checks)
   }
 

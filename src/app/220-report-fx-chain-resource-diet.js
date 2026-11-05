@@ -75,7 +75,7 @@
       r.openSheets = [...document.querySelectorAll(".editor:not([hidden]), .dj:not([hidden]), .trk:not([hidden]), .browser:not([hidden])")].map(e => e.id || e.className);
       try { r.rc = window.__rcSnap ? window.__rcSnap() : null; } catch (e) { r.rc = "error " + e.message; }
       r.settings = {};
-      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!k.startsWith("nightbloom")) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
+      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!(k.startsWith("nightbloom") || /^nb-(perms|shell|build-tab)$/.test(k))) continue; let v = localStorage.getItem(k); if (v.length > 20000) v = v.slice(0, 20000) + "…(" + v.length + " chars)"; try { r.settings[k] = JSON.parse(v); } catch (e) { r.settings[k] = v; } } } catch (e) {}
       (window.__nbReportExtras || []).forEach(f => { try { Object.assign(r, f()); } catch (e) { r.extrasError = String(e && e.message || e); } });
       r.log = (window.__nbLog || []).map(([t, k, d]) => (t / 1000).toFixed(2) + "s  " + k.padEnd(13) + " " + d);
       return r;
