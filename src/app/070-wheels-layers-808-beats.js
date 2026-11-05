@@ -8,15 +8,18 @@
   // every oscillator or sample that a played note creates follows the wheels
   // (138: plugged in only while a wheel is away from rest; plugged in, every oscillator works out its pitch sample by sample)
   const pmLive = new Set(); let pmOn = false, pmOffT = 0;
-  function pitchConnect(node) {
+  // (240) samples have their own bend range, and the mod wheel can speed them up instead of adding vibrato: a sample's
+  // sources follow a second bus that carries the bend only, at the sampler's range
+  let sampBendSt = 12, sampBendOnly = () => true, pmSamp = 0;
+  function pitchConnect(node, bendOnly) {
     if (!pmNodes || !node.detune) return;
-    const bus = pmNodes.bus; pmLive.add(node);
+    const bus = bendOnly ? pmNodes.bus2 : pmNodes.bus; node.__bus = bus; pmLive.add(node);
     try { node.addEventListener("ended", () => { pmLive.delete(node); if (node.__pm) { node.__pm = false; try { bus.disconnect(node.detune); } catch (e) {} } }); } catch (e) {}
     if (pmOn) { try { bus.connect(node.detune); node.__pm = true; } catch (e) {} }
   }
   function pmPlug(on) {
     if (!pmNodes || on === pmOn) return; pmOn = on;
-    for (const n of pmLive) { try { if (on && !n.__pm) { pmNodes.bus.connect(n.detune); n.__pm = true; } else if (!on && n.__pm) { pmNodes.bus.disconnect(n.detune); n.__pm = false; } } catch (e) {} }
+    for (const n of pmLive) { const b = n.__bus || pmNodes.bus; try { if (on && !n.__pm) { b.connect(n.detune); n.__pm = true; } else if (!on && n.__pm) { b.disconnect(n.detune); n.__pm = false; } } catch (e) {} }
   }
   function setupPitchMod() {
     if (pmNodes || !ctx) return;
@@ -26,13 +29,14 @@
     else { one = ctx.createBufferSource(); const b = ctx.createBuffer(1, 128, ctx.sampleRate); b.getChannelData(0).fill(1); one.buffer = b; one.loop = true; }
     const bend = ctx.createGain(); bend.gain.value = 0;
     one.connect(bend).connect(bus); one.start();
+    const bus2 = ctx.createGain(), bend2 = ctx.createGain(); bend2.gain.value = 0; one.connect(bend2).connect(bus2);
     const lfo = ctx.createOscillator(); lfo.frequency.value = 5.6;
     const vib = ctx.createGain(); vib.gain.value = 0;
     lfo.connect(vib).connect(bus); lfo.start();
-    pmNodes = { bus, bend, vib };
+    pmNodes = { bus, bend, vib, bus2, bend2 };
     const co = ctx.createOscillator.bind(ctx), cb = ctx.createBufferSource.bind(ctx);
     ctx.createOscillator = function () { const o = co(); if (modDepth > 0) { try { o.detune.automationRate = "k-rate"; } catch (e) {} pitchConnect(o); } return o; };   // (138: tuning once per block)
-    ctx.createBufferSource = function () { const s = cb(); if (modDepth > 0) pitchConnect(s); return s; };
+    ctx.createBufferSource = function () { const s = cb(); if (modDepth > 0) pitchConnect(s, pmSamp > 0 && sampBendOnly()); return s; };
     if (window.__nbMobile) { const cf = ctx.createBiquadFilter.bind(ctx); ctx.createBiquadFilter = function () { const f = cf(); if (modDepth > 0) { try { f.frequency.automationRate = "k-rate"; f.detune.automationRate = "k-rate"; f.Q.automationRate = "k-rate"; } catch (e) {} } return f; }; }
     applyPitch();
   }
@@ -40,6 +44,7 @@
     if (!pmNodes) return;
     const t = ctx.currentTime;
     pmNodes.bend.gain.setTargetAtTime(pm.bend * pm.range * 100, t, 0.008);
+    pmNodes.bend2.gain.setTargetAtTime(pm.bend * sampBendSt * 100, t, 0.008);
     pmNodes.vib.gain.setTargetAtTime(pm.mod * pm.mod * 55, t, 0.04);
     const away = Math.abs(pm.bend) > 0.002 || pm.mod > 0.002;
     if (away) { clearTimeout(pmOffT); pmOffT = 0; pmPlug(true); }
@@ -48,6 +53,7 @@
   const wrapMod = fn => function () { modDepth++; try { return fn.apply(this, arguments); } finally { modDepth--; } };
   makeVoice = wrapMod(makeVoice);
   makeSampleVoice = wrapMod(makeSampleVoice);
+  { const ms = makeSampleVoice; makeSampleVoice = function () { pmSamp++; try { return ms.apply(this, arguments); } finally { pmSamp--; } }; }
   makeInstVoice = wrapMod(makeInstVoice);
   {
     const origBuild = buildAudio;

@@ -3640,3 +3640,16 @@ body.es-on #epStrip { display: none; }
 .kz-plays { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
 .kz-plays .kz-pl { font-weight: 600; }
 .kz-note { text-align: left; }
+/* (240) Play it live: the sampler's speed, bend and wheels */
+.sp-box { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 6px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, currentColor 5%, transparent); }
+.sp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.sp-grp { display: inline-flex; align-items: center; gap: 6px; }
+.sp-grp input[type=range] { width: 180px; }
+.sp-v { min-width: 3.6em; font-variant-numeric: tabular-nums; }
+.sp-live { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 26px; }
+.sp-chip { padding: 3px 9px; border-radius: 999px; font-size: 12px; background: color-mix(in srgb, currentColor 8%, transparent); opacity: .65; font-variant-numeric: tabular-nums; }
+.sp-chip.on { opacity: 1; background: color-mix(in srgb, #c9a6ff 35%, transparent); }
+.sp-live small { opacity: .7; }
+.sp-help { font-size: 12px; opacity: .75; line-height: 1.45; }
+#spLearn.on { outline: 2px solid #ffb65c; }
+@media (max-width: 640px) { .sp-grp input[type=range] { width: 120px; } }

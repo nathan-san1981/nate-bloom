@@ -84,6 +84,11 @@
   // One voice of the sampler: plain playback, or a cloud of short grains (or the Elephant, 770, which plays the sample under its shape)
   const recentGrains = [];
   let eleVoiceHook = null;
+  // (240) playing samples live: a speed the wheels, the joystick and the Samples screen set. Tape: speed and pitch move
+  // together, like a record; Keep pitch: the sample plays through grains, so speed and pitch are separate
+  let sampSpeed = () => 1, sampKeep = () => false;
+  const SAMP_LIVE = new Set();
+  function sampSpeedApply() { if (!ctx) return; const t = ctx.currentTime, k = Math.max(0.05, sampSpeed()); SAMP_LIVE.forEach(L => { try { L.src.playbackRate.setTargetAtTime(L.base * k, t, 0.03); } catch (e) {} }); }
   function makeSampleVoice(midi, i, when, scale = 1) {
     const buf = sampBuf[i]; if (!buf || !ctx) return null;
     const slot = state.samp.slots[i], P = slot.p, mode = slot.mode;
@@ -93,7 +98,8 @@
     const lvl = ctx.createGain(); lvl.gain.value = P.level * 1.4 * scale;
     out.connect(lvl).connect(fx.input);
 
-    if (mode === "play" || mode === "slice") {
+    const stretch = mode === "play" && sampKeep();
+    if ((mode === "play" && !stretch) || mode === "slice") {
       const tone = ctx.createBiquadFilter(); tone.type = "lowpass"; tone.frequency.value = expMap(P.tone, 250, 20000);
       tone.connect(out);
       const src = ctx.createBufferSource(); src.buffer = buf;
@@ -108,6 +114,7 @@
         src.playbackRate.value = rate;
         off = P.start * dur * 0.98; playLen = Math.max(0.02, P.length * (dur - off));
       }
+      { const L = { src, base: src.playbackRate.value }; src.playbackRate.value = L.base * Math.max(0.05, sampSpeed()); SAMP_LIVE.add(L); src.addEventListener("ended", () => SAMP_LIVE.delete(L)); }
       src.connect(tone);
       if (mode === "play" && slot.loop) { src.loop = true; src.loopStart = off; src.loopEnd = off + playLen; src.start(t, off); } else src.start(t, off, playLen);
       out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 0.004);
@@ -124,27 +131,30 @@
       };
     }
 
-    // granular
-    out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + 0.06);
+    // granular (240: and Play with Keep pitch, as grains that walk through the sample at the speed set)
+    out.gain.setValueAtTime(0.0001, t); out.gain.linearRampToValueAtTime(1, t + (stretch ? 0.005 : 0.06));
     let nextGrain = t, endAt = Infinity, scanOff = 0;
+    const off0 = P.start * dur * 0.98, len0 = Math.max(0.02, P.length * (dur - off0));
+    let dest = out; if (stretch) { const tn = ctx.createBiquadFilter(); tn.type = "lowpass"; tn.frequency.value = expMap(P.tone, 250, 20000); tn.connect(out); dest = tn; }
+    let ret = null, ended = false;
     const hasPanner = typeof ctx.createStereoPanner === "function";
     function grain(gt) {
-      const size = expMap(P.size, 0.02, 0.5), dens = expMap(P.density, 4, 60);
+      const size = stretch ? 0.085 : expMap(P.size, 0.02, 0.5), dens = stretch ? 26 : expMap(P.density, 4, 60);
       const overlap = Math.max(1, size * dens);
-      const center = (P.pos * dur + scanOff) % dur;
-      let off = center + (Math.random() - 0.5) * P.spray * dur * 0.4;
+      const center = stretch ? off0 + scanOff : (P.pos * dur + scanOff) % dur;
+      let off = center + (Math.random() - 0.5) * (stretch ? 0.002 : P.spray * dur * 0.4);
       const span = size * rate;
       off = Math.min(Math.max(0, off), Math.max(0, dur - span - 0.001));
       const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
-      if (more2Ready) pitchConnect(src);
+      if (more2Ready) pitchConnect(src, sampBendOnly());
       const g = ctx.createGain();
       g.gain.setValueAtTime(0, gt);
       g.gain.linearRampToValueAtTime(0.75 / Math.sqrt(overlap), gt + size * 0.5);
       g.gain.linearRampToValueAtTime(0, gt + size);
-      if (hasPanner) {
+      if (hasPanner && !stretch) {
         const pan = ctx.createStereoPanner(); pan.pan.value = (Math.random() - 0.5) * (0.3 + P.spray);
-        src.connect(g).connect(pan).connect(out);
-      } else src.connect(g).connect(out);
+        src.connect(g).connect(pan).connect(dest);
+      } else src.connect(g).connect(dest);
       src.start(gt, off, span); src.stop(gt + size + 0.02);
       recentGrains.push({ slot: i, x: off / dur, t: gt });
       if (recentGrains.length > 120) recentGrains.splice(0, 40);
@@ -156,17 +166,19 @@
       if (nextGrain < ctx.currentTime - 0.05) { nextGrain = lastScan = ctx.currentTime + 0.01; }   // timers were paused: don't fire the missed grains in a burst
       while (nextGrain < horizon) {
         // scan sweeps the read position forward through the file, wrapping at the end
-        const speed = P.scan * P.scan * 1.5;
-        scanOff = (scanOff + (nextGrain - lastScan) * speed) % dur;
+        const k = Math.max(0, sampSpeed()), base = P.scan * P.scan * 1.5;
+        const speed = stretch ? k : (k === 1 ? base : base * k + (k > 1 ? (k - 1) * 0.6 : 0));   // (240: the wheels speed the scan up, or slow it to a stop)
+        scanOff = scanOff + (nextGrain - lastScan) * speed; if (!stretch) scanOff %= dur;
         lastScan = nextGrain;
+        if (stretch && scanOff >= len0) { if (slot.loop) scanOff -= len0; else { if (!ended && ret) { ended = true; ret.stop(nextGrain); } break; } }
         nextGrain += grain(nextGrain) * (0.7 + Math.random() * 0.6);
       }
     }, 20);
-    return {
+    return ret = {
       stop(at) {
         const now = ctx.currentTime;
         if (at == null) { at = now; out.gain.cancelScheduledValues(now); out.gain.setValueAtTime(Math.max(0.0001, out.gain.value), now); }
-        const rel = 0.5;
+        const rel = stretch ? Math.max(0.03, expMap(P.fade, 0.02, 3)) : 0.5;
         out.gain.setTargetAtTime(0.0001, at, rel / 4);
         endAt = at + rel;
         setTimeout(() => { clearInterval(timer); setTimeout(() => { out.disconnect(); lvl.disconnect(); }, 800); }, (endAt - now) * 1000 + 50);
