@@ -3,7 +3,7 @@
     // for what it does there. Drag a knob or fader in the strip to move it by touch, tap a pad to play it. Hold a
     // knob or fader (or ✎, then tap anything in the strip) to give it another job on this screen.
     // ======================================================================
-    ML.strip = window.NB_LITE ? "ml" : "always"; ML.stripPads = true; ML.padMap = []; ML.edit = false; ML.pick = null;
+    ML.strip = (window.NB_LITE || !window.NB_YOURS) ? "ml" : "always"; /* (235: others see it only with a MiniLab plugged in) */ ML.stripPads = true; ML.padMap = []; ML.edit = false; ML.pick = null;
     try { const o = JSON.parse(localStorage.getItem("nightbloom-minilab") || "{}"); if (["always", "ml", "off"].includes(o.strip)) ML.strip = o.strip; if (o.stripPads === false) ML.stripPads = false; } catch (e) {}
     try { const a = JSON.parse(localStorage.getItem("nightbloom-minilab-pads") || "[]"); if (Array.isArray(a)) ML.padMap = a.filter(m => m && m.pg && m.i >= 0 && m.i < 16 && m.t); } catch (e) {}
     const padSave = () => { try { localStorage.setItem("nightbloom-minilab-pads", JSON.stringify(ML.padMap)); } catch (e) {} };

@@ -30332,7 +30332,7 @@ z: [z]=Z
     // for what it does there. Drag a knob or fader in the strip to move it by touch, tap a pad to play it. Hold a
     // knob or fader (or ✎, then tap anything in the strip) to give it another job on this screen.
     // ======================================================================
-    ML.strip = window.NB_LITE ? "ml" : "always"; ML.stripPads = true; ML.padMap = []; ML.edit = false; ML.pick = null;
+    ML.strip = (window.NB_LITE || !window.NB_YOURS) ? "ml" : "always"; /* (235: others see it only with a MiniLab plugged in) */ ML.stripPads = true; ML.padMap = []; ML.edit = false; ML.pick = null;
     try { const o = JSON.parse(localStorage.getItem("nightbloom-minilab") || "{}"); if (["always", "ml", "off"].includes(o.strip)) ML.strip = o.strip; if (o.stripPads === false) ML.stripPads = false; } catch (e) {}
     try { const a = JSON.parse(localStorage.getItem("nightbloom-minilab-pads") || "[]"); if (Array.isArray(a)) ML.padMap = a.filter(m => m && m.pg && m.i >= 0 && m.i < 16 && m.t); } catch (e) {}
     const padSave = () => { try { localStorage.setItem("nightbloom-minilab-pads", JSON.stringify(ML.padMap)); } catch (e) {} };
@@ -33493,7 +33493,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 234;
+    window.NB_BUILD = 235;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
