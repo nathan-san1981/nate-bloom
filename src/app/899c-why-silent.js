@@ -44,6 +44,14 @@
       });
       // the MicroFreak set to its own sounds plays nothing in Nate Bloom
       try { const X = window.__hwx && window.__hwx.get("mf"); if (X && X.present() && window.__mfMode && window.__mfMode() === "own" && /micro\s*freak/i.test(MA.src) && performance.now() - MA.last < 15000) add(1, "You're playing the MicroFreak's keys, and it's set to its own sounds: Nate Bloom ignores its notes, and its USB carries no sound.", () => { try { X.open(); } catch (e) {} }, "Its settings"); } catch (e) {}
+      // (237) dropping out: other programs, and the bigger buffer in one tap (it needs a restart to take effect)
+      try { const C = window.__nbCpu, d10 = C ? C.drops.slice(-10).reduce((a, b) => a + b, 0) : 0, L = C && C.last;
+        if (L && !L.warming && L.computer >= 60) { const ours = (L.app || 0) / Math.max(1, L.cores); if (L.computer - ours >= 45) add(2, "Other programs are using " + Math.round(L.computer - ours) + "% of the computer" + ((L.others || []).length ? ": " + L.others.map(o => o.name + " " + o.pct + "% of a core").join(", ") : "") + ". That can make the sound drop out; close or pause them.", null); }
+        if (d10 && localStorage.getItem("nightbloom-buffer") !== "steady") add(2, "The sound dropped out " + d10 + " times in the last 10 s. Steady gives it twice the slack (about 10 ms more delay).", () => {
+          try { localStorage.setItem("nightbloom-buffer", "steady"); } catch (e) {}
+          const LL = window.NB_NATIVE && NB_NATIVE.lowLatency; try { window.__nbAdd && window.__nbAdd("setup", "sound buffer → steady from No sound?"); } catch (e) {}
+          if (LL && LL.set) { try { LL.set(false); } catch (e) {} setTimeout(() => { try { LL.restart(); } catch (e) { location.reload(); } }, 300); } else setTimeout(() => location.reload(), 300);
+        }, "Steady and restart"); } catch (e) {}
       // notes: arriving or not
       let ins = 0; try { ins = md.access ? [...md.access.inputs.values()].filter(i => md.ins.has(i.id)).length : 0; } catch (e) {}
       if (MA.n === 0) add(1, ins ? "No notes have come in from a controller yet (the on-screen keys and the computer keyboard still play)." : "No MIDI controller is connected (MIDI › Connect).", null);

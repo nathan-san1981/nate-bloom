@@ -25,6 +25,9 @@
       // an output that can't keep up. The first was blamed on the output before.
       const vs = nbsTry(() => voices.size, 0), lay = nbsTry(() => __stk.items().length, 1), stuck = nbsTry(() => __live23.stuckN(), 0);
       if (stuck) return ["The sound is dropping out" + where + ", and " + stuck + (stuck === 1 ? " note is" : " notes are") + " stuck on. Stop all (■) releases them."];
+      // (237) the computer itself is busy with other programs: say which, since nothing in Nate Bloom fixes that
+      { const C = window.__nbCpu && __nbCpu.last; if (C && !C.warming && C.computer >= 60) { const ours = (C.app || 0) / Math.max(1, C.cores), oth = (C.others || []).slice(0, 2);
+        if (C.computer - ours >= 45) return ["The sound is dropping out" + where + ": other programs are using " + Math.round(C.computer - ours) + "% of the computer (Nate Bloom about " + Math.max(1, Math.round(ours)) + "%)" + (oth.length ? ", most of it " + oth.map(o => o.name + " (" + o.pct + "% of a core)").join(" and ") : "") + ". Close or pause " + (oth.length === 1 ? "it" : "them") + (bufWant() === "fast" && !window.NB_LITE ? ", or tap No sound? › Steady for more slack." : ".")]; } }
       if (window.NB_BIG && bufWant() === "fast") return ["The sound is dropping out" + where + ". This computer has room for it: switch the sound buffer to Steady (Settings › Sound check) and reload; it gives the sound twice the slack for about 10 ms more delay."];   // (174)
       // (175) released notes still ringing count too (an arp's tails were most of it, and the message said "2 voices")
       const ring = nbsTry(() => { let k = 0; const now = ctx.currentTime; NB_REL.forEach(L => L.forEach(v => { if (v.at <= now) k++; })); return k; }, 0), all = vs + ring;

@@ -33,7 +33,8 @@ app.commandLine.appendSwitch("enable-features", "AudioWorkletRealtimeThread,Audi
   let ll = null;
   try { ll = JSON.parse(fs.readFileSync(path.join(app.getPath("userData"), "low-latency.json"), "utf8")); } catch (e) {}
   // (193) on unless switched off: 256 frames took a key-to-sound from about 47 ms to about 16 ms here
-  const frames = process.env.NB_LOW_LATENCY ? +process.env.NB_LOW_LATENCY || 256 : !ll || ll.on ? (+(ll && ll.frames) || 256) : 0;
+  // (237) Windows: off unless chosen (its shared-mode output works in 10 ms periods; a forced small buffer only adds risk there)
+  const frames = process.env.NB_LOW_LATENCY ? +process.env.NB_LOW_LATENCY || 256 : (ll ? ll.on : process.platform !== "win32") ? (+(ll && ll.frames) || 256) : 0;
   global.NB_LL_ACTIVE = frames >= 64 && frames <= 2048 ? frames : 0;
   if (frames >= 64 && frames <= 2048) {
     app.commandLine.appendSwitch("audio-buffer-size", String(frames));
@@ -486,7 +487,32 @@ function installBridgePlugin() {
 }
 installBridgePlugin();
 ipcMain.handle("nb:bridge-plugin", () => bridgePlugin);
+// (237) the programs using the computer besides Nate Bloom: every process's ticks from /proc, the busiest three by name
+let topPrev = null;
+function topOthers(dt, ours) {
+  const now = {}; let names = {};
+  try { for (const d of fs.readdirSync("/proc")) { if (!/^\d+$/.test(d) || ours.has(+d)) continue;
+    try { const s = fs.readFileSync("/proc/" + d + "/stat", "utf8"), i = s.lastIndexOf(")"), f = s.slice(i + 2).split(" "); now[d] = +f[11] + +f[12]; names[d] = s.slice(s.indexOf("(") + 1, i); } catch (e) {} } } catch (e) {}
+  const prev = topPrev; topPrev = now; if (!prev) return [];
+  const by = {};
+  for (const d in now) { if (prev[d] == null) continue; const p = (now[d] - prev[d]) / 100 / dt * 100; if (p < 5) continue;
+    let nm = names[d]; try { const c = fs.readFileSync("/proc/" + d + "/cmdline", "utf8").split("\0").filter(Boolean); const scr = c.slice(1).find(a => /\.(py|js|sh)$/.test(a)); if (scr) nm += " " + path.basename(scr); } catch (e) {}
+    by[nm] = (by[nm] || 0) + p; }
+  return Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, p]) => ({ name: n, pct: Math.round(p) }));
+}
+// (237) Windows: the whole computer from os.cpus(), Nate Bloom from Electron's own figures (no per-thread view)
+let winCpuPrev = null;
+function winCpu() {
+  const cs = require("os").cpus().map(c => { const t = c.times; return { idle: t.idle, tot: t.user + t.nice + t.sys + t.idle + t.irq }; });
+  const prev = winCpuPrev; winCpuPrev = cs; let appPct = 0; try { appPct = app_metrics(); } catch (e) {}
+  if (!prev) return { warming: true };
+  const busy = (a, b) => { const dT = a.tot - b.tot; return dT > 0 ? Math.round((1 - (a.idle - b.idle) / dT) * 1000) / 10 : 0; };
+  const cores = cs.map((c, i) => busy(c, prev[i])), sum = k => cs.reduce((a, c) => a + c[k], 0), psum = k => prev.reduce((a, c) => a + c[k], 0);
+  const dT = sum("tot") - psum("tot"), computer = dT > 0 ? Math.round((1 - (sum("idle") - psum("idle")) / dT) * 1000) / 10 : 0;
+  return { secs: 1, computer, busiestCore: Math.max(...cores), cores: cores.length, app: appPct, audio: null, audioOut: 0, engine: [], plugins: {}, pluginMain: 0, others: [] };
+}
 ipcMain.handle("nb:cpu", () => {
+  if (process.platform === "win32") return winCpu();
   if (process.platform !== "linux" || !win || win.isDestroyed()) return null;
   const t = Number(process.hrtime.bigint()) / 1e9, pid = win.webContents.getOSProcessId(), st = cpuStat(), th = cpuThreads(pid);
   let appPct = 0; try { appPct = app_metrics(); } catch (e) {}
@@ -511,6 +537,7 @@ ipcMain.handle("nb:cpu", () => {
     if (id.includes(":")) r.app += p;   // (Electron's own figures don't count the plugins' processes)
   }
   r.app = Math.round(r.app * 10) / 10;
+  try { const ours = new Set(app.getAppMetrics().map(m => m.pid).concat(Object.keys(kids).map(k => +k.split(":")[0]).filter(Boolean))); r.others = topOthers(dt, ours); } catch (e) { r.others = []; }
   return r;
 });
 // Nate Bloom's processes together, in % of one core (Electron measures each since the last call)

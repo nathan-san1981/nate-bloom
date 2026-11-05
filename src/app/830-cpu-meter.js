@@ -7,7 +7,7 @@
   // ======================================================================
   {
     const NN = window.NB_NATIVE;
-    if (NN && NN.platform === "linux" && typeof NN.cpu === "function") {
+    if (NN && /^(linux|windows)$/.test(NN.platform) && typeof NN.cpu === "function") {   // (237) Windows too: the computer and Nate Bloom (no per-thread view there)
       const esc3 = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
       const C = window.__nbCpu = { last: null, drops: [], dropPrev: null, open: false, peak: 0 };
       const mk = id => { const b = document.createElement("button"); b.type = "button"; b.className = "btn nb-cpu"; b.id = id;
@@ -34,6 +34,7 @@
       }
       const sum = a => a.reduce((x, y) => x + y, 0), r1 = x => Math.round(x);
       function headline(r) {
+        if (r.audio == null) return r.computer || 0;   // (Windows: the computer's load)
         const parts = [r.audio, ...(r.engine || []), ...Object.values(r.plugins || {})];
         return parts.length ? Math.max(...parts) : 0;
       }
@@ -49,7 +50,7 @@
           b.querySelector(".v").textContent = r1(h) + "%" + (d10 ? " ⚠" : "");   // (the number stays; a dropout in the last 10 s turns it red)
           b.querySelector("u").style.width = Math.min(100, h) + "%";
           b.classList.toggle("warm", !d10 && h >= 60 && h < 85); b.classList.toggle("hot", !!d10 || h >= 85);
-          b.title = "CPU: the busiest sound thread " + r1(h) + "% of a core · the computer " + r1(r.computer) + "%" + (d10 ? " · the sound dropped out in the last 10 s" : "");
+          b.title = (r.audio == null ? "CPU: the computer " + r1(r.computer) + "%" : "CPU: the busiest sound thread " + r1(h) + "% of a core · the computer " + r1(r.computer) + "%") + (d10 ? " · the sound dropped out in the last 10 s" : "");
         });
         paintPop();
       }
@@ -59,15 +60,16 @@
         const r = C.last;
         if (!r) { pop.innerHTML = '<p class="nbc-note">Measuring… (the first figures come after a second)</p>'; return; }
         const eng = r.engine || [], plugs = Object.entries(r.plugins || {}), d60 = sum(C.drops), d10 = sum(C.drops.slice(-10));
-        pop.innerHTML = `<div class="nbc-h"><strong>CPU</strong><small>measured by Linux over the last second</small></div>
-          <div class="nbc-g">The sound's threads <small>each a share of one core: at 100% it has no time left and the sound drops out</small></div>
+        pop.innerHTML = `<div class="nbc-h"><strong>CPU</strong><small>measured by ${NN.platform === "windows" ? "Windows" : "Linux"} over the last second</small></div>
+          ${r.audio == null ? "" : `<div class="nbc-g">The sound's threads <small>each a share of one core: at 100% it has no time left and the sound drops out</small></div>
           ${row("Browser audio", r.audio, "every browser synth, sample, effect and the mix")}
           ${eng.length ? row("Native engine", Math.max(...eng), eng.length + (eng.length === 1 ? " thread" : " threads") + (eng.length > 1 ? ", the busiest shown · " + r1(sum(eng)) + "% in all" : "") + " · " + (window.__ne && window.__ne.ok ? "Juno and the other native synths" : "idle")) : row("Native engine", null, window.__ne && window.__ne.on ? "not running" : "switched off (Settings › App)", false)}
           ${plugs.length ? plugs.map(([id, v]) => row(plugName(id), v, "its own audio thread")).join("") : '<p class="nbc-note">No VST3, CLAP or LV2 plugins loaded.</p>'}
-          ${r.pluginMain > 0.5 ? row("Plugin windows", r.pluginMain, "plugins' own windows, loading and settings (not the sound)") : ""}
+          ${r.pluginMain > 0.5 ? row("Plugin windows", r.pluginMain, "plugins' own windows, loading and settings (not the sound)") : ""}`}
           <div class="nbc-g">Altogether</div>
           ${row("Nate Bloom", r.app / Math.max(1, r.cores), r1(r.app) + "% of one core across all its processes (screen, sound, network), of " + r.cores + " cores")}
           ${row("This computer", r.computer, "everything running · busiest core " + r1(r.busiestCore) + "%")}
+          ${(r.others || []).length ? `<div class="nbc-g">Other programs <small>% of one core each, over the last second</small></div>` + r.others.map(o => row(o.name, Math.min(100, o.pct / Math.max(1, r.cores)), r1(o.pct) + "% of one core (" + r1(o.pct / Math.max(1, r.cores)) + "% of the computer)")).join("") : ""}
           <div class="nbc-row${d10 ? " hot" : d60 ? " warm" : ""}"><span>Dropouts</span><b>${d60}</b><i class="bar off"></i><small>${d60 ? "in the last minute" + (d10 ? ", " + d10 + " in the last 10 s" : "") + " (the output filled in, or a native part was late)" : "none in the last minute"}</small></div>`;
         const b = C.at && document.body.contains(C.at) && C.at.offsetParent ? C.at : btns.find(x => x.offsetParent);
         if (b) { const rc = b.getBoundingClientRect(), w = Math.min(420, innerWidth - 16); pop.style.width = w + "px"; pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, rc.right - w)) + "px"; pop.style.top = (rc.bottom + 6) + "px"; }
