@@ -1,0 +1,74 @@
+name: Windows app
+
+# (234) Nate Bloom for Windows: the Linux app's shell (linux/main.js, preload.js) built for Windows. The Linux-only
+# parts (native engine, plugin host, fast pads, bridge, pactl) aren't built; the page sees platform "windows".
+on:
+  push:
+    branches: [main]
+    paths: ["linux/main.js", "linux/preload.js", "linux/link.js", "windows/**", ".github/workflows/windows.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      NB_VERSION: 1.0.${{ github.run_number }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: The site goes inside the app
+        run: |
+          mkdir -p /tmp/nb-logs
+          cd linux && rm -rf site && mkdir -p site/lite
+          cp ../index.html ../icon-192.png ../icon-512.png ../manifest.webmanifest site/
+          cp ../lite/index.html ../lite/manifest.webmanifest site/lite/
+          [ -f ../lite/sim.html ] && cp ../lite/sim.html site/lite/ || true
+          cp -r ../inst site/inst
+          cp -r ../wam site/wam
+          date -u +%Y-%m-%dT%H:%M:%SZ > site/BUILD.txt
+          du -sh site
+      - name: Install
+        run: cd linux && npm install --no-audit --no-fund --ignore-scripts 2>&1 | tail -20 && node node_modules/electron/install.js
+      - name: Package (installer and portable .exe)
+        id: build
+        run: |
+          set -o pipefail
+          cd linux && npx --no-install electron-builder --win nsis portable --x64 --publish never --config ../windows/builder.json -c.extraMetadata.version=$NB_VERSION 2>&1 | tee /tmp/nb-logs/build.log
+          ls -la dist-win | tee -a /tmp/nb-logs/build.log
+      - name: Smoke test (start the portable .exe, check the page)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          pip install -q playwright==1.48.0 2>&1 | tail -2
+          python windows/smoke.py "linux/dist-win/win-unpacked/Nate Bloom.exe" 2>&1 | tee /tmp/nb-logs/smoke.txt
+      - name: Release
+        if: steps.build.outcome == 'success' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd linux/dist-win
+          SETUP=$(ls NateBloom-Setup-*.exe | head -1); PORT=$(ls NateBloom-portable-*.exe | head -1)
+          cp "$SETUP" NateBloom-Setup.exe; cp "$PORT" NateBloom-portable.exe
+          gh release create "win-v$NB_VERSION" "$SETUP" "$PORT" --title "Nate Bloom for Windows $NB_VERSION" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
+          gh release view windows-latest >/dev/null 2>&1 || gh release create windows-latest --title "Nate Bloom for Windows (latest)" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
+          gh release edit windows-latest --title "Nate Bloom for Windows (latest: $NB_VERSION)" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
+          gh release upload windows-latest NateBloom-Setup.exe NateBloom-portable.exe --clobber
+      - name: Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-logs
+          path: /tmp/nb-logs

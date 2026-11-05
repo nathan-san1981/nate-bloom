@@ -125,7 +125,7 @@
         Object.keys(ENGINES).filter(id => id !== "fm" || betaOn).forEach(id => add("eng:" + id, ENGINES[id].name, "engine", "Engines"));
         cat("leads").forEach(e => lib(e, "Synth leads")); cat("pads").forEach(e => lib(e, "Pads & atmos"));
       }
-      if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? "yours" : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? "Your plugins" : "Nate Bloom's plugins"));
+      if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? (NB_YOURS ? "yours" : "by Nathan") : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? (NB_YOURS ? "Your plugins" : "Nathan's plugins") : "Nate Bloom's plugins"));
       // (220) the hardware synths plugged in (the Minilogue XD, the MicroFreak): any melodic track can play one over MIDI
       if (!["drums", "audio", "sampler"].includes(kind)) {
         const H = window.__hw; if (H && H.shown && H.shown()) add("hw", H.name, H.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths");

@@ -97,7 +97,7 @@
     if (helpEl && list) {
       const TOPICS = [
         ["around", "Getting around", /^(Getting around|Keys · Seq · Notes are|☰ \(top right\))/],
-        ["sounds", "Sounds", /^(Tabs |In Lib|Analog|Natewave|Your plugins|Studio |Plugins |⚡ Fast plugins)/],
+        ["sounds", "Sounds", /^(Tabs |In Lib|Analog|Natewave|Your plugins|Nathan's plugins|Studio |Plugins |⚡ Fast plugins)/],
         ["together", "Playing together", /^(Playing engines together|Playing sounds together)/],
         ["keys", "Keys & controllers", /^(The button next to the tabs|Playing from a keyboard|Playing from a controller|Plugin controls)/],
         ["fx", "Effects & Motion", /^Effects/],

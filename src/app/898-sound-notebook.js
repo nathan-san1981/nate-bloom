@@ -6,7 +6,7 @@
   // the XD's own program data kept so the notebook can send the sound back to the XD. Notes are yours to write.
   // The XD's program format is Korg's (minilogue xd MIDI implementation; field layout as in loguetools, BSD).
   // ======================================================================
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const NB_KEY = "nightbloom-notebook";
     let NOTES = []; try { NOTES = JSON.parse(localStorage.getItem(NB_KEY) || "[]"); if (!Array.isArray(NOTES)) NOTES = []; } catch (e) { NOTES = []; }
     const nbSave = () => { try { localStorage.setItem(NB_KEY, JSON.stringify(NOTES)); return true; } catch (e) { toast("The notebook is full: export it, then delete some entries"); return false; } };

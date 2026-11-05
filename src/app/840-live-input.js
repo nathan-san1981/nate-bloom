@@ -8,7 +8,7 @@
   // ======================================================================
   {
     const NN = window.NB_NATIVE;
-    if (NN && NN.platform === "linux") {
+    if (NN && /^(linux|windows)$/.test(NN.platform)) {
       const IN = window.__nbIn = { on: false, dev: "", pick: "1", level: 0.8, stream: null, src: null, split: null, merge: null, gain: null, an: null, dest: null, err: "", label: "", devs: [] };
       try { const o = JSON.parse(localStorage.getItem("nightbloom-input") || "{}"); ["dev", "pick"].forEach(k => { if (typeof o[k] === "string") IN[k] = o[k]; }); if (Number.isFinite(o.level)) IN.level = o.level; IN.on = !!o.on; } catch (e) {}
       const save = () => { try { localStorage.setItem("nightbloom-input", JSON.stringify({ dev: IN.dev, pick: IN.pick, level: IN.level, on: IN.on })); } catch (e) {} };

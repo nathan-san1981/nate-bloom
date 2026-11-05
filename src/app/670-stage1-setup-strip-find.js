@@ -7,7 +7,7 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 233;
+    window.NB_BUILD = 234;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -112,7 +112,7 @@
       const app = window.NB_NATIVE ? nbsTry(() => String(NBNativeBridge.version()), "") : "";
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
-        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && window.NB_NATIVE.platform === "linux" ? " · Linux app " + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
+        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform) ? (window.NB_NATIVE.platform === "windows" ? " · Windows app " : " · Linux app ") + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
         ${window.NBEngine ? suRow("Native engine", `<button type="button" class="btn" id="suNat" aria-pressed="${!!(window.__ne && window.__ne.on)}">${window.__ne && window.__ne.on ? "On" : "Off"}</button><span class="su-note" id="suNatNote">the synths worked out on several cores, not the one audio thread</span>`, "suNatRow") : ""}
         ${window.NBPlug ? suRow("VST3, CLAP, LV2", `<button type="button" class="btn" id="suVst">Plugins…</button><span class="su-note" id="suVstNote">plugins on this computer, each on a thread of its own</span>`, "suVstRow") : ""}
         ${window.NB_NATIVE && window.NB_NATIVE.setWide ? suRow("Screens", `<button type="button" class="btn" id="suWide" aria-pressed="${document.body.classList.contains("nb-wide")}">Across both screens</button><span class="su-note">the window spans your screens side by side and the page uses the whole width (61 keys across both) · Ctrl+Shift+F</span>`, "suWideRow") : ""}
@@ -335,7 +335,10 @@
       const on = Object.keys(t.playing || {}).filter(k => t.playing[k]); let pos = "";
       if (on.length) { const g = nbsTry(lkGrid, null); if (g && g.src && g.perf0 != null && g.sd) { const steps = Math.max(0, (performance.now() - g.perf0) / 1000 / g.sd); pos = " · " + (Math.floor(steps / 16) + 1) + ":" + (Math.floor((steps % 16) / 4) + 1); } }
       nbT($id("shMid"), (t.tempo == null ? "" : Math.round(t.tempo) + " bpm") + key + (on.length ? pos : " · stopped"));
-      SH.el.querySelectorAll(".sh-dot").forEach(s => s.classList.toggle("on", !!r[s.dataset.k]));
+      SH.el.querySelectorAll(".sh-dot").forEach(s => { const k = s.dataset.k, on = !!r[k]; s.classList.toggle("on", on);
+        // (234) a device's dot shows once it has been connected here at least once: nobody else sees a MiniLab, a K.O. II or a Pixelbook they don't have
+        let seen = false; try { seen = !!localStorage.getItem("nightbloom-seen-" + k); if (on && !seen) { localStorage.setItem("nightbloom-seen-" + k, "1"); seen = true; } } catch (e) { seen = true; }
+        s.hidden = !on && !seen; });
       nbT($id("shOut"), "out: " + (r.out || "?"));
       const dr = $id("shDrops"); dr.hidden = !(h.dropouts > 0); if (!dr.hidden) nbT(dr, h.dropouts + (h.dropouts === 1 ? " drop" : " drops"));
       // what changed since the last look: say it

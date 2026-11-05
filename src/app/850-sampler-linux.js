@@ -9,7 +9,7 @@
     // ======================================================================
     {
       const NNs = window.NB_NATIVE;
-      if (NNs && NNs.platform === "linux") {
+      if (NNs && /^(linux|windows)$/.test(NNs.platform)) {
         const $s = id => document.getElementById(id), ed = window.__nbEd;   // (a name 470 uses for its own)
         const mkb = (txt, id, title) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = txt; if (id) b.id = id; if (title) b.title = title; return b; };
         const bpmNow = () => (state && state.seq && state.seq.bpm) || 120;

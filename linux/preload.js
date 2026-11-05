@@ -13,7 +13,7 @@ for (const p of [path.join(__dirname, "native", "build", "Release", "nbfastpads.
 if (!fp) console.warn("Fast pads aren't available here; Beat Pads plays through the browser's audio");
 
 contextBridge.exposeInMainWorld("NB_NATIVE", {
-  platform: "linux",
+  platform: process.platform === "win32" ? "windows" : "linux",   // (234) the same app built for Windows: the Linux-only parts look for "linux"
   version,
   shellLatest: () => ipcRenderer.invoke("nb:shell-latest"),   // (232) a newer Linux app package
   shellInstall: () => ipcRenderer.invoke("nb:shell-install"),

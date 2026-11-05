@@ -406,7 +406,7 @@ registerProcessor("nb-aw", NBAwProc);
   AW.oldHall = P => hallIR(ctx.sampleRate, Object.assign({}, bfx, P || {}));
   AW.labSet = o => { Object.assign(bfx, o); applyBfx(true); };
   AW.dbg = () => ({ lab: !!(B && B.__aw), master: !!(fx && fx.comp && fx.comp.__aw), mc: awMcOn(), chans: Object.keys(fxChan).map(id => [id, !!fxChan[id].tape, fxChan[id].tape ? JSON.stringify(fxChan[id].tape.__l) : '']), gr: AW.master });
-  const awLinux = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");
+  const awLinux = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));   // (234) the Windows app too
   const AW_MC_KEY = "nightbloom-mastercomp";
   const awMcOn = () => { try { return localStorage.getItem(AW_MC_KEY) !== "off"; } catch (e) { return true; } };
   function awLoad() {

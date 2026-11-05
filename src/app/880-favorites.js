@@ -8,7 +8,7 @@
   // Loading one touches only the sounds it holds. Kept across projects (like My sounds), with the last five saves
   // of each for undo, and exported or imported as a file.
   // ======================================================================
-  if (window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !window.NB_LITE) {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform) && !window.NB_LITE) {
     const FV_KEY = "nightbloom-favorites";
     let FAV = []; try { const v = JSON.parse(localStorage.getItem(FV_KEY) || "[]"); if (Array.isArray(v)) FAV = v; } catch (e) {}
     const clone = o => JSON.parse(JSON.stringify(o == null ? null : o));

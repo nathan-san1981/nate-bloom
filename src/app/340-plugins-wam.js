@@ -289,7 +289,7 @@
     // ---- the Plugins sheet ----
     let showAdd = false, msg = "";
     const row = (cls, title, sub, own) => { const r = document.createElement("div"); r.className = "wam-row " + (cls || ""); const t = document.createElement("div"); t.className = "wam-t"; t.innerHTML = "<b></b><small></small>"; t.querySelector("b").textContent = title; t.querySelector("small").textContent = sub; t.title = sub;
-      if (own) { const n = document.createElement("span"); n.className = "nb" + (own === "yours" ? " yours" : ""); n.textContent = own === "yours" ? "YOURS" : "NB"; n.title = own === "yours" ? "Your own plugin" : "Nate Bloom's own"; t.querySelector("b").appendChild(n); } r.appendChild(t); return r; };
+      if (own) { const n = document.createElement("span"); n.className = "nb" + (own === "yours" ? " yours" : ""); n.textContent = own === "yours" ? (NB_YOURS ? "YOURS" : "NATHAN'S") : "NB"; n.title = own === "yours" ? (NB_YOURS ? "Your own plugin" : "Made by Nathan") : "Nate Bloom's own"; t.querySelector("b").appendChild(n); } r.appendChild(t); return r; };
     const subOf = c => (c.vendor === "Nate Bloom" || c.vendor === "Nathan" ? c.type.toLowerCase() : c.vendor) + " · " + c.desc;
     const ownOf = c => c.vendor === "Nathan" ? "yours" : c.vendor === "Nate Bloom";
     const btn = (label, fn, pressed, aria) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = label; if (pressed != null) b.setAttribute("aria-pressed", String(pressed)); if (aria) b.setAttribute("aria-label", aria); b.addEventListener("click", fn); return b; };
@@ -626,8 +626,8 @@
           if (!sheet.hidden && fpApi() && NBW_HERE) {
             const live = fpNodes().filter(W => W.node.fast).map(W => W.name);
             const r2 = row(FP.on ? "on" : "", "⚡ Fast plugins", FP.on
-              ? "Your plugins (YOURS) play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and the Garage's Nate Bloom recordings don't hear them while this is on."
-              : "Your plugins (YOURS) can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
+              ? (NB_YOURS ? "Your plugins (YOURS)" : "Nathan's plugins") + " play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and the Garage's Nate Bloom recordings don't hear them while this is on."
+              : (NB_YOURS ? "Your plugins (YOURS)" : "Nathan's plugins") + " can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
             r2.append(btn(FP.on ? "On" : "Off", async () => { FP.on = !FP.on; try { localStorage.setItem("nightbloom-fastplug", FP.on ? "1" : "0"); } catch (e) {} start(); await fpApply(); nbwPaint(); }, FP.on, "Fast plugins"));
             list.insertBefore(r2, list.firstChild);
           }

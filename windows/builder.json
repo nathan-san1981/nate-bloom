@@ -1,0 +1,10 @@
+{
+  "appId": "com.natebloom.desktop",
+  "productName": "Nate Bloom",
+  "directories": { "output": "dist-win" },
+  "files": ["main.js", "preload.js", "link.js", "plugins.js", "plugscan.js", "plughost.js", "plugin-store.js", "package.json", "build/icon.png"],
+  "extraResources": [{ "from": "site", "to": "site" }],
+  "win": { "target": ["nsis", "portable"], "icon": "build/icon.png" },
+  "nsis": { "oneClick": true, "perMachine": false, "runAfterFinish": true, "artifactName": "NateBloom-Setup-${version}.${ext}", "shortcutName": "Nate Bloom" },
+  "portable": { "artifactName": "NateBloom-portable-${version}.${ext}" }
+}

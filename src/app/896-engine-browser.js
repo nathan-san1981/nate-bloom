@@ -135,7 +135,7 @@
         const b = ebTile(k, n, s, null); b.addEventListener("click", e => { e.stopImmediatePropagation(); ebEng = null; const en = (allEntries().find(x => x.id === k)); if (en) chooseEntry(en); }, true); g2.appendChild(b);
       });
       const kitsB = ebTile("kits", "Drum kits", "sampled kits onto the Pads", CATALOG.kits.length); g2.appendChild(kitsB);
-      const groups = [["Your plugins", c => c.vendor === "Nathan"], ["Nate Bloom's plugins", c => c.vendor === "Nate Bloom"], ["Other plugins", c => !c.native && c.vendor !== "Nathan" && c.vendor !== "Nate Bloom"], ["Plugins on this computer", c => !!c.native]];
+      const groups = [[NB_YOURS ? "Your plugins" : "Nathan's plugins", c => c.vendor === "Nathan"], ["Nate Bloom's plugins", c => c.vendor === "Nate Bloom"], ["Other plugins", c => !c.native && c.vendor !== "Nathan" && c.vendor !== "Nate Bloom"], ["Plugins on this computer", c => !!c.native]];
       for (const [label, f] of groups) {
         const L = plugInsts().filter(f); if (!L.length) continue;
         ebL().appendChild(ebHead(label));

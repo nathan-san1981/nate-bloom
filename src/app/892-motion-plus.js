@@ -2,7 +2,7 @@
   // (203) Motion, in the Linux app: tempo sync, two more shapes (ramp down, random steps), and any knob as a target:
   // touch any knob or slider in the app, or pick a plugin's control, and the LFO moves it around where it was.
   // ======================================================================
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const MP_SYNC = [["free", "Free", 0], ["1", "1 bar", 4], ["2", "1/2", 2], ["4", "1/4", 1], ["8", "1/8", 0.5], ["16", "1/16", 0.25], ["4d", "1/4 dotted", 1.5], ["8d", "1/8 dotted", 0.75], ["4t", "1/4 triplet", 2 / 3], ["8t", "1/8 triplet", 1 / 3], ["2b", "2 bars", 8], ["4b", "4 bars", 16]];
     const mpBpm = () => (state.seq && state.seq.bpm) || 120;
     const mpHz = L => { const s = MP_SYNC.find(x => x[0] === L.sync); return s && s[2] ? mpBpm() / 60 / s[2] : rateHz(L.rate); };

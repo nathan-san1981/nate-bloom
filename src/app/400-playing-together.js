@@ -94,11 +94,11 @@
       }; }
     // ---- what's in it ----
     function kindOf(p) {
-      if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? "your plugin" : "plugin"; }
+      if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : "plugin"; }
       return p.id.startsWith("nb-") ? "studio" : "library";
     }
-    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
-    const NB_COPY_OK = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");   // (214) two sounds on one engine
+    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", "by Nathan": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
+    const NB_COPY_OK = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));   // (214) two sounds on one engine
     function items() {
       const g = groupsOn(), out = [];
       if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => { const pn = state.layers[id].pname; out.push({ t: "syn", id, name: pn || ENGINES[id].name, sub: pn ? ENGINES[id].name : "", kind: "synth" }); }); }   // (214) a preset's name, the engine under it
@@ -450,7 +450,7 @@
       its.forEach(it => {
         const mu = isMuted(it);
         const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.dataset.k = itKey(it); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
-        if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
+        if (it.kind === "your plugin" || it.kind === "by Nathan") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
         m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = (it.sub || it.kind) + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
         m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));

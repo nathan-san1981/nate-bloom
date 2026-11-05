@@ -5370,13 +5370,15 @@ a.length>D&&(D=a.length,p=0|1.25*D+7200,r=new Int8Array(p));a=u.lame_encode_buff
   const LIB_KNOBS = [["tune","Tune",0.5],["tone","Tone",1],["attack","Attack",0],["decay","Decay",0.62],["release","Release",0.3],["level","Level",0.8]];
   // (173) a computer with room to spare: the Linux app, or a desktop browser with 8 GB or more (not Lite, not a touch
   // screen). It plays more notes at once and records and samples for longer; phones and tablets keep the old limits.
-  const NB_BIG = !window.NB_LITE && ((!!window.NB_NATIVE && window.NB_NATIVE.platform === "linux") ||
+  // (234) the Windows app is for anyone: Nathan's own plugins are "by Nathan" there, not "yours"
+  const NB_YOURS = !(window.NB_NATIVE && window.NB_NATIVE.platform === "windows"); window.NB_YOURS = NB_YOURS;
+  const NB_BIG = !window.NB_LITE && ((!!window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform)) ||
     ((navigator.deviceMemory || 0) >= 8 && (navigator.hardwareConcurrency || 0) >= 6 && !(window.matchMedia && matchMedia("(pointer: coarse)").matches)));
   window.NB_BIG = NB_BIG;
   // (173) saving a file: the share sheet on a phone, tablet or Chromebook; on a computer (the Linux app included) it's a download
   // (the Linux app files it in Downloads/Nate Bloom). A share with nowhere to go used to lose the file there.
   const nbShareFiles = f => { try { const mob = /Android|iPhone|iPad|iPod|Mobile|CrOS/i.test(navigator.userAgent || "") || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
-    return mob && !(window.NB_NATIVE && window.NB_NATIVE.platform === "linux") && !!navigator.canShare && navigator.canShare({ files: [f] }); } catch (e) { return false; } };
+    return mob && !(window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform)) && !!navigator.canShare && navigator.canShare({ files: [f] }); } catch (e) { return false; } };
   const MAX_SAMPLE_SEC = NB_BIG ? 1200 : 300;   // samples can be up to 5 minutes (20 on a big computer); longer files open the section picker
   const nbMinSec = s => (s % 60 ? Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") : s / 60 + ":00");   // 300 → "5:00"
   const sampleDefaults = () => Object.fromEntries([...SAMP_SLICE_KNOBS, ...SAMP_PLAY_KNOBS, ...SAMP_GRAIN_KNOBS, ...SAMP_ELE_KNOBS].map(([k,,v]) => [k, v]));
@@ -21994,7 +21996,7 @@ registerProcessor("nb-verb", NBVerb);`;
     // ---- the Plugins sheet ----
     let showAdd = false, msg = "";
     const row = (cls, title, sub, own) => { const r = document.createElement("div"); r.className = "wam-row " + (cls || ""); const t = document.createElement("div"); t.className = "wam-t"; t.innerHTML = "<b></b><small></small>"; t.querySelector("b").textContent = title; t.querySelector("small").textContent = sub; t.title = sub;
-      if (own) { const n = document.createElement("span"); n.className = "nb" + (own === "yours" ? " yours" : ""); n.textContent = own === "yours" ? "YOURS" : "NB"; n.title = own === "yours" ? "Your own plugin" : "Nate Bloom's own"; t.querySelector("b").appendChild(n); } r.appendChild(t); return r; };
+      if (own) { const n = document.createElement("span"); n.className = "nb" + (own === "yours" ? " yours" : ""); n.textContent = own === "yours" ? (NB_YOURS ? "YOURS" : "NATHAN'S") : "NB"; n.title = own === "yours" ? (NB_YOURS ? "Your own plugin" : "Made by Nathan") : "Nate Bloom's own"; t.querySelector("b").appendChild(n); } r.appendChild(t); return r; };
     const subOf = c => (c.vendor === "Nate Bloom" || c.vendor === "Nathan" ? c.type.toLowerCase() : c.vendor) + " · " + c.desc;
     const ownOf = c => c.vendor === "Nathan" ? "yours" : c.vendor === "Nate Bloom";
     const btn = (label, fn, pressed, aria) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = label; if (pressed != null) b.setAttribute("aria-pressed", String(pressed)); if (aria) b.setAttribute("aria-label", aria); b.addEventListener("click", fn); return b; };
@@ -22331,8 +22333,8 @@ registerProcessor("nb-verb", NBVerb);`;
           if (!sheet.hidden && fpApi() && NBW_HERE) {
             const live = fpNodes().filter(W => W.node.fast).map(W => W.name);
             const r2 = row(FP.on ? "on" : "", "⚡ Fast plugins", FP.on
-              ? "Your plugins (YOURS) play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and the Garage's Nate Bloom recordings don't hear them while this is on."
-              : "Your plugins (YOURS) can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
+              ? (NB_YOURS ? "Your plugins (YOURS)" : "Nathan's plugins") + " play from the app's own low-latency audio" + (live.length ? ": " + live.join(", ") : "") + ". Nate Bloom's effects, Takes and the Garage's Nate Bloom recordings don't hear them while this is on."
+              : (NB_YOURS ? "Your plugins (YOURS)" : "Nathan's plugins") + " can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on.");
             r2.append(btn(FP.on ? "On" : "Off", async () => { FP.on = !FP.on; try { localStorage.setItem("nightbloom-fastplug", FP.on ? "1" : "0"); } catch (e) {} start(); await fpApply(); nbwPaint(); }, FP.on, "Fast plugins"));
             list.insertBefore(r2, list.firstChild);
           }
@@ -24731,11 +24733,11 @@ registerProcessor("nb-wave", NBWave);
       }; }
     // ---- what's in it ----
     function kindOf(p) {
-      if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? "your plugin" : "plugin"; }
+      if (PLUG(p.id)) { const c = ((window.__wam && __wam.CAT) || []).find(c => "wam:" + c.key === p.id); return c && c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : "plugin"; }
       return p.id.startsWith("nb-") ? "studio" : "library";
     }
-    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
-    const NB_COPY_OK = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");   // (214) two sounds on one engine
+    const KC = { synth: "var(--lilac)", studio: "#7fd6c2", library: "#8fb3ff", plugin: "var(--amber)", "your plugin": "#ff8fc7", "by Nathan": "#ff8fc7", instrument: "#c9a96e", sampler: "#9be38a", hardware: "#ffd36b" };
+    const NB_COPY_OK = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));   // (214) two sounds on one engine
     function items() {
       const g = groupsOn(), out = [];
       if (g.syn) { const on = synOn(); (on.length ? on : ["saw"]).forEach(id => { const pn = state.layers[id].pname; out.push({ t: "syn", id, name: pn || ENGINES[id].name, sub: pn ? ENGINES[id].name : "", kind: "synth" }); }); }   // (214) a preset's name, the engine under it
@@ -25087,7 +25089,7 @@ registerProcessor("nb-wave", NBWave);
       its.forEach(it => {
         const mu = isMuted(it);
         const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.dataset.k = itKey(it); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
-        if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
+        if (it.kind === "your plugin" || it.kind === "by Nathan") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
         m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = (it.sub || it.kind) + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
         m.setAttribute("aria-pressed", String(isSel(it))); m.setAttribute("aria-label", it.name + ", " + it.kind + (mu ? ", muted" : "") + (isSel(it) ? ", its controls are showing" : ". Show its controls"));
@@ -25423,7 +25425,7 @@ registerProcessor("nb-wave", NBWave);
         Object.keys(ENGINES).filter(id => id !== "fm" || betaOn).forEach(id => add("eng:" + id, ENGINES[id].name, "engine", "Engines"));
         cat("leads").forEach(e => lib(e, "Synth leads")); cat("pads").forEach(e => lib(e, "Pads & atmos"));
       }
-      if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? "yours" : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? "Your plugins" : "Nate Bloom's plugins"));
+      if (kind === "plugin" && plugOK()) plugCat().forEach(c => add("wam:" + c.key, c.name, (c.vendor === "Nathan" ? (NB_YOURS ? "yours" : "by Nathan") : c.vendor) + (c.desc ? " · " + c.desc : ""), c.vendor === "Nathan" ? (NB_YOURS ? "Your plugins" : "Nathan's plugins") : "Nate Bloom's plugins"));
       // (220) the hardware synths plugged in (the Minilogue XD, the MicroFreak): any melodic track can play one over MIDI
       if (!["drums", "audio", "sampler"].includes(kind)) {
         const H = window.__hw; if (H && H.shown && H.shown()) add("hw", H.name, H.present() ? "plays it over MIDI · its own sound" : "not plugged in", "Your hardware synths");
@@ -28842,7 +28844,7 @@ z: [z]=Z
     if (helpEl && list) {
       const TOPICS = [
         ["around", "Getting around", /^(Getting around|Keys · Seq · Notes are|☰ \(top right\))/],
-        ["sounds", "Sounds", /^(Tabs |In Lib|Analog|Natewave|Your plugins|Studio |Plugins |⚡ Fast plugins)/],
+        ["sounds", "Sounds", /^(Tabs |In Lib|Analog|Natewave|Your plugins|Nathan's plugins|Studio |Plugins |⚡ Fast plugins)/],
         ["together", "Playing together", /^(Playing engines together|Playing sounds together)/],
         ["keys", "Keys & controllers", /^(The button next to the tabs|Playing from a keyboard|Playing from a controller|Plugin controls)/],
         ["fx", "Effects & Motion", /^Effects/],
@@ -33348,7 +33350,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 233;
+    window.NB_BUILD = 234;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -33453,7 +33455,7 @@ registerProcessor("nb-rec", NBRec);`;
       const app = window.NB_NATIVE ? nbsTry(() => String(NBNativeBridge.version()), "") : "";
       return `<div class="su-h">App</div>
         ${suRow("Install", '<button type="button" class="btn" id="suInstall">Add to the home screen…</button>', "suInstallRow")}
-        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && window.NB_NATIVE.platform === "linux" ? " · Linux app " + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
+        ${suRow("Versions", `<span id="suVer">page build ${NB_BUILD}${window.NB_LITE ? " · Lite" : ""}${window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform) ? (window.NB_NATIVE.platform === "windows" ? " · Windows app " : " · Linux app ") + esc3(String(window.NB_NATIVE.version || "")) : app ? " · Android app " + esc3(app) : window.NB_NATIVE ? " · Android app" : ""}</span>`, "suVerRow")}
         ${window.NBEngine ? suRow("Native engine", `<button type="button" class="btn" id="suNat" aria-pressed="${!!(window.__ne && window.__ne.on)}">${window.__ne && window.__ne.on ? "On" : "Off"}</button><span class="su-note" id="suNatNote">the synths worked out on several cores, not the one audio thread</span>`, "suNatRow") : ""}
         ${window.NBPlug ? suRow("VST3, CLAP, LV2", `<button type="button" class="btn" id="suVst">Plugins…</button><span class="su-note" id="suVstNote">plugins on this computer, each on a thread of its own</span>`, "suVstRow") : ""}
         ${window.NB_NATIVE && window.NB_NATIVE.setWide ? suRow("Screens", `<button type="button" class="btn" id="suWide" aria-pressed="${document.body.classList.contains("nb-wide")}">Across both screens</button><span class="su-note">the window spans your screens side by side and the page uses the whole width (61 keys across both) · Ctrl+Shift+F</span>`, "suWideRow") : ""}
@@ -33676,7 +33678,10 @@ registerProcessor("nb-rec", NBRec);`;
       const on = Object.keys(t.playing || {}).filter(k => t.playing[k]); let pos = "";
       if (on.length) { const g = nbsTry(lkGrid, null); if (g && g.src && g.perf0 != null && g.sd) { const steps = Math.max(0, (performance.now() - g.perf0) / 1000 / g.sd); pos = " · " + (Math.floor(steps / 16) + 1) + ":" + (Math.floor((steps % 16) / 4) + 1); } }
       nbT($id("shMid"), (t.tempo == null ? "" : Math.round(t.tempo) + " bpm") + key + (on.length ? pos : " · stopped"));
-      SH.el.querySelectorAll(".sh-dot").forEach(s => s.classList.toggle("on", !!r[s.dataset.k]));
+      SH.el.querySelectorAll(".sh-dot").forEach(s => { const k = s.dataset.k, on = !!r[k]; s.classList.toggle("on", on);
+        // (234) a device's dot shows once it has been connected here at least once: nobody else sees a MiniLab, a K.O. II or a Pixelbook they don't have
+        let seen = false; try { seen = !!localStorage.getItem("nightbloom-seen-" + k); if (on && !seen) { localStorage.setItem("nightbloom-seen-" + k, "1"); seen = true; } } catch (e) { seen = true; }
+        s.hidden = !on && !seen; });
       nbT($id("shOut"), "out: " + (r.out || "?"));
       const dr = $id("shDrops"); dr.hidden = !(h.dropouts > 0); if (!dr.hidden) nbT(dr, h.dropouts + (h.dropouts === 1 ? " drop" : " drops"));
       // what changed since the last look: say it
@@ -36118,7 +36123,7 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
   // ======================================================================
   {
     const NN = window.NB_NATIVE;
-    if (NN && NN.platform === "linux") {
+    if (NN && /^(linux|windows)$/.test(NN.platform)) {
       const IN = window.__nbIn = { on: false, dev: "", pick: "1", level: 0.8, stream: null, src: null, split: null, merge: null, gain: null, an: null, dest: null, err: "", label: "", devs: [] };
       try { const o = JSON.parse(localStorage.getItem("nightbloom-input") || "{}"); ["dev", "pick"].forEach(k => { if (typeof o[k] === "string") IN[k] = o[k]; }); if (Number.isFinite(o.level)) IN.level = o.level; IN.on = !!o.on; } catch (e) {}
       const save = () => { try { localStorage.setItem("nightbloom-input", JSON.stringify({ dev: IN.dev, pick: IN.pick, level: IN.level, on: IN.on })); } catch (e) {} };
@@ -36214,7 +36219,7 @@ registerProcessor("nb-plug-io", NBPlugIO);`;
     // ======================================================================
     {
       const NNs = window.NB_NATIVE;
-      if (NNs && NNs.platform === "linux") {
+      if (NNs && /^(linux|windows)$/.test(NNs.platform)) {
         const $s = id => document.getElementById(id), ed = window.__nbEd;   // (a name 470 uses for its own)
         const mkb = (txt, id, title) => { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = txt; if (id) b.id = id; if (title) b.title = title; return b; };
         const bpmNow = () => (state && state.seq && state.seq.bpm) || 120;
@@ -36667,7 +36672,7 @@ registerProcessor("nb-bridge", NBBridgeP);`;
   // Loading one touches only the sounds it holds. Kept across projects (like My sounds), with the last five saves
   // of each for undo, and exported or imported as a file.
   // ======================================================================
-  if (window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && !window.NB_LITE) {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(window.NB_NATIVE.platform) && !window.NB_LITE) {
     const FV_KEY = "nightbloom-favorites";
     let FAV = []; try { const v = JSON.parse(localStorage.getItem(FV_KEY) || "[]"); if (Array.isArray(v)) FAV = v; } catch (e) {}
     const clone = o => JSON.parse(JSON.stringify(o == null ? null : o));
@@ -37409,7 +37414,7 @@ registerProcessor("nb-aw", NBAwProc);
   AW.oldHall = P => hallIR(ctx.sampleRate, Object.assign({}, bfx, P || {}));
   AW.labSet = o => { Object.assign(bfx, o); applyBfx(true); };
   AW.dbg = () => ({ lab: !!(B && B.__aw), master: !!(fx && fx.comp && fx.comp.__aw), mc: awMcOn(), chans: Object.keys(fxChan).map(id => [id, !!fxChan[id].tape, fxChan[id].tape ? JSON.stringify(fxChan[id].tape.__l) : '']), gr: AW.master });
-  const awLinux = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");
+  const awLinux = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));   // (234) the Windows app too
   const AW_MC_KEY = "nightbloom-mastercomp";
   const awMcOn = () => { try { return localStorage.getItem(AW_MC_KEY) !== "off"; } catch (e) { return true; } };
   function awLoad() {
@@ -37600,7 +37605,7 @@ registerProcessor("nb-aw", NBAwProc);
   // (203) Motion, in the Linux app: tempo sync, two more shapes (ramp down, random steps), and any knob as a target:
   // touch any knob or slider in the app, or pick a plugin's control, and the LFO moves it around where it was.
   // ======================================================================
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const MP_SYNC = [["free", "Free", 0], ["1", "1 bar", 4], ["2", "1/2", 2], ["4", "1/4", 1], ["8", "1/8", 0.5], ["16", "1/16", 0.25], ["4d", "1/4 dotted", 1.5], ["8d", "1/8 dotted", 0.75], ["4t", "1/4 triplet", 2 / 3], ["8t", "1/8 triplet", 1 / 3], ["2b", "2 bars", 8], ["4b", "4 bars", 16]];
     const mpBpm = () => (state.seq && state.seq.bpm) || 120;
     const mpHz = L => { const s = MP_SYNC.find(x => x[0] === L.sync); return s && s[2] ? mpBpm() / 60 / s[2] : rateHz(L.rate); };
@@ -37902,7 +37907,7 @@ registerProcessor("nb-aw", NBAwProc);
         const b = ebTile(k, n, s, null); b.addEventListener("click", e => { e.stopImmediatePropagation(); ebEng = null; const en = (allEntries().find(x => x.id === k)); if (en) chooseEntry(en); }, true); g2.appendChild(b);
       });
       const kitsB = ebTile("kits", "Drum kits", "sampled kits onto the Pads", CATALOG.kits.length); g2.appendChild(kitsB);
-      const groups = [["Your plugins", c => c.vendor === "Nathan"], ["Nate Bloom's plugins", c => c.vendor === "Nate Bloom"], ["Other plugins", c => !c.native && c.vendor !== "Nathan" && c.vendor !== "Nate Bloom"], ["Plugins on this computer", c => !!c.native]];
+      const groups = [[NB_YOURS ? "Your plugins" : "Nathan's plugins", c => c.vendor === "Nathan"], ["Nate Bloom's plugins", c => c.vendor === "Nate Bloom"], ["Other plugins", c => !c.native && c.vendor !== "Nathan" && c.vendor !== "Nate Bloom"], ["Plugins on this computer", c => !!c.native]];
       for (const [label, f] of groups) {
         const L = plugInsts().filter(f); if (!L.length) continue;
         ebL().appendChild(ebHead(label));
@@ -38062,7 +38067,7 @@ registerProcessor("nb-aw", NBAwProc);
       }
       // a plugin
       const pk = k.slice(2), c = ((window.__nbw && window.__nbw.CAT) || []).find(x => x.key === pk); if (!c) { ep.hidden = true; return; }
-      ep.appendChild(epHead(c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), k));
+      ep.appendChild(epHead(c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : (c.vendor || "plugin"), k));
       const fill = m => {
         if (!m || !m.list || !m.list.length) {
           const n = document.createElement("p"); n.className = "ep-none";
@@ -38134,7 +38139,7 @@ registerProcessor("nb-aw", NBAwProc);
           if (e.id.startsWith("n:") && L[0].e.id.startsWith("e:") && engOf(e.id) !== L[0].e.id.slice(2)) return;
           if (!CLK[e.id]) out[e.id] = { name: e.name, sub: e.sub || "", why: "older copy of " + L[0].e.name + (L[0].e.sub ? " (" + String(L[0].e.sub).split(" · ")[0] + ")" : "") }; });
       });
-      for (const id in SUPERSEDED) if (!CLK[id]) { const e = all.find(x => x.id === id); if (e) out[id] = { name: e.name, sub: e.sub || "", why: "the " + SUPERSEDED[id] + " took its place" }; }
+      for (const id in SUPERSEDED) if (!CLK[id] && !(id === "e:hoover" && !ENGINES.alpha)) {   /* (the classic Hoover stays where there is no Alpha Juno: the website, the Windows app) */ const e = all.find(x => x.id === id); if (e) out[id] = { name: e.name, sub: e.sub || "", why: "the " + SUPERSEDED[id] + " took its place" }; }
       CLS = out; return CLS;
     }
     const OFF = k => !!(HID[k] || clsBuild()[k]);
@@ -38235,7 +38240,7 @@ registerProcessor("nb-aw", NBAwProc);
       const k = "w:" + c.key; if (OFF(k)) return;
       const open = esOpen.has(k), playing = curEng === k;
       const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
-      { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, ev => esToggle(k, ev))); hr.appendChild(esHideBtn(k, c.name, "plugin", wrap)); wrap.appendChild(hr); }
+      { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : (c.vendor || "plugin"), false, ev => esToggle(k, ev))); hr.appendChild(esHideBtn(k, c.name, "plugin", wrap)); wrap.appendChild(hr); }
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps"; wrap.appendChild(box);
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
@@ -38317,7 +38322,7 @@ registerProcessor("nb-aw", NBAwProc);
       if (pending) { const n = document.createElement("p"); n.className = "es-none"; n.textContent = "Loading the plugins' presets…"; es.appendChild(n); }
     }
     // ---------- (213) Effects, Linux only: put an effect on the sounds you pick, and take it off one sound without the others ----------
-    const ES_LINUX = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");
+    const ES_LINUX = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));
     const FX_GROUPS = [["Reverb", /reverb/i], ["Delay & Echo", /delay|echo/i], ["Chorus & Modulation", /modulation|chorus|phaser|flanger/i], ["Saturation & Tape", /saturation|tape/i],
       ["Distortion & Amps", /distortion|fuzz|amp/i], ["Filters & EQ", /filter|equalizer|eq/i], ["Dynamics", /dynamics|compress/i], ["Granular & Glitch", /granular|glitch/i], ["Pitch", /pitch/i]];
     const fxGroupOf = c => { for (const [g, re] of FX_GROUPS) if (re.test(c.type || "")) return g; return "Utility & Other"; };
@@ -38528,7 +38533,7 @@ registerProcessor("nb-aw", NBAwProc);
       }
       for (const c of catL().filter(c => c.kind === "instrument")) {
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
-        add(plainE.id, c.name, c.vendor === "Nathan" ? "your plugin" : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
+        add(plainE.id, c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
         const m = esPlugCache(c.key);
         if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name + (pr.cat ? " · " + pr.cat : ""), (pr.cat ? pr.cat + " " : "") + (c.type || ""), () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
       }
@@ -38579,7 +38584,7 @@ registerProcessor("nb-aw", NBAwProc);
   // (214, Linux) the second (third, fourth) sound on an engine plays as another set of that engine's voices, each with its
   // own preset's settings: every note (and the arp) plays the engine again with the copy's settings swapped in for that note.
   // It rides on the engine's own part of what the keys play, so it follows that engine's controller, zones and arp.
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const vc0 = voiceComponents;
     voiceComponents = function () {
       const r = vc0.apply(this, arguments);
@@ -38607,7 +38612,7 @@ registerProcessor("nb-aw", NBAwProc);
   // the XD's own program data kept so the notebook can send the sound back to the XD. Notes are yours to write.
   // The XD's program format is Korg's (minilogue xd MIDI implementation; field layout as in loguetools, BSD).
   // ======================================================================
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const NB_KEY = "nightbloom-notebook";
     let NOTES = []; try { NOTES = JSON.parse(localStorage.getItem(NB_KEY) || "[]"); if (!Array.isArray(NOTES)) NOTES = []; } catch (e) { NOTES = []; }
     const nbSave = () => { try { localStorage.setItem(NB_KEY, JSON.stringify(NOTES)); return true; } catch (e) { toast("The notebook is full: export it, then delete some entries"); return false; } };
@@ -39520,23 +39525,23 @@ registerProcessor("nb-aw", NBAwProc);
   // ======================================================================
   {
     const N = window.NB_NATIVE;
-    if (N && N.platform === "linux" && N.shellLatest) {
+    if (N && /^(linux|windows)$/.test(N.platform) && N.shellLatest) {
       async function check() {
         let r = null; try { r = await N.shellLatest(); } catch (e) { return; }
         if (!r || !r.newer || !r.hasDeb) return;
         const lg = document.getElementById("shLog"); if (!lg || document.getElementById("shUpd")) return;
         const b = document.createElement("button"); b.type = "button"; b.className = "btn primary"; b.id = "shUpd"; b.textContent = "App " + r.latest + " ↓";
-        b.title = "A newer Linux app is out (" + r.latest + ", you have " + r.current + "): its plugin store, bridge and engine. Tap to download it and open the installer.";
+        b.title = "A newer version of the app is out (" + r.latest + ", you have " + r.current + "). Tap to download it and open the installer.";
         b.addEventListener("click", async () => {
           b.disabled = true; b.textContent = "Downloading…";
           let x = null; try { x = await N.shellInstall(); } catch (e) { x = { ok: false, error: String(e) }; }
           const t = document.getElementById("uiToast");
-          if (x && x.ok) { b.textContent = "Installer open"; if (t) { t.textContent = "The installer is open: Install Package, then close and reopen Nate Bloom. Your sounds and settings stay."; t.hidden = false; setTimeout(() => { t.hidden = true; }, 7000); } }
+          if (x && x.ok) { b.textContent = "Installer open"; if (t) { t.textContent = (N.platform === "windows" ? "The installer is running: let it finish, and Nate Bloom opens again." : "The installer is open: Install Package, then close and reopen Nate Bloom.") + " Your sounds and settings stay."; t.hidden = false; setTimeout(() => { t.hidden = true; }, 7000); } }
           else { b.disabled = false; b.textContent = "App " + r.latest + " ↓"; if (t) { t.textContent = "Couldn't get it: " + (x && x.error || "no answer") + ". It's also on the releases page."; t.hidden = false; setTimeout(() => { t.hidden = true; }, 6000); } }
           try { window.__nbAdd && window.__nbAdd("app", "update " + r.current + " → " + r.latest + ": " + (x && x.ok ? "installer opened" : (x && x.error))); } catch (e) {}
         });
         lg.before(b);
-        try { window.__nbAdd && window.__nbAdd("app", "a newer Linux app is out: " + r.latest + " (this is " + r.current + ")"); } catch (e) {}
+        try { window.__nbAdd && window.__nbAdd("app", "a newer app is out: " + r.latest + " (this is " + r.current + ")"); } catch (e) {}
       }
       setTimeout(check, 8000); setInterval(check, 6 * 3600 * 1000);
     }

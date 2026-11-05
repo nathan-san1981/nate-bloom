@@ -69,7 +69,7 @@
       }
       // a plugin
       const pk = k.slice(2), c = ((window.__nbw && window.__nbw.CAT) || []).find(x => x.key === pk); if (!c) { ep.hidden = true; return; }
-      ep.appendChild(epHead(c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), k));
+      ep.appendChild(epHead(c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : (c.vendor || "plugin"), k));
       const fill = m => {
         if (!m || !m.list || !m.list.length) {
           const n = document.createElement("p"); n.className = "ep-none";
@@ -141,7 +141,7 @@
           if (e.id.startsWith("n:") && L[0].e.id.startsWith("e:") && engOf(e.id) !== L[0].e.id.slice(2)) return;
           if (!CLK[e.id]) out[e.id] = { name: e.name, sub: e.sub || "", why: "older copy of " + L[0].e.name + (L[0].e.sub ? " (" + String(L[0].e.sub).split(" · ")[0] + ")" : "") }; });
       });
-      for (const id in SUPERSEDED) if (!CLK[id]) { const e = all.find(x => x.id === id); if (e) out[id] = { name: e.name, sub: e.sub || "", why: "the " + SUPERSEDED[id] + " took its place" }; }
+      for (const id in SUPERSEDED) if (!CLK[id] && !(id === "e:hoover" && !ENGINES.alpha)) {   /* (the classic Hoover stays where there is no Alpha Juno: the website, the Windows app) */ const e = all.find(x => x.id === id); if (e) out[id] = { name: e.name, sub: e.sub || "", why: "the " + SUPERSEDED[id] + " took its place" }; }
       CLS = out; return CLS;
     }
     const OFF = k => !!(HID[k] || clsBuild()[k]);
@@ -242,7 +242,7 @@
       const k = "w:" + c.key; if (OFF(k)) return;
       const open = esOpen.has(k), playing = curEng === k;
       const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
-      { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, ev => esToggle(k, ev))); hr.appendChild(esHideBtn(k, c.name, "plugin", wrap)); wrap.appendChild(hr); }
+      { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : (c.vendor || "plugin"), false, ev => esToggle(k, ev))); hr.appendChild(esHideBtn(k, c.name, "plugin", wrap)); wrap.appendChild(hr); }
       if (open) {
         const box = document.createElement("div"); box.className = "es-ps"; wrap.appendChild(box);
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
@@ -324,7 +324,7 @@
       if (pending) { const n = document.createElement("p"); n.className = "es-none"; n.textContent = "Loading the plugins' presets…"; es.appendChild(n); }
     }
     // ---------- (213) Effects, Linux only: put an effect on the sounds you pick, and take it off one sound without the others ----------
-    const ES_LINUX = !!(window.NB_NATIVE && NB_NATIVE.platform === "linux");
+    const ES_LINUX = !!(window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform));
     const FX_GROUPS = [["Reverb", /reverb/i], ["Delay & Echo", /delay|echo/i], ["Chorus & Modulation", /modulation|chorus|phaser|flanger/i], ["Saturation & Tape", /saturation|tape/i],
       ["Distortion & Amps", /distortion|fuzz|amp/i], ["Filters & EQ", /filter|equalizer|eq/i], ["Dynamics", /dynamics|compress/i], ["Granular & Glitch", /granular|glitch/i], ["Pitch", /pitch/i]];
     const fxGroupOf = c => { for (const [g, re] of FX_GROUPS) if (re.test(c.type || "")) return g; return "Utility & Other"; };
@@ -535,7 +535,7 @@
       }
       for (const c of catL().filter(c => c.kind === "instrument")) {
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
-        add(plainE.id, c.name, c.vendor === "Nathan" ? "your plugin" : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
+        add(plainE.id, c.name, c.vendor === "Nathan" ? (NB_YOURS ? "your plugin" : "by Nathan") : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
         const m = esPlugCache(c.key);
         if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name + (pr.cat ? " · " + pr.cat : ""), (pr.cat ? pr.cat + " " : "") + (c.type || ""), () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
       }
@@ -586,7 +586,7 @@
   // (214, Linux) the second (third, fourth) sound on an engine plays as another set of that engine's voices, each with its
   // own preset's settings: every note (and the arp) plays the engine again with the copy's settings swapped in for that note.
   // It rides on the engine's own part of what the keys play, so it follows that engine's controller, zones and arp.
-  if (window.NB_NATIVE && NB_NATIVE.platform === "linux") {
+  if (window.NB_NATIVE && /^(linux|windows)$/.test(NB_NATIVE.platform)) {
     const vc0 = voiceComponents;
     voiceComponents = function () {
       const r = vc0.apply(this, arguments);
