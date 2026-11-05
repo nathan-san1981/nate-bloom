@@ -425,7 +425,8 @@ ipcMain.handle("nb:shell-latest", async () => {
     if (!r.ok) return { current: app.getVersion(), err: "HTTP " + r.status };
     const WIN = process.platform === "win32", TAG = WIN ? /^win-v/ : /^linux-v/;   // (234) the Windows app: its own releases, the Setup .exe
     const rel = (await r.json()).find(x => TAG.test(x.tag_name) && !x.draft); if (!rel) return { current: app.getVersion() };
-    const deb = (rel.assets || []).find(a => WIN ? /setup.*\.exe$/i.test(a.name) : /\.deb$/i.test(a.name));
+    const ARM = process.arch === "arm64";   // (236) an ARM64 Windows app updates to the ARM64 installer
+    const deb = (rel.assets || []).find(a => WIN ? /setup.*\.exe$/i.test(a.name) && /arm64/i.test(a.name) === ARM : /\.deb$/i.test(a.name));
     shellRel = { latest: rel.tag_name.replace(/^(linux|win)-v/, ""), deb: deb ? deb.browser_download_url : "", name: deb ? deb.name : "" };
     return { current: app.getVersion(), latest: shellRel.latest, newer: verNewer(shellRel.latest, app.getVersion()), hasDeb: !!deb };
   } catch (er) { return { current: app.getVersion(), err: String(er && er.message || er) }; }

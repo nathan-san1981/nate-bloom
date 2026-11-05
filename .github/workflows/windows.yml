@@ -47,6 +47,8 @@ jobs:
         run: |
           set -o pipefail
           cd linux && npx --no-install electron-builder --win nsis portable --x64 --publish never --config ../windows/builder.json -c.extraMetadata.version=$NB_VERSION 2>&1 | tee /tmp/nb-logs/build.log
+          # (236) native ARM64 for Snapdragon laptops: the x64 one runs there through emulation, but the heaviest synths drop out
+          npx --no-install electron-builder --win nsis portable --arm64 --publish never --config ../windows/builder.json -c.extraMetadata.version=$NB_VERSION -c.nsis.artifactName='NateBloom-Setup-arm64-${version}.${ext}' -c.portable.artifactName='NateBloom-portable-arm64-${version}.${ext}' 2>&1 | tee -a /tmp/nb-logs/build.log
           ls -la dist-win | tee -a /tmp/nb-logs/build.log
       - name: Smoke test (start the portable .exe, check the page)
         if: steps.build.outcome == 'success'
@@ -60,12 +62,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd linux/dist-win
-          SETUP=$(ls NateBloom-Setup-*.exe | head -1); PORT=$(ls NateBloom-portable-*.exe | head -1)
-          cp "$SETUP" NateBloom-Setup.exe; cp "$PORT" NateBloom-portable.exe
-          gh release create "win-v$NB_VERSION" "$SETUP" "$PORT" --title "Nate Bloom for Windows $NB_VERSION" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
+          SETUP=$(ls NateBloom-Setup-[0-9]*.exe | head -1); PORT=$(ls NateBloom-portable-[0-9]*.exe | head -1)
+          SETUPA=$(ls NateBloom-Setup-arm64-*.exe | head -1); PORTA=$(ls NateBloom-portable-arm64-*.exe | head -1)
+          cp "$SETUP" NateBloom-Setup.exe; cp "$PORT" NateBloom-portable.exe; cp "$SETUPA" NateBloom-Setup-arm64.exe; cp "$PORTA" NateBloom-portable-arm64.exe
+          gh release create "win-v$NB_VERSION" "$SETUP" "$PORT" "$SETUPA" "$PORTA" --title "Nate Bloom for Windows $NB_VERSION" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
           gh release view windows-latest >/dev/null 2>&1 || gh release create windows-latest --title "Nate Bloom for Windows (latest)" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
           gh release edit windows-latest --title "Nate Bloom for Windows (latest: $NB_VERSION)" --notes-file ../../windows/RELEASE_NOTES.md --latest=false
-          gh release upload windows-latest NateBloom-Setup.exe NateBloom-portable.exe --clobber
+          gh release upload windows-latest NateBloom-Setup.exe NateBloom-portable.exe NateBloom-Setup-arm64.exe NateBloom-portable-arm64.exe --clobber
       - name: Logs
         if: always()
         uses: actions/upload-artifact@v4

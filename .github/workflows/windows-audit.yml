@@ -31,8 +31,13 @@ jobs:
         run: cd linux && npm install --no-audit --no-fund --ignore-scripts 2>&1 | tail -5 && node node_modules/electron/install.js
       - name: Package
         run: cd linux && npx --no-install electron-builder --win nsis portable --x64 --publish never --config ../windows/builder.json -c.extraMetadata.version=1.0.0-audit 2>&1 | tail -5
+      - name: Package for ARM64
+        run: cd linux && npx --no-install electron-builder --win nsis portable --arm64 --publish never --config ../windows/builder.json -c.extraMetadata.version=1.0.0-audit -c.nsis.artifactName='NateBloom-Setup-arm64-${version}.${ext}' -c.portable.artifactName='NateBloom-portable-arm64-${version}.${ext}' 2>&1 | tail -5
       - name: Keep the build
-        run: cd linux/dist-win && mkdir -p ../../out && cp NateBloom-Setup-*.exe ../../out/setup.exe && cp NateBloom-portable-*.exe ../../out/portable.exe && cp -r win-unpacked ../../out/
+        run: |
+          cd linux/dist-win && ls && mkdir -p ../../out/x64 ../../out/arm64
+          cp NateBloom-Setup-1*.exe ../../out/x64/setup.exe && cp NateBloom-portable-1*.exe ../../out/x64/portable.exe && cp -r win-unpacked ../../out/x64/unpacked
+          cp NateBloom-Setup-arm64-*.exe ../../out/arm64/setup.exe && cp NateBloom-portable-arm64-*.exe ../../out/arm64/portable.exe && cp -r win-arm64-unpacked ../../out/arm64/unpacked
       - uses: actions/upload-artifact@v4
         with: { name: win-build, path: out, retention-days: 3 }
 
@@ -62,12 +67,13 @@ jobs:
           "$($c.Name) cores $($c.NumberOfCores) threads $($c.NumberOfLogicalProcessors) RAM $([math]::Round($o.TotalVisibleMemorySize/1MB,1)) GB" | Tee-Object -FilePath machine.txt -Append
       - name: Audit (${{ matrix.mode }})
         run: |
-          python windows/audit.py "build/win-unpacked/Nate Bloom.exe" ${{ matrix.mode }} report 2>&1 | tee audit.txt
+          A=x64; [ "${{ matrix.os }}" = "windows-11-arm" ] && A=arm64; echo "A=$A" >> $GITHUB_ENV
+          python windows/audit.py "build/$A/unpacked/Nate Bloom.exe" ${{ matrix.mode }} report 2>&1 | tee audit.txt
           cp machine.txt audit.txt report/
       - name: Installer and portable
         if: matrix.mode == 'normal'
         run: |
-          python windows/install_check.py build/setup.exe build/portable.exe report/install 2>&1 | tee report/install.txt
+          python windows/install_check.py build/$A/setup.exe build/$A/portable.exe report/install 2>&1 | tee report/install.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: "audit-${{ matrix.os }}-${{ matrix.mode }}", path: report }
