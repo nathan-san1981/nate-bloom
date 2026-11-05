@@ -25170,15 +25170,15 @@ registerProcessor("nb-wave", NBWave);
     }
     // a level that drops to 0 while it's playing says so (and the report's log shows it); a sound that comes back from
     // last time at 0 is set back to 0 dB, since a sound left at 0 in Playing is a silent one nobody chose to keep
-    { const was = new Map(), seen = new Set(), t0 = Date.now();
+    { const was = new Map(), seen = new Set();
       setInterval(() => {
         let its; try { its = items(); } catch (e) { return; }
         let ch = false; const now = new Map();
         for (const it of its) {
-          const lr = lvRef(it); if (!lr) continue; const k = itKey(it) + (it.ci != null ? "#" + it.ci : ""), z = !(lr.get() > 0.001); now.set(k, z); const first = !seen.has(k) && Date.now() - t0 < 20000; seen.add(k);
+          const lr = lvRef(it); if (!lr) continue; const k = itKey(it) + (it.ci != null ? "#" + it.ci : ""), z = !(lr.get() > 0.001); now.set(k, z); const first = !seen.has(k); seen.add(k);   // (227) the first time it's in Playing this session, not only at start-up
           if (first && z) { lr.set(0.8); try { lvApply(); save(); } catch (e) {} now.set(k, false); ch = true;
             try { window.__nbAdd && window.__nbAdd("level", it.name + " came back at level 0 · set to 0 dB"); } catch (e) {}
-            lvToast(it.name + " was at level 0 from last time (silent) · set back to 0 dB"); continue; }
+            lvToast(it.name + " was left at level 0 (silent) · set back to 0 dB"); continue; }
           if (z !== !!was.get(k)) { ch = true;
             if (z) { try { window.__nbAdd && window.__nbAdd("level", it.name + " level 0 (KeyLab fader or Mixer)"); } catch (e) {}
               lvToast(it.name + "'s level is at 0, so it's silent · tap 🔈 on its chip to bring it back"); } }
@@ -25217,6 +25217,13 @@ registerProcessor("nb-wave", NBWave);
         { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out" + (n > 1 ? " (the others keep playing" : " (nothing plays from the keys") + " · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
         stkRow.appendChild(c);
       });
+      // (227) the MicroFreak playing Nate Bloom sounds: it's in what's playing as the keys, so it shows here too
+      try { const X = window.__mfMode && window.__mfMode() === "nb" && window.__hwx && __hwx.get("mf");
+        if (X && X.present()) { const c = el("div", "stk-chip mf-keys"); c.style.setProperty("--kc", KC.hardware || "var(--amber)");
+          const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>"; m.querySelector("b").textContent = "MicroFreak";
+          m.querySelector("small").textContent = "its keys and knobs play " + ((r => r && r.startsWith("e:") && ENGINES[r.slice(2)] ? ENGINES[r.slice(2)].name : n > 1 ? "these" : n ? its[0].name : "nothing yet")(window.__mfRoute && __mfRoute())) + " · tap for its settings";
+          m.title = "The MicroFreak is set to play Nate Bloom sounds. Tap to switch it back to its own sounds, or change what it plays.";
+          m.addEventListener("click", () => { start(); X.open(); }); c.appendChild(m); stkRow.appendChild(c); } } catch (e) {}
       const add = el("button", "btn stk-add", "+ Add"); add.title = !n ? "Pick a sound for the keys" : "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
       add.addEventListener("click", () => { ADD.on = true; openBrowser(); paintBrMode(); });
       stkRow.appendChild(add);
@@ -25336,7 +25343,7 @@ registerProcessor("nb-wave", NBWave);
     function paintQuick() {
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
-      const togOn = q => q.hw || (q.hwx && !(q.hwx === "mf" && window.__mfMode)) || (!q.id.startsWith("my:") && togOK(q.id));
+      const togOn = q => q.hw || (q.hwx && !(q.hwx === "mf" && window.__mfMode && window.__mfMode() === "nb")) || (!q.id.startsWith("my:") && togOK(q.id));
       const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
@@ -33445,7 +33452,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 226;
+    window.NB_BUILD = 227;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -35036,7 +35043,11 @@ registerProcessor("nb-rec", NBRec);`;
       // the model in use: the one picked, else the first known synth plugged in, else the one last seen
       function model() {
         if (H.model) { const m = MODELS.find(x => x.id === H.model); if (m) return m; }
-        const on = outs().map(modelOf).find(Boolean); if (on) return on;
+        // (227) the first one in this list that's plugged in (the Minilogue XD before the MicroFreak), and from then on
+        // that one: it used to follow whatever was plugged in, so with the XD unplugged this slot turned into a second
+        // MicroFreak (and played the XD under that name once it was back)
+        const os = outs(), on = MODELS.find(m => m.id !== "other" && os.some(p => m.re.test(pname(p))));
+        if (on) { if (!H.model) { H.model = on.id; try { hwSave(); } catch (e) {} } return on; }
         return MODELS.find(x => x.id === H.lastModel) || MODELS[0];
       }
       const isHW = p => { const m = model(); return m.id !== "other" && m.re.test(pname(p)); };
@@ -35219,6 +35230,7 @@ registerProcessor("nb-rec", NBRec);`;
         if (real && real.deviceId !== H.inId) { try { window.__nbAdd && window.__nbAdd("hw", "back on " + (real.label || "the input")); } catch (e) {} hwOpen(true); }
       }
       H.recheck = hwRecheck;
+      H.pickApply = () => hwPick();   // (227) its input channels changed from outside its sheet
       H.save = () => hwSave();   // (200) Favorites put a hardware synth's settings back
       try { navigator.mediaDevices.addEventListener("devicechange", () => { clearTimeout(hwDcT); hwDcT = setTimeout(hwRecheck, 400); if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
       setInterval(() => { if (H.standIn && H.src) hwRecheck(); }, 5000);   // (and if the event never came)
@@ -35411,6 +35423,7 @@ registerProcessor("nb-rec", NBRec);`;
           X.allOff = () => { const p = X.port(); if (!p) return; const ch = (c.ch - 1) & 15; try { X.notes.forEach((k, n) => p.send([0x80 | ch, n, 0])); p.send([0xb0 | ch, 123, 0]); } catch (e) {} X.notes.clear(); };
           X.added = () => { c.seen = true; cfgSave(); if (!X.present()) toast(X.name + " added · plug it in over USB and it plays"); wire(X); };
           X.open = () => openSheet(X);
+          X.rewire = () => { X.err = ""; closeIn(X); wire(X); };   // (227) its input or channels changed
           return X;
         }
         function toast(t) { const e = document.getElementById("uiToast"); if (!e) return; e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { e.hidden = true; }, 2800); }
@@ -35508,6 +35521,97 @@ registerProcessor("nb-rec", NBRec);`;
         setInterval(() => all().forEach(X => { if (X.bus) X.bus.gain.value = X.mute ? 0 : X.cfg.level / 0.8; }), 500);
       }
     }
+  // ======================================================================
+  // 227: which input of the interface each hardware synth's sound is on, found by listening. The Minilogue's input took
+  // both of the Volt's inputs (1+2), so a MicroFreak on input 2 came through as the Minilogue, and with its own input
+  // unset the MicroFreak's chip had nothing. When a synth's own keys play a note (the MicroFreak's, the Minilogue's
+  // MIDI OUT), each input of the Volt is measured just before and just after: the one that jumps is that synth's.
+  // Twice the same answer and it's set (the MicroFreak on input 2, the Minilogue on input 1, say). Heard on neither:
+  // its sound isn't reaching the computer, and its sheet says so.
+  // ======================================================================
+  {
+    const H = window.__hw;
+    if (H && window.__hwx && navigator.mediaDevices) {
+      const P = window.__hwProbe = { st: null, an: [], dev: "", label: "", err: "", opening: false, base: [0, 0], quietAt: 0, res: {}, last: {}, until: 0 };
+      const buf = new Float32Array(2048);
+      const rms = a => { a.getFloatTimeDomainData(buf); let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i]; return Math.sqrt(s / buf.length); };
+      const say = (t) => { try { window.__nbAdd && window.__nbAdd("hw", t); } catch (e) {} };
+      const toast = m => { const e = document.getElementById("uiToast"); if (!e) return; e.textContent = m; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { e.hidden = true; }, 4500); };
+      async function voltDev() {
+        const ds = await navigator.mediaDevices.enumerateDevices();
+        return ds.find(d => d.kind === "audioinput" && H.dev && d.deviceId === H.dev) || ds.find(d => d.kind === "audioinput" && /volt/i.test(d.label || "")) || null;
+      }
+      async function open() {
+        if (P.st || P.opening || !ctx) return; P.opening = true;
+        try {
+          const d = await voltDev(); if (!d) { P.err = "no Volt"; return; }
+          const st = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: d.deviceId }, channelCount: { ideal: 2 }, echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+          P.st = st; P.dev = d.deviceId; P.label = d.label || "the interface"; P.err = "";
+          const src = ctx.createMediaStreamSource(st), sp = ctx.createChannelSplitter(2); src.connect(sp); P.src = src;
+          P.an = [0, 1].map(i => { const a = ctx.createAnalyser(); a.fftSize = 2048; sp.connect(a, i); return a; });
+        } catch (e) { P.err = (e && e.name) || "error"; }
+        finally { P.opening = false; }
+      }
+      function close() { try { P.src && P.src.disconnect(); } catch (e) {} if (P.st) P.st.getTracks().forEach(t => { try { t.stop(); } catch (e) {} }); P.st = P.src = null; P.an = []; }
+      // the resting level of each input, between notes
+      setInterval(() => { if (!P.an.length || performance.now() < P.quietAt) return; P.an.forEach((a, i) => { const v = rms(a); P.base[i] = P.base[i] ? P.base[i] * 0.7 + v * 0.3 : v; }); }, 120);
+      const XD = () => ({ id: "hw", name: H.name, get pick() { return H.pick; }, dev: () => H.dev, set(dev, pick) { H.pick = pick; try { H.save(); H.pickApply && H.pickApply(); } catch (e) {} } });
+      const MF = id => { const X = window.__hwx.get(id); return X && { id, name: X.name, get pick() { return X.cfg.pick; }, dev: () => X.cfg.dev, set(dev, pick) { X.cfg.dev = dev; X.cfg.pick = pick; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} } }; };
+      function heard(who) {
+        if (!P.an.length) return;
+        const b = P.base.slice(), mx = [0, 0]; let n = 0; P.quietAt = performance.now() + 700;
+        const t = setInterval(() => {
+          P.an.forEach((a, i) => { mx[i] = Math.max(mx[i], rms(a)); });
+          if (++n < 5) return; clearInterval(t);
+          const up = mx.map((v, i) => v > 0.004 && v > 3 * Math.max(b[i], 0.0004));
+          const ans = up[0] && up[1] ? "12" : up[0] ? "1" : up[1] ? "2" : "";
+          const L = P.last[who] || { ans: null, k: 0 }; L.k = L.ans === ans ? L.k + 1 : 1; L.ans = ans; P.last[who] = L;
+          if (L.k >= 2) decide(who, ans);
+        }, 90);
+      }
+      function decide(who, ans) {
+        const prev = P.res[who]; P.res[who] = { ans, at: Date.now() };
+        if (prev && prev.ans === ans) return;
+        const S = who === "hw" ? XD() : MF(who); if (!S) return;
+        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": its sound isn't coming into the computer. Check its output cable."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
+        const name = ans === "12" ? "inputs 1+2" : "input " + ans;
+        say(S.name + " heard on " + P.label + " " + name);
+        // its own: set when it has none, or when it was taking both and only one is its
+        const mine = S.dev(), onVolt = !mine || mine === P.dev;
+        if (onVolt && S.pick !== ans && (who !== "hw" || ans !== "12")) { S.set(P.dev, ans); toast(S.name + " is on " + P.label + " " + name + " · set"); }
+        // the other synth taking both inputs gives up this one
+        if (ans !== "12") {
+          const other = ans === "1" ? "2" : "1";
+          const others = [XD()].concat(window.__hwx.all().map(X => MF(X.id))).filter(o => o && o.id !== who);
+          others.forEach(o => { const od = o.dev(), same = o.id === "hw" ? (!od || od === P.dev) : od === P.dev; if (same && o.pick === "12") { o.set(P.dev, other); say(o.name + " moved to " + P.label + " input " + other + " (" + S.name + " is on input " + ans + ")"); } });
+        }
+        try { window.__hwxRepaint && window.__hwxRepaint(); window.__stk.paint(); } catch (e) {}
+      }
+      // its own keys: listen on each synth's MIDI input directly (whatever Nate Bloom does with those notes)
+      const hooked = new WeakSet();
+      function hook() {
+        if (!md.access) return;
+        for (const i of md.access.inputs.values()) {
+          if (hooked.has(i)) continue; const nm = (i.name || "") + " " + (i.manufacturer || "");
+          const m = H.models.find(x => x.id !== "other" && x.re.test(nm)); if (!m) continue;
+          if (m.skip && !/kbd|knob|midi out/i.test(i.name || "") && /sound/i.test(i.name || "")) continue;   // (the XD's own keys come from its MIDI OUT port)
+          hooked.add(i);
+          i.addEventListener("midimessage", e => {
+            const d = e.data; if (!d || (d[0] & 0xf0) !== 0x90 || !d[2]) return;
+            const who = H.modelId() === m.id ? "hw" : m.id; P.until = Date.now() + 10 * 60000;
+            if (!P.st) { open(); return; }
+            heard(who);
+          });
+        }
+      }
+      setInterval(() => {
+        hook();
+        if (P.st && Date.now() > P.until) close();   // (only open while someone is playing them)
+      }, 2000);
+      P.decide = decide;
+      P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer (check its output cable, or the mixer it goes to)."; };
+    }
+  }
   // ======================================================================
   // (176) The Linux app's native engine: the Juno, Supersaw, Analog, Hoover, Mono, Pluck, Tyrell, Sync Lead and Comb Bells worked out in compiled code on a pool of threads (nb_engine.cc), not
   // on the browser's one audio thread. The engine writes finished audio into shared memory; the AudioWorklet here
@@ -38853,14 +38957,14 @@ registerProcessor("nb-aw", NBAwProc);
     const MFM_KEY = "nightbloom-mf-mode", MFR_KEY = "nightbloom-mf-route";
     let mfMode = (() => { try { return localStorage.getItem(MFM_KEY) === "nb" ? "nb" : "own"; } catch (e) { return "own"; } })();
     let mfRoute = (() => { try { return localStorage.getItem(MFR_KEY) || "stack"; } catch (e) { return "stack"; } })();
-    window.__mfMode = () => mfMode;
+    window.__mfMode = () => mfMode; window.__mfRoute = () => mfRoute;
     const mdPort = kind => md.access ? [...md.access[kind === "in" ? "inputs" : "outputs"].values()].find(isMF) || null : null;
     function mfApply() {
       if (!md.access) return;
       const i = mdPort("in"), o = mdPort("out");
       if (o && md.outs.has(o.id)) { mdRemember("out", o, false); md.outs.delete(o.id); }   // (the sequencer's notes and clock never go to it)
       if (i) { const on = mfMode === "nb"; if (md.ins.has(i.id) !== on) { mdRemember("in", i, on); if (on) md.ins.add(i.id); else md.ins.delete(i.id); } if (on) mdRouteSet(i, mfRoute); }
-      try { const st = window.__stk, it = st.items().find(x => x.t === "hwx" && x.id === "mf"); if (it) st.drop(it, true); } catch (e) {}
+      if (mfMode === "nb") { try { const st = window.__stk, it = st.items().find(x => x.t === "hwx" && x.id === "mf"); if (it) st.drop(it, true); } catch (e) {} }   // (227) with its own sounds it can play along in Playing too
       try { renderMidi(); } catch (e) {}
     }
     function mfSetMode(m) { mfMode = m; try { localStorage.setItem(MFM_KEY, m); } catch (e) {} mfApply(); hwPaintSoon(); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} }
@@ -38906,8 +39010,18 @@ registerProcessor("nb-aw", NBAwProc);
           const add = (v, t) => { const o = mk("option", "", t); o.value = v; ds.appendChild(o); };
           add("", "Its sound: from its own outputs (not through Nate Bloom)");
           navigator.mediaDevices.enumerateDevices().then(ls => { ls.filter(x => x.kind === "audioinput").forEach((x, i) => add(x.deviceId, "Its sound comes in from: " + (x.label || "Input " + (i + 1)))); ds.value = X.cfg.dev || ""; }).catch(() => {});
-          ds.addEventListener("change", () => { X.cfg.dev = ds.value; X.err = ""; try { window.__hwxCfgSave(); } catch (e) {} });
-          r.appendChild(ds); box.appendChild(r);
+          ds.addEventListener("change", () => { X.cfg.dev = ds.value; X.err = ""; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} hwPaintSoon(); });
+          r.appendChild(ds);
+          if (X.cfg.dev) {   // (227) which of its inputs: the Minilogue can be on 1 and this on 2
+            const ps = mk("select", "hw-sel"); ps.setAttribute("aria-label", "Which inputs");
+            [["12", "Inputs 1+2"], ["1", "Input 1"], ["2", "Input 2"]].forEach(([v, t]) => { const o = mk("option", "", t); o.value = v; ps.appendChild(o); });
+            ps.value = X.cfg.pick || "12";
+            ps.addEventListener("change", () => { X.cfg.pick = ps.value; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} });
+            r.appendChild(ps);
+          }
+          box.appendChild(r);
+          { const t = window.__hwProbe && window.__hwProbe.text && window.__hwProbe.text("mf"); if (t) box.appendChild(mk("small", "hw-mfn", t)); }
+          box.appendChild(mk("small", "hw-mfn", "+ on MicroFreak in Quick sounds plays it along with what's playing (your KeyLab's notes go to it too); its own keys still play only itself."));
         }
       } else {
         const r = mk("div", "hw-mfc"), rs = mk("select", "hw-sel"); rs.setAttribute("aria-label", "MicroFreak's keys play");

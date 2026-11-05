@@ -33,7 +33,11 @@
       // the model in use: the one picked, else the first known synth plugged in, else the one last seen
       function model() {
         if (H.model) { const m = MODELS.find(x => x.id === H.model); if (m) return m; }
-        const on = outs().map(modelOf).find(Boolean); if (on) return on;
+        // (227) the first one in this list that's plugged in (the Minilogue XD before the MicroFreak), and from then on
+        // that one: it used to follow whatever was plugged in, so with the XD unplugged this slot turned into a second
+        // MicroFreak (and played the XD under that name once it was back)
+        const os = outs(), on = MODELS.find(m => m.id !== "other" && os.some(p => m.re.test(pname(p))));
+        if (on) { if (!H.model) { H.model = on.id; try { hwSave(); } catch (e) {} } return on; }
         return MODELS.find(x => x.id === H.lastModel) || MODELS[0];
       }
       const isHW = p => { const m = model(); return m.id !== "other" && m.re.test(pname(p)); };
@@ -216,6 +220,7 @@
         if (real && real.deviceId !== H.inId) { try { window.__nbAdd && window.__nbAdd("hw", "back on " + (real.label || "the input")); } catch (e) {} hwOpen(true); }
       }
       H.recheck = hwRecheck;
+      H.pickApply = () => hwPick();   // (227) its input channels changed from outside its sheet
       H.save = () => hwSave();   // (200) Favorites put a hardware synth's settings back
       try { navigator.mediaDevices.addEventListener("devicechange", () => { clearTimeout(hwDcT); hwDcT = setTimeout(hwRecheck, 400); if (!sh.hidden) hwSheetPaint(); }); } catch (e) {}
       setInterval(() => { if (H.standIn && H.src) hwRecheck(); }, 5000);   // (and if the event never came)

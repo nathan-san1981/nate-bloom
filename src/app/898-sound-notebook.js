@@ -356,14 +356,14 @@
     const MFM_KEY = "nightbloom-mf-mode", MFR_KEY = "nightbloom-mf-route";
     let mfMode = (() => { try { return localStorage.getItem(MFM_KEY) === "nb" ? "nb" : "own"; } catch (e) { return "own"; } })();
     let mfRoute = (() => { try { return localStorage.getItem(MFR_KEY) || "stack"; } catch (e) { return "stack"; } })();
-    window.__mfMode = () => mfMode;
+    window.__mfMode = () => mfMode; window.__mfRoute = () => mfRoute;
     const mdPort = kind => md.access ? [...md.access[kind === "in" ? "inputs" : "outputs"].values()].find(isMF) || null : null;
     function mfApply() {
       if (!md.access) return;
       const i = mdPort("in"), o = mdPort("out");
       if (o && md.outs.has(o.id)) { mdRemember("out", o, false); md.outs.delete(o.id); }   // (the sequencer's notes and clock never go to it)
       if (i) { const on = mfMode === "nb"; if (md.ins.has(i.id) !== on) { mdRemember("in", i, on); if (on) md.ins.add(i.id); else md.ins.delete(i.id); } if (on) mdRouteSet(i, mfRoute); }
-      try { const st = window.__stk, it = st.items().find(x => x.t === "hwx" && x.id === "mf"); if (it) st.drop(it, true); } catch (e) {}
+      if (mfMode === "nb") { try { const st = window.__stk, it = st.items().find(x => x.t === "hwx" && x.id === "mf"); if (it) st.drop(it, true); } catch (e) {} }   // (227) with its own sounds it can play along in Playing too
       try { renderMidi(); } catch (e) {}
     }
     function mfSetMode(m) { mfMode = m; try { localStorage.setItem(MFM_KEY, m); } catch (e) {} mfApply(); hwPaintSoon(); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} }
@@ -409,8 +409,18 @@
           const add = (v, t) => { const o = mk("option", "", t); o.value = v; ds.appendChild(o); };
           add("", "Its sound: from its own outputs (not through Nate Bloom)");
           navigator.mediaDevices.enumerateDevices().then(ls => { ls.filter(x => x.kind === "audioinput").forEach((x, i) => add(x.deviceId, "Its sound comes in from: " + (x.label || "Input " + (i + 1)))); ds.value = X.cfg.dev || ""; }).catch(() => {});
-          ds.addEventListener("change", () => { X.cfg.dev = ds.value; X.err = ""; try { window.__hwxCfgSave(); } catch (e) {} });
-          r.appendChild(ds); box.appendChild(r);
+          ds.addEventListener("change", () => { X.cfg.dev = ds.value; X.err = ""; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} hwPaintSoon(); });
+          r.appendChild(ds);
+          if (X.cfg.dev) {   // (227) which of its inputs: the Minilogue can be on 1 and this on 2
+            const ps = mk("select", "hw-sel"); ps.setAttribute("aria-label", "Which inputs");
+            [["12", "Inputs 1+2"], ["1", "Input 1"], ["2", "Input 2"]].forEach(([v, t]) => { const o = mk("option", "", t); o.value = v; ps.appendChild(o); });
+            ps.value = X.cfg.pick || "12";
+            ps.addEventListener("change", () => { X.cfg.pick = ps.value; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} });
+            r.appendChild(ps);
+          }
+          box.appendChild(r);
+          { const t = window.__hwProbe && window.__hwProbe.text && window.__hwProbe.text("mf"); if (t) box.appendChild(mk("small", "hw-mfn", t)); }
+          box.appendChild(mk("small", "hw-mfn", "+ on MicroFreak in Quick sounds plays it along with what's playing (your KeyLab's notes go to it too); its own keys still play only itself."));
         }
       } else {
         const r = mk("div", "hw-mfc"), rs = mk("select", "hw-sel"); rs.setAttribute("aria-label", "MicroFreak's keys play");

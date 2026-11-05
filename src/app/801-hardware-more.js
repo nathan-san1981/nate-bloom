@@ -47,6 +47,7 @@
           X.allOff = () => { const p = X.port(); if (!p) return; const ch = (c.ch - 1) & 15; try { X.notes.forEach((k, n) => p.send([0x80 | ch, n, 0])); p.send([0xb0 | ch, 123, 0]); } catch (e) {} X.notes.clear(); };
           X.added = () => { c.seen = true; cfgSave(); if (!X.present()) toast(X.name + " added · plug it in over USB and it plays"); wire(X); };
           X.open = () => openSheet(X);
+          X.rewire = () => { X.err = ""; closeIn(X); wire(X); };   // (227) its input or channels changed
           return X;
         }
         function toast(t) { const e = document.getElementById("uiToast"); if (!e) return; e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { e.hidden = true; }, 2800); }

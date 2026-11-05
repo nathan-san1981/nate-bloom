@@ -420,15 +420,15 @@
     }
     // a level that drops to 0 while it's playing says so (and the report's log shows it); a sound that comes back from
     // last time at 0 is set back to 0 dB, since a sound left at 0 in Playing is a silent one nobody chose to keep
-    { const was = new Map(), seen = new Set(), t0 = Date.now();
+    { const was = new Map(), seen = new Set();
       setInterval(() => {
         let its; try { its = items(); } catch (e) { return; }
         let ch = false; const now = new Map();
         for (const it of its) {
-          const lr = lvRef(it); if (!lr) continue; const k = itKey(it) + (it.ci != null ? "#" + it.ci : ""), z = !(lr.get() > 0.001); now.set(k, z); const first = !seen.has(k) && Date.now() - t0 < 20000; seen.add(k);
+          const lr = lvRef(it); if (!lr) continue; const k = itKey(it) + (it.ci != null ? "#" + it.ci : ""), z = !(lr.get() > 0.001); now.set(k, z); const first = !seen.has(k); seen.add(k);   // (227) the first time it's in Playing this session, not only at start-up
           if (first && z) { lr.set(0.8); try { lvApply(); save(); } catch (e) {} now.set(k, false); ch = true;
             try { window.__nbAdd && window.__nbAdd("level", it.name + " came back at level 0 · set to 0 dB"); } catch (e) {}
-            lvToast(it.name + " was at level 0 from last time (silent) · set back to 0 dB"); continue; }
+            lvToast(it.name + " was left at level 0 (silent) · set back to 0 dB"); continue; }
           if (z !== !!was.get(k)) { ch = true;
             if (z) { try { window.__nbAdd && window.__nbAdd("level", it.name + " level 0 (KeyLab fader or Mixer)"); } catch (e) {}
               lvToast(it.name + "'s level is at 0, so it's silent · tap 🔈 on its chip to bring it back"); } }
@@ -467,6 +467,13 @@
         { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out" + (n > 1 ? " (the others keep playing" : " (nothing plays from the keys") + " · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
         stkRow.appendChild(c);
       });
+      // (227) the MicroFreak playing Nate Bloom sounds: it's in what's playing as the keys, so it shows here too
+      try { const X = window.__mfMode && window.__mfMode() === "nb" && window.__hwx && __hwx.get("mf");
+        if (X && X.present()) { const c = el("div", "stk-chip mf-keys"); c.style.setProperty("--kc", KC.hardware || "var(--amber)");
+          const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>"; m.querySelector("b").textContent = "MicroFreak";
+          m.querySelector("small").textContent = "its keys and knobs play " + ((r => r && r.startsWith("e:") && ENGINES[r.slice(2)] ? ENGINES[r.slice(2)].name : n > 1 ? "these" : n ? its[0].name : "nothing yet")(window.__mfRoute && __mfRoute())) + " · tap for its settings";
+          m.title = "The MicroFreak is set to play Nate Bloom sounds. Tap to switch it back to its own sounds, or change what it plays.";
+          m.addEventListener("click", () => { start(); X.open(); }); c.appendChild(m); stkRow.appendChild(c); } } catch (e) {}
       const add = el("button", "btn stk-add", "+ Add"); add.title = !n ? "Pick a sound for the keys" : "Play another sound together with " + (n === 1 ? its[0].name : "these"); add.setAttribute("aria-label", add.title);
       add.addEventListener("click", () => { ADD.on = true; openBrowser(); paintBrMode(); });
       stkRow.appendChild(add);
@@ -586,7 +593,7 @@
     function paintQuick() {
       if (!qkRow) return;
       const sc = qkRow.scrollLeft; qkRow.innerHTML = "";
-      const togOn = q => q.hw || (q.hwx && !(q.hwx === "mf" && window.__mfMode)) || (!q.id.startsWith("my:") && togOK(q.id));
+      const togOn = q => q.hw || (q.hwx && !(q.hwx === "mf" && window.__mfMode && window.__mfMode() === "nb")) || (!q.id.startsWith("my:") && togOK(q.id));
       const its = items(), many = its.length > 1;
       qkItems().forEach(q => {
         const on = qkPlaying(q), cur = !!(state.cur && state.cur.id === q.id), it = on ? qkItemOf(q, its) : null, mu = !!(it && isMuted(it));
