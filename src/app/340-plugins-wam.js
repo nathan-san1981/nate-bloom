@@ -56,12 +56,15 @@
         const post = ctx.createGain(), out = ctx.createGain(); gain.connect(post); post.connect(out);
         const W = { id, key: sp.key, inst, node: inst.audioNode, gain, post, out, dest: null, ctx, held: new Set(), name: (inst.descriptor && inst.descriptor.name) || sp.name, vendor: (inst.descriptor && inst.descriptor.vendor) || sp.vendor || "" };
         NBW.parts.set(id, W); nbwWireTarget("plug:" + id); nbwTaps("plug:" + id);
+        try { W.fresh = await inst.audioNode.getState(); } catch (e) {}   // (238) how it starts, for Reset
         if (NBW.saved[id]) { try { await inst.audioNode.setState(NBW.saved[id]); } catch (e) {} }
         return W;
       })().finally(() => nbwLoading.delete(id));
       nbwLoading.set(id, pr);
       return pr;
     }
+    // (238) a plugin back to how it starts (its own defaults), and what was kept for it forgotten
+    window.__nbwReset = async id => { const W = NBW.parts.get(id); delete NBW.saved[id]; nbwSave(); if (W && W.fresh != null) { try { await W.node.setState(W.fresh); return true; } catch (e) {} } return false; };
     // (144) a plugin instrument keeps running its sound engine, silent or not, as long as it's loaded: once it's no
     // longer a layer its notes are released at once and, its settings kept, it's unloaded after 5 s (159: was 15 s,
     // and a note it still held kept it loaded and ringing for good). Picking it again loads it again.

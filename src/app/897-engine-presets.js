@@ -445,7 +445,7 @@
         row.append(q, tg); es.appendChild(row);
         { const sv = esSaved(); if (sv.length) { const ch = document.createElement("div"); ch.className = "es-saved"; sv.forEach(t => { const b = document.createElement("button"); b.className = "es-chip"; b.textContent = t; b.title = "Find " + t; b.addEventListener("click", () => { ESF.q = t; q.value = t; esFindPaint(res); }); const x = document.createElement("i"); x.textContent = "×"; x.title = "Forget this search"; x.addEventListener("click", ev => { ev.stopPropagation(); esSavedSet(esSaved().filter(y => y !== t)); esPaint(true, true); }); b.appendChild(x); ch.appendChild(b); }); es.appendChild(ch); } }
         const res = document.createElement("div"); res.className = "es-res"; es.appendChild(res);
-        q.addEventListener("input", () => { ESF.q = q.value; esFindPaint(res); });
+        q.addEventListener("input", () => { ESF.q = q.value; clearTimeout(q.__t); q.__t = setTimeout(() => esFindPaint(res), 160); });   // (238) once typing pauses: each search took 400–800 ms on a busy computer
         q.addEventListener("keydown", e => { if (e.key === "Escape") { ESF.on = false; ESF.q = ""; esPaint(true, true); } e.stopPropagation(); });
         q.addEventListener("keyup", e => e.stopPropagation());
         if (ESF.q.trim()) { esFindPaint(res); if (ESF.focus) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } es.scrollTop = st; return; }

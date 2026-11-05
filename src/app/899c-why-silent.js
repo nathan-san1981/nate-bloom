@@ -20,13 +20,15 @@
       // the audio itself
       if (!ctx) add(3, "The sound hasn't started yet.", () => { try { start(); } catch (e) {} }, "Start the sound");
       else if (ctx.state !== "running") add(3, "The audio is " + ctx.state + " (the browser or Linux paused it).", () => { try { ctx.resume(); } catch (e) {} }, "Resume");
-      try { if (!(state.fx.volume > 0.02)) add(3, "The master volume is at 0.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%"); } catch (e) {}
+      try { if (!(state.fx.volume > 0.02)) add(3, "The master volume is at 0.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%");
+        else if (state.fx.volume < 0.25) add(2, "The master volume is very low (" + Math.round(20 * Math.log10(state.fx.volume / 0.7)) + " dB): everything is quiet.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%"); } catch (e) {}
       let its = []; try { its = window.__stk.items(); } catch (e) {}
       if (!its.length) add(3, "Nothing is in Playing: the keys have no sound to play.", null);
       const Z = J("nightbloom-zones"), V = J("nightbloom-velsplit"), recent = MA.notes.slice(-8);
       its.forEach(it => {
         const tag = tagOfItem(it), base = tag.replace(/#\d+$/, "");
         try { const lr = window.__stk.lv(it); if (lr && !(lr.get() > 0.001)) add(2, it.name + "'s level is at 0.", () => { lr.set(0.8); try { lvApply(); save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {} }, "Back to 0 dB"); } catch (e) {}
+        try { const lr = window.__stk.lv(it), g = lr && lr.get(); if (g > 0.001 && g < 0.1) add(1, it.name + "'s level is very low (" + Math.round(20 * Math.log10(g / 0.8)) + " dB).", () => { lr.set(0.8); try { lvApply(); save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {} }, "Back to 0 dB"); } catch (e) {}
         try { if (window.__stk.muted(it)) add(2, it.name + " is muted (the speaker on its chip).", () => window.__stk.setMute(it, false), "Unmute"); } catch (e) {}
         const z = Z[tag] || Z[base];
         if (z) { const out = recent.filter(m => m < z[0] || m > z[1]); add(out.length ? 2 : 1, it.name + " plays only " + nn(z[0]) + "–" + nn(z[1]) + (out.length ? "; the notes you just played (" + [...new Set(out)].map(nn).slice(0, 4).join(", ") + ") are outside it." : "."), () => { try { window.__kz.clear(); } catch (e) {} }, "Clear the split"); }
@@ -60,7 +62,7 @@
     }
     const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "wsSheet"; sh.hidden = true;
     sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Why no sound?"><div class="ed-head"><strong>Why no sound?</strong><span class="ed-info">what could keep you from hearing it</span></div>
-      <div id="wsList" class="ws-list"></div><div class="ed-foot sheet-foot"><button class="btn big" id="wsAgain">Check again</button><button class="btn big primary" id="wsDone">Done</button></div></div>`;
+      <div id="wsList" class="ws-list"></div><div class="ed-foot sheet-foot"><button class="btn big" id="wsReset" title="Master 70%, every sound in Playing at 0 dB and unmuted, on every key, effects and FX Lab back to how they start, plugins in Playing back to their own defaults">Reset levels &amp; effects</button><button class="btn big" id="wsAgain">Check again</button><button class="btn big primary" id="wsDone">Done</button></div></div>`;
     document.body.appendChild(sh);
     function paint() {
       const L = sh.querySelector("#wsList"); L.innerHTML = "";
@@ -73,6 +75,25 @@
         L.appendChild(r);
       });
       try { window.__nbAdd && window.__nbAdd("why", F.length ? F.map(f => f.text).join(" | ") : "nothing found"); } catch (e) {}
+    }
+    // (238) everything a curious child (or a stray fader) can turn down, back to how it starts, in one go: tap twice
+    async function resetAll() {
+      try { state.fx.volume = 0.7; FX_KNOBS.forEach(([k,, v]) => { if (k !== "volume") state.fx[k] = v; }); state.fx.on = true; applyFx(); } catch (e) {}
+      try { Object.assign(bfx, BFX_DEF); saveBfxNow(); applyBfx(true); } catch (e) {}
+      let its = []; try { its = window.__stk.items(); } catch (e) {}
+      for (const it of its) {
+        try { const lr = window.__stk.lv(it); if (lr) lr.set(0.8); } catch (e) {}
+        try { window.__stk.setMute(it, false); } catch (e) {}
+        try { if (it.t === "lib" && /^wam:/.test(it.id) && window.__nbwReset) await window.__nbwReset(it.id); } catch (e) {}
+      }
+      try { window.__kz.clear(); } catch (e) {}
+      try { lvApply(); } catch (e) {} try { save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {}
+      try { window.__nbAdd && window.__nbAdd("why", "reset levels and effects: master 70%, " + its.length + " sounds at 0 dB, unmuted, on every key, effects as they start"); } catch (e) {}
+    }
+    { const rb = sh.querySelector("#wsReset"); let armed = 0;
+      rb.addEventListener("click", async () => {
+        if (Date.now() - armed > 4000) { armed = Date.now(); rb.textContent = "Tap again to reset"; setTimeout(() => { if (Date.now() - armed >= 4000) rb.textContent = "Reset levels & effects"; }, 4100); return; }
+        armed = 0; rb.textContent = "Resetting…"; await resetAll(); rb.textContent = "Done: reset"; setTimeout(() => { rb.textContent = "Reset levels & effects"; }, 2500); paint(); });
     }
     sh.querySelector("#wsAgain").addEventListener("click", paint);
     sh.querySelector("#wsDone").addEventListener("click", () => { sh.hidden = true; });

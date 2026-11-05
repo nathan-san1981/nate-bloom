@@ -3652,6 +3652,10 @@ body.es-on #epStrip { display: none; }
 .hw-mtr { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: #2a2533; overflow: hidden; }
 .hw-mtr u { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7fd6c2, #e0a43a 75%, #e06b6b); text-decoration: none; }
 .stk-chip .sc-bdg { display: block; font: 600 0.62rem var(--font-mono); color: var(--amber); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 22ch; }
+/* (238) each Playing chip's light */
+.sc-led { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, currentColor 18%, transparent); margin-right: 6px; flex: none; vertical-align: middle; transition: background .12s, box-shadow .12s; }
+.sc-led.on { background: #7ee787; box-shadow: 0 0 6px #7ee787; }
+.sc-led.silent { background: #ff6b6b; box-shadow: 0 0 6px #ff6b6b; }
 </style>
 </head>
 <body class="lite">
@@ -21904,12 +21908,15 @@ registerProcessor("nb-verb", NBVerb);`;
         const post = ctx.createGain(), out = ctx.createGain(); gain.connect(post); post.connect(out);
         const W = { id, key: sp.key, inst, node: inst.audioNode, gain, post, out, dest: null, ctx, held: new Set(), name: (inst.descriptor && inst.descriptor.name) || sp.name, vendor: (inst.descriptor && inst.descriptor.vendor) || sp.vendor || "" };
         NBW.parts.set(id, W); nbwWireTarget("plug:" + id); nbwTaps("plug:" + id);
+        try { W.fresh = await inst.audioNode.getState(); } catch (e) {}   // (238) how it starts, for Reset
         if (NBW.saved[id]) { try { await inst.audioNode.setState(NBW.saved[id]); } catch (e) {} }
         return W;
       })().finally(() => nbwLoading.delete(id));
       nbwLoading.set(id, pr);
       return pr;
     }
+    // (238) a plugin back to how it starts (its own defaults), and what was kept for it forgotten
+    window.__nbwReset = async id => { const W = NBW.parts.get(id); delete NBW.saved[id]; nbwSave(); if (W && W.fresh != null) { try { await W.node.setState(W.fresh); return true; } catch (e) {} } return false; };
     // (144) a plugin instrument keeps running its sound engine, silent or not, as long as it's loaded: once it's no
     // longer a layer its notes are released at once and, its settings kept, it's unloaded after 5 s (159: was 15 s,
     // and a note it still held kept it loaded and ringing for good). Picking it again loads it again.
@@ -33496,7 +33503,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 237;
+    window.NB_BUILD = 238;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -38591,7 +38598,7 @@ registerProcessor("nb-aw", NBAwProc);
         row.append(q, tg); es.appendChild(row);
         { const sv = esSaved(); if (sv.length) { const ch = document.createElement("div"); ch.className = "es-saved"; sv.forEach(t => { const b = document.createElement("button"); b.className = "es-chip"; b.textContent = t; b.title = "Find " + t; b.addEventListener("click", () => { ESF.q = t; q.value = t; esFindPaint(res); }); const x = document.createElement("i"); x.textContent = "×"; x.title = "Forget this search"; x.addEventListener("click", ev => { ev.stopPropagation(); esSavedSet(esSaved().filter(y => y !== t)); esPaint(true, true); }); b.appendChild(x); ch.appendChild(b); }); es.appendChild(ch); } }
         const res = document.createElement("div"); res.className = "es-res"; es.appendChild(res);
-        q.addEventListener("input", () => { ESF.q = q.value; esFindPaint(res); });
+        q.addEventListener("input", () => { ESF.q = q.value; clearTimeout(q.__t); q.__t = setTimeout(() => esFindPaint(res), 160); });   // (238) once typing pauses: each search took 400–800 ms on a busy computer
         q.addEventListener("keydown", e => { if (e.key === "Escape") { ESF.on = false; ESF.q = ""; esPaint(true, true); } e.stopPropagation(); });
         q.addEventListener("keyup", e => e.stopPropagation());
         if (ESF.q.trim()) { esFindPaint(res); if (ESF.focus) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } es.scrollTop = st; return; }
@@ -39544,13 +39551,15 @@ registerProcessor("nb-aw", NBAwProc);
       // the audio itself
       if (!ctx) add(3, "The sound hasn't started yet.", () => { try { start(); } catch (e) {} }, "Start the sound");
       else if (ctx.state !== "running") add(3, "The audio is " + ctx.state + " (the browser or Linux paused it).", () => { try { ctx.resume(); } catch (e) {} }, "Resume");
-      try { if (!(state.fx.volume > 0.02)) add(3, "The master volume is at 0.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%"); } catch (e) {}
+      try { if (!(state.fx.volume > 0.02)) add(3, "The master volume is at 0.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%");
+        else if (state.fx.volume < 0.25) add(2, "The master volume is very low (" + Math.round(20 * Math.log10(state.fx.volume / 0.7)) + " dB): everything is quiet.", () => { state.fx.volume = 0.7; applyFx(); save(); }, "Master to 70%"); } catch (e) {}
       let its = []; try { its = window.__stk.items(); } catch (e) {}
       if (!its.length) add(3, "Nothing is in Playing: the keys have no sound to play.", null);
       const Z = J("nightbloom-zones"), V = J("nightbloom-velsplit"), recent = MA.notes.slice(-8);
       its.forEach(it => {
         const tag = tagOfItem(it), base = tag.replace(/#\d+$/, "");
         try { const lr = window.__stk.lv(it); if (lr && !(lr.get() > 0.001)) add(2, it.name + "'s level is at 0.", () => { lr.set(0.8); try { lvApply(); save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {} }, "Back to 0 dB"); } catch (e) {}
+        try { const lr = window.__stk.lv(it), g = lr && lr.get(); if (g > 0.001 && g < 0.1) add(1, it.name + "'s level is very low (" + Math.round(20 * Math.log10(g / 0.8)) + " dB).", () => { lr.set(0.8); try { lvApply(); save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {} }, "Back to 0 dB"); } catch (e) {}
         try { if (window.__stk.muted(it)) add(2, it.name + " is muted (the speaker on its chip).", () => window.__stk.setMute(it, false), "Unmute"); } catch (e) {}
         const z = Z[tag] || Z[base];
         if (z) { const out = recent.filter(m => m < z[0] || m > z[1]); add(out.length ? 2 : 1, it.name + " plays only " + nn(z[0]) + "–" + nn(z[1]) + (out.length ? "; the notes you just played (" + [...new Set(out)].map(nn).slice(0, 4).join(", ") + ") are outside it." : "."), () => { try { window.__kz.clear(); } catch (e) {} }, "Clear the split"); }
@@ -39584,7 +39593,7 @@ registerProcessor("nb-aw", NBAwProc);
     }
     const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "wsSheet"; sh.hidden = true;
     sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Why no sound?"><div class="ed-head"><strong>Why no sound?</strong><span class="ed-info">what could keep you from hearing it</span></div>
-      <div id="wsList" class="ws-list"></div><div class="ed-foot sheet-foot"><button class="btn big" id="wsAgain">Check again</button><button class="btn big primary" id="wsDone">Done</button></div></div>`;
+      <div id="wsList" class="ws-list"></div><div class="ed-foot sheet-foot"><button class="btn big" id="wsReset" title="Master 70%, every sound in Playing at 0 dB and unmuted, on every key, effects and FX Lab back to how they start, plugins in Playing back to their own defaults">Reset levels &amp; effects</button><button class="btn big" id="wsAgain">Check again</button><button class="btn big primary" id="wsDone">Done</button></div></div>`;
     document.body.appendChild(sh);
     function paint() {
       const L = sh.querySelector("#wsList"); L.innerHTML = "";
@@ -39597,6 +39606,25 @@ registerProcessor("nb-aw", NBAwProc);
         L.appendChild(r);
       });
       try { window.__nbAdd && window.__nbAdd("why", F.length ? F.map(f => f.text).join(" | ") : "nothing found"); } catch (e) {}
+    }
+    // (238) everything a curious child (or a stray fader) can turn down, back to how it starts, in one go: tap twice
+    async function resetAll() {
+      try { state.fx.volume = 0.7; FX_KNOBS.forEach(([k,, v]) => { if (k !== "volume") state.fx[k] = v; }); state.fx.on = true; applyFx(); } catch (e) {}
+      try { Object.assign(bfx, BFX_DEF); saveBfxNow(); applyBfx(true); } catch (e) {}
+      let its = []; try { its = window.__stk.items(); } catch (e) {}
+      for (const it of its) {
+        try { const lr = window.__stk.lv(it); if (lr) lr.set(0.8); } catch (e) {}
+        try { window.__stk.setMute(it, false); } catch (e) {}
+        try { if (it.t === "lib" && /^wam:/.test(it.id) && window.__nbwReset) await window.__nbwReset(it.id); } catch (e) {}
+      }
+      try { window.__kz.clear(); } catch (e) {}
+      try { lvApply(); } catch (e) {} try { save(); } catch (e) {} try { window.__stk.paint(); } catch (e) {}
+      try { window.__nbAdd && window.__nbAdd("why", "reset levels and effects: master 70%, " + its.length + " sounds at 0 dB, unmuted, on every key, effects as they start"); } catch (e) {}
+    }
+    { const rb = sh.querySelector("#wsReset"); let armed = 0;
+      rb.addEventListener("click", async () => {
+        if (Date.now() - armed > 4000) { armed = Date.now(); rb.textContent = "Tap again to reset"; setTimeout(() => { if (Date.now() - armed >= 4000) rb.textContent = "Reset levels & effects"; }, 4100); return; }
+        armed = 0; rb.textContent = "Resetting…"; await resetAll(); rb.textContent = "Done: reset"; setTimeout(() => { rb.textContent = "Reset levels & effects"; }, 2500); paint(); });
     }
     sh.querySelector("#wsAgain").addEventListener("click", paint);
     sh.querySelector("#wsDone").addEventListener("click", () => { sh.hidden = true; });
@@ -39662,6 +39690,36 @@ registerProcessor("nb-aw", NBAwProc);
       });
     }
     setInterval(badges, 600);
+  }
+  // ======================================================================
+  // 238: every sound's chip in Playing lights when it plays. A key you play lights the chips of the sounds it reaches
+  // (their keys, soft or hard); a sound that should have played but is muted or at level 0 lights red instead, so a
+  // silent sound shows where the silence is.
+  // ======================================================================
+  {
+    const ACT = { notes: [] };   // [note, when]
+    { const n0 = noteOn; noteOn = function (m) { try { ACT.notes.push([m, performance.now(), NB_VEL7 || 100]); if (ACT.notes.length > 32) ACT.notes.shift(); } catch (e) {} return n0.apply(this, arguments); }; }
+    const J = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+    const tagOf = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    let Z = {}, V = {}, zAt = 0;
+    function act() {
+      const row = document.getElementById("stkRow"); if (document.hidden || !row || row.offsetParent === null) return;
+      const now = performance.now(); if (now - zAt > 1000) { Z = J("nightbloom-zones"); V = J("nightbloom-velsplit"); zAt = now; }
+      const recent = ACT.notes.filter(n => now - n[1] < 220);
+      let its = []; try { its = window.__stk.items(); } catch (e) { return; }
+      const chips = [...row.querySelectorAll(".stk-chip[data-k]")];
+      its.forEach((it, i) => {
+        const c = chips[i]; if (!c || it.t === "hw" || it.t === "hwx") return;   // (the hardware chips have their own light and meter)
+        const tag = tagOf(it), base = tag.replace(/#\d+$/, ""), z = Z[tag] || Z[base], v = V[tag] || V[base];
+        const hit = recent.some(([m,, vel]) => (!z || (m >= z[0] && m <= z[1])) && (!v || (vel >= v[0] && vel <= v[1])));
+        let silent = false; try { const lr = window.__stk.lv(it); silent = window.__stk.muted(it) || (lr && !(lr.get() > 0.001)); } catch (e) {}
+        let led = c.querySelector(".sc-led");
+        if (!led) { led = document.createElement("i"); led.className = "sc-led"; led.title = "Lights when this sound plays (red: it should have, but it's muted or at level 0)"; const sp = c.querySelector(".sc-main"); if (!sp) return; sp.prepend(led); }
+        const cls = "sc-led" + (hit ? (silent ? " silent" : " on") : "");
+        if (led.className !== cls) led.className = cls;
+      });
+    }
+    setInterval(act, 60);
   }
   // ======================================================================
   // 232: less work while nothing happens. The channel list the KeyLab/MiniLab strip and the Mixer ask for (dozens of

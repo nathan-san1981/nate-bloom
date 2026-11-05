@@ -55,3 +55,33 @@
     }
     setInterval(badges, 600);
   }
+  // ======================================================================
+  // 238: every sound's chip in Playing lights when it plays. A key you play lights the chips of the sounds it reaches
+  // (their keys, soft or hard); a sound that should have played but is muted or at level 0 lights red instead, so a
+  // silent sound shows where the silence is.
+  // ======================================================================
+  {
+    const ACT = { notes: [] };   // [note, when]
+    { const n0 = noteOn; noteOn = function (m) { try { ACT.notes.push([m, performance.now(), NB_VEL7 || 100]); if (ACT.notes.length > 32) ACT.notes.shift(); } catch (e) {} return n0.apply(this, arguments); }; }
+    const J = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+    const tagOf = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
+    let Z = {}, V = {}, zAt = 0;
+    function act() {
+      const row = document.getElementById("stkRow"); if (document.hidden || !row || row.offsetParent === null) return;
+      const now = performance.now(); if (now - zAt > 1000) { Z = J("nightbloom-zones"); V = J("nightbloom-velsplit"); zAt = now; }
+      const recent = ACT.notes.filter(n => now - n[1] < 220);
+      let its = []; try { its = window.__stk.items(); } catch (e) { return; }
+      const chips = [...row.querySelectorAll(".stk-chip[data-k]")];
+      its.forEach((it, i) => {
+        const c = chips[i]; if (!c || it.t === "hw" || it.t === "hwx") return;   // (the hardware chips have their own light and meter)
+        const tag = tagOf(it), base = tag.replace(/#\d+$/, ""), z = Z[tag] || Z[base], v = V[tag] || V[base];
+        const hit = recent.some(([m,, vel]) => (!z || (m >= z[0] && m <= z[1])) && (!v || (vel >= v[0] && vel <= v[1])));
+        let silent = false; try { const lr = window.__stk.lv(it); silent = window.__stk.muted(it) || (lr && !(lr.get() > 0.001)); } catch (e) {}
+        let led = c.querySelector(".sc-led");
+        if (!led) { led = document.createElement("i"); led.className = "sc-led"; led.title = "Lights when this sound plays (red: it should have, but it's muted or at level 0)"; const sp = c.querySelector(".sc-main"); if (!sp) return; sp.prepend(led); }
+        const cls = "sc-led" + (hit ? (silent ? " silent" : " on") : "");
+        if (led.className !== cls) led.className = cls;
+      });
+    }
+    setInterval(act, 60);
+  }
