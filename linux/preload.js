@@ -15,6 +15,8 @@ if (!fp) console.warn("Fast pads aren't available here; Beat Pads plays through 
 contextBridge.exposeInMainWorld("NB_NATIVE", {
   platform: "linux",
   version,
+  shellLatest: () => ipcRenderer.invoke("nb:shell-latest"),   // (232) a newer Linux app package
+  shellInstall: () => ipcRenderer.invoke("nb:shell-install"),
   background: true,                       // minimised, it keeps playing
   setPlaying: on => ipcRenderer.send("nb:playing", !!on),
   toast: msg => ipcRenderer.send("nb:toast", String(msg)),

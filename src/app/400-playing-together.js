@@ -449,7 +449,7 @@
       if (!n) stkRow.appendChild(el("span", "stk-none", "No sound on the keys"));   // (173) the last one was taken out
       its.forEach(it => {
         const mu = isMuted(it);
-        const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
+        const c = el("div", "stk-chip" + (isSel(it) ? " sel" : "") + (it.off ? " off" : "") + (mu ? " muted" : "")); c.dataset.k = itKey(it); c.style.setProperty("--kc", KC[it.kind.replace(/^your /, "")] || KC[it.kind] || "var(--lilac)");
         if (it.kind === "your plugin") c.style.setProperty("--kc", KC["your plugin"]);
         const m = el("button", "sc-main"); m.innerHTML = "<i></i><span><b></b><small></small></span>";
         m.querySelector("b").textContent = it.name; m.querySelector("small").textContent = (it.sub || it.kind) + (it.wait ? " · " + (it.why || "loading…") : it.off ? " · off, tap to turn on" : mu ? " · muted" : isSel(it) && n > 1 ? " · controls below" : "");
@@ -656,6 +656,6 @@
     { const p0 = paint; paint = function () { p0(); try { if (!stk.hidden) paintQuick(); } catch (e) {} }; }
     setTimeout(() => { try { paint(); } catch (e) {} }, 0);
     window.__qk = { items: qkItems, alone: qkAlone, toggle: qkToggle, pin: qkPin, paint: paintQuick, PIN };
-    window.__stk = { lv: lvRef, items, groupsOn, together, drop, only, focusOn, swap: e => swap(e, false), isSel, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
+    window.__stk = { lv: lvRef, muted: isMuted, setMute: (it, on) => { setMute(it, on); try { paint(); } catch (e) {} }, items, groupsOn, together, drop, only, focusOn, swap: e => swap(e, false), isSel, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
       seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }

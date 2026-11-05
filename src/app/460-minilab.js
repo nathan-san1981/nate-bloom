@@ -162,6 +162,15 @@
       const tk = JSON.stringify(t), vx = ML.virt.get(tk), cur = vx != null && Math.abs(vx - cur0) <= tol ? vx : cur0;   // (where it really is, between the steps a control rounds to)
       const L = ML.fad.get(tk);
       if ((L && L.key === key && Math.abs(cur - L.v) <= tol) || Math.abs(cur - y) < 0.03) { ML.fad.set(tk, { key, v: y }); ML.virt.set(tk, y); return learnApply(t, y); }
+      // (232) the levels (KeyLab faders 5-9, the MiniLab's level faders): pick up. A fader moves a level only once it
+      // reaches it (or passes it), so a fader left at the bottom can't take a sound to 0 by being touched; until then
+      // the screen says where to move it
+      if (t && t.k === "fn" && /^mix:/.test(t.id || "")) {
+        if (h0 != null && (h0 / 127 - cur) * (y - cur) <= 0 && h0 !== v) { ML.fad.set(tk, { key, v: y }); ML.virt.set(tk, y); return learnApply(t, y); }   // (crossed it: caught)
+        try { const nm = FNS[t.id] && FNS[t.id].name ? (typeof FNS[t.id].name === "function" ? FNS[t.id].name() : FNS[t.id].name) : "the level"; const el = document.getElementById("uiToast");
+          if (el) { el.textContent = nm + ": move the fader " + (y < cur ? "up" : "down") + " to " + Math.round(cur * 100) + "% to take over"; el.hidden = false; clearTimeout(mlFader.t); mlFader.t = setTimeout(() => { el.hidden = true; }, 1600); } } catch (e) {}
+        return false;
+      }
       if (h0 == null || h0 === v) return false;
       const a = h0 / 127; let x;
       if (v > h0) x = cur + (y - a) * (1 - cur) / Math.max(1e-3, 1 - a);   // both reach the top together

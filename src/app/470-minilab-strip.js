@@ -97,8 +97,8 @@
     }
     function stripFlash(i, on) { const c = sP[i]; if (c) c.classList.toggle("hit", on); }
     function stripHot(c) { if (!c || !stripOnNow) return; const cell = (c.kind === "K" ? sK : sF)[c.i]; if (!cell) return; cell.classList.add("hot"); clearTimeout(cell.__h); cell.__h = setTimeout(() => cell.classList.remove("hot"), 450); }
-    setInterval(() => { if (stripOnNow || ML.strip !== "off") paintStrip(false); }, 300);
-    setInterval(() => { if (stripOnNow) paintStrip(true); }, 1500);
+    setInterval(() => { if (!document.hidden && (stripOnNow || ML.strip !== "off")) paintStrip(false); }, 300);
+    setInterval(() => { if (!document.hidden && stripOnNow) paintStrip(true); }, 1500);
     addEventListener("resize", () => paintStrip(true));
     // ---------- touch: drag a knob or fader across, tap a pad; hold (or ✎) to change it ----------
     function stripCtl(cell) { const k = cell.dataset.c; return { kind: k[0], i: +k.slice(1) }; }

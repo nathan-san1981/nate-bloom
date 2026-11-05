@@ -34,7 +34,7 @@
             if (X.mute) return { midi: n0, hw: true, stop() {} };
             const p = X.port(); if (!p) return null;
             const ch = (c.ch - 1) & 15, n = n0 & 127, vel = Math.max(1, Math.min(127, Math.round(NB_VEL7 || 100))), t = at(when);
-            try { p.send([0x90 | ch, n, vel], t); } catch (e) { return null; }
+            try { p.send([0x90 | ch, n, vel], t); } catch (e) { return null; } X.sentAt = performance.now();
             X.notes.set(n, (X.notes.get(n) || 0) + 1);
             let done = false;
             return { midi: n0, hw: true, stop(tt) {
@@ -69,7 +69,7 @@
             closeIn(X); X.stream = st; X.src = ctx.createMediaStreamSource(st); X.label = (st.getAudioTracks()[0] || {}).label || "";
             const sp = ctx.createChannelSplitter(2), mg = ctx.createChannelMerger(2); X.src.connect(sp);
             const L = X.cfg.pick === "2" ? 1 : 0, R = X.cfg.pick === "12" ? 1 : L; sp.connect(mg, L, 0); sp.connect(mg, R, 1);
-            X.bus = ctx.createGain(); mg.connect(X.bus); X.merge = mg;
+            X.bus = ctx.createGain(); mg.connect(X.bus); X.merge = mg; X.an = ctx.createAnalyser(); X.an.fftSize = 512; mg.connect(X.an);   // (232) its meter on the chip
           } catch (e) { X.err = "the input didn't open (" + (e && e.name || "error") + ")"; }
           X.opening = false; route(X);
         }

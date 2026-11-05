@@ -144,6 +144,7 @@
     }
     let kpSig = "";
     setInterval(() => {
+      if (document.hidden) return;
       let n = 0, lo = 0; try { n = keyEls.size; lo = Math.min(...keyEls.keys()); } catch (e) {}
       const sig = localStorage.getItem(ZK) + "|" + items().map(tagOfItem).join(",") + "|" + n + "|" + lo + "|" + document.querySelectorAll("#stkRow .stk-chip").length + "|" + (document.querySelector("#keys .w .kzstrip, .w .kzstrip") ? 1 : 0);
       if (sig !== kpSig) { kpSig = sig; keysPaint(); }

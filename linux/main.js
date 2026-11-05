@@ -413,6 +413,32 @@ ipcMain.handle("nb:plug-presets", async (e, rel) => {
   } catch (er) { return []; }
 });
 ipcMain.handle("nb:store-remove", async (e, id) => store ? store.remove(String(id), { cfgDir: app.getPath("userData") }) : false);
+// (232) the app itself (the plugin store, the bridge, the native engine) updates only with a new package: the newest
+// Linux release on GitHub, and one tap to download its .deb and open it in Mint's package installer
+const verNum = v => String(v || "").replace(/^[^\d]*/, "").split(".").map(x => parseInt(x, 10) || 0);
+const verNewer = (a, b) => { const A = verNum(a), B = verNum(b); for (let i = 0; i < 3; i++) { if ((A[i] || 0) !== (B[i] || 0)) return (A[i] || 0) > (B[i] || 0); } return false; };
+let shellRel = null;
+ipcMain.handle("nb:shell-latest", async () => {
+  try {
+    const r = await net.fetch("https://api.github.com/repos/nathan-san1981/nate-bloom/releases?per_page=15", { headers: { Accept: "application/vnd.github+json", "User-Agent": "nate-bloom-app" } });
+    if (!r.ok) return { current: app.getVersion(), err: "HTTP " + r.status };
+    const rel = (await r.json()).find(x => /^linux-v/.test(x.tag_name) && !x.draft); if (!rel) return { current: app.getVersion() };
+    const deb = (rel.assets || []).find(a => /\.deb$/i.test(a.name));
+    shellRel = { latest: rel.tag_name.replace(/^linux-v/, ""), deb: deb ? deb.browser_download_url : "", name: deb ? deb.name : "" };
+    return { current: app.getVersion(), latest: shellRel.latest, newer: verNewer(shellRel.latest, app.getVersion()), hasDeb: !!deb };
+  } catch (er) { return { current: app.getVersion(), err: String(er && er.message || er) }; }
+});
+ipcMain.handle("nb:shell-install", async () => {
+  try {
+    if (!shellRel || !shellRel.deb) return { ok: false, error: "no package found" };
+    await fsp.mkdir(SAVE_DIR, { recursive: true });
+    const dest = path.join(SAVE_DIR, shellRel.name);
+    const r = await net.fetch(shellRel.deb); if (!r.ok) return { ok: false, error: "HTTP " + r.status };
+    await fsp.writeFile(dest + ".part", Buffer.from(await r.arrayBuffer())); await fsp.rename(dest + ".part", dest);
+    const why = await shell.openPath(dest);   // (Mint's package installer: Install Package, then reopen Nate Bloom)
+    return { ok: !why, file: dest, error: why || "" };
+  } catch (er) { return { ok: false, error: String(er && er.message || er) }; }
+});
 ipcMain.handle("nb:levels", () => paLevels());
 ipcMain.handle("nb:levels-fix", async () => {
   const L = await paLevels(); if (L.err) return L;

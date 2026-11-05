@@ -3615,3 +3615,15 @@ body.es-on #epStrip { display: none; }
 .es-cls > summary { cursor: pointer; padding: 9px 12px; font: 600 0.78rem var(--font-mono); color: var(--dim); list-style: none; }
 .es-cls > summary::before { content: "▸ "; } .es-cls[open] > summary::before { content: "▾ "; }
 .es-cls[open] > summary { border-bottom: 1px solid var(--line); color: var(--ink); }
+/* (232) Why no sound? */
+.ws-list { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
+.ws-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--line); font-size: 0.85rem; line-height: 1.35; }
+.ws-row.s3 { border-color: #e06b6b; background: rgba(224, 107, 107, .1); } .ws-row.s2 { border-color: #e0a43a; background: rgba(224, 164, 58, .1); }
+.ws-row.s0 { color: var(--dim); } .ws-row .btn { flex: none; }
+.ws-ok { color: var(--dim); font-size: 0.85rem; line-height: 1.4; }
+/* (232) a hardware synth's notes and sound on its chip */
+.hw-act { display: inline-flex; align-items: center; gap: 5px; margin-top: 2px; }
+.hw-led { width: 7px; height: 7px; border-radius: 50%; background: #3a3446; flex: none; transition: background .08s; }
+.hw-led.own { background: #6fb6ff; box-shadow: 0 0 6px #6fb6ff; } .hw-led.sent { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.hw-mtr { display: inline-block; width: 46px; height: 4px; border-radius: 2px; background: #2a2533; overflow: hidden; }
+.hw-mtr u { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7fd6c2, #e0a43a 75%, #e06b6b); text-decoration: none; }

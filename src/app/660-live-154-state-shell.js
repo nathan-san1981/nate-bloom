@@ -59,7 +59,7 @@
     }
     function nbsGet() { const d = nbsRefresh(false); const o = { schema: 1, ver: NBS.ver, secs: {} }; Object.keys(NBS.secs).forEach(k => { o.secs[k] = NBS.secs[k].ver; }); return Object.assign(o, d); }
     function nbsSubscribe(f) {
-      NBS.subs.add(f); if (!NBS.timer) NBS.timer = setInterval(() => { if (!document.hidden) nbsRefresh(true); }, 250);
+      NBS.subs.add(f); if (!NBS.timer) NBS.timer = setInterval(() => { if (!document.hidden) nbsRefresh(true); }, 500);   // (232: twice a second is plenty for the strip and the Pixelbook)
       try { f(nbsGet(), Object.keys(NBS.secs)); } catch (e) {}
       return () => { NBS.subs.delete(f); if (!NBS.subs.size && NBS.timer) { clearInterval(NBS.timer); NBS.timer = 0; } };
     }
