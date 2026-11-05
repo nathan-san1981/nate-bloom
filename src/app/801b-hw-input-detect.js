@@ -50,7 +50,7 @@
         const prev = P.res[who]; P.res[who] = { ans, at: Date.now() };
         if (prev && prev.ans === ans) return;
         const S = who === "hw" ? XD() : MF(who); if (!S) return;
-        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": its sound isn't coming into the computer. Check its output cable."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
+        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": USB carries only its MIDI. Run a cable from its audio out to a free input."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
         const name = ans === "12" ? "inputs 1+2" : "input " + ans;
         say(S.name + " heard on " + P.label + " " + name);
         // its own: set when it has none, or when it was taking both and only one is its
@@ -86,6 +86,6 @@
         if (P.st && Date.now() > P.until) close();   // (only open while someone is playing them)
       }, 2000);
       P.decide = decide;
-      P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer (check its output cable, or the mixer it goes to)."; };
+      P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer. USB carries only its MIDI: run a cable from its audio out to a free input on " + (P.label || "the interface") + "."; };
     }
   }

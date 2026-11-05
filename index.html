@@ -33309,7 +33309,7 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 227;
+    window.NB_BUILD = 228;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
@@ -35430,7 +35430,7 @@ registerProcessor("nb-rec", NBRec);`;
         const prev = P.res[who]; P.res[who] = { ans, at: Date.now() };
         if (prev && prev.ans === ans) return;
         const S = who === "hw" ? XD() : MF(who); if (!S) return;
-        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": its sound isn't coming into the computer. Check its output cable."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
+        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": USB carries only its MIDI. Run a cable from its audio out to a free input."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
         const name = ans === "12" ? "inputs 1+2" : "input " + ans;
         say(S.name + " heard on " + P.label + " " + name);
         // its own: set when it has none, or when it was taking both and only one is its
@@ -35466,7 +35466,7 @@ registerProcessor("nb-rec", NBRec);`;
         if (P.st && Date.now() > P.until) close();   // (only open while someone is playing them)
       }, 2000);
       P.decide = decide;
-      P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer (check its output cable, or the mixer it goes to)."; };
+      P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer. USB carries only its MIDI: run a cable from its audio out to a free input on " + (P.label || "the interface") + "."; };
     }
   }
   // ======================================================================
@@ -38861,6 +38861,7 @@ registerProcessor("nb-aw", NBAwProc);
       box.appendChild(seg);
       if (mfMode === "own") {
         box.appendChild(mk("small", "hw-mfn", "Nate Bloom sends it nothing and takes nothing from it: its keys, knobs, arp and sequencer are all its own. Pick its presets and engine here."));
+        box.appendChild(mk("small", "hw-mfn", "Its USB carries MIDI only, no sound. To hear it, run a 1/4\" cable from its Audio Out (back panel) to a free input on the Volt, or plug headphones into its own Phones jack."));
         const X = window.__hwx && window.__hwx.get("mf");
         if (X) {
           const r = mk("div", "hw-mfc"), ds = mk("select", "hw-sel"); ds.setAttribute("aria-label", "MicroFreak's sound comes in from");

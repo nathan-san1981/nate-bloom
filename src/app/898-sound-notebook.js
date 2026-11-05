@@ -403,6 +403,7 @@
       box.appendChild(seg);
       if (mfMode === "own") {
         box.appendChild(mk("small", "hw-mfn", "Nate Bloom sends it nothing and takes nothing from it: its keys, knobs, arp and sequencer are all its own. Pick its presets and engine here."));
+        box.appendChild(mk("small", "hw-mfn", "Its USB carries MIDI only, no sound. To hear it, run a 1/4\" cable from its Audio Out (back panel) to a free input on the Volt, or plug headphones into its own Phones jack."));
         const X = window.__hwx && window.__hwx.get("mf");
         if (X) {
           const r = mk("div", "hw-mfc"), ds = mk("select", "hw-sel"); ds.setAttribute("aria-label", "MicroFreak's sound comes in from");
