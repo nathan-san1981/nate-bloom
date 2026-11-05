@@ -51,7 +51,7 @@
       H.ready = () => H.present() && !!H.src;
       H.why = () => !md.access ? "connect MIDI" : !hwPort() ? "not plugged in" : H.opening ? "opening the input…" : !H.src ? (H.err || "no sound in yet") : "";
       const inStack = () => { try { return !!window.__stk.groupsOn().hw; } catch (e) { return false; } };
-      const wantIn = () => inStack() || (H.thru && H.present());   // (187) pass-through: heard whenever it's plugged in
+      const wantIn = () => inStack() || (H.thru && H.present()) || (!!(window.__gbHwUse && window.__gbHwUse("hw")) && H.present());   // (224) a Garage song playing it keeps its input open   // (187) pass-through: heard whenever it's plugged in
       // the input's own delay: the note goes out this much early, so the sound arrives in the mix on time
       function inLatMs() {
         let l = 0; try { const s = H.stream.getAudioTracks()[0].getSettings(); l = s && s.latency; } catch (e) {}

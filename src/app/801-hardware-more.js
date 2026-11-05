@@ -80,7 +80,7 @@
         }
         const ownMF = X => X.id === "mf" && window.__mfMode && window.__mfMode() === "own";   // (222) its own sounds: its input passes straight in
         window.__hwxCfgSave = cfgSave; window.__hwxRepaint = () => { if (!sh.hidden) paintSheet(); };
-        function wire(X) { const want = !!X.cfg.dev && (inStack(X) || ownMF(X)) && X.present() && !(X.id === "mf" && window.__mfMode && window.__mfMode() === "nb"); if (want && !X.src && !X.opening && !X.err) openIn(X); else if (!want && X.src) closeIn(X); else if (X.src) route(X); }
+        function wire(X) { const want = !!X.cfg.dev && (inStack(X) || ownMF(X) || !!(window.__gbHwUse && window.__gbHwUse("hwx:" + X.id))) && X.present() && !(X.id === "mf" && window.__mfMode && window.__mfMode() === "nb"); if (want && !X.src && !X.opening && !X.err) openIn(X); else if (!want && X.src) closeIn(X); else if (X.src) route(X); }
         setInterval(() => { if (!ctx) return; all().forEach(wire); }, 1000);
         // ---- the ports came or went: the Quick row has it once it's been plugged in ----
         { const op = md.onPorts; md.onPorts = function () { if (op) op.apply(this, arguments); let ch = false; all().forEach(X => { if (X.present() && !X.cfg.seen) { X.cfg.seen = true; ch = true; } }); if (ch) cfgSave(); try { window.__stk.paint(); } catch (e) {} }; }

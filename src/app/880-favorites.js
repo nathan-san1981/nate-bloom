@@ -53,6 +53,8 @@
       if (window.__nbCtl) { ex.ctl = {}; its.forEach(it => { const k = window.__nbCtl.keyOf(it); ex.ctl[k] = (window.__nbCtl.get(k) || []).slice(); }); }
       ex.stackHw = !!(state.stack && state.stack.hw);
       if (its.some(it => it.t === "hw") && window.__hw) { const H = window.__hw; ex.hw = { model: H.model, out: H.out, ch: H.ch, dev: H.dev, pick: H.pick, level: H.level, thru: H.thru, fxOn: H.fxOn, direct: H.direct }; }
+      try { const Z = JSON.parse(localStorage.getItem("nightbloom-zones") || "{}") || {}; if (Object.keys(Z).length) ex.zones = Z; } catch (e) {}   // (224) the keyboard split goes with it
+      try { const V = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; if (Object.keys(V).length) ex.vel = V; } catch (e) {}
       snap.fav = ex;
       return snap;
     }
@@ -73,6 +75,7 @@
         }
         sndQuiet = true; try { applySound(f); } finally { sndQuiet = false; }
         if (state.stack) state.stack.hw = !!ex.stackHw;
+        try { localStorage.setItem("nightbloom-zones", JSON.stringify(ex.zones || {})); localStorage.setItem("nightbloom-velsplit", JSON.stringify(ex.vel || {})); window.__nbZonesReload && window.__nbZonesReload(); window.__kz && window.__kz.paint(); } catch (e) {}   // (224)
         if (ex.hw && window.__hw) { Object.assign(window.__hw, ex.hw); try { window.__hw.save && window.__hw.save(); } catch (e) {} try { window.__hwDbg.hwWire(); } catch (e) {} }
         if (ex.fxby && typeof FXC !== "undefined") { for (const id in ex.fxby) Object.assign(fxcParams(id), ex.fxby[id]); fxcSave(); }
         if (ex.fxGlobal) Object.assign(state.fx, ex.fxGlobal);

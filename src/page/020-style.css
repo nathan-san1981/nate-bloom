@@ -3589,3 +3589,11 @@ body.es-on #epStrip { display: none; }
 .kz-n{flex:1 1 140px;min-width:0;display:flex;align-items:center;gap:6px;font-weight:600}.kz-n i{width:10px;height:10px;border-radius:3px;display:inline-block}.kz-row .hw-sel{flex:1 1 180px}.kz-row .kz-nt{flex:0 0 76px}
 .kz-n{background:transparent;border:1px solid transparent;border-radius:8px;color:inherit;font:inherit;padding:4px 6px;text-align:left;cursor:pointer}.kz-row.act .kz-n{border-color:var(--lilac,#c9a6ff);background:rgba(201,166,255,.12)}
 .hw-seg{display:flex;gap:4px;margin:8px 0 4px}.hw-seg .btn{flex:1;height:34px;font-size:12px;padding:0 6px}.hw-seg .btn.on{background:var(--lilac,#c9a6ff);color:#1a1424;border-color:transparent}
+/* (224) hide in the right-hand panel */
+.es-hrow{display:flex;align-items:stretch}.es-hrow .es-h{flex:1;min-width:0}
+.es-hide{flex:0 0 auto;border:0;background:transparent;color:var(--dim,#8a83a0);font:11px var(--font-mono,monospace);padding:0 8px;cursor:pointer;opacity:0;transition:opacity .12s}
+.es-pr:hover .es-hide,.es-hrow:hover .es-hide,.es-hide:focus{opacity:1}.es-hide:hover{color:var(--ink,#fff)}
+@media (hover:none){.es-hide{opacity:.6}}
+.es-add.es-back{width:auto;padding:0 10px;font-size:12px}
+.es-saved{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.es-chip{border:1px solid var(--line,#3a3350);background:transparent;color:inherit;border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer}.es-chip i{font-style:normal;opacity:.55;margin-left:6px}.es-chip i:hover{opacity:1}
+.es-savebtn{margin:0 0 6px}

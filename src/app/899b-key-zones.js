@@ -6,6 +6,9 @@
   // ======================================================================
   {
     const ZK = "nightbloom-zones";
+    const VK = "nightbloom-velsplit", getV = () => { try { return JSON.parse(localStorage.getItem(VK) || "{}") || {}; } catch (e) { return {}; } };
+    const setV = V => { try { localStorage.setItem(VK, JSON.stringify(V)); } catch (e) {} try { window.__nbZonesReload && window.__nbZonesReload(); } catch (e) {} paint(); };
+    const VPRE = { any: null, soft: [1, 79], hard: [80, 127] }, VPRE_N = { any: "Any velocity", soft: "Soft playing only (1–79)", hard: "Hard playing only (80–127)" };
     const getZ = () => { try { return JSON.parse(localStorage.getItem(ZK) || "{}") || {}; } catch (e) { return {}; } };
     const setZ = Z => { try { localStorage.setItem(ZK, JSON.stringify(Z)); } catch (e) {} location.hash; };
     const NN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"], nn = m => NN[m % 12] + (Math.floor(m / 12) - 1);
@@ -32,7 +35,8 @@
       const qb = (t, fn, dis) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = t; b.disabled = !!dis; b.addEventListener("click", fn); q.appendChild(b); };
       qb("3 zones · 21 / 20 / 20", () => { const Z2 = getZ(); its.slice(0, 3).forEach((it, i) => { Z2[tagOfItem(it)] = PRE[["low", "mid", "high"][i]]; }); apply(Z2); }, its.length < 2);
       qb("2 zones · halves", () => { const Z2 = getZ(); its.slice(0, 2).forEach((it, i) => { Z2[tagOfItem(it)] = PRE[i ? "highh" : "lowh"]; }); apply(Z2); }, its.length < 2);
-      qb("Clear all", () => { const Z2 = getZ(); its.forEach(it => delete Z2[tagOfItem(it)]); apply(Z2); });
+      qb("Soft / hard · first two sounds", () => { const V = getV(); its.slice(0, 2).forEach((it, i) => { V[tagOfItem(it)] = VPRE[i ? "hard" : "soft"]; }); setV(V); }, its.length < 2);
+      qb("Clear all", () => { const Z2 = getZ(); its.forEach(it => delete Z2[tagOfItem(it)]); apply(Z2); const V = getV(); its.forEach(it => delete V[tagOfItem(it)]); setV(V); });
       if (!its.some(it => tagOfItem(it) === act)) act = its.length ? tagOfItem(its[0]) : null;
       const L = $k("kzList"); L.innerHTML = "";
       if (!its.length) { const p = document.createElement("p"); p.className = "ed-info"; p.textContent = "Nothing is playing. Add sounds (Quick sounds' +), then give each its keys."; L.appendChild(p); }
@@ -53,11 +57,16 @@
         const pk = document.createElement("button"); pk.className = "btn"; pk.textContent = cap && cap.tag === tag ? (cap.lo == null ? "Play its lowest key…" : "…and its highest") : "Set with keys";
         pk.title = "Play this sound's lowest key, then its highest (on the KeyLab or the screen)";
         pk.addEventListener("click", () => { cap = cap && cap.tag === tag ? null : { tag, lo: null }; paint(); });
-        const cl = document.createElement("button"); cl.className = "btn"; cl.textContent = "✕ Clear"; cl.title = "Back to the whole keyboard"; cl.disabled = !z;
-        cl.addEventListener("click", () => { const Z2 = getZ(); delete Z2[tag]; apply(Z2); });
+        const vz = getV()[tag], vs = document.createElement("select"); vs.className = "hw-sel kz-vel"; vs.setAttribute("aria-label", "Velocity for " + it.name);
+        Object.keys(VPRE_N).forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = VPRE_N[k]; vs.appendChild(o); });
+        vs.value = !vz ? "any" : vz[0] >= 80 ? "hard" : vz[1] <= 79 ? "soft" : "any";
+        vs.addEventListener("change", () => { const V = getV(); if (vs.value === "any") delete V[tag]; else V[tag] = VPRE[vs.value]; setV(V); });
+        r.appendChild(vs);
+        const cl = document.createElement("button"); cl.className = "btn"; cl.textContent = "✕ Clear"; cl.title = "Back to the whole keyboard, any velocity"; cl.disabled = !z && !vz;
+        cl.addEventListener("click", () => { const Z2 = getZ(); delete Z2[tag]; apply(Z2); const V = getV(); delete V[tag]; setV(V); });
         r.append(pk, cl); L.appendChild(r);
       });
-      $k("kzMsg").textContent = "Zones use the keys' own notes (a 61-key board runs C1 to C6). The sequencer and the arp still play every sound.";
+      $k("kzMsg").textContent = "Zones use the keys' own notes (a 61-key board runs C1 to C6). Velocity picks a sound by how hard you play: soft for one, hard for another. The sequencer and the arp still play every sound.";
       drawMap(Z, its);
     }
     function drawMap(Z, its) {

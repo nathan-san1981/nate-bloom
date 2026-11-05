@@ -723,7 +723,22 @@
       clearInterval(EXP.timer); EXP.timer = setInterval(() => { if (EXP.st !== "run") { clearInterval(EXP.timer); return; } const el = $("gbExpT"); if (el) el.textContent = fmtClock(Math.max(0, ctx.currentTime - EXP.t0)) + " / " + fmtClock(TP.exp ? TP.exp.end * spb() : 0); }, 250);
       reSheet();
     }
-    function expDone() { TP.exp = null; stop(); stopTake(); EXP.st = take.done ? "ready" : ""; S.ph = 0; placePh(); paintBar(); reSheet(); }
+    function expDone() {
+      TP.exp = null; stop(); stopTake(); EXP.st = take.done ? "ready" : ""; S.ph = 0; placePh(); paintBar();
+      if (PRINT.on) {   // (224) the print: onto a new track, the hardware tracks muted (they're on audio now), the rest as they were
+        PRINT.on = false; const keep = PRINT.keep || [];
+        keep.forEach(([id, m, so]) => { const t = S.tracks.find(x => x.id === id); if (t) { t.mute = isHwTr(t) ? true : m; t.solo = so; } });
+        if (take.done) { const others = S.tracks.slice(); const d = take.done, buf = new AudioBuffer({ length: d.len, numberOfChannels: 2, sampleRate: d.rate }), L = buf.getChannelData(0), R = buf.getChannelData(1); let o = 0;
+          for (let c = 0; c < d.L.length; c++) { const l = d.L[c], r = d.R[c]; for (let i = 0; i < l.length && o < d.len; i++, o++) { L[o] = l[i] / 32767; R[o] = r[i] / 32767; } }
+          const res = gbAudioIn([{ buf, name: "Hardware print", start: 0 }], { open: false });
+          keep.forEach(([id, m, so]) => { const t = others.find(x => x.id === id); if (t) { t.mute = isHwTr(t) ? true : m; t.solo = so; } });
+          applyLevels(); saveSong(); EXP.st = ""; closeSheet(); setView("tracks"); gbSay(res ? "The hardware parts are on a new audio track; their MIDI tracks are muted" : "Couldn't add the track");
+          return;
+        }
+        applyLevels();
+      }
+      reSheet();
+    }
     function expCancel() { TP.exp = null; if (TP.on) stop(); if (take.rec) stopTake(); EXP.st = ""; reSheet(); }
     const fileName = () => (S.name || "song").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() || "song";
     function exportSheet() {
@@ -743,9 +758,44 @@
           box.append(c); return;
         }
         box.append(gbEl("p", "gb-p", "The song plays once from the start while Nate Bloom records it: everything you hear goes in, the reverb and master included, the metronome left out. Then save it as a WAV (full quality) or an MP3 (small, for messages)."));
-        box.append(btnE("Export now", expStart, "primary"));
+        const row = gbEl("div", "gb-chips"); row.append(btnE("Export now", expStart, "primary"), btnE("Save as MIDI (.mid)", saveMidi, "", "Every note track as a MIDI file: open it in Bitwig"));
+        if (S.tracks.some(isHwTr)) row.append(btnE("Print hardware parts to audio", printHw, "", "Plays the song with only the hardware tracks and records them onto a new audio track"));
+        box.append(row);
+        if (S.tracks.some(isHwTr)) box.append(gbEl("p", "gb-p", "Hardware tracks (the Minilogue XD, the MicroFreak) play over MIDI; their sound goes into Export and onto audio tracks only when it comes into the computer (the XD's input, or the input picked for the MicroFreak). Print puts them on an audio track so the song keeps them."));
       });
     }
+    // ---- (224) MIDI out: the song as a Standard MIDI File (type 1, 480 ticks a beat), drums on channel 10 ----
+    const isHwTr = t => t.snd === "hw" || (t.snd || "").startsWith("hwx:");
+    function songMidi() {
+      const D = 480, vlq = n => { const b = [n & 0x7f]; n >>= 7; while (n) { b.unshift((n & 0x7f) | 0x80); n >>= 7; } return b; };
+      const trk = evs => { evs.sort((a, b) => a[0] - b[0] || a[2] - b[2]); const out = []; let last = 0; for (const [t, bytes] of evs) { out.push(...vlq(t - last), ...bytes); last = t; } out.push(0, 0xff, 0x2f, 0); return [0x4d, 0x54, 0x72, 0x6b, (out.length >>> 24) & 255, (out.length >>> 16) & 255, (out.length >>> 8) & 255, out.length & 255, ...out]; };
+      const txt = (ty, str) => { const b = [...new TextEncoder().encode(str)].slice(0, 120); return [0xff, ty, ...vlq(b.length), ...b]; };
+      const us = Math.round(60000000 / S.bpm), tracks = [];
+      const sf = (() => { const k = ((S.key % 12) + 12) % 12, maj = S.minor ? (k + 3) % 12 : k, tbl = { 0: 0, 7: 1, 2: 2, 9: 3, 4: 4, 11: 5, 6: 6, 1: -5, 8: -4, 3: -3, 10: -2, 5: -1 }; return tbl[maj]; })();
+      tracks.push(trk([[0, txt(3, S.name || "Song")], [0, [0xff, 0x51, 3, (us >> 16) & 255, (us >> 8) & 255, us & 255]], [0, [0xff, 0x58, 4, S.sig, 2, 24, 8]], [0, [0xff, 0x59, 2, sf & 255, S.minor ? 1 : 0]]]));
+      let ch = 0;
+      S.tracks.forEach(tr => {
+        if (tr.kind === "audio") return;
+        const notes = tr.regions.flatMap(r => r.notes ? flatNotes(r) : []); if (!notes.length) return;
+        const c = tr.kind === "drums" ? 9 : (ch === 9 ? ++ch : ch) & 15; if (tr.kind !== "drums") ch = Math.min(15, ch + 1);
+        const evs = [[0, txt(3, tr.name)]];
+        if (tr.kind !== "drums") { const e = (tr.snd || "").startsWith("lib:") ? entryById("w:" + tr.snd.slice(4)) : null; if (e && Number.isFinite(e.prog)) evs.push([0, [0xc0 | c, e.prog & 127]]); }
+        const oct = tr.kind === "drums" ? 0 : 12 * (tr.oct || 0);
+        notes.forEach(([b, m, d, v]) => { const n = clamp(Math.round(m + oct), 0, 127), t0 = Math.max(0, Math.round(b * D)), t1 = Math.max(t0 + 1, Math.round((b + Math.max(0.01, d)) * D)), vel = clamp(Math.round((v ?? 0.8) * 127), 1, 127);
+          evs.push([t0, [0x90 | c, n, vel]], [t1, [0x80 | c, n, 0]]); });
+        tracks.push(trk(evs));
+      });
+      const head = [0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 1, 0, tracks.length, (D >> 8) & 255, D & 255];
+      return new Uint8Array(head.concat(...tracks));
+    }
+    async function saveMidi() { const u8 = songMidi(); if (u8.length < 40) { gbSay("No note tracks to save"); return; } const m = await saveFileOut(fileName(), "mid", u8, "audio/midi"); if (m) gbSay(m); }
+    // ---- (224) print the hardware parts: play the song with only them, record it, put it on a new audio track ----
+    function printHw() {
+      const keep = S.tracks.map(t => [t.id, t.mute, t.solo]);
+      S.tracks.forEach(t => { t.solo = false; t.mute = !isHwTr(t); }); applyLevels();
+      PRINT.on = true; PRINT.keep = keep; expStart();
+    }
+    const PRINT = { on: false, keep: null };
     function helpSheet() {
       openSheet("How the Garage works", "a GarageBand-style studio", box => {
         [["Audio", "An audio track records the microphone, or Nate Bloom itself: pick Nate Bloom, press ●, and the Garage steps into a small bar so you can play the keys, pads, Beats or DJ while the song plays (it plays around the recording, not into it). Import audio adds WAV, MP3, M4A, AIFF or FLAC files. Tap an audio region for Gain & fades (and Normalize). Play along keeps the song going in the small bar while you play. + Automation adds a lane for a plugin's control: draw on it, or ● and turn the control. A track's Volume automation (in its sheet) records as you move its volume while the song plays. Bounce (after Export) puts the mix on a new track."], ["Instruments", "Each card makes a track: Keyboard (piano, organ, electric pianos), Drums (the kits from the Rhythm Creator), Smart Bass, Guitar and Strings (chord strips in the song's key, with Autoplay patterns), Synths (Nate Bloom's engines and presets), Your Plugins, the Sampler and the Audio Recorder. ◫ at the top left adds another."],
@@ -1311,6 +1361,17 @@
       return e ? "lib:" + e.id.slice(2) : defaultSound(gmKind(P));
     }
     const gmName = P => P.ch === 9 ? "Drums" : (() => { const e = entryById("w:" + gmSound(P).slice(4)); return e ? e.name : GM_FAM[P.prog >> 3]; })();
+    // (224) Groove: the timing and accents of one part (a played drum part, say), learned per 16th of the bar, laid on the others
+    function grooveOf(notes, sig) {
+      const n = sig * 4, off = new Array(n).fill(0), cnt = new Array(n).fill(0), vel = new Array(n).fill(0); let vsum = 0;
+      notes.forEach(([b, , , v]) => { const s = b * 4, k = Math.round(s), slot = ((k % n) + n) % n; off[slot] += (s - k) / 4; vel[slot] += v; cnt[slot]++; vsum += v; });
+      const vm = notes.length ? vsum / notes.length : 0.8;
+      return { n, off: off.map((x, i) => cnt[i] ? x / cnt[i] : 0), acc: vel.map((x, i) => cnt[i] ? (x / cnt[i]) / vm : 1) };
+    }
+    function grooveApply(notes, G) {
+      return notes.map(([b, m, d, v]) => { const s = b * 4, k = Math.round(s); if (Math.abs(s - k) > 0.2) return [b, m, d, v]; const slot = ((k % G.n) + G.n) % G.n;
+        return [Math.max(0, k / 4 + G.off[slot]), m, d, clamp(v * G.acc[slot], 0.05, 1)]; });
+    }
     function feel(notes, swing, human, bpm) {
       const sb = 60 / bpm; let seed = 7;
       const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 * 2 - 1; };
@@ -1325,7 +1386,7 @@
       const parts = R.parts.slice(0, 32), keySig = M.meta.key, sig = M.meta.sig && M.meta.sig[1] === 4 && M.meta.sig[0] >= 2 && M.meta.sig[0] <= 7 ? M.meta.sig[0] : 4;
       const hwOpts = () => { const o = []; const H = window.__hw; if (H && H.shown && H.shown()) o.push(["hw", H.name]); if (window.__hwx) window.__hwx.all().filter(X => X.shown()).forEach(X => o.push(["hwx:" + X.id, X.name])); return o; };
       const pick = parts.map(P => gmSound(P));
-      let bpm = clamp(Math.round(R.bpm * 10) / 10, 40, 240), swing = 0.5, human = 0;
+      let bpm = clamp(Math.round(R.bpm * 10) / 10, 40, 240), swing = 0.5, human = 0, groove = -1;
       const total = Math.max(...parts.map(P => { const n = P.notes[P.notes.length - 1]; return n[0] + n[2]; }));
       const name = (M.meta.title || (file.name || "MIDI song").replace(/\.[^.]+$/, "")).slice(0, 40);
       openSheet("Import " + name, parts.length + (parts.length === 1 ? " part · " : " parts · ") + Math.round(total * 60 / R.bpm) + " s · " + Math.round(R.bpm) + " BPM in the file", box => {
@@ -1348,6 +1409,11 @@
         sl("Swing", 50, 75, 1, 50, v => v === 50 ? "straight" : v + "%", v => { swing = v / 100; });
         row = row2(box, "", ""); row.firstChild.remove();
         sl("Humanize", 0, 100, 5, 0, v => v ? v + "%" : "off", v => { human = v / 100; });
+        row = row2(box, "", ""); row.firstChild.remove();
+        { row.append(gbEl("span", "gb-lab", "Groove")); const gs = document.createElement("select"); gs.className = "gb-in"; gs.setAttribute("aria-label", "Groove from a part");
+          const o0 = document.createElement("option"); o0.value = ""; o0.textContent = "None: as the file has it"; gs.append(o0);
+          parts.forEach((P, i) => { const o = document.createElement("option"); o.value = i; o.textContent = "The feel of " + (P.name || (P.ch === 9 ? "Drums" : GM_FAM[P.prog >> 3])); gs.append(o); });
+          gs.value = groove < 0 ? "" : String(groove); gs.addEventListener("change", () => { groove = gs.value === "" ? -1 : +gs.value; }); row.append(gs); }
         box.append(gbEl("p", "gb-p", "The file's own timing and velocities are kept. Swing pushes the off-beat 16ths late (MPC-style: 50% is straight, 66% a triplet shuffle); Humanize moves notes a few milliseconds and varies how hard they're hit. Hardware synths play over MIDI on the channel set in their sheet."));
         const go = gbEl("div", "gb-midi-go");
         go.append(btnE("Make the song", () => {
@@ -1359,7 +1425,7 @@
             if (!pick[i]) return;
             const kind = gmKind(P), tr = addTrack(kind, { stay: true }); if (!tr) return;
             tr.name = (P.name || (P.ch === 9 ? "Drums" : gmName(P))).slice(0, 40); tr.snd = pick[i]; tr.mode = "notes"; prep(tr);
-            const notes = feel(P.notes, swing, human, bpm).map(x => [x[0], x[1], x[2], x[3]]);
+            const notes = feel(groove >= 0 && groove !== i ? grooveApply(P.notes, grooveOf(parts[groove].notes, sig)) : P.notes, swing, human, bpm).map(x => [x[0], x[1], x[2], x[3]]);
             const endB = notes.reduce((a, x) => Math.max(a, x[0] + x[2]), 0), len = Math.max(sig, Math.ceil(endB / sig - 1e-6) * sig);
             placeRegion(tr, { id: uid(), start: 0, len, rep: 1, notes }, false); n++;
           });
@@ -1393,6 +1459,8 @@
     const isMid = f => /\.(midi?|kar|rmi)$/i.test(f.name || "") || /midi/i.test(f.type || "");
     addEventListener("dragover", e => { const it = e.dataTransfer && [...(e.dataTransfer.items || [])]; if (it && it.some(x => x.kind === "file" && /midi/i.test(x.type || ""))) e.preventDefault(); });
     addEventListener("drop", e => { const fs = e.dataTransfer && [...(e.dataTransfer.files || [])].filter(isMid); if (!fs || !fs.length) return; e.preventDefault(); e.stopPropagation(); midiFiles(fs); }, true);
+    window.__gbSongMidi = () => songMidi();
+    window.__gbHwUse = id => !!(S && V.open && S.tracks.some(t => !t.mute && (id ? t.snd === id : t.snd === "hw")));   // (224)
     window.__gbAudio = gbAudioIn; window.__gbSay = gbSay;
     // Capture (Live, 136): what was just played, as a new track in the current song
     function gbCapture(o) {

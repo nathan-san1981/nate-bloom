@@ -282,8 +282,9 @@
     fx = { noise };
     buildChain();
     applyFx(); applyDrum();
-    setSample(0, makeExampleChime(), "Example chime (generated)", { placeholder: true });
+    // (224) the example chime is worked out after the start, when slot 1 is still empty (60 ms the screen used to freeze for)
     loadStoredSamples().then(() => { loadMoreStored(); libStartup(); });
+    setTimeout(() => { try { if (!sampBuf[0]) setSample(0, makeExampleChime(), "Example chime (generated)", { placeholder: true }); } catch (e) {} }, 1200);
   }
 
   function applyFx() {
