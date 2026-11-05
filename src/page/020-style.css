@@ -3632,3 +3632,11 @@ body.es-on #epStrip { display: none; }
 .sc-led { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, currentColor 18%, transparent); margin-right: 6px; flex: none; vertical-align: middle; transition: background .12s, box-shadow .12s; }
 .sc-led.on { background: #7ee787; box-shadow: 0 0 6px #7ee787; }
 .sc-led.silent { background: #ff6b6b; box-shadow: 0 0 6px #ff6b6b; }
+/* (239) the split sheet's keyboards */
+.kz-kbs { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
+.kz-kb { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; padding: 6px 10px; }
+.kz-kb small { opacity: .7; font-size: 11px; }
+.kz-kb.on { outline: 2px solid var(--accent, #c9a6ff); }
+.kz-plays { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.kz-plays .kz-pl { font-weight: 600; }
+.kz-note { text-align: left; }

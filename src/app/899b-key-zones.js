@@ -9,12 +9,30 @@
     const VK = "nightbloom-velsplit", getV = () => { try { return JSON.parse(localStorage.getItem(VK) || "{}") || {}; } catch (e) { return {}; } };
     const setV = V => { try { localStorage.setItem(VK, JSON.stringify(V)); } catch (e) {} try { window.__nbZonesReload && window.__nbZonesReload(); } catch (e) {} paint(); };
     const VPRE = { any: null, soft: [1, 79], hard: [80, 127] }, VPRE_N = { any: "Any velocity", soft: "Soft playing only (1–79)", hard: "Hard playing only (80–127)" };
-    const getZ = () => { try { return JSON.parse(localStorage.getItem(ZK) || "{}") || {}; } catch (e) { return {}; } };
-    const setZ = Z => { try { localStorage.setItem(ZK, JSON.stringify(Z)); } catch (e) {} location.hash; };
+    // (239) a split per keyboard: the sheet edits the shared split (every keyboard and the screen) or one keyboard's own
+    const ZKB = "nightbloom-zones-kb", KON = "nightbloom-kb-only";
+    const J = k => { try { return JSON.parse(localStorage.getItem(k) || "{}") || {}; } catch (e) { return {}; } };
+    const W = (k, o) => { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) {} };
+    let kb = null;   // null: the shared split; else a keyboard's key (in:<name>|…)
+    const getZ = () => kb ? (J(ZKB)[kb] || {}) : J(ZK);
+    const setZ = Z => { if (kb) { const A = J(ZKB); A[kb] = Z; W(ZKB, A); } else W(ZK, Z); };
     const NN = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"], nn = m => NN[m % 12] + (Math.floor(m / 12) - 1);
-    const LO = 36, HI = 96;   // a 61-key board: C1 to C6
-    const PRE = { all: null, low: [36, 56], mid: [57, 76], high: [77, 96], lowh: [36, 65], highh: [66, 96] };
-    const PRE_N = { all: "Whole keyboard", low: "Low · bottom 21 keys (C1–A♭2)", mid: "Middle · next 20 (A2–E4)", high: "High · top 20 (F4–C6)", lowh: "Lower half (C1–F3)", highh: "Upper half (F♯3–C6)", custom: "Custom range…" };
+    let LO = 36, HI = 96;   // a 61-key board: C1 to C6 (239: a keyboard's own range when one is picked)
+    let PRE = {}, PRE_N = {};
+    function ranges() {
+      const c = kb ? kbList().find(x => x.key === kb) : null, nm = c ? c.name : "";
+      [LO, HI] = /micro\s*freak|mini\s*lab|25\b|keystep/i.test(nm) ? [48, 72] : /\b49\b/.test(nm) ? [36, 84] : /\b88\b/.test(nm) ? [21, 108] : /\b37\b|minifreak/i.test(nm) ? [48, 84] : [36, 96];
+      const n = HI - LO + 1, a = LO + Math.round(n / 3) - 1, b = LO + Math.round(2 * n / 3) - 1, h = LO + Math.floor(n / 2) - 1;
+      PRE = { all: null, low: [LO, a], mid: [a + 1, b], high: [b + 1, HI], lowh: [LO, h], highh: [h + 1, HI] };
+      const r = z => nn(z[0]) + "–" + nn(z[1]);
+      PRE_N = { all: "Whole keyboard", low: "Low third (" + r(PRE.low) + ")", mid: "Middle third (" + r(PRE.mid) + ")", high: "High third (" + r(PRE.high) + ")", lowh: "Lower half (" + r(PRE.lowh) + ")", highh: "Upper half (" + r(PRE.highh) + ")", custom: "Custom range…" };
+    }
+    // the keyboards: every controller that's on, and the MicroFreak even while it plays its own sounds
+    function kbList() {
+      let L = []; try { L = window.__nbCtlList ? window.__nbCtlList() : []; } catch (e) {}
+      try { const X = window.__hwx && window.__hwx.get("mf"); if (X && X.present() && !L.some(c => /micro\s*freak/i.test(c.name))) L.push({ key: "mf:own", name: "MicroFreak", own: true }); } catch (e) {}
+      return L;
+    }
     const tagOfItem = it => it.t === "syn" ? "e:" + it.id : it.t === "syn2" ? "e:" + it.id + "#" + it.ci : it.t === "lib" ? "l:" + it.id : it.t === "hwx" ? "hwx:" + it.id : it.t;
     const items = () => { try { return window.__stk.items(); } catch (e) { return []; } };
     // the zones the 899 wrapper reads live: it keeps its own copy, so hand it the new one
@@ -23,17 +41,17 @@
     // copy's and its engine's alike), and the library layers' own key ranges, so every sound is back on every key.
     // (It cleared only the sounds' exact names: a split kept under the engine's name, or a sound's from before, stayed.)
     function clearAll() {
-      try { localStorage.setItem(ZK, "{}"); localStorage.setItem(VK, "{}"); } catch (e) {}
+      try { localStorage.setItem(ZK, "{}"); localStorage.setItem(VK, "{}"); localStorage.setItem(ZKB, "{}"); } catch (e) {}   // (239: each keyboard's own split too; what a keyboard plays stays)
       try { (state.lib.parts || []).forEach(p => { if (p) { p.lo = 0; p.hi = 127; } }); save(); } catch (e) {}
       try { window.__nbZonesReload && window.__nbZonesReload(); } catch (e) {}
       cap = null; paint(); try { window.__stk.paint(); } catch (e) {} try { window.__kz.keys(); } catch (e) {} try { decorateZones(); } catch (e) {}
       try { window.__nbAdd && window.__nbAdd("zones", "split cleared: every sound on every key"); } catch (e) {}
       const t = document.getElementById("uiToast"); if (t) { t.textContent = "Split cleared · every sound plays on every key again"; t.hidden = false; clearTimeout(clearAll.t); clearAll.t = setTimeout(() => { t.hidden = true; }, 3000); }
     }
-    const anySplit = () => { const Z = getZ(), V = getV(); let lib = false; try { lib = (state.lib.parts || []).some(p => p && p.id && (p.lo > 0 || p.hi < 127)); } catch (e) {} return Object.keys(Z).length > 0 || Object.keys(V).length > 0 || lib; };
+    const anySplit = () => { const Z = J(ZK), V = getV(); if (Object.values(J(ZKB)).some(o => o && Object.keys(o).length)) return true; let lib = false; try { lib = (state.lib.parts || []).some(p => p && p.id && (p.lo > 0 || p.hi < 127)); } catch (e) {} return Object.keys(Z).length > 0 || Object.keys(V).length > 0 || lib; };
     const sh = document.createElement("div"); sh.className = "editor sheet"; sh.id = "kzSheet"; sh.hidden = true;
     sh.innerHTML = `<div class="ed-card" role="dialog" aria-label="Split the keyboard"><div class="ed-head"><strong>Split the keyboard</strong><span class="ed-info">each sound on its own keys</span></div>
-      <span class="ed-info" style="text-align:left">Pick a sound below, then drag across the keys for the part it plays.</span><canvas id="kzMap" style="width:100%;height:72px;border-radius:8px;background:#0f0d16;touch-action:none;cursor:crosshair"></canvas><div class="kz-q" id="kzQ"></div><div id="kzList"></div>
+      <div class="kz-kbs" id="kzKbs"></div><div class="kz-plays" id="kzPlays"></div><span class="ed-info" style="text-align:left">Pick a sound below, then drag across the keys for the part it plays.</span><canvas id="kzMap" style="width:100%;height:72px;border-radius:8px;background:#0f0d16;touch-action:none;cursor:crosshair"></canvas><div class="kz-q" id="kzQ"></div><div id="kzList"></div>
       <span class="ed-info" id="kzMsg" style="text-align:left"></span><div class="ed-foot sheet-foot"><button class="btn big primary" id="kzDone">Done</button></div></div>`;
     document.body.appendChild(sh);
     const $k = id => document.getElementById(id);
@@ -42,10 +60,12 @@
     let act = null;   // the sound a drag on the keys gives its part to
     function paint() {
       if (sh.hidden) return;
+      const kbs = kbList(); if (kb && !kbs.some(c => c.key === kb)) kb = null;
+      ranges(); paintKbs(kbs);
       const Z = getZ(), its = items();
       const q = $k("kzQ"); q.innerHTML = "";
       const qb = (t, fn, dis) => { const b = document.createElement("button"); b.className = "btn"; b.textContent = t; b.disabled = !!dis; b.addEventListener("click", fn); q.appendChild(b); };
-      qb("3 zones · 21 / 20 / 20", () => { const Z2 = getZ(); its.slice(0, 3).forEach((it, i) => { Z2[tagOfItem(it)] = PRE[["low", "mid", "high"][i]]; }); apply(Z2); }, its.length < 2);
+      qb("3 zones · thirds", () => { const Z2 = getZ(); its.slice(0, 3).forEach((it, i) => { Z2[tagOfItem(it)] = PRE[["low", "mid", "high"][i]]; }); apply(Z2); }, its.length < 2);
       qb("2 zones · halves", () => { const Z2 = getZ(); its.slice(0, 2).forEach((it, i) => { Z2[tagOfItem(it)] = PRE[i ? "highh" : "lowh"]; }); apply(Z2); }, its.length < 2);
       qb("Soft / hard · first two sounds", () => { const V = getV(); its.slice(0, 2).forEach((it, i) => { V[tagOfItem(it)] = VPRE[i ? "hard" : "soft"]; }); setV(V); }, its.length < 2);
       qb("Clear all · every sound on every key", () => clearAll());
@@ -67,7 +87,7 @@
           r.append(nsel(z[0], (c, v) => { c[0] = v; }), nsel(z[1], (c, v) => { c[1] = v; }));
         }
         const pk = document.createElement("button"); pk.className = "btn"; pk.textContent = cap && cap.tag === tag ? (cap.lo == null ? "Play its lowest key…" : "…and its highest") : "Set with keys";
-        pk.title = "Play this sound's lowest key, then its highest (on the KeyLab or the screen)";
+        pk.title = kb ? "Play this sound's lowest key, then its highest, on this keyboard" : "Play this sound's lowest key, then its highest (on the KeyLab or the screen)";
         pk.addEventListener("click", () => { cap = cap && cap.tag === tag ? null : { tag, lo: null }; paint(); });
         const vz = getV()[tag] || getV()[tag.replace(/#\d+$/, "")], vs = document.createElement("select"); vs.className = "hw-sel kz-vel"; vs.setAttribute("aria-label", "Velocity for " + it.name);
         Object.keys(VPRE_N).forEach(k => { const o = document.createElement("option"); o.value = k; o.textContent = VPRE_N[k]; vs.appendChild(o); });
@@ -78,9 +98,43 @@
         cl.addEventListener("click", () => { const Z2 = getZ(), base = tag.replace(/#\d+$/, ""); if (Z2[tag]) delete Z2[tag]; else delete Z2[base]; apply(Z2); const V = getV(); if (V[tag]) delete V[tag]; else delete V[base]; setV(V); });
         r.append(pk, cl); L.appendChild(r);
       });
-      $k("kzMsg").textContent = "Zones use the keys' own notes (a 61-key board runs C1 to C6). Velocity picks a sound by how hard you play: soft for one, hard for another. The sequencer and the arp still play every sound.";
+      $k("kzMsg").textContent = (kb ? "This keyboard's own split: its notes use it instead of the shared one (" + nn(LO) + "–" + nn(HI) + " here; with its octave buttons shifted, set zones with its keys). " : "") + "Zones use the keys' own notes (middle C is C4; a 61-key board runs C2 to C7). Velocity picks a sound by how hard you play: soft for one, hard for another. The sequencer and the arp still play every sound.";
       drawMap(Z, its);
     }
+    // (239) which keyboard the sheet edits, and what that keyboard plays
+    function paintKbs(kbs) {
+      const T = $k("kzKbs"), P = $k("kzPlays"); T.innerHTML = ""; P.innerHTML = "";
+      const own = J(ZKB);
+      const tab = (key, label, sub) => { const b = document.createElement("button"); b.className = "btn kz-kb" + (kb === key ? " on" : ""); b.setAttribute("aria-pressed", String(kb === key)); b.innerHTML = "<b></b><small></small>"; b.querySelector("b").textContent = label; b.querySelector("small").textContent = sub; b.addEventListener("click", () => { kb = key; cap = null; paint(); }); T.appendChild(b); };
+      tab(null, "Every keyboard", "the shared split · the screen's keys");
+      kbs.forEach(c => tab(c.key, c.name, c.own ? "its own sounds now" : KONLY()[c.key] ? "one sound" : own[c.key] ? "its own split" : "uses the shared split"));
+      if (!kb) return;
+      const c = kbs.find(x => x.key === kb); if (!c) return;
+      if (c.own) {   // the MicroFreak on its own sounds: Nate Bloom takes nothing from its keys
+        const p = document.createElement("p"); p.className = "ed-info kz-note"; p.textContent = "The MicroFreak is playing its own sounds, so Nate Bloom ignores its keys. Switch it to Nate Bloom sounds to split it or give it one sound here.";
+        const b = document.createElement("button"); b.className = "btn"; b.textContent = "Use the MicroFreak for Nate Bloom sounds"; b.addEventListener("click", () => { try { window.__mfSet.mode("nb"); } catch (e) {} setTimeout(() => { kb = (kbList().find(x => /micro\s*freak/i.test(x.name) && !x.own) || {}).key || null; paint(); }, 600); });
+        P.append(p, b); return;
+      }
+      const lab = document.createElement("span"); lab.className = "kz-pl"; lab.textContent = c.name + " plays";
+      const sel = document.createElement("select"); sel.className = "hw-sel"; sel.setAttribute("aria-label", "What " + c.name + " plays");
+      const opt = (v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
+      opt("", "Everything in Playing" + (own[kb] ? " · its own split below" : " · the shared split"));
+      items().forEach(it => opt(tagOfItem(it), "Only " + it.name));
+      const cur = KONLY()[kb] || ""; if (cur && ![...sel.options].some(o => o.value === cur)) opt(cur, "Only " + cur.replace(/^[a-z]+:/, "") + " (not in Playing now)");
+      sel.value = cur;
+      sel.addEventListener("change", () => {
+        const K = KONLY(); if (sel.value) K[kb] = sel.value; else delete K[kb]; W(KON, K);
+        // the sound it plays alone: from this keyboard only, unless it was already shared out
+        if (sel.value) { try { const it = items().find(x => tagOfItem(x) === sel.value); if (it) { const k = window.__nbCtl.keyOf(it), L = window.__nbCtl.get(k); if (!L.length) window.__nbCtl.set(k, [kb]); else if (!L.includes(kb)) window.__nbCtl.set(k, L.concat(kb)); } } catch (e) {} }
+        try { if (/micro\s*freak/i.test(c.name) && window.__mfSet) window.__mfSet.route("stack"); } catch (e) {}
+        try { window.__nbZonesReload && window.__nbZonesReload(); } catch (e) {} try { window.__stk.paint(); } catch (e) {}
+        try { window.__nbAdd && window.__nbAdd("zones", c.name + " plays " + (sel.value ? "only " + sel.options[sel.selectedIndex].text.replace(/^Only /, "") : "everything in Playing")); } catch (e) {}
+        paint(); });
+      P.append(lab, sel);
+      if (own[kb]) { const b = document.createElement("button"); b.className = "btn"; b.textContent = "Use the shared split"; b.title = "Drop this keyboard's own split"; b.addEventListener("click", () => { const A = J(ZKB); delete A[kb]; W(ZKB, A); try { window.__nbZonesReload(); } catch (e) {} paint(); }); P.appendChild(b); }
+      if (cur) { const n = document.createElement("small"); n.className = "ed-info"; n.textContent = "Its keys play only that sound (at its level, with its effects); the other sounds in Playing stay on the other keyboards. A split below divides that one sound's keys only if you add more."; P.appendChild(n); }
+    }
+    const KONLY = () => J(KON);
     function drawMap(Z, its) {
       const cv = $k("kzMap"), c = cv.getContext("2d"), dpr = devicePixelRatio || 1, w = cv.width = cv.clientWidth * dpr, h = cv.height = cv.clientHeight * dpr;
       const whites = []; for (let m = LO; m <= HI; m++) if (![1, 3, 6, 8, 10].includes(m % 12)) whites.push(m);
@@ -104,7 +158,7 @@
       cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", () => { d0 = null; }); }
     // "Set with keys": the next two keys played set the range, and don't sound
     { const mn = makeNote; makeNote = function (root) {
-        if (cap && !sh.hidden) { if (cap.lo == null) { cap.lo = root; paint(); } else { const Z = getZ(); Z[cap.tag] = [Math.min(cap.lo, root), Math.max(cap.lo, root)]; cap = null; apply(Z); } return { tones: [], stop() {} }; }
+        if (cap && !sh.hidden && (!kb || window.__nbSrc === kb)) { if (cap.lo == null) { cap.lo = root; paint(); } else { const Z = getZ(); Z[cap.tag] = [Math.min(cap.lo, root), Math.max(cap.lo, root)]; cap = null; apply(Z); } return { tones: [], stop() {} }; }
         return mn.apply(this, arguments);
       }; }
     $k("kzDone").addEventListener("click", () => { cap = null; sh.hidden = true; });

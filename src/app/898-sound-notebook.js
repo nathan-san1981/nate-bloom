@@ -366,6 +366,7 @@
       if (mfMode === "nb") { try { const st = window.__stk, it = st.items().find(x => x.t === "hwx" && x.id === "mf"); if (it) st.drop(it, true); } catch (e) {} }   // (227) with its own sounds it can play along in Playing too
       try { renderMidi(); } catch (e) {}
     }
+    window.__mfSet = { mode: m => mfSetMode(m), route: r => { mfRoute = r; try { localStorage.setItem(MFR_KEY, r); } catch (e) {} mfApply(); } };   // (239: the split sheet's MicroFreak row)
     function mfSetMode(m) { mfMode = m; try { localStorage.setItem(MFM_KEY, m); } catch (e) {} mfApply(); hwPaintSoon(); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} }
     setInterval(() => { if (md.access) { const i = mdPort("in"), o = mdPort("out"); if ((o && md.outs.has(o.id)) || (i && md.ins.has(i.id) !== (mfMode === "nb"))) mfApply(); } }, 2000);   // (and after a rescan or a replug)
     // its knobs on a Nate Bloom synth: each to the control that does the same job, the rest in order

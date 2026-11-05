@@ -28,13 +28,21 @@
     const zSave = () => { try { localStorage.setItem(ZK, JSON.stringify(ZONES)); } catch (e) {} };
     let VELS = {}; try { VELS = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; } catch (e) {}
     const inVel = tag => { const z = VELS[tag] || VELS[tag.replace(/#\d+$/, "")]; if (!z) return true; const v = typeof NB_VEL7 === "number" ? NB_VEL7 : 100; return v >= z[0] && v <= z[1]; };   // (224) a soft sound and a hard one
-    const inZone = (tag, m) => { const z = ZONES[tag] || ZONES[tag.replace(/#\d+$/, "")]; return !z || (m >= z[0] && m <= z[1]); };
+    // (239) each keyboard can have its own split ("nightbloom-zones-kb": { keyboard: { sound: [lo, hi] } }), used for
+    // the notes from that keyboard instead of the shared one, and can play only one sound ("nightbloom-kb-only")
+    let ZKB = {}, KONLY = {};
+    const zkbLoad = () => { try { ZKB = JSON.parse(localStorage.getItem("nightbloom-zones-kb") || "{}") || {}; KONLY = JSON.parse(localStorage.getItem("nightbloom-kb-only") || "{}") || {}; } catch (e) {} };
+    zkbLoad();
+    const inZone = (tag, m) => { const src = window.__nbSrc, base = tag.replace(/#\d+$/, "");
+      if (src != null && ZKB[src]) { const zk = ZKB[src][tag] || ZKB[src][base]; return !zk || (m >= zk[0] && m <= zk[1]); }
+      const z = ZONES[tag] || ZONES[base]; return !z || (m >= z[0] && m <= z[1]); };
+    const kbOK = tag => { const src = window.__nbSrc; if (src == null || !KONLY[src]) return true; const o = KONLY[src]; return tag === o || tag.replace(/#\d+$/, "") === o; };
     const vcG = voiceComponents;
     voiceComponents = function () {
       const r = vcG.apply(this, arguments);
       if (!Array.isArray(r)) return r;
       return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make, acc = c.accepts || (() => true);
-        return Object.assign({}, c, { __sg: 1, accepts: m => acc(m) && inZone(tag, m) && inVel(tag), make() { return track(tag, mk.apply(this, arguments)); } }); });
+        return Object.assign({}, c, { __sg: 1, accepts: m => acc(m) && kbOK(tag) && inZone(tag, m) && inVel(tag), make() { return track(tag, mk.apply(this, arguments)); } }); });
     };
     // which voices each key's note (and each held note) is made of
     const mnG = makeNote;
@@ -66,6 +74,6 @@
     window.__nbSweep = sweep;
     { const re = renderEngine; renderEngine = function () { const r = re.apply(this, arguments); setTimeout(sweep, 0); return r; }; }
     setInterval(sweep, 1000);   // (and changes that don't redraw the screen)
-    window.__nbZonesReload = () => { try { ZONES = JSON.parse(localStorage.getItem(ZK) || "{}") || {}; VELS = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; } catch (e) {} };
+    window.__nbZonesReload = () => { try { ZONES = JSON.parse(localStorage.getItem(ZK) || "{}") || {}; VELS = JSON.parse(localStorage.getItem("nightbloom-velsplit") || "{}") || {}; } catch (e) {} zkbLoad(); };
     window.__nbVoiceReg = () => [...REG].map(([t, s]) => [t, s.size]);
   }

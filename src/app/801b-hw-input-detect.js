@@ -36,6 +36,10 @@
       const MF = id => { const X = window.__hwx.get(id); return X && { id, name: X.name, get pick() { return X.cfg.pick; }, dev: () => X.cfg.dev, set(dev, pick) { X.cfg.dev = dev; X.cfg.pick = pick; try { window.__hwxCfgSave(); X.rewire && X.rewire(); } catch (e) {} } }; };
       function heard(who) {
         if (!P.an.length) return;
+        // (239) the MicroFreak's keys playing Nate Bloom (which plays the Minilogue) brought the Minilogue in: that isn't
+        // the MicroFreak's own sound, so it doesn't count
+        if (who !== "hw" && performance.now() - (H.sentAt || 0) < 600) return;
+        if (who !== "hw" && window.__mfMode && window.__mfMode() === "nb") { try { if (window.__stk.items().some(it => it.t === "hw")) return; } catch (e) {} }
         const b = P.base.slice(), mx = [0, 0]; let n = 0; P.quietAt = performance.now() + 700;
         const t = setInterval(() => {
           P.an.forEach((a, i) => { mx[i] = Math.max(mx[i], rms(a)); });
