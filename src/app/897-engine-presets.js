@@ -113,6 +113,59 @@
     try { HID = JSON.parse(localStorage.getItem(HIDK) || "{}") || {}; } catch (e) {}
     const hidSave = () => { try { localStorage.setItem(HIDK, JSON.stringify(HID)); } catch (e) {} };
     const ESH = { on: false };
+    // (231) Classic: the older copies of a sound that has a newer or better one (the same instrument from a second or
+    // third General MIDI library, a preset that is the engine itself, the classic Hoover since the Alpha Juno). Out of
+    // the lists and Find, never deleted: they wait in the Classic tab, playable there, and any can come back.
+    const CLSK = "nightbloom-classic-keep"; let CLK = {};
+    try { CLK = JSON.parse(localStorage.getItem(CLSK) || "{}") || {}; } catch (e) {}
+    const clkSave = () => { try { localStorage.setItem(CLSK, JSON.stringify(CLK)); } catch (e) {} };
+    const SRC_RANK = [[/^w:wam:natebloom\//, 0], [/^w:nb-|^sp:/, 1], [/^e:/, 2], [/_(Acoustic_Guitar|Stratocaster|Gibson_Les_Paul|Soul_Ahhs)_sf2/, 3], [/_GeneralUserGS_sf2/, 4], [/^n:/, 5],   // (a real recording of an acoustic instrument over a synth imitation with its name)
+       [/_FluidR3_GM_sf2/, 6], [/_JCLive_sf2/, 7], [/_Chaos_sf2/, 8]];
+    const rankOf = id => { for (const [re, r] of SRC_RANK) if (re.test(id)) return r; return -1; };   // (-1: not part of this, e.g. a plugin's own preset bank)
+    const SUPERSEDED = { "e:hoover": "Alpha Juno" };   // (engines kept for old projects, with a newer one in their place)
+    let CLS = {}, clsSig = "";
+    function clsBuild() {
+      let all = []; try { all = allEntries(); } catch (e) { return CLS; }
+      const sig = all.length + "|" + catL().length + "|" + Object.keys(CLK).length; if (sig === clsSig) return CLS; clsSig = sig;
+      const plug = catL().filter(c => c.kind === "instrument" && /^natebloom\//.test(c.url || "")).map(c => ({ id: "w:wam:" + c.key, name: c.name }));
+      const by = new Map(), norm = s => String(s).toLowerCase().replace(/\(classic\)|[^a-z0-9]/g, "");
+      const ids = new Set();
+      for (const e of all.concat(plug)) { if (ids.has(e.id)) continue; ids.add(e.id); const r = rankOf(e.id); if (r < 0) continue; const k = norm(e.name); if (!k) continue; if (!by.has(k)) by.set(k, []); by.get(k).push({ e, r, i: +(/^n:(\d+)/.exec(e.id) || [0, 0])[1] }); }
+      const out = {};
+      by.forEach((L, k) => {
+        if (L.length < 2) return;
+        L.sort((a, b) => a.r - b.r || b.i - a.i);   // (the best kind first; of two presets, the newer)
+        const engOf = id => { const m = /^n:(\d+)/.exec(id), p = m && NB_PRESETS[+m[1]]; return p ? [].concat(p[1]).join("+") : null; };
+        L.slice(1).forEach(({ e }) => {
+          // a preset only copies an engine when it is that engine's own sound (a Natewave preset called Sync Lead isn't the Sync Lead engine)
+          if (e.id.startsWith("n:") && L[0].e.id.startsWith("e:") && engOf(e.id) !== L[0].e.id.slice(2)) return;
+          if (!CLK[e.id]) out[e.id] = { name: e.name, sub: e.sub || "", why: "older copy of " + L[0].e.name + (L[0].e.sub ? " (" + String(L[0].e.sub).split(" · ")[0] + ")" : "") }; });
+      });
+      for (const id in SUPERSEDED) if (!CLK[id]) { const e = all.find(x => x.id === id); if (e) out[id] = { name: e.name, sub: e.sub || "", why: "the " + SUPERSEDED[id] + " took its place" }; }
+      CLS = out; return CLS;
+    }
+    const OFF = k => !!(HID[k] || clsBuild()[k]);
+    window.__nbIsClassic = id => !!clsBuild()[id];
+    const ESC = { on: false };
+    function esClassicView() {
+      const C = clsBuild(), ks = Object.keys(C);
+      const h = document.createElement("div"); h.className = "es-sec"; h.textContent = ks.length + " classic sounds · older copies, kept for old projects · tap to play"; es.appendChild(h);
+      const groups = [["Engines and presets", k => /^[en]:/.test(k)], ["Second library copies", k => /^w:\d/.test(k)], ["Other", k => !/^[en]:|^w:\d/.test(k)]];
+      let all = []; try { all = allEntries(); } catch (e) {}
+      groups.forEach(([title, f]) => {
+        const g = ks.filter(f).sort((a, b) => C[a].name.localeCompare(C[b].name)); if (!g.length) return;
+        const d = document.createElement("details"); d.className = "es-cls"; const sm = document.createElement("summary"); sm.textContent = title + " · " + g.length; d.appendChild(sm);
+        g.forEach(k => {
+          const x = C[k], e = all.find(y => y.id === k), r = document.createElement("div"); r.className = "es-pr";
+          r.appendChild(esRow("es-p", x.name, (x.sub ? x.sub + " · " : "") + x.why, state.cur && state.cur.id === k, () => { if (e) chooseEntry(e, !k.startsWith("w:wam:")); }));
+          const b = document.createElement("button"); b.className = "es-add es-back"; b.textContent = "Bring back"; b.title = "Back in the lists and Find";
+          b.addEventListener("click", () => { CLK[k] = 1; clkSave(); clsSig = ""; r.remove(); const c = es.querySelector(".es-cb"); if (c) c.textContent = "Classic · " + Object.keys(clsBuild()).length; });
+          r.appendChild(b); d.appendChild(r);
+        });
+        es.appendChild(d);
+      });
+      if (Object.keys(CLK).length) { const rs = document.createElement("button"); rs.className = "es-more"; rs.textContent = "Send the ones I brought back to Classic again"; rs.addEventListener("click", () => { CLK = {}; clkSave(); clsSig = ""; esPaint(true, true); }); es.appendChild(rs); }
+    }
     function esHideBtn(hk, name, sub, rowEl) {
       const h = document.createElement("button"); h.className = "es-hide"; h.textContent = "Hide"; h.title = "Hide " + name + " (it goes to the Hidden tab, not deleted)"; h.setAttribute("aria-label", h.title);
       h.addEventListener("click", ev => { ev.stopPropagation(); HID[hk] = { name, sub: sub || "", t: Date.now() }; hidSave(); if (rowEl) rowEl.remove(); const c = es.querySelector(".es-hb"); if (c) c.textContent = "Hidden · " + Object.keys(HID).length; });
@@ -164,8 +217,8 @@
 
     function esEngine(id, cur, curEng) {
       const E = ENGINES[id]; if (!E) return;
-      const k = "e:" + id; if (HID[k]) return;
-      const L = EB().presetsOf(id).filter(([, i]) => !HID["n:" + i]), open = esOpen.has(k), playing = curEng === k;
+      const k = "e:" + id; if (OFF(k)) return;
+      const L = EB().presetsOf(id).filter(([, i]) => !OFF("n:" + i)), open = esOpen.has(k), playing = curEng === k;
       const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
       const cnt = document.createElement("i"); cnt.className = "es-n"; cnt.textContent = L.length ? String(L.length) : "";
       { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", E.short || E.name, (E.short && E.short !== E.name ? E.name + " · " : "") + (E.after || ""), false, ev => esToggle(k, ev), cnt)); hr.appendChild(esHideBtn(k, E.name, "engine", wrap)); wrap.appendChild(hr); }
@@ -184,7 +237,7 @@
       es.appendChild(wrap);
     }
     function esPlugin(c, cur, curEng) {
-      const k = "w:" + c.key; if (HID[k]) return;
+      const k = "w:" + c.key; if (OFF(k)) return;
       const open = esOpen.has(k), playing = curEng === k;
       const wrap = document.createElement("div"); wrap.className = "es-e" + (open ? " open" : "") + (playing ? " playing" : ""); wrap.dataset.k = k;
       { const hr = document.createElement("div"); hr.className = "es-hrow"; hr.appendChild(esRow("es-h", c.name, c.vendor === "Nathan" ? "your plugin" : (c.vendor || "plugin"), false, ev => esToggle(k, ev))); hr.appendChild(esHideBtn(k, c.name, "plugin", wrap)); wrap.appendChild(hr); }
@@ -196,7 +249,7 @@
         EB().plugPresets(c.key).then(m => {
           note.remove();
           if (!m || !m.list || !m.list.length) { if (!c.native) { note.textContent = "No preset list: its sounds come from its own controls."; box.appendChild(note); } return; }
-          m.list.forEach((pr, i) => { if (HID["pp:" + c.key + "#" + i]) return; box.appendChild(esPRow(pr.name, pr.cat || "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)), () => EB().plugTogether(c, pr), null, "pp:" + c.key + "#" + i)); });
+          m.list.forEach((pr, i) => { if (OFF("pp:" + c.key + "#" + i)) return; box.appendChild(esPRow(pr.name, pr.cat || "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)), () => EB().plugTogether(c, pr), null, "pp:" + c.key + "#" + i)); });
         });
       }
       es.appendChild(wrap);
@@ -233,7 +286,7 @@
         if (seen.has(i)) continue; seen.add(i);
         const eid = "n:" + i, e = by.get(eid) || { id: eid, name: p[0], sub: "", cat: "nb" }, st = EB().engOfPreset(i);
         const src = st.map(x => ENGINES[x] ? ENGINES[x].short || ENGINES[x].name : x).join(" + ");
-        if (HID[eid] || st.some(x => HID["e:" + x])) continue;
+        if (OFF(eid) || st.some(x => OFF("e:" + x))) continue;
         add(esTypeOf(p[0], p[3] && p[3].sub), { id: eid, name: p[0], sub: src, on: cur === eid, pick: () => chooseEntry(e, true), addf: togE(e) });
       }
       return out;
@@ -246,8 +299,8 @@
       for (const c of P) {
         const m = esPlugCache(c.key); if (m === undefined) { pending = true; continue; }
         if (!m || !m.list) continue;
-        if (HID["w:" + c.key]) continue;
-        m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name) || HID["pp:" + c.key + "#" + i]) return; const nm = pr.name.replace(/^(60|106) · [A-Z]\d\d /, ""); (items[esTypeOf(nm, c.type)] = items[esTypeOf(nm, c.type)] || []).push({ id: "pp:" + c.key + "#" + i, name: pr.name, sub: c.name, on: cur === "pp:" + c.key + "#" + i, pick: () => EB().choosePlugPreset(c, pr, i), addf: () => EB().plugTogether(c, pr) }); });
+        if (OFF("w:" + c.key)) continue;
+        m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name) || OFF("pp:" + c.key + "#" + i)) return; const nm = pr.name.replace(/^(60|106) · [A-Z]\d\d /, ""); (items[esTypeOf(nm, c.type)] = items[esTypeOf(nm, c.type)] || []).push({ id: "pp:" + c.key + "#" + i, name: pr.name, sub: c.name, on: cur === "pp:" + c.key + "#" + i, pick: () => EB().choosePlugPreset(c, pr, i), addf: () => EB().plugTogether(c, pr) }); });
       }
       if (pending) esLoadPlugs();
       const order = ES_TYPES.map(t => t[0]).concat(["Other"]);
@@ -376,11 +429,14 @@
       fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
       head.appendChild(fb);
       const nh = Object.keys(HID).length, hb = document.createElement("button"); hb.className = "es-fb es-hb" + (ESH.on ? " on" : ""); hb.textContent = "Hidden · " + nh; hb.title = "What you've hidden: bring any of it back"; hb.setAttribute("aria-pressed", String(ESH.on));
-      hb.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) ESF.on = false; es.scrollTop = 0; esPaint(true, true); });
+      hb.addEventListener("click", () => { ESH.on = !ESH.on; if (ESH.on) { ESF.on = false; ESC.on = false; } es.scrollTop = 0; esPaint(true, true); });
       head.appendChild(hb);
+      { const nc = Object.keys(clsBuild()).length, cb = document.createElement("button"); cb.className = "es-fb es-cb" + (ESC.on ? " on" : ""); cb.textContent = "Classic · " + nc; cb.title = "Older copies of sounds that have a newer one: kept, not in the lists"; cb.setAttribute("aria-pressed", String(ESC.on));
+        cb.addEventListener("click", () => { ESC.on = !ESC.on; if (ESC.on) { ESF.on = false; ESH.on = false; } es.scrollTop = 0; esPaint(true, true); }); head.appendChild(cb); }
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
       if (ESH.on) { esHiddenView(); return; }
+      if (ESC.on) { esClassicView(); return; }
       if (ESF.on && esMode !== "fx") {
         const row = document.createElement("div"); row.className = "es-find";
         const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
@@ -452,7 +508,7 @@
     const esSavedSet = L => { try { localStorage.setItem("nightbloom-es-saved", JSON.stringify(L)); } catch (e) {} };
     function esFindItems() {
       const L = [], seen = new Set(), cur = state.cur && state.cur.id || "";
-      const add = (id, name, sub, extra, pick, addf, kind) => { if (seen.has(id) || HID[id]) return; seen.add(id); L.push({ id, name, sub, tags: esTagsFor(name, sub, extra), pick, addf, on: cur === id, kind }); };
+      const add = (id, name, sub, extra, pick, addf, kind) => { if (seen.has(id) || OFF(id)) return; seen.add(id); L.push({ id, name, sub, tags: esTagsFor(name, sub, extra), pick, addf, on: cur === id, kind }); };
       const CATN = { nb: "Nate Bloom preset", engines: "engine", kits: "drum kit", mine: "your instrument", keys: "keys", strings: "strings", winds: "winds & brass", bells: "bells & mallets", gtrbass: "guitar & bass", leads: "synth lead", pads: "pad", world: "world", perc: "percussion", drums: "drums", classic: "classic synth" };
       for (const e of allEntries()) {
         const sub = e.cat === "nb" ? e.sub : e.id.startsWith("w:nb-") ? "Studio" : e.sub;
@@ -507,6 +563,7 @@
     setInterval(() => { if (!document.hidden) esPlace(); }, 500);
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
+    window.__nbAll = () => ({ entries: allEntries(), nb: NB_PRESETS.map(p => [p[0], p[1]]), classic: (typeof CLASSIC_PRESETS !== 'undefined' ? CLASSIC_PRESETS : []).map(p => [p[0], p[1]]), engines: Object.keys(ENGINES).map(k => [k, ENGINES[k].name, ENGINES[k].after || '']) });   // (a look at every sound, for checks)
   }
 
   // (214, Linux) the second (third, fourth) sound on an engine plays as another set of that engine's voices, each with its

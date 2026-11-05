@@ -347,6 +347,7 @@
     let list = q ? all.filter(e => (e.name + " " + e.sub).toLowerCase().includes(q))
       : brCat === "fav" ? all.filter(e => favs.includes(e.id)) : all.filter(e => e.cat === brCat);
     if (pickFor != null) list = list.filter(e => e.id.startsWith("w:"));
+    if (brCat !== "fav" && window.__nbIsClassic) list = list.filter(e => !window.__nbIsClassic(e.id));   // (231) the older copies wait in Classic
     brList.innerHTML = "";
     if (!list.length) {
       const p = document.createElement("p"); p.className = "br-empty";

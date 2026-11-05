@@ -3610,3 +3610,8 @@ body.es-on #epStrip { display: none; }
 .kzlab { position: absolute; top: 6px; left: 3px; z-index: 3; pointer-events: none; white-space: nowrap; font: 700 0.62rem var(--font-mono); padding: 1px 5px; border-radius: 6px; background: rgba(15, 13, 22, 0.82); max-width: 9em; overflow: hidden; text-overflow: ellipsis; }
 .stk-chip.kz-on { box-shadow: inset 4px 0 0 var(--kzc); }
 .stk-chip.kz-on .sc-main i { background: var(--kzc); }
+/* (231) Classic: the older copies, in drop-downs */
+.es-cls { margin: 4px 0 8px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.es-cls > summary { cursor: pointer; padding: 9px 12px; font: 600 0.78rem var(--font-mono); color: var(--dim); list-style: none; }
+.es-cls > summary::before { content: "▸ "; } .es-cls[open] > summary::before { content: "▾ "; }
+.es-cls[open] > summary { border-bottom: 1px solid var(--line); color: var(--ink); }
