@@ -1,0 +1,73 @@
+name: Windows audit
+
+# (235) QA of the Windows app on several versions of Windows, at full speed and boxed to a low-end computer.
+#   windows-2022: Windows Server 2022 (the Windows 10 21H2 core)  windows-2025: Server 2025 (the Windows 11 24H2 core)
+#   windows-11-arm: Windows 11 24H2 desktop on ARM (Snapdragon laptops), running the x64 app through Windows' emulation
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["windows/audit.py", "windows/install_check.py", ".github/workflows/windows-audit.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: The site goes inside the app
+        run: |
+          cd linux && rm -rf site && mkdir -p site/lite
+          cp ../index.html ../icon-192.png ../icon-512.png ../manifest.webmanifest site/
+          cp ../lite/index.html ../lite/manifest.webmanifest site/lite/
+          cp -r ../inst site/inst && cp -r ../wam site/wam
+      - name: Install
+        run: cd linux && npm install --no-audit --no-fund --ignore-scripts 2>&1 | tail -5 && node node_modules/electron/install.js
+      - name: Package
+        run: cd linux && npx --no-install electron-builder --win nsis portable --x64 --publish never --config ../windows/builder.json -c.extraMetadata.version=1.0.0-audit 2>&1 | tail -5
+      - name: Keep the build
+        run: cd linux/dist-win && mkdir -p ../../out && cp NateBloom-Setup-*.exe ../../out/setup.exe && cp NateBloom-portable-*.exe ../../out/portable.exe && cp -r win-unpacked ../../out/
+      - uses: actions/upload-artifact@v4
+        with: { name: win-build, path: out, retention-days: 3 }
+
+  audit:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, windows-2025, windows-11-arm]
+        mode: [normal, min]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: win-build, path: build }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", architecture: x64 }
+      - name: Tools
+        run: pip install -q playwright==1.48.0 psutil 2>&1 | tail -2
+      - name: The machine
+        shell: pwsh
+        run: |
+          $o = Get-CimInstance Win32_OperatingSystem; $c = Get-CimInstance Win32_Processor | Select-Object -First 1
+          "$($o.Caption) $($o.Version) build $($o.BuildNumber) $($o.OSArchitecture)" | Tee-Object -FilePath machine.txt
+          "$($c.Name) cores $($c.NumberOfCores) threads $($c.NumberOfLogicalProcessors) RAM $([math]::Round($o.TotalVisibleMemorySize/1MB,1)) GB" | Tee-Object -FilePath machine.txt -Append
+      - name: Audit (${{ matrix.mode }})
+        run: |
+          python windows/audit.py "build/win-unpacked/Nate Bloom.exe" ${{ matrix.mode }} report 2>&1 | tee audit.txt
+          cp machine.txt audit.txt report/
+      - name: Installer and portable
+        if: matrix.mode == 'normal'
+        run: |
+          python windows/install_check.py build/setup.exe build/portable.exe report/install 2>&1 | tee report/install.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "audit-${{ matrix.os }}-${{ matrix.mode }}", path: report }

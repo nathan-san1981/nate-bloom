@@ -21,7 +21,8 @@ const SAVE_DIR = (() => { let d = app.getPath("downloads"); if (path.resolve(d) 
 app.setName("Nate Bloom");
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 // (173) a computer, not a tablet: the page may use up to 8 GB for long takes, big samples and many instruments
-app.commandLine.appendSwitch("js-flags", "--max-old-space-size=8192");
+// (235) at most half the computer's memory, so a 4 or 8 GB machine cleans up before it runs out instead of after
+app.commandLine.appendSwitch("js-flags", "--max-old-space-size=" + Math.max(1024, Math.min(8192, Math.round((+process.env.NB_TOTALMEM_MB || require("os").totalmem() / 1048576) / 2))));
 // (174) the sound's audio thread (where every synth, plugin and effect is worked out) at real-time priority, so the
 // rest of the computer can't push it late; Mint's rtkit grants it. Unknown names are ignored by Electron.
 app.commandLine.appendSwitch("enable-features", "AudioWorkletRealtimeThread,AudioWorkletThreadRealtimePriority");
