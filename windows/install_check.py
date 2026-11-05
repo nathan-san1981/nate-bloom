@@ -17,17 +17,21 @@ async def openit(exe, extra, shot, label):
     p = subprocess.Popen([exe, "--remote-debugging-port=9334"] + extra, env=env)
     try:
         async with async_playwright() as pw:
-            b = None
-            for _ in range(120):
-                try: b = await pw.chromium.connect_over_cdp("http://127.0.0.1:9334"); break
-                except Exception: await asyncio.sleep(1)
-            if not b: rep("FAIL", label + ": never came up"); return
-            pg = None
-            for _ in range(60):
-                ps = [x for c in b.contexts for x in c.pages if x.url.startswith("app://")]
-                if ps: pg = ps[0]; break
+            b = None; pg = None; seen = set()
+            for i in range(360):
+                try:
+                    if b is None or i % 20 == 19:
+                        try:
+                            if b: await b.close()
+                        except Exception: pass
+                        b = await pw.chromium.connect_over_cdp("http://127.0.0.1:9334", timeout=5000)
+                    ps = [x for c in b.contexts for x in c.pages]
+                    for x in ps: seen.add(x.url[:60])
+                    ps = [x for x in ps if x.url.startswith("app://")]
+                    if ps: pg = ps[0]; break
+                except Exception as ex: seen.add("err " + str(ex)[:50]); b = None
                 await asyncio.sleep(0.5)
-            if not pg: rep("FAIL", label + ": no page"); return
+            if not pg: rep("FAIL", label + ": no page after 3 min, seen " + str(sorted(seen)[:5])); return
             errs = []; pg.on("pageerror", lambda e: errs.append(str(e)[:200]))
             await pg.wait_for_function("window.NB_BUILD && document.getElementById('startBtn')", timeout=120000)
             dt = time.time() - t0
@@ -48,10 +52,17 @@ async def main():
     kill()
     t0 = time.time(); r = subprocess.run([SETUP, "/S"], capture_output=True, timeout=600); t = time.time() - t0
     exe = os.path.join(INST, "Nate Bloom.exe")
+    lnk = None
     for _ in range(60):
         if os.path.exists(exe): break
+        sm0 = glob.glob(os.path.join(APD, "Microsoft", "Windows", "Start Menu", "Programs", "**", "Nate Bloom*.lnk"), recursive=True)
+        if sm0:
+            lnk = sm0[0]
+            t = subprocess.run(["powershell", "-NoProfile", "-Command", "(New-Object -ComObject WScript.Shell).CreateShortcut('%s').TargetPath" % lnk], capture_output=True, text=True).stdout.strip()
+            if t and os.path.exists(t): exe = t; break
         time.sleep(1)
-    rep("PASS" if os.path.exists(exe) else "FAIL", "installer runs silently and installs to %s (%.0f s, exit %d)" % (INST, t, r.returncode))
+    print("INFO installed exe:", exe, "| Programs:", os.listdir(os.path.join(LAD, "Programs")) if os.path.isdir(os.path.join(LAD, "Programs")) else "none", flush=True)
+    rep("PASS" if os.path.exists(exe) else "FAIL", "installer runs silently and installs to %s (%.0f s, exit %d)" % (os.path.dirname(exe), t, r.returncode))
     time.sleep(5); kill()   # (runAfterFinish starts it)
     sm = glob.glob(os.path.join(APD, "Microsoft", "Windows", "Start Menu", "Programs", "**", "Nate Bloom*.lnk"), recursive=True)
     dk = glob.glob(os.path.join(os.path.expanduser("~"), "Desktop", "Nate Bloom*.lnk")) + glob.glob(os.path.join(os.environ.get("PUBLIC", "C:\\Users\\Public"), "Desktop", "Nate Bloom*.lnk"))
@@ -60,7 +71,7 @@ async def main():
     if os.path.exists(exe):
         await openit(exe, ["--force-device-scale-factor=1.5"], "installed-150pct.png", "installed app at 150% scaling")
         await openit(exe, ["--force-device-scale-factor=1"], "installed-100pct.png", "installed app at 100% scaling")
-    un = glob.glob(os.path.join(INST, "Uninstall*.exe"))
+    un = glob.glob(os.path.join(os.path.dirname(exe), "Uninstall*.exe"))
     if un:
         subprocess.run([un[0], "/S"], capture_output=True, timeout=300)
         for _ in range(60):

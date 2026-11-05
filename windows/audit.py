@@ -126,7 +126,7 @@ async def main():
             await pg.screenshot(path=os.path.join(OUT, "2-ready.png"))
 
             # the audio keeping up: a big chord on the default sound, then on the heaviest kinds of sound
-            heavy = await pg.evaluate("""(() => { const E = __nbTest.entries(); const pick = re => (E.find(e => re.test(e.id)) || {}).id; return [pick(/^e:supersaw$/) || pick(/^e:/), pick(/^w:wam:natebloom\\/(twin77|nebula80|hypnagogia)/), pick(/^w:wam:natebloom\\//)].filter(Boolean); })()""")
+            heavy = await pg.evaluate("""(() => { const E = __nbTest.entries(); const has = id => E.some(e => e.id === id); return ["e:supersaw", "w:wam:nathan/twin77", "w:wam:nathan/nebula80", "w:wam:nathan/hypnagogia", "w:nb-grandlayers"].filter(has); })()""")
             ku = []
             for hid in heavy:
                 await pg.evaluate("id => __nbTest.choose(id)", hid); await pg.wait_for_timeout(1500)
@@ -161,22 +161,21 @@ async def main():
             if slow: rep("WARN", "slow to load: " + ", ".join(slow[:10]))
             R["info"]["mem_after_sounds_mb"] = tree_mb(pp)
 
-            # every tab
+            # every tab: the three spaces, then each tab of Build and each section of Settings
             await pg.keyboard.press("Escape")
-            names = ["Play", "Build", "Settings", "Sounds", "Beats", "Rhythm", "Samples", "Songs", "Tracks", "DJ", "Keys", "Seq", "Notes", "Mix", "Synths", "Drums", "Garage"]
+            CLICK = """([t, ymax]) => { const els = [...document.querySelectorAll('button, [role=tab], a')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.top >= 0 && r.top < ymax && e.textContent.trim() === t; }); if (!els.length) return false; els[0].click(); return true; }"""
             opened, e1 = [], len(errs)
-            for i, nm in enumerate(names):
-                try:
-                    loc = pg.get_by_role("button", name=nm, exact=True)
-                    if await loc.count() == 0: continue
-                    el = loc.first
-                    if not await el.is_visible(): continue
-                    await el.click(timeout=3000); await pg.wait_for_timeout(700); opened.append(nm)
-                    await pg.keyboard.press("Escape")
-                    if nm in ("Build", "Synths", "DJ", "Mix", "Settings"): await pg.screenshot(path=os.path.join(OUT, "tab-%02d-%s.png" % (i, nm)))
-                except Exception: pass
+            for sp_, sub in [("Play", []), ("Build", ["Sounds", "Beats", "Rhythm", "Samples", "Songs", "Tracks", "DJ"]), ("Settings", [])]:
+                if await pg.evaluate(CLICK, [sp_, 40]):
+                    opened.append(sp_); await pg.wait_for_timeout(900)
+                for t in sub:
+                    if await pg.evaluate(CLICK, [t, 140]):
+                        opened.append(sp_ + "/" + t); await pg.wait_for_timeout(1200)
+                        await pg.screenshot(path=os.path.join(OUT, "tab-%s-%s.png" % (sp_, t)))
+                        await pg.keyboard.press("Escape")
+            await pg.evaluate(CLICK, ["Build", 40])
             R["info"]["tabs"] = opened
-            rep("PASS" if len(opened) >= 5 else "WARN", "tabs opened: " + ", ".join(opened))
+            rep("PASS" if len(opened) >= 9 and len(errs) == e1 else "WARN", "screens opened (%d): %s%s" % (len(opened), ", ".join(opened), "" if len(errs) == e1 else " · errors " + str(errs[e1:e1 + 3])))
             mem = tree_mb(pp); R["info"]["mem_end_mb"] = mem; R["info"]["job_peak_mb"] = job_peak()
             lim = 3072 if MODE == "min" else 8192
             rep("PASS" if mem and mem < lim * 0.8 else "WARN", "memory in use at the end: %s MB (all of the app's processes)%s" % (mem, "" if not JOB else ", peak %s MB of the 3072 MB box" % job_peak()))
