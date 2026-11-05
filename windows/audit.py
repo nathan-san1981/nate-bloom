@@ -78,22 +78,30 @@ async def main():
         env["NB_TOTALMEM_MB"] = "4096"
         args += ["--disable-gpu", "--disable-gpu-compositing"]
     t0 = time.time()
-    p = subprocess.Popen(args, env=env)
+    env["ELECTRON_ENABLE_LOGGING"] = "1"
+    logf = open(os.path.join(OUT, "app.log"), "w")
+    p = subprocess.Popen(args, env=env, stdout=logf, stderr=subprocess.STDOUT)
     if MODE == "min": box(p.pid)
     pp = psutil.Process(p.pid)
     try:
         async with async_playwright() as pw:
-            b = None
-            for _ in range(90):
-                try: b = await pw.chromium.connect_over_cdp("http://127.0.0.1:9333"); break
-                except Exception: await asyncio.sleep(1)
-            if not b: rep("FAIL", "the app's page never came up"); return
-            pg = None
-            for _ in range(240):
-                ps = [x for c in b.contexts for x in c.pages if x.url.startswith("app://")]
-                if ps: pg = ps[0]; break
+            pg = None; seen = set(); b = None; t_conn = None
+            for i in range(240):
+                if p.poll() is not None: rep("FAIL", "the app quit by itself (exit %s)" % p.returncode); return
+                try:
+                    if b is None or i % 20 == 19:
+                        try:
+                            if b: await b.close()
+                        except Exception: pass
+                        b = await pw.chromium.connect_over_cdp("http://127.0.0.1:9333", timeout=5000); t_conn = t_conn or time.time() - t0
+                    ps = [x for c in b.contexts for x in c.pages]
+                    for x in ps: seen.add(x.url[:80])
+                    ps = [x for x in ps if x.url.startswith("app://")]
+                    if ps: pg = ps[0]; break
+                except Exception as ex: seen.add("err " + str(ex)[:60]); b = None
                 await asyncio.sleep(0.5)
-            if not pg: rep("FAIL", "no app:// page"); return
+            R["info"]["urls_seen"] = sorted(seen); R["info"]["cdp_s"] = t_conn
+            if not pg: rep("FAIL", "no app:// page after 2 min; pages seen: %s" % sorted(seen)[:6]); return
             errs = []; pg.on("pageerror", lambda e: errs.append(str(e)[:240]))
             cons = []; pg.on("console", lambda m: cons.append(m.text[:200]) if m.type == "error" else None)
             await pg.wait_for_function("window.NB_BUILD && document.getElementById('startBtn')", timeout=120000)
