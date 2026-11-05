@@ -183,6 +183,46 @@
     "sweeprate": 0.1,
     "sync": 0
    }
+  },
+  {
+   "name": "Bell metal",
+   "values": {
+    "frequency": 440,
+    "drift": 5,
+    "mix": 45
+   }
+  },
+  {
+   "name": "Dalek",
+   "values": {
+    "frequency": 30,
+    "drift": 0,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Sci-fi shimmer",
+   "values": {
+    "frequency": 1800,
+    "drift": 40,
+    "mix": 35
+   }
+  },
+  {
+   "name": "Tremolo ring",
+   "values": {
+    "frequency": 4,
+    "drift": 0,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Gong",
+   "values": {
+    "frequency": 110,
+    "drift": 25,
+    "mix": 55
+   }
   }
  ],
  "faust": "2.90.17",

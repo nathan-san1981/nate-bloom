@@ -15,4 +15,7 @@ base(p) = ba.selectn(5, wave, sin(2 * ma.PI * p), 1 - 4 * abs(p - 0.5), 2 * p - 
 // Shape: 0 = the wave as it is, 100 = a hard on/off of it; the steps are rounded over 2 ms so they don't click
 w(off) = base(ma.frac(phasor + off)) : sh : si.smooth(ba.tau2pole(0.002)) with { sh(s) = s * (1 - shape) + ma.signum(s) * shape; };
 g(off) = 1 - depth * (0.5 + 0.5 * w(off));
-process = _, _ : *(g(0)), *(g(pan * 0.5));
+// (229) Pan swings on an equal-power law: the level doesn't dip as it passes the centre (it fell 3 dB there)
+pk = 1 + (sqrt(2) - 1) * (1 - depth);   // (unity at Depth 0, a constant level at 100)
+th = (0.25 + 0.25 * w(0) * depth) * ma.PI;
+process = _, _ : *(g(0) * (1 - pan) + cos(th) * pk * pan), *(g(0) * (1 - pan) + sin(th) * pk * pan);

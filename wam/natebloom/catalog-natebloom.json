@@ -45,7 +45,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Modulation",
-  "desc": "The three-voice string-machine ensemble: slow swirl plus fast shimmer, the sound of a Solina and Vangelis-era pads.",
+  "desc": "Two ensembles: the string-machine chorus of a Solina or an ARP Omni, or Airwindows Ensemble's up to 48 sweeping taps, widened.",
   "url": "natebloom/ensemble/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -85,7 +85,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Equalizer & Filter",
-  "desc": "A Moog-style ladder filter with an LFO and an envelope follower: slow sweeps, swells, or wah when you play harder.",
+  "desc": "The Moog ladder as Huovilainen modelled it: it drives, squelches and self-oscillates, moved by an LFO and an envelope follower.",
   "url": "natebloom/ladder/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -95,7 +95,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Dynamics",
-  "desc": "Glue for the whole mix. Lower Mix for parallel (New York) compression: punch without losing the transients.",
+  "desc": "Glue for the whole mix: linked on the louder side with a soft knee, soft attack, and Mix for New York-style parallel compression.",
   "url": "natebloom/compressor/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },
@@ -105,7 +105,7 @@
   "vendor": "Nate Bloom",
   "kind": "effect",
   "type": "Modulation",
-  "desc": "Tremolo (Pan at 0) or auto-pan (Pan at 100): smooth or choppy.",
+  "desc": "Tremolo (Pan at 0) or auto-pan (Pan at 100) on an equal-power swing, smooth or choppy.",
   "url": "natebloom/autopan/index.js",
   "site": "https://nathan-san1981.github.io/nate-bloom/"
  },

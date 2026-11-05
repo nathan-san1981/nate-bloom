@@ -50,7 +50,9 @@
         const prev = P.res[who]; P.res[who] = { ans, at: Date.now() };
         if (prev && prev.ans === ans) return;
         const S = who === "hw" ? XD() : MF(who); if (!S) return;
-        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays"); if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": USB carries only its MIDI. Run a cable from its audio out to a free input."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
+        if (!ans) { say(S.name + ": not heard on " + P.label + " when it plays");
+          // (229) its input set to the interface (or "default", which is the interface) only brings in the other synth again: off
+          if (who !== "hw") { const d = S.dev(); if (d && (d === P.dev || d === "default")) { S.set("", "12"); say(S.name + "'s input cleared (it was taking " + P.label + ", the other synth's sound)"); } } if (who !== "hw") toast(S.name + " isn't heard on " + P.label + ": USB carries only its MIDI. Run a cable from its audio out to a free input."); try { window.__hwxRepaint && window.__hwxRepaint(); } catch (e) {} return; }
         const name = ans === "12" ? "inputs 1+2" : "input " + ans;
         say(S.name + " heard on " + P.label + " " + name);
         // its own: set when it has none, or when it was taking both and only one is its
@@ -86,6 +88,10 @@
         if (P.st && Date.now() > P.until) close();   // (only open while someone is playing them)
       }, 2000);
       P.decide = decide;
+      // (229) once: a MicroFreak input left on "default" (the Volt, which carries the Minilogue) doubled the Minilogue in
+      // recordings; its sound isn't on the Volt (USB only), so that input goes back to "its own outputs"
+      setTimeout(() => { try { if (localStorage.getItem("nb-mf-dev-229")) return; localStorage.setItem("nb-mf-dev-229", "1");
+        const X = window.__hwx.get("mf"); if (X && X.cfg.dev === "default" && X.cfg.pick === "12") { X.cfg.dev = ""; window.__hwxCfgSave(); X.rewire && X.rewire(); say("MicroFreak's input (default, the Volt) cleared: it brought the Minilogue in twice"); } } catch (e) {} }, 4000);
       P.text = id => { const r = P.res[id]; if (!r) return P.err ? "" : "Play a few notes on its own keys: Nate Bloom finds which input of " + (P.label || "the interface") + " it's on."; return r.ans ? "Heard on " + P.label + (r.ans === "12" ? " inputs 1+2" : " input " + r.ans) + "." : "Not heard on " + P.label + " when it plays: its sound isn't coming into the computer. USB carries only its MIDI: run a cable from its audio out to a free input on " + (P.label || "the interface") + "."; };
     }
   }

@@ -114,6 +114,50 @@
     "console": 0,
     "mix": 100
    }
+  },
+  {
+   "name": "Gentle leveler",
+   "values": {
+    "threshold": -20,
+    "ratio": 1.8,
+    "release": 400,
+    "makeup": 3,
+    "mix": 100,
+    "console": 30
+   }
+  },
+  {
+   "name": "Drum smash",
+   "values": {
+    "threshold": -32,
+    "ratio": 10,
+    "release": 80,
+    "makeup": 12,
+    "mix": 45,
+    "console": 30
+   }
+  },
+  {
+   "name": "Bass tamer",
+   "values": {
+    "threshold": -18,
+    "ratio": 4,
+    "release": 150,
+    "makeup": 4,
+    "mix": 100,
+    "console": 30
+   }
+  },
+  {
+   "name": "Pumping",
+   "values": {
+    "threshold": -28,
+    "ratio": 8,
+    "release": 250,
+    "makeup": 8,
+    "mix": 100,
+    "console": 30
+   }
   }
  ],
  "faust": "2.90.17"

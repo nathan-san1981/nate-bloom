@@ -420,6 +420,9 @@
             r.appendChild(ps);
           }
           box.appendChild(r);
+          // (229) the input the Minilogue already comes in on (the Volt, or "default", which is it): its sound twice in recordings
+          if (X.cfg.dev && (X.cfg.dev === "default" || (window.__hwProbe && window.__hwProbe.dev && X.cfg.dev === window.__hwProbe.dev)) && X.cfg.pick === "12")
+            box.appendChild(mk("small", "hw-mfn", "That input is the Minilogue's too: with Inputs 1+2 the Minilogue comes in here a second time (twice as loud in recordings). Pick the one input the MicroFreak is on, or set it back to its own outputs."));
           { const t = window.__hwProbe && window.__hwProbe.text && window.__hwProbe.text("mf"); if (t) box.appendChild(mk("small", "hw-mfn", t)); }
           box.appendChild(mk("small", "hw-mfn", "+ on MicroFreak in Quick sounds plays it along with what's playing (your KeyLab's notes go to it too); its own keys still play only itself."));
         }

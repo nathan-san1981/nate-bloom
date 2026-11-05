@@ -177,6 +177,60 @@
     "sync": 5,
     "wave": 4
    }
+  },
+  {
+   "name": "Slow drift",
+   "values": {
+    "rate": 0.15,
+    "depth": 60,
+    "shape": 0,
+    "pan": 100
+   }
+  },
+  {
+   "name": "Tremolo",
+   "values": {
+    "rate": 5,
+    "depth": 60,
+    "shape": 10,
+    "pan": 0
+   }
+  },
+  {
+   "name": "Choppy 1/16",
+   "values": {
+    "rate": 8,
+    "depth": 100,
+    "shape": 100,
+    "pan": 0
+   }
+  },
+  {
+   "name": "Ping-pong",
+   "values": {
+    "rate": 2,
+    "depth": 100,
+    "shape": 70,
+    "pan": 100
+   }
+  },
+  {
+   "name": "Helicopter",
+   "values": {
+    "rate": 14,
+    "depth": 90,
+    "shape": 40,
+    "pan": 60
+   }
+  },
+  {
+   "name": "Wide swirl",
+   "values": {
+    "rate": 0.6,
+    "depth": 85,
+    "shape": 0,
+    "pan": 100
+   }
   }
  ],
  "faust": "2.90.17",

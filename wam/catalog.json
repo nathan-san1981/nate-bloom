@@ -28,7 +28,7 @@
    "vendor": "Nathan",
    "kind": "instrument",
    "type": "Synth",
-   "desc": "Vangelis's palette: CS-80 brass and leads with aftertouch, ring-modulated bells, an electric grand, a tine piano, strings, choir and timpani, all through a big hall.",
+   "desc": "Vangelis's palette: CS-80 brass and leads on Duet 80's voice, FM bells and tine piano on a 6-operator core, an electric grand, strings, choir and timpani, through a big hall.",
    "url": "natebloom/nebula80/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -38,7 +38,7 @@
    "vendor": "Nathan",
    "kind": "instrument",
    "type": "Synth",
-   "desc": "Five engines in the spirit of Oneohtrix Point Never: Juno arpeggios, slowed eccojam loops, uncanny choir pads, glassy FM, harpsichord plucks and walls of noise, through chorus, tape, Echo Jam, delay and reverb. The arp follows the tempo.",
+   "desc": "Five OPN-style engines: Juno arps, a glottal-pulse choir, 6-operator glass FM, plucked harpsichord with a soundboard, drones; Echo Jam, tape and reverb.",
    "url": "natebloom/hypnagogia/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -108,7 +108,7 @@
    "vendor": "Nathan",
    "kind": "effect",
    "type": "Glitch",
-   "desc": "A tempo-synced random glitch: stutter, reverse, tape stop, bitcrush and gate, picked by weight on each step while the sequencer plays.",
+   "desc": "Tempo-synced stutter, reverse, tape stop, crush and gate on each step: click-free, with a varispeed tape stop.",
    "url": "natebloom/glitch_starter/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -178,7 +178,7 @@
    "vendor": "Nate Bloom",
    "kind": "instrument",
    "type": "Macro oscillator",
-   "desc": "Plaits' 24 models (Mutable Instruments, MIT) under three knobs: Harmonics, Timbre, Morph, through its own low-pass gate. Analog, phase distortion, three banks of 6-op FM, wave terrain, string machine, chiptune, wavetable, chords, speech, swarm, noise, particles, plucked string, bells, drums.",
+   "desc": "Plaits' 24 models (Mutable Instruments, MIT), now a whole synth: Harmonics, Timbre, Morph, its low-pass gate, a resonant filter with its own envelope, an LFO, the Juno chorus and Galactic reverb.",
    "url": "natebloom/twist/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -348,7 +348,7 @@
    "vendor": "Nate Bloom",
    "kind": "effect",
    "type": "Modulation",
-   "desc": "The three-voice string-machine ensemble: slow swirl plus fast shimmer, the sound of a Solina and Vangelis-era pads.",
+   "desc": "Two ensembles: the string-machine chorus of a Solina or an ARP Omni, or Airwindows Ensemble's up to 48 sweeping taps, widened.",
    "url": "natebloom/ensemble/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -368,7 +368,7 @@
    "vendor": "Nate Bloom",
    "kind": "effect",
    "type": "Modulation",
-   "desc": "Tremolo (Pan at 0) or auto-pan (Pan at 100): smooth or choppy.",
+   "desc": "Tremolo (Pan at 0) or auto-pan (Pan at 100) on an equal-power swing, smooth or choppy.",
    "url": "natebloom/autopan/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -428,7 +428,7 @@
    "vendor": "Nate Bloom",
    "kind": "effect",
    "type": "Equalizer & Filter",
-   "desc": "A Moog-style ladder filter with an LFO and an envelope follower: slow sweeps, swells, or wah when you play harder.",
+   "desc": "The Moog ladder as Huovilainen modelled it: it drives, squelches and self-oscillates, moved by an LFO and an envelope follower.",
    "url": "natebloom/ladder/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },
@@ -588,7 +588,7 @@
    "vendor": "Nate Bloom",
    "kind": "effect",
    "type": "Dynamics",
-   "desc": "Glue for the whole mix. Lower Mix for parallel (New York) compression: punch without losing the transients.",
+   "desc": "Glue for the whole mix: linked on the louder side with a soft knee, soft attack, and Mix for New York-style parallel compression.",
    "url": "natebloom/compressor/index.js",
    "site": "https://nathan-san1981.github.io/nate-bloom/"
   },

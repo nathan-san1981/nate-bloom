@@ -1,0 +1,12 @@
+{"kind":"effect","params":[
+ {"id":"prob","label":"Probability","min":0,"max":1,"init":0.35,"pct":1},
+ {"id":"div","label":"Division","min":0,"max":2,"init":1,"step":1,"menu":[["1/8",0],["1/16",1],["1/32",2]]},
+ {"id":"mix","label":"Mix","min":0,"max":1,"init":1,"pct":1},
+ {"id":"bits","label":"Crush Bits","min":2,"max":16,"init":6,"step":1},
+ {"id":"pitch","label":"Pitch Jump","min":0,"max":1,"init":0.25,"pct":1},
+ {"id":"w_stut","label":"Stutter Weight","min":0,"max":1,"init":1,"pct":1},
+ {"id":"w_rev","label":"Reverse Weight","min":0,"max":1,"init":0.6,"pct":1},
+ {"id":"w_tape","label":"Tape Stop Weight","min":0,"max":1,"init":0.3,"pct":1},
+ {"id":"w_crush","label":"Crush Weight","min":0,"max":1,"init":0.5,"pct":1},
+ {"id":"w_gate","label":"Gate Weight","min":0,"max":1,"init":0.5,"pct":1}
+]}

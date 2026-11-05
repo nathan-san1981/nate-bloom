@@ -34,6 +34,9 @@ const CATALOG = [
     blurb: "Analog tape: saturation, wow and flutter" },
   { id: "actuate", name: "Actuate", kind: "fx", repo: "ardura/Actuate", bundle: /actuate/i, pre: true, formats: ["vst3", "clap"], licence: "GPL-3.0",
     blurb: "Granular sampler and texture machine" },
+  // (205) more from the plan: drums made from scratch (sfizz and Argotlunar have no Linux download in their releases)
+  { id: "geonkick", name: "Geonkick", kind: "synth", repo: "Geonkick-Synthesizer/geonkick", bundle: /geonkick/i, share: /^geonkick$/i, formats: ["lv2", "vst3"], licence: "GPL-3.0",   // (its VST3 crashed the scan)
+    blurb: "Percussion synth: 808, 909 and CR-78-style kicks, snares and hats, with its preset kits" },
   { id: "airwindows", name: "Airwindows Consolidated", kind: "fx", repo: "baconpaul/airwin2rack", bundle: /airwin/i, pre: true, licence: "MIT",
     blurb: "Hundreds of small, excellent effects in one plugin" },
 ];
@@ -149,7 +152,11 @@ async function walk(dir, depth, out) {
   return out;
 }
 async function findShare(dir, re, out = []) {
-  for (const base of ["usr/share", "usr/local/share"]) {
+  // (229) a .deb's usr/share, or a tarball's or zip's own share/ (Surge XT's tar.gz, Geonkick's zip), at the top or one
+  // folder down
+  const bases = ["usr/share", "usr/local/share", "share"];
+  try { for (const d of await fsp.readdir(dir, { withFileTypes: true })) if (d.isDirectory()) bases.push(path.join(d.name, "share"), path.join(d.name, "usr/share")); } catch (e) {}
+  for (const base of bases) {
     let ents = []; try { ents = await fsp.readdir(path.join(dir, base), { withFileTypes: true }); } catch (e) { continue; }
     for (const d of ents) if (d.isDirectory() && re.test(d.name)) out.push(path.join(dir, base, d.name));
   }

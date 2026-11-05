@@ -240,6 +240,54 @@
     "drive": 0,
     "mix": 100
    }
+  },
+  {
+   "name": "Wobble 1/4",
+   "values": {
+    "cutoff": 600,
+    "resonance": 60,
+    "lforate": 2,
+    "lfodepth": 85,
+    "envelope": 0,
+    "drive": 6,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Warm lowpass",
+   "values": {
+    "cutoff": 2500,
+    "resonance": 15,
+    "lforate": 0.1,
+    "lfodepth": 0,
+    "envelope": 0,
+    "drive": 4,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Auto-filter pad",
+   "values": {
+    "cutoff": 1400,
+    "resonance": 40,
+    "lforate": 0.05,
+    "lfodepth": 60,
+    "envelope": 20,
+    "drive": 2,
+    "mix": 100
+   }
+  },
+  {
+   "name": "Telephone",
+   "values": {
+    "cutoff": 3500,
+    "resonance": 70,
+    "lforate": 0.1,
+    "lfodepth": 0,
+    "envelope": 0,
+    "drive": 12,
+    "mix": 100
+   }
   }
  ],
  "faust": "2.90.17",

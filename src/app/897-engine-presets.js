@@ -196,7 +196,7 @@
         EB().plugPresets(c.key).then(m => {
           note.remove();
           if (!m || !m.list || !m.list.length) { if (!c.native) { note.textContent = "No preset list: its sounds come from its own controls."; box.appendChild(note); } return; }
-          m.list.forEach((pr, i) => { if (HID["pp:" + c.key + "#" + i]) return; box.appendChild(esPRow(pr.name, "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)), () => EB().plugTogether(c, pr), null, "pp:" + c.key + "#" + i)); });
+          m.list.forEach((pr, i) => { if (HID["pp:" + c.key + "#" + i]) return; box.appendChild(esPRow(pr.name, pr.cat || "", cur === "pp:" + c.key + "#" + i, esPick(() => EB().choosePlugPreset(c, pr, i)), () => EB().plugTogether(c, pr), null, "pp:" + c.key + "#" + i)); });
         });
       }
       es.appendChild(wrap);
@@ -222,7 +222,7 @@
     let esPlugLoad = null;
     function esLoadPlugs() {   // the plugins' preset lists, fetched once
       if (esPlugLoad) return esPlugLoad;
-      const P = catL().filter(c => c.kind === "instrument" && !c.native);
+      const P = catL().filter(c => c.kind === "instrument" && (!c.native || /^surge xt$/i.test(c.name)));
       return (esPlugLoad = Promise.all(P.map(c => EB().plugPresets(c.key).catch(() => null))).then(() => { esPaint(true, true); }));
     }
     function esTypeItems(cur) {
@@ -241,7 +241,7 @@
     function esTypeView(cur) {
       const items = esTypeItems(cur);
       // the plugins' presets, from the lists already fetched
-      const P = catL().filter(c => c.kind === "instrument" && !c.native);
+      const P = catL().filter(c => c.kind === "instrument" && (!c.native || /^surge xt$/i.test(c.name)));
       let pending = false;
       for (const c of P) {
         const m = esPlugCache(c.key); if (m === undefined) { pending = true; continue; }
@@ -468,7 +468,7 @@
         const plainE = { id: "w:wam:" + c.key, name: c.name, sub: "plugin", cat: "plugins", sus: 1 };
         add(plainE.id, c.name, c.vendor === "Nathan" ? "your plugin" : "plugin", (c.type || "") + " " + (c.desc || ""), () => chooseEntry(plainE, false), togE(plainE), "plugin");
         const m = esPlugCache(c.key);
-        if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name, c.type || "", () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
+        if (m && m.list) m.list.forEach((pr, i) => { if (/^init$/i.test(pr.name)) return; add("pp:" + c.key + "#" + i, pr.name, c.name + (pr.cat ? " · " + pr.cat : ""), (pr.cat ? pr.cat + " " : "") + (c.type || ""), () => EB().choosePlugPreset(c, pr, i), () => EB().plugTogether(c, pr), "plugin preset"); });
       }
       return L;
     }

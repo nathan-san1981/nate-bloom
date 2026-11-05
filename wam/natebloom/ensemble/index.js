@@ -1,3 +1,2 @@
-// Ensemble: Nate Bloom's own plugin (Faust, src/ensemble.dsp)
-import { make } from "../lib/nbfaust.js";
+import { make } from "../lib/nbport.js";
 export default make(import.meta.url);

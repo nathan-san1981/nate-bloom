@@ -18,3 +18,10 @@ dropped); TapeDelay2's two feedback lines are edited for ping-pong and in-loop s
 `cloud/` (build 215) is Cloud on Mutable Instruments Clouds' GranularProcessor (Émilie Gillet, MIT), built against
 https://github.com/pichenettes/eurorack (`clouds/dsp/*`, `clouds/resources.cc`) and stmlib with `-DTEST=1`; the
 wrapper adds the 32 kHz ⇄ host-rate windowed-sinc resampler and the dry/wet mix.
+
+Build 229: `ensemble/` (String machine + Airwindows Ensemble, Chris Johnson, MIT; `build-port.sh ensemble`); `twist/`
+(Plaits, Émilie Gillet, MIT, against https://github.com/pichenettes/eurorack: `twist/sources.txt`, with
+`-DTEST=1 -include twist/inc/stdio.h` and the `kr106/` and `unicorn_dream/` headers for the Juno chorus and Galactic3);
+`rs/glitch_starter.cpp` (the Rust original translated to C++, click-free in 229); `fm6/` (a 6-operator voice on the
+`dx7/` engine) used by `nebula80/` and `hypnagogia/` (Nathan's CLAP plugins with `-DNB_FM6`; Nebula 80's CS Brass and
+CS Lead run `duet80core/`, Duet 80's own voice engine); `build-clapfm.sh` builds those two.

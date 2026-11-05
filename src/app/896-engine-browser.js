@@ -31,7 +31,8 @@
     async function plugPresets(key) {
       if (ebMeta.has(key)) return ebMeta.get(key);
       const c = cat().find(x => x.key === key); ebMeta.set(key, null);
-      if (!c || c.native || !/^natebloom\//.test(c.url || "")) { ebMeta.set(key, false); return false; }
+      if (c && c.native) { const d = await doorway(c); ebMeta.set(key, d || false); return d || false; }
+      if (!c || !/^natebloom\//.test(c.url || "")) { ebMeta.set(key, false); return false; }
       try {
         const base = new URL((window.NB_LITE ? "../" : "") + "wam/", location.href).href;
         const r = await fetch(base + c.url.replace(/index\.js$/, "meta.json")); const M = await r.json();
@@ -43,7 +44,29 @@
         const out = { params: M.params || [], list }; ebMeta.set(key, out); return out;
       } catch (e) { ebMeta.set(key, false); return false; }
     }
+    // (229) the doorways (Linux app): an installed plugin's own factory presets, read from its data folder. Surge XT's 637
+    // factory patches (.fxp in ~/.local/share/surge-xt/patches_factory, put there by Get free plugins): each one is the
+    // plugin's own state after the file's 60-byte header, so choosing one loads the real patch (checked in the store CI).
+    const DOORS = [{ re: /^surge xt$/i, dir: "surge-xt/patches_factory", ext: /\.fxp$/i, skip: 60 }];
+    async function doorway(c) {
+      const NP = window.NBPlug, D = DOORS.find(d => d.re.test(c.name || "")); if (!NP || !NP.presets || !D || c.kind === "effect") return null;
+      let rels = []; try { rels = await NP.presets(D.dir); } catch (e) {}
+      rels = (rels || []).filter(r => D.ext.test(r)).sort();
+      if (!rels.length) return null;
+      const list = rels.map(r => { const parts = r.split("/"), name = parts.pop().replace(D.ext, ""), cat = parts.pop() || ""; return { name: name, cat: cat, rel: r, skip: D.skip, door: true, values: {} }; });
+      return { params: [], list, door: true };
+    }
+    async function doorApply(W, c, pr) {
+      const b64 = await window.NBPlug.preset(pr.rel); if (!b64) throw new Error("couldn't read " + pr.rel);
+      const raw = atob(b64).slice(pr.skip || 0); let s = ""; for (let i = 0; i < raw.length; i += 0x8000) s += raw.slice(i, i + 0x8000);
+      await W.node.setState({ nbplug: 1, fmt: c.fmt, uid: c.uid, state: btoa(s) });
+    }
     async function plugApply(c, pr) {
+      if (pr && pr.door) {
+        const W = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
+        if (W && W.node) { try { await doorApply(W, c, pr); } catch (er) { try { window.__nbAdd && window.__nbAdd("plug", "preset " + pr.name + ": " + er.message); } catch (e) {} } }
+        return;
+      }
       const W = window.__nbw && window.__nbw.NBW && window.__nbw.NBW.parts.get("wam:" + c.key);
       const meta = ebMeta.get(c.key);
       if (W && W.node && meta) {
@@ -166,7 +189,7 @@
         holder.innerHTML = "";
         if (m === null) { const p = document.createElement("p"); p.className = "br-empty"; p.textContent = "Loading its presets…"; holder.appendChild(p); return; }
         if (!m || !m.list.length) { const p = document.createElement("p"); p.className = "br-empty"; p.textContent = c.native ? "A plugin on this computer keeps its presets in its own window." : "It has no preset list; its sounds come from its own controls."; holder.appendChild(p); return; }
-        m.list.forEach((pr, i) => { const on = state.cur && state.cur.id === "pp:" + key + "#" + i; holder.appendChild(ebRow(pr.name, pr.full ? "preset" : "its " + (EB_SUBS.find(s => pr.values[s] != null) || "sound") + " setting", () => choosePlugPreset(c, pr, i), { loading: true, on })); });
+        m.list.forEach((pr, i) => { const on = state.cur && state.cur.id === "pp:" + key + "#" + i; holder.appendChild(ebRow(pr.name, pr.door ? (pr.cat || "factory patch") : pr.full ? "preset" : "its " + (EB_SUBS.find(s => pr.values[s] != null) || "sound") + " setting", () => choosePlugPreset(c, pr, i), { loading: true, on })); });
       };
       fill(ebMeta.has(key) ? ebMeta.get(key) : null);
       if (!ebMeta.has(key) || ebMeta.get(key) === null) plugPresets(key).then(m => { if (ebEng === "w:" + key) fill(m); });
