@@ -60,7 +60,7 @@ def kill_all():
 MEAS = """async ([ms]) => { const T = window.__nbTest; let pk = 0, n = 0, nan = false; const end = performance.now() + ms;
   while (performance.now() < end) { const l = T.level(); if (l !== l) nan = true; else if (Array.isArray(l)) { pk = Math.max(pk, l[0]); n++; } await new Promise(r => setTimeout(r, 30)); }
   return { pk, nan }; }"""
-KEEPUP = """async ([notes, ms]) => { const T = window.__nbTest; const lt = []; let po;
+KEEPUP = """async ([notes, ms]) => { const T = window.__nbTest; const ctx = T.ctx; const lt = []; let po;
   try { po = new PerformanceObserver(l => l.getEntries().forEach(e => lt.push(e.duration))); po.observe({ type: "longtask", buffered: false }); } catch (e) {}
   const st0 = ctx.playbackStats ? { ...JSON.parse(JSON.stringify(ctx.playbackStats)) } : null;
   notes.forEach(n => T.on(n)); await new Promise(r => setTimeout(r, 300));
@@ -89,7 +89,7 @@ async def main():
                 except Exception: await asyncio.sleep(1)
             if not b: rep("FAIL", "the app's page never came up"); return
             pg = None
-            for _ in range(60):
+            for _ in range(240):
                 ps = [x for c in b.contexts for x in c.pages if x.url.startswith("app://")]
                 if ps: pg = ps[0]; break
                 await asyncio.sleep(0.5)
@@ -110,7 +110,7 @@ async def main():
             try: await pg.click("#startBtn", timeout=5000)
             except Exception: pass
             await pg.wait_for_timeout(3000)
-            st = await pg.evaluate("ctx ? ctx.state : 'none'")
+            st = await pg.evaluate("(() => { const c = window.__nbTest && __nbTest.ctx; return c ? c.state : 'none'; })()")
             rep("PASS" if st == "running" else "FAIL", "sound starts (audio " + str(st) + ")")
             a = await pg.evaluate("(() => { const T = window.__nbTest; T.on(60); return new Promise(res => setTimeout(() => { const l = T.level(); T.off(60); res(l); }, 800)); })()")
             rep("PASS" if isinstance(a, list) and a[0] > 0.003 else "FAIL", "a note sounds (peak %s)" % (a[0] if isinstance(a, list) else a))
@@ -179,3 +179,4 @@ async def main():
         with open(os.path.join(OUT, "result.json"), "w") as f: json.dump(R, f, indent=1)
         kill_all()
 asyncio.run(main())
+sys.exit(1 if any(k == "FAIL" for k, _ in R["checks"]) else 0)

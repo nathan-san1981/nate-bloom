@@ -577,7 +577,7 @@
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
     // (232) for the play-every-sound check (t/allsounds.py): pick any sound, play a note, read the output level
-    window.__nbTest = { entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
+    window.__nbTest = { get ctx() { return ctx; }, entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
       on: m => noteOn(m), off: m => noteOff(m), buf: null,
       level() { if (!analyser) return -1; if (!this.buf || this.buf.length !== analyser.fftSize) this.buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(this.buf); let p = 0, s = 0; for (const x of this.buf) { const a = Math.abs(x); if (a > p) p = a; s += x * x; if (!Number.isFinite(x)) return NaN; } return [p, Math.sqrt(s / this.buf.length)]; } };
     window.__nbAll = () => ({ entries: allEntries(), nb: NB_PRESETS.map(p => [p[0], p[1]]), classic: (typeof CLASSIC_PRESETS !== 'undefined' ? CLASSIC_PRESETS : []).map(p => [p[0], p[1]]), engines: Object.keys(ENGINES).map(k => [k, ENGINES[k].name, ENGINES[k].after || '']) });   // (a look at every sound, for checks)

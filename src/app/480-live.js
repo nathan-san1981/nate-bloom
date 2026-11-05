@@ -435,7 +435,7 @@
     // (Back and Esc close the choices, then the effects, then Live: they're layers like any sheet)
     // the Live button in the top bar (and in the menu)
     const lb = document.createElement("button"); lb.className = "btn livebtn"; lb.id = "liveBtn"; lb.setAttribute("aria-label", "Live");
-    lb.title = "Live: big knobs, faders and pads for playing out with the MiniLab and the K.O. II";
+    lb.title = window.NB_YOURS ? "Live: big knobs, faders and pads for playing out with the MiniLab and the K.O. II" : "Live: big knobs, faders and pads for playing out";
     lb.innerHTML = '<i aria-hidden="true"></i><span>Live</span>';
     { const mix = $id("mixBtn"); if (mix && mix.parentNode) mix.parentNode.insertBefore(lb, mix); }
     lb.addEventListener("click", lvOpen);

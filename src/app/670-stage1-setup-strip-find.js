@@ -7,11 +7,11 @@
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 235;
+    window.NB_BUILD = 236;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
-    const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
+    const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ...(window.NB_YOURS ? [["pixelbook", "Pixelbook"]] : []), ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
     const suHidden = (id, name) => { const b = document.createElement("button"); b.id = id; b.type = "button"; b.style.display = "none"; b.textContent = name; document.body.appendChild(b); return b; };
     const setupBtn = suHidden("setupBtn", "Settings"), findBtn = suHidden("findBtn", "Find");

@@ -194,7 +194,7 @@
       const nw = mk("button", "btn primary", "📓 Save sound"); nw.addEventListener("click", openSave);
       card.appendChild(head("📓 Sound notebook", [nw, exp, imp]));
       const list = mk("div", "nbk-list"); card.appendChild(list);
-      if (!NOTES.length) list.appendChild(mk("p", "nbk-info", "Nothing saved yet. 📓 Save sound on the Playing row keeps what's playing, and what the Minilogue XD is on."));
+      if (!NOTES.length) list.appendChild(mk("p", "nbk-info", "Nothing saved yet. 📓 Save sound on the Playing row keeps what's playing" + (window.NB_YOURS ? ", and what the Minilogue XD is on." : ", with your notes.")));
       NOTES.forEach(e => list.appendChild(entryEl(e, e.id === openId)));
       sheet.hidden = false;
       const op = list.querySelector(".nbk-e.open"); if (op) op.scrollIntoView({ block: "nearest" });
@@ -251,7 +251,7 @@
     const stkRow = document.getElementById("stkRow");
     function addBtn() {
       if (!stkRow || stkRow.querySelector(".nbk-save")) return;
-      const b = mk("button", "btn nbk-save", "📓 Save sound"); b.title = "Save what's playing and what the Minilogue XD is on, with notes, to the sound notebook"; b.setAttribute("aria-label", b.title);
+      const b = mk("button", "btn nbk-save", "📓 Save sound"); b.title = window.NB_YOURS ? "Save what's playing and what the Minilogue XD is on, with notes, to the sound notebook" : "Save what's playing, with notes, to the sound notebook"; b.setAttribute("aria-label", b.title);
       b.addEventListener("click", openSave); stkRow.appendChild(b);
     }
     if (stkRow) { new MutationObserver(addBtn).observe(stkRow, { childList: true }); addBtn(); }

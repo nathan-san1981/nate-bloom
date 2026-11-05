@@ -22,7 +22,7 @@
         <div class="pl-body">
           <section class="pl-stack" aria-label="The stack"><div class="pl-h"><span>Stack</span><button type="button" class="btn" id="plPick">Sounds…</button></div><div class="pl-cards" id="plCards"></div></section>
           <section class="pl-mid" id="plMid">
-            <div class="pl-h"><button type="button" class="btn" id="plPagePrev" aria-label="Previous knob page">‹</button><span id="plPage"></span><button type="button" class="btn" id="plPageNext" aria-label="Next knob page">›</button><span class="pl-sp"></span><span class="pl-note">knobs · the MiniLab's K1–K8</span></div>
+            <div class="pl-h"><button type="button" class="btn" id="plPagePrev" aria-label="Previous knob page">‹</button><span id="plPage"></span><button type="button" class="btn" id="plPageNext" aria-label="Next knob page">›</button><span class="pl-sp"></span><span class="pl-note">${window.NB_YOURS ? "knobs · the MiniLab's K1–K8" : "knobs · a controller's first 8 knobs"}</span></div>
             <div class="pl-knobs" id="plKnobs"></div>
             <div class="pl-faders" id="plFaders"></div>
             <div class="pl-h"><button type="button" class="btn" id="plSetPrev" aria-label="Previous pad set">‹</button><span id="plSet"></span><button type="button" class="btn" id="plSetNext" aria-label="Next pad set">›</button><span class="pl-sp"></span><button type="button" class="btn" id="plBank" aria-pressed="false" title="The MiniLab's other bank: pads 9 to 16">9–16</button><button type="button" class="btn" id="plKit" hidden>Kit…</button></div>

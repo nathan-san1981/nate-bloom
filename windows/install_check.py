@@ -71,3 +71,4 @@ async def main():
     await openit(PORT, [], "portable.png", "portable .exe")
     with open(os.path.join(OUT, "install.json"), "w") as f: json.dump(res, f, indent=1)
 asyncio.run(main())
+sys.exit(1 if any(k == "FAIL" for k, _ in res) else 0)

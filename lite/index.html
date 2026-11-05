@@ -31016,7 +31016,7 @@ z: [z]=Z
     // (Back and Esc close the choices, then the effects, then Live: they're layers like any sheet)
     // the Live button in the top bar (and in the menu)
     const lb = document.createElement("button"); lb.className = "btn livebtn"; lb.id = "liveBtn"; lb.setAttribute("aria-label", "Live");
-    lb.title = "Live: big knobs, faders and pads for playing out with the MiniLab and the K.O. II";
+    lb.title = window.NB_YOURS ? "Live: big knobs, faders and pads for playing out with the MiniLab and the K.O. II" : "Live: big knobs, faders and pads for playing out";
     lb.innerHTML = '<i aria-hidden="true"></i><span>Live</span>';
     { const mix = $id("mixBtn"); if (mix && mix.parentNode) mix.parentNode.insertBefore(lb, mix); }
     lb.addEventListener("click", lvOpen);
@@ -31092,7 +31092,7 @@ z: [z]=Z
     const koIn = () => md.access ? [...md.access.inputs.values()].find(o => KO_RE.test(o.name || "")) : null;
     const syncMode = () => md.opt.clockOut ? "lead" : md.opt.clockIn ? "follow" : "off";
     const SYNC_KO = { lead: "K.O. II follows", follow: "K.O. II leads", off: "No sync" }, SYNC_ANY = { lead: "Clock out", follow: "Clock in", off: "No sync" };
-    const gearB = mkBtn("lvGear", "lv-gear", '<i class="g-ml"></i><i class="g-ko"></i><span></span>', "Gear: the MiniLab, the K.O. II and who keeps time");
+    const gearB = mkBtn("lvGear", "lv-gear", '<i class="g-ml"></i><i class="g-ko"></i><span></span>', window.NB_YOURS ? "Gear: the MiniLab, the K.O. II and who keeps time" : "Gear: your controller and who keeps time");
     $id("lvKo").before(gearB);
     function paintGear() {
       const ko = !!(koOut2() || koIn()), m = syncMode();
@@ -33493,11 +33493,11 @@ registerProcessor("nb-rec", NBRec);`;
     // Pixelbook, where the sound goes, dropouts, Log and Find, and a message the moment the route or a MIDI device
     // changes; Play opens Live, Build the main screen, Set up this space, and the current interface runs under it.
     // ======================================================================
-    window.NB_BUILD = 235;
+    window.NB_BUILD = 236;
     // (191) the build number where it's easy to see: in Help's title
     try { const hh = document.querySelector("#helpSheet .ed-head strong"); if (hh) hh.textContent = "How Nate Bloom works · build " + window.NB_BUILD; } catch (e) {}
     const SU = { el: null, pane: null, nav: null, sec: "", parked: null, from: null, obs: null, unsub: null, last: lsGet("nightbloom-setup", "sound"), toneT: 0 };
-    const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ["pixelbook", "Pixelbook"], ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
+    const SU_SECS = [["sound", "Sound check"], ["midi", "MIDI"], ["gear", "Gear"], ...(window.NB_YOURS ? [["pixelbook", "Pixelbook"]] : []), ["projects", "Projects"], ["app", "App"], ["help", "Help"]];
     const suName = s => (SU_SECS.find(x => x[0] === s) || ["", ""])[1];
     const suHidden = (id, name) => { const b = document.createElement("button"); b.id = id; b.type = "button"; b.style.display = "none"; b.textContent = name; document.body.appendChild(b); return b; };
     const setupBtn = suHidden("setupBtn", "Settings"), findBtn = suHidden("findBtn", "Find");
@@ -33870,7 +33870,7 @@ registerProcessor("nb-rec", NBRec);`;
         <div class="pl-body">
           <section class="pl-stack" aria-label="The stack"><div class="pl-h"><span>Stack</span><button type="button" class="btn" id="plPick">Sounds…</button></div><div class="pl-cards" id="plCards"></div></section>
           <section class="pl-mid" id="plMid">
-            <div class="pl-h"><button type="button" class="btn" id="plPagePrev" aria-label="Previous knob page">‹</button><span id="plPage"></span><button type="button" class="btn" id="plPageNext" aria-label="Next knob page">›</button><span class="pl-sp"></span><span class="pl-note">knobs · the MiniLab's K1–K8</span></div>
+            <div class="pl-h"><button type="button" class="btn" id="plPagePrev" aria-label="Previous knob page">‹</button><span id="plPage"></span><button type="button" class="btn" id="plPageNext" aria-label="Next knob page">›</button><span class="pl-sp"></span><span class="pl-note">${window.NB_YOURS ? "knobs · the MiniLab's K1–K8" : "knobs · a controller's first 8 knobs"}</span></div>
             <div class="pl-knobs" id="plKnobs"></div>
             <div class="pl-faders" id="plFaders"></div>
             <div class="pl-h"><button type="button" class="btn" id="plSetPrev" aria-label="Previous pad set">‹</button><span id="plSet"></span><button type="button" class="btn" id="plSetNext" aria-label="Next pad set">›</button><span class="pl-sp"></span><button type="button" class="btn" id="plBank" aria-pressed="false" title="The MiniLab's other bank: pads 9 to 16">9–16</button><button type="button" class="btn" id="plKit" hidden>Kit…</button></div>
@@ -38718,7 +38718,7 @@ registerProcessor("nb-aw", NBAwProc);
     setTimeout(esPlace, 0);
     window.__es = { place: esPlace, paint: () => esPaint(true), open: esOpen };
     // (232) for the play-every-sound check (t/allsounds.py): pick any sound, play a note, read the output level
-    window.__nbTest = { entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
+    window.__nbTest = { get ctx() { return ctx; }, entries: () => allEntries(), choose: async id => { const e = allEntries().find(x => x.id === id); if (!e) return false; await chooseEntry(e, false); return true; },
       on: m => noteOn(m), off: m => noteOff(m), buf: null,
       level() { if (!analyser) return -1; if (!this.buf || this.buf.length !== analyser.fftSize) this.buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(this.buf); let p = 0, s = 0; for (const x of this.buf) { const a = Math.abs(x); if (a > p) p = a; s += x * x; if (!Number.isFinite(x)) return NaN; } return [p, Math.sqrt(s / this.buf.length)]; } };
     window.__nbAll = () => ({ entries: allEntries(), nb: NB_PRESETS.map(p => [p[0], p[1]]), classic: (typeof CLASSIC_PRESETS !== 'undefined' ? CLASSIC_PRESETS : []).map(p => [p[0], p[1]]), engines: Object.keys(ENGINES).map(k => [k, ENGINES[k].name, ENGINES[k].after || '']) });   // (a look at every sound, for checks)
@@ -38943,7 +38943,7 @@ registerProcessor("nb-aw", NBAwProc);
       const nw = mk("button", "btn primary", "📓 Save sound"); nw.addEventListener("click", openSave);
       card.appendChild(head("📓 Sound notebook", [nw, exp, imp]));
       const list = mk("div", "nbk-list"); card.appendChild(list);
-      if (!NOTES.length) list.appendChild(mk("p", "nbk-info", "Nothing saved yet. 📓 Save sound on the Playing row keeps what's playing, and what the Minilogue XD is on."));
+      if (!NOTES.length) list.appendChild(mk("p", "nbk-info", "Nothing saved yet. 📓 Save sound on the Playing row keeps what's playing" + (window.NB_YOURS ? ", and what the Minilogue XD is on." : ", with your notes.")));
       NOTES.forEach(e => list.appendChild(entryEl(e, e.id === openId)));
       sheet.hidden = false;
       const op = list.querySelector(".nbk-e.open"); if (op) op.scrollIntoView({ block: "nearest" });
@@ -39000,7 +39000,7 @@ registerProcessor("nb-aw", NBAwProc);
     const stkRow = document.getElementById("stkRow");
     function addBtn() {
       if (!stkRow || stkRow.querySelector(".nbk-save")) return;
-      const b = mk("button", "btn nbk-save", "📓 Save sound"); b.title = "Save what's playing and what the Minilogue XD is on, with notes, to the sound notebook"; b.setAttribute("aria-label", b.title);
+      const b = mk("button", "btn nbk-save", "📓 Save sound"); b.title = window.NB_YOURS ? "Save what's playing and what the Minilogue XD is on, with notes, to the sound notebook" : "Save what's playing, with notes, to the sound notebook"; b.setAttribute("aria-label", b.title);
       b.addEventListener("click", openSave); stkRow.appendChild(b);
     }
     if (stkRow) { new MutationObserver(addBtn).observe(stkRow, { childList: true }); addBtn(); }

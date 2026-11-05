@@ -69,7 +69,7 @@
     const koIn = () => md.access ? [...md.access.inputs.values()].find(o => KO_RE.test(o.name || "")) : null;
     const syncMode = () => md.opt.clockOut ? "lead" : md.opt.clockIn ? "follow" : "off";
     const SYNC_KO = { lead: "K.O. II follows", follow: "K.O. II leads", off: "No sync" }, SYNC_ANY = { lead: "Clock out", follow: "Clock in", off: "No sync" };
-    const gearB = mkBtn("lvGear", "lv-gear", '<i class="g-ml"></i><i class="g-ko"></i><span></span>', "Gear: the MiniLab, the K.O. II and who keeps time");
+    const gearB = mkBtn("lvGear", "lv-gear", '<i class="g-ml"></i><i class="g-ko"></i><span></span>', window.NB_YOURS ? "Gear: the MiniLab, the K.O. II and who keeps time" : "Gear: your controller and who keeps time");
     $id("lvKo").before(gearB);
     function paintGear() {
       const ko = !!(koOut2() || koIn()), m = syncMode();
