@@ -3597,3 +3597,7 @@ body.es-on #epStrip { display: none; }
 .es-add.es-back{width:auto;padding:0 10px;font-size:12px}
 .es-saved{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}.es-chip{border:1px solid var(--line,#3a3350);background:transparent;color:inherit;border-radius:14px;padding:3px 10px;font-size:12px;cursor:pointer}.es-chip i{font-style:normal;opacity:.55;margin-left:6px}.es-chip i:hover{opacity:1}
 .es-savebtn{margin:0 0 6px}
+/* (226) a sound at level 0: it's playing, silently */
+.stk-chip.lv0 { outline: 1px dashed #e0a43a; outline-offset: -1px; }
+.stk-chip .sc-lv { flex: none; border-left: 1px solid var(--line); color: var(--amber); font: 600 0.68rem var(--font-mono); padding: 0 9px; white-space: nowrap; background: rgba(224,164,58,.12); }
+.stk-chip .sc-lv:hover { color: var(--ink); background: rgba(224,164,58,.25); }

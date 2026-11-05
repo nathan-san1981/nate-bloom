@@ -399,6 +399,44 @@
     // ---- the strip ----
     const stk = document.getElementById("stk"), stkRow = document.getElementById("stkRow"), stkHelp = document.getElementById("stkHelp");
     const el = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt != null) x.textContent = txt; return x; };
+    // (226) each sound's level, wherever it's kept: a sound at level 0 is in Playing, takes notes, and makes no sound
+    function lvRef(it) {
+      try {
+        if (it.t === "syn") { const L = state.layers[it.id]; return L ? { get: () => L.level, set: v => { L.level = v; } } : null; }
+        if (it.t === "syn2") { const c = (state.layers[it.id].copies || [])[it.ci]; return c && c.level != null ? { get: () => c.level, set: v => { c.level = v; } } : null; }
+        if (it.t === "lib") { const pt = state.lib.parts.find(p => p && p.id === it.id); return pt ? { get: () => pt.level ?? 0.8, set: v => { pt.level = v; } } : null; }
+        if (it.t === "hw") { const ch = mixChannels().find(c => c.group === "Hardware"); return ch ? { get: ch.get, set: ch.set } : null; }
+        if (it.t === "hwx" && window.__hwx) { const X = __hwx.get(it.id); return X && X.cfg ? { get: () => X.cfg.level, set: v => { X.cfg.level = v; try { window.__hwxCfgSave && __hwxCfgSave(); } catch (e) {} } } : null; }
+        if (it.t === "samp") { const sl = state.samp.slots[it.slot]; return sl && sl.p ? { get: () => sl.p.level, set: v => { sl.p.level = v; } } : null; }
+        if (it.t === "inst") return { get: () => state.inst.p.level, set: v => { state.inst.p.level = v; } };
+      } catch (e) {}
+      return null;
+    }
+    const lvToast = m => { const e = document.getElementById("uiToast"); if (!e) return; e.textContent = m; e.hidden = false; clearTimeout(lvToast.t); lvToast.t = setTimeout(() => { e.hidden = true; }, 4200); };
+    function lvBack(it, lr) {
+      lr.set(0.8); try { lvApply(); } catch (e) {} try { save(); } catch (e) {}
+      try { window.__nbAdd && window.__nbAdd("level", it.name + " back to 0 dB"); } catch (e) {}
+      lvToast(it.name + " is back at 0 dB"); paint();
+    }
+    // a level that drops to 0 while it's playing says so (and the report's log shows it); a sound that comes back from
+    // last time at 0 is set back to 0 dB, since a sound left at 0 in Playing is a silent one nobody chose to keep
+    { const was = new Map(), seen = new Set(), t0 = Date.now();
+      setInterval(() => {
+        let its; try { its = items(); } catch (e) { return; }
+        let ch = false; const now = new Map();
+        for (const it of its) {
+          const lr = lvRef(it); if (!lr) continue; const k = itKey(it) + (it.ci != null ? "#" + it.ci : ""), z = !(lr.get() > 0.001); now.set(k, z); const first = !seen.has(k) && Date.now() - t0 < 20000; seen.add(k);
+          if (first && z) { lr.set(0.8); try { lvApply(); save(); } catch (e) {} now.set(k, false); ch = true;
+            try { window.__nbAdd && window.__nbAdd("level", it.name + " came back at level 0 · set to 0 dB"); } catch (e) {}
+            lvToast(it.name + " was at level 0 from last time (silent) · set back to 0 dB"); continue; }
+          if (z !== !!was.get(k)) { ch = true;
+            if (z) { try { window.__nbAdd && window.__nbAdd("level", it.name + " level 0 (KeyLab fader or Mixer)"); } catch (e) {}
+              lvToast(it.name + "'s level is at 0, so it's silent · tap 🔈 on its chip to bring it back"); } }
+        }
+        was.clear(); now.forEach((v, k) => was.set(k, v));
+        if (ch) paint();
+      }, 700);
+    }
     function paint() {
       if (!stk) return;
       const synths = !["drum", "samp", "pads"].includes(state.engine);
@@ -421,6 +459,10 @@
         { const L = CTL[itKey(it)], cb = el("button", "sc-c" + (L && L.length ? " set" : ""), "🎹 " + ctlLabel(it) + " ▾"); cb.title = "Which controller plays " + it.name; cb.setAttribute("aria-label", cb.title + ": " + ctlLabel(it)); cb.addEventListener("click", e => { e.stopPropagation(); start(); openCtlPop(it, cb); }); c.appendChild(cb); }   // (185)
         if (it.t === "lib" && PLUG(it.id) && NBW_OK()) { const g = el("button", "sc-g", "⚙"); g.title = it.name + "'s own controls"; g.setAttribute("aria-label", g.title); g.addEventListener("click", () => { start(); __wam.instrument(it.id).then(W => __wam.openGui(W)).catch(() => {}); }); c.appendChild(g); }
         // (172) the speaker mutes it and brings it back; ✕ takes it out of what's playing (+ in Quick sounds adds it again)
+        { const lr = lvRef(it); if (lr && !(lr.get() > 0.001)) {   // (226) its level is at 0: it plays, silently. Say so, and one tap brings it back
+          c.classList.add("lv0"); m.querySelector("small").textContent = (it.sub || it.kind) + " · level 0, silent";
+          const b = el("button", "sc-lv", "🔈 Level 0 · bring back"); b.title = it.name + "'s level is at 0 (a KeyLab fader 5–8 or the Mixer put it there). Tap to set it back to 0 dB."; b.setAttribute("aria-label", b.title);
+          b.addEventListener("click", e => { e.stopPropagation(); start(); lvBack(it, lr); }); c.appendChild(b); } }
         c.appendChild(muteBtn("sc-m", it));   // (173) even the only one: it can be muted, or taken out and nothing plays
         { const x = el("button", "sc-x", "✕"); x.title = "Take " + it.name + " out" + (n > 1 ? " (the others keep playing" : " (nothing plays from the keys") + " · + in Quick sounds adds it back)"; x.setAttribute("aria-label", "Take " + it.name + " out of what's playing"); x.addEventListener("click", () => { start(); drop(it); }); c.appendChild(x); }
         stkRow.appendChild(c);
@@ -607,6 +649,6 @@
     { const p0 = paint; paint = function () { p0(); try { if (!stk.hidden) paintQuick(); } catch (e) {} }; }
     setTimeout(() => { try { paint(); } catch (e) {} }, 0);
     window.__qk = { items: qkItems, alone: qkAlone, toggle: qkToggle, pin: qkPin, paint: paintQuick, PIN };
-    window.__stk = { items, groupsOn, together, drop, only, focusOn, swap: e => swap(e, false), isSel, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
+    window.__stk = { lv: lvRef, items, groupsOn, together, drop, only, focusOn, swap: e => swap(e, false), isSel, paint: () => paint(), S, libSel: () => libSelOn(), keys: () => voiceComponents().map(c => c.name),
       seqVoices: () => { if (!ctx) return 0; const t = ctx.currentTime + 0.05, vs = melodicVoices(60, t, 0.01); vs.forEach(v => v.stop(t + 0.02)); return vs.length; } };
   }
