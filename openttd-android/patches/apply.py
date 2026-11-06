@@ -22,12 +22,28 @@ patch("CMakeLists.txt", "include(InstallAndPackage)\n", "if(NOT ANDROID)\n    in
 # SDL calls SDL_main; the game's files live in the app's private storage
 patch("src/os/unix/unix_main.cpp", '#include <time.h>\n',
       '#include <time.h>\n'
-      '#if defined(__ANDROID__)\n#\tinclude <SDL.h>\n#\tinclude <unistd.h>\n#\tinclude <stdlib.h>\n#\tinclude <string>\n#endif\n')
+      '#if defined(__ANDROID__)\n#\tinclude <SDL.h>\n#\tinclude <unistd.h>\n#\tinclude <stdlib.h>\n#\tinclude <string>\n'
+      '#\tinclude <pthread.h>\n#\tinclude <android/log.h>\n'
+      '/* Android drops stdout/stderr; send the game\'s messages to the system log (tag OpenTTD). */\n'
+      'static int _log_pipe[2];\n'
+      'static void *LogPipeThread(void *)\n{\n'
+      '\tchar buf[1024]; std::string line; ssize_t n;\n'
+      '\twhile ((n = read(_log_pipe[0], buf, sizeof(buf))) > 0) {\n'
+      '\t\tfor (ssize_t i = 0; i < n; i++) {\n'
+      '\t\t\tif (buf[i] == \'\\n\') { __android_log_write(ANDROID_LOG_INFO, "OpenTTD", line.c_str()); line.clear(); } else line += buf[i];\n'
+      '\t\t}\n\t}\n\treturn nullptr;\n}\n'
+      'static void LogToLogcat()\n{\n'
+      '\tif (pipe(_log_pipe) != 0) return;\n'
+      '\tsetvbuf(stdout, nullptr, _IOLBF, 0); setvbuf(stderr, nullptr, _IONBF, 0);\n'
+      '\tdup2(_log_pipe[1], 1); dup2(_log_pipe[1], 2);\n'
+      '\tpthread_t t; pthread_create(&t, nullptr, LogPipeThread, nullptr); pthread_detach(t);\n}\n'
+      '#endif\n')
 patch("src/os/unix/unix_main.cpp", "int CDECL main(int argc, char *argv[])\n{\n",
       "int CDECL main(int argc, char *argv[])\n{\n"
       "#if defined(__ANDROID__)\n"
       "\t/* Unicorn Railways: everything (base sets, config, saves) is under the app's internal storage,\n"
       "\t * which the activity fills from the APK's assets before the game starts. */\n"
+      "\tLogToLogcat();\n"
       "\tconst char *home = SDL_AndroidGetInternalStoragePath();\n"
       "\tif (home != nullptr) {\n"
       "\t\tsetenv(\"HOME\", home, 1);\n"

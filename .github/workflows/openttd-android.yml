@@ -57,6 +57,7 @@ jobs:
           name: native-${{ matrix.abi }}
           path: |
             /tmp/jni
+            /tmp/gamedata
             /tmp/ur-logs
 
   apk:
@@ -95,6 +96,8 @@ jobs:
           curl -fsSL -o /tmp/dl/sfx.zip https://cdn.openttd.org/opensfx-releases/$OPENSFX/opensfx-$OPENSFX-all.zip
           (cd /tmp/dl && unzip -oq gfx.zip && unzip -oq sfx.zip && ls -la)
           cp /tmp/dl/*.tar $B/
+          # OpenTTD's language file and its own base-set files, built with the game (the same for every ABI)
+          cp -r /tmp/nat/native-x86_64/gamedata/. $A/assets/game/data/openttd/
           mkdir -p $A/assets/game/config/openttd && cp openttd-android/game/openttd.cfg $A/assets/game/config/openttd/
           find $A/assets | tee /tmp/ur-logs/assets.txt
       - name: Build the APK
