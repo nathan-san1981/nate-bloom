@@ -1,4 +1,4 @@
-name: Unicorn Railways (OpenTTD for Fire tablets)
+name: OpenTTD for tablets (Unicorn Railways + full game)
 
 on:
   push:
@@ -100,15 +100,17 @@ jobs:
           cp /tmp/dl/*.tar $B/
           # OpenTTD's language file and its own base-set files, built with the game (the same for every ABI)
           cp -r /tmp/nat/native-x86_64/gamedata/. $A/assets/game/data/openttd/
-          mkdir -p $A/assets/game/config/openttd && cp openttd-android/game/openttd.cfg openttd-android/game/private.cfg $A/assets/game/config/openttd/
-          find $A/assets | tee /tmp/ur-logs/assets.txt
+          # starting settings per edition
+          for e in kid full; do mkdir -p openttd-android/app/src/$e/assets/game/config/openttd; cp openttd-android/game/$e/*.cfg openttd-android/app/src/$e/assets/game/config/openttd/; done
+          find $A/assets openttd-android/app/src/kid openttd-android/app/src/full | tee /tmp/ur-logs/assets.txt
       - name: Build the APK
         id: build
         run: |
           set -o pipefail
-          gradle -p openttd-android assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/ur-logs/apk.log
-          cp openttd-android/app/build/outputs/apk/release/app-release.apk /tmp/ur-logs/UnicornRailways.apk
-          ls -la /tmp/ur-logs/UnicornRailways.apk
+          gradle -p openttd-android assembleKidRelease assembleFullRelease --no-daemon --stacktrace 2>&1 | tee /tmp/ur-logs/apk.log
+          cp openttd-android/app/build/outputs/apk/kid/release/app-kid-release.apk /tmp/ur-logs/UnicornRailways.apk
+          cp openttd-android/app/build/outputs/apk/full/release/app-full-release.apk /tmp/ur-logs/OpenTTD-tablet.apk
+          ls -la /tmp/ur-logs/*.apk
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -123,7 +125,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api: [28, 30]
+        include:
+          - { name: kid-api28, api: 28, apk: UnicornRailways.apk, pkg: com.unicornclock.railways, size: 1024x600, dpi: 160 }
+          - { name: kid-api30, api: 30, apk: UnicornRailways.apk, pkg: com.unicornclock.railways, size: 1024x600, dpi: 160 }
+          - { name: full-api34, api: 34, apk: OpenTTD-tablet.apk, pkg: org.natebloom.openttd, size: 2560x1600, dpi: 320 }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -135,7 +140,7 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Fire-sized emulator checks
+      - name: Tablet-sized emulator checks
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -145,11 +150,11 @@ jobs:
           profile: pixel_c
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
-          script: bash openttd-android/ci/smoke.sh /tmp/ur-test/api${{ matrix.api }} /tmp/ur-build/UnicornRailways.apk
+          script: bash openttd-android/ci/smoke.sh /tmp/ur-test/${{ matrix.name }} /tmp/ur-build/${{ matrix.apk }} ${{ matrix.pkg }} ${{ matrix.size }} ${{ matrix.dpi }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-api${{ matrix.api }}
+          name: test-${{ matrix.name }}
           path: /tmp/ur-test
 
   publish:
@@ -168,7 +173,8 @@ jobs:
         run: |
           V=0.1.${{ github.run_number }}
           cp /tmp/ur-all/apk/UnicornRailways.apk "UnicornRailways-$V.apk"
-          gh release create "unicorn-railways-v$V" "UnicornRailways-$V.apk" \
+          cp /tmp/ur-all/apk/OpenTTD-tablet.apk "OpenTTD-tablet-$V.apk"
+          gh release create "unicorn-railways-v$V" "UnicornRailways-$V.apk" "OpenTTD-tablet-$V.apk" \
             --title "Unicorn Railways (OpenTTD) for Fire tablets $V" --notes-file openttd-android/RELEASE_NOTES.md --latest=false
       - name: Logs, screenshots and the APK to the railways-ci branch
         run: |

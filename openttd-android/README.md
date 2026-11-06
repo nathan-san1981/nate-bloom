@@ -1,6 +1,8 @@
 # Unicorn Railways (OpenTTD for Fire tablets)
 
-OpenTTD built for Android (Fire OS 7/8) on SDL2, with the free OpenGFX and OpenSFX base sets inside the APK.
+OpenTTD built for Android tablets on SDL2, with the free OpenGFX and OpenSFX base sets inside the APK. Two editions
+(product flavors): `kid` (Unicorn Railways, Fire 7 Kids) and `full` (the whole game, Galaxy Tab S10 FE+). A touch layer
+(`patches/touch_android.inc`) turns taps, drags, press-and-hold, pinch and two-finger gestures into game input.
 
 - `patches/apply.py` — the changes to upstream OpenTTD: built as SDL's `libmain.so`, files kept in the app's own storage.
 - `ci/build-native.sh` — SDL2 + OpenTTD for one ABI with the NDK (arm64-v8a, armeabi-v7a, x86_64 for the emulator).

@@ -7,12 +7,27 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.unicornclock.railways"
-        // Fire OS 7 (Android 9) and up; built for Fire OS 8 (Android 11)
+        // Fire OS 7 (Android 9) and up; built for Fire OS 8 (Android 11) and the Galaxy Tab S10 FE+ (Android 15)
         minSdk = 24
         targetSdk = 34
         versionCode = (System.getenv("UR_VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("UR_VERSION_NAME") ?: "0.1"
+    }
+
+    // kid: Unicorn Railways for her Fire tablet.  full: the whole of OpenTTD for the Galaxy Tab S10 FE+.
+    // Different app ids, so both can be installed on the same tablet.
+    flavorDimensions += "edition"
+    productFlavors {
+        create("kid") {
+            dimension = "edition"
+            applicationId = "com.unicornclock.railways"
+            resValue("string", "app_name", "Unicorn Railways")
+        }
+        create("full") {
+            dimension = "edition"
+            applicationId = "org.natebloom.openttd"
+            resValue("string", "app_name", "OpenTTD")
+        }
     }
 
     signingConfigs {

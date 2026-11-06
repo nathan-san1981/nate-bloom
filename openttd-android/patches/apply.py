@@ -55,4 +55,17 @@ patch("src/os/unix/unix_main.cpp", "int CDECL main(int argc, char *argv[])\n{\n"
 # bionic has open/fdatasync but doesn't define _POSIX_C_SOURCE
 patch("src/ini.cpp", "#if (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199309L) || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500)\n",
       "#if (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199309L) || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500) || defined(__ANDROID__)\n")
+# the touch layer (patches/touch_android.inc) in the SDL2 video driver
+touch = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "touch_android.inc"), encoding="utf-8").read()
+patch("src/video/sdl2_v.cpp", '#include "../safeguards.h"\n',
+      '#if defined(__ANDROID__)\n#\tinclude "../viewport_func.h"\n#\tinclude "../zoom_func.h"\n#\tinclude "../window_gui.h"\n'
+      '#\tinclude "../tilehighlight_func.h"\n#\tinclude <vector>\n#\tinclude <algorithm>\n#\tinclude <cmath>\n#endif\n#include "../safeguards.h"\n')
+patch("src/video/sdl2_v.cpp", "bool VideoDriver_SDL_Base::PollEvent()\n",
+      "#if defined(__ANDROID__)\n" + touch + "#endif\n\nbool VideoDriver_SDL_Base::PollEvent()\n")
+patch("src/video/sdl2_v.cpp", "\tif (!SDL_PollEvent(&ev)) return false;\n",
+      "#if defined(__ANDROID__)\n\tTouchTick();\n\tif (!SDL_PollEvent(&ev)) return false;\n\tif (TouchEvent(ev, this->sdl_window)) return true;\n"
+      "#else\n\tif (!SDL_PollEvent(&ev)) return false;\n#endif\n")
+patch("src/video/sdl2_v.cpp", "\tif (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) return SDL_GetError();\n",
+      "#if defined(__ANDROID__)\n\tSDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, \"0\");\n\tSDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, \"1\");\n#endif\n"
+      "\tif (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) return SDL_GetError();\n")
 print("apply.py: OpenTTD patched for Android")

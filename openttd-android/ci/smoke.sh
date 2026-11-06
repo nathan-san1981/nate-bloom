@@ -1,33 +1,35 @@
 #!/bin/bash
-# Inside the emulator job: a Fire 7-shaped screen (1024x600), install, start, check the game is running and drawing,
-# tap the title screen, keep screenshots and the log.
+# Inside the emulator job. Usage: smoke.sh <out dir> <apk> <package> <WxH> <density>
+#   kid:  a Fire 7-shaped screen (1024x600, 160 dpi)     full: a Galaxy Tab S10 FE+-shaped screen (2560x1600, 320 dpi)
+# Title screen, then a new game started straight onto a map, driven by touch: drag the map, press-and-hold for a
+# right click, Back. (Pinch needs two fingers, which adb can't send.) Screenshots and the log are kept.
 set -x
-OUT=${1:-/tmp/ur-test}; APK=$2; PKG=com.unicornclock.railways
+OUT=$1; APK=$2; PKG=$3; SIZE=${4:-1024x600}; DPI=${5:-160}
+W=${SIZE%x*}; H=${SIZE#*x}; ACT=$PKG/com.unicornclock.railways.RailwaysActivity
 mkdir -p "$OUT"
 adb wait-for-device
 for i in $(seq 1 60); do [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 2; done
-sleep 5; adb shell wm size 1024x600; adb shell wm density 160
+sleep 5; adb shell wm size $SIZE; adb shell wm density $DPI
 adb shell settings put system accelerometer_rotation 0 || true
 adb install -r -g "$APK" > "$OUT/install.txt" 2>&1; cat "$OUT/install.txt"
+shot() { adb exec-out screencap -p > "$OUT/shot-$1.png"; }
+alive() { echo "$1 pid=$(adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"; }
 adb logcat -c
-timeout 30 adb shell am start -n $PKG/.RailwaysActivity 2>&1 | tee "$OUT/start.txt"
-for t in 10 30 60; do
-  sleep $([ $t = 10 ] && echo 10 || echo 20)
-  adb exec-out screencap -p > "$OUT/shot-${t}s.png"
-  echo "${t}s pid=$(adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"
-done
-# tap New Game on the title menu, then the world-generation window's Generate button (bottom right of the window)
-adb shell input tap 511 141; sleep 4; adb exec-out screencap -p > "$OUT/shot-tap1.png"
-adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || true
-adb shell input tap 511 433; sleep 25; adb exec-out screencap -p > "$OUT/shot-tap2.png"
-# tap the middle of the new map (a tile), then wait for the year to tick on
-adb shell input tap 300 300; sleep 20; adb exec-out screencap -p > "$OUT/shot-play.png"
-echo "after taps pid=$(adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"
-adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap|Graphics" > "$OUT/meminfo.txt" 2>&1
-adb shell run-as $PKG ls -laR files > "$OUT/files.txt" 2>&1
-adb shell run-as $PKG cat files/config/openttd/openttd.cfg > "$OUT/openttd.cfg" 2>&1
+timeout 30 adb shell am start -n $ACT 2>&1 | tee "$OUT/start.txt"
+sleep 15; shot title; alive title
+adb shell dumpsys window | grep -E "mCurrentFocus|InsetsSource|navigationBars" | head -8 > "$OUT/window.txt"
+adb shell am force-stop $PKG; sleep 2
+timeout 30 adb shell am start -n $ACT --es ottd_args "-g" 2>&1 | tee -a "$OUT/start.txt"
+sleep 25; shot game; alive game
+# one finger drags the map (from the middle, a third of the screen to the left and up)
+adb shell input swipe $((W/2)) $((H/2)) $((W/6)) $((H/3)) 700; sleep 2; shot drag
+# a tap on the map (no tool picked: shows nothing harmful), then press-and-hold on the first toolbar button (tooltip)
+adb shell input tap $((W/2)) $((H/2)); sleep 1
+adb shell input swipe $((W*2/100)) $((H*2/100)) $((W*2/100)) $((H*2/100)) 900; sleep 1; shot hold
+adb shell input keyevent BACK; sleep 2; shot back; alive back
+adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap" > "$OUT/meminfo.txt" 2>&1
 adb logcat -d > "$OUT/logcat-full.txt"
-grep -iE "UnicornRailways|SDL|openttd|dbg:|libmain|DEBUG|AndroidRuntime|FATAL|crash|signal" "$OUT/logcat-full.txt" | tail -400 > "$OUT/logcat.txt"
+grep -iE "UnicornRailways|SDL|openttd|AndroidRuntime|FATAL|crash|signal" "$OUT/logcat-full.txt" | tail -400 > "$OUT/logcat.txt"
 gzip -f "$OUT/logcat-full.txt"
-cat "$OUT/checks.txt" "$OUT/meminfo.txt"; tail -80 "$OUT/logcat.txt"
+cat "$OUT/checks.txt" "$OUT/meminfo.txt" "$OUT/window.txt"
 exit 0

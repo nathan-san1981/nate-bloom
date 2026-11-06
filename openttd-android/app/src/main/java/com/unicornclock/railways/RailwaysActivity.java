@@ -25,12 +25,17 @@ public class RailwaysActivity extends SDLActivity {
 
     @Override
     protected String[] getArguments() {
-        // SDL video, SDL sound, no music driver yet
-        return new String[] { "-v", "sdl", "-s", "sdl", "-m", "null" };
+        // SDL video, SDL sound, no music driver yet. The emulator tests can ask for a new game straight away
+        // (extra ottd_args = "-g"); nothing else is accepted from outside.
+        java.util.ArrayList<String> a = new java.util.ArrayList<>(java.util.Arrays.asList("-v", "sdl", "-s", "sdl", "-m", "null"));
+        String extra = getIntent() != null ? getIntent().getStringExtra("ottd_args") : null;
+        if ("-g".equals(extra)) a.add("-g");
+        return a.toArray(new String[0]);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        immersive(); // before the game's surface exists, so it starts at full size
         try {
             unpackAssets();
         } catch (Exception e) {
