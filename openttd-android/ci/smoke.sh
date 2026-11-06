@@ -11,24 +11,26 @@ adb wait-for-device
 for i in $(seq 1 60); do [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && break; sleep 2; done
 sleep 5; adb shell wm size $SIZE; adb shell wm density $DPI
 adb shell settings put system accelerometer_rotation 0 || true
+# Android's one-time "Viewing full screen" tip would cover the game and eat the first touches
+adb shell settings put secure immersive_mode_confirmations confirmed || true
 adb install -r -g "$APK" > "$OUT/install.txt" 2>&1; cat "$OUT/install.txt"
-shot() { adb exec-out screencap -p > "$OUT/shot-$1.png"; }
-alive() { echo "$1 pid=$(adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"; }
+shot() { timeout 60 adb exec-out screencap -p > "$OUT/shot-$1.png"; }
+alive() { echo "$1 pid=$(timeout 20 adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"; }
 adb logcat -c
 timeout 30 adb shell am start -n $ACT 2>&1 | tee "$OUT/start.txt"
 sleep 15; shot title; alive title
-adb shell dumpsys window | grep -E "mCurrentFocus|InsetsSource|navigationBars" | head -8 > "$OUT/window.txt"
-adb shell am force-stop $PKG; sleep 2
+timeout 60 adb shell dumpsys window | grep -E "mCurrentFocus|InsetsSource|navigationBars" | head -8 > "$OUT/window.txt"
+timeout 30 adb shell am force-stop $PKG; sleep 3
 timeout 30 adb shell am start -n $ACT --es ottd_args "-g" 2>&1 | tee -a "$OUT/start.txt"
 sleep 25; shot game; alive game
 # one finger drags the map (from the middle, a third of the screen to the left and up)
-adb shell input swipe $((W/2)) $((H/2)) $((W/6)) $((H/3)) 700; sleep 2; shot drag
+timeout 60 adb shell input swipe $((W/2)) $((H/2)) $((W/6)) $((H/3)) 700; sleep 2; shot drag
 # a tap on the map (no tool picked: shows nothing harmful), then press-and-hold on the first toolbar button (tooltip)
-adb shell input tap $((W/2)) $((H/2)); sleep 1
-adb shell input swipe $((W*2/100)) $((H*2/100)) $((W*2/100)) $((H*2/100)) 900; sleep 1; shot hold
-adb shell input keyevent BACK; sleep 2; shot back; alive back
-adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap" > "$OUT/meminfo.txt" 2>&1
-adb logcat -d > "$OUT/logcat-full.txt"
+timeout 60 adb shell input tap $((W/2)) $((H/2)); sleep 1
+timeout 60 adb shell input swipe $((W*2/100)) $((H*2/100)) $((W*2/100)) $((H*2/100)) 900; sleep 1; shot hold
+timeout 60 adb shell input keyevent BACK; sleep 2; shot back; alive back
+timeout 60 adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap" > "$OUT/meminfo.txt" 2>&1
+timeout 60 adb logcat -d > "$OUT/logcat-full.txt"
 grep -iE "UnicornRailways|SDL|openttd|AndroidRuntime|FATAL|crash|signal" "$OUT/logcat-full.txt" | tail -400 > "$OUT/logcat.txt"
 gzip -f "$OUT/logcat-full.txt"
 cat "$OUT/checks.txt" "$OUT/meminfo.txt" "$OUT/window.txt"
