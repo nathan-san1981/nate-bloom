@@ -511,6 +511,11 @@ body.no-say .say-btn{display:none}
 #pocketpet{background:#ffe3f1}
 #petFrame{position:absolute;left:0;top:0;width:100%;height:100%;border:0;display:block;background:#ffe3f1}
 .pick-foot .pick-pet{margin-left:12px}
+.pick-row.five-up{gap:12px}
+.pick-row.five-up .pick-tile{width:180px;height:214px;font-size:22px;gap:8px}
+.pick-row.five-up .pick-tile svg{width:150px;height:90px}
+.pick-tile.five{background:linear-gradient(#FFE0EF,#FFF6FB);box-shadow:0 8px 0 #F2C6DA,inset 0 0 0 4px #F58BB8}
+.pick-tile.five:active{transform:translateY(4px);box-shadow:0 4px 0 #F2C6DA,inset 0 0 0 4px #F58BB8}
 /* ---------- Calendar ---------- */
 #calendar{background:var(--lav-bg)}
 .ca-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;flex:1;min-height:0}
@@ -1173,7 +1178,7 @@ body.no-say .say-btn{display:none}
 <div class="pick-ov" id="pickOv" hidden>
   <div class="pick-card">
     <div class="pick-title">Pick a game</div>
-    <div class="pick-row four-up">
+    <div class="pick-row four-up five-up">
       <button class="pick-tile" id="pickRun1" aria-label="Unicorn Run">
         <svg viewBox="0 0 200 120" width="200" height="120" aria-hidden="true"><g fill="none" stroke-width="12" stroke-linecap="round">
           <path d="M30 104 A70 70 0 0 1 170 104" stroke="#F58BB8"/><path d="M44 104 A56 56 0 0 1 156 104" stroke="#FFD45C"/>
@@ -1201,7 +1206,6 @@ body.no-say .say-btn{display:none}
           <path d="M14 46 L20 39 H32 L38 46 L26 60 Z" fill="#FFD45C" stroke="#3B2350" stroke-width="3" stroke-linejoin="round"/></svg>
         <span>Unicorn Meadow</span></button>
       <button class="pick-tile four" id="pickUnicornauts" aria-label="Unicornauts">
-        <span class="pick-new">NEW</span>
         <svg viewBox="0 0 200 120" width="200" height="120" aria-hidden="true">
           <circle cx="30" cy="22" r="3" fill="#FFD45C"/><circle cx="172" cy="30" r="2.5" fill="#FFD45C"/><circle cx="160" cy="96" r="3" fill="#9FD3F5"/><circle cx="40" cy="92" r="2.5" fill="#F58BB8"/>
           <path d="M150 64 a22 22 0 1 1 -10 -30 a16 16 0 1 0 10 30 z" fill="#FFE9A8" stroke="#3B2350" stroke-width="3" stroke-linejoin="round"/>
@@ -1214,8 +1218,18 @@ body.no-say .say-btn{display:none}
             <path d="M92 6 L95 18 H89 Z" fill="#FFD45C" stroke="#3B2350" stroke-width="2" stroke-linejoin="round"/>
           </g></svg>
         <span>Unicornauts</span></button>
+      <button class="pick-tile five" id="pickPet" aria-label="Pocket Pet">
+        <span class="pick-new">NEW</span>
+        <svg viewBox="0 0 200 120" width="200" height="120" aria-hidden="true">
+          <ellipse cx="100" cy="62" rx="44" ry="52" fill="#FF9CC8" stroke="#3B2350" stroke-width="4"/>
+          <rect x="70" y="40" width="60" height="38" rx="6" fill="#B8C79C" stroke="#3B2350" stroke-width="3"/>
+          <rect x="88" y="52" width="6" height="6" fill="#26291F"/><rect x="106" y="52" width="6" height="6" fill="#26291F"/>
+          <rect x="94" y="64" width="12" height="4" fill="#26291F"/><path d="M100 46 l4 -8" stroke="#26291F" stroke-width="4"/>
+          <circle cx="84" cy="94" r="6" fill="#FFF6FB" stroke="#3B2350" stroke-width="3"/><circle cx="100" cy="98" r="6" fill="#FFF6FB" stroke="#3B2350" stroke-width="3"/><circle cx="116" cy="94" r="6" fill="#FFF6FB" stroke="#3B2350" stroke-width="3"/>
+          <circle cx="40" cy="30" r="3" fill="#FFD45C"/><circle cx="162" cy="40" r="3" fill="#9FD3F5"/><circle cx="158" cy="98" r="3" fill="#F58BB8"/></svg>
+        <span>Pocket Pet</span></button>
     </div>
-    <div class="pick-foot"><button class="pill-btn pick-back" id="pickClose">Back to clock</button><button class="pill-btn pick-dun" id="pickDungeon">Unicorn Dungeon</button><button class="pill-btn pick-dun pick-pet" id="pickPet" hidden>Pocket Pet</button><button class="pill-btn pick-dun pick-pet" id="pickRail" hidden>Unicorn Railways</button><button class="pill-btn pick-dun pick-pet" id="pickPark" hidden>Unicorn Park</button></div>
+    <div class="pick-foot"><button class="pill-btn pick-back" id="pickClose">Back to clock</button><button class="pill-btn pick-dun" id="pickDungeon">Unicorn Dungeon</button><button class="pill-btn pick-dun pick-pet" id="pickRail" hidden>Unicorn Railways</button><button class="pill-btn pick-dun pick-pet" id="pickPark" hidden>Unicorn Park</button></div>
   </div>
 </div>
 
@@ -1670,7 +1684,7 @@ var DEFAULTS={bed:'19:30',wake:'07:00',rainbow:60,chime:true,name:'',
   lat:38.6631,lon:-90.5771,clock12:true,dayB:70,nightB:5,pin:'',master:'',
   dimDusk:true,dimDawn:true,duskOff:0,dawnOff:0,dimLevel:25,dimFade:30,
   sndSound:'off',sndFirst:'none',sndTimes:3,sndAuto:true,sndFor:0,sndVol:40,
-  holidays:true,events:[],gameLimit:0,petOn:false,railOn:false,parkOn:false,rockMins:5,rockKind:'both',rockStart:0,readAloud:true,alarms:[],alerts:true,nightAllow:{sounds:true,moon:true,stars:true},nightSubB:30,tasks:['Brush teeth (morning)','Get dressed','Make my bed','Pick up toys','Read a book','Brush teeth (night)'],starGoal:30,starReward:'',
+  holidays:true,events:[],gameLimit:0,petOn:true,railOn:false,parkOn:false,rockMins:5,rockKind:'both',rockStart:0,readAloud:true,alarms:[],alerts:true,nightAllow:{sounds:true,moon:true,stars:true},nightSubB:30,tasks:['Brush teeth (morning)','Get dressed','Make my bed','Pick up toys','Read a book','Brush teeth (night)'],starGoal:30,starReward:'',
   bands:{coldBelow:40,chillyTo:55,niceTo:70,warmTo:84}};
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
 var lsFailT=0;
@@ -1678,6 +1692,7 @@ function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}c
 var S=Object.assign({},DEFAULTS,lsGet(KS,{}));
 if(!S.nightAllow)S.nightAllow={sounds:true,moon:true,stars:true};
 if(!S.starsAlways){S.nightAllow.stars=true;S.starsAlways=true;lsSet(KS,S);}
+if(!S.petShown){S.petOn=true;S.petShown=true;lsSet(KS,S);}
 S.bands=Object.assign({},DEFAULTS.bands,S.bands||{});
 var W=lsGet(KW,null);
 var online=false;
@@ -4305,7 +4320,7 @@ function petSrc(){
   return PET_HTML.replace('<!--PET-HOOK-->',hook).replace('<!--PET-VOICE-->',petVoiceTxt?S0+' type="application/json" id="petVoice">'+petVoiceTxt+S1:'');
 }
 function petEnter(){
-  if(!S.petOn)return;
+  if(S.petOn===false)return;
   setView('pocketpet',20*60);
   if(GTIME.hit()){petStop();$('petLimit').hidden=false;GTIME.save();return;}
   $('petLimit').hidden=true;var f=$('petFrame');petOn=true;
@@ -5300,7 +5315,7 @@ $('scene').addEventListener('click',function(e){var p=stagePoint(e,this);sparkle
 $('btnSpace').addEventListener('click',function(){setView('space',240);spaceEnter();});
 $('btnMoon').addEventListener('click',function(){setView('moon',240);renderMoon();});
 $('btnBack8').addEventListener('click',function(){view='auto';tick();});
-function openGames(){var o=$('pickOv');o.hidden=false;$('pickPet').hidden=!S.petOn;tgSync();viewUntil=Math.max(viewUntil,Date.now()+120000);say('Pick a game!');
+function openGames(){var o=$('pickOv');o.hidden=false;$('pickPet').hidden=S.petOn===false;tgSync();viewUntil=Math.max(viewUntil,Date.now()+120000);say('Pick a game!');
   clearTimeout(openGames.t);openGames.t=setTimeout(function(){o.hidden=true;},90000);}
 function pickGame(n){$('pickOv').hidden=true;if(n===4){uaEnter();return;}if(n===3){if(!window.MEADOW)return;setView('meadow',600);window.MEADOW.enter();}else if(n===2){setView('game2',600);GAME2.enter();}else{setView('game',600);GAME.enter();}}
 $('btnGame').addEventListener('click',openGames);
@@ -5380,7 +5395,7 @@ function fillForm(){
   $('bandErr').hidden=true;
   $('sBed').value=S.bed;$('sWake').value=S.wake;$('sRainbow').value=S.rainbow;$('sChime').checked=!!S.chime;$('sName').value=S.name;
   $('bCold').value=S.bands.coldBelow;$('bChilly').value=S.bands.chillyTo;$('bNice').value=S.bands.niceTo;$('bWarm').value=S.bands.warmTo;
-  scRefresh();$('sLat').value=S.lat;$('sLon').value=S.lon;$('s12').checked=!!S.clock12;$('sDayB').value=S.dayB;$('sNightB').value=S.nightB;pinBoxRender();$('sSay').checked=S.readAloud!==false;$('sVoiceNat').checked=S.voice!=='device';$('sGameLim').value=S.gameLimit||0;$('sPetOn').checked=!!S.petOn;$('sRailOn').checked=!!S.railOn;$('sParkOn').checked=!!S.parkOn;$('sRockMins').value=String(S.rockMins==null?5:S.rockMins);$('sRockKind').value=S.rockKind||'both';$('sRockStart').value=String(S.rockStart||0);
+  scRefresh();$('sLat').value=S.lat;$('sLon').value=S.lon;$('s12').checked=!!S.clock12;$('sDayB').value=S.dayB;$('sNightB').value=S.nightB;pinBoxRender();$('sSay').checked=S.readAloud!==false;$('sVoiceNat').checked=S.voice!=='device';$('sGameLim').value=S.gameLimit||0;$('sPetOn').checked=S.petOn!==false;$('sRailOn').checked=!!S.railOn;$('sParkOn').checked=!!S.parkOn;$('sRockMins').value=String(S.rockMins==null?5:S.rockMins);$('sRockKind').value=S.rockKind||'both';$('sRockStart').value=String(S.rockStart||0);
   NIGHT_KEYS.forEach(function(k){$('na_'+k).checked=!!(S.nightAllow||{})[k];});$('sNightSubB').value=S.nightSubB||30;
   $('dDusk').checked=!!S.dimDusk;$('dDawn').checked=!!S.dimDawn;$('dDuskOff').value=S.duskOff;$('dDawnOff').value=S.dawnOff;
   $('dLevel').value=S.dimLevel;$('dFade').value=S.dimFade;dimHint();
