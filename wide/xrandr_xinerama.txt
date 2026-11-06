@@ -1,0 +1,2 @@
+Monitors: 1
+ 0: +screen 1920/508x1080/286+0+0  screen

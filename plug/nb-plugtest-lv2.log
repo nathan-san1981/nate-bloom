@@ -1,0 +1,8 @@
+instantiate lsine
+ui parent 10485763
+ui cleanup idles=80
+cleanup runs=6093 gain=0.500
+instantiate lsine
+ui parent 10485763
+ui cleanup idles=82
+cleanup runs=6132 gain=0.500

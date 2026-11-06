@@ -1,0 +1,6 @@
+[W][01045.291144] mod.rt       | [     module-rt.c:  224 translate_error()] RTKit error: org.freedesktop.DBus.Error.AccessDenied
+[W][01045.291268] mod.rt       | [     module-rt.c:  526 set_nice()] could not set nice-level to -11: Permission denied
+[E][01045.294395] spa.dbus     | [          dbus.c:  349 impl_connection_get()] Failed to connect to session bus: Unable to autolaunch a dbus-daemon without a $DISPLAY for X11
+[W][01045.298847] mod.rt       | [     module-rt.c:  224 translate_error()] RTKit error: org.freedesktop.DBus.Error.AccessDenied
+[W][01045.298885] mod.rt       | [     module-rt.c:  716 impl_acquire_rt()] could not make thread 7920 realtime using RTKit: Permission denied
+536870912

@@ -1,0 +1,16 @@
+pulse fast {"base": 5.8, "out": 10, "rate": 44100, "fallback": null, "engineAhead": 512}
+pulse steady {"base": 5.8, "out": 11, "rate": 44100, "fallback": null, "engineAhead": 512}
+pulse_env10 fast {"base": 5.8, "out": 16, "rate": 44100, "fallback": null, "engineAhead": 512}
+pulse_env10 steady {"base": 5.8, "out": 15, "rate": 44100, "fallback": null, "engineAhead": 512}
+pulse_low256 fast {"base": 5.8, "out": 10, "rate": 44100, "fallback": null, "engineAhead": 512}
+pulse_low256 steady {"base": 5.8, "out": 10, "rate": 44100, "fallback": null, "engineAhead": 640}
+pulse_low128 fast {"base": 2.9, "out": 6, "rate": 44100, "fallback": null, "engineAhead": 384}
+pulse_low128 steady {"base": 2.9, "out": 7, "rate": 44100, "fallback": null, "engineAhead": 384}
+pipewire fast {"base": 5.3, "out": 0, "rate": 48000, "fallback": null, "engineAhead": 512}
+pipewire steady null
+pipewire_env fast {"base": 5.3, "out": 0, "rate": 48000, "fallback": null, "engineAhead": 512}
+pipewire_env steady null
+pipewire_low256 fast {"base": 5.3, "out": 0, "rate": 48000, "fallback": null, "engineAhead": 512}
+pipewire_low256 steady null
+pipewire_low128 fast {"base": 2.7, "out": 0, "rate": 48000, "fallback": null, "engineAhead": 384}
+pipewire_low128 steady null

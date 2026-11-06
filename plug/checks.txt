@@ -1,0 +1,46 @@
+PASS the plugin host is offered (NBPlug) and the page is 243
+page: {"nbw":true,"paint":true,"create":true,"found":250,"at":"2026-11-06T04:18:52.439Z","url":"app://nate-bloom/","keys":"oop setOop store preset presets list scan addFolder removeFolder suspects trust load midi flush param params getState setState gui unload transport stats notices"}
+console: error Failed to load resource: the server responded with a status of 404 (Not Found)
+PASS the scan finds the test plugins · ['1/3 Octave Spectrum Display Mono (lv2, effect)', '1/3 Octave Spectrum Display Stereo (lv2, effect)', 'BBC M-6 (lv2, effect)', 'BBC Meter (Mono) (lv2, effect)', 'BBC Meter (Stereo) (lv2, effect)', 'Bit Meter (lv2, effect)', 'Control Invert (lv2, effect)', 'Control Linear Scale (lv2, effect)', 'Control Low Pass (lv2, effect)', 'Control Port Exponential (lv2, effect)', 'Control Port Logarithm (lv2, effect)', 'DIN Meter (Mono) (lv2, effect)', 'DIN Meter (Stereo) (lv2, effect)', 'DR-14 - Crest Factor Loudness Range Meter (Mono) (lv2, effect)', 'DR-14 - Crest Factor Loudness Range Meter (Stereo) (lv2, effect)', 'EBU Meter (Mono) (lv2, effect)', 'EBU Meter (Stereo) (lv2, effect)', 'EBU R128 Meter (lv2, effect)', 'K12/RMS Meter (Mono) (lv2, effect)', 'K12/RMS Meter (Stereo) (lv2, effect)', 'K14/RMS Meter (Mono) (lv2, effect)', 'K14/RMS Meter (Stereo) (lv2, effect)', 'K20/RMS Meter (Mono) (lv2, effect)', 'K20/RMS Meter (Stereo) (lv2, effect)', 'LSP Artistic Delay Mono (lv2, effect)', 'LSP Artistic Delay Stereo (lv2, effect)', 'LSP Compressor LeftRight (lv2, effect)', 'LSP Compressor MidSide (lv2, effect)', 'LSP Compressor Mono (lv2, effect)', 'LSP Compressor Stereo (lv2, effect)', 'LSP Crossover LeftRight x8 (lv2, effect)', 'LSP Crossover MidSide x8 (lv2, effect)', 'LSP Crossover Mono x8 (lv2, effect)', 'LSP Crossover Stereo x8 (lv2, effect)', 'LSP Delay Compensator Mono (lv2, effect)', 'LSP Delay Compensator Stereo (lv2, effect)', 'LSP Delay Compensator x2 Stereo (lv2, effect)', 'LSP Dynamic Processor LeftRight (lv2, effect)', 'LSP Dynamic Processor MidSide (lv2, effect)', 'LSP Dynamic Processor Mono (lv2, effect)']
+couldn't be used: []
+found in the page: 250
+PASS the Plugins sheet lists them, with the VST3 and CLAP section · ⚡ Fast plugins | Your plugins (YOURS) can play from the app's own low-latency audio, like the fast pads: they answer sooner, but skip Nate Bloom's effects and recording while it's on. | Off | VST3, CLAP AND LV2 ON THIS COMPUTER |  | 39 instruments (first under Instruments) and 211 effects (first under + Add a
+PASS NB Test Sine: plays alone and is heard · [0.1524, [{'name': 'NB Test Sine', 'fmt': 'clap', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 3, 'budgetUs': 2902}]]
+PASS NB Test Sine: its own window opens · NB Test Sine's own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin.
+
+Show its window
+Clos
+PASS NB Test Sine: and closes
+PASS NB Test VSine: plays alone and is heard · [0.1524, [{'name': 'NB Test Sine', 'fmt': 'clap', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 6, 'budgetUs': 2902}, {'name': 'NB Test VSine', 'fmt': 'vst3', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 3, 'budgetUs': 2902}]]
+PASS NB Test VSine: its own window opens · NB Test VSine's own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin.
+
+Show its window
+Clo
+PASS NB Test VSine: and closes
+PASS NB Test LSine: plays alone and is heard · [0.1524, [{'name': 'NB Test VSine', 'fmt': 'vst3', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 5, 'budgetUs': 2902}, {'name': 'NB Test LSine', 'fmt': 'lv2', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 2, 'budgetUs': 2902}]]
+PASS NB Test LSine: its own window opens · NB Test LSine's own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin.
+
+Show its window
+Clo
+PASS NB Test LSine: and closes
+PASS Surge XT (CLAP): plays alone and is heard · [0.0744, [{'name': 'NB Test LSine', 'fmt': 'lv2', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 4, 'budgetUs': 2902}, {'name': 'Surge XT', 'fmt': 'clap', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 15, 'budgetUs': 2902}]]
+PASS Surge XT (CLAP): its own window opens · Surge XT's own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin.
+
+Show its window
+Close it
+PASS Surge XT (CLAP): and closes
+PASS Surge XT (VST3): plays alone and is heard · [0.0759, [{'name': 'Surge XT', 'fmt': 'clap', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 16, 'budgetUs': 2902}, {'name': 'Surge XT', 'fmt': 'vst3', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 17, 'budgetUs': 2902}]]
+PASS Surge XT (VST3): its own window opens · Surge XT's own controls are in their own window, beside Nate Bloom's. Close it there or here; what you change is kept with the plugin.
+
+Show its window
+Close it
+PASS Surge XT (VST3): and closes
+PASS NB Test Gain on the mix: the Juno goes through it unchanged (Gain 1) · [{'name': 'NB Test Gain', 'on': True}, 0.1214, 0.1368, 1.04]
+PASS its Gain set to a quarter of its range from Nate Bloom (0.5): about -6 dB · -6.46
+console: error Failed to load resource: the server responded with a status of 404 (Not Found)
+PASS after a reload NB Test Gain is back on the mix with its setting (-6 dB) · [[{'name': 'NB Test Gain', 'fmt': 'clap', 'fx': True, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 20, 'blockUs': 1, 'budgetUs': 2902}, {'name': 'Surge XT', 'fmt': 'vst3', 'fx': False, 'open': False, 'crashed': False, 'underruns': 0, 'delayMs': 0, 'blockUs': 18, 'budgetUs': 2902}], -5.23]
+plugins: [{"name": "NB Test Gain", "fmt": "clap", "fx": true, "open": false, "crashed": false, "underruns": 0, "delayMs": 20, "blockUs": 1, "budgetUs": 2902}, {"name": "Surge XT", "fmt": "vst3", "fx": false, "open": false, "crashed": false, "underruns": 0, "delayMs": 0, "blockUs": 18, "budgetUs": 2902}]
+each plugin in its own process: False
+(the crash test needs each plugin in its own process: the second pass has it)
+PASS no page errors · []
+RESULT OK

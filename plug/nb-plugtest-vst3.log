@@ -1,0 +1,15 @@
+ModuleEntry
+ModuleEntry
+ModuleEntry
+setActive 1
+view attached parent 10485762 runloop 1
+view removed ticks 90
+setActive 0
+proc terminate procs=7903 g=0.500
+ModuleEntry
+ModuleEntry
+setActive 1
+view attached parent 10485762 runloop 1
+view removed ticks 90
+setActive 0
+proc terminate procs=7934 g=0.500

@@ -1,0 +1,14 @@
+/dev/shm:
+total 4528
+drwxrwxrwt  2 root     root         120 Nov  6 04:16 .
+drwxr-xr-x 18 root     root        3960 Nov  6 04:06 ..
+-rw-------  1 root     root       82488 Nov  6 04:06 libpod_lock
+-rw-------  1 runner   runner     82488 Nov  6 04:06 libpod_rootless_lock_1001
+-rw-r-----  1 www-data www-data    4096 Nov  6 04:06 mono.901
+-rw-rw-rw-  1 runner   runner   4459168 Nov  6 04:12 nate-bloom-bridge
+
+/home/runner/.clap:
+total 32
+drwxr-xr-x  2 runner runner  4096 Nov  6 04:12 .
+drwxr-x--- 16 runner runner  4096 Nov  6 04:13 ..
+-rwxr-xr-x  1 runner runner 22664 Nov  6 04:12 NateBloomBridge.clap

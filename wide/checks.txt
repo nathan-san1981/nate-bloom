@@ -1,0 +1,12 @@
+randr before: {"wide":false,"screens":1,"how":"","info":{},"bounds":{"x":1280,"y":140,"width":1280,"height":800},"displays":[{"bounds":{"x":0,"y":0,"width":3840,"height":1080},"workArea":{"x":0,"y":0,"width":3840,"height":1080},"scale":1}],"probe":{"ok":true,"wm":"","fsm":false,"mons":[[0,0,0,3840,1080]]}}
+randr on: {"wide": true, "screens": 1, "how": "one screen", "info": {"screens": 1}, "bounds": {"x": 1280, "y": 140, "width": 1280, "height": 800}, "displays": [{"bounds": {"x": 0, "y": 0, "width": 3840, "height": 1080}, "workArea": {"x": 0, "y": 0, "width": 3840, "height": 1080}, "scale": 1}], "probe": {"ok": true, "wm": "", "fsm": false, "mons": [[0, 0, 0, 3840, 1080]]}}
+randr page: {"wide":true,"w":1280,"h":800}
+randr FAIL across: one screen {'x': 1280, 'y': 140, 'width': 1280, 'height': 800} of 3840
+randr PASS back:  {'x': 1280, 'y': 140, 'width': 1280, 'height': 800}
+randr page errors: []
+xinerama before: {"wide":false,"screens":1,"how":"","info":{},"bounds":{"x":320,"y":140,"width":1280,"height":800},"displays":[{"bounds":{"x":0,"y":0,"width":1920,"height":1080},"workArea":{"x":0,"y":0,"width":1920,"height":1080},"scale":1}],"probe":{"ok":true,"wm":"","fsm":false,"mons":[[0,0,0,1920,1080],[1,0,0,1920,1080]]}}
+xinerama on: {"wide": true, "screens": 1, "how": "one screen", "info": {"screens": 1}, "bounds": {"x": 320, "y": 140, "width": 1280, "height": 800}, "displays": [{"bounds": {"x": 0, "y": 0, "width": 1920, "height": 1080}, "workArea": {"x": 0, "y": 0, "width": 1920, "height": 1080}, "scale": 1}], "probe": {"ok": true, "wm": "", "fsm": false, "mons": [[0, 0, 0, 1920, 1080], [1, 0, 0, 1920, 1080]]}}
+xinerama page: {"wide":true,"w":1280,"h":800}
+xinerama FAIL across: one screen {'x': 320, 'y': 140, 'width': 1280, 'height': 800} of 1920
+xinerama PASS back:  {'x': 320, 'y': 140, 'width': 1280, 'height': 800}
+xinerama page errors: []
