@@ -19,7 +19,7 @@ done
 # tap New Game on the title menu, then the world-generation window's Generate button (bottom right of the window)
 adb shell input tap 511 141; sleep 4; adb exec-out screencap -p > "$OUT/shot-tap1.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || true
-adb shell input keyevent ENTER; sleep 25; adb exec-out screencap -p > "$OUT/shot-tap2.png"
+adb shell input tap 511 433; sleep 25; adb exec-out screencap -p > "$OUT/shot-tap2.png"
 echo "after taps pid=$(adb shell pidof $PKG | tr -d '\r')" | tee -a "$OUT/checks.txt"
 adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap|Graphics" > "$OUT/meminfo.txt" 2>&1
 adb shell run-as $PKG ls -laR files > "$OUT/files.txt" 2>&1
