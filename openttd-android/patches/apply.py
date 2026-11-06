@@ -36,4 +36,7 @@ patch("src/os/unix/unix_main.cpp", "int CDECL main(int argc, char *argv[])\n{\n"
       "\t\tif (chdir(home) != 0) { /* the game still starts; it just finds no base set */ }\n"
       "\t}\n"
       "#endif\n")
+# bionic has open/fdatasync but doesn't define _POSIX_C_SOURCE
+patch("src/ini.cpp", "#if (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199309L) || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500)\n",
+      "#if (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 199309L) || (defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 500) || defined(__ANDROID__)\n")
 print("apply.py: OpenTTD patched for Android")

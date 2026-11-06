@@ -16,7 +16,7 @@ cmake -S $W/openttd -B $W/b-ottd-$ABI "${COMMON[@]}" \
   -DCMAKE_DISABLE_FIND_PACKAGE_Fluidsynth=ON -DCMAKE_DISABLE_FIND_PACKAGE_Harfbuzz=ON -DCMAKE_DISABLE_FIND_PACKAGE_ICU=ON \
   -DCMAKE_DISABLE_FIND_PACKAGE_OpusFile=ON -DCMAKE_DISABLE_FIND_PACKAGE_OpenGL=ON -DCMAKE_DISABLE_FIND_PACKAGE_Grfcodec=ON \
   -DCMAKE_DISABLE_FIND_PACKAGE_unofficial-breakpad=ON
-cmake --build $W/b-ottd-$ABI --target openttd
+cmake --build $W/b-ottd-$ABI --target openttd -- -k 0
 mkdir -p $OUT/$ABI
 cp $PFX/lib/libSDL2.so $OUT/$ABI/
 cp $W/b-ottd-$ABI/libmain.so $OUT/$ABI/
