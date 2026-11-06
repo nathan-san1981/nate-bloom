@@ -76,4 +76,6 @@ patch("src/CMakeLists.txt", "    main_gui.cpp\n", "    main_gui.cpp\n    kid_gui
 patch("src/window_type.h", "\tWC_HELPWIN,\n\n\tWC_INVALID = 0xFFFF,", "\tWC_HELPWIN,\n\n\tWC_KID_TOOLBAR, ///< Unicorn Railways: the kid toolbar.\n\n\tWC_INVALID = 0xFFFF,")
 patch("src/main_gui.cpp", "void ShowVitalWindows()\n{\n", "extern bool _kid_mode;\nvoid ShowKidToolbar();\nvoid ShowVitalWindows()\n{\n\tif (_kid_mode && _game_mode == GM_NORMAL) { ShowKidToolbar(); return; }\n")
 patch("src/os/unix/unix_main.cpp", "\tLogToLogcat();\n", "\tLogToLogcat();\n\t{ extern bool _kid_mode; const char *k = getenv(\"UNICORN_KID\"); _kid_mode = k != nullptr && k[0] == '1'; }\n")
+# let Android's own crash reporter print a backtrace (OpenTTD's handler has none on Android)
+patch("src/os/unix/unix_main.cpp", "\tCrashLog::InitialiseCrashLog();\n", "#if !defined(__ANDROID__)\n\tCrashLog::InitialiseCrashLog();\n#endif\n")
 print("apply.py: OpenTTD patched for Android")

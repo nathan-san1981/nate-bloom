@@ -25,7 +25,7 @@ cmake --build $W/b-ottd-$ABI --target openttd -- -k 0
 mkdir -p $OUT/$ABI
 cp $PFX/lib/libSDL2.so $OUT/$ABI/
 cp $W/b-ottd-$ABI/libmain.so $OUT/$ABI/
-$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded $OUT/$ABI/*.so
+$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-debug $OUT/$ABI/*.so
 ls -la $OUT/$ABI
 # language and OpenTTD's own base-set files (the same for every ABI) go next to the game data
 G=$W/../gamedata; mkdir -p $G/lang $G/baseset

@@ -24,7 +24,7 @@ if [ "$PKG" = "com.unicornclock.railways" ]; then
   # Unicorn Railways opens straight into her world with the picture toolbar (2 columns of 88x80 buttons, top left)
   sleep 20; shot kid-world; alive kid-world
   # Road: drag a road across the middle
-  timeout 60 adb shell input tap 44 40; sleep 1
+  timeout 60 adb shell input tap 44 40; sleep 2; shot kid-roadtool; alive kid-roadtool
   timeout 60 adb shell input swipe 400 300 800 300 1500; sleep 2; shot kid-road
   # Bus stop at both ends of it
   timeout 60 adb shell input tap 44 120; sleep 1
@@ -48,7 +48,7 @@ timeout 60 adb shell input swipe $((W/2)) $((H*2/100)) $((W/2)) $((H*2/100)) 900
 timeout 60 adb shell input keyevent BACK; sleep 2; shot back; alive back
 timeout 60 adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap" > "$OUT/meminfo.txt" 2>&1
 timeout 60 adb logcat -d > "$OUT/logcat-full.txt"
-grep -iE "UnicornRailways|SDL|openttd|AndroidRuntime|FATAL|crash|signal" "$OUT/logcat-full.txt" | tail -400 > "$OUT/logcat.txt"
+grep -iE "UnicornRailways|SDL|openttd|AndroidRuntime|FATAL|crash|signal| DEBUG |backtrace|#[0-9][0-9] pc" "$OUT/logcat-full.txt" | tail -600 > "$OUT/logcat.txt"
 gzip -f "$OUT/logcat-full.txt"
 cat "$OUT/checks.txt" "$OUT/meminfo.txt" "$OUT/window.txt"
 exit 0
