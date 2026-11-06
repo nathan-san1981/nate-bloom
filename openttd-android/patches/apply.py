@@ -76,6 +76,10 @@ patch("src/CMakeLists.txt", "    main_gui.cpp\n", "    main_gui.cpp\n    kid_gui
 patch("src/window_type.h", "\tWC_HELPWIN,\n\n\tWC_INVALID = 0xFFFF,", "\tWC_HELPWIN,\n\n\tWC_KID_TOOLBAR, ///< Unicorn Railways: the kid toolbar.\n\n\tWC_INVALID = 0xFFFF,")
 patch("src/main_gui.cpp", "void ShowVitalWindows()\n{\n", "extern bool _kid_mode;\nvoid ShowKidToolbar();\nvoid ShowVitalWindows()\n{\n\tif (_kid_mode && _game_mode == GM_NORMAL) { ShowKidToolbar(); return; }\n")
 patch("src/os/unix/unix_main.cpp", "\tLogToLogcat();\n", "\tLogToLogcat();\n\t{ extern bool _kid_mode; const char *k = getenv(\"UNICORN_KID\"); _kid_mode = k != nullptr && k[0] == '1'; }\n")
+# the kid build has no main toolbar: windows that line up under it go to the top right instead
+patch("src/window.cpp", "\tconst Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);\n\tassert(w != nullptr);\n",
+      "\tconst Window *w = FindWindowById(WC_MAIN_TOOLBAR, 0);\n\tif (w == nullptr) return { _screen.width - window_width, 0 };\n")
+patch("src/news_gui.cpp", "\t\tthis->status_height = FindWindowById(WC_STATUS_BAR, 0)->height;", "\t\t{ const Window *sb = FindWindowById(WC_STATUS_BAR, 0); this->status_height = sb != nullptr ? sb->height : 0; }")
 # let Android's own crash reporter print a backtrace (OpenTTD's handler has none on Android)
 patch("src/os/unix/unix_main.cpp", "\tCrashLog::InitialiseCrashLog();\n", "#if !defined(__ANDROID__)\n\tCrashLog::InitialiseCrashLog();\n#endif\n")
 print("apply.py: OpenTTD patched for Android")
