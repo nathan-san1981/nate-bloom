@@ -1,7 +1,8 @@
-OpenTTD 15.3 for tablets, two apps built from the same code (they install side by side):
-- OpenTTD-tablet-*.apk — the full game for the Galaxy Tab S10 FE+. 300% interface (change it in Game Options).
-- UnicornRailways-*.apk — test build for the Fire 7 Kids. Still the stock game with touch; the kid version comes next,
-  so don't put this one on her tablet yet.
+Unicorn Railways for her Fire (UnicornRailways-*.apk): OpenTTD with a kid toolbar instead of the menus.
+Left column, top to bottom: Road and Rails (drag a finger to draw), Bus stop and Station (tap a road or a rail),
+New bus! and New train! (one tap: builds the depot, buys the vehicle, sends it between two of her stops), Undo
+(removes only things she built), Go fast, Zoom in and out, and Home (saves her world and goes back to the clock).
+Nothing she can lose: unlimited money, nothing breaks down, no disasters, no rival companies, no news pop-ups.
+Her world saves when she leaves, every 10 minutes, and when the tablet sleeps.
 
-Touch: tap = click · drag one finger = move the map, or draw track/road with a tool · press and hold = right click
-(tooltips) · pinch = zoom · drag two fingers = scroll · two-finger tap or Back = cancel the tool, else close the front window.
+Also here: OpenTTD-tablet-*.apk, the full game with touch controls.
