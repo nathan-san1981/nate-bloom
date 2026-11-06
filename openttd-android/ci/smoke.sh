@@ -27,7 +27,7 @@ sleep 25; shot game; alive game
 timeout 60 adb shell input swipe $((W/2)) $((H/2)) $((W/6)) $((H/3)) 700; sleep 2; shot drag
 # a tap on the map (no tool picked: shows nothing harmful), then press-and-hold on the first toolbar button (tooltip)
 timeout 60 adb shell input tap $((W/2)) $((H/2)); sleep 1
-timeout 60 adb shell input swipe $((W*8/100)) $((H*3/100)) $((W*8/100)) $((H*3/100)) 900; sleep 1; shot hold
+timeout 60 adb shell input swipe $((W/2)) $((H*2/100)) $((W/2)) $((H*2/100)) 900; sleep 1; shot hold
 timeout 60 adb shell input keyevent BACK; sleep 2; shot back; alive back
 timeout 60 adb shell dumpsys meminfo $PKG | grep -E "TOTAL|Native Heap" > "$OUT/meminfo.txt" 2>&1
 timeout 60 adb logcat -d > "$OUT/logcat-full.txt"
