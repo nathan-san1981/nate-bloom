@@ -3653,3 +3653,15 @@ body.es-on #epStrip { display: none; }
 .sp-help { font-size: 12px; opacity: .75; line-height: 1.45; }
 #spLearn.on { outline: 2px solid #ffb65c; }
 @media (max-width: 640px) { .sp-grp input[type=range] { width: 120px; } }
+/* (241) Play it live on the DJ screen */
+.djl-box { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, currentColor 5%, transparent); font-size: 12px; }
+.djl-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.djl-on { display: inline-flex; align-items: center; gap: 4px; opacity: .8; }
+.djl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.djl-lab { opacity: .7; }
+.djl-seg button.lit { box-shadow: inset 0 -2px 0 #c9a6ff; }
+#djlOct { min-width: 3.4em; text-align: center; font-variant-numeric: tabular-nums; cursor: pointer; }
+#djlOct.moved { color: #c9a6ff; font-weight: 600; }
+.djl-live { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; align-items: center; }
+.djl-help { opacity: .65; line-height: 1.4; }
+.dj-deck.djl-tgt { outline: 2px solid color-mix(in srgb, #c9a6ff 70%, transparent); outline-offset: 2px; }

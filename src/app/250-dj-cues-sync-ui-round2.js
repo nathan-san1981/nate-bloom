@@ -325,7 +325,7 @@
   const camShift = (cam, st) => { if (!cam || !st) return cam || ""; const n = +cam.slice(0, -1), l = cam.slice(-1); return ((((n - 1 + 7 * st) % 12) + 12) % 12 + 1) + l; };
   const keyShiftName = (key, st) => { if (!key || !st) return key || ""; const m = key.match(/^(\S+)\s+(major|minor)$/); if (!m) return key; const i = KEYS.indexOf(m[1]); return i < 0 ? key : KEYS[((i + st) % 12 + 12) % 12] + " " + m[2]; };
   function djSetSemi(d, st) {
-    st = Math.max(-6, Math.min(6, Math.round(st || 0)));
+    st = Math.max(-24, Math.min(24, Math.round(st || 0)));   // (241: two octaves each way, for Play it live's Oct buttons)
     if ((d.semi || 0) === st) return;
     d.semi = st;
     if (d.playing && d.buf && ctx) { const p = djPos(d); djStartSrc(d, ctx.currentTime + 0.02, p); if (DJ.sync && LEAD().playing && FOL().playing) setTimeout(() => djAlign(false), 60); }

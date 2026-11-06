@@ -20,6 +20,7 @@ class NBStretch extends AudioWorkletProcessor {
         case "loop": this.loop = m.loop ? { a: m.loop.a * sampleRate, b: m.loop.b * sampleRate } : null; break;
         case "keylock": if (this.playing) this.pos = this.posOut(); this.on = !!m.on; this.fresh(); break;
         case "pitch": if (this.playing) this.pos = this.posOut(); this.P = m.pitch || 1; this.fresh(); break;
+        case "psoft": this.P = m.pitch || 1; break;   // (241) a pitch bend moving: no reset, so it glides
       }
     };
     const po = options && options.processorOptions;   // set up in one go (offline rendering)
@@ -121,7 +122,7 @@ registerProcessor("nb-stretch", NBStretch);`;
     Object.defineProperty(s, "loopStart", { get: () => s._a, set: v => { s._a = v; if (s._loop) sendLoop(); } });
     Object.defineProperty(s, "loopEnd", { get: () => s._b, set: v => { s._b = v; if (s._loop) sendLoop(); } });
     s.connect = n => { try { node.disconnect(); } catch (e) {} node.connect(n); return n; };
-    s.start = (at, from) => node.port.postMessage({ cmd: "start", at, from, rate: s.playbackRate.value, loop: s._loop ? { a: s._a, b: s._b } : null, on: DJ.keylock || !!d.semi, pitch: Math.pow(2, (d.semi || 0) / 12) });
+    s.start = (at, from) => node.port.postMessage({ cmd: "start", at, from, rate: s.playbackRate.value, loop: s._loop ? { a: s._a, b: s._b } : null, on: DJ.keylock || !!d.semi || !!d.pbend, pitch: Math.pow(2, ((d.semi || 0) + (d.pbend || 0)) / 12) });
     s.stop = at => node.port.postMessage({ cmd: "stop", at });
     return s;
   }
