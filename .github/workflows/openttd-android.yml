@@ -1,0 +1,176 @@
+name: Unicorn Railways (OpenTTD for Fire tablets)
+
+on:
+  push:
+    branches: [main]
+    paths: ["openttd-android/**", ".github/workflows/openttd-android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openttd-android
+  cancel-in-progress: false
+
+env:
+  OPENTTD_TAG: "15.3"
+  SDL_TAG: "release-2.32.10"
+  OPENGFX: "8.0"
+  OPENSFX: "1.0.3"
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a, x86_64]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sources
+        run: |
+          mkdir -p /tmp/w /tmp/ur-logs
+          git clone -q --depth 1 --branch "$OPENTTD_TAG" https://github.com/OpenTTD/OpenTTD.git /tmp/w/openttd
+          git clone -q --depth 1 --branch "$SDL_TAG" https://github.com/libsdl-org/SDL.git /tmp/w/sdl
+          python3 openttd-android/patches/apply.py /tmp/w/openttd
+          sudo apt-get install -y -qq ninja-build >/dev/null
+      - name: Host tools (strgen, settingsgen)
+        run: cmake -G Ninja -S /tmp/w/openttd -B /tmp/w/host -DOPTION_TOOLS_ONLY=ON && cmake --build /tmp/w/host --target tools
+      - name: SDL2 and OpenTTD for ${{ matrix.abi }}
+        id: build
+        run: |
+          export ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME
+          echo "NDK $ANDROID_NDK_HOME" | tee /tmp/ur-logs/native-${{ matrix.abi }}.log
+          set -o pipefail
+          bash openttd-android/ci/build-native.sh ${{ matrix.abi }} /tmp/w /tmp/jni 2>&1 | tee -a /tmp/ur-logs/native-${{ matrix.abi }}.log
+      - name: Keep the end of the log small enough to read
+        if: always()
+        run: |
+          L=/tmp/ur-logs/native-${{ matrix.abi }}.log
+          grep -nE "error|Error|FAILED|warning: .*(undefined|implicit)" $L | head -200 > /tmp/ur-logs/native-${{ matrix.abi }}-errors.txt || true
+          tail -300 $L > /tmp/ur-logs/native-${{ matrix.abi }}-tail.txt; rm $L
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-${{ matrix.abi }}
+          path: |
+            /tmp/jni
+            /tmp/ur-logs
+
+  apk:
+    needs: native
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      UR_VERSION_CODE: ${{ github.run_number }}
+      UR_VERSION_NAME: 0.1.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: /tmp/nat
+      - name: Native libraries, SDL's Java side, game files
+        run: |
+          set -e
+          mkdir -p /tmp/ur-logs
+          A=openttd-android/app/src/main
+          mkdir -p $A/jniLibs
+          for d in /tmp/nat/native-*/jni/*; do cp -r "$d" $A/jniLibs/; done
+          ls -R $A/jniLibs | tee /tmp/ur-logs/jnilibs.txt
+          git clone -q --depth 1 --branch "$SDL_TAG" https://github.com/libsdl-org/SDL.git /tmp/sdl
+          mkdir -p $A/java/org/libsdl/app && cp /tmp/sdl/android-project/app/src/main/java/org/libsdl/app/*.java $A/java/org/libsdl/app/
+          cp -r /tmp/sdl/android-project/app/src/main/res/mipmap-* $A/res/
+          B=$A/assets/game/data/openttd/baseset; mkdir -p $B /tmp/dl
+          curl -fsSL -o /tmp/dl/gfx.zip https://cdn.openttd.org/opengfx-releases/$OPENGFX/opengfx-$OPENGFX-all.zip
+          curl -fsSL -o /tmp/dl/sfx.zip https://cdn.openttd.org/opensfx-releases/$OPENSFX/opensfx-$OPENSFX-all.zip
+          (cd /tmp/dl && unzip -oq gfx.zip && unzip -oq sfx.zip && ls -la)
+          cp /tmp/dl/*.tar $B/
+          mkdir -p $A/assets/game/config/openttd && cp openttd-android/game/openttd.cfg $A/assets/game/config/openttd/
+          find $A/assets | tee /tmp/ur-logs/assets.txt
+      - name: Build the APK
+        id: build
+        run: |
+          set -o pipefail
+          gradle -p openttd-android assembleRelease --no-daemon --stacktrace 2>&1 | tee /tmp/ur-logs/apk.log
+          cp openttd-android/app/build/outputs/apk/release/app-release.apk /tmp/ur-logs/UnicornRailways.apk
+          ls -la /tmp/ur-logs/UnicornRailways.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apk
+          path: /tmp/ur-logs
+
+  # Fire OS 7 is built on Android 9 (API 28) and Fire OS 8 on Android 11 (API 30)
+  test:
+    needs: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [28, 30]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: apk
+          path: /tmp/ur-build
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Fire-sized emulator checks
+        continue-on-error: true
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_c
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -no-boot-anim
+          script: bash openttd-android/ci/smoke.sh /tmp/ur-test/api${{ matrix.api }} /tmp/ur-build/UnicornRailways.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-api${{ matrix.api }}
+          path: /tmp/ur-test
+
+  publish:
+    needs: [native, apk, test]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/ur-all
+      - name: Release (only when the commit message asks for it)
+        if: needs.apk.result == 'success' && contains(github.event.head_commit.message, '[release]')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=0.1.${{ github.run_number }}
+          cp /tmp/ur-all/apk/UnicornRailways.apk "UnicornRailways-$V.apk"
+          gh release create "unicorn-railways-v$V" "UnicornRailways-$V.apk" \
+            --title "Unicorn Railways (OpenTTD) for Fire tablets $V" --notes-file openttd-android/RELEASE_NOTES.md --latest=false
+      - name: Logs, screenshots and the APK to the railways-ci branch
+        run: |
+          cd /tmp/ur-all
+          rm -rf native-*/jni
+          echo "${{ github.run_number }} ${{ github.sha }} native=${{ needs.native.result }} apk=${{ needs.apk.result }} test=${{ needs.test.result }}" > run.txt
+          git init -q && git checkout -q -b railways-ci
+          git config user.name "ur-ci" && git config user.email "ur-ci@users.noreply.github.com"
+          git add -A && git commit -qm "Unicorn Railways run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" railways-ci
