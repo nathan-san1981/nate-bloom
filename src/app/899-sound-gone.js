@@ -42,7 +42,7 @@
       const r = vcG.apply(this, arguments);
       if (!Array.isArray(r)) return r;
       return r.map(c => { if (!c || typeof c.make !== "function" || c.__sg) return c; const tag = tagOf(c), mk = c.make, acc = c.accepts || (() => true);
-        return Object.assign({}, c, { __sg: 1, accepts: m => acc(m) && kbOK(tag) && inZone(tag, m) && inVel(tag), make() { return track(tag, mk.apply(this, arguments)); } }); });
+        return Object.assign({}, c, { __sg: 1, accepts: m => acc(m) && kbOK(tag) && !(tag === "hwx:mf" && window.__nbSrc && /micro\s*freak/i.test(window.__nbSrc)) && inZone(tag, m) && inVel(tag), make() { return track(tag, mk.apply(this, arguments)); } }); });
     };
     // which voices each key's note (and each held note) is made of
     const mnG = makeNote;

@@ -39,7 +39,7 @@
         // (239) the MicroFreak's keys playing Nate Bloom (which plays the Minilogue) brought the Minilogue in: that isn't
         // the MicroFreak's own sound, so it doesn't count
         if (who !== "hw" && performance.now() - (H.sentAt || 0) < 600) return;
-        if (who !== "hw" && window.__mfMode && window.__mfMode() === "nb") { try { if (window.__stk.items().some(it => it.t === "hw")) return; } catch (e) {} }
+        if (who !== "hw" && window.__mfMode && window.__mfMode() !== "own") { try { if (window.__stk.items().some(it => it.t === "hw")) return; } catch (e) {} }
         const b = P.base.slice(), mx = [0, 0]; let n = 0; P.quietAt = performance.now() + 700;
         const t = setInterval(() => {
           P.an.forEach((a, i) => { mx[i] = Math.max(mx[i], rms(a)); });

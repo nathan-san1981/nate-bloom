@@ -576,6 +576,7 @@
       if (q.pin) { state.cur = { id: q.id, cat: e.cat || state.cur && state.cur.cat }; save(); }
       paint();
     }
+    window.__stkAddHwx = id => { start(); const s = S(); s.hwx = (s.hwx || []).filter(x => x !== id).concat(id); keepFocusPlaying(); renderEngine(); save(); const X = XHW(id); if (X) X.added(); };   // (242: the MicroFreak's "Hear it through Nate Bloom")
     // (172) the playing sound a Quick tile stands for
     const qkItemOf = (q, its) => its.find(x => (q.hw && x.t === "hw") || (q.hwx && x.t === "hwx" && x.id === q.hwx) || (q.eng && x.t === "syn" && x.id === q.eng) || (q.id.startsWith("w:") && x.t === "lib" && x.id === q.id.slice(2)) || (q.id === "e:inst" && x.t === "inst"));
     async function qkToggle(q) {
