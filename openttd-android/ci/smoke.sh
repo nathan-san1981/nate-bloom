@@ -10,7 +10,7 @@ sleep 5; adb shell wm size 1024x600; adb shell wm density 160
 adb shell settings put system accelerometer_rotation 0 || true
 adb install -r -g "$APK" > "$OUT/install.txt" 2>&1; cat "$OUT/install.txt"
 adb logcat -c
-adb shell am start -W -n $PKG/.RailwaysActivity | tee "$OUT/start.txt"
+timeout 30 adb shell am start -n $PKG/.RailwaysActivity 2>&1 | tee "$OUT/start.txt"
 for t in 10 30 60; do
   sleep $([ $t = 10 ] && echo 10 || echo 20)
   adb exec-out screencap -p > "$OUT/shot-${t}s.png"
