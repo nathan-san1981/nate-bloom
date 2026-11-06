@@ -10,15 +10,9 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: Unicornauts gets harder and more hands-on. Steer the rocket (touch above or below it, or
-the arrow buttons), fly into stars, steer around space rocks, and fly through the ring with the right answer:
-counting, numbers, adding and take-away within 10, letters, first sounds and simple words, getting harder after
-three right in a row. Plus satellites: send up a Love, Rainbow, Sparkle, Flower, Music or Dream satellite and
-Earth changes (hearts, rainbow colors, twinkles, flowers, music notes, sweet-dream moons). Also in this version:
-Pluto as a dwarf planet with who-found-it facts for every planet, real gravity in Space, Unicorn Meadow's Uh-oh
-button, and jobs earn Meadow gems.
-
-Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
-dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
-games, Unicorn Music, opening at start-up, crash recovery (and giving up after 3 crashes in 10 minutes), updates
-keeping her data, and optional device-owner lockdown with undo.
+New in this version: Pocket Pet, a virtual pet, off until you switch it on (grown-up settings → Pocket Pet).
+Then a Pocket Pet button appears on the Games screen. She picks a pet (unicorn, dragon, kitty, bunny, puppy,
+penguin, octopus, alien, robot or dino), a name and a color, hatches the egg and raises it: feed, play the
+left-or-right game, clean up, medicine, lights off at bedtime. The easy rules for her: needs go down at half speed,
+the pet never dies, hearts always show, the buttons it needs glow, the pet sleeps at her bedtime and talks in the
+clock's voice. Time with the pet counts toward daily game time; it makes no sounds while the game is closed.
