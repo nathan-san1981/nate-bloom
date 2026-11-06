@@ -69,7 +69,7 @@
           <div class="nbc-g">Altogether</div>
           ${row("Nate Bloom", r.app / Math.max(1, r.cores), r1(r.app) + "% of one core across all its processes (screen, sound, network), of " + r.cores + " cores")}
           ${row("This computer", r.computer, "everything running · busiest core " + r1(r.busiestCore) + "%")}
-          ${(r.others || []).length ? `<div class="nbc-g">Other programs <small>% of one core each, over the last second</small></div>` + r.others.map(o => row(o.name, Math.min(100, o.pct / Math.max(1, r.cores)), r1(o.pct) + "% of one core (" + r1(o.pct / Math.max(1, r.cores)) + "% of the computer)")).join("") : ""}
+          ${(r.others || []).length ? `<div class="nbc-g">Other programs <small>% of one core each, over the last second</small></div>` + r.others.map(o => row(o.name, Math.min(100, o.pct / Math.max(1, r.cores)), r1(o.pct) + "% of one core (" + r1(o.pct / Math.max(1, r.cores)) + "% of the computer)" + (o.waits ? " · waits for the sound" : ""))).join("") : ""}
           <div class="nbc-row${d10 ? " hot" : d60 ? " warm" : ""}"><span>Dropouts</span><b>${d60}</b><i class="bar off"></i><small>${d60 ? "in the last minute" + (d10 ? ", " + d10 + " in the last 10 s" : "") + " (the output filled in, or a native part was late)" : "none in the last minute"}</small></div>`;
         const b = C.at && document.body.contains(C.at) && C.at.offsetParent ? C.at : btns.find(x => x.offsetParent);
         if (b) { const rc = b.getBoundingClientRect(), w = Math.min(420, innerWidth - 16); pop.style.width = w + "px"; pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, rc.right - w)) + "px"; pop.style.top = (rc.bottom + 6) + "px"; }

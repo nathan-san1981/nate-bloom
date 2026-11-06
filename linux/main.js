@@ -494,12 +494,40 @@ function topOthers(dt, ours) {
   try { for (const d of fs.readdirSync("/proc")) { if (!/^\d+$/.test(d) || ours.has(+d)) continue;
     try { const s = fs.readFileSync("/proc/" + d + "/stat", "utf8"), i = s.lastIndexOf(")"), f = s.slice(i + 2).split(" "); now[d] = +f[11] + +f[12]; names[d] = s.slice(s.indexOf("(") + 1, i); } catch (e) {} } } catch (e) {}
   const prev = topPrev; topPrev = now; if (!prev) return [];
-  const by = {};
+  const by = {}, pids = {};
   for (const d in now) { if (prev[d] == null) continue; const p = (now[d] - prev[d]) / 100 / dt * 100; if (p < 5) continue;
     let nm = names[d]; try { const c = fs.readFileSync("/proc/" + d + "/cmdline", "utf8").split("\0").filter(Boolean); const scr = c.slice(1).find(a => /\.(py|js|sh)$/.test(a)); if (scr) nm += " " + path.basename(scr); } catch (e) {}
-    by[nm] = (by[nm] || 0) + p; }
-  return Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, p]) => ({ name: n, pct: Math.round(p) }));
+    by[nm] = (by[nm] || 0) + p; (pids[nm] = pids[nm] || []).push(+d); }
+  return Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, p]) => ({ name: n, pct: Math.round(p), pids: pids[n], waits: pids[n].every(isIdle) }));
 }
+// (243) a heavy background job of the user's own (Storytime recording voices, say) made to wait for the sound: every thread
+// of it to the idle class (SCHED_IDLE) at the lowest priority. It still uses every core when they're free; it gives them
+// up the moment Nate Bloom's audio, or anything else, needs one. Only the user's own processes (no root needed).
+const myUid = (() => { try { return process.getuid(); } catch (e) { return -1; } })();
+function isIdle(pid) { try { const s = fs.readFileSync("/proc/" + pid + "/sched", "utf8"); return /^policy\s*:\s*5$/m.test(s); } catch (e) { return false; } }
+function ownedByMe(pid) { try { return fs.statSync("/proc/" + pid).uid === myUid; } catch (e) { return false; } }
+function makeWait(pids) {
+  const done = [];
+  for (const pid of pids || []) {
+    if (!ownedByMe(pid) || isIdle(pid)) continue;
+    let tids = []; try { tids = fs.readdirSync("/proc/" + pid + "/task"); } catch (e) {}
+    for (const t of tids) { try { require("child_process").spawnSync("chrt", ["-i", "-p", "0", t], { timeout: 1500 }); } catch (e) {} try { require("os").setPriority(+t, 19); } catch (e) {} }
+    try { require("child_process").spawnSync("ionice", ["-c", "3", "-p", String(pid)], { timeout: 1500 }); } catch (e) {}
+    done.push(pid);
+  }
+  return done;
+}
+// Storytime's voice recording waits by itself, whenever Nate Bloom is open
+const AUTO_WAIT = /storytime|kokoro/i;
+let waited = [];
+setInterval(() => {
+  if (process.platform !== "linux") return;
+  try { for (const d of fs.readdirSync("/proc")) { if (!/^\d+$/.test(d)) continue; let c = ""; try { c = fs.readFileSync("/proc/" + d + "/cmdline", "utf8").replace(/\0/g, " "); } catch (e) { continue; }
+    if (!AUTO_WAIT.test(c) || /nate.?bloom|electron/i.test(c)) continue; const r = makeWait([+d]); if (r.length) waited.push({ pid: +d, what: c.slice(0, 80), at: Date.now() }); } } catch (e) {}
+  if (waited.length > 20) waited = waited.slice(-20);
+}, 5000);
+ipcMain.handle("nb:make-wait", (e, pids) => process.platform === "linux" ? makeWait(Array.isArray(pids) ? pids.map(Number).filter(n => n > 1) : []) : []);
+ipcMain.handle("nb:waited", () => waited);
 // (237) Windows: the whole computer from os.cpus(), Nate Bloom from Electron's own figures (no per-thread view)
 let winCpuPrev = null;
 function winCpu() {

@@ -17,6 +17,8 @@ contextBridge.exposeInMainWorld("NB_NATIVE", {
   version,
   shellLatest: () => ipcRenderer.invoke("nb:shell-latest"),   // (232) a newer Linux app package
   shellInstall: () => ipcRenderer.invoke("nb:shell-install"),
+  makeWait: pids => ipcRenderer.invoke("nb:make-wait", pids),   // (243) a busy program of the user's own gives way to the sound
+  waited: () => ipcRenderer.invoke("nb:waited"),
   background: true,                       // minimised, it keeps playing
   setPlaying: on => ipcRenderer.send("nb:playing", !!on),
   toast: msg => ipcRenderer.send("nb:toast", String(msg)),
