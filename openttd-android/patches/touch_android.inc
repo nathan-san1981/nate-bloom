@@ -4,6 +4,9 @@
  *   press and hold     = right click (tooltips, cancel)
  *   pinch              = zoom at the fingers   drag two fingers  = scroll the map
  *   two-finger tap / Back key = cancel the build tool, or close the front window */
+extern bool _kid_mode;
+void KidHome();
+void KidSave();
 namespace {
 struct TouchFinger { SDL_FingerID id; int x, y; };
 enum TouchMode { TM_IDLE, TM_PENDING, TM_DRAG, TM_TWO, TM_DONE };
@@ -52,6 +55,7 @@ static void TouchBack()
 		ResetObjectToPlace();
 		return;
 	}
+	if (_kid_mode) { KidHome(); return; } // her Back key goes back to the clock (her world is saved)
 	for (Window *w : Window::IterateFromFront()) {
 		switch (w->window_class) {
 			case WC_MAIN_WINDOW: case WC_MAIN_TOOLBAR: case WC_STATUS_BAR: case WC_TOOLTIPS: case WC_SELECT_GAME:
@@ -77,7 +81,7 @@ static float TouchDist() { float dx = _touch.fingers[0].x - _touch.fingers[1].x,
 /** Called every poll: turns a held, still finger into a right click. */
 static void TouchTick()
 {
-	if (_touch.mode == TM_PENDING && _touch.fingers.size() == 1 && SDL_GetTicks() - _touch.t0 >= TOUCH_HOLD_MS) {
+	if (!_kid_mode && _touch.mode == TM_PENDING && _touch.fingers.size() == 1 && SDL_GetTicks() - _touch.t0 >= TOUCH_HOLD_MS) {
 		TouchRightClick(_touch.sx, _touch.sy);
 		_touch.mode = TM_DONE;
 	}
@@ -176,6 +180,10 @@ static bool TouchEvent(const SDL_Event &ev, SDL_Window *win)
 
 		case SDL_KEYUP:
 			return ev.key.keysym.sym == SDLK_AC_BACK;
+
+		case SDL_APP_WILLENTERBACKGROUND:
+			if (_kid_mode) KidSave(); // Home button or the tablet sleeping: keep her world
+			return false;
 
 		default: return false;
 	}

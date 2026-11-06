@@ -68,4 +68,12 @@ patch("src/video/sdl2_v.cpp", "\tif (!SDL_PollEvent(&ev)) return false;\n",
 patch("src/video/sdl2_v.cpp", "\tif (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) return SDL_GetError();\n",
       "#if defined(__ANDROID__)\n\tSDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, \"0\");\n\tSDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, \"1\");\n#endif\n"
       "\tif (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) return SDL_GetError();\n")
+
+# ---- Unicorn Railways kid layer (patches/kid_gui.cpp), switched on by UNICORN_KID ----
+import shutil
+shutil.copy(os.path.join(os.path.dirname(os.path.abspath(__file__)), "kid_gui.cpp"), os.path.join(root, "src", "kid_gui.cpp"))
+patch("src/CMakeLists.txt", "    main_gui.cpp\n", "    main_gui.cpp\n    kid_gui.cpp\n")
+patch("src/window_type.h", "\tWC_HELPWIN,\n\n\tWC_INVALID = 0xFFFF,", "\tWC_HELPWIN,\n\n\tWC_KID_TOOLBAR, ///< Unicorn Railways: the kid toolbar.\n\n\tWC_INVALID = 0xFFFF,")
+patch("src/main_gui.cpp", "void ShowVitalWindows()\n{\n", "extern bool _kid_mode;\nvoid ShowKidToolbar();\nvoid ShowVitalWindows()\n{\n\tif (_kid_mode && _game_mode == GM_NORMAL) { ShowKidToolbar(); return; }\n")
+patch("src/os/unix/unix_main.cpp", "\tLogToLogcat();\n", "\tLogToLogcat();\n\t{ extern bool _kid_mode; const char *k = getenv(\"UNICORN_KID\"); _kid_mode = k != nullptr && k[0] == '1'; }\n")
 print("apply.py: OpenTTD patched for Android")

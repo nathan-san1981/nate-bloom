@@ -29,12 +29,32 @@ public class RailwaysActivity extends SDLActivity {
         // (extra ottd_args = "-g"); nothing else is accepted from outside.
         java.util.ArrayList<String> a = new java.util.ArrayList<>(java.util.Arrays.asList("-v", "sdl", "-s", "sdl", "-m", "null"));
         String extra = getIntent() != null ? getIntent().getStringExtra("ottd_args") : null;
-        if ("-g".equals(extra)) a.add("-g");
+        if (KID) {
+            // Unicorn Railways: straight into her world (the newest save), or a new one the first time
+            a.add("-g");
+            File save = newestSave();
+            if (save != null) a.add(save.getAbsolutePath());
+        } else if ("-g".equals(extra)) a.add("-g");
         return a.toArray(new String[0]);
+    }
+
+    static final boolean KID = "kid".equals(BuildConfig.FLAVOR);
+
+    private File newestSave() {
+        File base = new File(getFilesDir(), "data/openttd");
+        File best = null;
+        File kid = new File(base, "save/kid.sav");
+        if (kid.exists()) best = kid;
+        File[] auto = new File(base, "autosave").listFiles();
+        if (auto != null) for (File f : auto) if (f.getName().endsWith(".sav") && (best == null || f.lastModified() > best.lastModified())) best = f;
+        return best;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (KID) {
+            try { android.system.Os.setenv("UNICORN_KID", "1", true); } catch (Exception e) { Log.e(TAG, "setenv", e); }
+        }
         immersive(); // before the game's surface exists, so it starts at full size
         try {
             unpackAssets();

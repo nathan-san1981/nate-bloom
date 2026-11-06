@@ -48,6 +48,7 @@ android {
     }
 
     lint { checkReleaseBuilds = false }
+    buildFeatures { buildConfig = true }
 
     // libSDL2.so and libmain.so (OpenTTD) are built by ci/build-native.sh into app/src/main/jniLibs
     packaging { jniLibs { useLegacyPackaging = true } }

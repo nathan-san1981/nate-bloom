@@ -20,6 +20,23 @@ adb logcat -c
 timeout 30 adb shell am start -n $ACT 2>&1 | tee "$OUT/start.txt"
 sleep 15; shot title; alive title
 timeout 60 adb shell dumpsys window | grep -E "mCurrentFocus|InsetsSource|navigationBars" | head -8 > "$OUT/window.txt"
+if [ "$PKG" = "com.unicornclock.railways" ]; then
+  # Unicorn Railways opens straight into her world with the picture toolbar (2 columns of 88x80 buttons, top left)
+  sleep 20; shot kid-world; alive kid-world
+  # Road: drag a road across the middle
+  timeout 60 adb shell input tap 44 40; sleep 1
+  timeout 60 adb shell input swipe 400 300 800 300 1500; sleep 2; shot kid-road
+  # Bus stop at both ends of it
+  timeout 60 adb shell input tap 44 120; sleep 1
+  timeout 60 adb shell input tap 420 300; sleep 1; timeout 60 adb shell input tap 780 300; sleep 2; shot kid-stops
+  # New bus!
+  timeout 60 adb shell input tap 44 200; sleep 4; shot kid-bus
+  timeout 60 adb shell input tap 132 280; sleep 25; shot kid-bus-moving; alive kid-bus
+  # Home: saves her world and goes back
+  timeout 60 adb shell input tap 88 430; sleep 4; alive kid-home
+  timeout 30 adb shell am start -n $ACT; sleep 20; shot kid-reopened; alive kid-reopened
+  timeout 60 adb shell run-as $PKG ls -la files/data/openttd/save > "$OUT/saves.txt" 2>&1 || true
+fi
 timeout 30 adb shell am force-stop $PKG; sleep 3
 timeout 30 adb shell am start -n $ACT --es ottd_args "-g" 2>&1 | tee -a "$OUT/start.txt"
 sleep 25; shot game; alive game
