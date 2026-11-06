@@ -9,6 +9,11 @@ COMMON=(-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$TC -DANDROID
 cmake -S $W/sdl -B $W/b-sdl-$ABI "${COMMON[@]}" -DCMAKE_INSTALL_PREFIX=$PFX -DSDL_SHARED=ON -DSDL_STATIC=OFF -DSDL_TEST=OFF
 cmake --build $W/b-sdl-$ABI
 cmake --install $W/b-sdl-$ABI
+# liblzma (the title-screen game and most savegames are LZMA-compressed)
+cmake -S $W/xz -B $W/b-xz-$ABI "${COMMON[@]}" -DCMAKE_INSTALL_PREFIX=$PFX -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+  -DXZ_NLS=OFF -DXZ_DOC=OFF -DXZ_TOOL_XZ=OFF -DXZ_TOOL_XZDEC=OFF -DXZ_TOOL_LZMADEC=OFF -DXZ_TOOL_LZMAINFO=OFF -DXZ_TOOL_SCRIPTS=OFF -DXZ_TOOL_SYMLINKS=OFF -DBUILD_TESTING=OFF
+cmake --build $W/b-xz-$ABI
+cmake --install $W/b-xz-$ABI
 cmake -S $W/openttd -B $W/b-ottd-$ABI "${COMMON[@]}" \
   -DHOST_BINARY_DIR=$W/host \
   -DCMAKE_FIND_ROOT_PATH=$PFX -DCMAKE_PREFIX_PATH=$PFX -DSDL2_DIR=$PFX/lib/cmake/SDL2 \

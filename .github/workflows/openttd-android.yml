@@ -16,6 +16,7 @@ concurrency:
 env:
   OPENTTD_TAG: "15.3"
   SDL_TAG: "release-2.32.10"
+  XZ_TAG: "v5.8.4"
   OPENGFX: "8.0"
   OPENSFX: "1.0.3"
 
@@ -34,6 +35,7 @@ jobs:
           mkdir -p /tmp/w /tmp/ur-logs
           git clone -q --depth 1 --branch "$OPENTTD_TAG" https://github.com/OpenTTD/OpenTTD.git /tmp/w/openttd
           git clone -q --depth 1 --branch "$SDL_TAG" https://github.com/libsdl-org/SDL.git /tmp/w/sdl
+          git clone -q --depth 1 --branch "$XZ_TAG" https://github.com/tukaani-project/xz.git /tmp/w/xz
           python3 openttd-android/patches/apply.py /tmp/w/openttd
           sudo apt-get install -y -qq ninja-build >/dev/null
       - name: Host tools (strgen, settingsgen)
@@ -98,7 +100,7 @@ jobs:
           cp /tmp/dl/*.tar $B/
           # OpenTTD's language file and its own base-set files, built with the game (the same for every ABI)
           cp -r /tmp/nat/native-x86_64/gamedata/. $A/assets/game/data/openttd/
-          mkdir -p $A/assets/game/config/openttd && cp openttd-android/game/openttd.cfg $A/assets/game/config/openttd/
+          mkdir -p $A/assets/game/config/openttd && cp openttd-android/game/openttd.cfg openttd-android/game/private.cfg $A/assets/game/config/openttd/
           find $A/assets | tee /tmp/ur-logs/assets.txt
       - name: Build the APK
         id: build
