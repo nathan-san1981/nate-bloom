@@ -63,7 +63,7 @@ patch("src/video/sdl2_v.cpp", '#include "../safeguards.h"\n',
 patch("src/video/sdl2_v.cpp", "bool VideoDriver_SDL_Base::PollEvent()\n",
       "#if defined(__ANDROID__)\n" + touch + "#endif\n\nbool VideoDriver_SDL_Base::PollEvent()\n")
 patch("src/video/sdl2_v.cpp", "\tif (!SDL_PollEvent(&ev)) return false;\n",
-      "#if defined(__ANDROID__)\n\tTouchTick();\n\tif (!SDL_PollEvent(&ev)) return false;\n\tif (TouchEvent(ev, this->sdl_window)) return true;\n"
+      "#if defined(__ANDROID__)\n\tTouchTick();\n\t{ /* fill the whole screen once the system bars are hidden (the first surface can be made before) */\n\t\tstatic uint32_t last_size_check = 0; uint32_t now_ms = SDL_GetTicks();\n\t\tif (now_ms - last_size_check > 500) { last_size_check = now_ms; int sw = 0, sh = 0; SDL_GetWindowSize(this->sdl_window, &sw, &sh);\n\t\t\tif (sw >= 64 && sh >= 64 && (sw != _screen.width || sh != _screen.height)) CreateMainSurface(sw, sh, false); }\n\t}\n\tif (!SDL_PollEvent(&ev)) return false;\n\tif (TouchEvent(ev, this->sdl_window)) return true;\n"
       "#else\n\tif (!SDL_PollEvent(&ev)) return false;\n#endif\n")
 patch("src/video/sdl2_v.cpp", "\tif (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) return SDL_GetError();\n",
       "#if defined(__ANDROID__)\n\tSDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, \"0\");\n\tSDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, \"1\");\n#endif\n"

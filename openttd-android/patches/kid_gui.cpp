@@ -16,6 +16,11 @@
 #include "tilehighlight_func.h"
 #include "command_func.h"
 #include "company_func.h"
+#include "company_base.h"
+#include "company_cmd.h"
+#include "livery.h"
+#include "palette_func.h"
+#include "zoom_func.h"
 #include "core/backup_type.hpp"
 #include "station_base.h"
 #include "roadstop_base.h"
@@ -218,31 +223,61 @@ static Axis KidAxisAt(TileIndex t, bool rail)
 	return AXIS_X;
 }
 
+/** Her buttons: a picture and a word on each, candy colours, painted by the window itself. */
+struct KidButton { WidgetID id; Colours colour; SpriteID sprite; const char *label; };
+static const KidButton _kid_buttons[] = {
+	{KW_ROAD, COLOUR_PINK, SPR_IMG_AUTOROAD, "Road"},          {KW_RAIL, COLOUR_PINK, SPR_IMG_AUTORAIL, "Track"},
+	{KW_BUSSTOP, COLOUR_MAUVE, SPR_IMG_BUS_STATION, "Bus stop"}, {KW_STATION, COLOUR_MAUVE, SPR_IMG_RAIL_STATION, "Station"},
+	{KW_BUS, COLOUR_LIGHT_BLUE, SPR_IMG_TRUCKLIST, "New bus"},  {KW_TRAIN, COLOUR_LIGHT_BLUE, SPR_IMG_TRAINLIST, "New train"},
+	{KW_UNDO, COLOUR_YELLOW, SPR_BULLDOZER_SW, "Oops"},         {KW_FAST, COLOUR_GREEN, SPR_IMG_FASTFORWARD, "Fast"},
+	{KW_ZOOM_IN, COLOUR_WHITE, SPR_IMG_ZOOMIN, "Closer"},       {KW_ZOOM_OUT, COLOUR_WHITE, SPR_IMG_ZOOMOUT, "Farther"},
+	{KW_HOME, COLOUR_PURPLE, SPR_IMG_TOWN, "Save & go home"},
+};
+
 static constexpr std::initializer_list<NWidgetPart> _nested_kid_widgets = {
-	NWidget(NWID_VERTICAL),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_IMGBTN, COLOUR_PINK, KW_ROAD), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_AUTOROAD, STR_ROAD_TOOLBAR_TOOLTIP_BUILD_AUTOROAD),
-			NWidget(WWT_IMGBTN, COLOUR_PINK, KW_RAIL), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_AUTORAIL, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_AUTORAIL),
+	NWidget(NWID_VERTICAL), SetPIP(4, 3, 4), SetPadding(0, 4, 0, 4),
+		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_ROAD), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_RAIL), SetMinimalSize(50, 46),
 		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_IMGBTN, COLOUR_PINK, KW_BUSSTOP), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_BUS_STATION, STR_ROAD_TOOLBAR_TOOLTIP_BUILD_BUS_STATION),
-			NWidget(WWT_IMGBTN, COLOUR_PINK, KW_STATION), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_RAIL_STATION, STR_RAIL_TOOLBAR_TOOLTIP_BUILD_RAILROAD_STATION),
+		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_BUSSTOP), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_STATION), SetMinimalSize(50, 46),
 		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_IMGBTN, COLOUR_LIGHT_BLUE, KW_BUS), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_TRUCKLIST, STR_NULL),
-			NWidget(WWT_IMGBTN, COLOUR_LIGHT_BLUE, KW_TRAIN), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_TRAINLIST, STR_NULL),
+		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_BUS), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_TRAIN), SetMinimalSize(50, 46),
 		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_IMGBTN, COLOUR_ORANGE, KW_UNDO), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_DYNAMITE, STR_NULL),
-			NWidget(WWT_IMGBTN, COLOUR_GREEN, KW_FAST), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_FASTFORWARD, STR_NULL),
+		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_UNDO), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_FAST), SetMinimalSize(50, 46),
 		EndContainer(),
-		NWidget(NWID_HORIZONTAL),
-			NWidget(WWT_IMGBTN, COLOUR_GREY, KW_ZOOM_IN), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_ZOOMIN, STR_NULL),
-			NWidget(WWT_IMGBTN, COLOUR_GREY, KW_ZOOM_OUT), SetMinimalSize(44, 40), SetSpriteTip(SPR_IMG_ZOOMOUT, STR_NULL),
+		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_ZOOM_IN), SetMinimalSize(50, 40),
+			NWidget(WWT_EMPTY, COLOUR_PINK, KW_ZOOM_OUT), SetMinimalSize(50, 40),
 		EndContainer(),
-		NWidget(WWT_IMGBTN, COLOUR_MAUVE, KW_HOME), SetMinimalSize(88, 36), SetFill(1, 0), SetSpriteTip(SPR_IMG_TOWN, STR_NULL),
+		NWidget(WWT_EMPTY, COLOUR_PINK, KW_HOME), SetMinimalSize(103, 30), SetFill(1, 0),
 	EndContainer(),
 };
+
+/** A rounded rectangle (8 points per corner). */
+static void KidRoundRect(int l, int t, int r, int b, int k, PixelColour c)
+{
+	k = std::min({k, (r - l) / 2, (b - t) / 2});
+	static const int cs[5][2] = {{0, 100}, {38, 92}, {71, 71}, {92, 38}, {100, 0}};
+	std::vector<Point> pts;
+	auto corner = [&](int cx, int cy, int sx, int sy, bool rev) {
+		for (int i = 0; i < 5; i++) {
+			int j = rev ? 4 - i : i;
+			pts.push_back({cx + sx * k * cs[j][1] / 100, cy + sy * k * cs[j][0] / 100});
+		}
+	};
+	corner(l + k, t + k, -1, -1, true);
+	corner(r - k, t + k, 1, -1, false);
+	corner(r - k, b - k, 1, 1, true);
+	corner(l + k, b - k, -1, 1, false);
+	GfxFillPolygon(pts, c);
+}
 
 struct KidToolbarWindow : Window {
 	WidgetID tool = INVALID_WIDGET; ///< the kid window's own tap tool (bus stop, station, undo)
@@ -256,6 +291,39 @@ struct KidToolbarWindow : Window {
 	Point OnInitialPosition([[maybe_unused]] int16_t sm_width, [[maybe_unused]] int16_t sm_height, [[maybe_unused]] int window_number) override
 	{
 		return {0, 0};
+	}
+
+	void OnPaint() override
+	{
+		/* a soft lilac panel with a pink edge */
+		GfxFillRect(0, 0, this->width - 1, this->height - 1, GetColourGradient(COLOUR_MAUVE, SHADE_LIGHTEREST));
+		GfxFillRect(this->width - ScaleGUITrad(2), 0, this->width - 1, this->height - 1, GetColourGradient(COLOUR_PINK, SHADE_NORMAL));
+		this->DrawWidgets();
+	}
+
+	void DrawWidget(const Rect &r, WidgetID widget) const override
+	{
+		const KidButton *kb = nullptr;
+		for (const KidButton &b : _kid_buttons) if (b.id == widget) kb = &b;
+		if (kb == nullptr) return;
+		bool down = this->IsWidgetLowered(widget);
+		int k = ScaleGUITrad(9), drop = ScaleGUITrad(3), push = down ? drop : 0;
+		Colours c = kb->colour;
+		KidRoundRect(r.left, r.top + drop, r.right, r.bottom, k, GetColourGradient(c, SHADE_DARK));
+		KidRoundRect(r.left, r.top + push, r.right, r.bottom - drop + push, k, GetColourGradient(c, down ? SHADE_LIGHT : SHADE_LIGHTER));
+		KidRoundRect(r.left + ScaleGUITrad(3), r.top + push + ScaleGUITrad(2), r.right - ScaleGUITrad(3), r.top + push + (r.bottom - r.top) / 3, k - ScaleGUITrad(2), GetColourGradient(c, SHADE_LIGHTEREST));
+		bool wide = widget == KW_HOME;
+		int label_h = GetCharacterHeight(FS_SMALL);
+		PixelColour ink = GetColourGradient(COLOUR_PURPLE, SHADE_DARKEST);
+		if (wide) {
+			Rect ir{r.left + ScaleGUITrad(4), r.top + push, r.left + ScaleGUITrad(30), r.bottom - drop + push};
+			DrawSpriteIgnorePadding(kb->sprite, PAL_NONE, ir, SA_CENTER);
+			DrawString(ir.right, r.right - ScaleGUITrad(4), (r.top + r.bottom - drop) / 2 + push - GetCharacterHeight(FS_NORMAL) / 2, kb->label, ink.ToTextColour() | TC_NO_SHADE, SA_HOR_CENTER);
+			return;
+		}
+		Rect ir{r.left, r.top + push + ScaleGUITrad(3), r.right, r.bottom - drop + push - label_h - ScaleGUITrad(3)};
+		DrawSpriteIgnorePadding(kb->sprite, kb->sprite == SPR_BULLDOZER_SW ? PALETTE_TO_PINK : PAL_NONE, ir, SA_CENTER);
+		DrawString(r.left, r.right, r.bottom - drop + push - label_h - ScaleGUITrad(2), kb->label, ink.ToTextColour() | TC_NO_SHADE, SA_HOR_CENTER, false, FS_SMALL);
 	}
 
 	void Lower(WidgetID w)
@@ -366,6 +434,10 @@ static WindowDesc _kid_toolbar_desc(
 
 void ShowKidToolbar()
 {
+	/* her company's trains and buses are pink */
+	if (Company::IsValidID(_local_company) && Company::Get(_local_company)->colour != COLOUR_PINK) {
+		Command<CMD_SET_COMPANY_COLOUR>::Post(LS_DEFAULT, true, COLOUR_PINK);
+	}
 	CloseWindowByClass(WC_KID_TOOLBAR);
 	new KidToolbarWindow(_kid_toolbar_desc);
 }
