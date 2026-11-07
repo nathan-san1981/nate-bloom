@@ -34,13 +34,38 @@ public class MainActivity extends Activity {
     static final String TAG = "FamilyGames";
     static final String ACTION_DONE = "org.natebloom.familygames.INSTALL_DONE";
 
-    /** name, what it is, download (public releases of nathan-san1981/nate-bloom) */
+    /** name, what it is, fallback download, release tag prefix, file name prefix (public releases of nathan-san1981/nate-bloom).
+     *  The newest release with that tag prefix is used; the fallback only if GitHub can't be asked. */
     static final String[][] APPS = {
         {"Pocket Pet", "a pocket pet to hatch and raise",
-            "https://github.com/nathan-san1981/nate-bloom/releases/download/pocket-pet-v1.0.2/PocketPet-1.0.2.apk"},
+            "https://github.com/nathan-san1981/nate-bloom/releases/download/pocket-pet-v1.0.2/PocketPet-1.0.2.apk", "pocket-pet-v", "PocketPet-"},
         {"OpenTTD", "build railways, roads and towns (Transport Tycoon)",
-            "https://github.com/nathan-san1981/nate-bloom/releases/download/unicorn-railways-v0.1.25/OpenTTD-tablet-0.1.25.apk"},
+            "https://github.com/nathan-san1981/nate-bloom/releases/download/unicorn-railways-v0.1.25/OpenTTD-tablet-0.1.25.apk", "unicorn-railways-v", "OpenTTD-tablet-"},
     };
+    static final String RELEASES = "https://api.github.com/repos/nathan-san1981/nate-bloom/releases?per_page=60";
+
+    /** The newest release asset for this app, or its fallback. */
+    String newest(String[] app) {
+        try {
+            HttpURLConnection c = (HttpURLConnection) new URL(RELEASES).openConnection();
+            c.setConnectTimeout(15000); c.setReadTimeout(30000);
+            c.setRequestProperty("Accept", "application/vnd.github+json");
+            if (c.getResponseCode() != 200) return app[2];
+            StringBuilder sb = new StringBuilder();
+            try (InputStream in = c.getInputStream()) { byte[] b = new byte[1 << 15]; int n; while ((n = in.read(b)) > 0) sb.append(new String(b, 0, n, "UTF-8")); }
+            org.json.JSONArray rel = new org.json.JSONArray(sb.toString());
+            for (int i = 0; i < rel.length(); i++) {   // newest first
+                org.json.JSONObject r = rel.getJSONObject(i);
+                if (r.optBoolean("draft") || !r.optString("tag_name").startsWith(app[3])) continue;
+                org.json.JSONArray as = r.getJSONArray("assets");
+                for (int k = 0; k < as.length(); k++) {
+                    org.json.JSONObject a = as.getJSONObject(k);
+                    if (a.optString("name").startsWith(app[4]) && a.optString("name").endsWith(".apk")) return a.getString("browser_download_url");
+                }
+            }
+        } catch (Exception e) { Log.w(TAG, "newest " + app[0], e); }
+        return app[2];
+    }
 
     TextView status;
     Button button;
@@ -139,7 +164,8 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             try {
                 File f = new File(getCacheDir(), "app" + next + ".apk");
-                download(app[2], f, app[0]);
+                say("Finding the newest " + app[0] + "…");
+                download(newest(app), f, app[0]);
                 say("Installing " + app[0] + "…");
                 commit(f, app[0]);
             } catch (Exception e) {
