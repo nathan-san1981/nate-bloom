@@ -10,15 +10,8 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: Unicornauts gets harder and more hands-on. Steer the rocket (touch above or below it, or
-the arrow buttons), fly into stars, steer around space rocks, and fly through the ring with the right answer:
-counting, numbers, adding and take-away within 10, letters, first sounds and simple words, getting harder after
-three right in a row. Plus satellites: send up a Love, Rainbow, Sparkle, Flower, Music or Dream satellite and
-Earth changes (hearts, rainbow colors, twinkles, flowers, music notes, sweet-dream moons). Also in this version:
-Pluto as a dwarf planet with who-found-it facts for every planet, real gravity in Space, Unicorn Meadow's Uh-oh
-button, and jobs earn Meadow gems.
-
-Checked on Fire-sized Android 9 and Android 11 emulators (what Fire OS 7 and 8 are built on): clock, backlight
-dimming, voice, volume, comes back after Home/Recents and after being swiped away, Back key, pinning, offline,
-games, Unicorn Music, opening at start-up, crash recovery (and giving up after 3 crashes in 10 minutes), updates
-keeping her data, and optional device-owner lockdown with undo.
+New in this version: Pocket Pet has a new look for her: a colourful cartoon pet (unicorn with a rainbow mane and
+golden horn, mint dragon, peach kitty, lavender bunny and the rest) bouncing in a sunny meadow with a rainbow and
+flowers, a starry night when it sleeps, big candy-coloured picture buttons and pink hearts. Same easy rules, same
+voice. Also: Unicorn Railways and Unicorn Park buttons on the Games screen (off until switched on in settings, and
+only when those apps are installed).

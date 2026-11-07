@@ -5,7 +5,7 @@ tablet). Free and open source (MIT). Everything is built in and works offline, e
 falls back to the saved forecast.
 
 - Clock, bedtime and wake-up rainbow, weather and what to wear, alarms, timers, notes and voice notes, sun,
-  moon and space screens, Unicorn Music, five games (Unicorn Run, Unicorn Run 2, Unicorn Meadow, Unicornauts, Unicorn Dungeon)
+  moon and space screens, Unicorn Music, five games (Unicorn Run, Unicorn Run 2, Unicorn Meadow, Unicornauts, Unicorn Dungeon) plus Pocket Pet, a virtual pet that stays off until a grown-up switches it on
 - Jobs and chores ticked on the star chart earn gems in Unicorn Meadow
 - Opens by itself when the tablet turns on, full screen, and comes straight back if Home or Recents is pressed
   (or if it's swiped away in Recents); the Back key just closes whatever is open on the clock
