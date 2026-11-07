@@ -231,26 +231,26 @@ static const KidButton _kid_buttons[] = {
 	{KW_BUS, COLOUR_LIGHT_BLUE, SPR_IMG_TRUCKLIST, "New bus"},  {KW_TRAIN, COLOUR_LIGHT_BLUE, SPR_IMG_TRAINLIST, "New train"},
 	{KW_UNDO, COLOUR_YELLOW, SPR_BULLDOZER_SW, "Oops"},         {KW_FAST, COLOUR_GREEN, SPR_IMG_FASTFORWARD, "Fast"},
 	{KW_ZOOM_IN, COLOUR_WHITE, SPR_IMG_ZOOMIN, "Closer"},       {KW_ZOOM_OUT, COLOUR_WHITE, SPR_IMG_ZOOMOUT, "Farther"},
-	{KW_HOME, COLOUR_PURPLE, SPR_IMG_TOWN, "Save & go home"},
+	{KW_HOME, COLOUR_PURPLE, SPR_IMG_TOWN, "Go home"},
 };
 
 static constexpr std::initializer_list<NWidgetPart> _nested_kid_widgets = {
 	NWidget(NWID_VERTICAL), SetPIP(4, 3, 4), SetPadding(0, 4, 0, 4),
 		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_ROAD), SetMinimalSize(50, 46),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_RAIL), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_ROAD), SetMinimalSize(50, 48),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_RAIL), SetMinimalSize(50, 48),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_BUSSTOP), SetMinimalSize(50, 46),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_STATION), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_BUSSTOP), SetMinimalSize(50, 48),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_STATION), SetMinimalSize(50, 48),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_BUS), SetMinimalSize(50, 46),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_TRAIN), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_BUS), SetMinimalSize(50, 48),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_TRAIN), SetMinimalSize(50, 48),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_UNDO), SetMinimalSize(50, 46),
-			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_FAST), SetMinimalSize(50, 46),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_UNDO), SetMinimalSize(50, 48),
+			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_FAST), SetMinimalSize(50, 48),
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL), SetPIP(0, 3, 0),
 			NWidget(WWT_EMPTY, INVALID_COLOUR, KW_ZOOM_IN), SetMinimalSize(50, 40),
@@ -272,10 +272,10 @@ static void KidRoundRect(int l, int t, int r, int b, int k, PixelColour c)
 			pts.push_back({cx + sx * k * cs[j][1] / 100, cy + sy * k * cs[j][0] / 100});
 		}
 	};
-	corner(l + k, t + k, -1, -1, true);
-	corner(r - k, t + k, 1, -1, false);
-	corner(r - k, b - k, 1, 1, true);
-	corner(l + k, b - k, -1, 1, false);
+	corner(l + k, t + k, -1, -1, false);
+	corner(r - k, t + k, 1, -1, true);
+	corner(r - k, b - k, 1, 1, false);
+	corner(l + k, b - k, -1, 1, true);
 	GfxFillPolygon(pts, c);
 }
 
@@ -313,7 +313,7 @@ struct KidToolbarWindow : Window {
 		KidRoundRect(r.left, r.top + push, r.right, r.bottom - drop + push, k, GetColourGradient(c, down ? SHADE_LIGHT : SHADE_LIGHTER));
 		KidRoundRect(r.left + ScaleGUITrad(3), r.top + push + ScaleGUITrad(2), r.right - ScaleGUITrad(3), r.top + push + (r.bottom - r.top) / 3, k - ScaleGUITrad(2), GetColourGradient(c, SHADE_LIGHTEREST));
 		bool wide = widget == KW_HOME;
-		int label_h = GetCharacterHeight(FS_SMALL);
+		int label_h = GetCharacterHeight(FS_NORMAL);
 		PixelColour ink = GetColourGradient(COLOUR_PURPLE, SHADE_DARKEST);
 		if (wide) {
 			Rect ir{r.left + ScaleGUITrad(4), r.top + push, r.left + ScaleGUITrad(30), r.bottom - drop + push};
@@ -323,7 +323,7 @@ struct KidToolbarWindow : Window {
 		}
 		Rect ir{r.left, r.top + push + ScaleGUITrad(3), r.right, r.bottom - drop + push - label_h - ScaleGUITrad(3)};
 		DrawSpriteIgnorePadding(kb->sprite, kb->sprite == SPR_BULLDOZER_SW ? PALETTE_TO_PINK : PAL_NONE, ir, SA_CENTER);
-		DrawString(r.left, r.right, r.bottom - drop + push - label_h - ScaleGUITrad(2), kb->label, ink.ToTextColour() | TC_NO_SHADE, SA_HOR_CENTER, false, FS_SMALL);
+		DrawString(r.left, r.right, r.bottom - drop + push - label_h - ScaleGUITrad(2), kb->label, ink.ToTextColour() | TC_NO_SHADE, SA_HOR_CENTER, false, FS_NORMAL);
 	}
 
 	void Lower(WidgetID w)

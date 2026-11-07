@@ -74,6 +74,15 @@ public class RailwaysActivity extends SDLActivity {
     /** Full screen from the very first frame, so the game's surface never changes size under it
      *  (a late switch left touches scaled to the old, shorter screen). */
     @SuppressWarnings("deprecation")
+    /** The game can't start twice in one process: when it closes (Home), the process goes too, so the
+     *  next start from the clock is clean. */
+    @Override
+    protected void onDestroy() {
+        boolean closing = isFinishing();
+        super.onDestroy();
+        if (closing) android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
     private void immersive() {
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
