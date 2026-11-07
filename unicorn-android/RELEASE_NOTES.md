@@ -10,8 +10,6 @@ Full setup guide: https://github.com/nathan-san1981/nate-bloom/tree/main/unicorn
 
 First time: set a Grown-up PIN in grown-up settings, then Tablet app → Let it open by itself.
 
-New in this version: Pocket Pet has a new look for her: a colourful cartoon pet (unicorn with a rainbow mane and
-golden horn, mint dragon, peach kitty, lavender bunny and the rest) bouncing in a sunny meadow with a rainbow and
-flowers, a starry night when it sleeps, big candy-coloured picture buttons and pink hearts. Same easy rules, same
-voice. Also: Unicorn Railways and Unicorn Park buttons on the Games screen (off until switched on in settings, and
-only when those apps are installed).
+New in this version: Classic Pet on the Games screen, next to Pocket Pet: the original-style pocket pet
+(egg-shaped device, A/B/C buttons, pixel screen; harder, and a neglected pet can die). It has its own switch in the
+grown-up settings ("Classic Pocket Pet") and its own save, separate from her cartoon Pocket Pet.
