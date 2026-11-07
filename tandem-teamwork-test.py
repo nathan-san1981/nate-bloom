@@ -88,6 +88,8 @@ class ClusterMeter:
     status they report to Tandem."""
     def __init__(self):
         self.samples, self.gpu, self.stop = {}, {}, threading.Event()
+        self.track = {}  # job id -> {"type", "name", "where", "first", "last", "paused", "waiting"}
+        self.t0 = time.time()
 
     def run(self):
         while not self.stop.wait(2):
@@ -103,6 +105,24 @@ class ClusterMeter:
                         self.gpu.setdefault(p["name"], []).append(p["stats"]["gpu"])
                 elif not p["online"]:
                     self.samples.setdefault(p["name"], []).append(0.0)
+            names = {p["id"]: p["name"] for p in st["peers"]}
+            t = time.time()
+            for j in st["jobs"]:
+                if (j.get("created") or 0) < self.t0 - 5:
+                    continue
+                r = self.track.setdefault(j["id"], {"type": j["type"], "name": j.get("name", ""), "where": None,
+                                                    "first": None, "last": None, "paused": 0, "waiting": 0,
+                                                    "msg": ""})
+                if j["state"] in ("running", "paused") and j.get("loc") in ("local", "server"):
+                    w = st["name"] if j["loc"] == "local" else names.get(j.get("peer"), "?")
+                    r["where"] = r["where"] or w
+                    r["first"] = r["first"] or t
+                    r["last"] = t
+                    if j["state"] == "paused" or (j.get("msg") or "").lower().startswith("paused"):
+                        r["paused"] += 2
+                elif j["state"] == "queued":
+                    r["waiting"] += 2
+                    r["msg"] = j.get("msg") or r["msg"]
 
     def __enter__(self):
         self.t = threading.Thread(target=self.run, daemon=True)
@@ -115,6 +135,23 @@ class ClusterMeter:
 
     def avg(self):
         return {k: sum(v) / len(v) for k, v in self.samples.items() if v}
+
+    def summary(self):
+        """Per machine: jobs run, share of the time something was running, most at once, time paused."""
+        out = {}
+        runs = [r for r in self.track.values() if r["where"] and r["first"]]
+        if not runs:
+            return out, []
+        t0, t1 = min(r["first"] for r in runs), max(r["last"] for r in runs)
+        for w in sorted({r["where"] for r in runs}):
+            mine = [r for r in runs if r["where"] == w]
+            steps = int((t1 - t0) / 2) + 1
+            conc = [sum(1 for r in mine if r["first"] <= t0 + 2 * i <= r["last"]) for i in range(steps)]
+            out[w] = {"jobs": len(mine), "busy": 100 * sum(1 for c in conc if c) / max(1, steps),
+                      "peak": max(conc), "avg": sum(conc) / max(1, steps), "paused": sum(r["paused"] for r in mine),
+                      "types": sorted({r["type"] for r in mine})}
+        slow = sorted(runs, key=lambda r: r["last"] - r["first"], reverse=True)[:5]
+        return out, slow
 
     def gpu_avg(self):
         return {k: sum(v) / len(v) for k, v in self.gpu.items() if v}
@@ -220,6 +257,14 @@ def cleanup_results(res, before):
 
 
 def main():
+    import fcntl
+    global _lock
+    REPORT.parent.mkdir(parents=True, exist_ok=True)
+    _lock = open(REPORT.parent / ".teamwork-test.lock", "w")
+    try:
+        fcntl.flock(_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        sys.exit("A teamwork test is already running. Check it with: tail -3 ~/Tandem/max-run.txt")
     try:
         st = state()
     except Exception:
@@ -366,7 +411,8 @@ def main():
                 busy = ", ".join(f"{k} {v[-1]:.0f}%" for k, v in cm.samples.items() if v)
                 print(f"   … {int(time.time() - t0)} s, {sum(j['state'] == 'done' for j in tops)}/{len(tops)} jobs done · CPU now: {busy}", flush=True)
             time.sleep(1)
-    allhands = {"secs": time.time() - t0, "where": {}, "cpu": cm.avg(), "gpu": cm.gpu_avg(), "jobs": len(ids)}
+    allhands = {"secs": time.time() - t0, "where": {}, "cpu": cm.avg(), "gpu": cm.gpu_avg(), "jobs": len(ids),
+                "summary": cm.summary(), "track": cm.track}
     for w in seen.values():
         allhands["where"][w] = allhands["where"].get(w, 0) + 1
     f_r = frames(WORK / "allhands.mp4")
@@ -405,6 +451,22 @@ def main():
         if ah["gpu"]:
             out("  graphics card, avg " + "   ".join(f"{k} {v:.0f}%" for k, v in sorted(ah["gpu"].items())))
         out(f"  pieces per machine {where_txt(ah['where'])}")
+        per, slow = ah["summary"]
+        if per:
+            out("  per machine        (busy = share of the run with at least one job going there)")
+            for w, d in per.items():
+                out(f"    {w:9} {d['jobs']:3} jobs  busy {d['busy']:3.0f}%  avg {d['avg']:.1f} at once, peak {d['peak']}"
+                    f"  paused {d['paused']} s  ({', '.join(d['types'])})")
+            out("  longest jobs")
+            for r in slow:
+                out(f"    {int(r['last'] - r['first']):5} s  {r['type']:7} on {r['where']:9} {r['name'][:40]}")
+            waits = sorted((r for r in ah["track"].values() if r["waiting"] >= 30), key=lambda r: -r["waiting"])[:3]
+            for r in waits:
+                out(f"    waited {r['waiting']} s before starting: {r['name'][:40]} ({r['msg'][:60]})")
+        try:
+            (REPORT.parent / "teamwork-timeline.json").write_text(json.dumps(ah["track"], indent=1))
+        except OSError:
+            pass
         est, parts = 0, []
         if MAX:
             for k, mult, lab in (("encode", big, "encode"), ("render", big, "render"),
