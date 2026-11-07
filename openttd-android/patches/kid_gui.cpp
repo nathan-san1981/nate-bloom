@@ -421,6 +421,8 @@ struct KidToolbarWindow : Window {
 		if (++this->colour_ticks % 64 == 0 && Company::IsValidID(_local_company) && Company::Get(_local_company)->colour != COLOUR_PINK) {
 			Command<CMD_SET_COMPANY_COLOUR>::Post(LS_DEFAULT, true, COLOUR_PINK);
 		}
+		/* no red "Can't build..." messages for her (she can't read them yet); the thing just doesn't appear */
+		CloseWindowByClass(WC_ERRMSG);
 		/* keep the stock pickers that open with a tool out of sight */
 		KidHideClass(WC_BUILD_TOOLBAR);
 		KidHideClass(WC_BUS_STATION);
