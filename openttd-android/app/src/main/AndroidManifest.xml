@@ -16,7 +16,7 @@
             android:alwaysRetainTaskState="true"
             android:launchMode="singleTask"
             android:screenOrientation="sensorLandscape"
-            android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+            android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation|density|fontScale|colorMode|touchscreen|mcc|mnc"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
