@@ -1,0 +1,264 @@
+11-07 10:51:06.912  1747  2065 V installed: DexInv: --- END '/data/app/com.unicornclock.app-yQBRfzcX4MsD60omuih9SA==/base.apk' (success) ---
+11-07 10:51:06.931  2005  2033 V BackupManagerService: restoreAtInstall pkg=com.unicornclock.app token=1 restoreSet=0
+11-07 10:51:07.778  2005  2958 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+11-07 10:51:07.837  2294  2294 D ImsResolver: maybeAddedImsService, packageName: com.unicornclock.app
+11-07 10:51:08.175  2005  2022 I ActivityManager: Start proc 5058:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:51:09.213  2171  4789 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+11-07 10:51:09.237  2171  3850 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }
+11-07 10:51:09.281  2496  5098 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+11-07 10:51:09.282  2496  5020 I FontLog : Package com.unicornclock.app has no metadata [CONTEXT service_id=132 ]
+11-07 10:51:09.406  2496  5098 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://JU50IfS0P1cC3HOq0xzcNnFZL5-3b488gASuO62bITEEAePr-Xxfl3bERFzTkq3K2ukCb1msnJwDL9tM1P2Njw==@com.unicornclock.app/ was not found. Marking affiliation data as stale...
+11-07 10:51:09.425  5058  5113 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed_new": /data/user/0/com.unicornclock.app/app_webview/variations_seed_new (No such file or directory)
+11-07 10:51:09.425  5058  5113 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:51:09.513  2005  2022 I ActivityManager: Start proc 5122:com.android.chrome:sandboxed_process0/u0i0 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:51:11.017  1957  1968 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:51:11.017  1957  1968 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:51:11.093  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +2s805ms
+11-07 10:51:11.181  5058  5109 W cr_CrashFileManager: /data/user/0/com.unicornclock.app/cache/WebView/Crash Reports does not exist or is not a directory
+11-07 10:51:15.829  5058  5259 D ProfileInstaller: Installing profile for com.unicornclock.app
+11-07 10:51:35.035  2005  2954 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+11-07 10:51:35.036  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+11-07 10:51:35.036  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+11-07 10:51:35.036  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+11-07 10:51:35.036  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+11-07 10:51:35.036  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+11-07 10:51:39.842  2005  2872 I ActivityManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:51:39.851  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:51:39.851  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:51:39.851  1957  1974 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:51:39.851  1957  1974 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:51:41.385  2005  4326 I ActivityManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:51:42.917  2005  4326 I ActivityManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:51:46.087  2005  4326 I ActivityManager: START u0 {flg=0x30020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:51:46.496  2005  3720 D WindowManager: relayoutVisibleWindow: Window{becb62 u0 com.unicornclock.app/com.unicornclock.app.MainActivity EXITING} mAnimatingExit=true, mRemoveOnExit=false, mDestroying=false
+11-07 10:51:46.565  1957  1957 D SurfaceFlinger: duplicate layer name: changing com.unicornclock.app/com.unicornclock.app.MainActivity to com.unicornclock.app/com.unicornclock.app.MainActivity#1
+11-07 10:51:49.407  5058  5058 I UnicornClock: startLockTask owner=false permitted=false
+11-07 10:52:00.263  2005  2872 I ActivityManager: moveTaskToBack: TaskRecord{fbdfee1 #6 A=com.unicornclock.app U=0 StackId=1 sz=1}
+11-07 10:52:02.266  1957  1974 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#1
+11-07 10:52:02.266  1957  1974 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#1
+11-07 10:52:03.559  2005  3473 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+11-07 10:52:23.828  2005  2017 I ActivityManager: Force stopping com.unicornclock.app appid=10086 user=0: from pid 6080
+11-07 10:52:23.829  2005  2017 I ActivityManager: Killing 5058:com.unicornclock.app/u0a86 (adj 0): stop com.unicornclock.app
+11-07 10:52:23.841  2005  2017 W ActivityManager: Force removing ActivityRecord{bd24a7a u0 com.unicornclock.app/.MainActivity t6}: app died, no saved state
+11-07 10:52:26.206  2005  2925 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+11-07 10:52:26.260  2005  2022 I ActivityManager: Start proc 6097:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:52:26.918  6097  6118 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:52:26.940  2005  2022 I ActivityManager: Start proc 6122:com.android.chrome:sandboxed_process0/u0i1 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:52:27.336  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s114ms
+11-07 10:52:27.531  1957  1968 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:52:27.531  1957  1968 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:52:27.536  6097  6116 W cr_CrashFileManager: /data/user/0/com.unicornclock.app/cache/WebView/Crash Reports does not exist or is not a directory
+11-07 10:52:33.066  6097  6179 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:52:49.217  2005  3473 I ActivityManager: Force stopping com.unicornclock.app appid=10086 user=0: from pid 6244
+11-07 10:52:49.218  2005  3473 I ActivityManager: Killing 6097:com.unicornclock.app/u0a86 (adj 0): stop com.unicornclock.app
+11-07 10:52:49.227  2005  3473 W ActivityManager: Force removing ActivityRecord{b7c0c48 u0 com.unicornclock.app/.MainActivity t7}: app died, no saved state
+11-07 10:52:49.266  2005  2077 W InputDispatcher: channel '9d892c6 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:52:49.266  2005  2077 E InputDispatcher: channel '9d892c6 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:52:49.302  2005  3473 W InputDispatcher: Attempted to unregister already unregistered input channel '9d892c6 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:52:49.480  2005  2393 W ActivityManager: Service done with onDestroy, but not inDestroying: ServiceRecord{ba74ac0 u0 com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0}, app=ProcessRecord{d6a2ee6 0:com.android.chrome:sandboxed_process0/u0a86i1}
+11-07 10:52:51.454  2005  2872 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 2000
+11-07 10:52:51.495  2005  2022 I ActivityManager: Start proc 6257:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:52:52.015  6257  6276 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:52:52.040  2005  2022 I ActivityManager: Start proc 6280:com.android.chrome:sandboxed_process0/u0i2 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:52:52.523  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s31ms
+11-07 10:52:52.668  6257  6274 W cr_CrashFileManager: /data/user/0/com.unicornclock.app/cache/WebView/Crash Reports does not exist or is not a directory
+11-07 10:52:52.685  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:52:52.685  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:52:57.758  6257  6355 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:53:32.204  2005  2444 I ActivityManager: moveTaskToBack: TaskRecord{942b248 #8 A=com.unicornclock.app U=0 StackId=3 sz=1}
+11-07 10:53:33.323  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:53:33.323  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:53:33.328  1957  1974 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:53:33.328  1957  1974 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:53:41.853  2005  3848 I ActivityManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:53:51.792  2005  2167 W DevicePolicyManager: Trying to set ro.device_owner, but it has already been set?
+11-07 10:53:51.792  2005  2167 I DevicePolicyManager: Enabled the following restrictions by default: {no_add_managed_profile}
+11-07 10:53:51.831  2005  2167 I DevicePolicyManager: Device owner set: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} on user 0
+11-07 10:53:51.964  2005  2016 W ActivityManager: Ignoring request to force stop protected package com.unicornclock.app u0
+11-07 10:53:53.981  2005  3848 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+11-07 10:53:54.809  6257  6257 I UnicornClock: device owner: lock task permitted=true
+11-07 10:53:54.838  2005  3848 I PackageManager: Adding persistent preferred activity ComponentInfo{com.unicornclock.app/com.unicornclock.app.Home} for user 0:
+11-07 10:53:54.848  6257  6257 I UnicornClock: startLockTask owner=true permitted=true
+11-07 10:54:04.975  2171  6575 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.unicornclock.app flg=0x45000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+11-07 10:54:05.014  2294  2294 D ImsResolver: maybeAddedImsService, packageName: com.unicornclock.app
+11-07 10:54:15.293  2005  2077 I ActivityManager: START u0 {act=android.intent.action.MAIN cat=[android.intent.category.HOME] flg=0x10200000 cmp=com.unicornclock.app/.Home (has extras)} from uid 1000
+11-07 10:54:18.992  2005  3501 I DevicePolicyManager: Device owner removed: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+11-07 10:54:19.072  2005  2005 I DevicePolicyManager: Device admin ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} removed from user 0
+11-07 10:54:23.008  2005  2746 I ActivityManager: Force stopping com.unicornclock.app appid=10086 user=0: from pid 6730
+11-07 10:54:23.008  2005  2746 I ActivityManager: Killing 6257:com.unicornclock.app/u0a86 (adj 0): stop com.unicornclock.app
+11-07 10:54:23.016  2005  2746 W ActivityManager: Force removing ActivityRecord{833658a u0 com.unicornclock.app/.MainActivity t8}: app died, no saved state
+11-07 10:54:23.155  2005  3113 W ActivityManager: Service done with onDestroy, but not inDestroying: ServiceRecord{3d63342 u0 com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0}, app=ProcessRecord{eea262c 0:com.android.chrome:sandboxed_process0/u0a86i2}
+11-07 10:54:23.225  2005  2746 W ShortcutService: Cached launcher ComponentInfo{com.unicornclock.app/com.unicornclock.app.Home} no longer exists
+11-07 10:54:25.172  2005  3839 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+11-07 10:54:25.194  2005  2022 I ActivityManager: Start proc 6743:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:54:25.657  6743  6763 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:54:25.676  2005  2022 I ActivityManager: Start proc 6767:com.android.chrome:sandboxed_process0/u0i3 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:54:26.131  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +949ms
+11-07 10:54:26.239  1957  2594 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:54:26.240  1957  2594 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:54:26.247  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: Surface(name=9c5bc23 Splash Screen com.unicornclock.app)/@0xe95cc5b - animation-leash#0
+11-07 10:54:26.247  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: Surface(name=9c5bc23 Splash Screen com.unicornclock.app)/@0xe95cc5b - animation-leash#0
+11-07 10:54:28.920  2171  6667 I Fitness : OnPackageChangedOperation got intent: Intent { act=android.intent.action.PACKAGE_CHANGED dat=package:com.unicornclock.app flg=0x45000010 cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) } [CONTEXT service_id=17 ]
+11-07 10:54:29.033  2294  2294 D ImsResolver: maybeAddedImsService, packageName: com.unicornclock.app
+11-07 10:54:31.478  6743  6841 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:55:30.530  2005  2020 W BroadcastQueue: Permission Denial: broadcasting Intent { act=android.intent.action.USER_PRESENT flg=0x24200010 } from com.android.systemui (pid=2185, uid=10032) requires com.unicornclock.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION due to registered receiver BroadcastFilter{ad68a62 u0 ReceiverList{f6352d 6743 com.unicornclock.app/10086/u0 remote:3eff044}}
+11-07 10:55:34.031  2005  3501 W ActivityManager: Scheduling restart of crashed service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0 in 1000ms
+11-07 10:55:34.081  6743  6743 W UnicornClock: renderer gone, crashed=true
+11-07 10:55:34.204  2005  2022 I ActivityManager: Start proc 7132:com.android.chrome:sandboxed_process1/u0i4 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService1
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: Process: com.unicornclock.app, PID: 6743
+11-07 10:55:57.717  6743  6743 E UnicornClock: crash 1 in 10 min, restarting
+11-07 10:55:57.717  6743  6743 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:55:57.775  2005  2077 W InputDispatcher: channel '5dce5 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:55:57.775  2005  2077 E InputDispatcher: channel '5dce5 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:55:57.778  2005  3330 I ActivityManager: Process com.unicornclock.app (pid 6743) has died: fore TOP 
+11-07 10:55:57.782  2005  3330 W ActivityManager: Force removing ActivityRecord{63acc8f u0 com.unicornclock.app/.MainActivity t9}: app died, no saved state
+11-07 10:55:57.782  2005  2958 I WindowManager: WIN DEATH: Window{5dce5 u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+11-07 10:55:57.782  2005  2958 W InputDispatcher: Attempted to unregister already unregistered input channel '5dce5 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:55:57.798  1957  1968 W SurfaceFlinger: Attempting to destroy on removed layer: AppWindowToken{1860325 token=Token{6f6db1c ActivityRecord{63acc8f u0 com.unicornclock.app/.MainActivity t9}}}#0
+11-07 10:55:59.711  2005  2073 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10086
+11-07 10:55:59.921  2005  2022 I ActivityManager: Start proc 7223:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:56:00.469  7223  7243 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:56:00.489  2005  2022 I ActivityManager: Start proc 7246:com.android.chrome:sandboxed_process0/u0i5 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:56:00.942  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s4ms
+11-07 10:56:06.166  7223  7299 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:56:10.699  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:56:10.699  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:56:10.706  1957  2076 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:56:10.706  1957  2076 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:56:10.712  1957  2407 W SurfaceFlinger: Attempting to set client state on removed layer: Surface(name=AppWindowToken{67ab213 token=Token{6125902 ActivityRecord{7db9a4d u0 com.unicornclock.app/.MainActivity t10}}})/@0x1b8e980 - animation-leash#0
+11-07 10:56:10.712  1957  2407 W SurfaceFlinger: Attempting to destroy on removed layer: Surface(name=AppWindowToken{67ab213 token=Token{6125902 ActivityRecord{7db9a4d u0 com.unicornclock.app/.MainActivity t10}}})/@0x1b8e980 - animation-leash#0
+11-07 10:56:11.020  2005  2077 W InputDispatcher: channel '8344910 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:56:11.022  2005  2077 E InputDispatcher: channel '8344910 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:56:11.024  2005  2958 I WindowManager: WIN DEATH: Window{8344910 u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+11-07 10:56:11.024  2005  2958 W InputDispatcher: Attempted to unregister already unregistered input channel '8344910 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:56:11.037  2005  4266 I ActivityManager: Process com.unicornclock.app (pid 7223) has died: prev LAST
+11-07 10:56:11.103  2005  4266 W ActivityManager: Exception when unbinding service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:56:15.264  2005  2073 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10086
+11-07 10:56:15.281  2005  2022 I ActivityManager: Start proc 7339:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:56:15.832  7339  7359 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:56:15.851  2005  2022 I ActivityManager: Start proc 7363:com.android.chrome:sandboxed_process0/u0i6 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:56:16.299  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +929ms
+11-07 10:56:16.425  1957  1974 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:56:16.425  1957  1974 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:56:21.174  7339  7428 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:56:28.032  2005  2020 I ActivityManager: Force stopping com.unicornclock.app appid=10086 user=-1: installPackageLI
+11-07 10:56:28.032  2005  2020 I ActivityManager: Killing 7339:com.unicornclock.app/u0a86 (adj 0): stop com.unicornclock.app
+11-07 10:56:28.041  2005  2020 W ActivityManager: Force removing ActivityRecord{7db9a4d u0 com.unicornclock.app/.MainActivity t10}: app died, no saved state
+11-07 10:56:28.306  3596  3840 E IconLoader: Unexpected null component name or activity info: ComponentInfo{com.unicornclock.app/com.unicornclock.app.MainActivity}, null
+11-07 10:56:28.365  2005  2033 I PackageManager: Update package com.unicornclock.app code path from /data/app/com.unicornclock.app-yQBRfzcX4MsD60omuih9SA== to /data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==; Retain data and using new
+11-07 10:56:28.365  2005  2033 I PackageManager: Update package com.unicornclock.app resource path from /data/app/com.unicornclock.app-yQBRfzcX4MsD60omuih9SA== to /data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==; Retain data and using new
+11-07 10:56:28.506  2005  2033 I PackageManager.DexOptimizer: Running dexopt (dexoptNeeded=1) on: /data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==/base.apk pkg=com.unicornclock.app isa=x86_64 dexoptFlags=boot_complete,profile_guided,public,enable_hidden_api_checks targetFilter=speed-profile oatDir=/data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==/oat classLoaderContext=PCL[]
+11-07 10:56:28.506  1747  2065 V installed: DexInv: --- BEGIN '/data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==/base.apk' ---
+11-07 10:56:28.516  7462  7462 I dex2oat : /system/bin/dex2oat --input-vdex-fd=-1 --output-vdex-fd=10 --compiler-filter=speed-profile --classpath-dir=/data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw== --class-loader-context=PCL[] --generate-mini-debug-info --compact-dex-level=none --compilation-reason=install
+11-07 10:56:30.888  1747  2065 V installed: DexInv: --- END '/data/app/com.unicornclock.app-Yh-J_HT-u1BTOT_wDtdIXw==/base.apk' (success) ---
+11-07 10:56:30.911  2005  2033 I ActivityManager: Force stopping com.unicornclock.app appid=10086 user=0: pkg removed
+11-07 10:56:30.919  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+11-07 10:56:30.919  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+11-07 10:56:30.919  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+11-07 10:56:30.919  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+11-07 10:56:30.945  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.android.musicfx/.Compatibility$Receiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.apps.photos/.account.full.FetchAccountPropertiesAppUpgradeBroadcastReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.apps.photos/.account.full.SyncAccountsForLoginBroadcastReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.apps.photos/.experiments.phenotype.full.PhenotypeAppUpgradeBroadcastReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.apps.photos/.notificationchannels.AppUpdateBroadcastReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+11-07 10:56:30.968  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+11-07 10:56:30.969  2005  2020 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.unicornclock.app flg=0x4000010 (has extras) } to com.google.android.ims/.receivers.RcsAutoStartReceiver
+11-07 10:56:30.981  2005  2022 I ActivityManager: Start proc 7484:com.unicornclock.app/u0a86 for broadcast com.unicornclock.app/.BootReceiver
+11-07 10:56:31.079  2294  2294 D ImsResolver: maybeAddedImsService, packageName: com.unicornclock.app
+11-07 10:56:31.137  2496  7537 I ChromeSync: [Sync,SyncIntentOperation] Handling the intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.unicornclock.app flg=0x4000010 cmp=com.google.android.gms/.chimera.GmsIntentOperationService (has extras) }.
+11-07 10:56:31.222  2005  2872 I ActivityManager: START u0 {flg=0x10020000 cmp=com.unicornclock.app/.MainActivity} from uid 10086
+11-07 10:56:31.228  2496  7500 I FontLog : Package com.unicornclock.app has no metadata [CONTEXT service_id=132 ]
+11-07 10:56:31.397  2496  7537 I ChromeSync: [Persistence,AffiliationManager] One of affiliation or grouping data for android://JU50IfS0P1cC3HOq0xzcNnFZL5-3b488gASuO62bITEEAePr-Xxfl3bERFzTkq3K2ukCb1msnJwDL9tM1P2Njw==@com.unicornclock.app/ was not found. Marking affiliation data as stale...
+11-07 10:56:32.222  7484  7570 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:56:32.266  2005  2022 I ActivityManager: Start proc 7578:com.android.chrome:sandboxed_process0/u0i7 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:56:32.948  1957  2076 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:56:32.949  1957  2076 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:56:32.950  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s488ms
+11-07 10:56:36.732  7484  7642 D ProfileInstaller: Installing profile for com.unicornclock.app
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: Process: com.unicornclock.app, PID: 7484
+11-07 10:56:46.516  7484  7484 E UnicornClock: crash 2 in 10 min, restarting
+11-07 10:56:46.516  7484  7484 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:46.566  2005  2077 W InputDispatcher: channel '3d9c27f com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:56:46.566  2005  2077 E InputDispatcher: channel '3d9c27f com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:56:46.572  2005  2444 I WindowManager: WIN DEATH: Window{3d9c27f u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+11-07 10:56:46.572  2005  2872 I ActivityManager: Process com.unicornclock.app (pid 7484) has died: fore TOP 
+11-07 10:56:46.575  2005  2444 W InputDispatcher: Attempted to unregister already unregistered input channel '3d9c27f com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:56:46.578  2005  2872 W ActivityManager: Force removing ActivityRecord{d248288 u0 com.unicornclock.app/.MainActivity t11}: app died, no saved state
+11-07 10:56:46.586  1957  2594 W SurfaceFlinger: Attempting to destroy on removed layer: AppWindowToken{86b7046 token=Token{5813421 ActivityRecord{d248288 u0 com.unicornclock.app/.MainActivity t11}}}#0
+11-07 10:56:48.509  2005  2073 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10086
+11-07 10:56:48.598  2005  2022 I ActivityManager: Start proc 7685:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:56:49.216  7685  7706 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:56:49.240  2005  2022 I ActivityManager: Start proc 7710:com.android.chrome:sandboxed_process0/u0i8 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:56:49.785  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s204ms
+11-07 10:56:54.573  7685  7764 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: Process: com.unicornclock.app, PID: 7685
+11-07 10:56:57.594  7685  7685 E UnicornClock: crash 3 in 10 min, restarting
+11-07 10:56:57.594  7685  7685 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:57.624  2005  2077 W InputDispatcher: channel 'ea0cb54 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:56:57.625  2005  2077 E InputDispatcher: channel 'ea0cb54 com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:56:57.635  2005  4326 I WindowManager: WIN DEATH: Window{ea0cb54 u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+11-07 10:56:57.635  2005  4326 W InputDispatcher: Attempted to unregister already unregistered input channel 'ea0cb54 com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:56:57.635  2005  2956 W ActivityManager: Scheduling restart of crashed service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0 in 1000ms
+11-07 10:56:57.643  2005  2746 I ActivityManager: Process com.unicornclock.app (pid 7685) has died: fore TOP 
+11-07 10:56:57.645  2005  2746 W ActivityManager: Force removing ActivityRecord{d9d2d0b u0 com.unicornclock.app/.MainActivity t12}: app died, no saved state
+11-07 10:56:57.651  1957  2594 W SurfaceFlinger: Attempting to destroy on removed layer: AppWindowToken{d622e01 token=Token{127b7e8 ActivityRecord{d9d2d0b u0 com.unicornclock.app/.MainActivity t12}}}#0
+11-07 10:56:59.585  2005  2073 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity (has extras)} from uid 10086
+11-07 10:56:59.749  2005  2022 I ActivityManager: Start proc 7782:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:57:00.353  7782  7803 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:57:00.372  2005  2022 I ActivityManager: Start proc 7806:com.android.chrome:sandboxed_process0/u0i9 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:57:00.768  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s83ms
+11-07 10:57:05.883  7782  7861 D ProfileInstaller: Skipping profile installation for com.unicornclock.app
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: Process: com.unicornclock.app, PID: 7782
+11-07 10:57:08.691  7782  7782 E UnicornClock: crash 4 in 10 min, not restarting
+11-07 10:57:08.691  7782  7782 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:57:08.735  2005  2746 W ActivityManager:   Force finishing activity com.unicornclock.app/.MainActivity
+11-07 10:57:08.816  2005  2077 W InputDispatcher: channel '908982a com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Consumer closed input channel or an error occurred.  events=0x9
+11-07 10:57:08.816  2005  2077 E InputDispatcher: channel '908982a com.unicornclock.app/com.unicornclock.app.MainActivity (server)' ~ Channel is unrecoverably broken and will be disposed!
+11-07 10:57:08.822  2005  4326 I WindowManager: WIN DEATH: Window{908982a u0 com.unicornclock.app/com.unicornclock.app.MainActivity}
+11-07 10:57:08.822  2005  4326 W InputDispatcher: Attempted to unregister already unregistered input channel '908982a com.unicornclock.app/com.unicornclock.app.MainActivity (server)'
+11-07 10:57:08.823  2005  3330 I ActivityManager: Process com.unicornclock.app (pid 7782) has died: vis  +99TOP 
+11-07 10:57:08.843  1957  1968 W SurfaceFlinger: Attempting to set client state on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:57:08.843  1957  1968 W SurfaceFlinger: Attempting to destroy on removed layer: com.unicornclock.app/com.unicornclock.app.MainActivity#0
+11-07 10:57:30.740  2005  2747 I ActivityManager: START u0 {flg=0x10000000 cmp=com.unicornclock.app/.MainActivity} from uid 0
+11-07 10:57:30.780  2005  2022 I ActivityManager: Start proc 7916:com.unicornclock.app/u0a86 for activity com.unicornclock.app/.MainActivity
+11-07 10:57:31.406  7916  7945 E cr_VariationsUtils: Failed reading seed file "/data/user/0/com.unicornclock.app/app_webview/variations_seed": /data/user/0/com.unicornclock.app/app_webview/variations_seed (No such file or directory)
+11-07 10:57:31.427  2005  2022 I ActivityManager: Start proc 7950:com.android.chrome:sandboxed_process0/u0i10 for webview_service com.unicornclock.app/org.chromium.content.app.SandboxedProcessService0
+11-07 10:57:31.963  2005  2028 I ActivityManager: Displayed com.unicornclock.app/.MainActivity: +1s62ms
+11-07 10:57:31.994  1957  1968 W SurfaceFlinger: Attempting to set client state on removed layer: Splash Screen com.unicornclock.app#0
+11-07 10:57:31.994  1957  1968 W SurfaceFlinger: Attempting to destroy on removed layer: Splash Screen com.unicornclock.app#0

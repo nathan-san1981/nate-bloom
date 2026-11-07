@@ -1,0 +1,119 @@
+--------- beginning of main
+--------- beginning of system
+11-07 10:51:10.137  5058  5058 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:51:13.818  5058  5058 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:51:13.880  5058  5120 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:51:49.407  5058  5058 I UnicornClock: startLockTask owner=false permitted=false
+11-07 10:52:27.098  6097  6097 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:52:27.233  6097  6097 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:52:27.243  6097  6120 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:52:52.220  6257  6257 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:52:52.390  6257  6257 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:52:52.411  6257  6278 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:53:51.792  2005  2167 W DevicePolicyManager: Trying to set ro.device_owner, but it has already been set?
+11-07 10:53:51.792  2005  2167 I DevicePolicyManager: Enabled the following restrictions by default: {no_add_managed_profile}
+11-07 10:53:51.831  2005  2167 I DevicePolicyManager: Device owner set: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} on user 0
+11-07 10:53:54.809  6257  6257 I UnicornClock: device owner: lock task permitted=true
+11-07 10:53:54.848  6257  6257 I UnicornClock: startLockTask owner=true permitted=true
+11-07 10:54:18.992  2005  3501 I DevicePolicyManager: Device owner removed: ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver}
+11-07 10:54:19.072  2005  2005 I DevicePolicyManager: Device admin ComponentInfo{com.unicornclock.app/com.unicornclock.app.AdminReceiver} removed from user 0
+11-07 10:54:25.839  6743  6743 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:54:26.018  6743  6743 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:54:26.025  6743  6765 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+--------- beginning of crash
+11-07 10:55:34.072  6743  6791 E chromium: [ERROR:aw_browser_terminator.cc(150)] Renderer process (6767) crash detected (code 5).
+11-07 10:55:34.081  6743  6743 W UnicornClock: renderer gone, crashed=true
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: FATAL EXCEPTION: main
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: Process: com.unicornclock.app, PID: 6743
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:55:57.710  6743  6743 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:55:57.717  6743  6743 E UnicornClock: crash 1 in 10 min, restarting
+11-07 10:55:57.717  6743  6743 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:55:57.717  6743  6743 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:00.612  7223  7223 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:56:00.746  7223  7223 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:00.770  7223  7245 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:15.961  7339  7339 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:56:16.084  7339  7339 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:16.092  7339  7361 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:32.486  7484  7484 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:56:32.584  7484  7484 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:32.610  7484  7576 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: FATAL EXCEPTION: main
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: Process: com.unicornclock.app, PID: 7484
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:46.506  7484  7484 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:46.516  7484  7484 E UnicornClock: crash 2 in 10 min, restarting
+11-07 10:56:46.516  7484  7484 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:46.516  7484  7484 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:49.378  7685  7685 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:56:49.520  7685  7685 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:49.560  7685  7708 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: FATAL EXCEPTION: main
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: Process: com.unicornclock.app, PID: 7685
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:57.583  7685  7685 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:56:57.594  7685  7685 E UnicornClock: crash 3 in 10 min, restarting
+11-07 10:56:57.594  7685  7685 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:56:57.594  7685  7685 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:57:00.430  7782  7782 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:57:00.635  7782  7782 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:57:00.647  7782  7805 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: FATAL EXCEPTION: main
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: Process: com.unicornclock.app, PID: 7782
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: android.app.RemoteServiceException: shell-induced crash
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:57:08.678  7782  7782 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:57:08.691  7782  7782 E UnicornClock: crash 4 in 10 min, not restarting
+11-07 10:57:08.691  7782  7782 E UnicornClock: android.app.RemoteServiceException: shell-induced crash
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1737)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.os.Handler.dispatchMessage(Handler.java:106)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.os.Looper.loop(Looper.java:193)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at android.app.ActivityThread.main(ActivityThread.java:6669)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at java.lang.reflect.Method.invoke(Native Method)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+11-07 10:57:08.691  7782  7782 E UnicornClock: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+11-07 10:57:31.530  7916  7916 I TextToSpeech: Sucessfully bound to com.google.android.tts
+11-07 10:57:31.699  7916  7916 I TextToSpeech: Connected to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
+11-07 10:57:31.716  7916  7947 I TextToSpeech: Set up connection to ComponentInfo{com.google.android.tts/com.google.android.tts.service.GoogleTTSService}
