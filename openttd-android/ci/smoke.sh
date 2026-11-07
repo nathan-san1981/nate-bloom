@@ -33,7 +33,7 @@ if [ "$PKG" = "com.unicornclock.railways" ]; then
   timeout 60 adb shell input tap 58 260; sleep 4; shot kid-bus
   timeout 60 adb shell input tap 164 362; sleep 25; shot kid-bus-moving; alive kid-bus
   # Home: saves her world and goes back
-  timeout 60 adb shell input tap 112 532; sleep 6; alive kid-home
+  timeout 60 adb shell input tap 112 531; sleep 6; alive kid-home
   timeout 30 adb shell am start -n $ACT; sleep 20; shot kid-reopened; alive kid-reopened
   timeout 60 adb shell run-as $PKG ls -la files/data/openttd/save > "$OUT/saves.txt" 2>&1 || true
 fi
