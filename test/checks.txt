@@ -1,0 +1,2 @@
+installed: package:org.natebloom.openttd
+package:org.natebloom.pocketpet
