@@ -23,6 +23,7 @@
 #include "zoom_func.h"
 #include "core/backup_type.hpp"
 #include "station_base.h"
+#include "town.h"
 #include "roadstop_base.h"
 #include "depot_base.h"
 #include "engine_base.h"
@@ -445,4 +446,10 @@ void ShowKidToolbar()
 	}
 	CloseWindowByClass(WC_KID_TOOLBAR);
 	new KidToolbarWindow(_kid_toolbar_desc);
+	/* start looking at her things (her first stop or station), or at the town if she hasn't built any yet,
+	 * rather than wherever the map happens to open (often a lake) */
+	TileIndex look = INVALID_TILE;
+	for (const Station *st : Station::Iterate()) if (st->owner == _local_company) { look = st->xy; break; }
+	if (look == INVALID_TILE) for (const Town *t : Town::Iterate()) { look = t->xy; break; }
+	if (look != INVALID_TILE) ScrollMainWindowToTile(look, true);
 }
