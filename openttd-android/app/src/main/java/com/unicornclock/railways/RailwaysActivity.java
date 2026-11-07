@@ -55,6 +55,8 @@ public class RailwaysActivity extends SDLActivity {
         if (KID) {
             try { android.system.Os.setenv("UNICORN_KID", "1", true); } catch (Exception e) { Log.e(TAG, "setenv", e); }
         }
+        // lay the window out under the system bars from the start, so the first surface is already full size
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN | android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         immersive(); // before the game's surface exists, so it starts at full size
         try {
             unpackAssets();
