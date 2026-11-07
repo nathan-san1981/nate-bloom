@@ -228,7 +228,7 @@ struct KidButton { WidgetID id; Colours colour; SpriteID sprite; const char *lab
 static const KidButton _kid_buttons[] = {
 	{KW_ROAD, COLOUR_PINK, SPR_IMG_AUTOROAD, "Road"},          {KW_RAIL, COLOUR_PINK, SPR_IMG_AUTORAIL, "Track"},
 	{KW_BUSSTOP, COLOUR_MAUVE, SPR_IMG_BUS_STATION, "Bus stop"}, {KW_STATION, COLOUR_MAUVE, SPR_IMG_RAIL_STATION, "Station"},
-	{KW_BUS, COLOUR_LIGHT_BLUE, SPR_IMG_TRUCKLIST, "New bus"},  {KW_TRAIN, COLOUR_LIGHT_BLUE, SPR_IMG_TRAINLIST, "New train"},
+	{KW_BUS, COLOUR_LIGHT_BLUE, SPR_IMG_TRUCKLIST, "Bus!"},  {KW_TRAIN, COLOUR_LIGHT_BLUE, SPR_IMG_TRAINLIST, "Train!"},
 	{KW_UNDO, COLOUR_YELLOW, SPR_BULLDOZER_SW, "Oops"},         {KW_FAST, COLOUR_GREEN, SPR_IMG_FASTFORWARD, "Fast"},
 	{KW_ZOOM_IN, COLOUR_WHITE, SPR_IMG_ZOOMIN, "Closer"},       {KW_ZOOM_OUT, COLOUR_WHITE, SPR_IMG_ZOOMOUT, "Farther"},
 	{KW_HOME, COLOUR_PURPLE, SPR_IMG_TOWN, "Go home"},
@@ -281,6 +281,7 @@ static void KidRoundRect(int l, int t, int r, int b, int k, PixelColour c)
 
 struct KidToolbarWindow : Window {
 	WidgetID tool = INVALID_WIDGET; ///< the kid window's own tap tool (bus stop, station, undo)
+	uint colour_ticks = 0;
 
 	KidToolbarWindow(WindowDesc &desc) : Window(desc)
 	{
@@ -415,6 +416,10 @@ struct KidToolbarWindow : Window {
 
 	void OnRealtimeTick([[maybe_unused]] uint delta_ms) override
 	{
+		/* her company is pink (asked again until it sticks: the first ask can come before her company is ready) */
+		if (++this->colour_ticks % 64 == 0 && Company::IsValidID(_local_company) && Company::Get(_local_company)->colour != COLOUR_PINK) {
+			Command<CMD_SET_COMPANY_COLOUR>::Post(LS_DEFAULT, true, COLOUR_PINK);
+		}
 		/* keep the stock pickers that open with a tool out of sight */
 		KidHideClass(WC_BUILD_TOOLBAR);
 		KidHideClass(WC_BUS_STATION);
