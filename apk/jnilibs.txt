@@ -1,0 +1,16 @@
+openttd-android/app/src/main/jniLibs:
+arm64-v8a
+armeabi-v7a
+x86_64
+
+openttd-android/app/src/main/jniLibs/arm64-v8a:
+libSDL2.so
+libmain.so
+
+openttd-android/app/src/main/jniLibs/armeabi-v7a:
+libSDL2.so
+libmain.so
+
+openttd-android/app/src/main/jniLibs/x86_64:
+libSDL2.so
+libmain.so

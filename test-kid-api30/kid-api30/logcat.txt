@@ -1,0 +1,296 @@
+11-07 11:01:33.530  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:33.628  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:33.727  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:33.892  1979  2653 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:34.487   285   285 I Zygote  : Process 1352 exited due to signal 9 (Killed)
+11-07 11:01:34.704  3363  3548 I PeerConnectionFactory: [000:038] [3548] onSignalingThreadReady
+11-07 11:01:34.731   285   285 I Zygote  : Process 1826 exited due to signal 9 (Killed)
+11-07 11:01:34.735   286   286 I Zygote  : Process 1672 exited due to signal 9 (Killed)
+11-07 11:01:34.867   285   285 I Zygote  : Process 1873 exited due to signal 9 (Killed)
+11-07 11:01:34.921   285   285 I Zygote  : Process 1953 exited due to signal 9 (Killed)
+11-07 11:01:34.985   285   285 I Zygote  : Process 2453 exited due to signal 9 (Killed)
+11-07 11:01:35.079   285   285 I Zygote  : Process 1973 exited due to signal 9 (Killed)
+11-07 11:01:35.255   285   285 I Zygote  : Process 1998 exited due to signal 9 (Killed)
+11-07 11:01:35.474   285   285 I Zygote  : Process 2539 exited due to signal 9 (Killed)
+11-07 11:01:36.128     0     0 I init    : Sending signal 9 to service 'apexd' (pid 216) process group...
+11-07 11:01:36.039   285   285 I Zygote  : Process 2965 exited due to signal 9 (Killed)
+11-07 11:01:36.316  3467  3467 W dex2oat32: Compilation of void org.libsdl.app.SDLActivity.nativeAddTouch(int, java.lang.String) took 158.156ms
+11-07 11:01:36.474   285   285 I Zygote  : Process 3617 exited due to signal 9 (Killed)
+11-07 11:01:36.547  3499  3611 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:36.547  3499  3611 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:37.094  3846  3846 I UnicornRailways: unpacked game files in 71 ms
+11-07 11:01:37.096  3846  3846 V SDL     : Device: generic_x86_64_arm64
+11-07 11:01:37.096  3846  3846 V SDL     : Model: sdk_gphone_x86_64
+11-07 11:01:37.096  3846  3846 V SDL     : onCreate()
+11-07 11:01:37.119  3846  3846 V SDL     : nativeSetupJNI()
+11-07 11:01:37.119  3846  3846 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:01:37.119  3846  3846 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:01:37.170  3846  3846 V SDL     : onStart()
+11-07 11:01:37.170  3846  3846 V SDL     : onResume()
+11-07 11:01:37.288  3846  3846 V SDL     : surfaceCreated()
+11-07 11:01:37.288  3846  3846 V SDL     : surfaceChanged()
+11-07 11:01:37.288  3846  3846 V SDL     : Window size: 1024x528
+11-07 11:01:37.288  3846  3846 V SDL     : Device size: 1024x600
+11-07 11:01:37.303  3846  3876 V SDL     : Running main function SDL_main from library /data/app/~~85omvKpUUtwCP5pvIXYXUQ==/com.unicornclock.railways-lwWTv0s3tKv79_spkmtMMw==/lib/x86_64/libmain.so
+11-07 11:01:37.303  3846  3876 V SDL     : nativeRunMain()
+11-07 11:01:37.528  3846  3876 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:01:37.557  3846  3876 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:37.557  3846  3877 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:37.797  3846  3846 V SDL     : surfaceChanged()
+11-07 11:01:37.797  3846  3846 V SDL     : Window size: 1024x600
+11-07 11:01:37.797  3846  3846 V SDL     : Device size: 1024x600
+11-07 11:01:37.820  3846  3846 V SDL     : onWindowFocusChanged(): true
+11-07 11:01:37.820  3846  3846 V SDL     : nativeFocusChanged()
+11-07 11:01:38.233  3846  3877 I OpenTTD : [2026-11-07 11:01:38] dbg: [misc:0] Cryptographically-strong random generator unavailable; using fallback
+11-07 11:01:38.710  3968  3999 I Bugle   : bugle_enable_primes_crash_metrics: true
+11-07 11:01:38.903  3765  3900 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:38.903  3765  3900 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:39.197   286   286 I Zygote  : Process 2849 exited due to signal 9 (Killed)
+11-07 11:01:39.511  3968  4014 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:39.511  3968  4014 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:40.118  1569  1569 I UrgentSignalsProcessor: UrgentSignalsProcessor.flagUpdated():96 Received flagsUpdated for urgent signal
+11-07 11:01:40.120  1569  1569 I UrgentSignalsProcessor: UrgentSignalsProcessor.processSignals():115 Received signal: id: 576379183
+11-07 11:01:40.120  1569  1569 I UrgentSignalsProcessor: UrgentSignalsProcessor.processSignals():124 Signal target module: 1
+11-07 11:01:40.120  1569  1569 I UrgentSignalsProcessor: UrgentSignalsProcessor.processSignals():124 Signal target module: 1
+11-07 11:01:40.587   285   285 I Zygote  : Process 3136 exited due to signal 9 (Killed)
+11-07 11:01:40.594   285   285 I Zygote  : Process 1465 exited due to signal 9 (Killed)
+11-07 11:01:40.640  3499  3623 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:01:40.842   285   285 I Zygote  : Process 3475 exited due to signal 9 (Killed)
+11-07 11:01:40.910  4219  4241 I GAv4    : Google Analytics 18.5.89 is starting up. To enable debug logging on a device run:
+11-07 11:01:41.018   285   285 I Zygote  : Process 3528 exited due to signal 9 (Killed)
+11-07 11:01:41.087   495   551 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/com.android.email.job.BootCompletedJob$BootCompletedJobService in 1000ms for connection
+11-07 11:01:41.087   495   551 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/com.android.email.job.UpgradeJob$UpgradeJobService in 10999ms for connection
+11-07 11:01:41.087   495   551 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/.job.GmailInitialSetupJob$GmailInitialSetupJobService in 20999ms for connection
+11-07 11:01:41.087   495   551 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/com.android.email.job.MigrateDaJob$MigrateDaJobService in 30999ms for connection
+11-07 11:01:41.233   285   285 I Zygote  : Process 2295 exited due to signal 9 (Killed)
+11-07 11:01:41.519  4058  4109 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:41.519  4058  4109 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:41.970   285   285 I Zygote  : Process 3564 exited due to signal 9 (Killed)
+11-07 11:01:42.105   285   285 I Zygote  : Process 3592 exited due to signal 9 (Killed)
+11-07 11:01:42.336   285   285 I Zygote  : Process 1433 exited due to signal 9 (Killed)
+11-07 11:01:42.685  4489  4489 I GAv4    : Google Analytics 201.7.02 is starting up. To enable debug logging on a device run:
+11-07 11:01:43.895   285   285 I Zygote  : Process 1179 exited due to signal 9 (Killed)
+11-07 11:01:43.896   285   285 I Zygote  : Process 2145 exited due to signal 9 (Killed)
+11-07 11:01:44.119   285   285 I Zygote  : Process 3664 exited due to signal 9 (Killed)
+11-07 11:01:44.150   285   285 I Zygote  : Process 3703 exited due to signal 9 (Killed)
+11-07 11:01:44.492  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:44.653  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:44.834  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:44.882  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:44.943  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:44.945  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:45.296   285   285 I Zygote  : Process 3041 exited due to signal 9 (Killed)
+11-07 11:01:45.833   285   285 I Zygote  : Process 3765 exited due to signal 9 (Killed)
+11-07 11:01:46.679   285   285 I Zygote  : Process 4016 exited due to signal 9 (Killed)
+11-07 11:01:46.717  1979  2397 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:46.982  4802  4895 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:46.982  4802  4895 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:47.076   286   286 I Zygote  : Process 2576 exited due to signal 9 (Killed)
+11-07 11:01:47.300  1979  2653 E HotwordSilentEnrollment: Non-fatal error creating GoogleHotwordData
+11-07 11:01:47.368  5021  5075 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:47.368  5021  5075 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:47.590   285   285 I Zygote  : Process 4058 exited due to signal 9 (Killed)
+11-07 11:01:47.726  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:47.750  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:47.973  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:47.993  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:48.406  1979  2552 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:48.408  5123  5155 W DynamiteModule: Local module descriptor class for com.google.android.gms.crash not found.
+11-07 11:01:48.410  5123  5155 I DynamiteModule: Considering local module com.google.android.gms.crash:0 and remote module com.google.android.gms.crash:215
+11-07 11:01:48.410  5123  5155 I DynamiteModule: Selected remote version of com.google.android.gms.crash, version >= 215
+11-07 11:01:48.410  5123  5155 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:01:48.438   285   285 I Zygote  : Process 4160 exited due to signal 9 (Killed)
+11-07 11:01:48.466  5123  5155 I FirebaseCrashApiImpl: FirebaseCrashApiImpl created by ClassLoader ax[DexPathList[[zip file "/data/user_de/0/com.google.android.gms/app_chimera/m/00000004/DynamiteModulesC.apk"],nativeLibraryDirectories=[/data/user_de/0/com.google.android.gms/app_chimera/m/00000004/n/x86_64, /data/user_de/0/com.google.android.gms/app_chimera/m/00000004/n/arm64-v8a, /system/lib64, /system_ext/lib64]]]
+11-07 11:01:48.466  5123  5155 I FirebaseCrash: FirebaseCrash reporting loaded - esr@58dba4d
+11-07 11:01:48.477  5123  5156 W DynamiteModule: Local module descriptor class for com.google.android.gms.crash not found.
+11-07 11:01:48.514  5123  5156 I FirebaseCrashApiImpl: FirebaseCrash reporting API initialized
+11-07 11:01:48.514  5123  5156 I FirebaseCrash: FirebaseCrash reporting initialized esr@58dba4d
+11-07 11:01:48.514  5123  5156 W FirebaseCrashAnalytics: Unable to log event, missing Google Analytics for Firebase library
+11-07 11:01:48.582   285   285 I Zygote  : Process 4219 exited due to signal 9 (Killed)
+11-07 11:01:48.586  5158  5183 W DynamiteModule: Local module descriptor class for com.google.android.gms.crash not found.
+11-07 11:01:48.587  5158  5183 I DynamiteModule: Considering local module com.google.android.gms.crash:0 and remote module com.google.android.gms.crash:215
+11-07 11:01:48.587  5158  5183 I DynamiteModule: Selected remote version of com.google.android.gms.crash, version >= 215
+11-07 11:01:48.587  5158  5183 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:01:48.608  5158  5183 I FirebaseCrashApiImpl: FirebaseCrashApiImpl created by ClassLoader ax[DexPathList[[zip file "/data/user_de/0/com.google.android.gms/app_chimera/m/00000004/DynamiteModulesC.apk"],nativeLibraryDirectories=[/data/user_de/0/com.google.android.gms/app_chimera/m/00000004/n/x86_64, /data/user_de/0/com.google.android.gms/app_chimera/m/00000004/n/arm64-v8a, /system/lib64, /system_ext/lib64]]]
+11-07 11:01:48.608  5158  5183 I FirebaseCrash: FirebaseCrash reporting loaded - cxy@f0bd5e4
+11-07 11:01:48.633  5158  5184 W DynamiteModule: Local module descriptor class for com.google.android.gms.crash not found.
+11-07 11:01:48.704   286   286 I Zygote  : Process 4393 exited due to signal 9 (Killed)
+11-07 11:01:48.712  5158  5184 I FirebaseCrashApiImpl: FirebaseCrash reporting API initialized
+11-07 11:01:48.713  5158  5184 I FirebaseCrash: FirebaseCrash reporting initialized cxy@f0bd5e4
+11-07 11:01:48.713  5158  5184 W FirebaseCrashAnalytics: Unable to log event, missing Google Analytics for Firebase library
+11-07 11:01:48.905  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:48.992  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:49.407   285   285 I Zygote  : Process 4426 exited due to signal 9 (Killed)
+11-07 11:01:49.941  5238  5272 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:01:49.941  5238  5272 I FA      : To enable faster debug mode event logging run:
+11-07 11:01:50.283   285   285 I Zygote  : Process 4557 exited due to signal 9 (Killed)
+11-07 11:01:51.651  1979  2552 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:51.867  1979  2408 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:52.173  5454  5482 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:01:52.216   285   285 I Zygote  : Process 4630 exited due to signal 9 (Killed)
+11-07 11:01:52.228  5433  5492 I GAv4    : Google Analytics 202.3.00 is starting up. To enable debug logging on a device run:
+11-07 11:01:52.651  1979  2552 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:52.930   285   285 I Zygote  : Process 4679 exited due to signal 9 (Killed)
+11-07 11:01:53.397  1149  1418 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:53.450  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:53.556  1149  1417 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:53.575  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:53.646  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:54.466  1979  2397 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:54.499  1149  4711 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:54.525  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:55.183  1979  2408 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:56.467  1979  2408 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:56.860  1979  2397 W PhenotypeToGsaConfigs: Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:01:58.905  5158  5665 I FirebaseCrash: Sending crashes
+11-07 11:02:03.180  5123  5669 I FirebaseCrash: Sending crashes
+11-07 11:02:03.859   285   285 I Zygote  : Process 4580 exited due to signal 9 (Killed)
+11-07 11:02:03.941  1149  2774 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:03.946  1149  2774 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:03.948  1149  1149 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:06.887   285   285 I Zygote  : Process 4998 exited due to signal 9 (Killed)
+11-07 11:02:07.254   286   286 I Zygote  : Process 3968 exited due to signal 9 (Killed)
+11-07 11:02:07.332   285   285 I Zygote  : Process 4450 exited due to signal 9 (Killed)
+11-07 11:02:07.431   285   285 I Zygote  : Process 1494 exited due to signal 9 (Killed)
+11-07 11:02:12.427   285   285 I Zygote  : Process 5238 exited due to signal 9 (Killed)
+11-07 11:02:12.821   285   285 I Zygote  : Process 2475 exited due to signal 9 (Killed)
+11-07 11:02:13.007  5758  5758 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:13.012  5758  5758 I AndroidRuntime: Using default boot image
+11-07 11:02:13.012  5758  5758 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:13.166  5758  5758 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:13.172  5758  5758 D AndroidRuntime: Shutting down VM
+11-07 11:02:15.773  5779  5779 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:15.774  5779  5779 I AndroidRuntime: Using default boot image
+11-07 11:02:15.774  5779  5779 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:15.814  5779  5779 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:17.316  5779  5779 D AndroidRuntime: Shutting down VM
+11-07 11:02:18.983   286   286 I Zygote  : Process 4704 exited due to signal 9 (Killed)
+11-07 11:02:18.996   285   285 I Zygote  : Process 4802 exited due to signal 9 (Killed)
+11-07 11:02:19.922  5797  5797 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:19.923  5797  5797 I AndroidRuntime: Using default boot image
+11-07 11:02:19.923  5797  5797 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:19.958  5797  5797 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:19.962  5797  5797 D AndroidRuntime: Shutting down VM
+11-07 11:02:21.425  5817  5817 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:21.426  5817  5817 I AndroidRuntime: Using default boot image
+11-07 11:02:21.426  5817  5817 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:21.470  5817  5817 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:21.480  5817  5817 D AndroidRuntime: Shutting down VM
+11-07 11:02:22.940  5831  5831 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:22.941  5831  5831 I AndroidRuntime: Using default boot image
+11-07 11:02:22.941  5831  5831 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:22.997  5831  5831 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:23.000  5831  5831 D AndroidRuntime: Shutting down VM
+11-07 11:02:25.597  5848  5848 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:25.599  5848  5848 I AndroidRuntime: Using default boot image
+11-07 11:02:25.599  5848  5848 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:25.660  5848  5848 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:25.662  5848  5848 D AndroidRuntime: Shutting down VM
+11-07 11:02:27.437   285   285 I Zygote  : Process 5021 exited due to signal 9 (Killed)
+11-07 11:02:30.271  5865  5865 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:30.273  5865  5865 I AndroidRuntime: Using default boot image
+11-07 11:02:30.273  5865  5865 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:30.316  5865  5865 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:30.318  5865  5865 D AndroidRuntime: Shutting down VM
+11-07 11:02:31.772  5879  5912 I FA      : To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+11-07 11:02:31.772  5879  5912 I FA      : To enable faster debug mode event logging run:
+11-07 11:02:31.852   285   285 I Zygote  : Process 1289 exited due to signal 9 (Killed)
+11-07 11:02:38.581   285   285 I Zygote  : Process 2356 exited due to signal 9 (Killed)
+11-07 11:02:42.269  1979  6010 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:02:56.041  6256  6256 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:02:56.054  6256  6256 I AndroidRuntime: Using default boot image
+11-07 11:02:56.054  6256  6256 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:02:56.151  6256  6256 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:02:56.154  6256  6256 D AndroidRuntime: Shutting down VM
+11-07 11:02:56.269  3846  3876 V SDL     : Finished main function
+11-07 11:02:56.309  3846  3846 V SDL     : onPause()
+11-07 11:02:56.328  3846  3846 V SDL     : onWindowFocusChanged(): false
+11-07 11:02:56.624  3846  3846 V SDL     : surfaceDestroyed()
+11-07 11:02:56.766  3846  3846 V SDL     : onStop()
+11-07 11:02:56.768  3846  3846 V SDL     : onDestroy()
+11-07 11:02:56.775  3846  3846 V SDL     : SDLActivity thread ends
+11-07 11:02:56.775  3846  3846 I Process : Sending signal. PID: 3846 SIG: 9
+11-07 11:02:56.840   285   285 I Zygote  : Process 3846 exited due to signal 9 (Killed)
+11-07 11:02:58.125   285   285 I Zygote  : Process 5123 exited due to signal 9 (Killed)
+11-07 11:03:02.761  6291  6291 V SDL     : Device: generic_x86_64_arm64
+11-07 11:03:02.761  6291  6291 V SDL     : Model: sdk_gphone_x86_64
+11-07 11:03:02.761  6291  6291 V SDL     : onCreate()
+11-07 11:03:02.818  6291  6291 V SDL     : nativeSetupJNI()
+11-07 11:03:02.818  6291  6291 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:03:02.818  6291  6291 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:03:02.841  6291  6291 V SDL     : onStart()
+11-07 11:03:02.841  6291  6291 V SDL     : onResume()
+11-07 11:03:02.859  6291  6291 V SDL     : surfaceCreated()
+11-07 11:03:02.859  6291  6291 V SDL     : surfaceChanged()
+11-07 11:03:02.859  6291  6291 V SDL     : Window size: 1024x528
+11-07 11:03:02.859  6291  6291 V SDL     : Device size: 1024x600
+11-07 11:03:02.886  6291  6318 V SDL     : Running main function SDL_main from library /data/app/~~85omvKpUUtwCP5pvIXYXUQ==/com.unicornclock.railways-lwWTv0s3tKv79_spkmtMMw==/lib/x86_64/libmain.so
+11-07 11:03:02.886  6291  6318 V SDL     : nativeRunMain()
+11-07 11:03:02.964  6291  6318 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:03:03.061  6291  6318 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:03:03.061  6291  6319 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:03:03.096  6291  6291 V SDL     : onWindowFocusChanged(): true
+11-07 11:03:03.561  6291  6291 V SDL     : nativeFocusChanged()
+11-07 11:03:03.570  6291  6291 V SDL     : surfaceChanged()
+11-07 11:03:03.570  6291  6291 V SDL     : Window size: 1024x600
+11-07 11:03:03.570  6291  6291 V SDL     : Device size: 1024x600
+11-07 11:03:03.678   285   285 I Zygote  : Process 5158 exited due to signal 9 (Killed)
+11-07 11:03:03.710   285   285 I Zygote  : Process 5454 exited due to signal 9 (Killed)
+11-07 11:03:03.711   495   982 W ActivityManager: Scheduling restart of crashed service com.google.android.projection.gearhead/com.google.android.apps.auto.carservice.service.impl.GearheadCarStartupService in 1000ms for connection
+11-07 11:03:03.718   285   285 I Zygote  : Process 4489 exited due to signal 9 (Killed)
+11-07 11:03:06.572   285   285 I Zygote  : Process 3329 exited due to signal 9 (Killed)
+11-07 11:03:08.572   285   285 I Zygote  : Process 5433 exited due to signal 9 (Killed)
+11-07 11:03:22.842   285   285 I Zygote  : Process 6291 exited due to signal 9 (Killed)
+11-07 11:03:25.922  6374  6374 V SDL     : Device: generic_x86_64_arm64
+11-07 11:03:25.922  6374  6374 V SDL     : Model: sdk_gphone_x86_64
+11-07 11:03:25.922  6374  6374 V SDL     : onCreate()
+11-07 11:03:25.931  6374  6374 V SDL     : nativeSetupJNI()
+11-07 11:03:25.931  6374  6374 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:03:25.931  6374  6374 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:03:25.963  6374  6374 V SDL     : onStart()
+11-07 11:03:25.963  6374  6374 V SDL     : onResume()
+11-07 11:03:26.026  6374  6374 V SDL     : surfaceCreated()
+11-07 11:03:26.026  6374  6374 V SDL     : surfaceChanged()
+11-07 11:03:26.026  6374  6374 V SDL     : Window size: 1024x528
+11-07 11:03:26.026  6374  6374 V SDL     : Device size: 1024x600
+11-07 11:03:26.029  6374  6400 V SDL     : Running main function SDL_main from library /data/app/~~85omvKpUUtwCP5pvIXYXUQ==/com.unicornclock.railways-lwWTv0s3tKv79_spkmtMMw==/lib/x86_64/libmain.so
+11-07 11:03:26.029  6374  6400 V SDL     : nativeRunMain()
+11-07 11:03:26.064  6374  6400 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:03:26.077  6374  6400 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:03:26.077  6374  6401 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:03:26.177  6374  6374 V SDL     : surfaceChanged()
+11-07 11:03:26.177  6374  6374 V SDL     : Window size: 1024x600
+11-07 11:03:26.177  6374  6374 V SDL     : Device size: 1024x600
+11-07 11:03:26.223  6374  6374 V SDL     : onWindowFocusChanged(): true
+11-07 11:03:26.226  6374  6374 V SDL     : nativeFocusChanged()
+11-07 11:03:51.099  6440  6440 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:51.100  6440  6440 I AndroidRuntime: Using default boot image
+11-07 11:03:51.100  6440  6440 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:03:51.143  6440  6440 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:51.850  6440  6440 D AndroidRuntime: Shutting down VM
+11-07 11:03:54.489  6462  6462 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:54.490  6462  6462 I AndroidRuntime: Using default boot image
+11-07 11:03:54.490  6462  6462 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:03:54.531  6462  6462 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:54.533  6462  6462 D AndroidRuntime: Shutting down VM
+11-07 11:03:54.536  6462  6474 I AndroidRuntime: NOTE: attach of thread 'Binder:6462_2' failed
+11-07 11:03:55.999  6475  6475 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:56.000  6475  6475 I AndroidRuntime: Using default boot image
+11-07 11:03:56.000  6475  6475 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:03:56.045  6475  6475 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:56.951  6475  6475 D AndroidRuntime: Shutting down VM
+11-07 11:03:58.606  6492  6492 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:58.607  6492  6492 I AndroidRuntime: Using default boot image
+11-07 11:03:58.607  6492  6492 I AndroidRuntime: Leaving lock profiling enabled
+11-07 11:03:58.640   285   285 I Zygote  : Process 5195 exited due to signal 9 (Killed)
+11-07 11:03:58.656  6492  6492 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:58.661  6492  6492 D AndroidRuntime: Shutting down VM
+11-07 11:03:58.758  6374  6400 V SDL     : Finished main function
+11-07 11:03:58.780  6374  6374 V SDL     : onPause()
+11-07 11:03:58.791  6374  6374 V SDL     : onWindowFocusChanged(): false
+11-07 11:03:58.975  6374  6374 V SDL     : surfaceDestroyed()
+11-07 11:03:58.981  6374  6374 V SDL     : onStop()
+11-07 11:03:59.000  6374  6374 V SDL     : onDestroy()
+11-07 11:03:59.000  6374  6374 V SDL     : SDLActivity thread ends
+11-07 11:03:59.000  6374  6374 I Process : Sending signal. PID: 6374 SIG: 9
+11-07 11:03:59.179   285   285 I Zygote  : Process 6374 exited due to signal 9 (Killed)

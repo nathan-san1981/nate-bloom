@@ -1,0 +1,10 @@
+513:--  CFLAGS:        -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -idirafter "/tmp/w/sdl/src/video/khronos"
+539:[12/265] Generating include/SDL2/SDL_error.h
+608:[81/265] Building C object CMakeFiles/SDL2.dir/src/SDL_error.c.o
+816:-- Installing: /tmp/w/prefix-arm64-v8a/include/SDL2/SDL_error.h
+1259:[36/850] Generating ai/ai_error.sq.hpp
+1334:[111/850] Generating game/game_error.sq.hpp
+1406:[183/850] Generating template/template_error.sq.hpp
+1595:[372/850] Building CXX object CMakeFiles/openttd_lib.dir/src/script/api/script_error.cpp.o
+1907:[680/850] Building CXX object CMakeFiles/openttd_lib.dir/src/error.cpp.o
+1910:[683/850] Building CXX object CMakeFiles/openttd_lib.dir/src/error_gui.cpp.o

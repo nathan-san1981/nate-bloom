@@ -1,0 +1,2 @@
+Starting: Intent { cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity }
+Starting: Intent { cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity (has extras) }

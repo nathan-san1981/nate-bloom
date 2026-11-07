@@ -1,0 +1,374 @@
+11-07 11:01:32.322   522   994 V SplashScreenExceptionList: SplashScreen checking exception for package org.natebloom.openttd (target sdk:34) -> false
+11-07 11:01:32.325   831   862 V WindowManagerShell: Transition requested: android.os.BinderProxy@3c54169 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} topActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=1 lastActiveTime=43848 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@52107ee} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{f8f148f com.unicornclock.railways.RailwaysActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:32.327   522   994 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+11-07 11:01:32.390   522  2975 D CoreBackPreview: Window{611c153 u0 Splash Screen org.natebloom.openttd}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@bf64f89, mPriority=0, mIsAnimationCallback=false}
+11-07 11:01:32.478  1042  1042 D CarrierSvcBindHelper: onPackageAdded: org.natebloom.openttd
+11-07 11:01:32.520  1042  1310 D ImsResolver: maybeAddedImsService, packageName: org.natebloom.openttd
+11-07 11:01:32.594   522   550 I ActivityManager: Start proc 4197:org.natebloom.openttd/u0a192 for next-top-activity {org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity}
+11-07 11:01:32.596   522   802 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10192, mPackageName='org.natebloom.openttd, mAppProcessToken='null'}
+11-07 11:01:32.621  4197  4197 I tebloom.openttd: Using CollectorTypeCC GC.
+11-07 11:01:32.625  4197  4197 W tebloom.openttd: Unexpected CPU variant for x86: x86_64.
+11-07 11:01:32.625  4197  4197 W tebloom.openttd: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+11-07 11:01:32.628  4197  4197 E tebloom.openttd: Not starting debugger since process cannot load the jdwp agent.
+11-07 11:01:32.650   522   539 V WindowManager: Sent Transition #7 createdAt=11-07 11:01:32.282 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} topActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=1 lastActiveTime=43848 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{98d29be Task{fe2172c #8 type=standard A=10192:org.natebloom.openttd}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{ac6da1f com.unicornclock.railways.RailwaysActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:32.650   522   539 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{98d29be Task{fe2172c #8 type=standard A=10192:org.natebloom.openttd}}} m=OPEN f=NONE leash=Surface(name=Task=8)/@0xc7bf872 sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0},{WCT{RemoteToken{6c0fdc2 Task{50d3b43 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x2ff1bbf sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0}]}
+11-07 11:01:32.726  1042  1042 D CarrierSvcBindHelper: onPackageModified: org.natebloom.openttd
+11-07 11:01:32.741  1042  1310 D ImsResolver: maybeAddedImsService, packageName: org.natebloom.openttd
+11-07 11:01:32.849  4197  4197 D nativeloader: Configuring clns-6 for other apk /data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/lib/x86_64:/data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/org.natebloom.openttd
+11-07 11:01:32.854  4197  4197 V GraphicsEnvironment: ANGLE GameManagerService for org.natebloom.openttd: false
+11-07 11:01:32.854  4197  4197 V GraphicsEnvironment: org.natebloom.openttd is not listed in per-application setting
+11-07 11:01:32.870   833   833 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: org.natebloom.openttd, current user: UserHandle{0}, packageChangeEvent: NEW_INSTALL, intent user: UserHandle{0}
+11-07 11:01:32.871   336   336 I Zygote  : Process 4079 exited due to signal 9 (Killed)
+11-07 11:01:33.038  4197  4197 I UnicornRailways: unpacked game files in 143 ms
+11-07 11:01:33.038  4197  4197 V SDL     : Device: emu64xa
+11-07 11:01:33.038  4197  4197 V SDL     : Model: sdk_gphone64_x86_64
+11-07 11:01:33.038  4197  4197 V SDL     : onCreate()
+11-07 11:01:33.057  4197  4197 V SDL     : nativeSetupJNI()
+11-07 11:01:33.057  4197  4197 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:01:33.057  4197  4197 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:01:33.112  4197  4197 V SDL     : onStart()
+11-07 11:01:33.112  4197  4197 V SDL     : onResume()
+11-07 11:01:33.162   522   591 D CoreBackPreview: Window{20927a6 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@e281700, mPriority=0, mIsAnimationCallback=false}
+11-07 11:01:33.278  4197  4197 V SDL     : surfaceCreated()
+11-07 11:01:33.278  4197  4197 V SDL     : surfaceChanged()
+11-07 11:01:33.278  4197  4197 V SDL     : Window size: 2560x1600
+11-07 11:01:33.278  4197  4197 V SDL     : Device size: 2560x1600
+11-07 11:01:33.295  4197  4255 V SDL     : Running main function SDL_main from library /data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/lib/x86_64/libmain.so
+11-07 11:01:33.295  4197  4255 V SDL     : nativeRunMain()
+11-07 11:01:33.426  4197  4258 I OpenTTD : s_glBindAttribLocation: bind attrib 0 name position
+11-07 11:01:33.426  4197  4258 I OpenTTD : s_glBindAttribLocation: bind attrib 1 name color
+11-07 11:01:33.479  4197  4255 V SDL     : setOrientation() requestedOrientation=13 width=2560 height=1600 resizable=true hint=
+11-07 11:01:33.573   522   539 I ActivityTaskManager: Displayed org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity for user 0: +1s285ms
+11-07 11:01:33.577  4197  4255 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:33.577  4197  4258 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:33.643   522   591 W InputManager-JNI: Input channel object '611c153 Splash Screen org.natebloom.openttd (client)' was disposed without first being removed with the input manager!
+11-07 11:01:33.650   522   894 D CoreBackPreview: Window{611c153 u0 Splash Screen org.natebloom.openttd EXITING}: Setting back callback null
+11-07 11:01:33.905  4197  4255 D tebloom.openttd: PlayerBase::PlayerBase()
+11-07 11:01:33.905  4197  4255 D tebloom.openttd: TrackPlayerBase::TrackPlayerBase()
+11-07 11:01:33.911  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:33.934  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:34.407  4197  4258 I OpenTTD : s_glBindAttribLocation: bind attrib 0 name a_position
+11-07 11:01:34.407  4197  4258 I OpenTTD : s_glBindAttribLocation: bind attrib 1 name a_color
+11-07 11:01:34.407  4197  4258 I OpenTTD : s_glBindAttribLocation: bind attrib 2 name a_texCoord
+11-07 11:01:34.940  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:34.999  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:35.051  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:35.175  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:35.425  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:35.931  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:36.073  1362  1439 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:37.411  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:37.525  1362  1439 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:37.730     0     0 I init    : Sending signal 9 to service 'idmap2d' (pid 464) process group...
+11-07 11:01:37.754     0     0 I init    : Service 'idmap2d' (pid 464) received signal 9
+11-07 11:01:37.742  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:37.775  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:38.433  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:38.819  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:39.038     0     0 I init    : Sending signal 9 to service 'artd' (pid 4122) process group...
+11-07 11:01:39.092  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:39.162  1362  1439 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:39.220  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:39.544  1362  1362 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:39.722  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:40.609  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:40.658  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:40.956  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:41.060  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:41.410  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:41.650  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:42.003  1419  4424 I BlockstoreStorage: Clearing Blockstore Data for package org.natebloom.openttd [CONTEXT service_id=258 ]
+11-07 11:01:42.641  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:42.731  1362  4296 I FontLog : Package org.natebloom.openttd has no metadata [CONTEXT service_id=132 ]
+11-07 11:01:43.172  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:43.233  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:43.976  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:43.997  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:44.056   995  2850 D NetworkMonitor/101: Forcing reevaluation for UID 10131. Dns signal count: 0
+11-07 11:01:44.184  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:44.284  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:44.300  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:44.956  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:44.981  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:45.018  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:45.230  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:45.400  1362  1909 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:45.759  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:45.790  1362  1362 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:46.322  1595  1595 I AiAiEcho: AppFetcherImplV2 updateApps package:[org.natebloom.openttd], userId:[0], reason:[package is added.].
+11-07 11:01:46.401  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:46.511  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:47.244  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:47.794  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:47.835  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:47.853  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:48.062  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:48.349  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:48.630  4197  4290 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:48.960   522  1731 I ActivityManager: Force stopping org.natebloom.openttd appid=10192 user=0: from pid 4721
+11-07 11:01:48.961   522  1731 I ActivityManager: Killing 4197:org.natebloom.openttd/u0a192 (adj 0): stop org.natebloom.openttd due to from pid 4721
+11-07 11:01:48.961   522  1731 W ActivityTaskManager: Force removing ActivityRecord{2bc2edf u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity t8 f}}: app died, no saved state
+11-07 11:01:48.968   831   862 V WindowManagerShell: Transition requested: android.os.BinderProxy@8e29a8b TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=0 lastActiveTime=44226 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@6145768} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:48.979  1042  1042 D CarrierSvcBindHelper: onHandleForceStop: [org.natebloom.openttd]
+11-07 11:01:48.995   522   591 V ActivityManager: Got obituary of 4197:org.natebloom.openttd
+11-07 11:01:48.995   522  2604 I WindowManager: WIN DEATH: Window{20927a6 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity}
+11-07 11:01:48.995   522  2604 W InputManager-JNI: Input channel object '20927a6 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity (client)' was disposed without first being removed with the input manager!
+11-07 11:01:48.995   336   336 I Zygote  : Process 4197 exited due to signal 9 (Killed)
+11-07 11:01:49.030  1595  3052 I AiAiEcho: Settings changed for uri: content://settings/secure/dropbox:data_app_crash
+11-07 11:01:49.054  1595  1595 I AiAiEcho: AppFetcherImpl onPackageChanged org.natebloom.openttd.
+11-07 11:01:49.057  1595  3202 I AiAiEcho: AppIndexer Package:[org.natebloom.openttd] UserProfile:[0] Enabled:[true].
+11-07 11:01:49.057  1595  3202 I AiAiEcho: AppFetcherImplV2 updateApps package:[org.natebloom.openttd], userId:[0], reason:[package is updated.].
+11-07 11:01:49.192   522   539 V WindowManager: Sent Transition #8 createdAt=11-07 11:01:48.961 via request=TransitionRequestInfo { type = CLOSE, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=false baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=null topActivity=null origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=0 lastActiveTime=44226 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{98d29be Task{fe2172c #8 type=standard A=10192:org.natebloom.openttd}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=null launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:49.192   522   539 V WindowManager:     info={id=8 t=CLOSE f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{98d29be Task{fe2172c #8 type=standard A=10192:org.natebloom.openttd}}} m=CLOSE f=NONE leash=Surface(name=Task=8)/@0xc7bf872 sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0},{WCT{RemoteToken{6c0fdc2 Task{50d3b43 #1 type=home}}} m=TO_FRONT f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x2ff1bbf sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0},{null m=TO_FRONT f=IS_WALLPAPER leash=Surface(name=WallpaperWindowToken{dfc1cfb token=android.os.Binder@aec7e8a})/@0x89df1d1 sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0}]}
+11-07 11:01:49.193   522   535 W WindowManager: Failed to deliver inset control state change to w=Window{20927a6 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity EXITING}
+11-07 11:01:49.206   522   596 W WindowManager: Exception thrown during dispatchAppVisibility Window{20927a6 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity EXITING}
+11-07 11:01:49.206   522   596 I Process : Sending signal. PID: 4197 SIG: 9
+11-07 11:01:49.209   522   596 W WindowManager: Failed to deliver inset control state change to w=Window{20927a6 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity EXITING}
+11-07 11:01:50.252  1362  4189 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:50.415  1362  4189 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:50.526  1362  1362 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:52.118   522  1873 V SplashScreenExceptionList: SplashScreen checking exception for package org.natebloom.openttd (target sdk:34) -> false
+11-07 11:01:52.125   831   862 V WindowManagerShell: Transition requested: android.os.BinderProxy@5133c7b TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=9 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} topActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=1 lastActiveTime=63647 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@7c06a98} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{6f7e2f1 com.unicornclock.railways.RailwaysActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:52.126   522  1873 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity (has extras)} with LAUNCH_SINGLE_TASK from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+11-07 11:01:52.142   522   550 I ActivityManager: Start proc 4774:org.natebloom.openttd/u0a192 for next-top-activity {org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity}
+11-07 11:01:52.170  4774  4774 I tebloom.openttd: Using CollectorTypeCC GC.
+11-07 11:01:52.170  4774  4774 W tebloom.openttd: Unexpected CPU variant for x86: x86_64.
+11-07 11:01:52.170  4774  4774 W tebloom.openttd: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+11-07 11:01:52.172  4774  4774 E tebloom.openttd: Not starting debugger since process cannot load the jdwp agent.
+11-07 11:01:52.216  4774  4774 D nativeloader: Configuring clns-6 for other apk /data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/base.apk. target_sdk_version=34, uses_libraries=, library_path=/data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/lib/x86_64:/data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/org.natebloom.openttd
+11-07 11:01:52.223  4774  4774 V GraphicsEnvironment: ANGLE GameManagerService for org.natebloom.openttd: false
+11-07 11:01:52.223  4774  4774 V GraphicsEnvironment: org.natebloom.openttd is not listed in per-application setting
+11-07 11:01:52.224   522  1660 D CoreBackPreview: Window{6906de5 u0 Splash Screen org.natebloom.openttd}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@1022e86, mPriority=0, mIsAnimationCallback=false}
+11-07 11:01:52.386   522   539 V WindowManager: Sent Transition #9 createdAt=11-07 11:01:52.102 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=9 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity } baseActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} topActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} origActivity=null realActivity=ComponentInfo{org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity} numActivities=1 lastActiveTime=63647 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{f27749d Task{2c50f3 #9 type=standard A=10192:org.natebloom.openttd}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{7c2ad12 com.unicornclock.railways.RailwaysActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+11-07 11:01:52.387   522   539 V WindowManager:     info={id=9 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{f27749d Task{2c50f3 #9 type=standard A=10192:org.natebloom.openttd}}} m=OPEN f=NONE leash=Surface(name=Task=9)/@0x9bed347 sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0},{WCT{RemoteToken{6c0fdc2 Task{50d3b43 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0x2ff1bbf sb=Rect(0, 0 - 2560, 1600) eb=Rect(0, 0 - 2560, 1600) d=0}]}
+11-07 11:01:52.585  4774  4774 V SDL     : Device: emu64xa
+11-07 11:01:52.585  4774  4774 V SDL     : Model: sdk_gphone64_x86_64
+11-07 11:01:52.585  4774  4774 V SDL     : onCreate()
+11-07 11:01:52.602  4774  4774 V SDL     : nativeSetupJNI()
+11-07 11:01:52.605  4774  4774 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:01:52.605  4774  4774 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:01:52.613  4774  4774 V SDL     : onStart()
+11-07 11:01:52.613  4774  4774 V SDL     : onResume()
+11-07 11:01:52.694   522  1922 D CoreBackPreview: Window{afd1c37 u0 org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@780c810, mPriority=0, mIsAnimationCallback=false}
+11-07 11:01:52.762  4774  4774 V SDL     : surfaceCreated()
+11-07 11:01:52.762  4774  4774 V SDL     : surfaceChanged()
+11-07 11:01:52.762  4774  4774 V SDL     : Window size: 2560x1600
+11-07 11:01:52.762  4774  4774 V SDL     : Device size: 2560x1600
+11-07 11:01:52.820  4774  4798 V SDL     : Running main function SDL_main from library /data/app/~~q0LFVbfDRuNPFUAP5f0-1Q==/org.natebloom.openttd-haLphcbJLJrzd_yMxB1aiQ==/lib/x86_64/libmain.so
+11-07 11:01:52.820  4774  4798 V SDL     : nativeRunMain()
+11-07 11:01:52.870  4774  4798 V SDL     : setOrientation() requestedOrientation=13 width=2560 height=1600 resizable=true hint=
+11-07 11:01:52.960  4774  4798 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:52.960  4774  4800 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:01:52.976  4774  4800 I OpenTTD : s_glBindAttribLocation: bind attrib 0 name position
+11-07 11:01:52.976  4774  4800 I OpenTTD : s_glBindAttribLocation: bind attrib 1 name color
+11-07 11:01:53.104   522   539 I ActivityTaskManager: Displayed org.natebloom.openttd/com.unicornclock.railways.RailwaysActivity for user 0: +1s0ms
+11-07 11:01:53.215   522  2604 W InputManager-JNI: Input channel object '6906de5 Splash Screen org.natebloom.openttd (client)' was disposed without first being removed with the input manager!
+11-07 11:01:53.217   522   591 D CoreBackPreview: Window{6906de5 u0 Splash Screen org.natebloom.openttd EXITING}: Setting back callback null
+11-07 11:01:53.350  4774  4798 D tebloom.openttd: PlayerBase::PlayerBase()
+11-07 11:01:53.350  4774  4798 D tebloom.openttd: TrackPlayerBase::TrackPlayerBase()
+11-07 11:01:53.378  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:53.414  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:53.418  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:53.419  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:53.601  4774  4800 I OpenTTD : s_glBindAttribLocation: bind attrib 0 name a_position
+11-07 11:01:53.602  4774  4800 I OpenTTD : s_glBindAttribLocation: bind attrib 1 name a_color
+11-07 11:01:53.602  4774  4800 I OpenTTD : s_glBindAttribLocation: bind attrib 2 name a_texCoord
+11-07 11:01:53.731  1595  1623 I AiAiEcho: Settings changed for uri: content://settings/secure/dropbox:data_app_crash
+11-07 11:01:53.841  4774  4800 I OpenTTD : [2026-11-07 11:01:53] dbg: [misc:0] Cryptographically-strong random generator unavailable; using fallback
+11-07 11:01:53.980  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:54.318  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:54.340  1362  4190 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:54.394  1362  1362 I GCoreUlr: Unbound from all signal providers.
+11-07 11:01:54.396  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:54.597  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.030  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.288  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.324  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.388  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.628  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:55.728  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:56.616  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.066  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.229  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.269  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.501  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.579  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.594  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:57.925  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:58.137     0     0 I init    : Sending signal 9 to service 'idmap2d' (pid 4695) process group...
+11-07 11:01:58.190     0     0 I init    : Service 'idmap2d' (pid 4695) received signal 9
+11-07 11:01:58.030  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:58.035  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:58.207  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:58.476  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:58.528  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:59.232  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:01:59.980  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:00.055  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:00.526  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:00.884  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:00.916  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:01.233  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:01.276  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:01.347  2530  2692 W DG      : [flow tachyon_registration] DroidGuardRunner.newVmProcessForFastSignalCollection(): Fast program not found [CONTEXT service_id=25 ]
+11-07 11:02:01.550  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:01.680  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:01.757  1362  1362 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:02.475  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:02.864  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.022  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.102  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.146  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.194  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.244  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.463  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.492  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:03.578  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:04.242  4496  4881 V DynamiteModule: Dynamite loader version >= 2, using loadModule2NoCrashUtils
+11-07 11:02:04.314  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:04.525  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:05.066  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:06.249  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:07.151  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:07.557  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:07.618  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:07.719  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:07.876  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:09.191  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:09.440  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.056  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.272  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.303  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.319  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.820  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:10.896  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:11.231  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:12.230  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:12.265  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.195  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.344  1741  2901 W A       : Can't format flag AndroidGsaVelourJars__velour_crashtest_jar__name to integer.
+11-07 11:02:13.408  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.415  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.444  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.476  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.573  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.660  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:13.899  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:14.009  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:14.766  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:14.865  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:15.020  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:15.463  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:15.510  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:15.706  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:16.552  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:16.719  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.145  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.181  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.213  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.364  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.443  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.634  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.700  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.802  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.850  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.903  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:17.906  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:18.233  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:18.588  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:18.750  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:19.073  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:19.636  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.392  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.554   995  2850 D NetworkMonitor/101: Forcing reevaluation for UID 10132. Dns signal count: 0
+11-07 11:02:20.586  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.616  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.702  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.752  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.792  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:20.890  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.052  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.200  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.284  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.391  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.414  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.527  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.556  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.646  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.694  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.751  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:21.784  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.023  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.104  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.432  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.591  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.651  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.688  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:22.692  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:23.094  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:23.560  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:23.820  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:23.907  4774  4774 V SDL     : onWindowFocusChanged(): true
+11-07 11:02:23.908  4774  4774 V SDL     : nativeFocusChanged()
+11-07 11:02:23.932   522  1922 I ImeTracker: org.natebloom.openttd:aae128e9: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+11-07 11:02:23.932   522  1922 I ImeTracker: org.natebloom.openttd:aae128e9: onCancelled at PHASE_SERVER_SHOULD_HIDE
+11-07 11:02:24.061   336   336 I Zygote  : Process 1056 exited due to signal 9 (Killed)
+11-07 11:02:24.081  1507  1507 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=org.natebloom.openttd fieldId=0 fieldName=null extras=null}, false)
+11-07 11:02:24.230  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:24.257   522   894 W ActivityManager: Scheduling restart of crashed service com.google.android.apps.nexuslauncher/com.android.quickstep.TouchInteractionService in 1000ms for connection
+11-07 11:02:24.257   522   894 W ActivityManager: Scheduling restart of crashed service com.google.android.apps.nexuslauncher/com.android.launcher3.notification.NotificationListener in 11000ms for connection
+11-07 11:02:24.261  4774  4774 V SDL     : onConfigurationChanged()
+11-07 11:02:24.268  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:24.351  1507  1507 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=org.natebloom.openttd fieldId=0 fieldName=null extras=null}, true)
+11-07 11:02:24.386  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:25.058  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:25.093  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:25.251  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:25.356  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.065  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.171  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.399  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.703  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.740  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.756  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.789  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.840  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:26.999  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.404  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.430  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.454  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.461  4774  4774 V SDL     : onConfigurationChanged()
+11-07 11:02:27.506  1507  1507 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=org.natebloom.openttd fieldId=0 fieldName=null extras=null}, true)
+11-07 11:02:27.511  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.614  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.677  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.701  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.754  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.794  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.892  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:27.965  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.028  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.039  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.130  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.263  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.342  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.774  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.823  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.926  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:28.940  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:29.068  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:29.861  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:29.907  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.179  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.240  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.692  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.736  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.741  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:30.807  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:31.079  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:31.140  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:31.636  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:31.740  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:32.090  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:32.305  4774  4820 D tebloom.openttd: PlayerBase::stop() from IPlayer
+11-07 11:02:32.509  4774  4784 I tebloom.openttd: Explicit concurrent copying GC freed 2589(242KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2126KB/4252KB, paused 14us,10us total 28.618ms

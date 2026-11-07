@@ -1,0 +1,8 @@
+  mCurrentFocus=Window{d10c9c4 u0 com.unicornclock.railways/com.unicornclock.railways.RailwaysActivity}
+      InsetsSource type=ITYPE_STATUS_BAR frame=[0,0][1024,24] visible=false
+      InsetsSource type=ITYPE_NAVIGATION_BAR frame=[0,552][1024,600] visible=false
+      InsetsSource type=ITYPE_TOP_GESTURES frame=[0,0][1024,24] visible=true
+      InsetsSource type=ITYPE_BOTTOM_GESTURES frame=[0,552][1024,600] visible=true
+      InsetsSource type=ITYPE_LEFT_GESTURES frame=[0,0][0,600] visible=true
+      InsetsSource type=ITYPE_RIGHT_GESTURES frame=[1024,0][1024,600] visible=true
+      InsetsSource type=ITYPE_TOP_TAPPABLE_ELEMENT frame=[0,0][1024,24] visible=true

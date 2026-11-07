@@ -1,0 +1,8 @@
+        InsetsFrameProvider: {id=#72b60001, index=0, type=navigationBars, source=FRAME, flags=[SUPPRESS_SCRIM], insetsSize=Insets{left=0, top=0, right=0, bottom=120}, insetsSizeOverrides=[TypedInsetsSize: {windowType=INPUT_METHOD, insetsSize=Insets{left=0, top=0, right=0, bottom=96}}]}
+      Animation: com.android.server.wm.InsetsSourceProvider$ControlAdapter@867183b
+      Animation: com.android.server.wm.InsetsSourceProvider$ControlAdapter@66018e9
+    Requested non-default-visibility types: statusBars navigationBars
+  mCurrentFocus=Window{7d5f328 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}
+        InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= insetsRoundedCornerFrame=false
+        InsetsSource id=5a690000 type=statusBars frame=[0,0][2560,48] visible=true flags= insetsRoundedCornerFrame=false
+        InsetsSource id=5a690005 type=mandatorySystemGestures frame=[0,0][2560,48] visible=true flags= insetsRoundedCornerFrame=false

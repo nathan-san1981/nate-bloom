@@ -1,0 +1,1 @@
+  mCurrentFocus=Window{c4f1420 u0 com.unicornclock.railways/com.unicornclock.railways.RailwaysActivity}

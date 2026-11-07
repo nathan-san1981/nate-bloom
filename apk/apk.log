@@ -1,0 +1,125 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preKidReleaseBuild UP-TO-DATE
+> Task :app:mergeKidReleaseJniLibFolders
+> Task :app:checkKidReleaseDuplicateClasses
+> Task :app:generateKidReleaseBuildConfig
+> Task :app:javaPreCompileKidRelease
+> Task :app:checkKidReleaseAarMetadata
+> Task :app:generateKidReleaseResValues
+> Task :app:mapKidReleaseSourceSetPaths
+> Task :app:generateKidReleaseResources
+> Task :app:mergeKidReleaseNativeLibs
+> Task :app:packageKidReleaseResources
+> Task :app:mergeKidReleaseResources
+
+> Task :app:stripKidReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libSDL2.so, libmain.so.
+
+> Task :app:extractKidReleaseNativeSymbolTables
+> Task :app:createKidReleaseCompatibleScreenManifests
+> Task :app:mergeKidReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:extractDeepLinksKidRelease
+> Task :app:parseKidReleaseLocalResources
+> Task :app:processKidReleaseMainManifest
+> Task :app:processKidReleaseManifest
+> Task :app:desugarKidReleaseFileDependencies
+> Task :app:mergeKidReleaseStartupProfile
+> Task :app:processKidReleaseManifestForPackage
+> Task :app:mergeExtDexKidRelease
+> Task :app:mergeKidReleaseArtProfile
+> Task :app:mergeKidReleaseShaders
+> Task :app:compileKidReleaseShaders NO-SOURCE
+> Task :app:generateKidReleaseAssets UP-TO-DATE
+> Task :app:mergeKidReleaseAssets
+> Task :app:processKidReleaseResources
+> Task :app:extractKidReleaseVersionControlInfo
+> Task :app:compressKidReleaseAssets
+
+> Task :app:compileKidReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderKidRelease
+> Task :app:mergeKidReleaseGlobalSynthetics
+> Task :app:processKidReleaseJavaRes NO-SOURCE
+> Task :app:collectKidReleaseDependencies
+> Task :app:optimizeKidReleaseResources
+> Task :app:mergeKidReleaseJavaResource
+> Task :app:mergeDexKidRelease
+> Task :app:sdkKidReleaseDependencyData
+> Task :app:compileKidReleaseArtProfile
+> Task :app:validateSigningKidRelease
+> Task :app:writeKidReleaseAppMetadata
+> Task :app:writeKidReleaseSigningConfigVersions
+> Task :app:preFullReleaseBuild UP-TO-DATE
+> Task :app:mergeFullReleaseJniLibFolders
+> Task :app:checkFullReleaseDuplicateClasses
+> Task :app:generateFullReleaseBuildConfig
+> Task :app:javaPreCompileFullRelease
+> Task :app:checkFullReleaseAarMetadata
+> Task :app:generateFullReleaseResValues
+> Task :app:mapFullReleaseSourceSetPaths
+> Task :app:generateFullReleaseResources
+> Task :app:packageFullReleaseResources
+> Task :app:parseFullReleaseLocalResources
+> Task :app:createFullReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksFullRelease
+> Task :app:mergeFullReleaseNativeLibs
+> Task :app:mergeFullReleaseResources
+> Task :app:processFullReleaseMainManifest
+> Task :app:processFullReleaseManifest
+> Task :app:desugarFullReleaseFileDependencies
+> Task :app:processFullReleaseManifestForPackage
+
+> Task :app:stripFullReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libSDL2.so, libmain.so.
+
+> Task :app:mergeFullReleaseStartupProfile
+> Task :app:extractFullReleaseNativeSymbolTables
+> Task :app:mergeFullReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:mergeExtDexFullRelease
+> Task :app:mergeFullReleaseArtProfile
+> Task :app:mergeFullReleaseShaders
+> Task :app:compileFullReleaseShaders NO-SOURCE
+> Task :app:generateFullReleaseAssets UP-TO-DATE
+> Task :app:processFullReleaseResources
+> Task :app:mergeFullReleaseAssets
+
+> Task :app:compileFullReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderFullRelease
+> Task :app:packageKidRelease
+> Task :app:createKidReleaseApkListingFileRedirect
+> Task :app:assembleKidRelease
+> Task :app:mergeFullReleaseGlobalSynthetics
+> Task :app:extractFullReleaseVersionControlInfo
+> Task :app:processFullReleaseJavaRes NO-SOURCE
+> Task :app:mergeFullReleaseJavaResource
+> Task :app:collectFullReleaseDependencies
+> Task :app:mergeDexFullRelease
+> Task :app:sdkFullReleaseDependencyData
+> Task :app:compileFullReleaseArtProfile
+> Task :app:compressFullReleaseAssets
+> Task :app:validateSigningFullRelease
+> Task :app:writeFullReleaseAppMetadata
+> Task :app:writeFullReleaseSigningConfigVersions
+> Task :app:optimizeFullReleaseResources
+> Task :app:packageFullRelease
+> Task :app:createFullReleaseApkListingFileRedirect
+> Task :app:assembleFullRelease
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/build-1794049156499.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/nate-bloom/nate-bloom/openttd-android/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 20s
+84 actionable tasks: 84 executed

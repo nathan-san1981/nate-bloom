@@ -1,0 +1,212 @@
+11-07 11:02:14.187  1959  1959 I Zygote  : Process 2569 exited due to signal (9)
+11-07 11:02:14.856  3025  3317 W ErrorProcessor: onFatalError, processing error from engine(4)
+11-07 11:02:16.477  1959  1959 I Zygote  : Process 2869 exited due to signal (9)
+11-07 11:02:16.557  1959  1959 I Zygote  : Process 2999 exited due to signal (9)
+11-07 11:02:16.728  4279  4279 I GAv4    : Google Analytics 11.0.58 is starting up. To enable debug logging on a device run:
+11-07 11:02:16.740  1959  1959 I Zygote  : Process 4013 exited due to signal (9)
+11-07 11:02:17.221  2005  2034 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/.job.GmailInitialSetupJob$GmailInitialSetupJobService in 1000ms
+11-07 11:02:17.221  2005  2034 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/com.google.firebase.iid.FirebaseInstanceIdService in 21648ms
+11-07 11:02:17.221  2005  2034 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/com.android.email.job.UpgradeJob$UpgradeJobService in 11000ms
+11-07 11:02:17.221  2005  2034 W ActivityManager: Scheduling restart of crashed service com.google.android.gm/.job.GoogleMailWidgetAndShortcutSwitchJob$GoogleMailWidgetAndShortcutSwitchJobService in 31648ms
+11-07 11:02:17.267  1959  1959 I Zygote  : Process 3646 exited due to signal (9)
+11-07 11:02:17.407  1959  1959 I Zygote  : Process 3107 exited due to signal (9)
+11-07 11:02:18.131  4339  4339 I UnicornRailways: unpacked game files in 272 ms
+11-07 11:02:18.131  4339  4339 V SDL     : Device: generic_x86_64
+11-07 11:02:18.131  4339  4339 V SDL     : Model: Android SDK built for x86_64
+11-07 11:02:18.131  4339  4339 V SDL     : onCreate()
+11-07 11:02:18.587  4339  4339 V SDL     : nativeSetupJNI()
+11-07 11:02:18.588  4339  4339 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:02:18.588  4339  4339 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:02:18.641  4339  4339 V SDL     : onStart()
+11-07 11:02:18.641  4339  4339 V SDL     : onResume()
+11-07 11:02:18.833  4339  4339 V SDL     : surfaceCreated()
+11-07 11:02:18.833  4339  4339 V SDL     : surfaceChanged()
+11-07 11:02:18.865  4339  4339 V SDL     : Window size: 1024x552
+11-07 11:02:18.865  4339  4339 V SDL     : Device size: 1024x600
+11-07 11:02:18.875  4339  4373 V SDL     : Running main function SDL_main from library /data/app/com.unicornclock.railways-_yUq5Bp8QUOsFVJuq6hyTw==/lib/x86_64/libmain.so
+11-07 11:02:18.875  4339  4373 V SDL     : nativeRunMain()
+11-07 11:02:18.965  4339  4373 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:02:19.110  4339  4339 V SDL     : onWindowFocusChanged(): true
+11-07 11:02:19.112  4339  4373 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:02:19.112  4339  4374 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:02:19.670  4339  4339 V SDL     : nativeFocusChanged()
+11-07 11:02:19.872  4339  4339 V SDL     : surfaceChanged()
+11-07 11:02:19.891  4339  4339 V SDL     : Window size: 1024x600
+11-07 11:02:19.891  4339  4339 V SDL     : Device size: 1024x600
+11-07 11:02:20.989  4339  4374 I OpenTTD : [2026-11-07 11:02:20] dbg: [misc:0] Cryptographically-strong random generator unavailable; using fallback
+11-07 11:02:21.157  1959  1959 I Zygote  : Process 3222 exited due to signal (9)
+11-07 11:02:21.801  1959  1959 I Zygote  : Process 3504 exited due to signal (9)
+11-07 11:02:22.658  2164  2551 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:22.896  2005  2005 V SettingsProvider: Notifying for 0: content://settings/secure/dropbox:data_app_crash
+11-07 11:02:23.091  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:23.113  1959  1959 I Zygote  : Process 3966 exited due to signal (9)
+11-07 11:02:23.333  3025  3276 W ErrorProcessor: onFatalError, processing error from engine(4)
+11-07 11:02:23.577  1959  1959 I Zygote  : Process 2634 exited due to signal (9)
+11-07 11:02:23.830  4412  4490 I Bugle   : bugle_enable_primes_crash_metrics: true
+11-07 11:02:25.268  1959  1959 I Zygote  : Process 3992 exited due to signal (9)
+11-07 11:02:25.874  1959  1959 I Zygote  : Process 3604 exited due to signal (9)
+11-07 11:02:28.322  3729  4630 I Bugle   : bugle_enable_primes_crash_metrics: true
+11-07 11:02:28.622  4412  4627 I libjingle: [000:568] [4627] (peerconnectionfactory.cc:103): Signaling thread JavaCallback
+11-07 11:02:28.622  4412  4627 I PeerConnectionFactory: [000:568] [4627] PeerConnectionFactory: onSignalingThreadReady
+11-07 11:02:31.090  1959  1959 I Zygote  : Process 3159 exited due to signal (9)
+11-07 11:02:31.463  1959  1959 I Zygote  : Process 2686 exited due to signal (9)
+11-07 11:02:32.861  1959  1959 I Zygote  : Process 2426 exited due to signal (9)
+11-07 11:02:33.567  1959  1959 I Zygote  : Process 4042 exited due to signal (9)
+11-07 11:02:36.011  1959  1959 I Zygote  : Process 4066 exited due to signal (9)
+11-07 11:02:36.228  1959  1959 I Zygote  : Process 3255 exited due to signal (9)
+11-07 11:02:36.740  1959  1959 I Zygote  : Process 4279 exited due to signal (9)
+11-07 11:02:37.102  1959  1959 I Zygote  : Process 4200 exited due to signal (9)
+11-07 11:02:37.235  1959  1959 I Zygote  : Process 3365 exited due to signal (9)
+11-07 11:02:38.061  1959  1959 I Zygote  : Process 3818 exited due to signal (9)
+11-07 11:02:40.037  1960  1960 I Zygote  : Process 4393 exited due to signal (9)
+11-07 11:02:40.060  1959  1959 I Zygote  : Process 3839 exited due to signal (9)
+11-07 11:02:40.497  1959  1959 I Zygote  : Process 4317 exited due to signal (9)
+11-07 11:02:53.668  2164  5066 I GCoreUlr: Unbound from all signal providers.
+11-07 11:02:53.888  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:05.880  1959  1959 I Zygote  : Process 4658 exited due to signal (9)
+11-07 11:03:05.880  1959  1959 I Zygote  : Process 4715 exited due to signal (9)
+11-07 11:03:05.881  1959  1959 I Zygote  : Process 4693 exited due to signal (9)
+11-07 11:03:07.075  1960  1960 I Zygote  : Process 3044 exited due to signal (9)
+11-07 11:03:10.595  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:12.792  1959  1959 I Zygote  : Process 4175 exited due to signal (9)
+11-07 11:03:12.880  1959  1959 I Zygote  : Process 4235 exited due to signal (9)
+11-07 11:03:13.534  2164  5338 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:13.770  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:15.328  5374  5374 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:17.169  5374  5374 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:17.493  5374  5374 D AndroidRuntime: Shutting down VM
+11-07 11:03:20.528  1959  1959 I Zygote  : Process 4771 exited due to signal (9)
+11-07 11:03:20.563  1959  1959 I Zygote  : Process 4977 exited due to signal (9)
+11-07 11:03:20.582  1960  1960 I Zygote  : Process 4818 exited due to signal (9)
+11-07 11:03:24.553  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 165ms
+11-07 11:03:25.072  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 519ms
+11-07 11:03:25.503  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 180ms
+11-07 11:03:27.537  2164  5066 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 105ms
+11-07 11:03:27.540  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 105ms
+11-07 11:03:27.957  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 363ms
+11-07 11:03:27.966  2164  5066 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 351ms
+11-07 11:03:28.486  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 520ms
+11-07 11:03:28.487  2164  5066 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 521ms
+11-07 11:03:28.766  2164  5066 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 212ms
+11-07 11:03:29.312  5548  5548 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:29.366  2164  5551 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:29.796  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 709ms
+11-07 11:03:29.797  2164  5066 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 654ms
+11-07 11:03:29.816  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:03:30.822  5548  5548 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:32.346  5548  5548 D AndroidRuntime: Shutting down VM
+11-07 11:03:41.209  5644  5644 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:42.378  5644  5644 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:42.534  5644  5644 D AndroidRuntime: Shutting down VM
+11-07 11:03:44.171  5736  5736 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:44.485  5736  5736 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:44.598  5736  5736 D AndroidRuntime: Shutting down VM
+11-07 11:03:46.343  5746  5746 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:46.725  5746  5746 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:46.818  5746  5746 D AndroidRuntime: Shutting down VM
+11-07 11:03:50.514  1959  1959 I Zygote  : Process 3905 exited due to signal (9)
+11-07 11:03:51.627  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 267ms
+11-07 11:03:51.940  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=0 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 313ms
+11-07 11:03:52.111  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 171ms
+11-07 11:03:52.111  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 170ms
+11-07 11:03:52.328  2164  2985 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 120ms
+11-07 11:03:52.852  2164  5553 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=1 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 223ms
+11-07 11:03:53.210  2164  3089 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=2 in void android.database.sqlite.SQLiteConnectionPool.releaseConnection(android.database.sqlite.SQLiteConnection) for 230ms
+11-07 11:03:53.211  2164  5553 W .gms.persisten: Long monitor contention with owner lowpool[7] (3675) at android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal)(SQLiteConnectionPool.java:760) waiters=2 in android.database.sqlite.SQLiteConnection android.database.sqlite.SQLiteConnectionPool.waitForConnection(java.lang.String, int, android.os.CancellationSignal) for 231ms
+11-07 11:03:53.551  2384  2384 I SetupWizard: [PhenotypeHelper] Phenotype configs loaded. configs=Configurations(' com.google.android.setupwizard 228 1 999807111 com.google.android.setupwizard  0', 'CAMSBw0CzK2QDAU=', (Configuration(0, (Flag(PrimesFeature__deferred_battery_logging, false, 2, 0), Flag(PrimesFeature__enable_always_on_jank_monitoring, true, 2, 0), Flag(PrimesFeature__enable_battery_metric, true, 2, 0), Flag(PrimesFeature__enable_crash_metric, true, 2, 0), Flag(PrimesFeature__enable_jank_metric, true, 2, 0), Flag(PrimesFeature__enable_memory_metric, true, 2, 0), Flag(PrimesFeature__enable_native_crash_metric, true, 2, 0), Flag(PrimesFeature__enable_network_metric, true, 2, 0), Flag(PrimesFeature__enable_package_metric, true, 2, 0), Flag(PrimesFeature__enable_timer_metric, true, 2, 0), Flag(PrimesFeature__enable_tracing, true, 2, 0), Flag(PrimesFeature__increase_perf_sampling, false, 2, 0), Flag(PrimesStartupFeature__enable_init_on_activity_resumed, true, 2, 0), Flag(account_phenotype_sync_retry_backoff_factor, 1.3, 3, 0), Flag(account_phenotype_sync_retry_initial_delay_in_millis, 1000, 1, 0), Flag(account_phenotype_sync_retry_max_attempts, 8, 1, 0), Flag(account_phenotype_sync_retry_max_delay_in_millis, 10000, 1, 0), Flag(activities_to_precalculate_for, 'Ckljb20uZ29vZ2xlLmFuZHJvaWQuYXBwcy5zYWZldHlodWIvc2FmZXR5aHViOlNhdGVsbGl0ZUFuZENhckNyYXNoRGV0ZWN0aW9uCkVjb20uZ29vZ2xlLmFuZHJvaWQuYXBwcy5zYWZldHlodWIvc2FmZXR5aHViOlNhZmV0eVByZXBhcmVGb3JFbWVyZ2VuY3k', 5, 0), Flag(auth_eu_skipped_for_secondary_users, false, 2, 0), Flag(auth_eu_skipped_for_seeded_account, false, 2, 0), Flag(backup_pixelmigrate_minimum_package_version_for_handling_wifi_d2d, 546388, 1, 0), Flag(backup_restore_minimum_package_version_for_handling_d2d_migration, 17632, 1, 0), Flag(backup_supports_ios_wifi_d2d, false, 2, 0), Flag(backup_use_usb_guided_transfer, false, 2, 0), Flag(categories_exclusion_list, 'Ci1jb20uYW5kcm9pZC5zZXR0aW5ncy5zdWdnZXN0ZWQuY2F0ZWdvcnkuRU1BSUw', 5, 0), Flag(clear_paired_avatar_if_account_not_transferred, true, 2, 0), Flag(compliance_date_overrides, 'CiNjb20uZ29vZ2xlLmFuZHJvaWQuZXVpY2M6MjAyNS0wMy0xNAohY29tLmdvb2dsZS5hbmRyb2lkLmdtczoyMDI1LTA0LTA4CiNjb20uZ29vZ2xlLmFuZHJvaWQuZXVpY2M6MjAyNS0wMy0xNAohY29tLmdvb2dsZS5hbmRyb2lkLmdtczoyMDI1LTA0LTA4Ciljb20uZ29vZ2xlLmFuZHJvaWQuc2V0dXB3aXphcmQ6MjAyNS0wMS0wMQ', 5, 0), Flag(csat_notification_API_KEY, 'AIzaSyBXnTuSJOGnpztUlOVaoJrT95KtqQaurpo', 4, 0), Flag(csat_notification_delay_ms, 86400000, 1, 0), Flag(csat_notification_trigger_id, 'skH1MZxy40nBmAeLt9V0YaLawyHe', 4, 0), Flag(disable_deferred_notification_contrast_colour_check, '', 4, 0), Flag(enable_check_gaia_account, true, 2, 0), Flag(enable_csat_notification, false, 2, 0), Flag(enable_csupo_consent_transfer_changes, false, 2, 0), Flag(enable_default_colour_for_deferred_notification, false, 2, 0), Flag(enable_dynamic_activity_lookup_for_kids_post_setup_intent, true, 2, 0), Flag(enable_dynamic_activity_lookup_for_post_setup_intent_for_26q4, true, 2, 0), Flag(enable_dynamic_activity_lookup_for_post_setup_intent_for_desktop, true, 2, 0), Flag(enable_gservices_visibility_management_in_wrapper, '', 4, 0), Flag(enable_log_unbind_play_service_metrics, true, 2, 0), Flag(enable_minors_setup_cta_customization, false, 2, 0), Flag(enable_minors_setup_flow_new_ui, true, 2, 0), Flag(enable_minors_setup_flow_signal, true, 2, 0), Flag(enable_non_google_work_profile_account_transfer, false, 2, 0), Flag(enable_play_setup_service_retry, '', 4, 0), Flag(enable_sending_account_setup_complete_broadcast, true, 2, 0), Flag(enable_skipping_loading_launcher_layout_if_done_before, false, 2, 0), Flag(enable_suw_payments_metrics, true, 2, 0), Flag(enable_suw_quick_start_metrics, true, 2, 0), Flag(enable_wait_for_carrier_privileges_before_getting_carrier_setup_intent, '', 4, 0), Flag(feature_bts_enabled, '', 4, 0), Flag(feature_enable_gil_logging, 'false', 4, 0), Flag(feature_enable_gms_account_checkin_run_in_background, '', 4, 0), Flag(feature_enable_minors_setup_flow, '', 4, 0), Flag(feature_enable_physical_log, '', 4, 0), Flag(feature_enable_quick_enhanced_biometrics
+11-07 11:03:53.767  1959  1959 I Zygote  : Process 4884 exited due to signal (9)
+11-07 11:03:53.852  1959  1959 I Zygote  : Process 5350 exited due to signal (9)
+11-07 11:03:55.781  5828  5828 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:03:56.330  5828  5828 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:03:56.376  5828  5828 D AndroidRuntime: Shutting down VM
+11-07 11:04:02.161  1959  1959 I Zygote  : Process 4524 exited due to signal (9)
+11-07 11:04:02.172  1959  1959 I Zygote  : Process 5231 exited due to signal (9)
+11-07 11:04:02.264  1959  1959 I Zygote  : Process 5604 exited due to signal (9)
+11-07 11:04:07.186  5891  5891 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:04:07.474  5891  5891 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:04:07.551  5891  5891 D AndroidRuntime: Shutting down VM
+11-07 11:04:27.160  2164  5551 I GCoreUlr: Unbound from all signal providers.
+11-07 11:04:27.560  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:04:36.509  2511  5956 W gle.android.gm: Long monitor contention with owner LIT-UnlimitedExecutor #0 (5950) at android.database.Cursor android.content.ContentProviderProxy.query(java.lang.String, android.net.Uri, java.lang.String[], android.os.Bundle, android.os.ICancellationSignal)(ContentProviderNative.java:395) waiters=0 in java.util.Map bfrc.a() for 242ms
+11-07 11:04:40.543  5964  5964 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:04:41.250  5964  5964 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:04:41.312  5964  5964 D AndroidRuntime: Shutting down VM
+11-07 11:04:41.527  4339  4373 V SDL     : Finished main function
+11-07 11:04:41.537  4339  4339 V SDL     : onPause()
+11-07 11:04:41.561  4339  4339 V SDL     : onWindowFocusChanged(): false
+11-07 11:04:42.731  4339  4339 V SDL     : surfaceDestroyed()
+11-07 11:04:42.923  4339  4339 V SDL     : onStop()
+11-07 11:04:42.958  4339  4339 V SDL     : onDestroy()
+11-07 11:04:42.960  4339  4339 V SDL     : SDLActivity thread ends
+11-07 11:04:42.960  4339  4339 I Process : Sending signal. PID: 4339 SIG: 9
+11-07 11:04:43.027  1959  1959 I Zygote  : Process 4339 exited due to signal (9)
+11-07 11:04:44.157  3025  3154 W ErrorProcessor: onFatalError, processing error from engine(4)
+11-07 11:04:47.429  2164  5840 I GCoreUlr: Unbound from all signal providers.
+11-07 11:04:47.433  2164  2164 I GCoreUlr: Unbound from all signal providers.
+11-07 11:04:48.040  6052  6052 V SDL     : Device: generic_x86_64
+11-07 11:04:48.041  6052  6052 V SDL     : Model: Android SDK built for x86_64
+11-07 11:04:48.041  6052  6052 V SDL     : onCreate()
+11-07 11:04:48.378  6052  6052 V SDL     : nativeSetupJNI()
+11-07 11:04:48.378  6052  6052 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:04:48.378  6052  6052 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:04:48.398  6052  6052 V SDL     : onStart()
+11-07 11:04:48.398  6052  6052 V SDL     : onResume()
+11-07 11:04:48.560  6052  6052 V SDL     : surfaceCreated()
+11-07 11:04:48.560  6052  6052 V SDL     : surfaceChanged()
+11-07 11:04:48.567  6052  6052 V SDL     : Window size: 1024x552
+11-07 11:04:48.567  6052  6052 V SDL     : Device size: 1024x600
+11-07 11:04:48.613  6052  6072 V SDL     : Running main function SDL_main from library /data/app/com.unicornclock.railways-_yUq5Bp8QUOsFVJuq6hyTw==/lib/x86_64/libmain.so
+11-07 11:04:48.613  6052  6072 V SDL     : nativeRunMain()
+11-07 11:04:48.772  6052  6052 V SDL     : onWindowFocusChanged(): true
+11-07 11:04:48.979  6052  6052 V SDL     : surfaceChanged()
+11-07 11:04:49.018  6052  6052 V SDL     : Window size: 1024x600
+11-07 11:04:49.018  6052  6052 V SDL     : Device size: 1024x600
+11-07 11:04:49.040  6052  6072 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:04:49.141  6052  6072 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:04:49.142  6052  6073 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:05:11.367  1959  1959 I Zygote  : Process 6052 exited due to signal (9)
+11-07 11:05:12.199  3025  3276 W ErrorProcessor: onFatalError, processing error from engine(4)
+11-07 11:05:14.926  6128  6128 V SDL     : Device: generic_x86_64
+11-07 11:05:14.926  6128  6128 V SDL     : Model: Android SDK built for x86_64
+11-07 11:05:14.926  6128  6128 V SDL     : onCreate()
+11-07 11:05:15.003  6128  6128 V SDL     : nativeSetupJNI()
+11-07 11:05:15.003  6128  6128 V SDL     : AUDIO nativeSetupJNI()
+11-07 11:05:15.003  6128  6128 V SDL     : CONTROLLER nativeSetupJNI()
+11-07 11:05:15.017  6128  6128 V SDL     : onStart()
+11-07 11:05:15.017  6128  6128 V SDL     : onResume()
+11-07 11:05:15.279  6128  6128 V SDL     : surfaceCreated()
+11-07 11:05:15.279  6128  6128 V SDL     : surfaceChanged()
+11-07 11:05:15.280  6128  6128 V SDL     : Window size: 1024x552
+11-07 11:05:15.280  6128  6128 V SDL     : Device size: 1024x600
+11-07 11:05:15.303  6128  6147 V SDL     : Running main function SDL_main from library /data/app/com.unicornclock.railways-_yUq5Bp8QUOsFVJuq6hyTw==/lib/x86_64/libmain.so
+11-07 11:05:15.303  6128  6147 V SDL     : nativeRunMain()
+11-07 11:05:15.465  6128  6128 V SDL     : onWindowFocusChanged(): true
+11-07 11:05:15.493  6128  6147 V SDL     : setOrientation() requestedOrientation=13 width=1024 height=600 resizable=true hint=
+11-07 11:05:15.794  6128  6147 I SDL/APP : pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:05:15.794  6128  6128 V SDL     : nativeFocusChanged()
+11-07 11:05:15.795  6128  6148 I OpenTTD : INFO: pixel format wanted SDL_PIXELFORMAT_RGBX8888 (2), got SDL_PIXELFORMAT_RGBX8888 (2)
+11-07 11:05:15.881  6128  6128 V SDL     : surfaceChanged()
+11-07 11:05:15.894  6128  6128 V SDL     : Window size: 1024x600
+11-07 11:05:15.894  6128  6128 V SDL     : Device size: 1024x600
+11-07 11:05:43.708  6182  6182 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:05:44.537  6182  6182 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:05:45.313  6182  6182 D AndroidRuntime: Shutting down VM
+11-07 11:05:52.855  6198  6198 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:05:53.143  6198  6198 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:05:53.147  6198  6198 D AndroidRuntime: Shutting down VM
+11-07 11:05:54.499  6209  6209 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:05:54.752  6209  6209 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:05:55.657  6209  6209 D AndroidRuntime: Shutting down VM
+11-07 11:06:02.767  6225  6225 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-07 11:06:03.038  6225  6225 D AndroidRuntime: Calling main entry com.android.commands.input.Input
+11-07 11:06:03.093  6225  6225 D AndroidRuntime: Shutting down VM
+11-07 11:06:03.249  6128  6147 V SDL     : Finished main function
+11-07 11:06:03.258  6128  6128 V SDL     : onPause()
+11-07 11:06:03.262  6128  6128 V SDL     : onWindowFocusChanged(): false
+11-07 11:06:03.891  6128  6128 V SDL     : surfaceDestroyed()
+11-07 11:06:04.167  6128  6128 V SDL     : onStop()
+11-07 11:06:04.182  6128  6128 V SDL     : onDestroy()
+11-07 11:06:04.182  6128  6128 V SDL     : SDLActivity thread ends
+11-07 11:06:04.182  6128  6128 I Process : Sending signal. PID: 6128 SIG: 9
+11-07 11:06:04.237  1959  1959 I Zygote  : Process 6128 exited due to signal (9)
+11-07 11:06:04.779  3025  3177 W ErrorProcessor: onFatalError, processing error from engine(4)

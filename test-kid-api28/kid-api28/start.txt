@@ -1,0 +1,2 @@
+Starting: Intent { cmp=com.unicornclock.railways/.RailwaysActivity }
+Starting: Intent { cmp=com.unicornclock.railways/.RailwaysActivity (has extras) }
