@@ -51,4 +51,6 @@ timeout 60 adb logcat -d > "$OUT/logcat-full.txt"
 grep -iE "UnicornRailways|SDL|openttd|AndroidRuntime|FATAL|crash|signal| DEBUG |backtrace|#[0-9][0-9] pc" "$OUT/logcat-full.txt" | tail -600 > "$OUT/logcat.txt"
 gzip -f "$OUT/logcat-full.txt"
 cat "$OUT/checks.txt" "$OUT/meminfo.txt" "$OUT/window.txt"
+# the game must have been running at every step
+if grep -qE "pid=$" "$OUT/checks.txt"; then echo "FAIL: the game was not running at a step"; exit 1; fi
 exit 0
