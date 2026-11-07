@@ -112,7 +112,11 @@ class ClusterMeter:
                     continue
                 r = self.track.setdefault(j["id"], {"type": j["type"], "name": j.get("name", ""), "where": None,
                                                     "first": None, "last": None, "paused": 0, "waiting": 0,
-                                                    "msg": ""})
+                                                    "msg": "", "nolocal": "", "error": ""})
+                if j.get("nolocal"):
+                    r["nolocal"] = j["nolocal"]
+                if j["state"] == "failed":
+                    r["error"] = (j.get("msg") or "")[-300:]
                 if j["state"] in ("running", "paused") and j.get("loc") in ("local", "server"):
                     w = st["name"] if j["loc"] == "local" else names.get(j.get("peer"), "?")
                     r["where"] = r["where"] or w
@@ -400,16 +404,15 @@ def main():
                 elif j.get("loc") == "server" and j.get("peer") in names and j["state"] in ("running", "sending", "downloading"):
                     seen.setdefault(j["id"], names[j["peer"]])
             tops = [j for j in mine if j["id"] in ids]
-            bad = [j for j in tops if j["state"] in ("failed", "cancelled")]
-            if bad:
-                out(f"   failed: {bad[0]['name']}: {bad[0].get('msg', '')[-200:]}")
-                break
-            if tops and all(j["state"] == "done" for j in tops):
+            # a failed song doesn't stop the test: it's reported at the end with its error
+            if tops and all(j["state"] in ("done", "failed", "cancelled") for j in tops):
                 break
             if time.time() - last > 15:
                 last = time.time()
                 busy = ", ".join(f"{k} {v[-1]:.0f}%" for k, v in cm.samples.items() if v)
-                print(f"   … {int(time.time() - t0)} s, {sum(j['state'] == 'done' for j in tops)}/{len(tops)} jobs done · CPU now: {busy}", flush=True)
+                print(f"   … {int(time.time() - t0)} s, {sum(j['state'] == 'done' for j in tops)}/{len(tops)} jobs done"
+                      + (f", {sum(j['state'] == 'failed' for j in tops)} failed" if any(j['state'] == 'failed' for j in tops) else "")
+                      + f" · CPU now: {busy}", flush=True)
             time.sleep(1)
     allhands = {"secs": time.time() - t0, "where": {}, "cpu": cm.avg(), "gpu": cm.gpu_avg(), "jobs": len(ids),
                 "summary": cm.summary(), "track": cm.track}
@@ -463,6 +466,17 @@ def main():
             waits = sorted((r for r in ah["track"].values() if r["waiting"] >= 30), key=lambda r: -r["waiting"])[:3]
             for r in waits:
                 out(f"    waited {r['waiting']} s before starting: {r['name'][:40]} ({r['msg'][:60]})")
+            why = {}
+            for r in ah["track"].values():
+                if r["nolocal"] and r["where"] and r["where"] != stt["name"]:
+                    why.setdefault(r["nolocal"].split(" (")[0], []).append(r["nolocal"])
+            if why:
+                out("  why the laptop didn't take jobs that went elsewhere")
+                for k, v in sorted(why.items(), key=lambda kv: -len(kv[1])):
+                    out(f"    {len(v):3}×  {v[0][:110]}")
+            for r in ah["track"].values():
+                if r["error"]:
+                    out(f"  FAILED {r['type']} {r['name'][:40]}: {r['error'].splitlines()[-1][:160] if r['error'] else ''}")
         try:
             (REPORT.parent / "teamwork-timeline.json").write_text(json.dumps(ah["track"], indent=1))
         except OSError:
