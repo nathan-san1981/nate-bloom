@@ -81,17 +81,6 @@ class MainActivity : ComponentActivity() {
     private var pinNow = false
     private var away = false          // a grown-up opened a system screen from the clock (file picker, settings...)
     private var inFront = false
-    // a tablet game (Unicorn Railways / Unicorn Park) the clock opened: it may be in front until it closes,
-    // she presses Home, or the day's game time runs out
-    private var gamePkg: String? = null
-    private val gameTimeUp = Runnable {
-        if (gamePkg == null) return@Runnable
-        gamePkg = null
-        try {
-            startActivity(Intent(this@MainActivity, MainActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP))
-        } catch (e: Exception) { Log.w(TAG, "game time up", e) }
-    }
     private var webAlive = false      // false while the page is being rebuilt after its renderer died
     private var needsWeb = false      // the renderer died while the clock was in the background: rebuild on return
     private val rendererDeaths = ArrayList<Long>()
@@ -404,11 +393,6 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         inFront = true
-        if (gamePkg != null) {
-            gamePkg = null
-            ui.removeCallbacks(gameTimeUp)
-            if (::web.isInitialized) web.evaluateJavascript("try{window.__gameBack&&window.__gameBack()}catch(e){}", null)
-        }
         ui.removeCallbacks(bringBack)
         ui.removeCallbacks(awayTimeout)
         backupRelaunch(false)
@@ -428,7 +412,6 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         inFront = false
         if (!kioskOn || isChangingConfigurations) return
-        if (gamePkg != null) return   // one of her tablet games is in front, opened by the clock
         if (away) ui.postDelayed(awayTimeout, 180_000)
         else if (screenOn()) {
             backTries = 0
@@ -545,7 +528,7 @@ class MainActivity : ComponentActivity() {
         if (!dpm.isDeviceOwnerApp(packageName)) return
         val admin = ComponentName(this, AdminReceiver::class.java)
         try {
-            dpm.setLockTaskPackages(admin, arrayOf(packageName) + GAMES)
+            dpm.setLockTaskPackages(admin, arrayOf(packageName))
             Log.i(TAG, "device owner: lock task permitted=${dpm.isLockTaskPermitted(packageName)}")
             if (Build.VERSION.SDK_INT >= 28) dpm.setLockTaskFeatures(admin, DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS)
             dpm.setStatusBarDisabled(admin, true)
@@ -688,31 +671,6 @@ class MainActivity : ComponentActivity() {
         @JavascriptInterface
         fun version(): String = BuildConfig.VERSION_NAME
 
-        /** Is this tablet game installed? (only her games: Unicorn Railways, Unicorn Park) */
-        @JavascriptInterface
-        fun hasApp(pkg: String): Boolean = pkg in GAMES && packageManager.getLaunchIntentForPackage(pkg) != null
-
-        /** Opens one of her tablet games; the clock comes back when it closes, on Home, or after maxSec seconds
-         *  (0 = no limit). Works while the clock is locked as device owner (the games are allowed in lock mode). */
-        @JavascriptInterface
-        fun launchGame(pkg: String, maxSec: Int): Boolean {
-            if (pkg !in GAMES) return false
-            val i = packageManager.getLaunchIntentForPackage(pkg) ?: return false
-            if (lockState() == ActivityManager.LOCK_TASK_MODE_PINNED) return false   // screen pinning can't hand over
-            ui.post {
-                try {
-                    gamePkg = pkg
-                    ui.removeCallbacks(gameTimeUp)
-                    if (maxSec > 0) ui.postDelayed(gameTimeUp, maxSec * 1000L)
-                    startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                } catch (e: Exception) {
-                    gamePkg = null
-                    Log.w(TAG, "launch $pkg", e)
-                }
-            }
-            return true
-        }
-
         @JavascriptInterface
         fun status(): String {
             val canOpenAlone = isOwner() || Build.VERSION.SDK_INT < 29 || Settings.canDrawOverlays(this@MainActivity)
@@ -841,5 +799,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-private val GAMES = arrayOf("com.unicornclock.railways", "com.unicornclock.park")

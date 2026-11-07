@@ -278,7 +278,7 @@
     function esLoadPlugs() {   // the plugins' preset lists, fetched once
       if (esPlugLoad) return esPlugLoad;
       const P = catL().filter(c => c.kind === "instrument" && (!c.native || /^surge xt$/i.test(c.name)));
-      return (esPlugLoad = Promise.all(P.map(c => EB().plugPresets(c.key).catch(() => null))).then(() => { esPaint(true, true); }));
+      return (esPlugLoad = Promise.all(P.map(c => EB().plugPresets(c.key).catch(() => null))).then(() => { esFI = null; esPaint(true, true); }));   // (244: the search list picks them up)
     }
     function esTypeItems(cur) {
       const by = new Map(allEntries().map(e => [e.id, e])), out = {}, seen = new Set();
@@ -428,7 +428,7 @@
       sel.addEventListener("change", () => { esMode = sel.value; try { localStorage.setItem(ES_MODE_KEY, esMode); } catch (e) {} es.scrollTop = 0; esPaint(true, true); });
       head.appendChild(sel);
       const fb = document.createElement("button"); fb.className = "es-fb" + (ESF.on ? " on" : ""); fb.textContent = "Find"; fb.title = "Find a sound by its name or what it is (dark, 80s, bass, FM…)"; fb.setAttribute("aria-pressed", String(ESF.on));
-      fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
+      fb.addEventListener("click", () => { ESF.on = !ESF.on; if (!ESF.on) ESF.q = ""; else { esFI = null; setTimeout(() => { try { esFindList(); } catch (e) {} }, 30); } esPaint(true, true); if (ESF.on) setTimeout(() => { const i = es.querySelector(".es-q"); if (i) i.focus(); }, 0); });
       head.appendChild(fb);
       // (232) one place for what's set aside: Hidden, Classic and the key splits, each a drop-down
       { const nh = Object.keys(HID).length, nc = Object.keys(clsBuild()).length, ab = document.createElement("button"); ab.className = "es-fb es-hb es-cb" + (ESH.on ? " on" : ""); ab.textContent = "Set aside · " + (nh + nc);
@@ -437,9 +437,9 @@
       const hs = document.createElement("small"); hs.textContent = "tap to play · + to add"; head.appendChild(hs);
       es.appendChild(head);
       if (ESH.on) { esAsideView(); return; }
-      if (ESF.on && esMode !== "fx") {
+      if (ESF.on) {   // (244: in Effects too, where it finds effects)
         const row = document.createElement("div"); row.className = "es-find";
-        const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
+        const q = document.createElement("input"); q.className = "es-q"; q.type = "search"; q.placeholder = esMode === "fx" ? "An effect: reverb, tape echo, chorus, Juno…" : "Name or attribute: \"Juno Strings\", dark pad, 80s bass…"; q.value = ESF.q; q.setAttribute("aria-label", "Find a sound");
         const tg = document.createElement("button"); tg.className = "es-tg" + (ESF.tags ? " on" : ""); tg.textContent = "Attributes"; tg.title = "Show each sound's attributes (what Find matches on)"; tg.setAttribute("aria-pressed", String(ESF.tags));
         tg.addEventListener("click", () => { ESF.tags = !ESF.tags; try { localStorage.setItem("nightbloom-es-tags", ESF.tags ? "1" : ""); } catch (e) {} esPaint(true, true); });
         row.append(q, tg); es.appendChild(row);
@@ -541,12 +541,20 @@
       }
       return L;
     }
+    // (244) the list to search is built once and kept while Find is in use (it was rebuilt, with every plugin's presets,
+    // on each search), with each entry's text lowercased ahead
+    let esFI = null, esFIat = 0;
+    function esFindList() {
+      if (esFI && performance.now() - esFIat < 30000) return esFI;
+      esFI = esFindItems().map(it => { const n = it.name.toLowerCase(); return { it, n, hay: n + " " + (it.sub || "").toLowerCase() + " " + it.tags.join(" ") }; }); esFIat = performance.now(); return esFI;
+    }
     function esFindPaint(res) {
       res.innerHTML = ""; const raw = ESF.q.trim(); if (!raw) return;
+      const t0 = performance.now();
       const exact = /^".*"$/.test(raw), q = raw.replace(/^"|"$/g, "").toLowerCase(), words = q.split(/\s+/).filter(Boolean);
-      const scored = [];
-      for (const it of esFindItems()) {
-        const n = it.name.toLowerCase(), hay = n + " " + (it.sub || "").toLowerCase() + " " + it.tags.join(" ");
+      const scored = [], fxOnly = esMode === "fx";
+      for (const { it, n, hay } of esFindList()) {
+        if (fxOnly && it.kind !== "effect") continue;
         let sc = 0;
         if (exact) { if (n === q) sc = 100; else continue; }
         else if (n === q) sc = 100; else if (n.startsWith(q)) sc = 80; else if (n.includes(q)) sc = 60;
@@ -558,7 +566,8 @@
       if (scored.length && !esSaved().includes(raw)) { const sb = document.createElement("button"); sb.className = "es-more es-savebtn"; sb.textContent = "☆ Keep “" + raw + "” as a one-tap search"; sb.addEventListener("click", () => { esSavedSet(esSaved().concat(raw).slice(-12)); esPaint(true, true); }); res.appendChild(sb); }
       const h = document.createElement("div"); h.className = "es-sec"; h.textContent = scored.length ? scored.length + (scored.length === 1 ? " found" : " found") + (scored.length > 150 ? " · the first 150" : "") : "Nothing matches “" + raw + "”"; res.appendChild(h);
       scored.slice(0, 150).forEach(([, it]) => { const r = esPRow(it.name, (it.sub || "") + (it.kind && it.sub !== it.kind ? " · " + it.kind : ""), it.on, esPick(async () => { ESF.focus = false; await it.pick(); }), it.addf, it.tags, it.id); res.appendChild(r); });
-      if (!scored.length) { const p = document.createElement("p"); p.className = "es-none"; p.textContent = "Try part of a name, or what it is: bass, pad, bright, dark, 80s, FM, choir, plugin…"; res.appendChild(p); }
+      if (!scored.length) { const p = document.createElement("p"); p.className = "es-none"; p.textContent = fxOnly ? "Try part of a name, or what it does: reverb, delay, chorus, distortion, filter…" : "Try part of a name, or what it is: bass, pad, bright, dark, 80s, FM, choir, plugin…"; res.appendChild(p); }
+      window.__esFindMs = Math.round(performance.now() - t0);
     }
     es.addEventListener("focusin", e => { if (e.target.classList && e.target.classList.contains("es-q")) ESF.focus = true; });
     es.addEventListener("focusout", e => { if (e.target.classList && e.target.classList.contains("es-q")) setTimeout(() => { if (!es.contains(document.activeElement) || !document.activeElement.classList.contains("es-q")) ESF.focus = false; }, 0); });
