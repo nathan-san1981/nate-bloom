@@ -424,7 +424,7 @@ function defaultChild() {
     features: { letters: false, copy: false, songs: false, beat: false, fingers: false, reading: false, stickers: false, freeplay: false },
     levels: { letters: 1, copy: 1, beat: 1, fingers: 1, reading: 1 },
     songs: { hcb: false, mary: false, twinkle: false, row: false, ode: false, london: false },
-    beatClick: false, beatMarch: false, songsListen: false,
+    beatClick: false, beatMarch: false, songsListen: false, voice: false,
     stickers: []
   };
 }
@@ -5237,6 +5237,48 @@ SCREENS.adjustMusic = (id) => {
   return () => sv && sv.destroy();
 };
 
+/* ==== voice.js ==== */
+'use strict';
+/* ===================== Voice: spoken prompts for child mode =====================
+   Clips are made once on the computer (keys-music/make-voice.sh, Piper) and copied onto this device,
+   so they play offline. Off until switched on in parent controls. */
+const Voice = {
+  urls: {}, cur: null, db: null,
+  on() { const p = State.profile; return !!(p && p.type === 'child' && p.child.voice); },
+  async idb() {
+    if (this.db) return this.db;
+    this.db = await new Promise((res, rej) => { const r = indexedDB.open('keys-voice', 1); r.onupgradeneeded = () => r.result.createObjectStore('clips'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    return this.db;
+  },
+  async put(k, blob) { const db = await this.idb(); await new Promise((res, rej) => { const t = db.transaction('clips', 'readwrite'); t.objectStore('clips').put(blob, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); },
+  async get(k) { const db = await this.idb(); return new Promise(res => { const r = db.transaction('clips').objectStore('clips').get(k); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); }); },
+  /* copy every clip from the computer onto this device */
+  async download(progress) {
+    const base = MyMusic.base(); if (base === null) throw new Error('Not connected to the computer');
+    const list = await (await fetch(base + '/api/music/voice/list', { cache: 'no-store' })).json();
+    if (!list.items || !list.items.length) throw new Error('No voice on the computer yet — run make-voice.sh there');
+    let n = 0;
+    for (const k of list.items) {
+      const r = await fetch(base + '/api/music/voice/' + k, { cache: 'no-store' }); if (!r.ok) continue;
+      await this.put(k, await r.blob()); n++; progress && progress(n, list.items.length);
+    }
+    this.urls = {};
+    State.settings.voiceClips = { name: list.voice || '', n, keys: list.items }; State.save();
+    return n;
+  },
+  has() { return !!(State.settings.voiceClips && State.settings.voiceClips.n); },
+  async say(k, force = false) {
+    if (!force && !this.on()) return;
+    try {
+      if (!this.urls[k]) { const b = await this.get(k); if (!b) return; this.urls[k] = URL.createObjectURL(b); }
+      if (this.cur) { this.cur.pause(); }
+      const a = new window.Audio(this.urls[k]); this.cur = a; a.volume = 1; await a.play();
+    } catch (e) { }
+  },
+  stop() { if (this.cur) { this.cur.pause(); this.cur = null; } },
+  praise() { this.say(pick(['great', 'yay', 'nice'])); }
+};
+
 /* ==== child.js ==== */
 'use strict';
 /* ===================== child mode =====================
@@ -5321,6 +5363,8 @@ SCREENS.parent = () => {
       <div class="card"><h3>This week</h3><p class="muted" style="margin-top:6px">Played on ${played} of the last 7 days · ${mins} minutes · ${rounds} round${rounds === 1 ? '' : 's'} finished. Five to ten minutes a day is plenty at this age.</p></div>
       <div class="card">${CHILD_FEATURES.map(([k, t, d]) => `<div class="field"><div class="lbl"><b>${t}</b><div class="h">${d}</div>${c.levels[k] !== undefined ? `<div style="margin-top:8px">${lvl(k)}</div>` : ''}</div><button class="switch ${c.features[k] ? 'on' : ''}" data-feat="${k}" aria-label="${t}"></button></div>`).join('')}</div>
       <div class="card"><h3>Letter songs</h3>${Object.entries(CHILD_SONGS).map(([k, s]) => `<div class="field"><div class="lbl">${esc(s.title)}</div><button class="switch ${c.songs[k] ? 'on' : ''}" data-song="${k}"></button></div>`).join('')}</div>
+      <div class="card"><div class="field"><div class="lbl"><b>Voice</b><div class="h">A friendly voice says each prompt ("Find C", "Finger three", "Great job!"), so she doesn't need to read. Made once on the computer, then kept on this device.</div></div><button class="switch ${c.voice ? 'on' : ''}" data-opt="voice"></button></div>
+        <div class="row" style="gap:10px;flex-wrap:wrap"><span class="muted small vstat">${Voice.has() ? `${State.settings.voiceClips.n} clips on this device${State.settings.voiceClips.name ? ' · ' + esc(State.settings.voiceClips.name) : ''}` : 'Voice not on this device yet'}</span><span class="spacer"></span>${Voice.has() ? '<button class="btn ghost" data-vtest>Hear it</button>' : ''}<button class="btn" data-vget>${Voice.has() ? 'Update from the computer' : 'Get the voice from the computer'}</button></div></div>
       <div class="card"><div class="field"><div class="lbl"><b>Click in Steady beat</b><div class="h">Off = the circle only, silent</div></div><button class="switch ${c.beatClick ? 'on' : ''}" data-click></button></div>
         <div class="field"><div class="lbl"><b>March first in Steady beat</b><div class="h">Before tapping, a marching figure shows the beat for 8 counts so she can march or clap it first</div></div><button class="switch ${c.beatMarch ? 'on' : ''}" data-opt="beatMarch"></button></div>
         <div class="field"><div class="lbl"><b>Listen and sing first in Letter songs</b><div class="h">The piano plays the song once with the keys lighting up, then it's her turn</div></div><button class="switch ${c.songsListen ? 'on' : ''}" data-opt="songsListen"></button></div>
@@ -5335,6 +5379,8 @@ SCREENS.parent = () => {
     const f = e.target.closest('[data-feat]'); if (f) { c.features[f.dataset.feat] = !c.features[f.dataset.feat]; f.classList.toggle('on'); State.save(); }
     const s = e.target.closest('[data-song]'); if (s) { c.songs[s.dataset.song] = !c.songs[s.dataset.song]; s.classList.toggle('on'); State.save(); }
     const o = e.target.closest('[data-opt]'); if (o) { c[o.dataset.opt] = !c[o.dataset.opt]; o.classList.toggle('on'); State.save(); }
+    if (e.target.closest('[data-vtest]')) Voice.say('hello', true);
+    if (e.target.closest('[data-vget]')) { const st = $('.vstat', el); st.textContent = 'Copying…'; Voice.download((i, n) => st.textContent = `Copying ${i} of ${n}…`).then(n => { toast(`Voice ready: ${n} clips`); go('parent'); }).catch(er => { st.textContent = er.message; }); }
     if (e.target.closest('[data-click]')) { c.beatClick = !c.beatClick; e.target.closest('[data-click]').classList.toggle('on'); State.save(); }
     const lv = e.target.closest('[data-lvl] button'); if (lv) { const k = lv.parentElement.dataset.lvl; c.levels[k] = +lv.dataset.v; $$('button', lv.parentElement).forEach(b => b.classList.toggle('on', b === lv)); State.save(); }
     if (e.target.closest('[data-clearst]')) ask('Clear all stickers?', { ok: 'Clear', danger: true }).then(y => { if (y) { c.stickers = []; State.save(); go('parent'); } });
@@ -5355,11 +5401,12 @@ function childFrame(title) {
   const offNote = Bus.on('note', e => { if (e.type === 'on') kb.press(e.note, e.vel); else kb.release(e.note); });
   const offDemo = Bus.on('demo:light', e => { if (e.on) kb.mark(e.note, 'demo'); else kb.unmark(e.note, 'demo'); });
   el.addEventListener('click', e => { if (e.target.closest('[data-back]')) go('childHome'); });
-  return { el, stage: $('.stage', el), kb, cleanup: () => { offNote(); offDemo(); kb.destroy(); } };
+  return { el, stage: $('.stage', el), kb, cleanup: () => { Voice.stop(); offNote(); offDemo(); kb.destroy(); } };
 }
 function roundDone(F, next) {
   const c = State.profile.child;
   const idx = awardSticker();
+  Voice.say(c.features.stickers ? 'sticker' : pick(['great', 'yay']));
   F.stage.innerHTML = `<div style="text-align:center">${c.features.stickers ? `<div class="sticker" style="width:220px;height:220px;margin:auto">${stickerSVG(idx)}</div>` : `<div style="font-size:120px;color:var(--ok);line-height:1">✓</div>`}<button class="btn primary big" data-again style="margin-top:26px">${ICONS.again}Again</button></div>`;
   F.stage.querySelector('[data-again]').addEventListener('click', next);
 }
@@ -5368,17 +5415,19 @@ SCREENS.child_letters = () => {
   const F = childFrame('Letter land');
   const lv = State.profile.child.levels.letters;
   const pool = lv === 1 ? ['C'] : lv === 2 ? ['C', 'D', 'E'] : ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  let n = 0, off = null;
+  let n = 0, off = null, lastNudge = 0;
   const round = () => {
     n = 0; F.kb.clear('ok');
     const ask = () => {
       if (n >= 5) { off && off(); return roundDone(F, round); }
       const L = lv === 1 ? 'C' : pick(pool);
+      Voice.say('find_' + L.toLowerCase());
       F.stage.innerHTML = `<div style="text-align:center"><div class="lb colored" style="width:200px;height:220px;font-size:140px;border-radius:30px;margin:auto;background:var(--c-${L})">${L}</div><div style="display:flex;gap:10px;justify-content:center;margin-top:24px">${[...Array(5)].map((_, i) => `<span style="width:22px;height:22px;border-radius:50%;background:${i < n ? 'var(--ok)' : 'var(--panel2)'}"></span>`).join('')}</div></div>`;
       off && off();
       off = Bus.on('note', e => {
         if (e.type !== 'on' || e.src === 'demo') return;
         if (letterOf(e.note) === L && !isBlack(e.note)) { F.kb.mark(e.note, 'ok', 400); n++; setTimeout(ask, 450); off(); off = null; }
+        else if (now() - (lastNudge || 0) > 4000) { lastNudge = now(); Voice.say('try_again'); }
       });
     };
     ask();
@@ -5398,11 +5447,13 @@ SCREENS.child_copy = () => {
     const pat = []; for (let i = 0; i < len; i++) pat.push(i === 0 ? 60 : pick(pool));
     F.stage.innerHTML = `<div style="display:flex;gap:16px">${pat.map(m => `<div class="lb colored" style="width:110px;height:120px;font-size:64px;background:var(--c-${letterOf(m)});opacity:.35">${letterOf(m)}</div>`).join('')}</div>`;
     const cells = $$('.lb', F.stage);
+    if (n === 0) Voice.say('listen');
     tr = new Transport({ tempo: 70, countIn: 0, metro: false, length: pat.length });
     scheduleNotes(tr, pat.map((m, i) => ({ midi: m, start: i, dur: 0.9, vel: 80, hand: 'R' })));
     tr.onTick = b => cells.forEach((c, i) => c.style.opacity = b >= i - 0.05 && b < i + 0.95 ? 1 : 0.35);
     tr.onEnd = () => {
       cells.forEach(c => c.style.opacity = 0.35);
+      if (n === 0) Voice.say('your_turn');
       let i = 0; F.kb.setTargets([{ midi: pat[0] }]);
       off && off();
       off = Bus.on('note', e => {
@@ -5435,10 +5486,11 @@ SCREENS.child_songs = () => {
     F.stage.onclick = null;
     const sc = compileScore({ rh: CHILD_SONGS[k].rh, tempo: 80 });
     if (c.songsListen && !listened) {
+      Voice.say('listen_sing');
       F.stage.innerHTML = `<div style="text-align:center"><div style="font-size:30px;font-weight:700">Listen and sing along</div><button class="btn primary big" data-myturn style="margin-top:30px;display:none">${ICONS.play}My turn</button></div>`;
       const s = new Session({ score: sc, mode: 'demo', tempo: 80, onEnd: () => { const b = F.stage.querySelector('[data-myturn]'); if (b) b.style.display = ''; } });
       demoS = s; Audio.unlock().then(() => s.start());
-      F.stage.querySelector('[data-myturn]').addEventListener('click', () => { F.stage.innerHTML = ''; play(k, true); });
+      F.stage.querySelector('[data-myturn]').addEventListener('click', () => { F.stage.innerHTML = ''; Voice.say('your_turn'); play(k, true); });
       return;
     }
     const strip = new LetterStrip(F.stage, sc.notes, { colors: true, fingers: false });
@@ -5471,9 +5523,10 @@ SCREENS.child_beat = () => {
   const march = () => {
     $('[data-go]', F.stage).classList.add('hidden');
     const fig = h(`<div class="marcher" style="font-size:22px;font-weight:700;margin-top:18px">March!</div>`); dots.innerHTML = ''; dots.appendChild(fig);
+    Voice.say('march');
     const mt = new Transport({ tempo, countIn: 0, metro: c.beatClick, length: 8 });
     mt.onTick = b => { const k = Math.floor(b); const f = b - k; beat.style.transform = `translateX(${k % 2 ? 26 : -26}px) scale(${f < 0.12 ? 1.1 : 1})`; beat.style.opacity = f < 0.12 ? 1 : 0.6; fig.textContent = `March! ${Math.min(8, k + 1)}`; };
-    mt.onEnd = () => { beat.style.transform = ''; fig.textContent = 'Now tap the beat on the piano'; marched = true; tr = null; setTimeout(start, 900); };
+    mt.onEnd = () => { beat.style.transform = ''; fig.textContent = 'Now tap the beat on the piano'; Voice.say('tap_beat'); marched = true; tr = null; setTimeout(start, 900); };
     tr = mt; Audio.unlock().then(() => mt.start(400));
   };
   const start = () => {
@@ -5525,6 +5578,7 @@ SCREENS.child_fingers = () => {
       const hand = lv === 3 ? pick(['R', 'L']) : 'R';
       const fin = 1 + Math.floor(Math.random() * (lv === 1 ? 3 : 5));
       const target = (hand === 'R' ? RH : LH)[fin - 1];
+      Voice.say(`fin_${hand.toLowerCase()}${fin}`);
       F.stage.innerHTML = `<div style="text-align:center"><div style="font-size:120px;font-weight:800;line-height:1;color:var(--accent)">${fin}</div><div class="muted" style="font-size:22px;margin:6px 0">${hand === 'R' ? 'right hand' : 'left hand'}</div>${handSVG(hand, fin)}</div>`;
       F.kb.setTargets(lv === 1 ? [{ midi: target }] : []);
       off && off();
@@ -5561,6 +5615,7 @@ SCREENS.child_reading = () => {
     const ask = () => {
       if (n >= 5) { off && off(); return roundDone(F, round); }
       let m; do { m = pick(pool); } while (m === prev && pool.length > 1); prev = m;
+      if (n === 0) Voice.say('read_note');
       F.stage.innerHTML = `<div style="text-align:center">${draw(m)}<div style="display:flex;gap:10px;justify-content:center;margin-top:14px">${[...Array(5)].map((_, i) => `<span style="width:22px;height:22px;border-radius:50%;background:${i < n ? 'var(--ok)' : 'var(--panel2)'}"></span>`).join('')}</div></div>`;
       off && off();
       off = Bus.on('note', e => { if (e.type !== 'on' || e.src === 'demo') return; if (e.note % 12 === m % 12 && !isBlack(e.note)) { F.kb.mark(e.note, 'ok', 400); n++; off(); off = null; setTimeout(ask, 450); } });

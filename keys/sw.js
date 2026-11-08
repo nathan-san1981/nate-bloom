@@ -1,5 +1,5 @@
 // Keys offline cache. The app page is network-first (updates arrive when online, the cached copy is the offline fallback).
-const CACHE = "keys-739ee50b3c";
+const CACHE = "keys-bae1b94c9a";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("keys-") && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
