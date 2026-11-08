@@ -68,8 +68,12 @@ jobs:
 
       - name: Package (.deb, ARM64)
         id: build
+        env:
+          USE_SYSTEM_FPM: "true"   # (electron-builder's own fpm is an x86 build; on the ARM runner it's the gem)
         run: |
           set -o pipefail
+          command -v fpm >/dev/null || { sudo apt-get install -y -qq ruby ruby-dev >/dev/null && sudo gem install fpm --no-document -v 1.15.1 >/dev/null; }
+          fpm --version
           cd linux && npx --no-install electron-builder --linux deb --arm64 --publish never -c.extraMetadata.version=$NB_VERSION -c.artifactName='NateBloom-pi-${version}-${arch}.${ext}' 2>&1 | tee /tmp/nb-logs/build.log
           ls -la dist | tee -a /tmp/nb-logs/build.log
 
