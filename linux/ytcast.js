@@ -111,10 +111,11 @@ class BoxPlayer extends Player {
       const done = ok => { const i = handlers.indexOf(h); if (i >= 0) handlers.splice(i, 1); res(ok); };
       handlers.push(h); setTimeout(() => done(false), 30000);
     });
-    const opts = position > 0 ? "start=" + Math.floor(position) : "";
-    try { await cmd("loadfile", url, "replace", ...(opts ? [opts] : [])); } catch (e) { return false; }
+    // (no start= option: loadfile's argument order changed in mpv 0.38, so seek once it's loaded instead)
+    try { await cmd("loadfile", url, "replace"); } catch (e) { return false; }
     await set("pause", false); this.paused = false;
     const ok = await loaded;
+    if (ok && position > 1) await cmd("seek", position, "absolute").catch(() => {});
     if (!ok && tok === this.token) now("stopped");
     return ok;
   }
@@ -128,6 +129,7 @@ class BoxPlayer extends Player {
   async doGetDuration() { return (await get("duration")) || 0; }
 }
 const player = new BoxPlayer();
+if (process.env.NB_YTCAST_TEST) global.__nbYtPlayer = player;   // (tests drive the player directly)
 
 // the end of a song: the receiver doesn't notice by itself, so move on to the next one in the phone's queue
 handlers.push(async m => {
