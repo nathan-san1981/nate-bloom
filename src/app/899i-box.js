@@ -25,7 +25,9 @@
           el = document.createElement("div"); el.id = "bxStrip"; el.className = "bx-strip"; el.setAttribute("aria-live", "polite");
           const btn = document.createElement("button"); btn.type = "button"; btn.className = "btn"; btn.id = "bxBtn"; btn.textContent = "Box…"; btn.title = "The box: text size, screen, Wi-Fi, update, restart, shut down";
           btn.addEventListener("click", () => bxOpen());
-          const gear = $b("plGear"); top.insertBefore(el, gear || null); top.insertBefore(btn, gear || null);
+          const dj = document.createElement("button"); dj.type = "button"; dj.className = "btn"; dj.id = "bxDjBtn"; dj.textContent = "DJ"; dj.title = "The DJ: two decks, songs from a USB stick";
+          dj.addEventListener("click", () => BX.dj());
+          const gear = $b("plGear"); top.insertBefore(el, gear || null); top.insertBefore(dj, gear || null); top.insertBefore(btn, gear || null);
         }
         BX.el = el; return el;
       }
@@ -96,6 +98,93 @@
         const info = $b("bxInfo"); if (!info) return;
         info.textContent = [v, s.temp != null ? Math.round(s.temp) + "°C" : "", s.undervolt ? "power supply too weak" : "", s.output ? "sound to " + s.output : "no headphone output found", s.wifi ? "Wi-Fi " + (s.wifi === "enabled" ? "on" : s.wifi) : ""].filter(Boolean).join(" · ");
       }
+      // ---- DJ on the box: one tap from Play (DJ in the top bar) and back (▶ Play in the DJ's top bar) ----
+      function bxPlayBtnInDj() {
+        const top = document.querySelector("#djView .dj-top"); if (!top || $b("bxPlayBtn")) return;
+        const b = document.createElement("button"); b.type = "button"; b.className = "btn primary"; b.id = "bxPlayBtn"; b.textContent = "▶ Play"; b.title = "Back to Play";
+        b.addEventListener("click", () => bxGoPlay());
+        const done = $b("djDone"); if (done) done.after(b); else top.prepend(b);
+      }
+      function bxGoDj() {
+        try { if (window.__live21) window.__live21.plClose(); } catch (e) {}
+        try { window.__live27.bdGo("dj"); } catch (e) {}
+        setTimeout(bxPlayBtnInDj, 50);
+      }
+      function bxGoPlay() {
+        try { bxMusicClose(); } catch (e) {}
+        const d = $b("djView"); if (d && !d.hidden) { const done = $b("djDone"); if (done) done.click(); }
+        try { if (typeof shGo === "function") shGo("play"); else window.__live21.plOpen(); } catch (e) { try { window.__live21.plOpen(); } catch (er) {} }
+      }
+      BX.dj = bxGoDj; BX.play = bxGoPlay;
+      // ---- songs from a USB stick: Load… on a deck opens this list instead of a file dialog (no desktop on the box).
+      // The big knob walks the list and its click loads the song; Shift + click closes it. ----
+      const M = BX.m = { open: false, songs: [], sticks: [], sel: 0, el: null, t: 0, bypass: false };
+      const djFileEl = () => $b("djFile");
+      document.addEventListener("click", e => {
+        const f = djFileEl(); if (!f || e.target !== f || M.bypass || !api || !api.music) return;
+        e.preventDefault(); e.stopImmediatePropagation(); bxMusicOpen();
+      }, true);
+      async function bxMusicScan() {
+        let r = null; try { r = await api.music(); } catch (e) {}
+        const songs = (r && r.songs) || [], key = songs.map(s => s.path).join("\n");
+        if (key !== M.key) { M.key = key; M.songs = songs; M.sticks = (r && r.sticks) || []; M.sel = Math.min(M.sel, Math.max(0, songs.length - 1)); bxMusicPaint(); }
+      }
+      function bxMusicOpen() {
+        if (!M.el) {
+          const el = document.createElement("div"); el.className = "bx-sheet bx-music"; el.id = "bxMusic"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Songs on the USB stick");
+          el.innerHTML = `<div class="bx-card">
+              <div class="bx-head"><strong>Songs</strong><span class="bx-info" id="bxMusicInfo"></span><span class="bx-sp"></span>
+                <button type="button" class="btn" id="bxMusicOther">Other file…</button><button type="button" class="btn primary" id="bxMusicClose">Close</button></div>
+              <div class="bx-list" id="bxMusicList"></div>
+              <p class="bx-note">Big knob: pick · click: load onto the deck · Shift + click: close. Songs are read from the stick; nothing is changed on it.</p>
+            </div>`;
+          document.body.appendChild(el); M.el = el;
+          el.addEventListener("click", e => { if (e.target === el) bxMusicClose(); });
+          $b("bxMusicClose").addEventListener("click", () => bxMusicClose());
+          $b("bxMusicOther").addEventListener("click", () => { bxMusicClose(); const f = djFileEl(); if (!f) return; M.bypass = true; try { f.click(); } finally { M.bypass = false; } });
+        }
+        M.open = true; M.el.hidden = false; M.key = null; bxMusicPaint(); bxMusicScan();
+        clearInterval(M.t); M.t = setInterval(() => { if (M.open) bxMusicScan(); }, 3000);   // (a stick plugged in while it's open shows up)
+        try { ML.lay = null; } catch (e) {}
+      }
+      function bxMusicClose() {
+        if (!M.open) return; M.open = false; clearInterval(M.t); if (M.el) M.el.hidden = true; try { ML.lay = null; } catch (e) {}
+      }
+      function bxMusicPaint() {
+        if (!M.el) return;
+        const list = $b("bxMusicList"), info = $b("bxMusicInfo");
+        info.textContent = M.songs.length ? M.songs.length + " songs" + (M.sticks.length > 1 ? " on " + M.sticks.length + " sticks" : "") : "";
+        if (!M.songs.length) { list.innerHTML = `<div class="bx-empty">${M.sticks.length ? "No songs on the stick (MP3, WAV, M4A, AAC, FLAC, OGG)." : "Plug in a USB stick with songs: it shows up here in a few seconds."}</div>`; return; }
+        let last = null, html = "";
+        M.songs.forEach((s, i) => {
+          const fold = s.folder || "";
+          if (fold !== last) { html += `<div class="bx-fold">${esc(fold || "On the stick")}</div>`; last = fold; }
+          html += `<button type="button" class="bx-song${i === M.sel ? " sel" : ""}" data-i="${i}">${esc(s.name)}</button>`;
+        });
+        list.innerHTML = html;
+        list.querySelectorAll(".bx-song").forEach(b => b.addEventListener("click", () => { M.sel = +b.dataset.i; bxMusicLoad(); }));
+        bxMusicShowSel();
+      }
+      function bxMusicShowSel() {
+        const list = $b("bxMusicList"); if (!list) return;
+        list.querySelectorAll(".bx-song").forEach(b => b.classList.toggle("sel", +b.dataset.i === M.sel));
+        const b = list.querySelector('.bx-song[data-i="' + M.sel + '"]'); if (b) b.scrollIntoView({ block: "nearest" });
+      }
+      function bxMusicMove(d) { if (!M.songs.length) return; M.sel = (M.sel + d + M.songs.length) % M.songs.length; bxMusicShowSel(); try { mlHud("Song", M.songs[M.sel].name, null); } catch (e) {} }
+      async function bxMusicLoad() {
+        const s = M.songs[M.sel], f = djFileEl(); if (!s || !f) return;
+        bxMusicClose(); say("Opening " + s.name + "…");
+        let buf = null; try { buf = await api.read(s.path); } catch (e) {}
+        if (!buf) { say("Couldn't read " + s.name + " from the stick"); return; }
+        const ext = (s.file.split(".").pop() || "").toLowerCase(), type = { mp3: "audio/mpeg", wav: "audio/wav", m4a: "audio/mp4", aac: "audio/aac", flac: "audio/flac", ogg: "audio/ogg", opus: "audio/ogg" }[ext] || "";
+        try { const dt = new DataTransfer(); dt.items.add(new File([buf], s.file, { type })); f.files = dt.files; f.dispatchEvent(new Event("change", { bubbles: true })); }
+        catch (e) { say("Couldn't open " + s.name); }
+      }
+      { const l0 = L.dj; L.dj = function () {
+          const o = l0.apply(this, arguments);
+          if (M.open) o.M = { turn: ["Pick a song", d => bxMusicMove(d)], click: ["Load it onto the deck", () => bxMusicLoad()], sturn: o.M && o.M.sturn, sclick: ["Close the song list", () => bxMusicClose()] };
+          return o;
+        }; }
       // ---- start: Play, as soon as the page has its parts ----
       const go = () => {
         // MIDI on at once: elsewhere it waits for the first tap (a browser asks permission), but the box may never be

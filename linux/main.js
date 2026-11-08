@@ -298,6 +298,35 @@ ipcMain.handle("nb:box-status", async () => {
   if (s.throttled != null) { s.undervolt = !!(s.throttled & 0x1); s.hot = !!(s.throttled & 0x8) || (s.temp || 0) >= 80; }
   return s;
 });
+// (box) songs from a USB stick for the DJ: nb-box-helper mounts each stick read-only under /media/nb-usb/<device>;
+// the page lists them and reads the one it loads. Nothing outside that folder can be listed or read.
+const USB_ROOT = "/media/nb-usb";
+const MUSIC = /\.(mp3|wav|m4a|aac|flac|ogg|opus|aif|aiff)$/i;
+ipcMain.handle("nb:box-music-list", async () => {
+  if (!BOX) return null;
+  const out = [];
+  async function walk(dir, depth, stick) {
+    if (depth > 5 || out.length >= 3000) return;
+    let ents = []; try { ents = await fsp.readdir(dir, { withFileTypes: true }); } catch (e) { return; }
+    ents.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+    for (const en of ents) {
+      if (en.name.startsWith(".") || out.length >= 3000) continue;
+      const p = path.join(dir, en.name);
+      if (en.isDirectory()) await walk(p, depth + 1, stick);
+      else if (en.isFile() && MUSIC.test(en.name)) out.push({ path: p, name: en.name.replace(/\.[^.]+$/, ""), file: en.name, folder: path.relative(path.join(USB_ROOT, stick), dir) || "", stick });
+    }
+  }
+  let sticks = []; try { sticks = (await fsp.readdir(USB_ROOT, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name); } catch (e) {}
+  for (const s of sticks) await walk(path.join(USB_ROOT, s), 0, s);
+  return { sticks, songs: out };
+});
+ipcMain.handle("nb:box-music-read", async (e, p) => {
+  if (!BOX) return null;
+  const real = await fsp.realpath(String(p)).catch(() => "");
+  if (!real.startsWith(USB_ROOT + path.sep) || !MUSIC.test(real)) return null;
+  const st = await fsp.stat(real).catch(() => null); if (!st || st.size > 400 * 1048576) return null;
+  const b = await fsp.readFile(real); return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+});
 ipcMain.handle("nb:box-do", async (e, action) => {
   if (!BOX || !BOX_ACTIONS.has(String(action))) return { ok: false, error: "not an action the box knows" };
   return boxRun([String(action)]);

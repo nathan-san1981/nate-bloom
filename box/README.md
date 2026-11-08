@@ -48,6 +48,11 @@ Chromium kiosk.
 
 - Plug in the controller and the headphone cable before or after power-on; both are picked up when plugged in.
 - The MiniLab's big knob turns through sounds, pads play the drums, knobs and faders follow the screen.
+  Shift + turn changes knob pages, click stars the sound, Shift + click samples the last 2 bars onto a pad.
+- **Sample** (Play): grab 1–8 bars of what you just played, or record the mic, onto pads S1–S4.
+- **DJ** (top bar in Play) opens the two decks; **▶ Play** goes back. Plug in a USB stick and tap a deck's
+  **Load… → Song file…**: the stick's songs are listed by folder. Big knob picks, click loads, Shift + click closes.
+  The stick is mounted read-only — nothing on it is changed — and can be pulled at any time.
 - **Box…** (top bar in Play): text size, turning the screen if it's upside down, Wi-Fi, app update, restart, reboot,
   and **hold to shut down**. Pulling the power is safe too (logs live in memory), but shut down when you can.
 - The chips next to Box… show the temperature, **⚡ low power** if the supply or battery can't keep up (use the 45 W
@@ -55,7 +60,7 @@ Chromium kiosk.
 
 ## What the installer changes
 
-- Packages: `cage`, `wlr-randr`, PipeWire + WirePlumber, `rtkit`, the ARM64 Nate Bloom package (or Chromium).
+- Packages: `cage`, `wlr-randr`, `exfatprogs`, `ntfs-3g`, PipeWire + WirePlumber, `rtkit`, the ARM64 Nate Bloom package (or Chromium).
 - `/boot/firmware/config.txt`: one marked `nb-box` block (Touch Display 2 overlay, `usb_max_current_enable=1` so the
   Pi powers the controller and the cable at full current, no splash) and HDMI audio off (`vc4-kms-v3d,noaudio`) so the
   USB cable is the only sound output. The original is kept as `config.txt.before-nb-box`.
@@ -66,6 +71,8 @@ Chromium kiosk.
   `threadirqs`. The native synth engine gets three threads (`NB_ENG_THREADS=3` in `session.sh`).
 - Start-up: `nb-box.service` runs `cage` on tty1 as your user; `nb-box-helper` (allowed by `/etc/sudoers.d/nb-box`,
   nothing else) does the few root jobs Box… needs.
+- USB sticks: a udev rule starts `nb-box-usb@.service`, which mounts the stick read-only under `/media/nb-usb`
+  (FAT, exFAT, NTFS, ext4).
 
 ## If something's off
 

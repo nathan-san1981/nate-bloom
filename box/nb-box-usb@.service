@@ -1,0 +1,10 @@
+[Unit]
+Description=Nate Bloom Box: USB stick %i for the DJ (read-only)
+BindsTo=dev-%i.device
+After=dev-%i.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/nb-box-helper usb-mount %i
+ExecStop=/usr/local/sbin/nb-box-helper usb-unmount %i

@@ -46,7 +46,7 @@ fetch() {   # fetch NAME DEST
 
 say "Packages"
 sudo apt-get update -qq
-PKGS="cage wlr-randr pipewire pipewire-pulse pipewire-alsa wireplumber rtkit alsa-utils curl ca-certificates iw rfkill fonts-noto-core"
+PKGS="exfatprogs ntfs-3g cage wlr-randr pipewire pipewire-pulse pipewire-alsa wireplumber rtkit alsa-utils curl ca-certificates iw rfkill fonts-noto-core"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $PKGS
 
 if [ "$MODE" = app ]; then
@@ -77,6 +77,9 @@ fetch nb-box-helper /usr/local/sbin/nb-box-helper 0755
 fetch nb-box.service /tmp/nb-box.service.$$
 sudo sed "s/__USER__/$BOXUSER/g" /tmp/nb-box.service.$$ | sudo tee /etc/systemd/system/nb-box.service >/dev/null; sudo rm -f /tmp/nb-box.service.$$
 fetch nb-box-cpu.service /etc/systemd/system/nb-box-cpu.service
+fetch nb-box-usb@.service /etc/systemd/system/nb-box-usb@.service   # (USB sticks for the DJ, read-only, under /media/nb-usb)
+fetch 99-nb-box-usb.rules /etc/udev/rules.d/99-nb-box-usb.rules
+sudo mkdir -p /media/nb-usb
 sudo tee /etc/nb-box.conf >/dev/null <<EOF
 # Nate Bloom Box settings (Box… in the app changes ROTATE and SCALE; MODE is app or chromium)
 MODE=$MODE
@@ -136,6 +139,7 @@ sudo visudo -cf /etc/sudoers.d/nb-box >/dev/null
 
 say "Start on power-up"
 sudo systemctl daemon-reload
+sudo udevadm control --reload-rules 2>/dev/null || true
 sudo systemctl enable nb-box-cpu.service nb-box.service >/dev/null
 sudo systemctl set-default graphical.target >/dev/null
 sudo systemctl disable getty@tty1.service >/dev/null 2>&1 || true

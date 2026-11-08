@@ -16,6 +16,8 @@ if (!fp) console.warn("Fast pads aren't available here; Beat Pads plays through 
 if (process.argv.includes("--nb-box")) contextBridge.exposeInMainWorld("NBBox", {
   status: () => ipcRenderer.invoke("nb:box-status"),
   run: action => ipcRenderer.invoke("nb:box-do", String(action)),
+  music: () => ipcRenderer.invoke("nb:box-music-list"),   // songs on USB sticks: { sticks, songs: [{ path, name, file, folder, stick }] }
+  read: p => ipcRenderer.invoke("nb:box-music-read", String(p)),   // one song's bytes (an ArrayBuffer), only from the sticks
 });
 
 contextBridge.exposeInMainWorld("NB_NATIVE", {

@@ -2,6 +2,7 @@
 # Nate Bloom Box helper: the only things the app may do as root (sudoers allows this script, nothing else).
 #   nb-box-helper status | shutdown | reboot | wifi-on | wifi-off | rotate-90 | rotate-270 | scale-125 | scale-133 | scale-150 | restart-app
 #   nb-box-helper install-deb /home/<user>/Downloads/Nate Bloom/<file>.deb
+#   nb-box-helper usb-mount sda1 | usb-unmount sda1    (from udev / nb-box-usb@.service: USB sticks for the DJ)
 set -eu
 CONF=/etc/nb-box.conf
 
@@ -37,6 +38,20 @@ case "${1:-}" in
     later restart "systemctl restart nb-box.service"
     ;;
   restart-app) later restart "systemctl restart nb-box.service" ;;
+  usb-mount|usb-unmount)
+    D="${2:-}"
+    case "$D" in sd[a-z]|sd[a-z][0-9]|sd[a-z][0-9][0-9]) ;; *) echo "not a USB disk: $D" >&2; exit 2 ;; esac
+    M="/media/nb-usb/$D"
+    if [ "$1" = usb-unmount ]; then umount -l "$M" 2>/dev/null || true; rmdir "$M" 2>/dev/null || true; exit 0; fi
+    U=$(sed -n 's/^BOXUSER=//p' "$CONF"); UI=$(id -u "$U" 2>/dev/null || echo 0); GI=$(id -g "$U" 2>/dev/null || echo 0)
+    T=$(blkid -o value -s TYPE "/dev/$D" 2>/dev/null || true)
+    O="ro,nosuid,nodev,noexec"
+    case "$T" in vfat|exfat|ntfs|ntfs3) O="$O,uid=$UI,gid=$GI,umask=022" ;; esac
+    [ "$T" = ntfs ] && T=ntfs3
+    mkdir -p "$M"
+    if [ -n "$T" ]; then mount -t "$T" -o "$O" "/dev/$D" "$M" || { [ "$T" = ntfs3 ] && mount -t ntfs-3g -o "$O" "/dev/$D" "$M"; }
+    else mount -o "$O" "/dev/$D" "$M"; fi
+    ;;
   install-deb)
     F="${2:-}"
     case "$F" in /home/*/Downloads/"Nate Bloom"/*.deb) ;; *) echo "not a Nate Bloom package in Downloads" >&2; exit 2 ;; esac
@@ -45,5 +60,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV" >&2; exit 2 ;;
 esac

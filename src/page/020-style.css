@@ -3688,6 +3688,27 @@ html.nb-box .bx-sheet, html.nb-box .bx-sheet * { cursor: default; }
 .bx-row .btn { min-height: 44px; padding: 0 14px; }
 .bx-off.holding { background: #ff8fab; color: #1a1426; }
 .bx-note { margin: 0; font-size: 0.8rem; opacity: 0.6; line-height: 1.4; }
+/* (box) the DJ on one 960 x 540 screen: no MiniLab strip (the HUD says what each control did), Tap without ½× / 2×,
+   the EQ in two columns, a smaller dial, the bend-wheel settings (Play it live) left to bigger screens */
+html.nb-box #miniStrip { display: none !important; }
+html.nb-box body.mls-on { --mls-h: 0px; }
+html.nb-box #djView .dj-deck { gap: 6px; padding-bottom: 8px; }
+html.nb-box #djView .dj-row { flex-wrap: nowrap; min-height: 0; }
+html.nb-box #djView .dj-gridfix small, html.nb-box #djView .dj-half, html.nb-box #djView .dj-dbl { display: none; }
+html.nb-box #djView .dj-eq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2px 12px; }
+html.nb-box #djView .dj-eq .dj-sl { grid-template-columns: 36px minmax(0, 1fr) 40px; gap: 4px; }
+html.nb-box #djView .dj-align { height: 52px; }
+html.nb-box #djView .dj-dial { width: 112px; height: 112px; }
+html.nb-box #djView .dj-mid { gap: 6px; }
+html.nb-box #djlBox { display: none !important; }
+/* (box) songs from a USB stick */
+.bx-music .bx-card { width: min(720px, 96vw); height: 88vh; }
+.bx-music .bx-head .bx-info { margin-left: 6px; }
+.bx-list { flex: 1 1 auto; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-right: 4px; }
+.bx-fold { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; padding: 8px 4px 2px; }
+.bx-song { text-align: left; font: inherit; font-size: 1rem; color: var(--ink); background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bx-song.sel { background: var(--lilac); color: #1a1426; border-color: var(--lilac); font-weight: 600; }
+.bx-empty { padding: 40px 10px; text-align: center; opacity: 0.7; line-height: 1.5; }
 /*@end*/
 /* the big knob in Play: the sound's name, large, while you turn (899j) */
 .pk-flash { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(0.96); z-index: 70; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 34px; border-radius: 20px; background: rgba(19, 17, 27, 0.92); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.12s ease, transform 0.12s ease; max-width: 80vw; }
