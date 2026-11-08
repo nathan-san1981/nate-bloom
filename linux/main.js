@@ -297,7 +297,7 @@ function createWindow() {
 // (box) what only the Box asks of the computer: temperature, power, Wi-Fi, shutdown. Everything that needs root goes
 // through one small script (box/nb-box-helper, allowed for the box's user by sudoers) and only with the actions it knows.
 const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-125", "scale-133", "scale-150", "restart-app",
-  "bt-on", "bt-list", "bt-scan", "start-ask", "start-bloom", "start-keys", "start-listen"]);
+  "bt-on", "bt-list", "bt-scan", "start-ask", "start-bloom", "start-keys", "start-listen", "start-stream"]);
 const boxRun = args => new Promise(res => execFile("sudo", ["-n", BOX_HELPER, ...args], { timeout: 120000 }, (err, out, errOut) => res({ ok: !err, out: String(out || "").trim(), error: err ? String(errOut || err.message || err).trim() : "" })));
 async function boxStatus() {
   const s = { temp: null, throttled: null, undervolt: false, hot: false, wifi: null, output: null };

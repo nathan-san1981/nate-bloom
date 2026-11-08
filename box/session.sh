@@ -26,10 +26,16 @@ mkdir -p "$RUN" 2>/dev/null || true
 rm -f "$NEXT" "$RUN/home"
 if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
   START=""   # (the first time: /etc/nb-box.conf's START decides, normally the home screen)
+  [ "${START_AT_BOOT:=$(sed -n 's/^START=//p' /etc/nb-box.conf)}" = stream ] && command -v moonlight-qt >/dev/null 2>&1 && START=streamboot
   while :; do
     nb_start="$START"; START=""
     if [ -f "$NEXT" ]; then nb_start=$(head -c 16 "$NEXT" | tr -cd 'a-z'); rm -f "$NEXT"; fi
     case "$nb_start" in
+      streamboot)   # power-on straight into the game on the GPU box (box/stream-setup.sh --boot-into-stream)
+        i=0; while [ $i -lt 15 ] && ! tailscale ping -c 1 --timeout 2s "${STREAM_HOST:-gpu-box}" >/dev/null 2>&1; do i=$((i + 1)); sleep 1; done
+        QT_QPA_PLATFORM=wayland moonlight-qt stream "${STREAM_HOST:-gpu-box}" "${STREAM_APP:-Steam Big Picture}" --display-mode fullscreen \
+          --resolution "${STREAM_RES:-1280x720}" --fps "${STREAM_FPS:-60}" --bitrate "${STREAM_BITRATE:-12000}" --video-codec "${STREAM_CODEC:-HEVC}" || true
+        START=home; continue ;;
       stream)   # Moonlight: games streamed from the PC (controller-driven; power button = home)
         QT_QPA_PLATFORM=wayland moonlight-qt || true
         START=home; continue ;;

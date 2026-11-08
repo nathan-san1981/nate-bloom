@@ -5,7 +5,7 @@
 #   nb-box-helper usb-mount sda1 | usb-unmount sda1    (from udev / nb-box-usb@.service: USB sticks for the DJ)
 #   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
 #   nb-box-helper games          (reboot into the Batocera USB stick, if one is plugged in)
-#   nb-box-helper start-ask | start-bloom | start-keys | start-listen   (what the box opens at power-on)
+#   nb-box-helper start-ask | start-bloom | start-keys | start-listen | start-stream   (what the box opens at power-on)
 set -eu
 CONF=/etc/nb-box.conf
 
@@ -41,7 +41,7 @@ case "${1:-}" in
     later restart "systemctl restart nb-box.service"
     ;;
   restart-app) later restart "systemctl restart nb-box.service" ;;
-  start-ask|start-bloom|start-keys|start-listen)
+  start-ask|start-bloom|start-keys|start-listen|start-stream)
     V=${1#start-}
     if grep -q '^START=' "$CONF"; then sed -i "s/^START=.*/START=$V/" "$CONF"; else echo "START=$V" >> "$CONF"; fi
     ;;
@@ -108,5 +108,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
 esac

@@ -90,15 +90,18 @@ fetch nb-box-usb@.service /etc/systemd/system/nb-box-usb@.service   # (USB stick
 fetch 99-nb-box-usb.rules /etc/udev/rules.d/99-nb-box-usb.rules
 sudo mkdir -p /media/nb-usb
 START="$(sed -n 's/^START=//p' /etc/nb-box.conf 2>/dev/null || true)"   # (kept when this runs again)
+KEEP="$(grep '^STREAM_' /etc/nb-box.conf 2>/dev/null || true)"   # (stream-setup.sh's settings, kept too)
 sudo tee /etc/nb-box.conf >/dev/null <<EOF
 # Nate Bloom Box settings (Box… in the app changes ROTATE and SCALE; MODE is app or chromium;
-# START is what opens at power-on: ask = the home screen, or bloom, keys, listen)
+# START is what opens at power-on: ask = the home screen, or bloom, keys, listen, stream;
+# STREAM_* (box/stream-setup.sh): the GPU box, app and stream settings for power-on into a stream)
 MODE=$MODE
 ROTATE=$ROTATE
 SCALE=1.333
 BOXUSER=$BOXUSER
 START=${START:-ask}
 EOF
+[ -n "$KEEP" ] && echo "$KEEP" | sudo tee -a /etc/nb-box.conf >/dev/null
 
 say "The home screen: Nate Bloom, Keys, Listen, Stream, Media, Games"
 sudo mkdir -p /opt/nb-box/apps/keys

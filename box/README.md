@@ -54,7 +54,7 @@ controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 | **Nate Bloom** | the synth, drums, sampling and DJ (everything below). **⌂ Home** in Play's top bar comes back here. |
 | **Keys** | piano lessons, with the MiniLab, KeyLab or the Yamaha. Settings › Raspberry Pi box › Home screen comes back. |
 | **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones) and stops when you leave the screen. |
-| **Stream** | Moonlight: games from your PC streamed over Wi-Fi, played with the Xbox controller. The PC runs Sunshine (or NVIDIA GameStream); pair once with the code Moonlight shows. Set the stream to H.265/HEVC: the Pi 5 decodes that in hardware. |
+| **Stream** | Moonlight: games from the GPU box (Sunshine) streamed over Wi-Fi, played with the Xbox controller. Set up with `bash box/stream-setup.sh` (Tailscale, 720p60 HEVC, pairing); `--boot-into-stream` starts straight into Steam at power-on. The GPU box side: `stream/`. |
 | **Media** | Kodi for movies, music and photos from a USB stick or the network. Controller-driven; Power › Exit comes back. |
 | **Games** | retro games from a Batocera USB stick (below). Shows **No stick** until one is plugged in. |
 
