@@ -21,23 +21,23 @@ button { font: inherit; color: inherit; }
 #clock { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink2); min-width: 54px; text-align: right; }
 .ib { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--tile); display: grid; place-items: center; cursor: pointer; }
 .ib svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-#grid { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 14px; }
-.tile { position: relative; border: 0; border-radius: 18px; background: var(--tile); text-align: left; padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; outline: none; transition: transform .08s, background .12s; overflow: hidden; }
+#grid { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10px; }
+.tile { position: relative; border: 0; border-radius: 16px; background: var(--tile); text-align: left; padding: 12px 14px 11px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; outline: none; transition: transform .08s, background .12s; overflow: hidden; }
 .tile:active { transform: scale(.98); }
-.tile .ic { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; margin-bottom: auto; }
-.tile .ic svg { width: 28px; height: 28px; stroke: #0f1013; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.tile .n { font-size: 25px; font-weight: 700; letter-spacing: -.01em; }
-.tile .d { font-size: 14px; color: var(--ink2); line-height: 1.3; }
+.tile .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; margin-bottom: auto; }
+.tile .ic svg { width: 22px; height: 22px; stroke: #0f1013; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tile .n { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.tile .d { font-size: 12.5px; color: var(--ink2); line-height: 1.3; }
 .tile.sel { background: var(--tile2); box-shadow: 0 0 0 3px var(--acc) inset; }
 .tile.off { opacity: .45; }
 /* Listen as a now-playing card while music plays (Jam along) */
-.tile .np { display: none; position: absolute; left: 18px; right: 18px; top: 74px; }
+.tile .np { display: none; position: absolute; left: 14px; right: 14px; top: 54px; }
 .tile.playing .np { display: block; } .tile.playing .d { display: none; }
 .tile .np .k, .tile .np .s, .tile .np .a, .tile .np .bar { display: block; }
 .tile .np .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); font-weight: 650; }
-.tile .np .s { font-size: 21px; font-weight: 750; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tile .np .a { font-size: 13.5px; color: var(--ink2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tile .np .bar { height: 6px; border-radius: 3px; background: #2a2d35; margin-top: 10px; } .tile .np .bar b { display: block; height: 100%; border-radius: 3px; background: #7fdcae; }
+.tile .np .s { font-size: 17px; font-weight: 750; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .np .a { font-size: 12px; color: var(--ink2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .np .bar { height: 5px; border-radius: 3px; background: #2a2d35; margin-top: 6px; } .tile .np .bar b { display: block; height: 100%; border-radius: 3px; background: #7fdcae; }
 .tile .badge.res { background: var(--acc); color: #17181c; }
 .tile .badge { position: absolute; right: 14px; top: 14px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #2a2d35; color: var(--ink2); }
 #hint { position: absolute; left: 16px; right: 16px; bottom: 10px; height: 22px; font-size: 12.5px; color: var(--ink3); display: flex; gap: 18px; align-items: center; }
@@ -48,6 +48,14 @@ button { font: inherit; color: inherit; }
 #sheet.on { display: block; }
 #sheet .card { position: absolute; right: 0; top: 0; bottom: 0; width: 560px; background: #15171b; border-left: 1px solid var(--line); padding: 14px 18px; overflow: auto; }
 #sheet h2 { font-size: 20px; margin: 4px 0 12px; display: flex; align-items: center; gap: 10px; }
+#sheet .keep { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--tile2); cursor: pointer; border: 0; text-align: left; width: 100%; color: inherit; font: inherit; }
+#sheet .keep b { display: block; font-size: 14.5px; } #sheet .keep span span { font-size: 12.5px; color: var(--ink2); }
+#sheet .sw { width: 48px; height: 28px; border-radius: 999px; background: #3a3d45; position: relative; flex: none; transition: background .15s; }
+#sheet .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .15s; }
+#sheet .keep.on .sw { background: var(--ok); } #sheet .keep.on .sw::after { left: 23px; }
+#sheet .idle-opts { align-items: center; } #sheet .idle-opts .btn.on { background: var(--acc); color: #17181c; }
+#sheet input { flex: 1; min-width: 0; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); padding: 0 12px; font: inherit; font-size: 14px; outline: none; }
+#sheet input:focus { border-color: var(--acc); }
 #sheet h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin: 18px 0 8px; font-weight: 650; }
 .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .btn { height: 46px; padding: 0 16px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; }
@@ -91,9 +99,12 @@ button { font: inherit; color: inherit; }
   <button class="tile" data-app="bloom"><span class="ic" style="background:#c9b6ff"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="n">Nate Bloom</span><span class="d">Synths, drums, sampling, DJ</span></button>
   <button class="tile" data-app="keys"><span class="ic" style="background:#8fc3ff"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10M12 4v10M16 4v10M8 14v6M12 14v6M16 14v6"/></svg></span><span class="n">Keys</span><span class="d">Piano lessons</span></button>
   <button class="tile" data-app="listen"><span class="ic" style="background:#7fdcae"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="np"><span class="k"></span><span class="s"></span><span class="a"></span><span class="bar"><b></b></span></span><span class="n">Listen</span><span class="d">Spotify, YouTube &amp; AirPlay from your phone</span></button>
+  <button class="tile" data-app="radio"><span class="ic" style="background:#ffb3a7"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="m7 8 10-5"/><circle cx="9" cy="14" r="2.5"/><path d="M15 12h3M15 16h3"/></svg></span><span class="n">Radio</span><span class="d">Internet radio, no phone needed</span></button>
+  <button class="tile" data-app="sheets"><span class="ic" style="background:#8fc3ff"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13h6M9 17h6M9 9h2"/></svg></span><span class="n">Sheets</span><span class="d">Sheet music &amp; chord charts (PDF)</span></button>
   <button class="tile" data-app="stream"><span class="ic" style="background:#ffc477"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 3-5 3z"/></svg></span><span class="n">Stream</span><span class="d">PC games over Wi-Fi (Moonlight)</span></button>
   <button class="tile" data-app="media"><span class="ic" style="background:#ff9fb8"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5"/></svg></span><span class="n">Media</span><span class="d">Movies, music, photos (Kodi)</span></button>
-  <button class="tile" data-app="games"><span class="ic" style="background:#f2e27a"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".8"/><circle cx="18" cy="10" r=".8"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.6 6.2A2.8 2.8 0 0 0 7 17.2L9 15h6l2 2.2a2.8 2.8 0 0 0 4.9-2.4l-.6-6.2A4 4 0 0 0 17.3 5z"/></svg></span><span class="n">Games</span><span class="d">Retro games from the game stick</span></button>
+  <button class="tile" data-app="retro"><span class="ic" style="background:#f2b880"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="3"/><path d="M6 10v4M4 12h4"/><circle cx="16" cy="11" r=".9"/><circle cx="18.5" cy="13" r=".9"/></svg></span><span class="n">Retro</span><span class="d">Games without rebooting (RetroArch)</span></button>
+  <button class="tile" data-app="games"><span class="ic" style="background:#f2e27a"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".8"/><circle cx="18" cy="10" r=".8"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.6 6.2A2.8 2.8 0 0 0 7 17.2L9 15h6l2 2.2a2.8 2.8 0 0 0 4.9-2.4l-.6-6.2A4 4 0 0 0 17.3 5z"/></svg></span><span class="n">Games</span><span class="d">Batocera stick (reboots into it)</span></button>
 </div>
 
 <div id="hint"><span>Tap, or turn the big knob and click</span><span>Power button: back here · hold 2 s: off</span></div>
@@ -113,6 +124,14 @@ button { font: inherit; color: inherit; }
   <div class="row" id="start">
     <button class="btn" data-start="ask">Home screen</button><button class="btn" data-start="bloom">Nate Bloom</button><button class="btn" data-start="keys">Keys</button><button class="btn" data-start="listen">Listen</button><button class="btn" data-start="stream">Stream (straight into the game)</button>
   </div>
+  <h3>Idle screen</h3>
+  <div class="row"><button class="keep" id="idleOn" role="switch" aria-checked="false"><span class="sw"></span><span><b>Clock &amp; weather when the box sits untouched</b><span id="idleD">Off. Any touch, key or knob brings the screen back.</span></span></button></div>
+  <div class="row idle-opts" id="idleOpts" hidden>
+    <span class="note">After</span><button class="btn" data-min="2">2 min</button><button class="btn" data-min="5">5 min</button><button class="btn" data-min="10">10 min</button><button class="btn" data-min="20">20 min</button>
+  </div>
+  <div class="row idle-opts" id="idlePlace" hidden>
+    <input id="place" placeholder="Weather for… (city or ZIP)" autocomplete="off"><button class="btn" id="placeGo">Set</button><button class="btn" data-unit="f">°F</button><button class="btn" data-unit="c">°C</button>
+  </div>
   <h3>Box</h3>
   <div class="row"><button class="btn" id="restart">Restart app</button><button class="btn" id="reboot">Reboot</button><button class="btn danger hold" id="off"><i></i>Hold to shut down</button></div>
   <p class="note">Games: plug in the Batocera USB stick and pick Games; the box restarts into it. To come back, quit Batocera and take the stick out before turning the box on.</p>
@@ -123,9 +142,10 @@ button { font: inherit; color: inherit; }
 const B = window.NBBox || null;   // (only inside the box app)
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const tiles = $$(".tile");
-let sel = 0, apps = { bloom: true, keys: true, listen: true, stream: true, media: true, games: false, start: "ask" };
+let sel = 0, apps = { bloom: true, keys: true, listen: true, radio: true, sheets: true, retro: true, stream: true, media: true, games: false, start: "ask" };
 const NOT = { keys: "Keys isn't installed on this box", listen: "Listen isn't installed (run the box installer again)", stream: "Moonlight isn't installed (run the box installer again)",
-  media: "Kodi isn't installed (run the box installer again)", games: "Plug in the Batocera game stick, then pick Games" };
+  media: "Kodi isn't installed (run the box installer again)", radio: "Radio needs mpv (run the box installer again)", sheets: "Sheets needs poppler (run the box installer again)",
+  retro: "RetroArch isn't installed (run the box installer again)", games: "Plug in the Batocera game stick, then pick Games" };
 
 function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), ms || 2600); }
 function paint() {
@@ -171,7 +191,7 @@ addEventListener("keydown", e => {
   if (e.key === "ArrowRight") move(1); else if (e.key === "ArrowLeft") move(-1);
   else if (e.key === "ArrowDown") move(3); else if (e.key === "ArrowUp") move(-3);
   else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(sel); }
-  else if (/^[1-6]$/.test(e.key)) open(+e.key - 1);
+  else if (/^[1-9]$/.test(e.key)) open(+e.key - 1);
   else return;
   e.preventDefault();
 });
@@ -233,10 +253,27 @@ async function refreshApps() { if (!B) return paint(); const a = await B.apps().
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 /* settings */
-function openSheet() { $("#sheet").classList.add("on"); btList(false); paintStart(); }
+function openSheet() { $("#sheet").classList.add("on"); btList(false); paintStart(); if (B && B.idle) B.idle("get").then(c => { if (c) { idle = c; paintIdle(); } }).catch(() => {}); }
 function closeSheet() { $("#sheet").classList.remove("on"); }
 $("#gear").onclick = openSheet; $("#close").onclick = closeSheet;
 $("#sheet").addEventListener("click", e => { if (e.target.id === "sheet") closeSheet(); });
+/* idle screen (off by default; nothing changes until it's switched on here) */
+let idle = { on: false, minutes: 5, place: "", placeName: "", unit: "f" };
+function paintIdle() {
+  const k = $("#idleOn"); k.classList.toggle("on", idle.on); k.setAttribute("aria-checked", String(idle.on));
+  $("#idleD").textContent = idle.on ? "After " + idle.minutes + " min. Any touch, key or knob brings the screen back." : "Off. Any touch, key or knob brings the screen back.";
+  $("#idleOpts").hidden = $("#idlePlace").hidden = !idle.on;
+  $$("#idleOpts [data-min]").forEach(b => b.classList.toggle("on", +b.dataset.min === idle.minutes));
+  $$("#idlePlace [data-unit]").forEach(b => b.classList.toggle("on", b.dataset.unit === idle.unit));
+  if (document.activeElement !== $("#place")) $("#place").value = idle.placeName || idle.place || "";
+  $("#place").placeholder = idle.place && !idle.placeName ? "Couldn't find “" + idle.place + "”" : "Weather for… (city or ZIP)";
+}
+async function idleSet(o) { if (!B) return; const r = await B.idle("set", o).catch(() => null); if (r) { idle = r; paintIdle(); } }
+$("#idleOn").onclick = () => idleSet({ on: !idle.on });
+$$("#idleOpts [data-min]").forEach(b => b.onclick = () => idleSet({ minutes: +b.dataset.min }));
+$$("#idlePlace [data-unit]").forEach(b => b.onclick = () => idleSet({ unit: b.dataset.unit }));
+$("#placeGo").onclick = () => { $("#place").blur(); idleSet({ place: $("#place").value }); };
+$("#place").addEventListener("keydown", e => { if (e.key === "Enter") $("#placeGo").click(); e.stopPropagation(); });
 function paintStart() { $$("#start [data-start]").forEach(b => b.classList.toggle("on", b.dataset.start === (apps.start || "ask"))); }
 $$("#start [data-start]").forEach(b => b.onclick = async () => { if (!B) return; const r = await B.run("start-" + b.dataset.start); if (r && r.ok) { apps.start = b.dataset.start; paintStart(); toast("At power-on: " + b.textContent); } else toast("Couldn't save that"); });
 $("#restart").onclick = () => B && B.run("restart-app");
@@ -312,7 +349,7 @@ $("#bt").addEventListener("click", async e => {
 });
 
 // Jam along: the Listen tile shows what's playing, the app you left offers Resume, a tap opens the level sheet
-if (B && B.listen) { const sc = document.createElement("script"); sc.src = "/box/jam.js"; sc.onload = () => { if (window.NBJam) NBJam.onState.push(paint); }; document.head.appendChild(sc); }
+if (B && B.listen) { const sc = document.createElement("script"); sc.src = "/box/jam.js"; sc.onload = () => { if (window.NBJam) NBJam.onState.push(paint); const si = document.createElement("script"); si.src = "/box/idle.js"; document.head.appendChild(si); }; document.head.appendChild(sc); }
 refreshApps(); status(); setInterval(status, 10000); setInterval(refreshApps, 4000);
 if (B) { B.bt("on").catch(() => {}); btList(false); setInterval(() => btList(false), 15000); }
 paint();

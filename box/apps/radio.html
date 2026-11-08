@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radio · Nate Bloom Box</title>
+<style>
+/* Radio (box/apps/radio.html): internet radio on the touch screen, no phone needed. Stations from radio-browser.info
+   (searched by the app, linux/main.js), played by mpv as one more Listen source, so the chip, the backing level and
+   Keep playing work the same. 960 x 540. */
+:root { --bg: #0f1013; --tile: #1a1c21; --tile2: #22252c; --line: #2c2f37; --ink: #f2efe8; --ink2: #a4a7ae; --ink3: #74777e; --acc: #ffb3a7; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, "Noto Sans", sans-serif; overflow: hidden; user-select: none; }
+button, input { font: inherit; color: inherit; }
+#top { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+#top .t { font-size: 19px; font-weight: 700; flex: 1; }
+.btn { height: 46px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn.red { color: #ff9b8a; }
+#main { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 14px; display: grid; grid-template-columns: 340px 1fr; gap: 14px; }
+.card { background: var(--tile); border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; min-height: 0; }
+#now .k { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); font-weight: 650; }
+#now .logo { width: 72px; height: 72px; border-radius: 16px; background: var(--tile2); margin: 10px 0 12px; object-fit: contain; display: none; }
+#now .logo.on { display: block; }
+#now .song { font-size: 27px; font-weight: 750; letter-spacing: -.01em; line-height: 1.1; }
+#now .art { font-size: 15px; color: var(--ink2); margin-top: 4px; }
+#now .state { margin-top: 10px; display: none; align-items: center; gap: 8px; font-size: 14px; color: var(--acc); font-weight: 600; }
+#now .state.on { display: inline-flex; } #now .state i { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); }
+#now .row { display: flex; gap: 10px; margin-top: auto; }
+#now .row .btn { flex: 1; justify-content: center; }
+.keep { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--tile2); cursor: pointer; border: 0; text-align: left; width: 100%; margin-top: 12px; }
+.keep b { display: block; font-size: 14px; } .keep span { font-size: 12px; color: var(--ink2); line-height: 1.35; }
+.sw { width: 48px; height: 28px; border-radius: 999px; background: #3a3d45; position: relative; flex: none; transition: background .15s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: left .15s; }
+.keep.on .sw { background: #7fdcae; } .keep.on .sw::after { left: 23px; }
+/* finding stations */
+#find { padding: 14px 16px; gap: 10px; }
+#tabs { display: flex; gap: 8px; }
+#tabs button { height: 40px; padding: 0 14px; border-radius: 10px; border: 0; background: transparent; color: var(--ink2); font-weight: 600; font-size: 14px; cursor: pointer; }
+#tabs button.on { background: var(--tile2); color: var(--ink); }
+#q { display: flex; gap: 8px; }
+#q input { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 0 14px; font-size: 15px; outline: none; }
+#q input:focus { border-color: var(--acc); }
+#tags { display: flex; gap: 6px; flex-wrap: wrap; }
+#tags button { height: 30px; padding: 0 11px; border-radius: 999px; border: 0; background: var(--tile2); color: var(--ink2); font-size: 12.5px; cursor: pointer; }
+#tags button.on { background: var(--acc); color: #17181c; }
+#list { flex: 1; overflow: auto; margin: 0 -6px; padding: 0 6px; }
+.st { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 12px; cursor: pointer; border: 0; background: transparent; width: 100%; text-align: left; }
+.st:nth-child(odd) { background: #1d2026; }
+.st.sel { box-shadow: 0 0 0 2px var(--acc) inset; }
+.st.playing { background: #2a1f1d; }
+.st .lg { width: 40px; height: 40px; border-radius: 10px; background: var(--tile2); flex: none; object-fit: contain; }
+.st .x { flex: 1; min-width: 0; } .st .x b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st .x span { font-size: 12px; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.st .fav { width: 40px; height: 40px; border-radius: 10px; border: 0; background: transparent; color: var(--ink3); font-size: 20px; cursor: pointer; flex: none; }
+.st .fav.on { color: #f2e27a; }
+.note { color: var(--ink3); font-size: 13px; padding: 12px 6px; line-height: 1.4; }
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); background: #2a2d35; color: var(--ink); padding: 12px 18px; border-radius: 12px; font-size: 15px; opacity: 0; transition: .2s; pointer-events: none; z-index: 30; }
+#toast.on { opacity: 1; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="btn" id="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+  <div class="t">Radio</div>
+</div>
+<div id="main">
+  <div class="card" id="now">
+    <div class="k">Now playing</div>
+    <img class="logo" id="logo" alt="">
+    <div class="song" id="song">Pick a station</div>
+    <div class="art" id="art">Favorites, or search by name, style or country</div>
+    <div class="state" id="st"><i></i><span></span></div>
+    <button class="keep" id="keep" role="switch" aria-checked="false"><span class="sw"></span><span><b>Keep playing</b><span>in Nate Bloom, Keys, the home screen and game streams.</span></span></button>
+    <div class="row"><button class="btn red" id="stop"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Stop</button></div>
+  </div>
+  <div class="card" id="find">
+    <div id="tabs"><button data-tab="favs" class="on">Favorites</button><button data-tab="search">Search</button><button data-tab="tags">By style</button><button data-tab="us">United States</button></div>
+    <div id="q" hidden><input id="qi" placeholder="Station name" autocomplete="off"><button class="btn" id="go">Search</button></div>
+    <div id="tags" hidden></div>
+    <div id="list"><div class="note">Loading…</div></div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+"use strict";
+const B = window.NBBox || null, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const home = () => B ? B.go("home") : history.back();
+$("#home").onclick = home;
+function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), ms || 2600); }
+
+let favs = [], list = [], tab = "favs", sel = -1, playing = null, keep = false;
+const TAGS = ["jazz", "classical", "lofi", "ambient", "electronic", "house", "techno", "synthwave", "rock", "classic rock", "indie", "80s", "90s", "oldies", "country", "blues", "soul", "hip hop", "reggae", "latin", "news", "talk", "public radio", "college"];
+const isFav = s => favs.some(f => f.uuid === s.uuid || f.url === s.url);
+
+function paintList() {
+  const el = $("#list");
+  if (!list.length) { el.innerHTML = '<div class="note">' + (tab === "favs" ? "No favorites yet. Find a station and tap its ☆." : "Nothing found.") + "</div>"; return; }
+  el.innerHTML = list.map((s, i) => `<button class="st${i === sel ? " sel" : ""}${playing && (playing.uuid === s.uuid || playing.url === s.url) ? " playing" : ""}" data-i="${i}">
+    ${s.favicon ? `<img class="lg" src="${esc(s.favicon)}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="lg"></span>'}
+    <span class="x"><b>${esc(s.name)}</b><span>${esc([s.country, s.tags ? s.tags.split(",").slice(0, 3).join(", ") : "", s.bitrate ? s.bitrate + " kbps" : ""].filter(Boolean).join(" · "))}</span></span>
+    <span class="fav${isFav(s) ? " on" : ""}" data-fav="${i}" role="button" aria-label="Favorite">${isFav(s) ? "★" : "☆"}</span></button>`).join("");
+}
+$("#list").addEventListener("click", async e => {
+  const f = e.target.closest("[data-fav]");
+  if (f) { e.stopPropagation(); const s = list[+f.dataset.fav]; if (isFav(s)) favs = favs.filter(x => !(x.uuid === s.uuid || x.url === s.url)); else favs.push(s);
+    if (B) await B.radio("favs", favs).catch(() => {}); if (tab === "favs") list = favs.slice(); paintList(); return; }
+  const b = e.target.closest("[data-i]"); if (b) play(+b.dataset.i);
+});
+async function play(i) {
+  const s = list[i]; if (!s) return; sel = i; paintList();
+  if (!B) return toast("Plays " + s.name + " (on the box)");
+  toast("Tuning " + s.name + "…", 6000);
+  const r = await B.radio("play", s).catch(() => null);
+  if (!r || !r.ok) return toast("Couldn't play it" + (r && r.error ? ": " + r.error : ""));
+  playing = s; paintNow(); paintList();
+}
+$("#stop").onclick = async () => { if (B) await B.radio("stop").catch(() => {}); playing = null; paintNow(); paintList(); };
+function paintNow(now) {
+  const lg = $("#logo");
+  if (playing) {
+    lg.src = playing.favicon || ""; lg.classList.toggle("on", !!playing.favicon);
+    const title = now && now.source === "Radio" && now.name && now.name !== playing.name ? now.name : "";
+    $("#song").textContent = title || playing.name; $("#art").textContent = title ? playing.name : [playing.country, playing.tags ? playing.tags.split(",").slice(0, 3).join(", ") : ""].filter(Boolean).join(" · ");
+    $("#st").classList.add("on"); $("#st span").textContent = "playing";
+  } else { lg.classList.remove("on"); $("#song").textContent = "Pick a station"; $("#art").textContent = "Favorites, or search by name, style or country"; $("#st").classList.remove("on"); }
+  const k = $("#keep"); k.classList.toggle("on", keep); k.setAttribute("aria-checked", String(keep));
+}
+$("#keep").onclick = async () => { if (!B) return; const s = await B.listen("keep", !keep).catch(() => null); if (s) { keep = !!s.keep; paintNow(); } };
+
+/* tabs */
+async function search(q) {
+  $("#list").innerHTML = '<div class="note">Searching…</div>';
+  if (!B) { list = []; return paintList(); }
+  const r = await B.radio("search", q).catch(() => null);
+  list = r && r.ok ? r.stations : []; sel = -1; paintList();
+  if (!r || !r.ok) $("#list").innerHTML = '<div class="note">' + esc(r && r.error || "No answer (is the box online?)") + "</div>";
+}
+function showTab(t) {
+  tab = t; $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  $("#q").hidden = t !== "search"; $("#tags").hidden = t !== "tags";
+  if (t === "favs") { list = favs.slice(); sel = -1; paintList(); }
+  else if (t === "search") { $("#list").innerHTML = '<div class="note">Type a station name and tap Search.</div>'; setTimeout(() => $("#qi").focus(), 50); }
+  else if (t === "tags") { const on = $("#tags .on"); if (on) search({ tag: on.dataset.tag }); else $("#list").innerHTML = '<div class="note">Pick a style.</div>'; }
+  else if (t === "us") search({ country: "US" });
+}
+$$("#tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+$("#tags").innerHTML = TAGS.map(t => `<button data-tag="${t}">${t}</button>`).join("");
+$("#tags").addEventListener("click", e => { const b = e.target.closest("[data-tag]"); if (!b) return; $$("#tags button").forEach(x => x.classList.toggle("on", x === b)); search({ tag: b.dataset.tag }); });
+$("#go").onclick = () => { const v = $("#qi").value.trim(); if (v) search({ name: v }); };
+$("#qi").addEventListener("keydown", e => { if (e.key === "Enter") $("#go").click(); });
+
+/* keyboard, big knob, controller: up/down picks, Enter/click plays, Escape/B home */
+addEventListener("keydown", e => {
+  if (e.target === $("#qi")) { if (e.key === "Escape") e.target.blur(); return; }
+  if (e.key === "ArrowDown") move(1); else if (e.key === "ArrowUp") move(-1);
+  else if (e.key === "Enter") { if (sel >= 0) play(sel); }
+  else if (e.key === "Escape" || e.key === "Backspace" || e.key === "Home") home();
+  else return;
+  e.preventDefault();
+});
+function move(d) { if (!list.length) return; sel = Math.max(0, Math.min(list.length - 1, sel + d)); paintList(); const el = $(`.st[data-i="${sel}"]`); if (el) el.scrollIntoView({ block: "nearest" }); }
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => {
+  let acc114 = 0;
+  const on = i => { i.onmidimessage = m => { const [s, a, v] = m.data; if ((s & 0xf0) !== 0xb0) return;
+    if (a === 114) { acc114 += v >= 64 ? v - 128 : v; if (Math.abs(acc114) >= 2) { move(acc114 > 0 ? 1 : -1); acc114 = 0; } }
+    if ((a === 115 || a === 118) && v > 0) { if (sel >= 0) play(sel); else home(); } }; };
+  acc.inputs.forEach(on); acc.onstatechange = () => acc.inputs.forEach(on);
+}).catch(() => {});
+(function pad() { const g = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean);
+  if (g) { const now = Date.now(); if (!pad.t || now - pad.t > 220) { if (g.buttons[13] && g.buttons[13].pressed) { move(1); pad.t = now; } else if (g.buttons[12] && g.buttons[12].pressed) { move(-1); pad.t = now; }
+    else if (g.buttons[0] && g.buttons[0].pressed) { if (sel >= 0) play(sel); pad.t = now; } else if (g.buttons[1] && g.buttons[1].pressed) return home(); } }
+  requestAnimationFrame(pad); })();
+
+/* start: favorites, what's playing, the status loop */
+(async () => {
+  if (B) {
+    const f = await B.radio("favs").catch(() => null); favs = f && f.ok ? f.favs : [];
+    const s = await B.radio("status").catch(() => null); if (s && s.ok && s.playing && s.station) playing = s.station;
+    const l = await B.listen("status").catch(() => null); if (l) keep = !!l.keep;
+  }
+  showTab("favs"); paintNow();
+  if (B) setInterval(async () => {
+    const s = await B.listen("status").catch(() => null); if (!s) return;
+    keep = !!s.keep; if (!s.radio && playing) { playing = null; paintList(); }
+    paintNow(s.now);
+  }, 2000);
+})();
+</script>
+<script src="/box/jam.js"></script>
+<script src="/box/idle.js"></script>
+</body>
+</html>

@@ -40218,7 +40218,11 @@ registerProcessor("nb-aw", NBAwProc);
             if (!window.NBJam && !document.getElementById("nbJamJs")) {
               window.__nbAppMidi = true;
               const sc = document.createElement("script"); sc.id = "nbJamJs"; sc.src = "/box/jam.js";
-              sc.onload = () => window.NBJam && NBJam.mount({ bar: () => document.querySelector("#playView .pl-top"), before: () => $b("bxHomeBtn") });
+              sc.onload = () => {
+                window.NBJam && NBJam.mount({ bar: () => document.querySelector("#playView .pl-top"), before: () => $b("bxHomeBtn") });
+                // the idle screen (box/apps/idle.js): clock and weather after a while untouched, only once switched on in the home screen's Settings
+                const si = document.createElement("script"); si.src = "/box/idle.js"; document.head.appendChild(si);
+              };
               document.head.appendChild(sc);
             }
           }).catch(() => {});

@@ -46,7 +46,7 @@ Chromium kiosk.
 
 ## The home screen
 
-At power-on the box opens a home screen with six tiles. Tap one, or turn a controller's big knob and click; a game
+At power-on the box opens a home screen with nine tiles. Tap one, or turn a controller's big knob and click; a game
 controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 
 | Tile | What it is |
@@ -54,14 +54,38 @@ controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 | **Nate Bloom** | the synth, drums, sampling and DJ (everything below). **⌂ Home** in Play's top bar comes back here. |
 | **Keys** | piano lessons, with the MiniLab, KeyLab or the Yamaha. Settings › Raspberry Pi box › Home screen comes back. |
 | **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones). YouTube and YouTube Music: tap the Cast icon and pick Nate Bloom Box. The box fetches and plays the music itself, so the phone is just the remote: lock it or walk away and the queue keeps going. If the box isn't in the Cast list, the Listen screen shows a TV code for YouTube › Settings › Watch on TV › Link with TV code. Stops when you leave the screen, unless **Keep playing** is on (below). |
+| **Radio** | internet radio on the touch screen, no phone needed: favorites, search by name, by style, or the US list (stations from radio-browser.info). Plays as a Listen source, so Keep playing, the chip and the level fader work the same. |
+| **Sheets** | sheet music and chord charts: PDFs from `~/Sheets` on the box (over SSH or a shared folder; subfolders are fine) or a USB stick. Page turns: tap the right or left half, arrow keys, the big knob, the controller's pads (pad 1 back, pad 2 forward), the sustain pedal (forward), or a gamepad's bumpers. It remembers the page you were on. |
 | **Stream** | Moonlight: games from the GPU box (Sunshine) streamed over Wi-Fi, played with the Xbox controller. Set up with `bash box/stream-setup.sh` (Tailscale, 720p60 HEVC, pairing); `--boot-into-stream` starts straight into Steam at power-on. The GPU box side: `stream/`. |
 | **Media** | Kodi for movies, music and photos from a USB stick or the network. Controller-driven; Power › Exit comes back. |
-| **Games** | retro games from a Batocera USB stick (below). Shows **No stick** until one is plugged in. |
+| **Retro** | games in RetroArch without rebooting: systems on the left (the ones with a core installed: NES, SNES, Game Boy, GBA, Genesis, DS, PlayStation, N64), games from `~/ROMs/<system>` on the box or `roms/<system>` on a stick. Xbox controller; the Guide button or Select + Start quits a game, the power button comes home. Save states are automatic. Music keeps playing under 8/16-bit and PlayStation games; N64 and PSP stop it. |
+| **Games** | retro games from a Batocera USB stick (below), for anything RetroArch here can't run. Shows **No stick** until one is plugged in. |
 
 - **The power button is Home:** press it from anything (Moonlight and Kodi included) to come back here; **hold it
   2 seconds to shut down**. When the box is off, a press turns it on.
 - **Settings** (⚙ top right): Bluetooth pairing, what opens at power-on (home screen, Nate Bloom, Keys or Listen),
-  restart, reboot, hold to shut down.
+  the idle screen, restart, reboot, hold to shut down.
+- **Idle screen** (off until you switch it on in Settings): after 2, 5, 10 or 20 minutes untouched, the screen shows
+  a clock, the weather for the place you set (city or ZIP, °F or °C) and what's playing. Any touch, key, knob, pad
+  or controller input brings the page back, and that input does nothing else. It covers the app's own pages (Nate
+  Bloom, Keys, Listen, Radio, Sheets, Retro's picker, the home screen), not Moonlight, Kodi or a running game.
+
+### Two things at once
+
+One app on the screen, plus one music source under it: that's what the Pi 5 does well, and what the box allows.
+Nate Bloom's sound engine comes first; the music player runs beside it at normal priority and is light (tens of MB).
+Two screen apps never run together, and only one music source plays at a time (starting the radio or casting
+YouTube replaces what was playing).
+
+| On the screen | Music under it (Keep playing on) |
+| --- | --- |
+| Nate Bloom, Keys, Sheets, Radio, the home screen | yes |
+| Stream (Moonlight) | yes; volume on the phone |
+| Retro: NES, SNES, Game Boy, GBA, Genesis, DS, PlayStation | yes |
+| Retro: N64, PSP | no (they want the whole Pi) |
+| Media (Kodi), Games (Batocera) | no (their own sound; Batocera is its own OS) |
+
+Compressed swap (zram, half of RAM) is the safety net: a memory spike slows things instead of ending them.
 
 ### Jam along: your phone's music under Nate Bloom or Keys
 
@@ -126,7 +150,10 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
   For the home screen: `shairport-sync` and raspotify's `librespot`, `mpv` and the standalone `yt-dlp` in `/opt/nb-box/ytdlp` (Listen; their own services are switched off, the
   app runs them only while Listen is open), `moonlight-qt` from Moonlight's package repository (Stream), `kodi` (Media).
   Skip any with `--no-listen`, `--no-stream`, `--no-media`.
-- The home screen, Listen and Keys in `/opt/nb-box/apps`; `session.sh` runs Moonlight or Kodi when asked and comes
+- `mpv` and the standalone `yt-dlp` in `/opt/nb-box/ytdlp` (YouTube casting, Radio), `poppler-utils` (Sheets), `retroarch` and
+  Debian's `libretro-*` cores (Retro; `~/.config/retroarch/retroarch.cfg` gets fullscreen, auto save states and the
+  quit combo), `zram-tools` (`/etc/default/zramswap`: zstd, 50 %). Folders `~/Sheets` and `~/ROMs/<system>`.
+- The home screen, Listen, Radio, Sheets, Retro and Keys in `/opt/nb-box/apps`; `session.sh` runs Moonlight, Kodi or RetroArch when asked and comes
   back to the home screen; `/run/nb-box` passes those requests and the power button's "home".
 - The power button: logind ignores it (`/etc/systemd/logind.conf.d/nb-box.conf`) and `nb-box-power.service` makes a
   press go home and a 2-second hold shut down.
@@ -154,6 +181,9 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |
 | Clicks or dropouts | ⚡ low power showing? Use the 45 W supply. Otherwise Settings › App › sound buffer: Steady |
 | App closes right after starting (screen flashes back) | rerun the installer with `--4k-kernel` (the Pi 5's default kernel uses 16 KB memory pages) |
+| Radio finds nothing | the box needs internet for the station list (radio-browser.info); favorites still play |
+| A sheet's page is slow to appear | the first look at each page is drawn and kept (`~/.config/nate-bloom/sheets-cache`); after that it's instant. The next page is drawn ahead |
+| A Retro system says "no core installed" | `sudo apt install libretro-<name>` over SSH (the installer tries nestopia, snes9x, gambatte, mgba, genesisplusgx, desmume, beetle-psx, mupen64plus) |
 | YouTube casting stops working | YouTube changed something: the box updates yt-dlp once a day by itself; to do it now, `/opt/nb-box/ytdlp/yt-dlp -U` over SSH. AirPlay from the YouTube app still works meanwhile |
 | Listen doesn't show up on the phone | phone and box on the same Wi-Fi? Leave Listen and open it again; `systemctl status avahi-daemon` over SSH |
 | Moonlight or Kodi stuck | press the power button once: it closes them and the home screen comes back |

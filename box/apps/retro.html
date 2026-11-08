@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retro · Nate Bloom Box</title>
+<style>
+/* Retro (box/apps/retro.html): games in RetroArch without rebooting into the Batocera stick. Systems down the left
+   (the ones RetroArch has a core for), games on the right from ~/ROMs/<system> or a stick's roms/<system>. Picking a
+   game hands RetroArch the core and the file (session.sh); the power button brings the home screen back. 960 x 540. */
+:root { --bg: #0f1013; --tile: #1a1c21; --tile2: #22252c; --line: #2c2f37; --ink: #f2efe8; --ink2: #a4a7ae; --ink3: #74777e; --acc: #f2e27a; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, "Noto Sans", sans-serif; overflow: hidden; user-select: none; }
+button { font: inherit; color: inherit; }
+#top { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+#top .t { font-size: 19px; font-weight: 700; flex: 1; }
+.btn { height: 46px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chip { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--tile); font-size: 13px; color: var(--ink2); white-space: nowrap; }
+#main { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 14px; display: grid; grid-template-columns: 300px 1fr; gap: 14px; }
+.card { background: var(--tile); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; min-height: 0; }
+#sys { overflow: auto; gap: 4px; }
+.sy { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 0; background: transparent; text-align: left; cursor: pointer; width: 100%; }
+.sy.on { background: var(--tile2); } .sy.sel { box-shadow: 0 0 0 2px var(--acc) inset; }
+.sy.off { opacity: .4; }
+.sy .x { flex: 1; min-width: 0; } .sy b { display: block; font-size: 16px; } .sy span { font-size: 12px; color: var(--ink3); }
+.sy .n { font-size: 13px; color: var(--ink3); background: var(--bg); border-radius: 999px; padding: 3px 9px; }
+#games { padding: 14px 16px; }
+#gh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; } #gh b { font-size: 18px; } #gh span { font-size: 13px; color: var(--ink3); }
+#gl { flex: 1; overflow: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; align-content: start; margin: 0 -4px; padding: 0 4px; }
+.g { border: 0; border-radius: 12px; background: var(--tile2); text-align: left; padding: 11px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; min-height: 56px; }
+.g.sel { box-shadow: 0 0 0 2px var(--acc) inset; }
+.g b { font-size: 15px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .g span { font-size: 11.5px; color: var(--ink3); }
+.note { grid-column: 1 / -1; color: var(--ink3); font-size: 14px; line-height: 1.5; padding: 14px 4px; } .note code { color: var(--ink2); }
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); background: #2a2d35; color: var(--ink); padding: 12px 18px; border-radius: 12px; font-size: 15px; opacity: 0; transition: .2s; pointer-events: none; z-index: 30; }
+#toast.on { opacity: 1; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="btn" id="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+  <div class="t">Retro</div>
+  <span class="chip" id="info">Controller: Guide button or Select + Start quits a game</span>
+</div>
+<div id="main">
+  <div class="card" id="sys"><div class="note">Loading…</div></div>
+  <div class="card" id="games"><div id="gh"><b id="gt">Games</b><span id="gs"></span></div><div id="gl"></div></div>
+</div>
+<div id="toast"></div>
+<script>
+"use strict";
+const B = window.NBBox || null, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const home = () => B ? B.go("home") : history.back();
+$("#home").onclick = home;
+function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), ms || 2600); }
+
+let systems = [], si = 0, gi = 0, col = 0, folder = "~/ROMs";   // col: 0 = systems, 1 = games
+function paintSys() {
+  $("#sys").innerHTML = systems.length ? systems.map((s, i) => `<button class="sy${i === si ? " on" : ""}${col === 0 && i === si ? " sel" : ""}${s.core ? "" : " off"}" data-i="${i}">
+    <span class="x"><b>${esc(s.name)}</b><span>${s.core ? (s.heavy ? "stops the music while it runs" : "music can play under it") : "no core installed"}</span></span><span class="n">${s.games.length}</span></button>`).join("")
+    : '<div class="note">RetroArch isn\'t installed. Run the box installer again.</div>';
+}
+function paintGames() {
+  const s = systems[si]; if (!s) return;
+  $("#gt").textContent = s.name; $("#gs").textContent = s.games.length ? s.games.length + (s.games.length === 1 ? " game" : " games") : "";
+  $("#gl").innerHTML = s.games.length ? s.games.map((g, i) => `<button class="g${col === 1 && i === gi ? " sel" : ""}" data-i="${i}"><b>${esc(g.name)}</b><span>${esc(g.file)}${g.usb ? " · USB" : ""}</span></button>`).join("")
+    : `<div class="note">No ${esc(s.name)} games yet. Put them in <code>${esc(folder)}/${esc(s.id)}</code> on the box, or in <code>roms/${esc(s.id)}</code> on a USB stick. ${s.core ? "" : "This system also needs its RetroArch core (run the installer again)."}</div>`;
+  const e = $(".g.sel"); if (e) e.scrollIntoView({ block: "nearest" });
+}
+const paint = () => { paintSys(); paintGames(); };
+$("#sys").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (!b) return; si = +b.dataset.i; gi = 0; col = systems[si].games.length ? 1 : 0; paint(); });
+$("#gl").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b) launch(+b.dataset.i); });
+let busy = false;
+async function launch(i) {
+  const s = systems[si], g = s && s.games[i]; if (!g || busy) return;
+  if (!s.core) return toast("No core for " + s.name + ": run the installer again");
+  if (!B) return toast("Starts " + g.name + " (on the box)");
+  busy = true; toast("Starting " + g.name + "…" + (s.heavy ? " (music stops)" : ""), 8000);
+  const r = await B.go("retro", { core: s.core, rom: g.rom }).catch(e => ({ ok: false, error: String(e) }));
+  busy = false;
+  if (!r || !r.ok) toast("Couldn't start it" + (r && r.error ? ": " + r.error : ""));
+}
+function move(dx, dy) {
+  if (col === 0) { if (dx > 0 && systems[si] && systems[si].games.length) { col = 1; gi = 0; } else if (dy) si = Math.max(0, Math.min(systems.length - 1, si + dy)); }
+  else { if (dx < 0 && gi % 2 === 0) col = 0; else if (dx) gi = Math.max(0, Math.min(systems[si].games.length - 1, gi + dx)); else if (dy) gi = Math.max(0, Math.min(systems[si].games.length - 1, gi + dy * 2)); }
+  paint();
+}
+const act = () => { if (col === 0) { if (systems[si] && systems[si].games.length) { col = 1; gi = 0; paint(); } } else launch(gi); };
+addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") move(1, 0); else if (e.key === "ArrowLeft") move(-1, 0); else if (e.key === "ArrowDown") move(0, 1); else if (e.key === "ArrowUp") move(0, -1);
+  else if (e.key === "Enter") act(); else if (e.key === "Escape" || e.key === "Backspace" || e.key === "Home") { if (col === 1) { col = 0; paint(); } else home(); } else return;
+  e.preventDefault();
+});
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => {
+  let a114 = 0;
+  const on = i => { i.onmidimessage = m => { const [s, a, v] = m.data; if ((s & 0xf0) !== 0xb0) return;
+    if (a === 114) { a114 += v >= 64 ? v - 128 : v; if (Math.abs(a114) >= 2) { col === 0 ? move(0, a114 > 0 ? 1 : -1) : move(a114 > 0 ? 1 : -1, 0); a114 = 0; } }
+    if ((a === 115 || a === 118) && v > 0) act(); } };
+  acc.inputs.forEach(on); acc.onstatechange = () => acc.inputs.forEach(on);
+}).catch(() => {});
+(function pad() { const g = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean);
+  if (g) { const now = Date.now(); if (!pad.t || now - pad.t > 220) { const p = n => g.buttons[n] && g.buttons[n].pressed;
+    if (p(15)) { move(1, 0); pad.t = now; } else if (p(14)) { move(-1, 0); pad.t = now; } else if (p(13)) { move(0, 1); pad.t = now; } else if (p(12)) { move(0, -1); pad.t = now; }
+    else if (p(0)) { act(); pad.t = now; } else if (p(1)) { if (col === 1) { col = 0; paint(); pad.t = now; } else return home(); } } }
+  requestAnimationFrame(pad); })();
+
+(async () => {
+  if (!B) { systems = []; paint(); return; }
+  const r = await B.retro("list").catch(() => null);
+  if (r && r.ok) { systems = r.systems; folder = r.folder || folder; si = Math.max(0, systems.findIndex(s => s.core && s.games.length)); }
+  paint();
+})();
+</script>
+<script src="/box/jam.js"></script>
+<script>if (window.NBJam) NBJam.mount({ bar: () => document.getElementById("top"), before: () => document.getElementById("info") });</script>
+<script src="/box/idle.js"></script>
+</body>
+</html>

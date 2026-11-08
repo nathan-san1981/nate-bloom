@@ -293,8 +293,8 @@ function createWindow() {
   // Nate Bloom, Keys and the home screen, and stops only for Stream, Media, Games or Stop
   if (BOX) win.webContents.on("did-start-navigation", (e) => {
     const u = (e && e.url) || ""; if (e && e.isMainFrame === false) return;
-    if (u.includes("/box/keys/")) boxLast = "keys"; else if (/\/\?box=1/.test(u)) boxLast = "bloom";
-    if (!u.includes("/box/listen.html") && !listenKeep()) listenStop();
+    if (u.includes("/box/keys/")) boxLast = "keys"; else if (/\/\?box=1/.test(u)) boxLast = "bloom"; else if (u.includes("/box/sheets.html")) boxLast = "sheets";
+    if (!u.includes("/box/listen.html") && !u.includes("/box/radio.html") && !listenKeep()) listenStop();
   });
   win.loadURL(ORIGIN + (BOX ? boxStartPage() : "/"));
   win.webContents.once("did-finish-load", () => setTimeout(() => checkForUpdate(win), 4000));
@@ -321,8 +321,10 @@ ipcMain.handle("nb:box-status", async () => BOX ? boxStatus() : null);
 // screen. Games reboots into the Batocera USB stick (the box boots USB first, then the card).
 const BOX_APPS = process.env.NB_BOX_APPS || "/opt/nb-box/apps";
 const BOX_RUN = process.env.NB_BOX_RUN || "/run/nb-box";
-const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html" };
+const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html", radio: "/box/radio.html", sheets: "/box/sheets.html", retro: "/box/retro.html" };
 const BOX_OUT = { stream: "/usr/bin/moonlight-qt", media: "/usr/bin/kodi" };
+const RETROARCH = "/usr/bin/retroarch", CORES = "/usr/lib/aarch64-linux-gnu/libretro";
+const SHEETS_DIR = path.join(app.getPath("home"), "Sheets"), ROMS_DIR = path.join(app.getPath("home"), "ROMs");
 let boxLast = "";   // (the last of Nate Bloom / Keys opened: the home screen offers Resume on it)
 const hasFile = p => { try { return fs.statSync(p).isFile(); } catch (e) { return false; } };
 function boxConf(key) { try { return (new RegExp("^" + key + "=(\\S*)", "m").exec(fs.readFileSync("/etc/nb-box.conf", "utf8")) || [])[1] || ""; } catch (e) { return ""; } }
@@ -339,11 +341,15 @@ async function boxApps() {
     home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true,
     keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
     listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync") || ytcastReady()),
+    radio: hasFile(path.join(BOX_APPS, "radio.html")) && hasFile("/usr/bin/mpv"),
+    sheets: hasFile(path.join(BOX_APPS, "sheets.html")) && hasFile("/usr/bin/pdftoppm"),
+    retro: hasFile(path.join(BOX_APPS, "retro.html")) && hasFile(RETROARCH),
     stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
     start: boxConf("START") || "ask", last: boxLast,
   };
 }
-async function boxGo(a) {
+const RETRO_HEAVY = /mupen64|parallel_n64|ppsspp|flycast|dolphin|pcsx2/i;
+async function boxGo(a, arg) {
   a = String(a || "");
   if (BOX_PAGES[a]) {
     if (a !== "bloom" && !hasFile(path.join(BOX_APPS, BOX_PAGES[a].replace(/^\/box\//, "").replace(/\?.*$/, "")))) return { ok: false, error: "not installed" };
@@ -355,13 +361,26 @@ async function boxGo(a) {
     boxQuitFor = a; if (!(a === "stream" && listenKeep())) listenStop();   // (music plays on under a game stream; not under Kodi)
     setTimeout(() => app.quit(), 200); return { ok: true };
   }
+  if (a === "retro") {   // RetroArch, its own program like Stream: core and game from the picker page, in /run/nb-box/retro
+    const o = (arg && typeof arg === "object") ? arg : {};
+    const core = String(o.core || "").replace(/[^a-z0-9_]/gi, ""), rom = String(o.rom || "");
+    if (!hasFile(RETROARCH) || !core || !hasFile(path.join(CORES, core + "_libretro.so"))) return { ok: false, error: "not installed" };
+    const real = await fsp.realpath(rom).catch(() => "");
+    if (!(real.startsWith(ROMS_DIR + path.sep) || real.startsWith(USB_ROOT + path.sep)) || !hasFile(real)) return { ok: false, error: "no such game" };
+    try { await fsp.mkdir(BOX_RUN, { recursive: true }); await fsp.writeFile(path.join(BOX_RUN, "retro"), JSON.stringify({ core: path.join(CORES, core + "_libretro.so"), rom: real })); await fsp.writeFile(path.join(BOX_RUN, "next"), "retro\n"); } catch (e) { return { ok: false, error: String(e.message || e) }; }
+    // 8/16-bit and PS1 leave room for the music; N64 and PSP want the whole Pi
+    boxQuitFor = RETRO_HEAVY.test(core) ? "retro-heavy" : "retro"; if (boxQuitFor === "retro-heavy" || !listenKeep()) listenStop();
+    setTimeout(() => app.quit(), 200); return { ok: true };
+  }
   if (a === "games") { if (!(await gameStick())) return { ok: false, error: "no game stick" }; listenStop(); return boxRun(["games"]); }
   return { ok: false, error: "unknown app" };
 }
-ipcMain.handle("nb:box-go", (e, a) => BOX ? boxGo(a) : null);
+ipcMain.handle("nb:box-go", (e, a, arg) => BOX ? boxGo(a, arg) : null);
 ipcMain.handle("nb:box-apps", () => BOX ? boxApps() : null);
-// the power button (box/nb-box-power.py, as root) asks for the home screen by creating /run/nb-box/home
+// the power button (box/nb-box-power.py, as root) asks for the home screen by creating /run/nb-box/home;
+// ytcast.js asks the radio to stop (a cast starting) with radio-stop
 if (BOX) setInterval(() => {
+  const rs = path.join(BOX_RUN, "radio-stop"); if (hasFile(rs)) { try { fs.unlinkSync(rs); } catch (e) {} if (listenProcs().some(x => x.name === "radio")) radioStop(); }
   const f = path.join(BOX_RUN, "home");
   if (!hasFile(f)) return;
   try { fs.unlinkSync(f); } catch (e) {}
@@ -377,7 +396,7 @@ const LISTEN_PIDS = () => path.join(BOX_RUN, "listen.pids");
 const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return false; } };
 function listenProcs() {
   let l = []; try { l = JSON.parse(fs.readFileSync(LISTEN_PIDS(), "utf8")); } catch (e) {}
-  return (Array.isArray(l) ? l : []).filter(p => p && p.pid > 1 && alive(p.pid) && /librespot|shairport|listen-airplay|ytcast/.test(String(p.name)));
+  return (Array.isArray(l) ? l : []).filter(p => p && p.pid > 1 && alive(p.pid) && /librespot|shairport|listen-airplay|ytcast|radio/.test(String(p.name)));
 }
 // YouTube / YouTube Music: ytcast.js (a cast receiver, run with Electron's own Node) playing through mpv + yt-dlp
 const YTDLP = "/opt/nb-box/ytdlp/yt-dlp";
@@ -412,7 +431,7 @@ function listenStart() {
 }
 function listenStop() {
   for (const p of listenProcs()) { try { process.kill(-p.pid, "SIGTERM"); } catch (e) { try { process.kill(p.pid, "SIGTERM"); } catch (er) {} } }
-  listenSave([]); for (const f of ["listen.json", "ytcast.json"]) { try { fs.rmSync(path.join(BOX_RUN, f)); } catch (e) {} }
+  listenSave([]); radioTitle.stop(); for (const f of ["listen.json", "ytcast.json", "radio.json"]) { try { fs.rmSync(path.join(BOX_RUN, f)); } catch (e) {} }
 }
 // "Keep playing in Nate Bloom, Keys and the home screen": off until switched on in Listen; remembered
 const KEEP_FILE = () => path.join(app.getPath("userData"), "listen-keep.json");
@@ -425,7 +444,7 @@ let listenLevel = 1, listenMuted = false;
 async function listenNodes() {
   const pids = new Set(listenProcs().map(p => p.pid));
   return (await pwDump()).filter(o => o.type === "PipeWire:Interface:Node" && o.info && o.info.props && o.info.props["media.class"] === "Stream/Output/Audio" &&
-    (pids.has(+o.info.props["application.process.id"]) || /librespot|shairport|nb-ytcast/i.test(String(o.info.props["application.process.binary"] || "") + " " + String(o.info.props["application.name"] || "")))).map(o => o.id);
+    (pids.has(+o.info.props["application.process.id"]) || /librespot|shairport|nb-ytcast|nb-radio/i.test(String(o.info.props["application.process.binary"] || "") + " " + String(o.info.props["application.name"] || "")))).map(o => o.id);
 }
 const wp = args => new Promise(res => execFile("wpctl", args, { timeout: 4000 }, err => res(!err)));
 async function listenApply() { for (const id of await listenNodes()) { await wp(["set-volume", String(id), listenLevel.toFixed(3)]); await wp(["set-mute", String(id), listenMuted ? "1" : "0"]); } }
@@ -433,12 +452,171 @@ function listenStatus() {
   let now = null; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {}
   const l = listenProcs();
   let yt = {}; try { yt = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "ytcast.json"), "utf8")); } catch (e) {}
-  return { spotify: l.some(p => p.name === "librespot"), airplay: l.some(p => p.name === "shairport-sync"), youtube: l.some(p => p.name === "ytcast"),
+  return { spotify: l.some(p => p.name === "librespot"), airplay: l.some(p => p.name === "shairport-sync"), youtube: l.some(p => p.name === "ytcast"), radio: l.some(p => p.name === "radio"),
     ytCode: yt.code || null, ytPhones: yt.phones || [], name: LISTEN_NAME, now,
     keep: listenKeep(), level: listenLevel, muted: listenMuted };
 }
 // (a new stream, e.g. the next AirPlay session, starts at full volume: put the chosen level back every few seconds)
 if (BOX) setInterval(() => { if ((listenLevel < 0.999 || listenMuted) && listenProcs().length) listenApply(); }, 3000);
+// Internet radio (box/apps/radio.html): stations from radio-browser.info, played by mpv as one more Listen source.
+// It runs detached like the others, so Keep playing carries it through Nate Bloom, Keys and game streams.
+const RADIO_FILE = () => path.join(BOX_RUN, "radio.json"), RADIO_FAVS = () => path.join(app.getPath("userData"), "radio-favs.json");
+const radioTitle = { t: 0, stop() { clearInterval(this.t); this.t = 0; } };
+function listenNow(o) { try { fs.writeFileSync(path.join(BOX_RUN, "listen.json"), JSON.stringify(Object.assign({ t: Date.now() / 1000 }, o))); } catch (e) {} }
+async function radioStart(st) {
+  if (!hasFile("/usr/bin/mpv") || !st || !/^https?:\/\//.test(String(st.url || ""))) return { ok: false, error: "no station" };
+  radioStop(false);
+  try { fs.writeFileSync(path.join(BOX_RUN, "ytcast-stop"), ""); } catch (e) {}   // (one music source at a time: a YouTube cast gives way)
+  const sock = path.join(BOX_RUN, "radio.sock"); try { fs.rmSync(sock); } catch (e) {}
+  const p = spawn("/usr/bin/mpv", ["--no-video", "--no-terminal", "--audio-client-name=nb-radio", "--input-ipc-server=" + sock, "--volume=70", "--cache=yes", "--cache-secs=8", String(st.url)],
+    { stdio: "ignore", detached: true });
+  p.on("error", () => {}); p.unref(); if (!p.pid) return { ok: false, error: "mpv didn't start" };
+  listenSave(listenProcs().concat([{ pid: p.pid, name: "radio" }]));
+  const station = { name: String(st.name || "Radio"), url: String(st.url), favicon: String(st.favicon || ""), uuid: String(st.uuid || ""), country: String(st.country || ""), tags: String(st.tags || "") };
+  try { fs.writeFileSync(RADIO_FILE(), JSON.stringify(station)); } catch (e) {}
+  listenNow({ name: station.name, artists: "", album: "", state: "playing", source: "Radio" });
+  // the song title the stream sends (ICY), every few seconds, from mpv's socket
+  radioTitle.stop();
+  radioTitle.t = setInterval(() => {
+    if (!listenProcs().some(x => x.name === "radio")) { radioTitle.stop(); return; }
+    const c = require("net").connect(sock); let buf = "";
+    c.on("connect", () => c.write(JSON.stringify({ command: ["get_property", "media-title"], request_id: 1 }) + "\n"));
+    c.on("data", d => { buf += d; if (buf.includes("\n")) { try { const m = JSON.parse(buf.split("\n")[0]); const title = m.data && m.data !== station.url ? String(m.data) : "";
+      let now = {}; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {}
+      if (now.source === "Radio" && (now.name !== (title || station.name) || now.artists !== (title ? station.name : ""))) listenNow({ name: title || station.name, artists: title ? station.name : "", album: "", state: "playing", source: "Radio" });
+    } catch (e) {} c.destroy(); } });
+    c.on("error", () => {}); setTimeout(() => c.destroy(), 3000);
+  }, 4000);
+  return { ok: true };
+}
+function radioStop(clear = true) {
+  radioTitle.stop();
+  const l = listenProcs(); for (const p of l.filter(x => x.name === "radio")) { try { process.kill(p.pid, "SIGTERM"); } catch (e) {} }
+  listenSave(l.filter(x => x.name !== "radio"));
+  if (clear) { try { fs.rmSync(RADIO_FILE()); } catch (e) {} let now = {}; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {} if (now.source === "Radio") listenNow({ state: "idle", source: "Radio" }); }
+}
+const httpsJson = (url, ms = 12000) => new Promise(res => { const r = net.request({ url, redirect: "follow" }); let b = ""; const t = setTimeout(() => { try { r.abort(); } catch (e) {} res(null); }, ms);
+  r.on("response", rs => { rs.on("data", d => { b += d; }); rs.on("end", () => { clearTimeout(t); try { res(JSON.parse(b)); } catch (e) { res(null); } }); rs.on("error", () => { clearTimeout(t); res(null); }); });
+  r.on("error", () => { clearTimeout(t); res(null); }); r.setHeader("User-Agent", "NateBloomBox/1.0"); r.end(); });
+async function radioSearch(q) {
+  q = q && typeof q === "object" ? q : {};
+  const u = new URL("https://all.api.radio-browser.info/json/stations/search");
+  if (q.name) u.searchParams.set("name", String(q.name).slice(0, 80));
+  if (q.tag) u.searchParams.set("tag", String(q.tag).slice(0, 40));
+  if (q.country) u.searchParams.set("countrycode", String(q.country).slice(0, 2));
+  u.searchParams.set("hidebroken", "true"); u.searchParams.set("order", q.order === "name" ? "name" : "votes"); u.searchParams.set("reverse", q.order === "name" ? "false" : "true"); u.searchParams.set("limit", "60");
+  const r = await httpsJson(u.toString());
+  if (!Array.isArray(r)) return { ok: false, error: "radio-browser.info didn't answer" };
+  return { ok: true, stations: r.filter(s => /^https?:/.test(s.url_resolved || s.url || "")).map(s => ({ uuid: s.stationuuid, name: s.name, url: s.url_resolved || s.url, favicon: s.favicon || "", country: s.countrycode || "", tags: s.tags || "", bitrate: s.bitrate || 0, codec: s.codec || "" })) };
+}
+ipcMain.handle("nb:box-radio", async (e, cmd, arg) => {
+  if (!BOX) return null;
+  if (cmd === "play") return radioStart(arg);
+  if (cmd === "stop") { radioStop(); return { ok: true }; }
+  if (cmd === "search") return radioSearch(arg);
+  if (cmd === "favs") { let f = []; try { f = JSON.parse(fs.readFileSync(RADIO_FAVS(), "utf8")); } catch (er) {} if (Array.isArray(arg)) { f = arg.slice(0, 200); try { fs.writeFileSync(RADIO_FAVS(), JSON.stringify(f)); } catch (er) {} } return { ok: true, favs: f }; }
+  if (cmd === "status") { let st = null; try { st = JSON.parse(fs.readFileSync(RADIO_FILE(), "utf8")); } catch (er) {} return { ok: true, playing: listenProcs().some(x => x.name === "radio"), station: st }; }
+  return { ok: false, error: "unknown" };
+});
+
+// Sheet music (box/apps/sheets.html): PDFs from ~/Sheets or a USB stick, drawn page by page with pdftoppm; page turns from
+// the keyboard, a touch, the big knob, the controller's pads or the sustain pedal are the page's business
+const SHEETS_CACHE = () => path.join(app.getPath("userData"), "sheets-cache");
+ipcMain.handle("nb:box-sheets", async (e, cmd, arg) => {
+  if (!BOX) return null;
+  if (cmd === "list") {
+    const out = [];
+    async function walk(dir, depth, root, where) {
+      if (depth > 4 || out.length >= 2000) return;
+      let ents = []; try { ents = await fsp.readdir(dir, { withFileTypes: true }); } catch (er) { return; }
+      ents.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+      for (const en of ents) {
+        if (en.name.startsWith(".")) continue;
+        const p = path.join(dir, en.name);
+        if (en.isDirectory()) await walk(p, depth + 1, root, where);
+        else if (en.isFile() && /\.pdf$/i.test(en.name)) out.push({ path: p, name: en.name.replace(/\.pdf$/i, ""), folder: path.relative(root, dir) || "", where });
+      }
+    }
+    await walk(SHEETS_DIR, 0, SHEETS_DIR, "box");
+    let sticks = []; try { sticks = (await fsp.readdir(USB_ROOT, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => d.name); } catch (er) {}
+    for (const s of sticks) await walk(path.join(USB_ROOT, s), 0, path.join(USB_ROOT, s), "usb");
+    return { ok: true, sheets: out, folder: SHEETS_DIR };
+  }
+  const real = await fsp.realpath(String(arg && arg.path || "")).catch(() => "");
+  if (!(real.startsWith(SHEETS_DIR + path.sep) || real.startsWith(USB_ROOT + path.sep)) || !/\.pdf$/i.test(real) || !hasFile(real)) return { ok: false, error: "no such sheet" };
+  if (cmd === "info") return new Promise(res => execFile("pdfinfo", [real], { timeout: 15000 }, (err, out) => res(err ? { ok: false, error: "can't read it" } : { ok: true, pages: +((/^Pages:\s+(\d+)/m.exec(String(out)) || [])[1] || 1) })));
+  if (cmd === "page") {
+    const n = Math.max(1, Math.floor(+arg.page || 1)), w = Math.min(2600, Math.max(600, Math.floor(+arg.width || 1280)));
+    const st = await fsp.stat(real).catch(() => null); if (!st) return { ok: false };
+    const key = crypto.createHash("sha1").update(real + "|" + st.mtimeMs + "|" + st.size + "|" + w).digest("hex").slice(0, 16);
+    const dir = SHEETS_CACHE(); await fsp.mkdir(dir, { recursive: true }).catch(() => {});
+    const base = path.join(dir, key + "-" + n), png = base + ".png";
+    if (!hasFile(png)) await new Promise(res => execFile("pdftoppm", ["-png", "-r", "72", "-scale-to-x", String(w), "-scale-to-y", "-1", "-f", String(n), "-l", String(n), "-singlefile", real, base], { timeout: 30000 }, () => res()));
+    const b = await fsp.readFile(png).catch(() => null); if (!b) return { ok: false, error: "couldn't draw the page" };
+    return { ok: true, png: "data:image/png;base64," + b.toString("base64") };
+  }
+  return { ok: false, error: "unknown" };
+});
+
+// Retro (box/apps/retro.html): the systems RetroArch has cores for, and the games in ~/ROMs/<system> or a stick's roms/<system>
+const SYSTEMS = [   // folder, name, cores in order of preference (Debian's libretro-* packages), file types
+  ["nes", "NES", ["nestopia", "fceumm"], "nes|zip"], ["snes", "Super Nintendo", ["snes9x", "bsnes_mercury_balanced", "bsnes"], "sfc|smc|zip"],
+  ["gb", "Game Boy", ["gambatte", "mgba"], "gb|gbc|zip"], ["gba", "Game Boy Advance", ["mgba"], "gba|zip"],
+  ["genesis", "Genesis / Mega Drive", ["genesis_plus_gx", "picodrive"], "md|gen|bin|smd|zip"], ["sms", "Master System", ["genesis_plus_gx", "picodrive"], "sms|gg|zip"],
+  ["nds", "Nintendo DS", ["desmume", "melonds"], "nds|zip"], ["psx", "PlayStation", ["beetle_psx", "pcsx_rearmed", "mednafen_psx"], "cue|chd|pbp|m3u"],
+  ["n64", "Nintendo 64", ["mupen64plus_next", "mupen64plus", "parallel_n64"], "n64|z64|v64|zip"], ["psp", "PSP", ["ppsspp"], "iso|cso|pbp"],
+  ["arcade", "Arcade", ["fbneo", "mame2003_plus", "mame"], "zip"],
+];
+ipcMain.handle("nb:box-retro", async (e, cmd) => {
+  if (!BOX) return null;
+  if (cmd !== "list") return { ok: false, error: "unknown" };
+  let sticks = []; try { sticks = (await fsp.readdir(USB_ROOT, { withFileTypes: true })).filter(d => d.isDirectory()).map(d => path.join(USB_ROOT, d.name, "roms")); } catch (er) {}
+  const systems = [];
+  for (const [folder, name, cores, ext] of SYSTEMS) {
+    const core = cores.find(c => hasFile(path.join(CORES, c + "_libretro.so")));
+    const re = new RegExp("\\.(" + ext + ")$", "i"), games = [];
+    for (const root of [ROMS_DIR, ...sticks]) {
+      let ents = []; try { ents = await fsp.readdir(path.join(root, folder), { withFileTypes: true }); } catch (er) { continue; }
+      for (const en of ents) if (en.isFile() && !en.name.startsWith(".") && re.test(en.name) && games.length < 500) games.push({ name: en.name.replace(/\.[^.]+$/, "").replace(/\s*[\(\[].*$/, "") || en.name, file: en.name, rom: path.join(root, folder, en.name), usb: root !== ROMS_DIR });
+    }
+    games.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+    systems.push({ id: folder, name, core: core || null, heavy: RETRO_HEAVY.test(core || ""), games });
+  }
+  return { ok: true, systems, folder: ROMS_DIR, retroarch: hasFile(RETROARCH) };
+});
+
+// Idle screen (box/apps/idle.js): off until switched on in the home screen's Settings; clock, weather (Open-Meteo, for the
+// place typed there), what's playing. The pages do the timing and drawing; this keeps the settings and fetches the weather.
+const IDLE_FILE = () => path.join(app.getPath("userData"), "idle.json");
+function idleGet() { let o = {}; try { o = JSON.parse(fs.readFileSync(IDLE_FILE(), "utf8")); } catch (e) {} return Object.assign({ on: false, minutes: 5, place: "", lat: null, lon: null, placeName: "", unit: "f" }, o); }
+let wx = { t: 0, data: null };
+ipcMain.handle("nb:box-idle", async (e, cmd, arg) => {
+  if (!BOX) return null;
+  if (cmd === "get") return idleGet();
+  if (cmd === "set") {
+    const o = idleGet(), a = arg && typeof arg === "object" ? arg : {};
+    if ("on" in a) o.on = !!a.on;
+    if ("minutes" in a) o.minutes = Math.min(60, Math.max(1, Math.floor(+a.minutes) || 5));
+    if ("unit" in a) o.unit = a.unit === "c" ? "c" : "f";
+    if ("place" in a && String(a.place || "").trim() !== o.place) {
+      o.place = String(a.place || "").trim().slice(0, 80); o.lat = o.lon = null; o.placeName = ""; wx = { t: 0, data: null };
+      if (o.place) { const g = await httpsJson("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=" + encodeURIComponent(o.place)); const r = g && g.results && g.results[0];
+        if (r) { o.lat = r.latitude; o.lon = r.longitude; o.placeName = [r.name, r.admin1 && r.country_code === "US" ? r.admin1 : r.country].filter(Boolean).join(", "); } else o.placeName = ""; }
+    }
+    try { fs.writeFileSync(IDLE_FILE(), JSON.stringify(o)); } catch (er) {}
+    return o;
+  }
+  if (cmd === "weather") {
+    const o = idleGet(); if (o.lat == null) return { ok: false, error: "no place" };
+    if (wx.data && Date.now() - wx.t < 15 * 60000) return wx.data;
+    const r = await httpsJson("https://api.open-meteo.com/v1/forecast?latitude=" + o.lat + "&longitude=" + o.lon + "&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&forecast_days=3&timezone=auto&temperature_unit=" + (o.unit === "c" ? "celsius" : "fahrenheit") + "&wind_speed_unit=" + (o.unit === "c" ? "kmh" : "mph"));
+    if (!r || !r.current) return { ok: false, error: "no weather" };
+    wx = { t: Date.now(), data: { ok: true, place: o.placeName || o.place, unit: o.unit, now: { temp: r.current.temperature_2m, code: r.current.weather_code, wind: r.current.wind_speed_10m }, days: (r.daily.time || []).map((d, i) => ({ day: d, hi: r.daily.temperature_2m_max[i], lo: r.daily.temperature_2m_min[i], code: r.daily.weather_code[i] })) } };
+    return wx.data;
+  }
+  return { ok: false, error: "unknown" };
+});
+
 ipcMain.handle("nb:box-listen", async (e, cmd, arg) => {
   if (!BOX) return null;
   if (cmd === "start") listenStart();
@@ -450,7 +628,7 @@ ipcMain.handle("nb:box-listen", async (e, cmd, arg) => {
 });
 // (quitting for Stream with "Keep playing" on leaves the music running; any other quit stops it)
 let boxQuitFor = "";
-app.on("before-quit", () => { if (!(boxQuitFor === "stream" && listenKeep())) listenStop(); });
+app.on("before-quit", () => { if (!((boxQuitFor === "stream" || boxQuitFor === "retro") && listenKeep())) listenStop(); });
 
 // (box) Bluetooth: a keyboard, the Xbox controller, headphones. Scanning and pairing need root: the helper does them.
 const MAC = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/i;

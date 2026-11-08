@@ -1,7 +1,7 @@
 #!/bin/sh
 # Runs inside cage (nb-box.service): turns the 5" panel to landscape, then starts Nate Bloom full screen.
-# The app shows the home screen (Nate Bloom, Keys, Listen, Stream, Media, Games). Stream and Media are programs of their
-# own: the app writes "stream" or "media" into /run/nb-box/next and quits, this runs that program, and when it closes
+# The app shows the home screen (Nate Bloom, Keys, Listen, Radio, Sheets, Stream, Media, Retro, Games). Stream, Media and
+# Retro are programs of their own: the app writes "stream", "media" or "retro" into /run/nb-box/next and quits, this runs that program, and when it closes
 # (or the power button is pressed) the app comes back on the home screen. When the app closes without asking for
 # anything, this script ends, cage exits and systemd starts it all again.
 . /etc/nb-box.conf
@@ -41,6 +41,12 @@ if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
         START=home; continue ;;
       media)    # Kodi
         kodi --windowing=wayland || kodi || true
+        START=home; continue ;;
+      retro)    # RetroArch with the core and game the Retro page picked (/run/nb-box/retro); power button = home
+        CORE=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["core"])' "$RUN/retro" 2>/dev/null)
+        ROM=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["rom"])' "$RUN/retro" 2>/dev/null)
+        rm -f "$RUN/retro"
+        [ -n "$CORE" ] && [ -f "$ROM" ] && retroarch --fullscreen -L "$CORE" "$ROM" || true
         START=home; continue ;;
     esac
     NB_BOX_START="$nb_start" nate-bloom --box --ozone-platform=wayland --force-device-scale-factor="$SCALE"

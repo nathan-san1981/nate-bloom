@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sheets · Nate Bloom Box</title>
+<style>
+/* Sheets (box/apps/sheets.html): sheet music and chord charts, PDFs from ~/Sheets on the box or a USB stick. The app
+   draws each page (pdftoppm) and this shows it edge to edge. Page turns: tap the right/left half, arrow keys, the big
+   knob, a controller pad (pad 1 back, pad 2 forward), the sustain pedal (forward), or the gamepad's bumpers. 960 x 540. */
+:root { --bg: #0f1013; --tile: #1a1c21; --tile2: #22252c; --line: #2c2f37; --ink: #f2efe8; --ink2: #a4a7ae; --ink3: #74777e; --acc: #8fc3ff; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, "Noto Sans", sans-serif; overflow: hidden; user-select: none; }
+button { font: inherit; color: inherit; }
+#top { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+#top .t { font-size: 19px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn { height: 46px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chip { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--tile); font-size: 13px; color: var(--ink2); white-space: nowrap; }
+/* the library */
+#lib { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; align-content: start; overflow: auto; }
+#lib .sh { border: 0; border-radius: 16px; background: var(--tile); text-align: left; padding: 16px 18px; min-height: 96px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
+#lib .sh.sel { box-shadow: 0 0 0 3px var(--acc) inset; }
+#lib .sh b { font-size: 18px; line-height: 1.2; } #lib .sh span { font-size: 13px; color: var(--ink3); }
+#lib .note { grid-column: 1 / -1; color: var(--ink3); font-size: 15px; line-height: 1.5; padding: 20px 6px; }
+#lib .note code { color: var(--ink2); }
+/* the page */
+#view { position: absolute; inset: 0; background: #fff; display: none; }
+#view.on { display: block; }
+#view img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: top center; background: #fff; }
+#view .zone { position: absolute; top: 0; bottom: 0; width: 50%; }
+#view .zone.l { left: 0; } #view .zone.r { right: 0; }
+#view .bar { position: absolute; left: 0; right: 0; top: 0; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: rgba(15,16,19,.86); color: var(--ink); transform: translateY(-100%); transition: transform .2s; }
+#view.bar-on .bar { transform: none; }
+#view .bar .t { flex: 1; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#pg { position: absolute; right: 12px; bottom: 10px; background: rgba(15,16,19,.7); color: #fff; font-size: 13px; padding: 5px 10px; border-radius: 999px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+#pg.on { opacity: 1; }
+#toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); background: #2a2d35; color: var(--ink); padding: 12px 18px; border-radius: 12px; font-size: 15px; opacity: 0; transition: .2s; pointer-events: none; z-index: 30; }
+#toast.on { opacity: 1; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="btn" id="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+  <div class="t">Sheets</div>
+  <span class="chip" id="where">…</span>
+</div>
+<div id="lib"><div class="note">Loading…</div></div>
+<div id="view">
+  <img id="img" alt="">
+  <div class="zone l" id="zl"></div><div class="zone r" id="zr"></div>
+  <div class="bar"><button class="btn" id="back">‹ Library</button><div class="t" id="vt"></div><button class="btn" id="prev">‹</button><button class="btn" id="next">›</button></div>
+  <div id="pg"></div>
+</div>
+<div id="toast"></div>
+<script>
+"use strict";
+const B = window.NBBox || null, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const home = () => B ? B.go("home") : history.back();
+$("#home").onclick = home;
+function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), ms || 2600); }
+
+let sheets = [], sel = 0, cur = null, page = 1, pages = 1, barT = 0;
+const W = () => Math.round(Math.min(2600, innerWidth * (devicePixelRatio || 1)));
+function paintLib() {
+  const el = $("#lib");
+  if (!sheets.length) { el.innerHTML = `<div class="note">No sheet music yet. Put PDFs in <code>${esc(folder)}</code> on the box (over SSH or a shared folder), or on a USB stick. Subfolders are fine.</div>`; return; }
+  el.innerHTML = sheets.map((s, i) => `<button class="sh${i === sel ? " sel" : ""}" data-i="${i}"><b>${esc(s.name)}</b><span>${esc([s.where === "usb" ? "USB stick" : "", s.folder].filter(Boolean).join(" · "))}</span></button>`).join("");
+  const e = $(".sh.sel"); if (e) e.scrollIntoView({ block: "nearest" });
+}
+let folder = "~/Sheets";
+$("#lib").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b) openSheet(+b.dataset.i); });
+async function openSheet(i) {
+  const s = sheets[i]; if (!s) return; sel = i; paintLib();
+  if (!B) return toast("Opens " + s.name + " (on the box)");
+  const inf = await B.sheets("info", { path: s.path }).catch(() => null);
+  if (!inf || !inf.ok) return toast("Couldn't open it" + (inf && inf.error ? ": " + inf.error : ""));
+  cur = s; pages = inf.pages || 1; page = remembered(s) || 1;
+  $("#vt").textContent = s.name; $("#view").classList.add("on"); showBar();
+  await show();
+}
+const MEM = "nb-sheets-pages";
+const remembered = s => { try { return (JSON.parse(localStorage.getItem(MEM) || "{}"))[s.path] || 0; } catch (e) { return 0; } };
+const remember = () => { try { const m = JSON.parse(localStorage.getItem(MEM) || "{}"); m[cur.path] = page; localStorage.setItem(MEM, JSON.stringify(m)); } catch (e) {} };
+let showing = 0;
+async function show() {
+  const tok = ++showing;
+  $("#pg").textContent = page + " / " + pages; $("#pg").classList.add("on"); clearTimeout(show.t); show.t = setTimeout(() => $("#pg").classList.remove("on"), 1400);
+  const r = await B.sheets("page", { path: cur.path, page, width: W() }).catch(() => null);
+  if (tok !== showing) return;
+  if (!r || !r.ok) return toast("Couldn't draw the page");
+  $("#img").src = r.png; remember();
+  if (page < pages) B.sheets("page", { path: cur.path, page: page + 1, width: W() }).catch(() => {});   // (the next one, ready before it's needed)
+}
+function turn(d) { if (!cur) return; const n = Math.max(1, Math.min(pages, page + d)); if (n === page) { $("#pg").textContent = page + " / " + pages; $("#pg").classList.add("on"); setTimeout(() => $("#pg").classList.remove("on"), 900); return; } page = n; show(); }
+function closeSheet() { cur = null; $("#view").classList.remove("on", "bar-on"); $("#img").removeAttribute("src"); }
+function showBar() { $("#view").classList.add("bar-on"); clearTimeout(barT); barT = setTimeout(() => $("#view").classList.remove("bar-on"), 2600); }
+$("#zl").onclick = () => turn(-1); $("#zr").onclick = () => turn(1);
+$("#img").addEventListener("click", showBar);
+$("#view").addEventListener("pointerdown", e => { if (e.clientY < 54) showBar(); });
+$("#back").onclick = closeSheet; $("#prev").onclick = () => turn(-1); $("#next").onclick = () => turn(1);
+
+/* keys, knob, pads, pedal, gamepad */
+addEventListener("keydown", e => {
+  if (cur) {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") turn(1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") turn(-1);
+    else if (e.key === "Escape" || e.key === "Backspace") closeSheet(); else return;
+  } else {
+    if (e.key === "ArrowRight") move(1); else if (e.key === "ArrowLeft") move(-1); else if (e.key === "ArrowDown") move(3); else if (e.key === "ArrowUp") move(-3);
+    else if (e.key === "Enter") openSheet(sel); else if (e.key === "Escape" || e.key === "Backspace" || e.key === "Home") home(); else return;
+  }
+  e.preventDefault();
+});
+function move(d) { if (!sheets.length) return; sel = Math.max(0, Math.min(sheets.length - 1, sel + d)); paintLib(); }
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => {
+  let a114 = 0, pedal = false;
+  const on = i => { i.onmidimessage = m => { const [s, a, v] = m.data, t = s & 0xf0;
+    if (t === 0xb0) {
+      if (a === 114) { a114 += v >= 64 ? v - 128 : v; if (Math.abs(a114) >= 2) { cur ? turn(a114 > 0 ? 1 : -1) : move(a114 > 0 ? 1 : -1); a114 = 0; } }
+      else if ((a === 115 || a === 118) && v > 0) { cur ? closeSheet() : openSheet(sel); }
+      else if (a === 64) { const down = v >= 64; if (down && !pedal && cur) turn(1); pedal = down; }   // sustain pedal: next page
+    } else if (t === 0x90 && v > 0 && (s & 0x0f) === 9 && cur) {   // the controller's pads (channel 10): pad 1 back, pad 2 forward
+      if (a === 36) turn(-1); else if (a === 37) turn(1);
+    } }; };
+  acc.inputs.forEach(on); acc.onstatechange = () => acc.inputs.forEach(on);
+}).catch(() => {});
+(function pad() { const g = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean);
+  if (g) { const now = Date.now(); if (!pad.t || now - pad.t > 240) { const p = n => g.buttons[n] && g.buttons[n].pressed;
+    if (cur) { if (p(5) || p(15)) { turn(1); pad.t = now; } else if (p(4) || p(14)) { turn(-1); pad.t = now; } else if (p(1)) { closeSheet(); pad.t = now; } }
+    else { if (p(15)) { move(1); pad.t = now; } else if (p(14)) { move(-1); pad.t = now; } else if (p(13)) { move(3); pad.t = now; } else if (p(12)) { move(-3); pad.t = now; } else if (p(0)) { openSheet(sel); pad.t = now; } else if (p(1)) return home(); } } }
+  requestAnimationFrame(pad); })();
+addEventListener("resize", () => { if (cur) show(); });
+
+(async () => {
+  if (!B) { $("#where").textContent = "~/Sheets"; sheets = []; paintLib(); return; }
+  const r = await B.sheets("list").catch(() => null);
+  if (r && r.ok) { sheets = r.sheets; folder = r.folder || folder; }
+  $("#where").textContent = sheets.length + (sheets.length === 1 ? " sheet" : " sheets");
+  paintLib();
+})();
+</script>
+<script src="/box/jam.js"></script>
+<script>if (window.NBJam) NBJam.mount({ bar: () => document.getElementById("top"), before: () => document.getElementById("where") });</script>
+<script src="/box/idle.js"></script>
+</body>
+</html>

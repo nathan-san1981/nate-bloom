@@ -1,5 +1,5 @@
 /* Nate Bloom Box — Jam along (box/apps/jam.js, served by the app as /box/jam.js).
-   Music from the phone (Listen: Spotify Connect / AirPlay) keeps playing under Nate Bloom, Keys and the home screen
+   Music from the phone or the radio (Listen: Spotify Connect / AirPlay / YouTube; Radio) keeps playing under Nate Bloom, Keys and the home screen
    when "Keep playing" is on in Listen. This adds:
      - a now-playing chip in the page's top bar, only while something plays;
      - tap the chip: the Jam sheet (song, backing-track level, mute, stop);
@@ -37,7 +37,7 @@
 .nbj-x{position:absolute;right:12px;top:10px;width:44px;height:44px;border-radius:12px;border:0;background:#22252c;color:#f2efe8;font-size:20px;cursor:pointer}`;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
   const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const playing = s => !!(s && (s.spotify || s.airplay) && s.now && s.now.state && s.now.state !== "idle" && s.now.state !== "stopped");
+  const playing = s => !!(s && (s.spotify || s.airplay || s.youtube || s.radio) && s.now && s.now.state && s.now.state !== "idle" && s.now.state !== "stopped");
   J.playing = () => playing(J.st);
   const db = v => v <= 0.001 ? "−∞" : (20 * Math.log10(v)).toFixed(0) + " dB";
 

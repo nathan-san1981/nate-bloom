@@ -12,7 +12,7 @@ except ImportError:
 
 RUN = "/run/nb-box"
 HOLD = 2.0
-OTHERS = ["moonlight-qt", "kodi.bin", "kodi"]
+OTHERS = ["moonlight-qt", "kodi.bin", "kodi", "retroarch"]
 
 
 def button():

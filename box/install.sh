@@ -10,6 +10,7 @@
 #                                            --no-youtube no YouTube / YouTube Music casting in Listen
 #                                            --no-stream  no Moonlight (Stream: PC games over Wi-Fi)
 #                                            --no-media   no Kodi (Media)
+#                                            --no-retro   no RetroArch (Retro: games without rebooting into the stick)
 #                                            --no-games-boot  keep booting from the card first (Games needs USB first)
 # Safe to run again: every file it writes is replaced, every config.txt line sits in one marked block.
 set -euo pipefail
@@ -17,7 +18,7 @@ set -euo pipefail
 REPO="nathan-san1981/nate-bloom"
 RAW="https://raw.githubusercontent.com/$REPO/main/box"
 DEB_URL="https://github.com/$REPO/releases/download/pi-latest/NateBloom-pi-arm64.deb"
-MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 YOUTUBE=1 STREAM=1 MEDIA=1 GAMESBOOT=1
+MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 YOUTUBE=1 STREAM=1 MEDIA=1 RETRO=1 GAMESBOOT=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --chromium) MODE=chromium ;;
@@ -29,6 +30,7 @@ while [ $# -gt 0 ]; do
     --no-youtube) YOUTUBE=0 ;;
     --no-stream) STREAM=0 ;;
     --no-media) MEDIA=0 ;;
+    --no-retro) RETRO=0 ;;
     --no-games-boot) GAMESBOOT=0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
@@ -109,6 +111,11 @@ say "The home screen: Nate Bloom, Keys, Listen, Stream, Media, Games"
 sudo mkdir -p /opt/nb-box/apps/keys
 fetch apps/home.html /opt/nb-box/apps/home.html
 fetch apps/listen.html /opt/nb-box/apps/listen.html
+fetch apps/radio.html /opt/nb-box/apps/radio.html
+fetch apps/sheets.html /opt/nb-box/apps/sheets.html
+fetch apps/retro.html /opt/nb-box/apps/retro.html
+fetch apps/jam.js /opt/nb-box/apps/jam.js
+fetch apps/idle.js /opt/nb-box/apps/idle.js
 fetch apps/keys/index.html /opt/nb-box/apps/keys/index.html
 fetch listen-event.py /usr/local/lib/nb-box/listen-event.py 0755
 fetch listen-airplay.py /usr/local/lib/nb-box/listen-airplay.py 0755
@@ -142,6 +149,31 @@ if [ "$LISTEN" = 1 ]; then
       || warn "yt-dlp didn't download: YouTube casting is off"
   fi
 fi
+# Radio (mpv) and Sheets (poppler draws the PDF pages); their folders belong to the box's user
+say "Radio and Sheets"
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mpv poppler-utils || warn "mpv/poppler didn't install: Radio or Sheets may be off"
+mkdir -p "$HOME/Sheets"
+if [ "$RETRO" = 1 ]; then
+  say "Retro: RetroArch and the cores Debian ships (NES, SNES, Game Boy, GBA, Genesis, DS, PlayStation, N64)"
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq retroarch retroarch-assets || warn "retroarch didn't install: Retro is off"
+  for c in libretro-nestopia libretro-snes9x libretro-bsnes-mercury-balanced libretro-gambatte libretro-mgba libretro-genesisplusgx libretro-desmume libretro-beetle-psx libretro-mupen64plus-next libretro-mupen64plus; do
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$c" >/dev/null 2>&1 || true
+  done
+  for d in nes snes gb gba genesis sms nds psx n64 psp arcade; do mkdir -p "$HOME/ROMs/$d"; done
+  # RetroArch: fullscreen, no menu on exit, the Xbox controller's Guide button or Select+Start quits back to the home screen
+  mkdir -p "$HOME/.config/retroarch"
+  RA="$HOME/.config/retroarch/retroarch.cfg"; touch "$RA"
+  for kv in 'video_fullscreen = "true"' 'video_driver = "gl"' 'audio_driver = "pulse"' 'menu_driver = "ozone"' 'input_autodetect_enable = "true"' \
+            'input_menu_toggle_gamepad_combo = "2"' 'input_quit_gamepad_combo = "4"' 'quit_on_close_content = "1"' 'savestate_auto_save = "true"' 'savestate_auto_load = "true"' 'pause_nonactive = "false"'; do
+    k=${kv%% =*}; grep -q "^$k = " "$RA" && sed -i "s|^$k = .*|$kv|" "$RA" || echo "$kv" >> "$RA"
+  done
+fi
+# zram: compressed swap, so a memory spike slows things down instead of ending them (two heavy apps never run at once;
+# this is the safety net under one app plus the music)
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq zram-tools >/dev/null 2>&1 && {
+  printf 'ALGO=zstd\nPERCENT=50\nPRIORITY=100\n' | sudo tee /etc/default/zramswap >/dev/null
+  sudo systemctl enable --now zramswap.service >/dev/null 2>&1 || sudo systemctl restart zramswap.service >/dev/null 2>&1 || true
+} || warn "zram-tools didn't install (no compressed swap)"
 if [ "$STREAM" = 1 ]; then
   say "Stream: Moonlight (games from your PC over Wi-Fi)"
   if ! command -v moonlight-qt >/dev/null 2>&1; then

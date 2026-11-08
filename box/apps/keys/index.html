@@ -4383,7 +4383,8 @@ const OSK = (() => {
 <script>
 /* (Nate Bloom Box) Jam along: music from the phone in the top bar while it plays (box/apps/jam.js) */
 if (/[?&]box=1/.test(location.search) && window.NBBox) { const sc = document.createElement('script'); sc.src = '/box/jam.js';
-  sc.onload = () => window.NBJam && NBJam.mount({ bar: () => document.querySelector('.topbar'), before: () => document.querySelector('.topbar .pill') }); document.head.appendChild(sc); }
+  sc.onload = () => { window.NBJam && NBJam.mount({ bar: () => document.querySelector('.topbar'), before: () => document.querySelector('.topbar .pill') });
+    const si = document.createElement('script'); si.src = '/box/idle.js'; document.head.appendChild(si); }; document.head.appendChild(sc); }
 </script>
 </body>
 </html>

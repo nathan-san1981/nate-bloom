@@ -100,6 +100,7 @@ class BoxPlayer extends Player {
     const music = video.client && Constants.CLIENTS && video.client === Constants.CLIENTS.YTMUSIC;
     const url = (music ? "https://music.youtube.com/watch?v=" : "https://www.youtube.com/watch?v=") + video.id;
     const tok = ++this.token;
+    try { fs.writeFileSync(path.join(RUN, "radio-stop"), ""); } catch (e) {}   // (one music source at a time: the radio gives way)
     meta = { source: music ? "YouTube Music" : "YouTube" };
     now("playing");
     meta4(url).then(m => { if (m && tok === this.token) { Object.assign(meta, m); now(this.paused ? "paused" : "playing"); } });
@@ -169,6 +170,8 @@ function freshen() {
   execFile(YTDLP, ["-U"], { timeout: 120000 }, () => { try { fs.writeFileSync(stamp, ""); } catch (e) {} });
 }
 
+// the app asks for a stop (the radio or Spotify starting) by creating ytcast-stop
+setInterval(() => { const f = path.join(RUN, "ytcast-stop"); if (!fs.existsSync(f)) return; try { fs.rmSync(f); } catch (e) {} player.stop().catch(() => {}); }, 1000);
 (async () => {
   saveState();
   try { await receiver.start(); } catch (e) { process.exit(1); }
