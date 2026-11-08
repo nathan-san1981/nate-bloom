@@ -20,8 +20,8 @@ if (process.argv.includes("--nb-box")) contextBridge.exposeInMainWorld("NBBox", 
   read: p => ipcRenderer.invoke("nb:box-music-read", String(p)),   // one song's bytes (an ArrayBuffer), only from the sticks
   go: app => ipcRenderer.invoke("nb:box-go", String(app)),   // home | bloom | keys | listen | stream | media | games
   apps: () => ipcRenderer.invoke("nb:box-apps"),   // which of them this box has: { keys, listen, stream, media, games, start }
-  listen: cmd => ipcRenderer.invoke("nb:box-listen", String(cmd || "status")),   // start | stop | status: Spotify Connect + AirPlay
-  bt: (cmd, mac) => ipcRenderer.invoke("nb:box-bt", String(cmd), mac == null ? "" : String(mac)),   // on | list | scan | pair | connect | forget
+  listen: (cmd, arg) => ipcRenderer.invoke("nb:box-listen", String(cmd || "status"), arg),   // start | stop | status | keep on/off | level 0–1 | mute on/off
+  bt: (cmd, mac) => ipcRenderer.invoke("nb:box-bt", String(cmd), mac == null ? "" : String(mac)),   // on | list | scan | pair | connect | forget | pair-status | reply <digits|cancel>
 });
 
 contextBridge.exposeInMainWorld("NB_NATIVE", {

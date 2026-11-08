@@ -30,6 +30,11 @@ button { font: inherit; color: inherit; }
 .way b { display: block; font-size: 17px; margin-bottom: 3px; } .way span { font-size: 14px; color: var(--ink2); line-height: 1.4; }
 .way.off { opacity: .4; }
 .note { font-size: 12.5px; color: var(--ink3); line-height: 1.45; margin-top: auto; }
+.keep { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--tile2); cursor: pointer; border: 0; text-align: left; width: 100%; color: inherit; font: inherit; }
+.keep b { display: block; font-size: 15px; } .keep span { font-size: 12.5px; color: var(--ink2); line-height: 1.35; }
+.sw { width: 54px; height: 32px; border-radius: 999px; background: #3a3d45; position: relative; flex: none; transition: background .15s; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; transition: left .15s; }
+.keep.on .sw { background: var(--acc); } .keep.on .sw::after { left: 25px; }
 </style>
 </head>
 <body>
@@ -37,6 +42,7 @@ button { font: inherit; color: inherit; }
   <button class="btn" id="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
   <div class="t">Listen</div>
   <span class="chip" id="out">…</span>
+  <button class="btn" id="stop">Stop</button>
 </div>
 <div id="main">
   <div class="card" id="now">
@@ -48,7 +54,8 @@ button { font: inherit; color: inherit; }
   <div class="card" id="how">
     <div class="way" id="wSp"><span class="ic" style="background:#7fdcae">S</span><div><b>Spotify</b><span>In Spotify, tap the speaker icon under the song, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
     <div class="way" id="wAp"><span class="ic" style="background:#c9b6ff">A</span><div><b>AirPlay (iPhone)</b><span>Control Center, hold the music player, tap the AirPlay icon, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
-    <div class="note">Your phone and the box need to be on the same Wi-Fi. Volume is on the phone. Sound comes out wherever the box's audio goes now (the headphone adapter or Bluetooth headphones). Leaving this screen stops it.</div>
+    <button class="keep" id="keep" role="switch" aria-checked="false"><span class="sw"></span><span><b>Keep playing</b><span>in Nate Bloom, Keys, the home screen and game streams. Off: leaving this screen stops the music.</span></span></button>
+    <div class="note">Your phone and the box need to be on the same Wi-Fi. Volume is on the phone (also during a game stream). Sound comes out wherever the box's audio goes now. Media and Games always stop the music.</div>
   </div>
 </div>
 <script>
@@ -61,10 +68,15 @@ addEventListener("keydown", e => { if (e.key === "Escape" || e.key === "Backspac
 if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => { const h = () => acc.inputs.forEach(i => { i.onmidimessage = m => { const [s, a, v] = m.data; if ((s & 0xf0) === 0xb0 && (a === 115 || a === 118) && v > 0) home(); }; }); h(); acc.onstatechange = h; }).catch(() => {});
 (function pad() { const g = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean); if (g && g.buttons[1] && g.buttons[1].pressed) return home(); requestAnimationFrame(pad); })();
 
+let keep = false;
+function paintKeep() { const k = $("#keep"); k.classList.toggle("on", keep); k.setAttribute("aria-checked", String(keep)); }
+$("#keep").onclick = async () => { if (!B) return; const s = await B.listen("keep", !keep).catch(() => null); if (s) { keep = !!s.keep; paintKeep(); } };
+$("#stop").onclick = async () => { if (!B) return; await B.listen("stop").catch(() => {}); B.go("home"); };
 async function tick() {
   if (!B) return;
   const s = await B.listen("status").catch(() => null);
   if (s) {
+    keep = !!s.keep; paintKeep();
     $("#wSp").classList.toggle("off", !s.spotify); $("#wAp").classList.toggle("off", !s.airplay);
     const n = s.now;
     if (n && n.state && n.state !== "idle") {

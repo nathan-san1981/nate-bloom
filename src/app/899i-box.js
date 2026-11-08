@@ -34,6 +34,13 @@
             const h = document.createElement("button"); h.type = "button"; h.className = "btn"; h.id = "bxHomeBtn"; h.textContent = "⌂ Home"; h.title = "The box's home screen: Keys, Listen, Stream, Media, Games";
             h.addEventListener("click", () => NBBox.go("home"));
             top.insertBefore(h, $b("bxDjBtn") || gear || null);
+            // Jam along (box/apps/jam.js): music from the phone shown in the top bar while it plays, its level in a sheet
+            if (!window.NBJam && !document.getElementById("nbJamJs")) {
+              window.__nbAppMidi = true;
+              const sc = document.createElement("script"); sc.id = "nbJamJs"; sc.src = "/box/jam.js";
+              sc.onload = () => window.NBJam && NBJam.mount({ bar: () => document.querySelector("#playView .pl-top"), before: () => $b("bxHomeBtn") });
+              document.head.appendChild(sc);
+            }
           }).catch(() => {});
         }
         BX.el = el; return el;

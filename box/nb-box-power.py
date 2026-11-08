@@ -21,7 +21,8 @@ def button():
             d = evdev.InputDevice(p)
         except OSError:
             continue
-        if d.name == "pwr_button" or ecodes.KEY_POWER in d.capabilities().get(ecodes.EV_KEY, []) and "button" in d.name.lower():
+        n = d.name.lower()
+        if n == "pwr_button" or (ecodes.KEY_POWER in d.capabilities().get(ecodes.EV_KEY, []) and any(w in n for w in ("button", "pwr", "power"))):
             return d
     return None
 

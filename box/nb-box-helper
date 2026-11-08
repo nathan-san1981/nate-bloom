@@ -78,7 +78,11 @@ case "${1:-}" in
       bt-forget) bluetoothctl remove "$M" >/dev/null ;;
       bt-connect) bluetoothctl --timeout 15 connect "$M" | tail -1 ;;
       bt-pair)
-        # no screen agent: keyboards and controllers that ask for a code fall back to "just works" pairing
+        # with the code on the box's screen (bt-pair.py: a BlueZ agent that shows codes and takes them from the keypad)
+        if [ -x /usr/local/lib/nb-box/bt-pair.py ] && python3 -c 'import dbus, gi' 2>/dev/null; then
+          exec python3 /usr/local/lib/nb-box/bt-pair.py "$M"
+        fi
+        # (fallback, no screen agent: keyboards and controllers that ask for a code use "just works" pairing)
         bluetoothctl --agent NoInputNoOutput --timeout 30 pair "$M" | tail -1 || true
         bluetoothctl trust "$M" >/dev/null
         bluetoothctl --timeout 15 connect "$M" | tail -1

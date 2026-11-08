@@ -55,7 +55,7 @@ fetch() {   # fetch NAME DEST
 say "Packages"
 sudo apt-get update -qq
 PKGS="exfatprogs ntfs-3g cage wlr-randr pipewire pipewire-pulse pipewire-alsa pipewire-bin wireplumber rtkit alsa-utils curl ca-certificates iw rfkill fonts-noto-core
-      bluez libspa-0.2-bluetooth python3 python3-evdev"
+      bluez libspa-0.2-bluetooth python3 python3-evdev python3-dbus python3-gi"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $PKGS
 
 if [ "$MODE" = app ]; then
@@ -109,6 +109,8 @@ fetch apps/home.html /opt/nb-box/apps/home.html
 fetch apps/listen.html /opt/nb-box/apps/listen.html
 fetch apps/keys/index.html /opt/nb-box/apps/keys/index.html
 fetch listen-event.py /usr/local/lib/nb-box/listen-event.py 0755
+fetch listen-airplay.py /usr/local/lib/nb-box/listen-airplay.py 0755
+fetch bt-pair.py /usr/local/lib/nb-box/bt-pair.py 0755
 fetch nb-box-power.py /usr/local/lib/nb-box/nb-box-power.py 0755
 fetch nb-box-power.service /etc/systemd/system/nb-box-power.service
 # /run/nb-box: the app and session.sh pass "open Stream / Media" and the power button's "home" through it

@@ -206,6 +206,7 @@
   }
   function onMidi(e) {
     if (!md.ins.has(e.target.id)) return;
+    if (window.__midiTap && window.__midiTap(e)) return;   // (box: a sheet that borrows a fader, e.g. Jam along's backing level)
     const [st, d1, d2] = e.data, cmd = st & 0xf0;
     if (st === 0xf8 && md.opt.clockIn) {
       const now = e.timeStamp || performance.now(); md.clk.push(now); if (md.clk.length > 49) md.clk.shift();

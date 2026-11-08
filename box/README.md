@@ -53,7 +53,7 @@ controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 | --- | --- |
 | **Nate Bloom** | the synth, drums, sampling and DJ (everything below). **⌂ Home** in Play's top bar comes back here. |
 | **Keys** | piano lessons, with the MiniLab, KeyLab or the Yamaha. Settings › Raspberry Pi box › Home screen comes back. |
-| **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones) and stops when you leave the screen. |
+| **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones). YouTube works through AirPlay: in the YouTube app, Control Centre › audio output › Nate Bloom Box (playing with the screen locked or the app in the background needs YouTube Premium). Stops when you leave the screen, unless **Keep playing** is on (below). |
 | **Stream** | Moonlight: games from the GPU box (Sunshine) streamed over Wi-Fi, played with the Xbox controller. Set up with `bash box/stream-setup.sh` (Tailscale, 720p60 HEVC, pairing); `--boot-into-stream` starts straight into Steam at power-on. The GPU box side: `stream/`. |
 | **Media** | Kodi for movies, music and photos from a USB stick or the network. Controller-driven; Power › Exit comes back. |
 | **Games** | retro games from a Batocera USB stick (below). Shows **No stick** until one is plugged in. |
@@ -63,9 +63,26 @@ controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 - **Settings** (⚙ top right): Bluetooth pairing, what opens at power-on (home screen, Nate Bloom, Keys or Listen),
   restart, reboot, hold to shut down.
 
+### Jam along: your phone's music under Nate Bloom or Keys
+
+Turn on **Keep playing** on the Listen screen and the music carries on in Nate Bloom, Keys, the home screen and game
+streams. While it plays:
+
+- A green chip in the top bar shows the song. Tap it for the backing-track level, Mute and Stop. While that panel is
+  open, the level fader (MiniLab fader 4, KeyLab fader 9) sets the backing track instead of Nate Bloom's master.
+- The Listen tile on the home screen shows what's playing (tap it for the same panel), and the app you were last in
+  is marked **Resume**.
+- In a game stream, set the volume on the phone.
+- Media and Games always stop it (Kodi and Batocera take over the sound). Keep playing is off until you turn it on.
+
+### Typing without a keyboard
+
+Text fields in Nate Bloom and Keys (sound names, profile names, Wi-Fi passwords) bring up an on-screen keyboard. Start
+typing on a real keyboard and it steps aside.
+
 ### Bluetooth: keyboard, Xbox controller, headphones
 
-Settings › **Find devices** with the device in pairing mode, then **Pair**. It reconnects by itself after that.
+Settings › **Find devices** with the device in pairing mode, then **Pair**. It reconnects by itself after that. If the keyboard needs a code, it appears on the screen: type it on the keyboard, then Enter.
 - **A keyboard** types wherever there's a text field and plays notes in Nate Bloom. Keys' on-screen keyboard steps
   aside once you type on a real one. Touch and the controller still do everything; the keyboard is a nicety.
 - **Xbox controller:** the Xbox One S and later models (Bluetooth, model 1708 and newer) pair here. The original 2013
@@ -139,6 +156,6 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 | App closes right after starting (screen flashes back) | rerun the installer with `--4k-kernel` (the Pi 5's default kernel uses 16 KB memory pages) |
 | Listen doesn't show up on the phone | phone and box on the same Wi-Fi? Leave Listen and open it again; `systemctl status avahi-daemon` over SSH |
 | Moonlight or Kodi stuck | press the power button once: it closes them and the home screen comes back |
-| Bluetooth keyboard won't pair | put it in pairing mode right before **Find devices**; keyboards that insist on typing a code can be paired once over SSH with `bluetoothctl` |
+| Bluetooth keyboard won't pair | put it in pairing mode right before **Find devices**. If it wants a code, the box shows it large: type it on the keyboard and press Enter. A device that shows its own code gets a keypad on the screen. |
 | Games boots Nate Bloom instead | the stick isn't seen as bootable: remake it; check `sudo rpi-eeprom-config` shows `BOOT_ORDER=0xf614` |
 | Want the desktop back | `sudo systemctl disable nb-box && sudo systemctl enable getty@tty1 && sudo reboot` |

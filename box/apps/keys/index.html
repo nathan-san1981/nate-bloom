@@ -4380,5 +4380,10 @@ const OSK = (() => {
 })();
 
 </script>
+<script>
+/* (Nate Bloom Box) Jam along: music from the phone in the top bar while it plays (box/apps/jam.js) */
+if (/[?&]box=1/.test(location.search) && window.NBBox) { const sc = document.createElement('script'); sc.src = '/box/jam.js';
+  sc.onload = () => window.NBJam && NBJam.mount({ bar: () => document.querySelector('.topbar'), before: () => document.querySelector('.topbar .pill') }); document.head.appendChild(sc); }
+</script>
 </body>
 </html>

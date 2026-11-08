@@ -289,7 +289,13 @@ function createWindow() {
     setTimeout(() => { if (!win.isDestroyed()) win.reload(); }, 800);
   });
   setTimeout(() => { try { const c = JSON.parse(fs.readFileSync(crashPath, "utf8")); if (Date.now() - c.t > 600000 && c.n < 2) fs.unlinkSync(crashPath); } catch (er) {} }, 600000);
-  if (BOX) win.webContents.on("did-start-navigation", (e) => { const u = (e && e.url) || ""; if (e && e.isMainFrame !== false && !u.includes("/box/listen.html")) listenStop(); });
+  // (box) Listen's music stops when you leave it, unless "Keep playing" is on (Jam along): then it plays on under
+  // Nate Bloom, Keys and the home screen, and stops only for Stream, Media, Games or Stop
+  if (BOX) win.webContents.on("did-start-navigation", (e) => {
+    const u = (e && e.url) || ""; if (e && e.isMainFrame === false) return;
+    if (u.includes("/box/keys/")) boxLast = "keys"; else if (/\/\?box=1/.test(u)) boxLast = "bloom";
+    if (!u.includes("/box/listen.html") && !listenKeep()) listenStop();
+  });
   win.loadURL(ORIGIN + (BOX ? boxStartPage() : "/"));
   win.webContents.once("did-finish-load", () => setTimeout(() => checkForUpdate(win), 4000));
 }
@@ -317,6 +323,7 @@ const BOX_APPS = process.env.NB_BOX_APPS || "/opt/nb-box/apps";
 const BOX_RUN = process.env.NB_BOX_RUN || "/run/nb-box";
 const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html" };
 const BOX_OUT = { stream: "/usr/bin/moonlight-qt", media: "/usr/bin/kodi" };
+let boxLast = "";   // (the last of Nate Bloom / Keys opened: the home screen offers Resume on it)
 const hasFile = p => { try { return fs.statSync(p).isFile(); } catch (e) { return false; } };
 function boxConf(key) { try { return (new RegExp("^" + key + "=(\\S*)", "m").exec(fs.readFileSync("/etc/nb-box.conf", "utf8")) || [])[1] || ""; } catch (e) { return ""; } }
 function boxStartPage() {
@@ -333,7 +340,7 @@ async function boxApps() {
     keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
     listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync")),
     stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
-    start: boxConf("START") || "ask",
+    start: boxConf("START") || "ask", last: boxLast,
   };
 }
 async function boxGo(a) {
@@ -345,9 +352,10 @@ async function boxGo(a) {
   if (BOX_OUT[a]) {
     if (!hasFile(BOX_OUT[a])) return { ok: false, error: "not installed" };
     try { await fsp.mkdir(BOX_RUN, { recursive: true }); await fsp.writeFile(path.join(BOX_RUN, "next"), a + "\n"); } catch (e) { return { ok: false, error: String(e.message || e) }; }
-    listenStop(); setTimeout(() => app.quit(), 200); return { ok: true };
+    boxQuitFor = a; if (!(a === "stream" && listenKeep())) listenStop();   // (music plays on under a game stream; not under Kodi)
+    setTimeout(() => app.quit(), 200); return { ok: true };
   }
-  if (a === "games") { if (!(await gameStick())) return { ok: false, error: "no game stick" }; return boxRun(["games"]); }
+  if (a === "games") { if (!(await gameStick())) return { ok: false, error: "no game stick" }; listenStop(); return boxRun(["games"]); }
   return { ok: false, error: "unknown app" };
 }
 ipcMain.handle("nb:box-go", (e, a) => BOX ? boxGo(a) : null);
@@ -362,37 +370,86 @@ if (BOX) setInterval(() => {
 
 // (box) Listen: Spotify Connect (librespot, from the raspotify package) and AirPlay (shairport-sync), run by the app
 // as the box's user while the Listen page is open, so they play through the same PipeWire output as everything else
-let listenKids = [];
+// They run detached in their own process group (pids in /run/nb-box/listen.pids), so with "Keep playing" on they go on
+// while Moonlight has the screen and the app is closed; the app picks them up again when it comes back.
 const LISTEN_NAME = "Nate Bloom Box";
+const LISTEN_PIDS = () => path.join(BOX_RUN, "listen.pids");
+const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return false; } };
+function listenProcs() {
+  let l = []; try { l = JSON.parse(fs.readFileSync(LISTEN_PIDS(), "utf8")); } catch (e) {}
+  return (Array.isArray(l) ? l : []).filter(p => p && p.pid > 1 && alive(p.pid) && /librespot|shairport|listen-airplay/.test(String(p.name)));
+}
+const listenSave = l => { try { fs.mkdirSync(BOX_RUN, { recursive: true }); fs.writeFileSync(LISTEN_PIDS(), JSON.stringify(l)); } catch (e) {} };
 function listenStart() {
-  if (listenKids.length) return;
+  const have = listenProcs(); if (have.length) return;
   const ev = path.join(BOX_RUN, "listen.json"); try { fs.rmSync(ev); } catch (e) {}
+  const l = [];
   const run = (bin, args) => {
     if (!hasFile(bin)) return;
-    const p = spawn(bin, args, { stdio: "ignore", env: { ...process.env, NB_LISTEN_FILE: ev } });
-    p.nbName = path.basename(bin); p.on("exit", () => { listenKids = listenKids.filter(k => k !== p); }); p.on("error", () => {}); listenKids.push(p);
+    const p = spawn(bin, args, { stdio: "ignore", detached: true, env: { ...process.env, NB_LISTEN_FILE: ev } });
+    p.on("error", () => {}); p.unref(); if (p.pid) l.push({ pid: p.pid, name: path.basename(bin) });
   };
   run("/usr/bin/librespot", ["--name", LISTEN_NAME, "--device-type", "speaker", "--backend", "alsa", "--device", "default", "--bitrate", "320",
     "--initial-volume", "60", "--cache", path.join(app.getPath("userData"), "librespot"), "--disable-audio-cache", "--onevent", "/usr/local/lib/nb-box/listen-event.py"]);
-  run("/usr/bin/shairport-sync", ["-a", LISTEN_NAME, "-o", "alsa", "--", "-d", "default"]);
+  // AirPlay: a config file instead of options, so its metadata (the song from YouTube, Apple Music…) goes to a pipe that
+  // listen-airplay.py reads; a shairport-sync built without metadata support just ignores that part
+  if (hasFile("/usr/bin/shairport-sync")) {
+    const conf = path.join(app.getPath("userData"), "shairport-sync.conf"), pipe = path.join(BOX_RUN, "airplay-meta");
+    try { fs.writeFileSync(conf, `general = { name = "${LISTEN_NAME}"; output_backend = "alsa"; };\nalsa = { output_device = "default"; };\nmetadata = { enabled = "yes"; include_cover_art = "no"; pipe_name = "${pipe}"; };\n`); } catch (e) {}
+    run("/usr/bin/shairport-sync", ["-c", conf]);
+    if (hasFile("/usr/local/lib/nb-box/listen-airplay.py")) { const p = spawn("/usr/bin/python3", ["/usr/local/lib/nb-box/listen-airplay.py", pipe], { stdio: "ignore", detached: true, env: { ...process.env, NB_LISTEN_FILE: ev } }); p.on("error", () => {}); p.unref(); if (p.pid) l.push({ pid: p.pid, name: "listen-airplay" }); }
+  }
+  listenSave(l);
 }
-function listenStop() { for (const p of listenKids) { try { p.kill("SIGTERM"); } catch (e) {} } listenKids = []; }
+function listenStop() {
+  for (const p of listenProcs()) { try { process.kill(-p.pid, "SIGTERM"); } catch (e) { try { process.kill(p.pid, "SIGTERM"); } catch (er) {} } }
+  listenSave([]); try { fs.rmSync(path.join(BOX_RUN, "listen.json")); } catch (e) {}
+}
+// "Keep playing in Nate Bloom, Keys and the home screen": off until switched on in Listen; remembered
+const KEEP_FILE = () => path.join(app.getPath("userData"), "listen-keep.json");
+function listenKeep(v) {
+  if (v === undefined) { try { return !!JSON.parse(fs.readFileSync(KEEP_FILE(), "utf8")).on; } catch (e) { return false; } }
+  try { fs.writeFileSync(KEEP_FILE(), JSON.stringify({ on: !!v })); } catch (e) {} return !!v;
+}
+// the backing track's level: PipeWire's volume on the streams librespot and shairport-sync play into
+let listenLevel = 1, listenMuted = false;
+async function listenNodes() {
+  const pids = new Set(listenProcs().map(p => p.pid));
+  return (await pwDump()).filter(o => o.type === "PipeWire:Interface:Node" && o.info && o.info.props && o.info.props["media.class"] === "Stream/Output/Audio" &&
+    (pids.has(+o.info.props["application.process.id"]) || /librespot|shairport/i.test(String(o.info.props["application.process.binary"] || o.info.props["application.name"] || "")))).map(o => o.id);
+}
+const wp = args => new Promise(res => execFile("wpctl", args, { timeout: 4000 }, err => res(!err)));
+async function listenApply() { for (const id of await listenNodes()) { await wp(["set-volume", String(id), listenLevel.toFixed(3)]); await wp(["set-mute", String(id), listenMuted ? "1" : "0"]); } }
 function listenStatus() {
   let now = null; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {}
-  return { spotify: listenKids.some(p => p.nbName === "librespot"), airplay: listenKids.some(p => p.nbName === "shairport-sync"), name: LISTEN_NAME, now };
+  const l = listenProcs();
+  return { spotify: l.some(p => p.name === "librespot"), airplay: l.some(p => p.name === "shairport-sync"), name: LISTEN_NAME, now,
+    keep: listenKeep(), level: listenLevel, muted: listenMuted };
 }
-ipcMain.handle("nb:box-listen", (e, cmd) => {
+// (a new stream, e.g. the next AirPlay session, starts at full volume: put the chosen level back every few seconds)
+if (BOX) setInterval(() => { if ((listenLevel < 0.999 || listenMuted) && listenProcs().length) listenApply(); }, 3000);
+ipcMain.handle("nb:box-listen", async (e, cmd, arg) => {
   if (!BOX) return null;
-  if (cmd === "start") listenStart(); else if (cmd === "stop") listenStop();
+  if (cmd === "start") listenStart();
+  else if (cmd === "stop") listenStop();
+  else if (cmd === "keep") listenKeep(!!arg);
+  else if (cmd === "level") { const v = +arg; if (v >= 0 && v <= 1) { listenLevel = v; await listenApply(); } }
+  else if (cmd === "mute") { listenMuted = !!arg; await listenApply(); }
   return listenStatus();
 });
-app.on("before-quit", () => listenStop());
+// (quitting for Stream with "Keep playing" on leaves the music running; any other quit stops it)
+let boxQuitFor = "";
+app.on("before-quit", () => { if (!(boxQuitFor === "stream" && listenKeep())) listenStop(); });
 
 // (box) Bluetooth: a keyboard, the Xbox controller, headphones. Scanning and pairing need root: the helper does them.
 const MAC = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/i;
 ipcMain.handle("nb:box-bt", async (e, cmd, mac) => {
   if (!BOX) return null;
   cmd = String(cmd || "");
+  // pairing with a code: bt-pair.py writes what to show into /run/nb-box/bt-pair.json; the keypad's digits go back in bt-reply
+  if (cmd === "pair-status") { try { return JSON.parse(fs.readFileSync(path.join(BOX_RUN, "bt-pair.json"), "utf8")); } catch (er) { return null; } }
+  if (cmd === "reply") { const v = String(mac || ""); if (!/^(\d{1,6}|cancel)$/.test(v)) return { ok: false }; try { fs.writeFileSync(path.join(BOX_RUN, "bt-reply"), v); return { ok: true }; } catch (er) { return { ok: false, error: String(er.message || er) }; } }
+  if (cmd === "pair") { try { fs.rmSync(path.join(BOX_RUN, "bt-pair.json")); } catch (er) {} }
   if (["pair", "forget", "connect"].includes(cmd)) { if (!MAC.test(String(mac || ""))) return { ok: false, error: "bad address" }; return boxRun(["bt-" + cmd, String(mac).toUpperCase()]); }
   if (!["on", "list", "scan"].includes(cmd)) return { ok: false, error: "unknown" };
   const r = await boxRun(["bt-" + cmd]);
