@@ -40497,7 +40497,7 @@ html.nb-synths .recbanner { display: none !important; }
 <div class="sy-top">
   <h1>Nate <span>Bloom</span> Synths</h1>
   <span class="sy-chip" id="syKbChip"><i></i><span>No keyboard yet</span></span>
-  <div class="sy-mode" id="syMode" role="group" aria-label="What the Yamaha plays" hidden><span>Plays</span><button type="button" data-m="piano">Piano</button><button type="button" data-m="synth">Synth</button><button type="button" data-m="both">Piano + Synth</button></div>
+  <div class="sy-mode" id="syMode" role="group" aria-label="What the Yamaha plays" hidden><span>Plays</span><button type="button" data-m="piano">Piano only</button><button type="button" data-m="synth">Synth only</button><button type="button" data-m="both">Both</button></div>
   <span class="sy-sp"></span>
   <button class="sy-b sy-rec" id="syRec" title="Record what you play">● Record</button>
   <button class="sy-b" id="syKeysBtn" title="Keys on the screen">Keys on screen</button>
@@ -40717,7 +40717,7 @@ html.nb-synths .recbanner { display: none !important; }
         mode = b.dataset.m; try { localStorage.setItem("nb-synths-mode", mode); } catch (e) {}
         try { start(); } catch (e) {}
         applyMode(false);
-        say(mode === "piano" ? "Piano: the Yamaha's own sound, no synth" : mode === "synth" ? "Synth: only the synth (the Yamaha's piano sound is off)" : "Piano + Synth: both together");
+        say(mode === "piano" ? "Piano only: the Yamaha's own sound, the synth is off" : mode === "synth" ? "Synth only: the Yamaha's piano sound is off" : "Both: piano and synth together");
       }));
       // Piano: the Yamaha's notes and pedal don't reach the synth (other keyboards and the screen still play it)
       { const t0 = window.__midiTap; window.__midiTap = function (e) {
@@ -40781,7 +40781,7 @@ html.nb-synths .recbanner { display: none !important; }
       function paintAll(force) { paintTiles(); paintDials(force); paintFx(force); paintChip(); }
       // the base app plays the synths (not samples or drums)
       function toSynths() { try { const b = $s("mSynths"); if (b && b.getAttribute("aria-pressed") !== "true") b.click(); } catch (e) {} if (!curEng()) { const f = synthItems()[0]; if (f) { state.engine = f.eng; try { renderEngine(); } catch (e) {} } } }
-      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. <b>Plays</b> picks Piano, Synth or both. If Synth still has the piano under it, turn the Yamaha's volume knob down: the synth keeps playing. Sliders: slide or tap the track; the small mark is the default, and ↺ goes back to it.";
+      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. <b>Plays</b>: Piano only, Synth only, or Both. If Synth still has the piano under it, turn the Yamaha's volume knob down: the synth keeps playing. Sliders: slide or tap the track; the small mark is the default, and ↺ goes back to it.";
       showKeys(true);
       setTimeout(() => { toSynths(); paintAll(true); }, 0);
       $s("startBtn") && $s("startBtn").addEventListener("click", () => setTimeout(() => { toSynths(); paintAll(true); }, 50));
