@@ -19,6 +19,18 @@ const CACHE = path.join(app.getPath("userData"), "site");   // newer pages and d
 const SAVE_DIR = (() => { let d = app.getPath("downloads"); if (path.resolve(d) === path.resolve(app.getPath("home"))) d = path.join(d, "Downloads"); return path.join(d, "Nate Bloom"); })();
 
 app.setName("Nate Bloom");
+// (box) the Nate Bloom Box: a Raspberry Pi 5 with a 5" screen, started full screen by cage with --box (box/ in the repo).
+// One window over the whole screen, no menu, Play at start (?box=1), the GPU draws the page so the cores stay on sound.
+const BOX = process.argv.includes("--box") || process.env.NB_BOX === "1";
+const BOX_HELPER = "/usr/local/sbin/nb-box-helper";
+if (BOX) {
+  app.commandLine.appendSwitch("enable-gpu-rasterization");
+  app.commandLine.appendSwitch("ignore-gpu-blocklist");
+  app.commandLine.appendSwitch("disable-renderer-backgrounding");
+  app.commandLine.appendSwitch("disable-background-timer-throttling");
+  app.commandLine.appendSwitch("disable-features", "AudioServiceOutOfProcess,Translate,MediaRouter,HardwareMediaKeyHandling");
+  app.commandLine.appendSwitch("noerrdialogs");
+}
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 // (173) a computer, not a tablet: the page may use up to 8 GB for long takes, big samples and many instruments
 // (235) at most half the computer's memory, so a 4 or 8 GB machine cleans up before it runs out instead of after
@@ -226,13 +238,15 @@ function createWindow() {
   const statePath = path.join(app.getPath("userData"), "window.json");
   let st = { width: 1280, height: 800 };
   try { st = Object.assign(st, JSON.parse(fs.readFileSync(statePath, "utf8"))); } catch (e) {}
+  if (BOX) st = { width: 1280, height: 720 };   // (box: the whole screen, nothing remembered)
   win = new BrowserWindow({
-    width: st.width, height: st.height, x: st.x, y: st.y, minWidth: 360, minHeight: 560, show: false,
+    width: st.width, height: st.height, x: st.x, y: st.y, minWidth: BOX ? 320 : 360, minHeight: BOX ? 240 : 560, show: false,
     title: "Nate Bloom", backgroundColor: "#13111b", autoHideMenuBar: true,
+    ...(BOX ? { frame: false, fullscreen: true, kiosk: true } : {}),
     icon: path.join(__dirname, "build", "icon.png"),
-    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false, additionalArguments: ["--nb-userdata=" + app.getPath("userData")] },
+    webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, sandbox: false, nodeIntegration: false, backgroundThrottling: false, spellcheck: false, additionalArguments: ["--nb-userdata=" + app.getPath("userData")].concat(BOX ? ["--nb-box"] : []) },
   });
-  if (st.max && !st.wide) win.maximize();
+  if (st.max && !st.wide && !BOX) win.maximize();
   win.once("ready-to-show", () => {
     win.show();
     if (st.wide) {
@@ -253,7 +267,7 @@ function createWindow() {
   win.on("leave-full-screen", () => { if (WIDE && wideHow === "fullscreen" && Date.now() - ownFs > 1500) { WIDE = false; wideHow = ""; ++wideSeq; xSpan("off"); wideBack = null; wideMax = false; wideTell(); } });
   // Ctrl+Shift+F works with the menu bar hidden too (and only once)
   win.webContents.on("before-input-event", (e, i) => { if (i.type === "keyDown" && i.control && i.shift && !i.alt && !i.meta && i.code === "KeyF") { e.preventDefault(); setWide(!WIDE); } });
-  win.on("close", saveState);
+  if (!BOX) win.on("close", saveState);
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off
@@ -267,11 +281,30 @@ function createWindow() {
     setTimeout(() => { if (!win.isDestroyed()) win.reload(); }, 800);
   });
   setTimeout(() => { try { const c = JSON.parse(fs.readFileSync(crashPath, "utf8")); if (Date.now() - c.t > 600000 && c.n < 2) fs.unlinkSync(crashPath); } catch (er) {} }, 600000);
-  win.loadURL(ORIGIN + "/");
+  win.loadURL(ORIGIN + (BOX ? "/?box=1" : "/"));
   win.webContents.once("did-finish-load", () => setTimeout(() => checkForUpdate(win), 4000));
 }
 
+// (box) what only the Box asks of the computer: temperature, power, Wi-Fi, shutdown. Everything that needs root goes
+// through one small script (box/nb-box-helper, allowed for the box's user by sudoers) and only with the actions it knows.
+const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-125", "scale-133", "scale-150", "restart-app"]);
+const boxRun = args => new Promise(res => execFile("sudo", ["-n", BOX_HELPER, ...args], { timeout: 120000 }, (err, out, errOut) => res({ ok: !err, out: String(out || "").trim(), error: err ? String(errOut || err.message || err).trim() : "" })));
+ipcMain.handle("nb:box-status", async () => {
+  if (!BOX) return null;
+  const s = { temp: null, throttled: null, undervolt: false, hot: false, wifi: null, output: null };
+  try { s.temp = Math.round(+fs.readFileSync("/sys/class/thermal/thermal_zone0/temp", "utf8") / 100) / 10; } catch (e) {}
+  const r = await boxRun(["status"]);
+  if (r.ok) try { Object.assign(s, JSON.parse(r.out)); } catch (e) {}
+  if (s.throttled != null) { s.undervolt = !!(s.throttled & 0x1); s.hot = !!(s.throttled & 0x8) || (s.temp || 0) >= 80; }
+  return s;
+});
+ipcMain.handle("nb:box-do", async (e, action) => {
+  if (!BOX || !BOX_ACTIONS.has(String(action))) return { ok: false, error: "not an action the box knows" };
+  return boxRun([String(action)]);
+});
+
 function buildMenu() {
+  if (BOX) { Menu.setApplicationMenu(null); return; }   // (box: no menu bar on the kiosk)
   const t = [
     { label: "Nate Bloom", submenu: [
       { label: "Open the Saves Folder", click: async () => { await fsp.mkdir(SAVE_DIR, { recursive: true }); shell.openPath(SAVE_DIR); } },
@@ -424,11 +457,11 @@ ipcMain.handle("nb:shell-latest", async () => {
   try {
     const r = await net.fetch("https://api.github.com/repos/nathan-san1981/nate-bloom/releases?per_page=15", { headers: { Accept: "application/vnd.github+json", "User-Agent": "nate-bloom-app" } });
     if (!r.ok) return { current: app.getVersion(), err: "HTTP " + r.status };
-    const WIN = process.platform === "win32", TAG = WIN ? /^win-v/ : /^linux-v/;   // (234) the Windows app: its own releases, the Setup .exe
+    const WIN = process.platform === "win32", PI = !WIN && process.arch === "arm64", TAG = WIN ? /^win-v/ : PI ? /^pi-v/ : /^linux-v/;   // (234) the Windows app: its own releases, the Setup .exe; (box) ARM64 Linux: the Pi's own (pi.yml)
     const rel = (await r.json()).find(x => TAG.test(x.tag_name) && !x.draft); if (!rel) return { current: app.getVersion() };
     const ARM = process.arch === "arm64";   // (236) an ARM64 Windows app updates to the ARM64 installer
     const deb = (rel.assets || []).find(a => WIN ? /setup.*\.exe$/i.test(a.name) && /arm64/i.test(a.name) === ARM : /\.deb$/i.test(a.name));
-    shellRel = { latest: rel.tag_name.replace(/^(linux|win)-v/, ""), deb: deb ? deb.browser_download_url : "", name: deb ? deb.name : "" };
+    shellRel = { latest: rel.tag_name.replace(/^(linux|win|pi)-v/, ""), deb: deb ? deb.browser_download_url : "", name: deb ? deb.name : "" };
     return { current: app.getVersion(), latest: shellRel.latest, newer: verNewer(shellRel.latest, app.getVersion()), hasDeb: !!deb };
   } catch (er) { return { current: app.getVersion(), err: String(er && er.message || er) }; }
 });
@@ -440,6 +473,7 @@ ipcMain.handle("nb:shell-install", async () => {
     const r = await net.fetch(shellRel.deb); if (!r.ok) return { ok: false, error: "HTTP " + r.status };
     await fsp.writeFile(dest + ".part", Buffer.from(await r.arrayBuffer())); await fsp.rename(dest + ".part", dest);
     if (process.platform === "win32") { require("child_process").spawn(dest, ["--updated"], { detached: true, stdio: "ignore" }).unref(); setTimeout(() => app.quit(), 1500); return { ok: true, file: dest }; }   // (the installer replaces the app and starts it again)
+    if (BOX) { const r = await boxRun(["install-deb", dest]); return { ok: r.ok, file: dest, error: r.error }; }   // (box: installed by the helper, which restarts the app)
     const why = await shell.openPath(dest);   // (Mint's package installer: Install Package, then reopen Nate Bloom)
     return { ok: !why, file: dest, error: why || "" };
   } catch (er) { return { ok: false, error: String(er && er.message || er) }; }

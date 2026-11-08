@@ -3665,3 +3665,27 @@ body.es-on #epStrip { display: none; }
 .djl-live { display: flex; flex-wrap: wrap; gap: 4px; min-height: 22px; align-items: center; }
 .djl-help { opacity: .65; line-height: 1.4; }
 .dj-deck.djl-tgt { outline: 2px solid color-mix(in srgb, #c9a6ff 70%, transparent); outline-offset: 2px; }
+/*@site-only*/
+/* (box) the Nate Bloom Box: Play at 1280 x 720 on a 5" screen (scaled up by the kiosk); the controller's keys play */
+html.nb-box #plKeys { display: none !important; }
+html.nb-box .pl-body { grid-template-columns: 170px minmax(0, 1fr) 118px; }
+html.nb-box .pl-note { display: none; }
+html.nb-box body { cursor: none; }
+html.nb-box .bx-sheet, html.nb-box .bx-sheet * { cursor: default; }
+.bx-strip { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow: hidden; min-width: 0; }
+.bx-chip { font-size: 0.8rem; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); opacity: 0.85; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bx-chip.warn { border-color: #e8c15a; color: #e8c15a; opacity: 1; }
+.bx-chip.bad { border-color: #ff8fab; color: #ff8fab; opacity: 1; font-weight: 600; }
+.bx-sheet { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: rgba(8, 6, 14, 0.6); }
+.bx-sheet[hidden] { display: none; }
+.bx-card { width: min(640px, 94vw); max-height: 92vh; overflow-y: auto; box-sizing: border-box; padding: 14px 16px; border-radius: 16px; background: #1b1726; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.bx-head { display: flex; align-items: center; gap: 8px; }
+.bx-head strong { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; }
+.bx-sp { flex: 1 1 auto; }
+.bx-info { font-size: 0.85rem; opacity: 0.75; }
+.bx-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bx-row > span { width: 84px; flex: 0 0 auto; opacity: 0.8; }
+.bx-row .btn { min-height: 44px; padding: 0 14px; }
+.bx-off.holding { background: #ff8fab; color: #1a1426; }
+.bx-note { margin: 0; font-size: 0.8rem; opacity: 0.6; line-height: 1.4; }
+/*@end*/

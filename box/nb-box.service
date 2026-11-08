@@ -1,0 +1,27 @@
+[Unit]
+Description=Nate Bloom Box (Nate Bloom full screen in cage on tty1)
+After=systemd-user-sessions.service plymouth-quit-wait.service nb-box-cpu.service
+Wants=nb-box-cpu.service
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+
+[Service]
+User=__USER__
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+UtmpIdentifier=tty1
+UtmpMode=user
+Environment=XDG_SESSION_TYPE=wayland
+Environment=NB_BOX=1
+ExecStart=/usr/bin/cage -s -d -- /usr/local/lib/nb-box/session.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=graphical.target

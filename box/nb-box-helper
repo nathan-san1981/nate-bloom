@@ -1,0 +1,49 @@
+#!/bin/sh
+# Nate Bloom Box helper: the only things the app may do as root (sudoers allows this script, nothing else).
+#   nb-box-helper status | shutdown | reboot | wifi-on | wifi-off | rotate-90 | rotate-270 | scale-125 | scale-133 | scale-150 | restart-app
+#   nb-box-helper install-deb /home/<user>/Downloads/Nate Bloom/<file>.deb
+set -eu
+CONF=/etc/nb-box.conf
+
+later() {   # run after this script (and the app that called it) has finished, outside the app's service
+  systemd-run --quiet --collect --on-active=2 --unit="nb-box-$1-$$" /bin/sh -c "$2"
+}
+
+case "${1:-}" in
+  status)
+    T=$(vcgencmd get_throttled 2>/dev/null | sed -n 's/throttled=//p'); [ -n "$T" ] || T=0x0
+    W=$(nmcli -t -f WIFI radio 2>/dev/null || echo unknown)
+    # the sound output the box's user hears (PipeWire runs per user): its name, quotes and backslashes taken out
+    U=$(sed -n 's/^BOXUSER=//p' "$CONF"); O=""
+    if [ -n "$U" ]; then
+      N=$(id -u "$U" 2>/dev/null || echo 0)
+      O=$(runuser -u "$U" -- env XDG_RUNTIME_DIR="/run/user/$N" wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null | sed -n 's/.*node\.description = "\(.*\)"/\1/p' | head -1 | tr -d '"\\')
+      case "$O" in *[Hh][Dd][Mm][Ii]*|"Dummy Output"|"") O="" ;; esac
+    fi
+    printf '{"throttled":%d,"wifi":"%s","output":"%s"}\n' "$T" "$W" "$O"
+    ;;
+  shutdown) later off "systemctl poweroff" ;;
+  reboot) later reboot "systemctl reboot" ;;
+  wifi-on) rfkill unblock wifi || true; nmcli radio wifi on ;;
+  wifi-off) nmcli radio wifi off ;;
+  rotate-90|rotate-270)
+    R=${1#rotate-}
+    sed -i "s/^ROTATE=.*/ROTATE=$R/" "$CONF"
+    later restart "systemctl restart nb-box.service"
+    ;;
+  scale-125|scale-133|scale-150)
+    case "$1" in scale-125) S=1.25 ;; scale-133) S=1.333 ;; *) S=1.5 ;; esac
+    if grep -q '^SCALE=' "$CONF"; then sed -i "s/^SCALE=.*/SCALE=$S/" "$CONF"; else echo "SCALE=$S" >> "$CONF"; fi
+    later restart "systemctl restart nb-box.service"
+    ;;
+  restart-app) later restart "systemctl restart nb-box.service" ;;
+  install-deb)
+    F="${2:-}"
+    case "$F" in /home/*/Downloads/"Nate Bloom"/*.deb) ;; *) echo "not a Nate Bloom package in Downloads" >&2; exit 2 ;; esac
+    case "$F" in *..*) echo "bad path" >&2; exit 2 ;; esac
+    [ -f "$F" ] || { echo "no such file" >&2; exit 2; }
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
+    later restart "systemctl restart nb-box.service"
+    ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE" >&2; exit 2 ;;
+esac

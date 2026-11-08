@@ -172,7 +172,11 @@ std::string soOf(const std::string& path) {
   if (!S_ISDIR(st.st_mode)) return path;
   std::string base = path; while (!base.empty() && base.back() == '/') base.pop_back();
   std::string stem = base.substr(base.find_last_of('/') + 1); if (stem.size() > 5 && stem.compare(stem.size() - 5, 5, ".vst3") == 0) stem.resize(stem.size() - 5);
+#if defined(__aarch64__)
+  return base + "/Contents/aarch64-linux/" + stem + ".so";   // (box: the Pi's ARM64 bundle folder)
+#else
   return base + "/Contents/x86_64-linux/" + stem + ".so";
+#endif
 }
 IPluginFactory* openMod(const std::string& path, std::string& err) {
   std::lock_guard<std::mutex> lk(modMu);

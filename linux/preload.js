@@ -12,6 +12,12 @@ for (const p of [path.join(__dirname, "native", "build", "Release", "nbfastpads.
 }
 if (!fp) console.warn("Fast pads aren't available here; Beat Pads plays through the browser's audio");
 
+// (box) the Nate Bloom Box (main.js --box): its status and the few things it may ask of the computer
+if (process.argv.includes("--nb-box")) contextBridge.exposeInMainWorld("NBBox", {
+  status: () => ipcRenderer.invoke("nb:box-status"),
+  run: action => ipcRenderer.invoke("nb:box-do", String(action)),
+});
+
 contextBridge.exposeInMainWorld("NB_NATIVE", {
   platform: process.platform === "win32" ? "windows" : "linux",   // (234) the same app built for Windows: the Linux-only parts look for "linux"
   version,

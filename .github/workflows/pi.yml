@@ -1,0 +1,103 @@
+name: Pi app (Nate Bloom Box, ARM64)
+
+# The Linux app built on ARM64 for the Nate Bloom Box (Raspberry Pi 5, box/). Same app and native engine as
+# linux.yml, packaged as one .deb for Raspberry Pi OS (64-bit). Releases: pi-v1.0.N, and pi-latest whose
+# NateBloom-pi-arm64.deb is what box/install.sh downloads.
+on:
+  push:
+    branches: [main]
+    paths: ["linux/**", "native/**", "box/**", ".github/workflows/pi.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pi
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # 22.04: glibc 2.35, older than Raspberry Pi OS Bookworm's (2.36) and Trixie's, so the package runs on both
+    runs-on: ubuntu-22.04-arm
+    timeout-minutes: 60
+    env:
+      NB_VERSION: 1.0.${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: The site goes inside the app
+        run: |
+          mkdir -p /tmp/nb-logs
+          cd linux && rm -rf site && mkdir -p site/lite
+          cp ../index.html ../icon-192.png ../icon-512.png ../manifest.webmanifest site/
+          cp ../lite/index.html ../lite/manifest.webmanifest site/lite/
+          [ -f ../lite/sim.html ] && cp ../lite/sim.html site/lite/ || true
+          cp -r ../inst site/inst
+          cp -r ../wam site/wam
+          date -u +%Y-%m-%dT%H:%M:%SZ > site/BUILD.txt
+          du -sh site
+
+      - name: Install
+        run: cd linux && npm install --no-audit --no-fund 2>&1 | tail -20
+
+      - name: Fetch SIMD Everywhere, Ableton Link and the plugin formats' headers
+        run: |
+          git clone -q --depth 1 --branch v0.8.2 https://github.com/simd-everywhere/simde.git /tmp/simde || git clone -q --depth 1 https://github.com/simd-everywhere/simde.git /tmp/simde
+          mkdir -p native/nbsynth/simde && cp -r /tmp/simde/simde native/nbsynth/simde/
+          git clone -q --depth 1 --branch Link-4.1.1 https://github.com/Ableton/link.git native/ablink/link
+          git -C native/ablink/link submodule update -q --init --depth 1 modules/asio-standalone
+          git clone -q --depth 1 https://github.com/free-audio/clap.git linux/native/third_party/clap
+          git clone -q --depth 1 --branch v3.8.1_build_84 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces || git clone -q --depth 1 https://github.com/steinbergmedia/vst3_pluginterfaces.git linux/native/third_party/vst3/pluginterfaces
+          git clone -q --depth 1 https://github.com/lv2/lv2.git linux/native/third_party/lv2
+          git clone -q --depth 1 https://github.com/lv2/lilv.git linux/native/third_party/lilv
+          sudo apt-get update -qq && sudo apt-get install -y -qq libx11-dev build-essential python3
+
+      - name: Build the native engine (fast pads, synth engine, plugin host) for ARM64
+        id: native
+        run: |
+          set -o pipefail
+          cd linux/native && npx --no-install node-gyp rebuild 2>&1 | tee /tmp/nb-logs/native.log
+          node -e "const f = require('./build/Release/nbfastpads.node'); console.log(process.arch, Object.keys(f).join(' '))" | tee -a /tmp/nb-logs/native.log
+          node -e "const p = require('./build/Release/nbplug.node'); console.log('plugin host:', Object.keys(p).join(' '))" | tee -a /tmp/nb-logs/native.log
+          g++ -std=c++17 -O2 -fPIC -shared -Wall -Ithird_party/clap/include ../bridge/nb_bridge_clap.cc -o build/Release/NateBloomBridge.clap -lrt 2>&1 | tee -a /tmp/nb-logs/native.log
+
+      - name: Package (.deb, ARM64)
+        id: build
+        run: |
+          set -o pipefail
+          cd linux && npx --no-install electron-builder --linux deb --arm64 --publish never -c.extraMetadata.version=$NB_VERSION -c.artifactName='NateBloom-pi-${version}-${arch}.${ext}' 2>&1 | tee /tmp/nb-logs/build.log
+          ls -la dist | tee -a /tmp/nb-logs/build.log
+
+      - name: Box check (install the .deb, start it with --box on a 1280x720 screen, look)
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 10
+        run: bash linux/ci/box_check.sh /tmp/nb-logs/box
+
+      - name: Release
+        if: steps.build.outcome == 'success' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd linux/dist
+          DEB=$(ls NateBloom-pi-*.deb | head -1)
+          cp "$DEB" NateBloom-pi-arm64.deb
+          gh release create "pi-v$NB_VERSION" "$DEB" --title "Nate Bloom Box (Raspberry Pi) $NB_VERSION" --notes-file ../../box/RELEASE_NOTES.md --latest=false
+          gh release view pi-latest >/dev/null 2>&1 || gh release create pi-latest --title "Nate Bloom Box (latest)" --notes-file ../../box/RELEASE_NOTES.md --latest=false
+          gh release edit pi-latest --title "Nate Bloom Box (latest: $NB_VERSION)" --notes-file ../../box/RELEASE_NOTES.md --latest=false
+          gh release upload pi-latest NateBloom-pi-arm64.deb --clobber
+
+      - name: Publish logs to the ci-logs-pi branch
+        if: always()
+        run: |
+          cd /tmp/nb-logs || exit 0
+          echo "${{ github.run_number }} ${{ github.sha }} native=${{ steps.native.outcome }} build=${{ steps.build.outcome }}" > run.txt
+          git init -q && git checkout -q -b ci-logs-pi
+          git config user.name "nb-ci" && git config user.email "nb-ci@users.noreply.github.com"
+          git add -A && git commit -qm "Pi run ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" ci-logs-pi
