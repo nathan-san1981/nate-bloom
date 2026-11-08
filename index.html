@@ -40380,6 +40380,23 @@ body.nbosk-up{--nbosk-h:0px}`;
   // lock go off, so the piano plays plain notes. "Plays" picks Piano / Synth / Piano + Synth
   // (Synth turns the Yamaha's own sound off with MIDI Local Control). Off ?synths=1 none of this exists; the Box (?box=1) never sees it.
   // ======================================================================
+  // (anywhere but the Synths screen) if the Synths screen left the Yamaha's own sound off (it was closed mid-way, say),
+  // it's turned back on as soon as the Yamaha is seen. Only ever undoes what the Synths screen did.
+  {
+    let synthsHere = false; try { synthsHere = new URLSearchParams(location.search).get("synths") === "1"; } catch (e) {}
+    if (!synthsHere) {
+      const fix = () => {
+        try {
+          if (localStorage.getItem("nb-local-off") !== "1" || !md.access) return;
+          const outs = [...md.access.outputs.values()].filter(o => o.state !== "disconnected" && /yamaha|p-?2[0-9]{2}\b|p-?1[0-9]{2}\b|digital piano|clavinova|arius/i.test((o.name || "") + " " + (o.manufacturer || "")));
+          if (!outs.length) return;
+          outs.forEach(o => { try { for (let ch = 0; ch < 16; ch++) o.send([0xb0 | ch, 122, 127]); } catch (e) {} });
+          localStorage.removeItem("nb-local-off");
+        } catch (e) {}
+      };
+      const op = md.onPorts; md.onPorts = function () { try { if (op) op.apply(this, arguments); } catch (e) {} fix(); };
+    }
+  }
   {
     let on = false;
     try { on = new URLSearchParams(location.search).get("synths") === "1"; } catch (e) {}
@@ -40677,6 +40694,7 @@ html.nb-synths .recbanner { display: none !important; }
       function sendLocal(onv) {
         const outs = outsFor(SY.yamaha); if (!outs.length) return false;
         outs.forEach(o => { try { for (let ch = 0; ch < 16; ch++) o.send([0xb0 | ch, 122, onv ? 127 : 0]); } catch (e) {} });
+        try { if (onv) localStorage.removeItem("nb-local-off"); else localStorage.setItem("nb-local-off", "1"); } catch (e) {}
         return true;
       }
       // What the Yamaha plays: Piano (its own sound; the synth ignores its keys), Synth (Local Control off: the piano's
@@ -40707,7 +40725,13 @@ html.nb-synths .recbanner { display: none !important; }
           return t0 ? t0.apply(this, arguments) : false;
         }; }
       function paintLocal() { paintMode(); }
+      // the piano gets its own sound back whenever this isn't on screen (another tab or app, the screen off, closed),
+      // and Synth turns it off again when it's back
       window.addEventListener("pagehide", () => { if (SY.localOff) sendLocal(true); });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) { if (SY.localOff) { sendLocal(true); SY.localOff = false; } }
+        else if (SY.yamaha && mode === "synth") setTimeout(() => applyMode(true), 200);
+      });
       function paintChip() {
         const c = $s("syKbChip"); c.classList.toggle("ok", !!SY.yamaha);
         c.querySelector("span").textContent = SY.yamaha ? "Yamaha connected" : SY.other ? SY.other + " connected" : (md.access ? "Plug in the Yamaha (USB)" : "Tap to connect the keyboard");
