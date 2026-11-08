@@ -2,7 +2,7 @@
 
 Nate Bloom as a standalone instrument: a Raspberry Pi 5 with the 5" Touch Display 2 in the Waveshare
 PI5-CASE-TD2-5inch, a controller (MiniLab 3, KeyLab Essential 61 mk3, the Yamaha, any class-compliant USB MIDI
-keyboard) and headphones through a USB-C-to-3.5 mm cable. Power on and it opens straight into Play.
+keyboard) and headphones through a USB-A-to-3.5 mm adapter. Power on and it opens straight into Play.
 
 What runs: the Nate Bloom Linux app built for ARM64 (`.github/workflows/pi.yml`, release `pi-latest`), started full
 screen by `cage` with `--box`. It's the same app as on the ThinkPad — native synth engine on its own threads, fast
@@ -17,7 +17,7 @@ Chromium kiosk.
 | Raspberry Pi Touch Display 2, 5" | DSI ribbon (22-to-15 pin for the Pi 5) and GPIO power leads are in its box |
 | Waveshare PI5-CASE-TD2-5inch | the back cover; the screen is the front. File the USB openings if they don't line up |
 | ¼"-20 to M4 adapter | case base → the UBeesize ball head |
-| USB-C female → USB-A male adapter | your USB-C-to-3.5 mm cable goes into a USB-A port (the Pi's USB-C is power only) |
+| USB-A to 3.5 mm headphone adapter | a USB sound card; into any USB-A port (the Pi 5 has no headphone jack) |
 
 ## Put it together
 
