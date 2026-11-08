@@ -292,6 +292,9 @@ table.t{border-collapse:collapse;width:100%;font-size:16px} table.t td,table.t t
 .kb{--hand-r:#2f6fed;--hand-l:#e5484d}
 .handlayer{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .2s}
 .handlayer.on{opacity:1}
+.handcap{display:none;position:absolute;left:50%;top:-44px;transform:translateX(-50%);background:rgba(15,18,28,.86);color:#fff;font-size:14px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap;max-width:96%;overflow:hidden;text-overflow:ellipsis;z-index:2}
+.handlayer.starting .handcap{display:block}
+.kb .yamlogo{position:absolute;top:-1px;transform:translateX(-50%);z-index:4;pointer-events:none;font:800 9px/1 var(--font);letter-spacing:.12em;color:#fff;background:#111;border-radius:0 0 5px 5px;padding:3px 5px 4px;opacity:.85}
 .handsvg{position:absolute;inset:0;overflow:visible}
 .handsvg path{transition:d .32s cubic-bezier(.3,.8,.3,1)}
 .handsvg .num,.handsvg .tag{transition:transform .32s cubic-bezier(.3,.8,.3,1)}
@@ -1078,10 +1081,12 @@ class KeyboardView {
       const fg = document.createElement('span'); fg.className = 'fng'; d.appendChild(fg);
       this.el.appendChild(d); this.keyEls[m] = d;
     }
-    if (this.opts.hands) { this.guide = new HandGuide(this); }
+    if (this.opts.hands) { this.guide = new HandGuide(this); if (this._start) this.guide.start = this._start; }
+    this.el.__kbv = this;
     this.layout();
     for (const m in this.state) this.apply(+m);
     this.targets.forEach((f, m) => this.paintTarget(m, f));
+    this.guide && this.guide.update([...this.targets.values()]);
   }
   layout() {
     const W = this.el.clientWidth || 800;
@@ -1093,6 +1098,7 @@ class KeyboardView {
     }
     this.el.style.setProperty('--ww', this.geo.ww + 'px');
     this.guide && this.guide.relayout();
+    this.paintLandmark();
     Bus.emit('kb:layout', this);
   }
   apply(m) {
@@ -1112,6 +1118,15 @@ class KeyboardView {
   unmark(m, cls) { const e = this.keyEls[m]; e && e.classList.remove(cls); }
   clear(cls) { for (const m in this.keyEls) this.keyEls[m].classList.remove(cls); }
   flashBad(m) { const e = this.keyEls[m]; if (!e) return; e.classList.remove('bad'); void e.offsetWidth; e.classList.add('bad'); setTimeout(() => e.classList.remove('bad'), 600); }
+  setStart(st) { this._start = st; this.guide && this.guide.setStart(st); }
+  /* the YAMAHA logo on the P-225 sits over the line between E4 and F4: mark the same spot on the screen keys */
+  paintLandmark() {
+    let el = this.el.querySelector('.yamlogo');
+    const show = typeof Midi !== 'undefined' && Midi.setup === 'B' && this.geo && this.geo.keys[64] && this.geo.keys[65];
+    if (!show) { el && el.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.className = 'yamlogo'; el.textContent = 'YAMAHA'; el.title = 'Where the YAMAHA logo is on the piano'; this.el.appendChild(el); }
+    el.style.left = this.geo.keys[65].x + 'px';
+  }
   setTargets(list) {    // list of {midi, finger, hand}
     this.targets.forEach((_, m) => this.paintTarget(m, null));
     this.targets = new Map(list.map(t => [t.midi, t]));
@@ -1163,6 +1178,8 @@ class HandGuide {
       <g class="tag"><circle r="11"/><text text-anchor="middle" dy="4">${h}</text></g></g>`).join('')}</svg>`;
     kb.el.appendChild(this.layer);
     this.svg = this.layer.querySelector('svg');
+    this.cap = document.createElement('div'); this.cap.className = 'handcap'; this.layer.appendChild(this.cap);
+    this.start = null;   // { R: {finger: midi}, L: ... }: where the hands go before the first note
     this.hands = { L: this.layer.querySelector('.hand-l'), R: this.layer.querySelector('.hand-r') };
   }
   static stepWhite(m, n) { let x = m; const d = Math.sign(n); let k = Math.abs(n); while (k > 0) { x += d; if (!isBlack(x)) k--; } return x; }
@@ -1173,8 +1190,47 @@ class HandGuide {
     for (let g = 1; g <= 5; g++) map[g] = g === f0 ? m0 : HandGuide.stepWhite(m0, (h === 'R' ? 1 : -1) * (g - f0));   // right: higher finger = higher key; left: lower
     return map;
   }
+  /* the starting position: shown whenever the guide is on and nothing is being asked for yet (before Start, between runs) */
+  setStart(st) { this.start = st && (st.R || st.L) ? st : null; this.update(this.last || []); }
+  showStart() {
+    if (!this.start) { this.hide(); return; }
+    let any = false;
+    for (const h of ['L', 'R']) {
+      const map = this.start[h], el = this.hands[h];
+      if (!map) { el.style.display = 'none'; continue; }
+      any = true; el.style.display = ''; this.pos[h] = Object.assign({}, map);
+      const f0 = h === 'R' ? 1 : 5; this.act[h] = [Object.keys(map).includes(String(f0)) ? f0 : +Object.keys(map)[0]];
+      this.place(h, map, this.act[h]);
+    }
+    this.layer.classList.toggle('on', any);
+    this.layer.classList.add('starting');
+    this.cap.textContent = HandGuide.startText(this.start);
+  }
+  /* "Right thumb on middle C, the 3rd white key left of the YAMAHA logo" (the logo sits over E4 | F4 on the P-225) */
+  static startText(st) {
+    const yam = typeof Midi !== 'undefined' && Midi.setup === 'B';
+    const ord = n => n + (n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th');
+    const whites = (a, b) => { let n = 0; for (let x = Math.min(a, b); x <= Math.max(a, b); x++) if (!isBlack(x)) n++; return n; };
+    const where = m => {
+      const nm = m === 60 ? 'middle C' : nameOf(m);
+      const logo = m <= 64 ? whites(m, 64) : whites(65, m);   // white keys from the logo (it sits over E4 | F4)
+      if (yam && logo <= 4) return m <= 64 ? `${nm}, the ${ord(logo)} white key left of the YAMAHA logo` : `${nm}, the ${ord(logo)} white key right of the YAMAHA logo`;
+      if (m === 60) return nm;
+      if ((m - 60) % 12 === 0) { const k = Math.abs(m - 60) / 12; return `${nm}, ${k === 1 ? 'one octave' : k + ' octaves'} ${m < 60 ? 'below' : 'above'} middle C`; }
+      const up = (12 - m % 12) % 12, dn = m % 12, c = up <= dn ? m + up : m - dn;   // the nearest C
+      const cn = c === 60 ? 'middle C' : nameOf(c) + ((c - 60) % 12 === 0 && Math.abs(c - 60) === 12 ? (c < 60 ? ' (an octave below middle C)' : ' (an octave above middle C)') : '');
+      return `${nm}, the ${letterOf(m)}${isBlack(m) ? '♯' : ''} just ${m < c ? 'below' : 'above'} ${cn}`;
+    };
+    const bits = [];
+    if (st.R) { const f = st.R[1] != null ? 1 : +Object.keys(st.R)[0]; bits.push(`Right ${f === 1 ? 'thumb' : 'finger ' + f} on ${where(st.R[f])}`); }
+    if (st.L) { const f = st.L[5] != null ? 5 : +Object.keys(st.L)[0]; bits.push(`Left ${f === 1 ? 'thumb' : f === 5 ? 'little finger' : 'finger ' + f} on ${where(st.L[f])}`); }
+    return 'Start: ' + bits.join(' · ');
+  }
   update(list) {
-    if (!HandGuide.wanted() || !list.length) { this.hide(); return; }
+    this.last = list;
+    if (!HandGuide.wanted()) { this.hide(); return; }
+    if (!list.length) { this.showStart(); return; }
+    this.layer.classList.remove('starting');
     const active = { R: null, L: null };
     for (const t of list) {
       const h = t.hand === 'L' ? 'L' : 'R';
@@ -1239,9 +1295,9 @@ class HandGuide {
     }
     el.querySelector('.tag').style.transform = `translate(${(L + R) / 2}px, ${H * 0.93}px)`;
   }
-  hide() { this.layer.classList.remove('on'); for (const h of ['L', 'R']) this.hands[h].style.display = 'none'; }
+  hide() { this.layer.classList.remove('on', 'starting'); for (const h of ['L', 'R']) this.hands[h].style.display = 'none'; }
   reset() { this.pos = { R: null, L: null }; this.hide(); }
-  relayout() { for (const h of ['L', 'R']) if (this.pos[h] && this.hands[h].style.display !== 'none') this.place(h, this.pos[h], this.act[h]); }
+  relayout() { if (this.layer.classList.contains('starting')) { this.showStart(); return; } for (const h of ['L', 'R']) if (this.pos[h] && this.hands[h].style.display !== 'none') this.place(h, this.pos[h], this.act[h]); }
   /* Settings → Hand guide: auto (through Unit 4) | on | off. Never for child profiles. */
   static wanted() {
     const p = State.profile; if (!p || p.type === 'child') return false;
@@ -3604,6 +3660,7 @@ function showConnHelp() {
 }
 /* setup banner: shows which setup is active for two seconds */
 Bus.on('midi:setup', s => {
+  $$('.kb').forEach(el => el.__kbv && (el.__kbv.paintLandmark(), el.__kbv.guide && el.__kbv.guide.layer.classList.contains('starting') && el.__kbv.guide.showStart()));
   if (!s) return;
   const txt = s === 'A' ? 'Setup A · KeyLab 61 · app sound on' : s === 'B' ? 'Setup B · Yamaha P-225 · piano sound' : s === 'M' ? 'MiniLab 3 · 25 keys · app sound on' : 'Keyboard connected';
   const b = h(`<div class="banner">${txt}</div>`); document.body.appendChild(b);
@@ -3722,7 +3779,8 @@ function warmupItem() {
   }
   // early units: replay the most recent passed play-drill as a warm-up
   const passed = allLessons().filter(L => p.progress[L.id]?.passed && (L.kind || 'play') === 'play' && L.unit.id <= 10);
-  const L = passed[passed.length - 1] || lessonById('u1-4');
+  const L = passed[passed.length - 1];
+  if (!L) return null;   // nothing learned yet: no timed warm-up on music she hasn't been taught
   return { n: L.title, d: 'Five minutes, at tempo', run: () => go('lesson', L.id, { step: 'drill', today: 'warm', practice: true }) };
 }
 function runReview(id) { go('lesson', id, { step: 'drill', review: true, today: 'rev:' + id }); }
@@ -3966,6 +4024,16 @@ function mountScoreStage(P, score, opts = {}) {
       ? (need <= 25 ? `Set the MiniLab's octave so its keys run ${nameOf(lo)}–${nameOf(lo + 24)} (octave buttons).` : `This needs ${need} keys; the MiniLab has 25. Shift octaves as you go, use the on-screen keys, or plug in the KeyLab.`)
       : `This music spans ${need} keys — more than this keyboard has.`;
   } else P.rangeHint = '';
+  // where the hands start: the first fingered note of each hand in play
+  try {
+    const hs = opts.hands || ['R', 'L'], st = {};
+    for (const hh of ['R', 'L']) {
+      if (!hs.includes(hh)) continue;
+      const n0 = score.notes.filter(n => n.hand === hh && n.finger).sort((a, b) => a.start - b.start || (hh === 'R' ? a.midi - b.midi : b.midi - a.midi))[0];
+      if (n0 && P.kb.guide) st[hh] = P.kb.guide.fill(hh, { [n0.finger]: n0.shownMidi ?? n0.midi });
+    }
+    P.kb.setStart(st);
+  } catch (e) { P.kb.setStart(null); }
   if (view === 'letters') {
     P.stage.className = 'stage nopad';
     const notes = score.notes.filter(n => (opts.hands || ['R', 'L']).includes(n.hand));
@@ -4035,7 +4103,7 @@ function bindCommon(P, rerender) {
     metro: a => { P.metro = !P.metro; a.style.cssText = P.metro ? 'color:var(--accent)' : 'opacity:.45'; },
     view: a => { P.view = a.dataset.v; rerender(); },
     hints: a => { State.settings.hints = State.settings.hints === 'always' ? 'fade' : 'always'; State.save(); a.textContent = State.settings.hints === 'always' ? 'Hints on' : 'Hints'; toast(State.settings.hints === 'always' ? 'Key hints stay on' : 'Key hints appear after a mistake or a pause'); },
-    handg: a => { const on = !HandGuide.wanted(); State.settings.handGuide = on ? 'on' : 'off'; State.save(); a.textContent = on ? 'Hands on' : 'Hands'; a.classList.toggle('on', on); P.kb.setTargets([...P.kb.targets.values()]); /* repaint: hands, or finger numbers back on the keys */ toast(on ? 'Hand guide on: hands show with the key hints' : 'Hand guide off'); },
+    handg: a => { const on = !HandGuide.wanted(); State.settings.handGuide = on ? 'on' : 'off'; State.save(); a.textContent = on ? 'Hands on' : 'Hands'; a.classList.toggle('on', on); P.kb.setTargets([...P.kb.targets.values()]); /* repaint: hands, or finger numbers back on the keys */ toast(on ? 'Hand guide on: the hands show where to start, then follow the key hints' : 'Hand guide off'); },
     duet: a => { P.duet = !P.duet; a.classList.toggle('primary', P.duet); a.classList.toggle('ghost', !P.duet); }
   });
 }
