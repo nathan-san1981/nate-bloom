@@ -205,7 +205,8 @@ input[type=range]{width:220px;accent-color:var(--accent);height:36px}
 .sticker svg{width:72%;height:72%}
 .sticker.empty{background:var(--panel2);opacity:.6}
 .beat{width:220px;height:220px;border-radius:50%;background:var(--accent);margin:auto;transition:transform .08s ease-out,opacity .2s}
-.hold-ring{position:relative}
+.hold-ring{position:relative;touch-action:none;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.hold-ring svg{pointer-events:none}
 .hold-ring::after{content:"";position:absolute;inset:-4px;border-radius:16px;border:3px solid var(--accent);clip-path:inset(0 calc(100% - var(--p,0%)) 0 0)}
 /* ---------- misc ---------- */
 .empty{display:grid;place-items:center;height:100%;text-align:center;color:var(--ink2);padding:30px}
@@ -5352,9 +5353,11 @@ SCREENS.childHome = () => {
 function bindHold(btn, fn) {
   let t0 = 0, raf = 0;
   const step = () => { const p = Math.min(1, (now() - t0) / 2000); btn.style.setProperty('--p', (p * 100) + '%'); if (p >= 1) { cancel(); fn(); return; } raf = requestAnimationFrame(step); };
-  const start = e => { e.preventDefault(); t0 = now(); raf = requestAnimationFrame(step); };
+  const start = e => { e.preventDefault(); try { btn.setPointerCapture(e.pointerId); } catch (er) { } t0 = now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(step); };
   const cancel = () => { cancelAnimationFrame(raf); btn.style.setProperty('--p', '0%'); };
-  btn.addEventListener('pointerdown', start); btn.addEventListener('pointerup', cancel); btn.addEventListener('pointerleave', cancel); btn.addEventListener('pointercancel', cancel);
+  // a long press on Android otherwise opens Chrome's menu and cancels the hold
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+  btn.addEventListener('pointerdown', start); btn.addEventListener('pointerup', cancel); btn.addEventListener('pointercancel', cancel);
   return cancel;
 }
 
@@ -5756,6 +5759,8 @@ window.T = T;
   $('#favicon').href = icon;
   const manifest = { name: 'Keys — Piano Teacher', short_name: 'Keys', display: 'fullscreen', orientation: 'landscape', background_color: '#121316', theme_color: '#121316', start_url: location.href.split('#')[0], icons: [{ src: icon, sizes: '512x512', type: 'image/svg+xml', purpose: 'any' }] };
   // the hosted copy (GitHub Pages) ships a real manifest + PNG icons + service worker so Chrome can install it
+  // no long-press / right-click menus anywhere in the app (keyboard, buttons, child mode); text fields keep theirs
+  document.addEventListener('contextmenu', e => { if (!e.target.closest('input, textarea, [contenteditable]')) e.preventDefault(); });
   const hosted = !!$('#manifest').getAttribute('href');
   if (!hosted) $('#manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
   if (hosted && 'serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => { });
