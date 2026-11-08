@@ -1,8 +1,8 @@
 // Nate Bloom offline cache (Nate Bloom Lite, under lite/, has its own).
 // The app page is network-first (so updates arrive when you're online, with the cached copy as the
 // offline fallback). Sound library files are cache-first: once heard, they work offline.
-const CACHE = "nate-bloom-v3";
-const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
+const CACHE = "nate-bloom-v4";
+const CORE = ["./", "./index.html", "./manifest.webmanifest", "./synths.webmanifest", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => {
   // old caches go, including the vocal-separation model and engine files from before that feature was removed
