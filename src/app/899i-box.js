@@ -98,8 +98,19 @@
       }
       // ---- start: Play, as soon as the page has its parts ----
       const go = () => {
+        // MIDI on at once: elsewhere it waits for the first tap (a browser asks permission), but the box may never be
+        // touched, so the controller has to work from power-on; controllers plugged in later arrive by themselves
+        try { if (!md.access) { md.opt.auto = true; connectMidi(); } } catch (e) {}
         try { if (typeof shGo === "function") shGo("play"); else if (window.__live21) window.__live21.plOpen(); } catch (e) { try { window.__live21.plOpen(); } catch (er) {} }
         bxStrip(); bxPoll();
+        // the pads' sounds decoded now, not on their first hit (elsewhere the first hit of each sample is silent while
+        // it loads; on the box that would be the first kick of a set). Spread out so start-up stays smooth.
+        setTimeout(() => {
+          const ids = [];
+          try { for (let k = 0; k < 64; k++) { const P = bpPad(k); if (P && typeof P.src === "string" && rcEngine(P.src) === "smp" && !ids.includes(P.src)) ids.push(P.src); } } catch (e) {}
+          ids.forEach((id, i) => setTimeout(() => { try { rcSampleBuf(id); } catch (e) {} }, i * 60));
+          BX.warm = ids.length;
+        }, 1500);
       };
       if (document.readyState === "complete") setTimeout(go, 600); else window.addEventListener("load", () => setTimeout(go, 600), { once: true });
       document.addEventListener("visibilitychange", () => { if (!document.hidden) bxPoll(); });
