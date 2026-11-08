@@ -16,6 +16,9 @@
     "native": "cd native && node-gyp rebuild",
     "dist": "electron-builder --linux deb AppImage --publish never"
   },
+  "dependencies": {
+    "yt-cast-receiver": "^1.2.4"
+  },
   "devDependencies": {
     "electron": "^44.5.1",
     "electron-builder": "^25.1.8",
@@ -33,6 +36,7 @@
       "plughost.js",
       "plugin-store.js",
       "xspan.py",
+      "ytcast.js",
       "package.json",
       "build/icon.png",
       "native/build/Release/nbfastpads.node",

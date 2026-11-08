@@ -53,7 +53,7 @@ controller's d-pad and A, or a keyboard's arrows and Enter, work too.
 | --- | --- |
 | **Nate Bloom** | the synth, drums, sampling and DJ (everything below). **⌂ Home** in Play's top bar comes back here. |
 | **Keys** | piano lessons, with the MiniLab, KeyLab or the Yamaha. Settings › Raspberry Pi box › Home screen comes back. |
-| **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones). YouTube works through AirPlay: in the YouTube app, Control Centre › audio output › Nate Bloom Box (playing with the screen locked or the app in the background needs YouTube Premium). Stops when you leave the screen, unless **Keep playing** is on (below). |
+| **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones). YouTube and YouTube Music: tap the Cast icon and pick Nate Bloom Box. The box fetches and plays the music itself, so the phone is just the remote: lock it or walk away and the queue keeps going. If the box isn't in the Cast list, the Listen screen shows a TV code for YouTube › Settings › Watch on TV › Link with TV code. Stops when you leave the screen, unless **Keep playing** is on (below). |
 | **Stream** | Moonlight: games from the GPU box (Sunshine) streamed over Wi-Fi, played with the Xbox controller. Set up with `bash box/stream-setup.sh` (Tailscale, 720p60 HEVC, pairing); `--boot-into-stream` starts straight into Steam at power-on. The GPU box side: `stream/`. |
 | **Media** | Kodi for movies, music and photos from a USB stick or the network. Controller-driven; Power › Exit comes back. |
 | **Games** | retro games from a Batocera USB stick (below). Shows **No stick** until one is plugged in. |
@@ -123,7 +123,7 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 ## What the installer changes
 
 - Packages: `cage`, `wlr-randr`, `exfatprogs`, `ntfs-3g`, PipeWire + WirePlumber, `rtkit`, BlueZ, `python3-evdev`, the ARM64 Nate Bloom package (or Chromium).
-  For the home screen: `shairport-sync` and raspotify's `librespot` (Listen; their own services are switched off, the
+  For the home screen: `shairport-sync` and raspotify's `librespot`, `mpv` and the standalone `yt-dlp` in `/opt/nb-box/ytdlp` (Listen; their own services are switched off, the
   app runs them only while Listen is open), `moonlight-qt` from Moonlight's package repository (Stream), `kodi` (Media).
   Skip any with `--no-listen`, `--no-stream`, `--no-media`.
 - The home screen, Listen and Keys in `/opt/nb-box/apps`; `session.sh` runs Moonlight or Kodi when asked and comes
@@ -154,6 +154,7 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |
 | Clicks or dropouts | ⚡ low power showing? Use the 45 W supply. Otherwise Settings › App › sound buffer: Steady |
 | App closes right after starting (screen flashes back) | rerun the installer with `--4k-kernel` (the Pi 5's default kernel uses 16 KB memory pages) |
+| YouTube casting stops working | YouTube changed something: the box updates yt-dlp once a day by itself; to do it now, `/opt/nb-box/ytdlp/yt-dlp -U` over SSH. AirPlay from the YouTube app still works meanwhile |
 | Listen doesn't show up on the phone | phone and box on the same Wi-Fi? Leave Listen and open it again; `systemctl status avahi-daemon` over SSH |
 | Moonlight or Kodi stuck | press the power button once: it closes them and the home screen comes back |
 | Bluetooth keyboard won't pair | put it in pairing mode right before **Find devices**. If it wants a code, the box shows it large: type it on the keyboard and press Enter. A device that shows its own code gets a keypad on the screen. |

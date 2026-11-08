@@ -125,7 +125,7 @@
     if (back.isConnected) {
       q(".nbj-src").textContent = "Playing from your phone" + (s && s.now && s.now.source ? " · " + s.now.source : "");
       q(".nbj-song").textContent = on ? (s.now.name || "Playing") : "Nothing playing";
-      q(".nbj-art").textContent = on ? [s.now.artists, s.now.album].filter(Boolean).join(" · ") : "Pick “Nate Bloom Box” in Spotify or AirPlay";
+      q(".nbj-art").textContent = on ? [s.now.artists, s.now.album].filter(Boolean).join(" · ") : "Pick “Nate Bloom Box” in Spotify, YouTube or AirPlay";
       q(".nbj-stt").textContent = on ? "● " + s.now.state : "";
       q(".nbj-mute").classList.toggle("on", !!(s && s.muted)); q(".nbj-mute").textContent = s && s.muted ? "Unmute" : "Mute";
       paintLevel();

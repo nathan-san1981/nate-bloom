@@ -338,7 +338,7 @@ async function boxApps() {
   return {
     home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true,
     keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
-    listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync")),
+    listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync") || ytcastReady()),
     stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
     start: boxConf("START") || "ask", last: boxLast,
   };
@@ -377,8 +377,11 @@ const LISTEN_PIDS = () => path.join(BOX_RUN, "listen.pids");
 const alive = pid => { try { process.kill(pid, 0); return true; } catch (e) { return false; } };
 function listenProcs() {
   let l = []; try { l = JSON.parse(fs.readFileSync(LISTEN_PIDS(), "utf8")); } catch (e) {}
-  return (Array.isArray(l) ? l : []).filter(p => p && p.pid > 1 && alive(p.pid) && /librespot|shairport|listen-airplay/.test(String(p.name)));
+  return (Array.isArray(l) ? l : []).filter(p => p && p.pid > 1 && alive(p.pid) && /librespot|shairport|listen-airplay|ytcast/.test(String(p.name)));
 }
+// YouTube / YouTube Music: ytcast.js (a cast receiver, run with Electron's own Node) playing through mpv + yt-dlp
+const YTDLP = "/opt/nb-box/ytdlp/yt-dlp";
+const ytcastReady = () => hasFile("/usr/bin/mpv") && hasFile(YTDLP);
 const listenSave = l => { try { fs.mkdirSync(BOX_RUN, { recursive: true }); fs.writeFileSync(LISTEN_PIDS(), JSON.stringify(l)); } catch (e) {} };
 function listenStart() {
   const have = listenProcs(); if (have.length) return;
@@ -399,11 +402,17 @@ function listenStart() {
     run("/usr/bin/shairport-sync", ["-c", conf]);
     if (hasFile("/usr/local/lib/nb-box/listen-airplay.py")) { const p = spawn("/usr/bin/python3", ["/usr/local/lib/nb-box/listen-airplay.py", pipe], { stdio: "ignore", detached: true, env: { ...process.env, NB_LISTEN_FILE: ev } }); p.on("error", () => {}); p.unref(); if (p.pid) l.push({ pid: p.pid, name: "listen-airplay" }); }
   }
+  if (ytcastReady()) {
+    const cwd = path.join(app.getPath("userData"), "ytcast"); try { fs.mkdirSync(cwd, { recursive: true }); } catch (e) {}
+    const p = spawn(process.execPath, [path.join(__dirname, "ytcast.js")], { cwd, stdio: "ignore", detached: true,
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", NB_LISTEN_FILE: ev, NB_BOX_RUN: BOX_RUN, NB_YTCAST_FILE: path.join(BOX_RUN, "ytcast.json"), NB_YTCAST_NAME: LISTEN_NAME, NB_YTDLP: YTDLP } });
+    p.on("error", () => {}); p.unref(); if (p.pid) l.push({ pid: p.pid, name: "ytcast" });
+  }
   listenSave(l);
 }
 function listenStop() {
   for (const p of listenProcs()) { try { process.kill(-p.pid, "SIGTERM"); } catch (e) { try { process.kill(p.pid, "SIGTERM"); } catch (er) {} } }
-  listenSave([]); try { fs.rmSync(path.join(BOX_RUN, "listen.json")); } catch (e) {}
+  listenSave([]); for (const f of ["listen.json", "ytcast.json"]) { try { fs.rmSync(path.join(BOX_RUN, f)); } catch (e) {} }
 }
 // "Keep playing in Nate Bloom, Keys and the home screen": off until switched on in Listen; remembered
 const KEEP_FILE = () => path.join(app.getPath("userData"), "listen-keep.json");
@@ -416,14 +425,16 @@ let listenLevel = 1, listenMuted = false;
 async function listenNodes() {
   const pids = new Set(listenProcs().map(p => p.pid));
   return (await pwDump()).filter(o => o.type === "PipeWire:Interface:Node" && o.info && o.info.props && o.info.props["media.class"] === "Stream/Output/Audio" &&
-    (pids.has(+o.info.props["application.process.id"]) || /librespot|shairport/i.test(String(o.info.props["application.process.binary"] || o.info.props["application.name"] || "")))).map(o => o.id);
+    (pids.has(+o.info.props["application.process.id"]) || /librespot|shairport|nb-ytcast/i.test(String(o.info.props["application.process.binary"] || "") + " " + String(o.info.props["application.name"] || "")))).map(o => o.id);
 }
 const wp = args => new Promise(res => execFile("wpctl", args, { timeout: 4000 }, err => res(!err)));
 async function listenApply() { for (const id of await listenNodes()) { await wp(["set-volume", String(id), listenLevel.toFixed(3)]); await wp(["set-mute", String(id), listenMuted ? "1" : "0"]); } }
 function listenStatus() {
   let now = null; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {}
   const l = listenProcs();
-  return { spotify: l.some(p => p.name === "librespot"), airplay: l.some(p => p.name === "shairport-sync"), name: LISTEN_NAME, now,
+  let yt = {}; try { yt = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "ytcast.json"), "utf8")); } catch (e) {}
+  return { spotify: l.some(p => p.name === "librespot"), airplay: l.some(p => p.name === "shairport-sync"), youtube: l.some(p => p.name === "ytcast"),
+    ytCode: yt.code || null, ytPhones: yt.phones || [], name: LISTEN_NAME, now,
     keep: listenKeep(), level: listenLevel, muted: listenMuted };
 }
 // (a new stream, e.g. the next AirPlay session, starts at full volume: put the chosen level back every few seconds)

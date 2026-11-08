@@ -7,6 +7,7 @@
 #                                            --no-reboot  don't reboot at the end
 #                                            --4k-kernel  the 4 KB-page kernel (only if the app won't start on the Pi 5's default 16 KB one)
 #                                            --no-listen  no Spotify Connect / AirPlay (Listen on the home screen)
+#                                            --no-youtube no YouTube / YouTube Music casting in Listen
 #                                            --no-stream  no Moonlight (Stream: PC games over Wi-Fi)
 #                                            --no-media   no Kodi (Media)
 #                                            --no-games-boot  keep booting from the card first (Games needs USB first)
@@ -16,7 +17,7 @@ set -euo pipefail
 REPO="nathan-san1981/nate-bloom"
 RAW="https://raw.githubusercontent.com/$REPO/main/box"
 DEB_URL="https://github.com/$REPO/releases/download/pi-latest/NateBloom-pi-arm64.deb"
-MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 STREAM=1 MEDIA=1 GAMESBOOT=1
+MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 YOUTUBE=1 STREAM=1 MEDIA=1 GAMESBOOT=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --chromium) MODE=chromium ;;
@@ -25,6 +26,7 @@ while [ $# -gt 0 ]; do
     --no-reboot) REBOOT=0 ;;
     --4k-kernel) K4=1 ;;
     --no-listen) LISTEN=0 ;;
+    --no-youtube) YOUTUBE=0 ;;
     --no-stream) STREAM=0 ;;
     --no-media) MEDIA=0 ;;
     --no-games-boot) GAMESBOOT=0 ;;
@@ -129,6 +131,16 @@ if [ "$LISTEN" = 1 ]; then
   # the app runs both as the box's user while Listen is open; their own system services stay off
   for u in raspotify.service shairport-sync.service; do sudo systemctl disable --now "$u" >/dev/null 2>&1 || true; done
   sudo systemctl enable --now avahi-daemon.service >/dev/null 2>&1 || true
+  if [ "$YOUTUBE" = 1 ]; then
+    # YouTube / YouTube Music: the box answers the Cast button and plays with mpv + yt-dlp. yt-dlp is the standalone
+    # build in a folder the box's user owns, so the receiver can keep it current itself (yt-dlp -U, once a day)
+    say "Listen: YouTube and YouTube Music casting (mpv + yt-dlp)"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq mpv || warn "mpv didn't install: YouTube casting is off"
+    sudo mkdir -p /opt/nb-box/ytdlp && sudo chown "$BOXUSER:$BOXUSER" /opt/nb-box/ytdlp
+    curl -fsSL -o /opt/nb-box/ytdlp/yt-dlp.part https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux_aarch64 \
+      && chmod 0755 /opt/nb-box/ytdlp/yt-dlp.part && mv /opt/nb-box/ytdlp/yt-dlp.part /opt/nb-box/ytdlp/yt-dlp \
+      || warn "yt-dlp didn't download: YouTube casting is off"
+  fi
 fi
 if [ "$STREAM" = 1 ]; then
   say "Stream: Moonlight (games from your PC over Wi-Fi)"

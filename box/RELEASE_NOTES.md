@@ -8,7 +8,10 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
-**New: Jam along.** Turn on Keep playing in Listen and your phone's Spotify, YouTube (over AirPlay) or other music
+**New: YouTube casting.** Listen now shows up behind the Cast button in YouTube and YouTube Music; the box plays the
+music itself and the phone is the remote. Run the box installer again to add it (mpv and yt-dlp).
+
+**Jam along.** Turn on Keep playing in Listen and your phone's Spotify, YouTube or AirPlay music
 keeps going under Nate Bloom, Keys and game streams, with a chip in the top bar for the level and Stop. Bluetooth
 keyboards that want a pairing code now show it on the screen, and text fields get an on-screen keyboard.
 

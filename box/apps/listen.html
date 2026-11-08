@@ -30,6 +30,8 @@ button { font: inherit; color: inherit; }
 .way b { display: block; font-size: 17px; margin-bottom: 3px; } .way span { font-size: 14px; color: var(--ink2); line-height: 1.4; }
 .way.off { opacity: .4; }
 .note { font-size: 12.5px; color: var(--ink3); line-height: 1.45; margin-top: auto; }
+.state[hidden], .way em[hidden] { display: none; }
+.way em { display: block; font-style: normal; color: var(--ink3); margin-top: 3px; }
 .keep { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: var(--tile2); cursor: pointer; border: 0; text-align: left; width: 100%; color: inherit; font: inherit; }
 .keep b { display: block; font-size: 15px; } .keep span { font-size: 12.5px; color: var(--ink2); line-height: 1.35; }
 .sw { width: 54px; height: 32px; border-radius: 999px; background: #3a3d45; position: relative; flex: none; transition: background .15s; }
@@ -53,9 +55,10 @@ button { font: inherit; color: inherit; }
   </div>
   <div class="card" id="how">
     <div class="way" id="wSp"><span class="ic" style="background:#7fdcae">S</span><div><b>Spotify</b><span>In Spotify, tap the speaker icon under the song, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
-    <div class="way" id="wAp"><span class="ic" style="background:#c9b6ff">A</span><div><b>AirPlay (iPhone)</b><span>Control Center, hold the music player, tap the AirPlay icon, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
-    <button class="keep" id="keep" role="switch" aria-checked="false"><span class="sw"></span><span><b>Keep playing</b><span>in Nate Bloom, Keys, the home screen and game streams. Off: leaving this screen stops the music.</span></span></button>
-    <div class="note">Your phone and the box need to be on the same Wi-Fi. Volume is on the phone (also during a game stream). Sound comes out wherever the box's audio goes now. Media and Games always stop the music.</div>
+    <div class="way" id="wAp"><span class="ic" style="background:#c9b6ff">A</span><div><b>AirPlay (iPhone)</b><span>Control Center › AirPlay icon › <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
+    <div class="way" id="wYt"><span class="ic" style="background:#ff8a80">Y</span><div><b>YouTube &amp; YouTube Music</b><span>Cast icon › <b style="display:inline;font-size:inherit">Nate Bloom Box</b>: the box plays it, the phone is the remote.<em id="ytCode" hidden></em></span></div></div>
+    <button class="keep" id="keep" role="switch" aria-checked="false"><span class="sw"></span><span><b>Keep playing</b><span>in Nate Bloom, Keys, the home screen and game streams.</span></span></button>
+    <div class="note">Phone and box on the same Wi-Fi. Volume is on the phone. Media and Games always stop the music.</div>
   </div>
 </div>
 <script>
@@ -78,6 +81,9 @@ async function tick() {
   if (s) {
     keep = !!s.keep; paintKeep();
     $("#wSp").classList.toggle("off", !s.spotify); $("#wAp").classList.toggle("off", !s.airplay);
+    $("#wYt").hidden = !s.youtube;
+    const yc = $("#ytCode"); yc.hidden = !s.ytCode || !!(s.ytPhones && s.ytPhones.length);
+    if (s.ytCode) yc.textContent = "Not listed? YouTube › Settings › Watch on TV › TV code " + s.ytCode;
     const n = s.now;
     if (n && n.state && n.state !== "idle") {
       $("#song").textContent = n.name || (n.state === "playing" ? "Playing" : n.state === "paused" ? "Paused" : "Connected");
