@@ -260,6 +260,22 @@ def cleanup_results(res, before):
             pass
 
 
+def wait_quiet(max_wait=240):
+    """Baselines only mean something on an idle laptop: wait until Tandem has nothing running here and the CPU has
+    stayed under 15% for 20 seconds (or give up after max_wait and say so)."""
+    t0, calm = time.time(), 0
+    while time.time() - t0 < max_wait:
+        st = state()
+        busy_jobs = [j for j in st["jobs"] if j["state"] in ("running", "queued", "sending", "downloading", "paused")]
+        cpu = st["stats"].get("cpu", 100)
+        calm = calm + 2 if (not busy_jobs and cpu < 15) else 0
+        if calm >= 20:
+            return True
+        time.sleep(2)
+    out("   (the laptop never went quiet; baselines may read slow)")
+    return False
+
+
 def main():
     import fcntl
     global _lock
@@ -300,14 +316,21 @@ def main():
         bsecs = 20 if QUICK else 60
         bclip = WORK / "baseline-clip.mp4"
         make_clip(bclip, bsecs)
-        out(f"   a. {bsecs} s best-quality encode, laptop alone…")
-        snap = done_snapshot()
-        a = run_job([bclip], "mp4", "local", {"quality": "best"}, "baseline encode")
-        cleanup_results(a, snap)
-        base["encode"] = a["secs"] / bsecs
+        runs = []
+        for n in (1, 2):  # twice, keep the faster: one slow run (a background task, a cold start) can't skew it
+            wait_quiet()
+            out(f"   a{n}. {bsecs} s best-quality encode, laptop alone…")
+            snap = done_snapshot()
+            a = run_job([bclip], "mp4", "local", {"quality": "best"}, "baseline encode")
+            cleanup_results(a, snap)
+            runs.append(a["secs"])
+        base["encode"] = min(runs) / bsecs
+        if max(runs) > 1.3 * min(runs):
+            out(f"   note: the two encode baselines differed ({fmt_t(min(runs))} vs {fmt_t(max(runs))}); using the faster")
         bproj = WORK / "baseline.kdenlive"
         make_project(bproj, bclip, bsecs)
         try:
+            wait_quiet()
             out(f"   b. {bsecs} s Kdenlive render, laptop alone…")
             a = run_job([bproj], "krender", "local", {"quality": "good"}, "baseline render")
             (WORK / "baseline.mp4").unlink(missing_ok=True)
@@ -378,6 +401,7 @@ def main():
                 out(f"   failed: {e}")
 
     # ---- 4. all hands: a mixed load big enough to need all three machines at once
+    wait_quiet()
     out("\n4) All hands: a Kdenlive render, a video encode and stems, all at once")
     big = 60 if QUICK else 360
     clip2 = WORK / "teamwork-long.mp4"
@@ -460,6 +484,9 @@ def main():
             for w, d in per.items():
                 out(f"    {w:9} {d['jobs']:3} jobs  busy {d['busy']:3.0f}%  avg {d['avg']:.1f} at once, peak {d['peak']}"
                     f"  paused {d['paused']} s  ({', '.join(d['types'])})")
+            dups = [r for r in ah["track"].values() if "(second copy)" in (r.get("name") or "")]
+            if dups:
+                out(f"  second copies of slow pieces: {len(dups)} started")
             out("  longest jobs")
             for r in slow:
                 out(f"    {int(r['last'] - r['first']):5} s  {r['type']:7} on {r['where']:9} {r['name'][:40]}")
