@@ -40457,6 +40457,7 @@ html.nb-synths .recbanner { display: none !important; }
 .sy-chip2 > button { height: 100%; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; padding: 0 12px 0 16px; }
 .sy-chip2 > button.x { padding: 0 14px 0 6px; color: var(--dim); font-size: 1.1rem; }
 .sy-chip2 small { color: var(--dim); font-weight: 500; font-size: 0.78rem; margin-left: 6px; }
+.sy-paused { height: 56px; border-radius: 16px; border: 2px solid #ffb65c; background: #ffb65c22; color: #ffd59e; font: 700 1.1rem var(--font-body); cursor: pointer; }
 .sy-sec { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .sy-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sy-h b { font: 600 0.8rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
@@ -40515,9 +40516,11 @@ html.nb-synths .recbanner { display: none !important; }
   <span class="sy-chip" id="syKbChip"><i></i><span>No keyboard yet</span></span>
   <div class="sy-mode" id="syMode" role="group" aria-label="What the Yamaha plays" hidden><span>Plays</span><button type="button" data-m="piano">Piano only</button><button type="button" data-m="synth">Synth only</button><button type="button" data-m="both">Both</button></div>
   <span class="sy-sp"></span>
+  <button class="sy-b" id="syTest" title="Plays a chord on the synth: if you hear it, the tablet's sound is fine">🔊 Test sound</button>
   <button class="sy-b sy-rec" id="syRec" title="Record what you play">● Record</button>
   <button class="sy-b" id="syKeysBtn" title="Keys on the screen">Keys on screen</button>
 </div>
+<button class="sy-paused" id="syPaused" hidden>Sound is paused · tap here to turn it back on</button>
 <div class="sy-take" id="syTake" hidden><span class="sy-tk-dot">●</span><span id="syTakeInfo">Recording ready</span><span class="sy-sp"></span><button class="sy-b on" id="syTakePlay">▶ Play</button><button class="sy-b" id="syTakeSave" title="Save it as an MP3 (to Downloads, or share it)">Save</button><button class="sy-b ghost" id="syTakeDel">Delete</button></div>
 <div class="sy-sec"><div class="sy-h"><b>Synth</b><small>tap one to play it · <b class="sy-plusk">+</b> stacks it with what's playing</small></div>
   <div class="sy-tiles" id="syTiles"></div>
@@ -40806,7 +40809,7 @@ html.nb-synths .recbanner { display: none !important; }
       // Piano: the Yamaha's notes and pedal don't reach the synth (other keyboards and the screen still play it)
       { const t0 = window.__midiTap; window.__midiTap = function (e) {
           // the chip's dot flashes on every key from the keyboard: proof the notes are reaching this screen
-          try { if (e && e.data && (e.data[0] & 0xf0) === 0x90 && e.data[2] > 0) { const c = $s("syKbChip"); c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); SY.lastNote = Date.now(); } } catch (er) {}
+          try { if (e && e.data && (e.data[0] & 0xf0) === 0x90 && e.data[2] > 0) { const c = $s("syKbChip"); c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); SY.lastNote = Date.now(); const nm = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"][e.data[1] % 12] + (Math.floor(e.data[1] / 12) - 1); const sp = c.querySelector("span"); sp.textContent = (SY.yamaha ? "Yamaha" : "Keyboard") + " · " + nm; clearTimeout(SY.chipT); SY.chipT = setTimeout(() => paintChip(), 2500); if (!ctx || ctx.state !== "running") paintSound(true); } } catch (er) {}
           try { if (mode === "piano" && SY.piano && e && e.target && e.target.id === SY.piano.id) { const c = e.data[0] & 0xf0; if (c === 0x90 || c === 0x80 || c === 0xb0 || c === 0xe0 || c === 0xd0 || c === 0xa0) return true; } } catch (er) {}
           return t0 ? t0.apply(this, arguments) : false;
         }; }
@@ -40863,6 +40866,24 @@ html.nb-synths .recbanner { display: none !important; }
         $s("syTakeSave").addEventListener("click", () => { const x = $s("takeMp3"); if (x) { x.click(); say("Saving the MP3…"); } });
         $s("syTakeDel").addEventListener("click", () => { const x = $s("takeDiscard"); if (x) x.click(); $s("syTake").hidden = true; });
       }
+
+      // ---- sound check: Test sound plays a chord on whatever synths are playing; a paused sound engine says so ----
+      function paintSound(flash) {
+        const el = $s("syPaused"), st = $s("start"), paused = (!ctx || ctx.state !== "running") && !(st && !st.hidden) && !document.hidden;
+        el.hidden = !paused; if (paused && flash) say("Sound is paused · tap the orange bar");
+      }
+      $s("syPaused").addEventListener("click", () => { try { start(); if (ctx && ctx.resume) ctx.resume().then(() => paintSound(), () => {}); } catch (e) {} setTimeout(paintSound, 400); });
+      setInterval(paintSound, 1000);
+      $s("syTest").addEventListener("click", () => {
+        try { start(); if (ctx && ctx.resume) ctx.resume(); } catch (e) {}
+        setTimeout(() => {
+          try {
+            if (!ctx || ctx.state !== "running") { say("The tablet's sound engine is off · tap the orange bar"); paintSound(); return; }
+            [60, 64, 67].forEach((m, i) => setTimeout(() => { try { noteOn(m); setTimeout(() => { try { noteOff(m); } catch (e) {} }, 900); } catch (e) {} }, i * 60));
+            say("Playing a chord on " + stkItems().map(x => ENGINES[x.id].short || ENGINES[x.id].name).join(" + ") + " · no sound? turn the tablet's volume up");
+          } catch (e) {}
+        }, 120);
+      });
 
       function paintAll(force) { paintTiles(); paintDials(force); paintFx(force); paintChip(); }
       // the base app plays the synths (not samples or drums)
