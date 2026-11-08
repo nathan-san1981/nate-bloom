@@ -52,6 +52,8 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 .sy-chip { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 20px; background: var(--raised); border: 1px solid var(--line); font-size: 0.95rem; }
 .sy-chip i { width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
 .sy-chip.ok i { background: #4ade80; box-shadow: 0 0 8px #4ade8099; }
+.sy-chip.hit i { animation: syHit 0.35s ease-out; }
+@keyframes syHit { 0% { background: #fff; box-shadow: 0 0 14px #fff; transform: scale(1.8); } 100% { } }
 .sy-sp { flex: 1; }
 .sy-b { height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); color: var(--ink); font: 500 1rem var(--font-body); cursor: pointer; white-space: nowrap; }
 .sy-b:active { transform: scale(0.97); }
@@ -348,6 +350,8 @@ html.nb-synths .recbanner { display: none !important; }
       }));
       // Piano: the Yamaha's notes and pedal don't reach the synth (other keyboards and the screen still play it)
       { const t0 = window.__midiTap; window.__midiTap = function (e) {
+          // the chip's dot flashes on every key from the keyboard: proof the notes are reaching this screen
+          try { if (e && e.data && (e.data[0] & 0xf0) === 0x90 && e.data[2] > 0) { const c = $s("syKbChip"); c.classList.remove("hit"); void c.offsetWidth; c.classList.add("hit"); SY.lastNote = Date.now(); } } catch (er) {}
           try { if (mode === "piano" && SY.piano && e && e.target && e.target.id === SY.piano.id) { const c = e.data[0] & 0xf0; if (c === 0x90 || c === 0x80 || c === 0xb0 || c === 0xe0 || c === 0xd0 || c === 0xa0) return true; } } catch (er) {}
           return t0 ? t0.apply(this, arguments) : false;
         }; }
