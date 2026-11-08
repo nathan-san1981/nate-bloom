@@ -7,6 +7,7 @@ Ableton Link; their releases are on the Releases page.
 
 `/synths/` (or `?synths=1`) is **Nate Bloom Synths**: the synths alone on one screen, installed as its own app, for the
 Galaxy Tab on the Yamaha P-225. Big sliders for the sound (tap or slide; ↺ back to default), each effect On or Off,
+synths stacked (+ on a tile; each synth keeps its own sliders; Save this stack keeps it under Saved),
 ● Record (then Play, Save as MP3 or Delete), keys on screen when no keyboard is plugged in. When the Yamaha's USB port appears, every synth goes back to its default sound and chords and scale lock go
 off. *Plays* picks Piano (the synth ignores the Yamaha), Synth (the Yamaha's own sound off, by MIDI Local
 Control, sent again each time it's plugged in) or Piano + Synth; the piano's sound comes back when the page closes. The

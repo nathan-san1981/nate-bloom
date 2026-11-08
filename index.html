@@ -40443,6 +40443,20 @@ html.nb-synths .recbanner { display: none !important; }
 .sy-mode button { height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: transparent; color: var(--ink); font: 600 1rem var(--font-body); cursor: pointer; white-space: nowrap; }
 .sy-mode button[aria-pressed="true"] { background: var(--lilac); color: var(--panel); }
 .sy.pianoonly .sy-sec:not(.sy-kb) { opacity: 0.45; }
+.sy-t { position: relative; }
+.sy-t.on { border-color: color-mix(in srgb, var(--lilac) 55%, var(--line)); }
+.sy-t .sy-pl { position: absolute; top: -8px; right: -8px; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); background: var(--raised); color: var(--ink); font: 700 1.2rem/1 var(--font-body); display: grid; place-items: center; cursor: pointer; z-index: 1; }
+.sy-t.on .sy-pl { background: var(--lilac); color: var(--panel); border-color: var(--lilac); font-size: 1rem; }
+.sy-plusk { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--raised); border: 1px solid var(--line); color: var(--ink); font-size: 0.85rem; text-transform: none !important; letter-spacing: 0 !important; }
+.sy-tiles { padding-top: 6px; }
+.sy-stack, .sy-saved { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sy-stack:empty, .sy-saved:empty { display: none; }
+.sy-lab2 { font: 600 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-right: 2px; }
+.sy-chip2 { display: inline-flex; align-items: center; height: 44px; border-radius: 22px; border: 2px solid var(--line); background: var(--panel); color: var(--ink); font: 600 1rem var(--font-body); overflow: hidden; }
+.sy-chip2.cur { border-color: var(--lilac); background: color-mix(in srgb, var(--lilac) 18%, var(--panel)); }
+.sy-chip2 > button { height: 100%; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; padding: 0 12px 0 16px; }
+.sy-chip2 > button.x { padding: 0 14px 0 6px; color: var(--dim); font-size: 1.1rem; }
+.sy-chip2 small { color: var(--dim); font-weight: 500; font-size: 0.78rem; margin-left: 6px; }
 .sy-sec { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .sy-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sy-h b { font: 600 0.8rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
@@ -40505,8 +40519,12 @@ html.nb-synths .recbanner { display: none !important; }
   <button class="sy-b" id="syKeysBtn" title="Keys on the screen">Keys on screen</button>
 </div>
 <div class="sy-take" id="syTake" hidden><span class="sy-tk-dot">●</span><span id="syTakeInfo">Recording ready</span><span class="sy-sp"></span><button class="sy-b on" id="syTakePlay">▶ Play</button><button class="sy-b" id="syTakeSave" title="Save it as an MP3 (to Downloads, or share it)">Save</button><button class="sy-b ghost" id="syTakeDel">Delete</button></div>
-<div class="sy-sec"><div class="sy-h"><b>Synth</b><em id="syName"></em><small id="syAfter"></small></div><div class="sy-tiles" id="syTiles"></div></div>
-<div class="sy-sec"><div class="sy-h"><b>Sound</b><small>slide or tap · ↺ puts one back</small><span class="sy-sp"></span><button class="sy-b" id="syResetSnd">↺ Default sound</button></div><div class="sy-dials" id="syDials"></div></div>
+<div class="sy-sec"><div class="sy-h"><b>Synth</b><small>tap one to play it · <b class="sy-plusk">+</b> stacks it with what's playing</small></div>
+  <div class="sy-tiles" id="syTiles"></div>
+  <div class="sy-stack" id="syStack"></div>
+  <div class="sy-saved" id="sySaved"></div>
+</div>
+<div class="sy-sec"><div class="sy-h"><b>Sound</b><em id="syName"></em><small id="syAfter"></small><span class="sy-sp"></span><button class="sy-b" id="syResetSnd">↺ Default sound</button></div><div class="sy-dials" id="syDials"></div></div>
 <div class="sy-sec"><div class="sy-h"><b>Effects</b><small>each one On or Off</small><span class="sy-sp"></span><div class="sy-vol"><label for="syVolume">Volume</label><input type="range" id="syVolume" min="0" max="100" step="1"><output id="syVolV"></output></div><button class="sy-b" id="syFxOff">All effects off</button><button class="sy-b" id="syFxReset">↺ Default effects</button></div>
   <div class="sy-dials" id="syFx"></div>
 </div>
@@ -40570,25 +40588,89 @@ html.nb-synths .recbanner { display: none !important; }
       const synthItems = () => { try { return window.__qk.items().filter(q => q.eng && ENGINES[q.eng] && ENGINES[q.eng].knobs); } catch (e) { return []; } };
       const curEng = () => (ENGINES[state.engine] && ENGINES[state.engine].knobs) ? state.engine : null;
       function paramsOf(id) { if (!state.params[id]) state.params[id] = Object.fromEntries(ENGINES[id].knobs.map(([k, , v]) => [k, v])); return state.params[id]; }
+      // ---- stacking: tap a tile = that synth alone; + = add it to (or take it out of) the stack; a stacked synth's
+      // tile, or its chip, picks which one the sliders below change ----
+      const stkItems = () => { try { return window.__stk.items().filter(x => x.t === "syn"); } catch (e) { return []; } };
+      const itemOf = eng => stkItems().find(x => x.id === eng) || null;
+      async function playAlone(q) {
+        try { start(); } catch (e) {}
+        try { allOff(); } catch (e) {}
+        const it0 = itemOf(q.eng);
+        if (!it0) { try { await window.__qk.alone(q); } catch (e) {} }
+        const it = itemOf(q.eng); if (it) { try { window.__stk.only(it); } catch (e) {} }
+        if (state.engine !== q.eng) { state.engine = q.eng; try { renderEngine(); } catch (e) {} }
+        paintAll();
+      }
+      function focusSyn(eng) { const it = itemOf(eng); if (it) { try { window.__stk.focusOn(it); } catch (e) {} } if (state.engine !== eng) { state.engine = eng; try { renderEngine(); } catch (e) {} } paintAll(); }
+      async function stackToggle(q) {
+        try { start(); } catch (e) {}
+        const it = itemOf(q.eng), n = stkItems().length;
+        if (it) { if (n > 1) { try { window.__stk.drop(it); } catch (e) {} } else { say("That's the only one playing"); } }
+        else { try { await window.__qk.toggle(q); } catch (e) {} say(ENGINES[q.eng].name + " added · " + stkItems().map(x => ENGINES[x.id].short || ENGINES[x.id].name).join(" + ")); }
+        paintAll();
+      }
       function paintTiles() {
         const box = $s("syTiles"); box.innerHTML = "";
-        const cur = curEng();
+        const cur = curEng(), on = new Set(stkItems().map(x => x.id)), many = on.size > 1;
         synthItems().forEach(q => {
-          const t = mk("button", "sy-t" + (q.eng === cur ? " cur" : "")); t.type = "button";
+          const playing = on.has(q.eng);
+          const t = mk("div", "sy-t" + (q.eng === cur ? " cur" : "") + (playing ? " on" : "")); t.setAttribute("role", "button"); t.tabIndex = 0;
           t.append(mk("b", "", q.name), mk("small", "", q.sub || ""));
-          t.setAttribute("aria-pressed", String(q.eng === cur)); t.title = ENGINES[q.eng].name;
-          t.addEventListener("click", async () => {
-            try { start(); } catch (e) {}
-            try { allOff(); } catch (e) {}
-            try { await window.__qk.alone(q); } catch (e) {}
-            if (state.engine !== q.eng) { state.engine = q.eng; try { renderEngine(); } catch (e) {} }
-            paintAll();
-          });
-          box.appendChild(t);
+          t.setAttribute("aria-pressed", String(playing)); t.title = ENGINES[q.eng].name + (playing && many ? " · tap to change its sliders" : " · tap to play it alone");
+          t.addEventListener("click", e => { if (e.target.closest(".sy-pl")) return; if (playing && many) focusSyn(q.eng); else playAlone(q); });
+          const pl = mk("button", "sy-pl", playing ? "✓" : "+"); pl.type = "button";
+          pl.title = playing ? (many ? "Take " + ENGINES[q.eng].name + " out of the stack" : ENGINES[q.eng].name + " is playing") : "Stack " + ENGINES[q.eng].name + " with what's playing"; pl.setAttribute("aria-label", pl.title);
+          pl.addEventListener("click", e => { e.stopPropagation(); stackToggle(q); });
+          t.appendChild(pl); box.appendChild(t);
         });
-        const e = cur && ENGINES[cur];
-        $s("syName").textContent = e ? e.name : "Pick a synth";
-        $s("syAfter").textContent = e ? (e.after || "") : "";
+        // the stack: one chip per synth playing (tap = its sliders, ✕ = out), then Save
+        const st = $s("syStack"); st.innerHTML = "";
+        const its = stkItems();
+        if (its.length > 1) {
+          st.appendChild(mk("span", "sy-lab2", "Playing"));
+          its.forEach(it => {
+            const c = mk("span", "sy-chip2" + (it.id === cur ? " cur" : "")), b = mk("button", "", ENGINES[it.id].short || ENGINES[it.id].name); b.type = "button";
+            b.title = "Change " + ENGINES[it.id].name + "'s sliders"; b.addEventListener("click", () => focusSyn(it.id));
+            const x = mk("button", "x", "✕"); x.type = "button"; x.setAttribute("aria-label", "Take " + ENGINES[it.id].name + " out");
+            x.addEventListener("click", () => { try { window.__stk.drop(it); } catch (e) {} paintAll(); });
+            c.append(b, x); st.appendChild(c);
+          });
+          const sv = mk("button", "sy-b", "Save this stack"); sv.type = "button"; sv.title = "Keep this sound (the synths, their sliders) to bring back with one tap";
+          sv.addEventListener("click", saveStack); st.appendChild(sv);
+        }
+        const ce = cur && ENGINES[cur];
+        $s("syName").textContent = ce ? ce.name : "Pick a synth";
+        $s("syAfter").textContent = ce ? (its.length > 1 ? "one of " + its.length + " stacked · its own sliders" : (ce.after || "")) : "";
+        paintSaved();
+      }
+      // ---- saved sounds (Nate Bloom's My sounds): one tap brings a stack back ----
+      function stackName() { return stkItems().map(x => ENGINES[x.id].short || ENGINES[x.id].name).join(" + ") || "My sound"; }
+      function saveStack() {
+        try {
+          let nm = stackName(), k = 2; const names = new Set(mySounds.map(x => x.name)); const base = nm; while (names.has(nm)) nm = base + " " + k++;
+          mySounds.unshift(captureSound(nm)); saveMs(); try { renderMySounds(); } catch (e) {}
+          say("Saved \"" + nm + "\" · it's under Saved"); paintSaved();
+        } catch (e) { say("Couldn't save it"); }
+      }
+      function paintSaved() {
+        const box = $s("sySaved"); box.innerHTML = "";
+        let list = []; try { list = mySounds.filter(x => x && ENGINES[x.engine]); } catch (e) {}
+        if (!list.length) return;
+        box.appendChild(mk("span", "sy-lab2", "Saved"));
+        list.slice(0, 12).forEach(sd => {
+          const c = mk("span", "sy-chip2"), b = mk("button", ""); b.type = "button";
+          b.append(document.createTextNode(sd.name));
+          const parts = Object.keys(sd.layers || {}).filter(k => sd.layers[k] && sd.layers[k].on && ENGINES[k]).map(k => ENGINES[k].short || ENGINES[k].name);
+          if (parts.length && parts.join(" + ") !== sd.name) b.appendChild(mk("small", "", parts.join(" + ")));
+          b.title = "Play " + sd.name; b.addEventListener("click", () => { try { allOff(); } catch (e) {} try { applySound(sd); } catch (e) {} paintAll(true); say(sd.name); });
+          const x = mk("button", "x", "✕"); x.type = "button"; x.setAttribute("aria-label", "Delete " + sd.name);
+          let arm = 0;
+          x.addEventListener("click", () => {
+            if (!arm) { x.textContent = "Sure?"; arm = setTimeout(() => { arm = 0; x.textContent = "✕"; }, 2500); return; }
+            const i = mySounds.indexOf(sd); if (i >= 0) { mySounds.splice(i, 1); saveMs(); try { renderMySounds(); } catch (e) {} } paintSaved();
+          });
+          c.append(b, x); box.appendChild(c);
+        });
       }
       function paintDials(force) {
         const box = $s("syDials"), id = curEng();
