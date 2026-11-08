@@ -129,7 +129,7 @@ p{margin:0 0 .6em;line-height:1.45}
 .kb .fng{position:absolute;top:22%;left:0;right:0;text-align:center;font-weight:800;font-size:clamp(11px,calc(var(--ww)*.45),22px);color:#fff;pointer-events:none;z-index:3}
 .kb .wht.tgt{background:var(--tgt)} .kb .blk.tgt{background:var(--tgt)}
 .kb .wht.tgt .lab{color:#fff}
-.kb .wht.tgt-l,.kb .blk.tgt-l{background:#7a5cff}
+.kb .wht.tgt-l,.kb .blk.tgt-l{background:#e5484d}
 .kb .wht.demo,.kb .blk.demo{background:#7fa7ff}
 .kb .key.down{background:var(--down)!important;filter:brightness(var(--vel,1))}
 .kb .wht.down .lab{color:#fff}
@@ -273,6 +273,41 @@ table.t{border-collapse:collapse;width:100%;font-size:16px} table.t td,table.t t
   .ctrlrow{flex-wrap:nowrap;gap:6px} .lbl-t{display:none}
   .child-home{padding:16px;gap:14px} .ctile{min-height:150px;font-size:21px} .ctile svg{width:64px;height:64px}
 }
+
+/* help tip card: small, top-right, closable */
+.helptip{position:fixed;top:84px;right:16px;z-index:60;width:min(380px,calc(100vw - 32px));background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:14px 16px;font-size:15px;line-height:1.4;animation:tipin .18s ease-out}
+@keyframes tipin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.helptip b{font-size:16px}
+.helptip p{margin:6px 0 0;color:var(--ink2)}
+.helptip .htx{border:0;background:var(--panel2);color:var(--ink);width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;cursor:pointer;flex:none}
+.helptip .hc{margin-top:10px;display:grid;gap:6px;max-height:40vh;overflow:auto}
+.helptip .hc div{color:var(--ink2);font-size:14px;display:grid;grid-template-columns:118px 1fr;gap:8px;align-items:baseline}
+.helptip .hc span{font-weight:600;color:var(--ink)}
+.helptip .hf{margin-top:10px;font-size:13px;color:var(--ink3);gap:8px}
+.helptip .htoff{border:0;background:none;color:var(--accent);padding:0;font-size:13px;cursor:pointer}
+.helpbtn{font-size:20px;font-weight:700}
+@media (max-height:640px) and (min-width:700px){.helptip{top:60px;font-size:14px}}
+
+/* hand guide: see-through hands from above */
+.kb{--hand-r:#2f6fed;--hand-l:#e5484d}
+.handlayer{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;transition:opacity .2s}
+.handlayer.on{opacity:1}
+.handsvg{position:absolute;inset:0;overflow:visible}
+.handsvg path{transition:d .32s cubic-bezier(.3,.8,.3,1)}
+.handsvg .num,.handsvg .tag{transition:transform .32s cubic-bezier(.3,.8,.3,1)}
+.hand-r{--hc:var(--hand-r)} .hand-l{--hc:var(--hand-l)}
+.handsvg .skin{fill:var(--hc);opacity:.26}
+.handsvg .skin .act{opacity:0}
+.handsvg .lines path{fill:none;stroke:var(--hc);stroke-width:1.6;stroke-opacity:.55}
+.handsvg .lines path.act{fill:var(--hc);fill-opacity:.82;stroke:#fff;stroke-width:2.2;stroke-opacity:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.handsvg .nails path{fill:#fff;opacity:.55}
+.handsvg .num circle{fill:#fff;stroke:var(--hc);stroke-width:1.5}
+.handsvg .num text{font:800 12px system-ui,sans-serif;fill:var(--hc)}
+.handsvg .num.act circle{fill:var(--hc);stroke:#fff;stroke-width:2;r:12px}
+.handsvg .num.act text{fill:#fff;font-size:14px}
+.handsvg .tag circle{fill:var(--hc)}
+.handsvg .tag text{font:800 12px system-ui,sans-serif;fill:#fff}
+.kb .key .fng{z-index:6}
 </style>
 </head>
 <body>
@@ -371,6 +406,8 @@ const DEFAULT_SETTINGS = {
   theme: 'system',         // system | light | dark
   hqSamples: false,        // user downloaded high-quality samples
   hints: 'fade',           // fade (after a mistake or pause) | always
+  tips: 'on',              // help cards the first time each step/screen is seen
+  handGuide: 'auto',       // see-through hands on the keys: auto (through Unit 4) | on | off
   touch: {},               // per-keyboard velocity calibration {deviceName: {p, mf, f}}
   musicServer: ''          // Keys Music server (computer) for My music
 };
@@ -1012,7 +1049,7 @@ function kbGeometry(lo, hi, W) {
 
 class KeyboardView {
   constructor(el, opts = {}) {
-    this.el = el; this.opts = Object.assign({ range: [36, 96], labels: 'letters', colors: false, touch: true, fingers: true }, opts);
+    this.el = el; this.opts = Object.assign({ range: [36, 96], labels: 'letters', colors: false, touch: true, fingers: true, hands: false }, opts);
     this.state = {}; this.marks = {}; this.targets = new Map();
     el.classList.add('kb');
     this.build();
@@ -1041,6 +1078,7 @@ class KeyboardView {
       const fg = document.createElement('span'); fg.className = 'fng'; d.appendChild(fg);
       this.el.appendChild(d); this.keyEls[m] = d;
     }
+    if (this.opts.hands) { this.guide = new HandGuide(this); }
     this.layout();
     for (const m in this.state) this.apply(+m);
     this.targets.forEach((f, m) => this.paintTarget(m, f));
@@ -1054,6 +1092,7 @@ class KeyboardView {
       const e = this.keyEls[m]; e.style.left = g.x + 'px'; e.style.width = (g.black ? g.w : g.w - 1) + 'px';
     }
     this.el.style.setProperty('--ww', this.geo.ww + 'px');
+    this.guide && this.guide.relayout();
     Bus.emit('kb:layout', this);
   }
   apply(m) {
@@ -1077,12 +1116,14 @@ class KeyboardView {
     this.targets.forEach((_, m) => this.paintTarget(m, null));
     this.targets = new Map(list.map(t => [t.midi, t]));
     this.targets.forEach((t, m) => this.paintTarget(m, t));
+    this.guide && this.guide.update(list);
   }
   paintTarget(m, t) {
     const e = this.keyEls[m]; if (!e) return;
     e.classList.toggle('tgt', !!t);
     e.classList.toggle('tgt-l', !!t && t.hand === 'L');
-    const f = e.querySelector('.fng'); if (f) f.textContent = t && t.finger && this.opts.fingers ? t.finger : '';
+    // with the hand guide showing, the finger number is on the hand, not repeated on the key
+    const f = e.querySelector('.fng'); if (f) f.textContent = t && t.finger && this.opts.fingers && !(this.guide && HandGuide.wanted()) ? t.finger : '';
   }
   bindTouch() {
     const active = new Map();   // pointerId -> midi
@@ -1104,6 +1145,110 @@ class KeyboardView {
     this.el.addEventListener('contextmenu', e => e.preventDefault());
   }
   destroy() { this.ro.disconnect(); }
+}
+
+/* ===================== hand guide: see-through hands resting on the keys =====================
+   Shows which hand, where all five fingers sit and which finger plays next. The hand position is learned
+   from the fingerings in the music (finger -> key) and filled out along the white keys; the hands slide
+   when the position changes. Appears only together with the key hints. */
+class HandGuide {
+  constructor(kb) {
+    this.kb = kb; this.pos = { R: null, L: null }; this.act = { R: [], L: [] };
+    this.layer = document.createElement('div'); this.layer.className = 'handlayer';
+    this.layer.innerHTML = `<svg class="handsvg" xmlns="http://www.w3.org/2000/svg">${['L', 'R'].map(h => `<g class="hand hand-${h.toLowerCase()}" style="display:none">
+      <g class="skin"><path class="palm"/>${[1, 2, 3, 4, 5].map(f => `<path class="f f${f}"/>`).join('')}</g>
+      <g class="lines">${[1, 2, 3, 4, 5].map(f => `<path class="o o${f}"/>`).join('')}</g>
+      <g class="nails">${[1, 2, 3, 4, 5].map(f => `<path class="n n${f}"/>`).join('')}</g>
+      <g class="nums">${[1, 2, 3, 4, 5].map(f => `<g class="num num${f}"><circle r="10"/><text text-anchor="middle" dy="4">${f}</text></g>`).join('')}</g>
+      <g class="tag"><circle r="11"/><text text-anchor="middle" dy="4">${h}</text></g></g>`).join('')}</svg>`;
+    kb.el.appendChild(this.layer);
+    this.svg = this.layer.querySelector('svg');
+    this.hands = { L: this.layer.querySelector('.hand-l'), R: this.layer.querySelector('.hand-r') };
+  }
+  static stepWhite(m, n) { let x = m; const d = Math.sign(n); let k = Math.abs(n); while (k > 0) { x += d; if (!isBlack(x)) k--; } return x; }
+  /* finger -> midi map for a hand from an anchor (finger f on key m), keeping keys already known */
+  fill(h, known) {
+    const [[f0, m0]] = Object.entries(known).map(([f, m]) => [+f, m]);
+    const map = {};
+    for (let g = 1; g <= 5; g++) map[g] = g === f0 ? m0 : HandGuide.stepWhite(m0, (h === 'R' ? 1 : -1) * (g - f0));   // right: higher finger = higher key; left: lower
+    return map;
+  }
+  update(list) {
+    if (!HandGuide.wanted() || !list.length) { this.hide(); return; }
+    const active = { R: null, L: null };
+    for (const t of list) {
+      const h = t.hand === 'L' ? 'L' : 'R';
+      let f = t.finger || null;
+      const cur = this.pos[h];
+      if (!f && cur) { const hit = Object.entries(cur).find(([, m]) => m === t.midi); if (hit) f = +hit[0]; }
+      if (!f) continue;
+      if (!cur || cur[f] !== t.midi || Object.entries(cur).some(([g, m]) => m === t.midi && +g !== f)) {
+        this.pos[h] = this.fill(h, { [f]: t.midi });              // new hand position
+      }
+      (active[h] ||= []).push(f);
+    }
+    let any = false;
+    for (const h of ['L', 'R']) {
+      const map = this.pos[h], el = this.hands[h];
+      const inUse = list.some(t => (t.hand === 'L' ? 'L' : 'R') === h);
+      if (!map || !inUse) { el.style.display = 'none'; continue; }
+      any = true; el.style.display = '';
+      this.act[h] = active[h] || [];
+      this.place(h, map, this.act[h]);
+    }
+    this.layer.classList.toggle('on', any);
+  }
+  /* draw one hand from above: fingertips on their keys, knuckles drawn in toward the palm, thumb from the side */
+  place(h, map, act) {
+    const g = this.kb.geo; if (!g) return;
+    const W = this.kb.el.clientWidth, H = this.kb.el.clientHeight || 160, el = this.hands[h];
+    this.svg.setAttribute('viewBox', `0 0 ${W} ${H}`); this.svg.setAttribute('width', W); this.svg.setAttribute('height', H);
+    const ww = g.ww, wt = clamp(ww * 0.74, 14, 30);                 // fingertip width
+    const tips = {};
+    for (let f = 1; f <= 5; f++) {
+      const k = g.keys[map[f]]; if (!k) continue;
+      const len = { 1: 0.66, 2: 0.47, 3: 0.42, 4: 0.46, 5: 0.56 }[f];   // fingertip height (fraction of key height): middle finger reaches furthest
+      tips[f] = { x: k.x + k.w / 2, y: H * (k.black ? Math.min(len, 0.4) - 0.06 : len) };
+    }
+    const fs = Object.keys(tips).map(Number); if (fs.length < 2) { el.style.display = 'none'; return; }
+    const xs = fs.map(f => tips[f].x), cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const thumbSide = h === 'R' ? -1 : 1;                             // right thumb on the left, left thumb on the right
+    const knY = H * 0.8, wk = wt * 1.18;
+    const knuckle = f => f === 1 ? { x: tips[1].x - thumbSide * wt * 0.9, y: H * 0.98 } : { x: cx + (tips[f].x - cx) * 0.72, y: knY + (f === 3 ? -2 : f === 5 ? 6 : 0) };
+    const finger = f => {   // tapered finger with a round tip
+      const t = tips[f], k = knuckle(f), r = (f === 1 ? wt * 1.08 : f === 5 ? wt * 0.88 : wt) / 2, rk = (f === 1 ? wk * 1.15 : f === 5 ? wk * 0.9 : wk) / 2;
+      const ang = Math.atan2(t.y - k.y, t.x - k.x), nx = -Math.sin(ang), ny = Math.cos(ang);
+      const a1 = [k.x + nx * rk, k.y + ny * rk], a2 = [t.x + nx * r, t.y + ny * r], b2 = [t.x - nx * r, t.y - ny * r], b1 = [k.x - nx * rk, k.y - ny * rk];
+      return `M${a1} L${a2} A${r} ${r} 0 0 0 ${b2} L${b1} Z`;
+    };
+    const nail = f => { const t = tips[f], r = (f === 5 ? wt * 0.88 : wt) / 2 * 0.62; const k = knuckle(f), ang = Math.atan2(t.y - k.y, t.x - k.x); const c = [t.x + Math.cos(ang) * -r * 0.9, t.y + Math.sin(ang) * -r * 0.9]; return `M${c[0] - r} ${c[1]} a${r} ${r * 1.1} 0 1 0 ${2 * r} 0 a${r} ${r * 1.1} 0 1 0 ${-2 * r} 0`; };
+    // palm: across the knuckles of fingers 2-5, down off the bottom of the keys, widening toward the wrist and taking in the thumb base
+    const k2 = knuckle(2), k5 = knuckle(5), sideIn = h === 'R' ? [k2, k5] : [k5, k2];
+    const L = Math.min(k2.x, k5.x) - wk * 0.7, R = Math.max(k2.x, k5.x) + wk * 0.7, thumbX = knuckle(1).x;
+    const left = h === 'R' ? Math.min(L, thumbX - wk * 0.5) : L, right = h === 'R' ? R : Math.max(R, thumbX + wk * 0.5);
+    const palm = `M${left} ${H + 20} L${left + (h === 'R' ? wk * 0.2 : 0)} ${knY + wk * 0.4} Q${L} ${knY - wk * 0.4} ${L + wk * 0.6} ${knY - wk * 0.45} L${R - wk * 0.6} ${knY - wk * 0.45} Q${R} ${knY - wk * 0.4} ${right - (h === 'L' ? wk * 0.2 : 0)} ${knY + wk * 0.4} L${right} ${H + 20} Z`;
+    const setD = (sel, d) => { const p = el.querySelector(sel); if (!p) return; p.style.d = d ? `path("${d}")` : 'none'; p.style.display = d ? '' : 'none'; };
+    setD('.palm', palm);
+    for (let f = 1; f <= 5; f++) {
+      const ok = !!tips[f], d = ok ? finger(f) : null;
+      setD('.f' + f, d); setD('.o' + f, d); setD('.n' + f, ok ? nail(f) : null);
+      el.querySelector('.o' + f).classList.toggle('act', act.includes(f));
+      el.querySelector('.f' + f).classList.toggle('act', act.includes(f));
+      const num = el.querySelector('.num' + f);
+      if (ok) { num.style.display = ''; num.style.transform = `translate(${tips[f].x}px, ${tips[f].y + wt * 0.95}px)`; num.classList.toggle('act', act.includes(f)); } else num.style.display = 'none';
+    }
+    el.querySelector('.tag').style.transform = `translate(${(L + R) / 2}px, ${H * 0.93}px)`;
+  }
+  hide() { this.layer.classList.remove('on'); for (const h of ['L', 'R']) this.hands[h].style.display = 'none'; }
+  reset() { this.pos = { R: null, L: null }; this.hide(); }
+  relayout() { for (const h of ['L', 'R']) if (this.pos[h] && this.hands[h].style.display !== 'none') this.place(h, this.pos[h], this.act[h]); }
+  /* Settings → Hand guide: auto (through Unit 4) | on | off. Never for child profiles. */
+  static wanted() {
+    const p = State.profile; if (!p || p.type === 'child') return false;
+    const s = State.settings.handGuide || 'auto';
+    if (s === 'off') return false; if (s === 'on') return true;
+    return (typeof currentUnit === 'function' ? currentUnit() : 1) <= 4;
+  }
 }
 
 /* ==== notation.js ==== */
@@ -3396,8 +3541,20 @@ function go(screen, ...args) {
   Session.current && Session.current.stop && Session.current.stop();
   Session.current = null;
   app().innerHTML = '';
+  Help.hide();
   currentCleanup = SCREENS[screen](...args) || null;
   window.scrollTo(0, 0);
+  // screen tips: a ? button in the top bar, and the tip itself the first time
+  const tip = typeof SCREEN_TIPS !== 'undefined' && SCREEN_TIPS[screen];
+  if (tip && State.profile && State.profile.type !== 'child') {
+    const scr = app().lastElementChild, bar = scr && scr.querySelector('.topbar');
+    if (bar && !bar.querySelector('.helpbtn')) {
+      const slot = bar.querySelector('.pillslot');
+      const b = h(Help.helpButton()); slot ? bar.insertBefore(b, slot) : bar.appendChild(b);
+      b.addEventListener('click', e => { e.stopPropagation(); Help.el ? Help.hide() : Help.show(scr, 'screen:' + screen, tip, true); });
+    }
+    setTimeout(() => { if (app().lastElementChild === scr) Help.show(scr, 'screen:' + screen, tip); }, 400);
+  }
 }
 /* in-page dialog (the artifact frame blocks confirm/prompt) */
 function ask(msg, { input = null, ok = 'OK', danger = false } = {}) {
@@ -3719,6 +3876,7 @@ function mountPlayer(cfg) {
       <div class="ctrlrow ctrls"></div>
       <span class="pedal-ind badge hidden">Ped</span>
       ${cfg.extra ? '<button class="btn ghost" data-act="extra">' + esc(cfg.extra.label) + '</button>' : ''}
+      ${State.profile && State.profile.type !== 'child' ? Help.helpButton() : ''}
       <span class="pillslot compact hide-sm"></span>
     </div>
     <div class="pcenter">
@@ -3729,7 +3887,7 @@ function mountPlayer(cfg) {
   </div>`);
   app().appendChild(el);
   const stage = $('.stage', el), fb = $('.feedback', el), actions = $('.actions', el), ctrls = $('.ctrls', el);
-  const kb = new KeyboardView($('.kbx', el), { range: info.range, labels: State.settings.labels });
+  const kb = new KeyboardView($('.kbx', el), { range: info.range, labels: State.settings.labels, hands: true });
   const P = window._P = { cfg, el, stage, fb, actions, ctrls, kb, si: cfg.index, view: 'staff', hands: null, tempo: null, metro: true, loop: null, session: null, scoreView: null, wf: null, strip: null, cleanup: [] };
   // ---- keyboard <-> input ----
   const offNote = Bus.on('note', e => { if (e.type === 'on') kb.press(e.note, e.vel); else kb.release(e.note); });
@@ -3747,6 +3905,7 @@ function mountPlayer(cfg) {
   el.addEventListener('click', e => {
     const a = e.target.closest('[data-act]'); if (!a) return;
     const act = a.dataset.act;
+    if (act === 'help') { Help.el ? Help.hide() : Help.show(P.el, 'step:' + P.cfg.steps[P.si].type, STEP_TIPS[P.cfg.steps[P.si].type] || STEP_TIPS.custom, true); return; }
     if (act === 'back') { stopSession(P); cfg.onBack(); }
     else if (act === 'extra') { stopSession(P); cfg.extra.run(); }
     else if (act === 'step') { stopSession(P); P.si = +a.dataset.i; renderStep(P); }
@@ -3754,6 +3913,7 @@ function mountPlayer(cfg) {
   });
   renderStep(P);
   return () => {
+    Help.hide();
     stopSession(P); offNote(); offDemo(); offWrong(); offPed(); offSetup(); offLost(); offPill();
     P.cleanup.forEach(f => f()); kb.destroy(); P.scoreView && P.scoreView.destroy(); P.wf && P.wf.destroy();
     document.removeEventListener('visibilitychange', visWL); wl && wl.release && wl.release().catch(() => { });
@@ -3778,11 +3938,13 @@ function renderStep(P) {
   P.wf && P.wf.destroy(); P.wf = null; P.strip = null;
   P.stage.innerHTML = ''; P.stage.className = 'stage'; P.ctrls.innerHTML = ''; setFeedback(P, ''); P.handlers = {};
   $('.pcenter', P.el).classList.remove('wfmode');
-  P.kb.clear('ok'); P.kb.clear('tgt');
+  P.kb.clear('ok'); P.kb.clear('tgt'); P.kb.guide && P.kb.guide.reset();
   renderStepper(P);
   const step = P.cfg.steps[P.si];
   const run = STEP_RENDER[step.type] || STEP_RENDER.custom;
   run(P, step);
+  Help.hide();
+  setTimeout(() => { if (P.cfg.steps[P.si] === step && !(P.session && P.session.running)) Help.show(P.el, 'step:' + step.type, STEP_TIPS[step.type] || STEP_TIPS.custom); }, 350);
 }
 function nextStep(P) { if (P.si < P.cfg.steps.length - 1) { P.si++; renderStep(P); } else P.cfg.onBack(); }
 
@@ -3820,6 +3982,7 @@ function mountScoreStage(P, score, opts = {}) {
 }
 /* start a Session wired to the current stage */
 function startSession(P, score, o) {
+  Help.hide();
   stopSession(P);
   P.kb.clear('ok');
   P.scoreView && P.scoreView.clearColors(); P.wf && P.wf.clear(); P.strip && P.strip.reset();
@@ -3859,6 +4022,7 @@ function mountControls(P, { hands = true, tempo = true, metro = true, view = tru
   if (metro) parts.push(`<button class="iconbtn" data-act="metro" title="Metronome" style="${P.metro ? 'color:var(--accent)' : 'opacity:.45'}">${ICONS.metro}</button>`);
   if (view) parts.push(`<div class="seg">${views.map(v => `<button data-act="view" data-v="${v}" class="${P.view === v ? 'on' : ''}">${{ staff: 'Staff', waterfall: 'Falling', letters: 'Letters' }[v]}</button>`).join('')}</div>`);
   if (P.duetAvail) parts.push(`<button class="btn ${P.duet ? 'primary' : 'ghost'}" data-act="duet" title="The app plays a teacher part with you">Duet</button>`);
+  if (!P.noHints) parts.push(`<button class="btn ghost handbtn ${HandGuide.wanted() ? 'on' : ''}" data-act="handg" title="Hand guide: see-through hands on the keys" style="padding:0 12px">${HandGuide.wanted() ? 'Hands on' : 'Hands'}</button>`);
   if (tempo && !P.noHints) parts.push(`<button class="btn ghost hintbtn" data-act="hints" title="Keyboard hints: when stuck / always" style="padding:0 12px">${State.settings.hints === 'always' ? 'Hints on' : 'Hints'}</button>`);
   P.ctrls.innerHTML = parts.join('') + extra;
   const sel = $('[data-keysel]', P.ctrls); if (sel) sel.addEventListener('change', () => P.cfg.keys.onPick(sel.value));
@@ -3871,6 +4035,7 @@ function bindCommon(P, rerender) {
     metro: a => { P.metro = !P.metro; a.style.cssText = P.metro ? 'color:var(--accent)' : 'opacity:.45'; },
     view: a => { P.view = a.dataset.v; rerender(); },
     hints: a => { State.settings.hints = State.settings.hints === 'always' ? 'fade' : 'always'; State.save(); a.textContent = State.settings.hints === 'always' ? 'Hints on' : 'Hints'; toast(State.settings.hints === 'always' ? 'Key hints stay on' : 'Key hints appear after a mistake or a pause'); },
+    handg: a => { const on = !HandGuide.wanted(); State.settings.handGuide = on ? 'on' : 'off'; State.save(); a.textContent = on ? 'Hands on' : 'Hands'; a.classList.toggle('on', on); P.kb.setTargets([...P.kb.targets.values()]); /* repaint: hands, or finger numbers back on the keys */ toast(on ? 'Hand guide on: hands show with the key hints' : 'Hand guide off'); },
     duet: a => { P.duet = !P.duet; a.classList.toggle('primary', P.duet); a.classList.toggle('ghost', !P.duet); }
   });
 }
@@ -4489,6 +4654,8 @@ SCREENS.settings = (back = 'home') => {
         <div class="field"><div class="lbl">Demo and accompaniment sound<div class="h">Through the piano uses the Yamaha's own sound over MIDI</div></div>${seg('demoOut', [['tablet', BOX ? 'Box' : 'Tablet'], ['piano', 'Piano']])}</div>
         <div class="field"><div class="lbl">Keyboard size</div>${seg('kbSize', [['auto', 'Auto'], ['25', '25'], ['61', '61'], ['88', '88']])}</div>
         <div class="field"><div class="lbl">Key labels</div>${seg('labels', [['none', 'None'], ['letters', 'Letters'], ['octave', 'Letters + octave']])}</div>
+        <div class="field"><div class="lbl">Tips<div class="h">A small box explaining each step and its buttons, the first time you see it. The ? button shows it any time.</div></div>${seg('tips', [['on', 'On'], ['off', 'Off']])}</div>
+        <div class="field"><div class="lbl">Hand guide<div class="h">See-through hands on the keys: which hand, where each finger sits, and the finger to use next. Shows together with the key hints. Auto = through Unit 4.</div></div>${seg('handGuide', [['auto', 'Auto'], ['on', 'On'], ['off', 'Off']])}</div>
         <div class="field"><div class="lbl">Keyboard hints in drills<div class="h">When stuck = the next keys light up after a mistake or a pause. Learning to read without them is the point.</div></div>${seg('hints', [['fade', 'When stuck'], ['always', 'Always']])}</div>
         <div class="field"><div class="lbl">Touch calibration<div class="h">${(s.touch || {})[Midi.deviceName || 'none'] ? 'Calibrated for this keyboard' : 'Not calibrated for this keyboard — dynamics use standard levels'}</div></div><button class="btn" data-touch>Calibrate (20 s)</button></div>
       </div>
@@ -4518,7 +4685,7 @@ SCREENS.settings = (back = 'home') => {
   el.addEventListener('click', async e => {
     if (e.target.closest('[data-back]')) return go(back === 'profiles' || !State.profile ? 'profiles' : State.profile.type === 'child' ? 'childHome' : 'home');
     const sb = e.target.closest('.seg[data-k] button');
-    if (sb) { const k = sb.parentElement.dataset.k; s[k] = sb.dataset.v; State.save(); $$('button', sb.parentElement).forEach(b => b.classList.toggle('on', b === sb)); applyTheme(); Bus.emit('midi:status'); return; }
+    if (sb) { const k = sb.parentElement.dataset.k; s[k] = sb.dataset.v; if (k === 'tips' && s[k] === 'on' && State.profile) State.profile.tipsSeen = {}; State.save(); $$('button', sb.parentElement).forEach(b => b.classList.toggle('on', b === sb)); applyTheme(); Bus.emit('midi:status'); return; }
     if (e.target.closest('[data-touch]')) return go('touchCalib');
     if (e.target.closest('[data-hq]')) {
       const b = e.target.closest('[data-hq]'); b.disabled = true;
@@ -4590,6 +4757,78 @@ function applyTheme() {
   document.documentElement.classList.toggle('dark', dark);
   $('meta[name=theme-color]').content = dark ? '#121316' : '#f6f5f2';
 }
+
+/* ==== help.js ==== */
+'use strict';
+/* ===================== Help: small, closable tip cards =====================
+   Each step and screen has a short explanation plus what the buttons on screen do. A tip shows by itself
+   only the first time; the ? button brings it back. Adults only (child profiles never see tips). */
+const STEP_TIPS = {
+  concept: ['Concept', 'The idea for this lesson, in a few words. Listen plays the example so you hear it before you read more.'],
+  demo: ['Demo', 'The app plays the music while the keys light up. Watch, listen, then hum it back once before you play.'],
+  guided: ['Guided', 'Play at your own speed: the music waits for the right notes, and the keys show you where to go.'],
+  practice: ['Practice', 'Three short new pieces using today\'s skill, plus one from an earlier lesson. The keys light up only if you get stuck. Not scored.'],
+  drill: ['Drill', 'The real test. The music keeps time, and every run is new music. It starts slower and speeds up as you play cleanly. Two clean runs at full speed pass it.'],
+  apply: ['Apply', 'A short piece that uses the skill. In early units, Duet adds a teacher part played by the app.'],
+  gate: ['Check', 'What you still need to pass this lesson. Lessons come back for review after 1, 3, 7, 21 and 60 days.'],
+  piece: ['Piece', 'Learn a full piece. Use Wait while learning notes, then Flow to play in time. Loop a hard spot until it\'s easy.'],
+  sight: ['Sight-reading', 'New music you\'ve never seen. Keep going no matter what: the score is how well you keep the beat, not every note.'],
+  tap: ['Rhythm tap', 'Tap the rhythm on any key with the click. Only timing counts. New rhythm each time.'],
+  earday: ['Ear', 'Listen and answer by ear. A minute and a half, twice a week.'],
+  custom: ['Lesson step', 'Follow the instructions on screen.']
+};
+const CONTROL_TIPS = [
+  ['[data-act=hands]', 'R / L / Both', 'Which hand you play. The app plays the other hand.'],
+  ['[data-act="tempo+"]', '− ♩ +', 'Slower or faster. Slow and clean beats fast and messy.'],
+  ['[data-act=metro]', 'Metronome', 'Turns the click on or off.'],
+  ['[data-act=view]', 'Staff / Falling', 'Sheet music, or notes falling onto the keys.'],
+  ['[data-act=handg]', 'Hands', 'See-through hands on the keys: which hand, where each finger sits, the finger to use next.'],
+  ['[data-act=hints]', 'Hints', 'When stuck: keys light up after a mistake or a pause. On: always lit.'],
+  ['[data-act=duet]', 'Duet', 'The app plays a teacher part with you.'],
+  ['[data-act=mode]', 'Wait / Flow', 'Wait: the music waits for you. Flow: it keeps time.'],
+  ['[data-act=loop]', 'Loop', 'Repeat a few bars until they\'re easy.'],
+  ['[data-act=chords]', 'Chords', 'The app plays the tune; you play the chord symbols.'],
+  ['[data-act=extra]', 'Adjust', 'Change key, octave or simplify this song.'],
+  ['[data-act=figplay]', 'Listen', 'Hear the example.'],
+  ['[data-act=loopbars]', 'Loop those bars', 'Practise just the bars that went wrong.'],
+  ['[data-act=hearself]', 'Hear yourself', 'Plays back exactly what you just played.'],
+  ['[data-act=easier]', 'Easier version', 'Slower, one hand at a time. Not counted.'],
+  ['.pedal-ind', 'Ped', 'Lights up while the sustain pedal is down.']
+];
+const SCREEN_TIPS = {
+  home: ['Home', 'Today\'s practice is a 15–20 minute plan: tap the first item and go down the list. My music holds songs from the computer or this tablet. Pieces, Sight-reading and Progress are the buttons further down.'],
+  addMusic: ['Add music', 'Songs on the computer: anything in the Piano Music folder appears here by itself. A file on this tablet: pick a MusicXML or MIDI file.'],
+  adjustMusic: ['Adjust', 'Key moves the song up or down. Octave fits it on the keyboard. Melody only and Easy left hand make it simpler. The preview updates as you go.'],
+  noteSpeed: ['Note speed', 'One note at a time on the staff: play it as fast as you can. 60 seconds, against your own best.'],
+  sightHub: ['Sight-reading', 'Daily fresh reading. Level up after good runs on five different days.'],
+  touchCalib: ['Touch calibration', 'Play soft, medium and loud so dynamics are judged against your own touch on this keyboard.']
+};
+const Help = {
+  el: null,
+  enabled() { const p = State.profile, t = State.settings.tips; return !!(p && p.type !== 'child' && t !== false && t !== 'off'); },
+  seen(k) { const p = State.profile; return !!(p && (p.tipsSeen || {})[k]); },
+  mark(k) { const p = State.profile; if (p) { (p.tipsSeen ||= {})[k] = 1; State.save(); } },
+  hide() { if (this.el) { this.el.remove(); this.el = null; } },
+  /* show the tip for key k inside root; force = opened with the ? button */
+  show(root, k, tip, force = false) {
+    this.hide();
+    if (!tip || (!force && (!this.enabled() || this.seen(k)))) return;
+    this.mark(k);
+    const ctrls = CONTROL_TIPS.filter(([sel]) => { const n = root.querySelector(sel); return n && n.offsetParent !== null; });
+    const card = h(`<div class="helptip" role="dialog" aria-label="${esc(tip[0])} help">
+      <div class="row" style="align-items:flex-start;gap:8px"><b style="flex:1">${esc(tip[0])}</b><button class="htx" aria-label="Close">×</button></div>
+      <p>${esc(tip[1])}</p>
+      ${ctrls.length ? `<div class="hc">${ctrls.map(([, a, b]) => `<div><span>${esc(a)}</span>${esc(b)}</div>`).join('')}</div>` : ''}
+      <div class="row hf"><button class="htoff">Turn off tips</button><span class="spacer"></span><span>? brings this back</span></div>
+    </div>`);
+    card.addEventListener('click', e => {
+      if (e.target.closest('.htx')) this.hide();
+      if (e.target.closest('.htoff')) { State.settings.tips = 'off'; State.save(); this.hide(); toast('Tips off. Turn them back on in Settings.'); }
+    });
+    root.appendChild(card); this.el = card;
+  },
+  helpButton() { return `<button class="iconbtn helpbtn" data-act="help" aria-label="What does this do?" title="What does this do?">?</button>`; }
+};
 
 /* ==== practice.js ==== */
 'use strict';
