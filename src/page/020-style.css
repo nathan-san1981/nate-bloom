@@ -3689,3 +3689,8 @@ html.nb-box .bx-sheet, html.nb-box .bx-sheet * { cursor: default; }
 .bx-off.holding { background: #ff8fab; color: #1a1426; }
 .bx-note { margin: 0; font-size: 0.8rem; opacity: 0.6; line-height: 1.4; }
 /*@end*/
+/* the big knob in Play: the sound's name, large, while you turn (899j) */
+.pk-flash { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(0.96); z-index: 70; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 34px; border-radius: 20px; background: rgba(19, 17, 27, 0.92); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.12s ease, transform 0.12s ease; max-width: 80vw; }
+.pk-flash.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.pk-flash b { font-family: var(--font-display); font-size: 2.6rem; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 76vw; }
+.pk-flash small { font-size: 0.95rem; opacity: 0.7; }
