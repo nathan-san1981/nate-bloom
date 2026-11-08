@@ -14,7 +14,7 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.pathname.includes("/lite/") || url.pathname.includes("/brogue/") || url.pathname.includes("/stage/")) return;   // Nate Bloom Lite and Brogue have their own offline caches; Stage (the Pixelbook) is always fetched fresh
+  if (url.pathname.includes("/lite/") || url.pathname.includes("/brogue/") || url.pathname.includes("/stage/") || url.pathname.includes("/keys/")) return;   // Nate Bloom Lite, Brogue and Keys (the piano teacher) have their own offline caches; Stage (the Pixelbook) is always fetched fresh
   const sameOrigin = url.origin === self.location.origin;
   const isLibrary = url.hostname === "surikov.github.io" || (sameOrigin && url.pathname.includes("/snd/"));
   const isAppPage = sameOrigin && /\/(index\.html)?$/.test(url.pathname);
