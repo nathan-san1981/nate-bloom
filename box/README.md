@@ -61,7 +61,9 @@ Chromium kiosk.
   USB cable is the only sound output. The original is kept as `config.txt.before-nb-box`.
 - Sound: PipeWire fixed at 48 kHz with 256-frame buffers, a USB output always preferred and never suspended,
   real-time limits for the `audio` group.
-- Steadiness: CPU governor `performance`, the journal in memory, Wi-Fi power saving off, printing/modem/apt timers off.
+- Steadiness: CPU governor `performance`, the journal in memory, Wi-Fi power saving off, printing/modem/apt timers off;
+  on the kernel command line `usbcore.autosuspend=-1` (the headphone adapter and controller never doze) and
+  `threadirqs`. The native synth engine gets three threads (`NB_ENG_THREADS=3` in `session.sh`).
 - Start-up: `nb-box.service` runs `cage` on tty1 as your user; `nb-box-helper` (allowed by `/etc/sudoers.d/nb-box`,
   nothing else) does the few root jobs Box… needs.
 
@@ -73,4 +75,5 @@ Chromium kiosk.
 | Black screen | `journalctl -u nb-box -b` over SSH; check the ribbon is in DISP 1 (or reinstall with `--dsi0`) |
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |
 | Clicks or dropouts | ⚡ low power showing? Use the 45 W supply. Otherwise Settings › App › sound buffer: Steady |
+| App closes right after starting (screen flashes back) | rerun the installer with `--4k-kernel` (the Pi 5's default kernel uses 16 KB memory pages) |
 | Want the desktop back | `sudo systemctl disable nb-box && sudo systemctl enable getty@tty1 && sudo reboot` |

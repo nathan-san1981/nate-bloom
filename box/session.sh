@@ -15,6 +15,9 @@ done
 [ -n "$OUT" ] && wlr-randr --output "$OUT" --transform "$ROTATE" || true
 
 export NB_BOX=1
+# the native synth engine: its own thread plus two workers on the Pi 5's four cores (the desktop default leaves three
+# cores to other programs; the box has none). The fourth core keeps the browser's audio thread and the screen.
+export NB_ENG_THREADS="${NB_ENG_THREADS:-3}"
 if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
   exec nate-bloom --box --ozone-platform=wayland --force-device-scale-factor="$SCALE"
 fi

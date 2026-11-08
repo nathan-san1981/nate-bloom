@@ -5,19 +5,21 @@
 #                                            --dsi0       the screen's ribbon is in the Pi's port 0 (default: port 1)
 #                                            --rotate N   90 (default) or 270, whichever way the screen sits in the case
 #                                            --no-reboot  don't reboot at the end
+#                                            --4k-kernel  the 4 KB-page kernel (only if the app won't start on the Pi 5's default 16 KB one)
 # Safe to run again: every file it writes is replaced, every config.txt line sits in one marked block.
 set -euo pipefail
 
 REPO="nathan-san1981/nate-bloom"
 RAW="https://raw.githubusercontent.com/$REPO/main/box"
 DEB_URL="https://github.com/$REPO/releases/download/pi-latest/NateBloom-pi-arm64.deb"
-MODE=app DSI=1 ROTATE=90 REBOOT=1
+MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --chromium) MODE=chromium ;;
     --dsi0) DSI=0 ;;
     --rotate) shift; ROTATE="${1:-90}" ;;
     --no-reboot) REBOOT=0 ;;
+    --4k-kernel) K4=1 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
@@ -109,8 +111,14 @@ sudo tee -a "$CFG" >/dev/null <<EOF
 $OVL
 usb_max_current_enable=1
 disable_splash=1
+$([ "$K4" = 1 ] && echo "kernel=kernel8.img")
 # <<< nb-box
 EOF
+# kernel command line: USB devices never autosuspend (no lost first note or click from the headphone adapter or the
+# controller waking up), interrupts in threads so the audio threads can outrank them
+CMD=/boot/firmware/cmdline.txt; [ -f "$CMD" ] || CMD=/boot/cmdline.txt
+sudo cp -n "$CMD" "$CMD.before-nb-box" 2>/dev/null || true
+for opt in usbcore.autosuspend=-1 threadirqs; do grep -qw -- "$opt" "$CMD" || sudo sed -i "1 s/\$/ $opt/" "$CMD"; done
 
 say "Tuning: CPU at full speed, logs in memory, Wi-Fi without power saving, idle services off"
 sudo mkdir -p /etc/systemd/journald.conf.d /etc/NetworkManager/conf.d
