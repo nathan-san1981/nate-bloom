@@ -40830,12 +40830,12 @@ html.nb-synths .recbanner { display: none !important; }
       // ---- the Yamaha ----
       function outsFor(inp) {
         if (!md.access) return [];
-        const nm = (inp && inp.name) || "";
-        const all = [...md.access.outputs.values()].filter(o => o.state !== "disconnected" && isYamaha(o));
-        const same = all.filter(o => o.name === nm); return same.length ? same : all;
+        const nm = (inp && inp.name) || "", live = [...md.access.outputs.values()].filter(o => o.state !== "disconnected" && !(typeof mdOwnPort === "function" && mdOwnPort(o)));
+        const same = live.filter(o => o.name === nm); if (same.length) return same;
+        const y = live.filter(isYamaha); return y.length ? y : live.filter(o => !/through|thru|midi through/i.test(o.name || ""));
       }
       function sendLocal(onv) {
-        const outs = outsFor(SY.yamaha); if (!outs.length) return false;
+        const outs = outsFor(SY.piano); if (!outs.length) return false;
         outs.forEach(o => { try { for (let ch = 0; ch < 16; ch++) o.send([0xb0 | ch, 122, onv ? 127 : 0]); } catch (e) {} });
         try { if (onv) localStorage.removeItem("nb-local-off"); else localStorage.setItem("nb-local-off", "1"); } catch (e) {}
         return true;
@@ -40846,9 +40846,9 @@ html.nb-synths .recbanner { display: none !important; }
       let mode = "both"; try { const m = localStorage.getItem("nb-synths-mode"); if (["piano", "synth", "both"].includes(m)) mode = m; } catch (e) {}
       SY.mode = () => mode;
       function paintMode() {
-        const g = $s("syMode"); g.hidden = !SY.yamaha;
+        const g = $s("syMode"); g.hidden = !SY.piano;
         g.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === mode)));
-        root.classList.toggle("pianoonly", !!SY.yamaha && mode === "piano");
+        root.classList.toggle("pianoonly", !!SY.piano && mode === "piano");
       }
       function applyMode(quiet) {
         const wantLocal = mode !== "synth";
@@ -40864,7 +40864,7 @@ html.nb-synths .recbanner { display: none !important; }
       }));
       // Piano: the Yamaha's notes and pedal don't reach the synth (other keyboards and the screen still play it)
       { const t0 = window.__midiTap; window.__midiTap = function (e) {
-          try { if (mode === "piano" && SY.yamaha && e && e.target && e.target.id === SY.yamaha.id) { const c = e.data[0] & 0xf0; if (c === 0x90 || c === 0x80 || c === 0xb0 || c === 0xe0 || c === 0xd0 || c === 0xa0) return true; } } catch (er) {}
+          try { if (mode === "piano" && SY.piano && e && e.target && e.target.id === SY.piano.id) { const c = e.data[0] & 0xf0; if (c === 0x90 || c === 0x80 || c === 0xb0 || c === 0xe0 || c === 0xd0 || c === 0xa0) return true; } } catch (er) {}
           return t0 ? t0.apply(this, arguments) : false;
         }; }
       function paintLocal() { paintMode(); }
@@ -40873,10 +40873,10 @@ html.nb-synths .recbanner { display: none !important; }
       window.addEventListener("pagehide", () => { if (SY.localOff) sendLocal(true); });
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) { if (SY.localOff) { sendLocal(true); SY.localOff = false; } }
-        else if (SY.yamaha && mode === "synth") setTimeout(() => applyMode(true), 200);
+        else if (SY.piano && mode === "synth") setTimeout(() => applyMode(true), 200);
       });
       function paintChip() {
-        const c = $s("syKbChip"); c.classList.toggle("ok", !!SY.yamaha);
+        const c = $s("syKbChip"); c.classList.toggle("ok", !!SY.piano);
         c.querySelector("span").textContent = SY.yamaha ? "Yamaha connected" : SY.other ? SY.other + " connected" : (md.access ? "Plug in the Yamaha (USB)" : "Tap to connect the keyboard");
         paintLocal();
       }
@@ -40885,6 +40885,8 @@ html.nb-synths .recbanner { display: none !important; }
         const ins = [...md.access.inputs.values()].filter(i => i.state !== "disconnected" && !(typeof mdOwnPort === "function" && mdOwnPort(i)));
         const y = ins.find(isYamaha) || null;
         SY.other = !y && ins.length ? (ins[0].name || "A keyboard") : "";
+        const wasP = SY.piano; SY.piano = y || ins.find(i => !/through|thru/i.test(i.name || "")) || null;
+        if (SY.piano && !y && (!wasP || wasP.id !== SY.piano.id)) { SY.localOff = false; setTimeout(() => applyMode(true), 300); }
         const was = SY.yamaha; SY.yamaha = y;
         if (y && (!was || was.id !== y.id)) {
           yamahaDefaults();
