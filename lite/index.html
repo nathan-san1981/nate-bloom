@@ -40517,8 +40517,8 @@ body.nbosk-up{--nbosk-h:0px}`;
   }
   // ======================================================================
   // (synths) Nate Bloom Synths: the synths alone, for the Galaxy Tab S10 FE+ on the Yamaha P-225. Opened with ?synths=1
-  // (the short link synths/ and its own install, "Synths"). One screen: pick a synth, big dials for its sound, the
-  // effects each with an On/Off, Volume, and keys on screen for when the piano isn't plugged in. When the Yamaha's USB
+  // (the short link synths/ and its own install, "Synths"). One screen: pick a synth, big sliders for its sound, the
+  // effects each with an On/Off, Volume, ● Record (Play / Save MP3 / Delete), and keys on screen for when the piano isn't plugged in. When the Yamaha's USB
   // port shows up, every synth goes back to its default sound (once each time it's plugged in) and chords and scale
   // lock go off, so the piano plays plain notes. The Yamaha's own piano sound is left alone unless "Piano sound" is
   // tapped (MIDI Local Control). Off ?synths=1 none of this exists; the Box (?box=1) never sees it.
@@ -40556,6 +40556,12 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 .sy-b:active { transform: scale(0.97); }
 .sy-b.on { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
 .sy-b.ghost { background: transparent; color: var(--dim); }
+.sy-rec { color: #ff6b6b; border-color: #ff6b6b66; font-weight: 600; min-width: 132px; }
+.sy-rec.live { background: #e5484d; color: #fff; border-color: #e5484d; animation: syPulse 1.2s ease-in-out infinite; }
+@keyframes syPulse { 50% { box-shadow: 0 0 0 6px #e5484d33; } }
+.sy-take { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--raised); border: 1px solid #e5484d66; border-radius: 16px; padding: 8px 12px; font-size: 1rem; }
+.sy-take .sy-tk-dot { color: #e5484d; }
+html.nb-synths .recbanner { display: none !important; }
 .sy-sec { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .sy-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sy-h b { font: 600 0.8rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
@@ -40566,29 +40572,34 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 .sy-t b { font: 500 1.05rem var(--font-display); }
 .sy-t small { font-size: 0.72rem; color: var(--dim); }
 .sy-t.cur { border-color: var(--lilac); background: color-mix(in srgb, var(--lilac) 18%, var(--panel)); }
-.sy-dials { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px 8px; justify-items: center; }
-.sy-d { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 120px; touch-action: none; }
-.sy-d svg { width: 92px; height: 92px; cursor: grab; touch-action: none; }
-.sy-d.drag svg { cursor: grabbing; }
-.sy-d .sy-trk { fill: none; stroke: var(--line); stroke-width: 10; stroke-linecap: round; }
-.sy-d .sy-val { fill: none; stroke: var(--lilac); stroke-width: 10; stroke-linecap: round; }
-.sy-d .sy-cap { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
-.sy-d .sy-ptr { stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
-.sy-d.off .sy-val { stroke: var(--dim); opacity: 0.35; }
-.sy-d.off .sy-ptr { stroke: var(--dim); }
-.sy-d .sy-nm { font: 600 1rem var(--font-body); }
-.sy-d .sy-vv { font: 500 0.85rem var(--font-mono); color: var(--dim); min-height: 1.1em; }
-.sy-d .sy-row { display: flex; gap: 6px; align-items: center; justify-content: center; height: 34px; }
-.sy-d .sy-pill { height: 34px; min-width: 64px; padding: 0 12px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); font: 600 0.9rem var(--font-body); cursor: pointer; }
+.sy-dials { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 4px 28px; }
+.sy-d { display: grid; grid-template-columns: 112px minmax(0, 1fr) 76px; align-items: center; gap: 12px; height: 60px; }
+.sy-d .sy-lab { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sy-d .sy-nm { font: 600 1.05rem var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sy-d .sy-vv { font: 500 0.85rem var(--font-mono); color: var(--dim); }
+.sy-d .sy-sl { position: relative; height: 60px; touch-action: pan-y; cursor: pointer; outline: none; }
+.sy-d .sy-sl:focus-visible .sy-th { box-shadow: 0 0 0 4px color-mix(in srgb, var(--lilac) 45%, transparent); }
+.sy-d .sy-tk { position: absolute; left: 18px; right: 18px; top: 50%; height: 14px; margin-top: -7px; border-radius: 7px; background: var(--line); }
+.sy-d .sy-fl { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 7px; background: var(--lilac); }
+.sy-d .sy-th { position: absolute; top: 50%; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; background: var(--ink); border: 3px solid var(--lilac); box-shadow: 0 2px 8px #0008; transition: transform 0.08s; }
+.sy-d.drag .sy-th { transform: scale(1.15); }
+.sy-d .sy-dt { position: absolute; top: 50%; width: 2px; height: 22px; margin: -11px 0 0 -1px; background: var(--dim); opacity: 0.6; border-radius: 1px; }
+.sy-d.off .sy-fl { background: var(--dim); opacity: 0.35; }
+.sy-d.off .sy-th { border-color: var(--dim); background: var(--raised); }
+.sy-d.off .sy-nm { color: var(--dim); }
+.sy-d .sy-row { display: flex; justify-content: flex-end; }
+.sy-d .sy-pill { height: 40px; width: 72px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); color: var(--dim); font: 600 0.95rem var(--font-body); cursor: pointer; }
 .sy-d .sy-pill.on { background: var(--lilac); color: var(--panel); border-color: var(--lilac); }
-.sy-d .sy-rs { height: 34px; width: 40px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 1.05rem; cursor: pointer; }
+.sy-d .sy-rs { height: 40px; width: 48px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 1.15rem; cursor: pointer; }
 .sy-d .sy-rs.gone { visibility: hidden; }
 .sy-vol { display: flex; align-items: center; gap: 10px; flex: 1 1 260px; max-width: 420px; }
 .sy-vol label { font: 600 1rem var(--font-body); }
-.sy-vol input { flex: 1; height: 44px; accent-color: var(--lilac); }
+.sy-vol input { flex: 1; height: 44px; -webkit-appearance: none; appearance: none; background: transparent; touch-action: pan-y; }
+.sy-vol input::-webkit-slider-runnable-track { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--lilac) var(--p, 70%), var(--line) var(--p, 70%)); }
+.sy-vol input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -10px; border-radius: 50%; background: var(--ink); border: 3px solid var(--lilac); box-shadow: 0 2px 8px #0008; }
 .sy-vol output { font: 500 0.9rem var(--font-mono); color: var(--dim); width: 3ch; text-align: right; }
 .sy-kb { display: flex; flex-direction: column; gap: 8px; position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -12px 24px var(--panel); }
-.sy-keys { position: relative; height: 170px; display: flex; touch-action: none; }
+.sy-keys { position: relative; height: 150px; display: flex; touch-action: none; }
 .sy-w { flex: 1; background: var(--key-white); border: 1px solid #0004; border-radius: 0 0 8px 8px; margin: 0 1px; position: relative; }
 .sy-w.dn { background: var(--key-white-down); }
 .sy-k { position: absolute; top: 0; height: 60%; background: var(--key-black); border-radius: 0 0 6px 6px; z-index: 1; border: 1px solid #000; }
@@ -40597,7 +40608,7 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 .sy-oct { display: flex; align-items: center; gap: 8px; }
 .sy-oct span { font: 500 0.95rem var(--font-mono); color: var(--dim); min-width: 4ch; text-align: center; }
 .sy-note { color: var(--dim); font-size: 0.85rem; line-height: 1.4; }
-@media (max-width: 700px) { .sy-dials { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); } .sy-d { width: 112px; } .sy-d svg { width: 92px; height: 92px; } }
+@media (max-width: 560px) { .sy-dials { grid-template-columns: 1fr; } .sy-d { grid-template-columns: 92px minmax(0, 1fr) 64px; } }
 `;
       document.head.appendChild(css);
 
@@ -40609,11 +40620,13 @@ html.nb-synths .uitoast { z-index: 2147483002; }
   <span class="sy-chip" id="syKbChip"><i></i><span>No keyboard yet</span></span>
   <button class="sy-b" id="syLocal" hidden title="The Yamaha's own piano sound under the synth (MIDI Local Control)">Piano sound: On</button>
   <span class="sy-sp"></span>
+  <button class="sy-b sy-rec" id="syRec" title="Record what you play">● Record</button>
   <button class="sy-b" id="syKeysBtn" title="Keys on the screen">Keys on screen</button>
   <button class="sy-b ghost" id="syFull" title="The whole of Nate Bloom">Full app</button>
 </div>
+<div class="sy-take" id="syTake" hidden><span class="sy-tk-dot">●</span><span id="syTakeInfo">Recording ready</span><span class="sy-sp"></span><button class="sy-b on" id="syTakePlay">▶ Play</button><button class="sy-b" id="syTakeSave" title="Save it as an MP3 (to Downloads, or share it)">Save</button><button class="sy-b ghost" id="syTakeDel">Delete</button></div>
 <div class="sy-sec"><div class="sy-h"><b>Synth</b><em id="syName"></em><small id="syAfter"></small></div><div class="sy-tiles" id="syTiles"></div></div>
-<div class="sy-sec"><div class="sy-h"><b>Sound</b><small>drag a dial up or down · ↺ puts one back</small><span class="sy-sp"></span><button class="sy-b" id="syResetSnd">↺ Default sound</button></div><div class="sy-dials" id="syDials"></div></div>
+<div class="sy-sec"><div class="sy-h"><b>Sound</b><small>slide or tap · ↺ puts one back</small><span class="sy-sp"></span><button class="sy-b" id="syResetSnd">↺ Default sound</button></div><div class="sy-dials" id="syDials"></div></div>
 <div class="sy-sec"><div class="sy-h"><b>Effects</b><small>each one On or Off</small><span class="sy-sp"></span><div class="sy-vol"><label for="syVolume">Volume</label><input type="range" id="syVolume" min="0" max="100" step="1"><output id="syVolV"></output></div><button class="sy-b" id="syFxOff">All effects off</button><button class="sy-b" id="syFxReset">↺ Default effects</button></div>
   <div class="sy-dials" id="syFx"></div>
 </div>
@@ -40624,49 +40637,50 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 <div class="sy-note" id="syNote"></div>`;
       document.body.appendChild(root);
 
-      // ---- a dial: drag up (or right) for more, ↺ or a double tap for its default ----
-      const A0 = 135, SWEEP = 270, R = 40, C = 52;   // (drawn on a 104 grid, shown at 92 px)
-      const pt = (deg, r) => { const a = (deg - 90) * Math.PI / 180; return [C + r * Math.cos(a), C + r * Math.sin(a)]; };
-      const arc = (v) => { const a1 = -A0, a2 = -A0 + SWEEP * Math.max(0.0001, v); const [x1, y1] = pt(a1, R), [x2, y2] = pt(a2, R); return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${R} ${R} 0 ${a2 - a1 > 180 ? 1 : 0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`; };
+      // ---- a slider: tap the track to jump, slide the thumb; ↺ goes back to the default (the mark on the track) ----
+      // A vertical swipe still scrolls the page (touch-action: pan-y): a value changes only on a tap or a sideways slide.
       // opt: { name, get(), set(v), def, fmt(v), off: { isOn(), toggle() } }
       function dial(opt) {
         const d = mk("div", "sy-d");
-        d.innerHTML = `<svg viewBox="0 0 104 104" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100"><path class="sy-trk" d="${arc(1)}"/><path class="sy-val"/><circle class="sy-cap" cx="${C}" cy="${C}" r="27"/><line class="sy-ptr" x1="${C}" y1="${C}"/></svg><div class="sy-nm"></div><div class="sy-vv"></div><div class="sy-row"></div>`;
-        const svg = d.querySelector("svg"), val = d.querySelector(".sy-val"), ptr = d.querySelector(".sy-ptr"), vv = d.querySelector(".sy-vv"), row = d.querySelector(".sy-row");
-        d.querySelector(".sy-nm").textContent = opt.name; svg.setAttribute("aria-label", opt.name);
+        d.innerHTML = `<div class="sy-lab"><div class="sy-nm"></div><div class="sy-vv"></div></div><div class="sy-sl" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100"><div class="sy-tk"><div class="sy-fl"></div><div class="sy-dt"></div><div class="sy-th"></div></div></div><div class="sy-row"></div>`;
+        const sl = d.querySelector(".sy-sl"), tk = d.querySelector(".sy-tk"), fl = d.querySelector(".sy-fl"), th = d.querySelector(".sy-th"), vv = d.querySelector(".sy-vv"), row = d.querySelector(".sy-row");
+        d.querySelector(".sy-nm").textContent = opt.name; sl.setAttribute("aria-label", opt.name);
+        d.querySelector(".sy-dt").style.left = (opt.def * 100) + "%";
         let pill = null;
         if (opt.off) { pill = mk("button", "sy-pill"); pill.type = "button"; pill.addEventListener("click", () => { opt.off.toggle(); paint(); }); row.appendChild(pill); }
         const rs = mk("button", "sy-rs", "↺"); rs.type = "button"; rs.title = "Back to " + opt.name + "'s default"; rs.setAttribute("aria-label", rs.title);
         rs.addEventListener("click", () => { opt.set(opt.def); paint(); }); if (!opt.off) row.appendChild(rs);   // (an effect has On/Off; Default effects puts them all back)
         function paint() {
           const v = Math.min(1, Math.max(0, +opt.get() || 0)), isOn = !opt.off || opt.off.isOn();
-          val.setAttribute("d", arc(v));
-          const [x, y] = pt(-A0 + SWEEP * v, 21); ptr.setAttribute("x2", x.toFixed(1)); ptr.setAttribute("y2", y.toFixed(1));
+          fl.style.width = (v * 100) + "%"; th.style.left = (v * 100) + "%";
           vv.textContent = isOn ? opt.fmt(v) : "off";
           d.classList.toggle("off", !isOn);
-          svg.setAttribute("aria-valuenow", Math.round(v * 100));
+          sl.setAttribute("aria-valuenow", Math.round(v * 100)); sl.setAttribute("aria-valuetext", vv.textContent);
           if (pill) { pill.textContent = isOn ? "On" : "Off"; pill.classList.toggle("on", isOn); pill.setAttribute("aria-pressed", String(isOn)); pill.title = opt.name + (isOn ? " is on · tap for off" : " is off · tap for on"); }
           rs.classList.toggle("gone", Math.abs(v - opt.def) < 0.005 && isOn);
         }
-        let pid = null, y0 = 0, x0 = 0, v0 = 0, lastTap = 0;
-        svg.addEventListener("pointerdown", e => {
-          pid = e.pointerId; try { svg.setPointerCapture(pid); } catch (er) {} e.preventDefault();
-          y0 = e.clientY; x0 = e.clientX; v0 = +opt.get() || 0; d.classList.add("drag");
-          const now = performance.now(); if (now - lastTap < 320) { opt.set(opt.def); paint(); pid = null; } lastTap = now;
+        const at = x => { const r = tk.getBoundingClientRect(); return Math.min(1, Math.max(0, (x - r.left) / r.width)); };
+        const put = v => { if (opt.off && !opt.off.isOn()) opt.off.toggle(); opt.set(v); paint(); };
+        // grabbing the thumb moves it from where it is (no jump); anywhere else on the track: a tap jumps there
+        let pid = null, x0 = 0, y0 = 0, v0 = 0, grab = false, sliding = false;
+        sl.addEventListener("pointerdown", e => {
+          pid = e.pointerId; x0 = e.clientX; y0 = e.clientY; v0 = +opt.get() || 0; sliding = false;
+          const tr = th.getBoundingClientRect(); grab = Math.abs(e.clientX - (tr.left + tr.width / 2)) < 30;
+          if (e.pointerType === "mouse") { try { sl.setPointerCapture(pid); } catch (er) {} }
         });
-        svg.addEventListener("pointermove", e => {
+        sl.addEventListener("pointermove", e => {
           if (e.pointerId !== pid) return;
-          const dv = ((y0 - e.clientY) + (e.clientX - x0) * 0.6) / 260;   // a 260 px drag is the whole way
-          if (opt.off && !opt.off.isOn() && Math.abs(dv) > 0.01) { opt.off.toggle(); v0 = +opt.get() || 0; y0 = e.clientY; x0 = e.clientX; }
-          opt.set(Math.min(1, Math.max(0, v0 + dv))); paint();
+          if (!sliding) { if (Math.abs(e.clientX - x0) < 6 || Math.abs(e.clientX - x0) < Math.abs(e.clientY - y0)) return; sliding = true; d.classList.add("drag"); try { sl.setPointerCapture(pid); } catch (er) {} }
+          const r = tk.getBoundingClientRect();
+          put(grab ? Math.min(1, Math.max(0, v0 + (e.clientX - x0) / r.width)) : at(e.clientX));
         });
-        const end = e => { if (e.pointerId === pid) { pid = null; d.classList.remove("drag"); } };
-        svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end);
-        svg.addEventListener("contextmenu", e => e.preventDefault());
-        svg.addEventListener("keydown", e => {
+        sl.addEventListener("pointerup", e => { if (e.pointerId !== pid) return; if (!sliding && !grab) put(at(e.clientX)); pid = null; sliding = false; d.classList.remove("drag"); });
+        sl.addEventListener("pointercancel", e => { if (e.pointerId === pid) { pid = null; sliding = false; d.classList.remove("drag"); } });
+        sl.addEventListener("contextmenu", e => e.preventDefault());
+        sl.addEventListener("keydown", e => {
           const k = e.key, step = e.shiftKey ? 0.1 : 0.02;
-          if (k === "ArrowUp" || k === "ArrowRight") { opt.set(Math.min(1, (+opt.get() || 0) + step)); paint(); e.preventDefault(); }
-          if (k === "ArrowDown" || k === "ArrowLeft") { opt.set(Math.max(0, (+opt.get() || 0) - step)); paint(); e.preventDefault(); }
+          if (k === "ArrowUp" || k === "ArrowRight") { put(Math.min(1, (+opt.get() || 0) + step)); e.preventDefault(); }
+          if (k === "ArrowDown" || k === "ArrowLeft") { put(Math.max(0, (+opt.get() || 0) - step)); e.preventDefault(); }
         });
         d.__paint = paint; paint();
         return d;
@@ -40729,9 +40743,9 @@ html.nb-synths .uitoast { z-index: 2147483002; }
             fmt: v => Math.round(v * 100) + "", off: { isOn: () => fxIsOn(k), toggle: () => fxToggle(k) },
           })));
         }
-        const vol = $s("syVolume"); vol.value = Math.round(state.fx.volume * 100); $s("syVolV").textContent = vol.value;
+        const vol = $s("syVolume"); vol.value = Math.round(state.fx.volume * 100); $s("syVolV").textContent = vol.value; vol.style.setProperty("--p", vol.value + "%");
       }
-      $s("syVolume").addEventListener("input", e => { fxSet("volume", (+e.target.value) / 100); $s("syVolV").textContent = e.target.value; });
+      $s("syVolume").addEventListener("input", e => { fxSet("volume", (+e.target.value) / 100); $s("syVolV").textContent = e.target.value; e.target.style.setProperty("--p", e.target.value + "%"); });
       // the app's own faders (hidden behind this screen) follow, so the full app shows the same
       function syncAppKnobs() { document.querySelectorAll("#engineKnobs .knob, #fxKnobs .knob").forEach(el => { if (el.__nbSet && el.__nbGet) { const v = el.__nbGet(); el.__nbSet(v); } }); }
 
@@ -40835,10 +40849,31 @@ html.nb-synths .uitoast { z-index: 2147483002; }
       { const op = md.onPorts; md.onPorts = function () { try { if (op) op.apply(this, arguments); } catch (e) {} try { scanPorts(); } catch (e) {} }; }
       $s("syKbChip").addEventListener("click", () => { if (!md.access) { try { connectMidi(); } catch (e) {} } });
 
+      // ---- Record: everything you hear (the app's take), then Play, Save (MP3) or Delete ----
+      try { localStorage.setItem("nightbloom-recto", "take"); } catch (e) {}   // (a recording here stays a take, never the sampler or the Garage)
+      { const tb = () => $s("takeBtn"), bar = () => $s("takeBar"), rec = $s("syRec");
+        const paintRec = () => { const t = tb(); if (!t) return; const live = t.classList.contains("live"); rec.classList.toggle("live", live); rec.textContent = live ? t.textContent.replace(/^■\s*/, "■ Stop ") : "● Record"; rec.setAttribute("aria-pressed", String(live)); };
+        rec.addEventListener("click", () => { const t = tb(); if (!t) return; try { start(); } catch (e) {} const was = t.classList.contains("live"); try { if (!was) { const tp = $s("takePlay"); if (tp && /■/.test(tp.textContent)) tp.click(); } } catch (e) {} t.click(); paintRec(); if (!was) $s("syTake").hidden = true; });
+        setInterval(paintRec, 250);
+        const paintTake = () => {
+          const b = bar(), el = $s("syTake"); if (!b) return;
+          if (b.hidden) { el.hidden = true; return; }
+          if (b.dataset.empty) { el.hidden = true; say("Too short to keep · tap Record, play, then Stop"); return; }
+          el.hidden = false;
+          const m = /(\d+:\d\d)/.exec(($s("takeInfo") || {}).textContent || "");
+          $s("syTakeInfo").textContent = "Recording" + (m ? " · " + m[1] : "") + " ready";
+        };
+        const b = bar(); if (b) new MutationObserver(paintTake).observe(b, { attributes: true, attributeFilter: ["hidden", "data-empty"] });
+        const tpl = $s("takePlay"); if (tpl) new MutationObserver(() => { $s("syTakePlay").textContent = /■/.test(tpl.textContent) ? "■ Stop" : "▶ Play"; }).observe(tpl, { childList: true, characterData: true, subtree: true });
+        $s("syTakePlay").addEventListener("click", () => { const x = $s("takePlay"); if (x) x.click(); });
+        $s("syTakeSave").addEventListener("click", () => { const x = $s("takeMp3"); if (x) { x.click(); say("Saving the MP3…"); } });
+        $s("syTakeDel").addEventListener("click", () => { const x = $s("takeDiscard"); if (x) x.click(); $s("syTake").hidden = true; });
+      }
+
       function paintAll(force) { paintTiles(); paintDials(force); paintFx(force); paintChip(); }
       // the base app plays the synths (not samples or drums)
       function toSynths() { try { const b = $s("mSynths"); if (b && b.getAttribute("aria-pressed") !== "true") b.click(); } catch (e) {} if (!curEng()) { const f = synthItems()[0]; if (f) { state.engine = f.eng; try { renderEngine(); } catch (e) {} } } }
-      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. To hear only the synth, tap <b>Piano sound</b> (or turn the Yamaha's volume down). Dials: drag up for more, down for less; a double tap or ↺ puts one back.";
+      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. To hear only the synth, tap <b>Piano sound</b> (or turn the Yamaha's volume down). Sliders: slide or tap the track; the small mark is the default, and ↺ goes back to it.";
       showKeys(true);
       setTimeout(() => { toSynths(); paintAll(true); }, 0);
       $s("startBtn") && $s("startBtn").addEventListener("click", () => setTimeout(() => { toSynths(); paintAll(true); }, 50));
