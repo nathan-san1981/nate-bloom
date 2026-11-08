@@ -7,7 +7,7 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
-const { execFile } = require("child_process");
+const { execFile, spawn } = require("child_process");
 const { createLink } = require("./link");
 
 const SITE = "https://nathan-san1981.github.io/nate-bloom/";
@@ -91,6 +91,14 @@ async function serve(req) {
   if (rel === "" || rel.endsWith("/")) rel += "index.html";
   rel = rel.replace(/^lite\/(snd|inst)\//, "$1/");   // Lite shares the instruments and sounds
   if (rel === "sw.js" || rel === "lite/sw.js") return new Response("", { status: 404 });   // no service worker: the app is its own offline copy
+  // (box) the home screen, Listen and Keys live in /opt/nb-box/apps (box/apps in the repo), on the app's own origin so
+  // MIDI and saved progress work there too; Keys' /api/ (its box server in the spec) is answered here
+  if (BOX && rel.startsWith("api/")) return boxApi(req, rel.slice(4));
+  if (BOX && rel.startsWith("box/")) {
+    const p = inside(BOX_APPS, rel.slice(4));
+    if (p && await exists(p)) return new Response(fs.createReadStream(p), { headers: { "content-type": typeOf(p), "cache-control": "no-cache", ...COI } });
+    return new Response("", { status: 404 });
+  }
   for (const root of [CACHE, BUNDLED]) {
     const p = inside(root, rel);
     if (p && await exists(p)) return new Response(fs.createReadStream(p), { headers: { "content-type": typeOf(p), "cache-control": "no-cache", ...COI } });
@@ -281,23 +289,142 @@ function createWindow() {
     setTimeout(() => { if (!win.isDestroyed()) win.reload(); }, 800);
   });
   setTimeout(() => { try { const c = JSON.parse(fs.readFileSync(crashPath, "utf8")); if (Date.now() - c.t > 600000 && c.n < 2) fs.unlinkSync(crashPath); } catch (er) {} }, 600000);
-  win.loadURL(ORIGIN + (BOX ? "/?box=1" : "/"));
+  if (BOX) win.webContents.on("did-start-navigation", (e) => { const u = (e && e.url) || ""; if (e && e.isMainFrame !== false && !u.includes("/box/listen.html")) listenStop(); });
+  win.loadURL(ORIGIN + (BOX ? boxStartPage() : "/"));
   win.webContents.once("did-finish-load", () => setTimeout(() => checkForUpdate(win), 4000));
 }
 
 // (box) what only the Box asks of the computer: temperature, power, Wi-Fi, shutdown. Everything that needs root goes
 // through one small script (box/nb-box-helper, allowed for the box's user by sudoers) and only with the actions it knows.
-const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-125", "scale-133", "scale-150", "restart-app"]);
+const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-125", "scale-133", "scale-150", "restart-app",
+  "bt-on", "bt-list", "bt-scan", "start-ask", "start-bloom", "start-keys", "start-listen"]);
 const boxRun = args => new Promise(res => execFile("sudo", ["-n", BOX_HELPER, ...args], { timeout: 120000 }, (err, out, errOut) => res({ ok: !err, out: String(out || "").trim(), error: err ? String(errOut || err.message || err).trim() : "" })));
-ipcMain.handle("nb:box-status", async () => {
-  if (!BOX) return null;
+async function boxStatus() {
   const s = { temp: null, throttled: null, undervolt: false, hot: false, wifi: null, output: null };
   try { s.temp = Math.round(+fs.readFileSync("/sys/class/thermal/thermal_zone0/temp", "utf8") / 100) / 10; } catch (e) {}
   const r = await boxRun(["status"]);
   if (r.ok) try { Object.assign(s, JSON.parse(r.out)); } catch (e) {}
   if (s.throttled != null) { s.undervolt = !!(s.throttled & 0x1); s.hot = !!(s.throttled & 0x8) || (s.temp || 0) >= 80; }
   return s;
+}
+ipcMain.handle("nb:box-status", async () => BOX ? boxStatus() : null);
+
+// (box) more than music: a home screen at power-on (Nate Bloom, Keys, Listen, Stream, Media, Games). Nate Bloom, Keys,
+// Listen and the home screen are pages in this window; Stream (Moonlight) and Media (Kodi) are their own programs, so
+// the app writes which one into /run/nb-box/next and quits, and session.sh runs it, then brings this back on the home
+// screen. Games reboots into the Batocera USB stick (the box boots USB first, then the card).
+const BOX_APPS = process.env.NB_BOX_APPS || "/opt/nb-box/apps";
+const BOX_RUN = process.env.NB_BOX_RUN || "/run/nb-box";
+const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html" };
+const BOX_OUT = { stream: "/usr/bin/moonlight-qt", media: "/usr/bin/kodi" };
+const hasFile = p => { try { return fs.statSync(p).isFile(); } catch (e) { return false; } };
+function boxConf(key) { try { return (new RegExp("^" + key + "=(\\S*)", "m").exec(fs.readFileSync("/etc/nb-box.conf", "utf8")) || [])[1] || ""; } catch (e) { return ""; } }
+function boxStartPage() {
+  if (!hasFile(path.join(BOX_APPS, "home.html"))) return BOX_PAGES.bloom;   // (an install without the home screen, or CI: straight to Play)
+  const want = process.env.NB_BOX_START || boxConf("START");
+  return BOX_PAGES[want] || BOX_PAGES.home;
+}
+function gameStick() {   // the Batocera stick: its boot partition is labelled BATOCERA
+  return new Promise(res => execFile("lsblk", ["-rno", "LABEL,TRAN,PKNAME"], { timeout: 4000 }, (err, out) => res(!err && /^BATOCERA\b/m.test(String(out)))));
+}
+async function boxApps() {
+  return {
+    home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true,
+    keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
+    listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync")),
+    stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
+    start: boxConf("START") || "ask",
+  };
+}
+async function boxGo(a) {
+  a = String(a || "");
+  if (BOX_PAGES[a]) {
+    if (a !== "bloom" && !hasFile(path.join(BOX_APPS, BOX_PAGES[a].replace(/^\/box\//, "").replace(/\?.*$/, "")))) return { ok: false, error: "not installed" };
+    win.loadURL(ORIGIN + BOX_PAGES[a]); return { ok: true };
+  }
+  if (BOX_OUT[a]) {
+    if (!hasFile(BOX_OUT[a])) return { ok: false, error: "not installed" };
+    try { await fsp.mkdir(BOX_RUN, { recursive: true }); await fsp.writeFile(path.join(BOX_RUN, "next"), a + "\n"); } catch (e) { return { ok: false, error: String(e.message || e) }; }
+    listenStop(); setTimeout(() => app.quit(), 200); return { ok: true };
+  }
+  if (a === "games") { if (!(await gameStick())) return { ok: false, error: "no game stick" }; return boxRun(["games"]); }
+  return { ok: false, error: "unknown app" };
+}
+ipcMain.handle("nb:box-go", (e, a) => BOX ? boxGo(a) : null);
+ipcMain.handle("nb:box-apps", () => BOX ? boxApps() : null);
+// the power button (box/nb-box-power.py, as root) asks for the home screen by creating /run/nb-box/home
+if (BOX) setInterval(() => {
+  const f = path.join(BOX_RUN, "home");
+  if (!hasFile(f)) return;
+  try { fs.unlinkSync(f); } catch (e) {}
+  if (win && !win.isDestroyed() && hasFile(path.join(BOX_APPS, "home.html"))) win.loadURL(ORIGIN + BOX_PAGES.home);
+}, 600);
+
+// (box) Listen: Spotify Connect (librespot, from the raspotify package) and AirPlay (shairport-sync), run by the app
+// as the box's user while the Listen page is open, so they play through the same PipeWire output as everything else
+let listenKids = [];
+const LISTEN_NAME = "Nate Bloom Box";
+function listenStart() {
+  if (listenKids.length) return;
+  const ev = path.join(BOX_RUN, "listen.json"); try { fs.rmSync(ev); } catch (e) {}
+  const run = (bin, args) => {
+    if (!hasFile(bin)) return;
+    const p = spawn(bin, args, { stdio: "ignore", env: { ...process.env, NB_LISTEN_FILE: ev } });
+    p.nbName = path.basename(bin); p.on("exit", () => { listenKids = listenKids.filter(k => k !== p); }); p.on("error", () => {}); listenKids.push(p);
+  };
+  run("/usr/bin/librespot", ["--name", LISTEN_NAME, "--device-type", "speaker", "--backend", "alsa", "--device", "default", "--bitrate", "320",
+    "--initial-volume", "60", "--cache", path.join(app.getPath("userData"), "librespot"), "--disable-audio-cache", "--onevent", "/usr/local/lib/nb-box/listen-event.py"]);
+  run("/usr/bin/shairport-sync", ["-a", LISTEN_NAME, "-o", "alsa", "--", "-d", "default"]);
+}
+function listenStop() { for (const p of listenKids) { try { p.kill("SIGTERM"); } catch (e) {} } listenKids = []; }
+function listenStatus() {
+  let now = null; try { now = JSON.parse(fs.readFileSync(path.join(BOX_RUN, "listen.json"), "utf8")); } catch (e) {}
+  return { spotify: listenKids.some(p => p.nbName === "librespot"), airplay: listenKids.some(p => p.nbName === "shairport-sync"), name: LISTEN_NAME, now };
+}
+ipcMain.handle("nb:box-listen", (e, cmd) => {
+  if (!BOX) return null;
+  if (cmd === "start") listenStart(); else if (cmd === "stop") listenStop();
+  return listenStatus();
 });
+app.on("before-quit", () => listenStop());
+
+// (box) Bluetooth: a keyboard, the Xbox controller, headphones. Scanning and pairing need root: the helper does them.
+const MAC = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/i;
+ipcMain.handle("nb:box-bt", async (e, cmd, mac) => {
+  if (!BOX) return null;
+  cmd = String(cmd || "");
+  if (["pair", "forget", "connect"].includes(cmd)) { if (!MAC.test(String(mac || ""))) return { ok: false, error: "bad address" }; return boxRun(["bt-" + cmd, String(mac).toUpperCase()]); }
+  if (!["on", "list", "scan"].includes(cmd)) return { ok: false, error: "unknown" };
+  const r = await boxRun(["bt-" + cmd]);
+  if (r.ok && cmd !== "on") try { return { ok: true, devices: JSON.parse(r.out) }; } catch (er) { return { ok: false, error: "bad answer" }; }
+  return r;
+});
+
+// (box) Keys' box API (Keys calls /api/…): saved progress on disk, the sound outputs, power, switching apps
+function pwDump() { return new Promise(res => execFile("pw-dump", [], { timeout: 5000, maxBuffer: 32 << 20 }, (err, out) => { try { res(JSON.parse(out)); } catch (x) { res([]); } })); }
+async function boxSinks() {
+  const d = await pwDump(); let def = "";
+  for (const o of d) if (o.type === "PipeWire:Interface:Metadata" && o.props && o.props["metadata.name"] === "default")
+    for (const m of o.metadata || []) if (m.key === "default.audio.sink") def = (m.value && m.value.name) || "";
+  return d.filter(o => o.type === "PipeWire:Interface:Node" && o.info && o.info.props && o.info.props["media.class"] === "Audio/Sink")
+    .map(o => ({ id: o.id, name: o.info.props["node.description"] || o.info.props["node.name"], default: o.info.props["node.name"] === def }));
+}
+async function boxApi(req, ep) {
+  const J = (o, st) => new Response(JSON.stringify(o), { status: st || 200, headers: { "content-type": "application/json", ...COI } });
+  let body = null; if (req.method === "POST") { try { body = await req.json(); } catch (e) {} }
+  const KS = path.join(app.getPath("userData"), "keys-state.json");
+  try {
+    if (ep === "status") { const s = await boxStatus(); return J({ temp: s.temp, throttled: "0x" + (s.throttled || 0).toString(16), sinks: await boxSinks(), stateFile: true }); }
+    if (ep === "state/get") { try { return J(JSON.parse(await fsp.readFile(KS, "utf8"))); } catch (e) { return J(null); } }
+    if (ep === "state") { if (body && Array.isArray(body.profiles)) { await fsp.writeFile(KS + ".part", JSON.stringify(body)); await fsp.rename(KS + ".part", KS); } return J({ ok: true }); }
+    if (ep === "sink") { const id = parseInt(body && body.id, 10); if (!(id > 0)) return J(null);
+      const ok = await new Promise(res => execFile("wpctl", ["set-default", String(id)], { timeout: 5000 }, err => res(!err))); return J(ok ? { ok: true } : null); }
+    if (ep === "app") { const to = body && body.to === "home" ? "home" : body && body.to === "keys" ? "keys" : "bloom"; setTimeout(() => boxGo(to), 50); return J({ ok: true }); }
+    if (ep === "power") { const a = body && body.action === "shutdown" ? "shutdown" : "reboot"; return J(await boxRun([a])); }
+  } catch (e) { return J({ ok: false, error: String(e.message || e) }, 500); }
+  return J({ ok: false, error: "unknown" }, 404);
+}
+
 // (box) songs from a USB stick for the DJ: nb-box-helper mounts each stick read-only under /media/nb-usb/<device>;
 // the page lists them and reads the one it loads. Nothing outside that folder can be listed or read.
 const USB_ROOT = "/media/nb-usb";

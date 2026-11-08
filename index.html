@@ -40064,6 +40064,13 @@ registerProcessor("nb-aw", NBAwProc);
           const dj = document.createElement("button"); dj.type = "button"; dj.className = "btn"; dj.id = "bxDjBtn"; dj.textContent = "DJ"; dj.title = "The DJ: two decks, songs from a USB stick";
           dj.addEventListener("click", () => BX.dj());
           const gear = $b("plGear"); top.insertBefore(el, gear || null); top.insertBefore(dj, gear || null); top.insertBefore(btn, gear || null);
+          // (the home screen: Keys, Listen, Stream, Media, Games; only on a box installed with it)
+          if (window.NBBox && NBBox.apps) NBBox.apps().then(ap => {
+            if (!ap || !ap.home || $b("bxHomeBtn")) return;
+            const h = document.createElement("button"); h.type = "button"; h.className = "btn"; h.id = "bxHomeBtn"; h.textContent = "⌂ Home"; h.title = "The box's home screen: Keys, Listen, Stream, Media, Games";
+            h.addEventListener("click", () => NBBox.go("home"));
+            top.insertBefore(h, $b("bxDjBtn") || gear || null);
+          }).catch(() => {});
         }
         BX.el = el; return el;
       }

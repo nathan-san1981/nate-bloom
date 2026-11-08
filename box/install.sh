@@ -6,13 +6,17 @@
 #                                            --rotate N   90 (default) or 270, whichever way the screen sits in the case
 #                                            --no-reboot  don't reboot at the end
 #                                            --4k-kernel  the 4 KB-page kernel (only if the app won't start on the Pi 5's default 16 KB one)
+#                                            --no-listen  no Spotify Connect / AirPlay (Listen on the home screen)
+#                                            --no-stream  no Moonlight (Stream: PC games over Wi-Fi)
+#                                            --no-media   no Kodi (Media)
+#                                            --no-games-boot  keep booting from the card first (Games needs USB first)
 # Safe to run again: every file it writes is replaced, every config.txt line sits in one marked block.
 set -euo pipefail
 
 REPO="nathan-san1981/nate-bloom"
 RAW="https://raw.githubusercontent.com/$REPO/main/box"
 DEB_URL="https://github.com/$REPO/releases/download/pi-latest/NateBloom-pi-arm64.deb"
-MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0
+MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 STREAM=1 MEDIA=1 GAMESBOOT=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --chromium) MODE=chromium ;;
@@ -20,6 +24,10 @@ while [ $# -gt 0 ]; do
     --rotate) shift; ROTATE="${1:-90}" ;;
     --no-reboot) REBOOT=0 ;;
     --4k-kernel) K4=1 ;;
+    --no-listen) LISTEN=0 ;;
+    --no-stream) STREAM=0 ;;
+    --no-media) MEDIA=0 ;;
+    --no-games-boot) GAMESBOOT=0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
@@ -46,7 +54,8 @@ fetch() {   # fetch NAME DEST
 
 say "Packages"
 sudo apt-get update -qq
-PKGS="exfatprogs ntfs-3g cage wlr-randr pipewire pipewire-pulse pipewire-alsa wireplumber rtkit alsa-utils curl ca-certificates iw rfkill fonts-noto-core"
+PKGS="exfatprogs ntfs-3g cage wlr-randr pipewire pipewire-pulse pipewire-alsa pipewire-bin wireplumber rtkit alsa-utils curl ca-certificates iw rfkill fonts-noto-core
+      bluez libspa-0.2-bluetooth python3 python3-evdev"
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq $PKGS
 
 if [ "$MODE" = app ]; then
@@ -80,13 +89,62 @@ fetch nb-box-cpu.service /etc/systemd/system/nb-box-cpu.service
 fetch nb-box-usb@.service /etc/systemd/system/nb-box-usb@.service   # (USB sticks for the DJ, read-only, under /media/nb-usb)
 fetch 99-nb-box-usb.rules /etc/udev/rules.d/99-nb-box-usb.rules
 sudo mkdir -p /media/nb-usb
+START="$(sed -n 's/^START=//p' /etc/nb-box.conf 2>/dev/null || true)"   # (kept when this runs again)
 sudo tee /etc/nb-box.conf >/dev/null <<EOF
-# Nate Bloom Box settings (Box… in the app changes ROTATE and SCALE; MODE is app or chromium)
+# Nate Bloom Box settings (Box… in the app changes ROTATE and SCALE; MODE is app or chromium;
+# START is what opens at power-on: ask = the home screen, or bloom, keys, listen)
 MODE=$MODE
 ROTATE=$ROTATE
 SCALE=1.333
 BOXUSER=$BOXUSER
+START=${START:-ask}
 EOF
+
+say "The home screen: Nate Bloom, Keys, Listen, Stream, Media, Games"
+sudo mkdir -p /opt/nb-box/apps/keys
+fetch apps/home.html /opt/nb-box/apps/home.html
+fetch apps/listen.html /opt/nb-box/apps/listen.html
+fetch apps/keys/index.html /opt/nb-box/apps/keys/index.html
+fetch listen-event.py /usr/local/lib/nb-box/listen-event.py 0755
+fetch nb-box-power.py /usr/local/lib/nb-box/nb-box-power.py 0755
+fetch nb-box-power.service /etc/systemd/system/nb-box-power.service
+# /run/nb-box: the app and session.sh pass "open Stream / Media" and the power button's "home" through it
+echo "d /run/nb-box 0775 $BOXUSER $BOXUSER -" | sudo tee /etc/tmpfiles.d/nb-box.conf >/dev/null
+sudo systemd-tmpfiles --create /etc/tmpfiles.d/nb-box.conf
+# the power button: press = home screen, hold 2 s = shut down (nb-box-power.py); logind leaves it alone
+sudo mkdir -p /etc/systemd/logind.conf.d
+printf '[Login]\nHandlePowerKey=ignore\nHandlePowerKeyLongPress=ignore\n' | sudo tee /etc/systemd/logind.conf.d/nb-box.conf >/dev/null
+
+if [ "$LISTEN" = 1 ]; then
+  say "Listen: Spotify Connect (raspotify's librespot) and AirPlay (shairport-sync)"
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq shairport-sync avahi-daemon || warn "shairport-sync didn't install: AirPlay is off"
+  if ! command -v librespot >/dev/null 2>&1; then
+    curl -fsSL https://dtcooper.github.io/raspotify/install.sh | sh || warn "raspotify didn't install: Spotify Connect is off"
+  fi
+  # the app runs both as the box's user while Listen is open; their own system services stay off
+  for u in raspotify.service shairport-sync.service; do sudo systemctl disable --now "$u" >/dev/null 2>&1 || true; done
+  sudo systemctl enable --now avahi-daemon.service >/dev/null 2>&1 || true
+fi
+if [ "$STREAM" = 1 ]; then
+  say "Stream: Moonlight (games from your PC over Wi-Fi)"
+  if ! command -v moonlight-qt >/dev/null 2>&1; then
+    curl -1sLf 'https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/setup.deb.sh' | sudo distro=raspbian codename="${VERSION_CODENAME:-bookworm}" bash \
+      && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq moonlight-qt || warn "Moonlight didn't install: Stream is off"
+  fi
+fi
+if [ "$MEDIA" = 1 ]; then
+  say "Media: Kodi"
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq kodi kodi-peripheral-joystick || sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq kodi || warn "Kodi didn't install: Media is off"
+fi
+if [ "$GAMESBOOT" = 1 ] && command -v rpi-eeprom-config >/dev/null 2>&1; then
+  say "Games: boot USB first, then the card (a Batocera stick plugged in at power-on starts games)"
+  CUR="$(sudo rpi-eeprom-config 2>/dev/null || true)"
+  if ! echo "$CUR" | grep -q '^BOOT_ORDER=0xf614$'; then
+    { echo "$CUR" | grep -v '^BOOT_ORDER='; echo "BOOT_ORDER=0xf614"; } > /tmp/nb-box-eeprom.conf
+    sudo rpi-eeprom-config --apply /tmp/nb-box-eeprom.conf >/dev/null && echo "    boot order: USB, card, NVMe (takes effect after the reboot)" || warn "couldn't change the boot order: Games will need --no-games-boot's steps"
+    rm -f /tmp/nb-box-eeprom.conf
+  fi
+fi
 
 say "Sound: PipeWire at 48 kHz with small buffers, the USB headphone cable first"
 sudo mkdir -p /etc/pipewire/pipewire.conf.d /etc/pipewire/pipewire-pulse.conf.d /etc/wireplumber/wireplumber.conf.d /etc/wireplumber/main.lua.d
@@ -101,6 +159,7 @@ sudo tee /etc/security/limits.d/95-nb-box-audio.conf >/dev/null <<'EOF'
 @audio   -  nice     -10
 EOF
 sudo usermod -aG audio,video,input,render,plugdev "$BOXUSER"
+getent group bluetooth >/dev/null && sudo usermod -aG bluetooth "$BOXUSER" || true
 
 say "The screen (Touch Display 2, 5\") and USB power"
 CFG=/boot/firmware/config.txt; [ -f "$CFG" ] || CFG=/boot/config.txt
@@ -140,9 +199,10 @@ sudo visudo -cf /etc/sudoers.d/nb-box >/dev/null
 say "Start on power-up"
 sudo systemctl daemon-reload
 sudo udevadm control --reload-rules 2>/dev/null || true
-sudo systemctl enable nb-box-cpu.service nb-box.service >/dev/null
+sudo systemctl enable nb-box-cpu.service nb-box.service nb-box-power.service bluetooth.service >/dev/null
 sudo systemctl set-default graphical.target >/dev/null
 sudo systemctl disable getty@tty1.service >/dev/null 2>&1 || true
 
 say "Done ($MODE mode). Plug in the MiniLab and the headphone cable."
+echo "    Home screen at power-on. Games: write Batocera to a USB stick with box/make-game-stick.sh."
 if [ "$REBOOT" = 1 ]; then echo "Rebooting in 5 seconds (Ctrl+C to stay)…"; sleep 5; sudo reboot; else echo "Reboot when ready: sudo reboot"; fi

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Nate Bloom Box</title>
+<style>
+/* Nate Bloom Box home screen (box/apps/home.html, served by the app as /box/home.html). Drawn for 960 x 540 (the 5"
+   screen at 1280 x 720, page scale 1.333). Touch, a MIDI controller's big knob, a game controller and a keyboard all
+   work: turn/arrows/d-pad move, click/Enter/A opens. */
+:root { --bg: #0f1013; --tile: #1a1c21; --tile2: #22252c; --line: #2c2f37; --ink: #f2efe8; --ink2: #a4a7ae; --ink3: #74777e; --acc: #c9b6ff; --ok: #6fd3a0; --warn: #f0a05a; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, "Noto Sans", sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; }
+button { font: inherit; color: inherit; }
+#top { height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+#top .t { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+#top .sp { flex: 1; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px; border-radius: 999px; background: var(--tile); font-size: 13px; color: var(--ink2); white-space: nowrap; }
+.chip.warn { color: var(--warn); }
+.chip svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#clock { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink2); min-width: 54px; text-align: right; }
+.ib { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--tile); display: grid; place-items: center; cursor: pointer; }
+.ib svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#grid { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 14px; }
+.tile { position: relative; border: 0; border-radius: 18px; background: var(--tile); text-align: left; padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; outline: none; transition: transform .08s, background .12s; overflow: hidden; }
+.tile:active { transform: scale(.98); }
+.tile .ic { width: 50px; height: 50px; border-radius: 14px; display: grid; place-items: center; margin-bottom: auto; }
+.tile .ic svg { width: 28px; height: 28px; stroke: #0f1013; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tile .n { font-size: 25px; font-weight: 700; letter-spacing: -.01em; }
+.tile .d { font-size: 14px; color: var(--ink2); line-height: 1.3; }
+.tile.sel { background: var(--tile2); box-shadow: 0 0 0 3px var(--acc) inset; }
+.tile.off { opacity: .45; }
+.tile .badge { position: absolute; right: 14px; top: 14px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #2a2d35; color: var(--ink2); }
+#hint { position: absolute; left: 16px; right: 16px; bottom: 10px; height: 22px; font-size: 12.5px; color: var(--ink3); display: flex; gap: 18px; align-items: center; }
+#toast { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 30; max-width: 900px; text-align: center; }
+#toast.on { opacity: 1; }
+/* settings sheet */
+#sheet { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; z-index: 20; }
+#sheet.on { display: block; }
+#sheet .card { position: absolute; right: 0; top: 0; bottom: 0; width: 560px; background: #15171b; border-left: 1px solid var(--line); padding: 14px 18px; overflow: auto; }
+#sheet h2 { font-size: 20px; margin: 4px 0 12px; display: flex; align-items: center; gap: 10px; }
+#sheet h3 { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); margin: 18px 0 8px; font-weight: 650; }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn { height: 46px; padding: 0 16px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; }
+.btn.on { background: var(--acc); color: #17181c; }
+.btn.danger { color: #ff9b8a; }
+.btn:disabled { opacity: .45; }
+.dev { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--tile); margin-bottom: 8px; min-height: 58px; }
+.dev .k { width: 34px; height: 34px; border-radius: 10px; background: var(--tile2); display: grid; place-items: center; }
+.dev .k svg { width: 19px; height: 19px; stroke: var(--ink2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dev .x { flex: 1; min-width: 0; } .dev .x b { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .dev .x span { font-size: 12.5px; color: var(--ink3); }
+.dev .x span.ok { color: var(--ok); }
+.note { font-size: 13px; color: var(--ink3); line-height: 1.45; margin: 6px 0; }
+.hold { position: relative; overflow: hidden; }
+.hold i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(255,120,100,.28); }
+</style>
+</head>
+<body>
+<div id="top">
+  <div class="t">Nate Bloom Box</div>
+  <div class="sp"></div>
+  <span class="chip" id="cTemp" hidden></span>
+  <span class="chip" id="cOut" hidden></span>
+  <span class="chip" id="cBt" hidden></span>
+  <span id="clock"></span>
+  <button class="ib" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</div>
+
+<div id="grid">
+  <button class="tile" data-app="bloom"><span class="ic" style="background:#c9b6ff"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="n">Nate Bloom</span><span class="d">Synths, drums, sampling, DJ</span></button>
+  <button class="tile" data-app="keys"><span class="ic" style="background:#8fc3ff"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10M12 4v10M16 4v10M8 14v6M12 14v6M16 14v6"/></svg></span><span class="n">Keys</span><span class="d">Piano lessons</span></button>
+  <button class="tile" data-app="listen"><span class="ic" style="background:#7fdcae"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="n">Listen</span><span class="d">Spotify &amp; AirPlay from your phone</span></button>
+  <button class="tile" data-app="stream"><span class="ic" style="background:#ffc477"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 3-5 3z"/></svg></span><span class="n">Stream</span><span class="d">PC games over Wi-Fi (Moonlight)</span></button>
+  <button class="tile" data-app="media"><span class="ic" style="background:#ff9fb8"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5"/></svg></span><span class="n">Media</span><span class="d">Movies, music, photos (Kodi)</span></button>
+  <button class="tile" data-app="games"><span class="ic" style="background:#f2e27a"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".8"/><circle cx="18" cy="10" r=".8"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.6 6.2A2.8 2.8 0 0 0 7 17.2L9 15h6l2 2.2a2.8 2.8 0 0 0 4.9-2.4l-.6-6.2A4 4 0 0 0 17.3 5z"/></svg></span><span class="n">Games</span><span class="d">Retro games from the game stick</span></button>
+</div>
+
+<div id="hint"><span>Tap, or turn the big knob and click</span><span>Power button: back here · hold 2 s: off</span></div>
+<div id="toast"></div>
+
+<div id="sheet"><div class="card">
+  <h2><span style="flex:1">Settings</span><button class="ib" id="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></h2>
+  <h3>Bluetooth · keyboard, controller, headphones</h3>
+  <div id="bt"><div class="note">Loading…</div></div>
+  <div class="row"><button class="btn" id="scan">Find devices</button><span class="note" id="scanNote">Put the device in pairing mode first.</span></div>
+  <h3>At power-on</h3>
+  <div class="row" id="start">
+    <button class="btn" data-start="ask">Home screen</button><button class="btn" data-start="bloom">Nate Bloom</button><button class="btn" data-start="keys">Keys</button><button class="btn" data-start="listen">Listen</button>
+  </div>
+  <h3>Box</h3>
+  <div class="row"><button class="btn" id="restart">Restart app</button><button class="btn" id="reboot">Reboot</button><button class="btn danger hold" id="off"><i></i>Hold to shut down</button></div>
+  <p class="note">Games: plug in the Batocera USB stick and pick Games; the box restarts into it. To come back, quit Batocera and take the stick out before turning the box on.</p>
+</div></div>
+
+<script>
+"use strict";
+const B = window.NBBox || null;   // (only inside the box app)
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const tiles = $$(".tile");
+let sel = 0, apps = { bloom: true, keys: true, listen: true, stream: true, media: true, games: false, start: "ask" };
+const NOT = { keys: "Keys isn't installed on this box", listen: "Listen isn't installed (run the box installer again)", stream: "Moonlight isn't installed (run the box installer again)",
+  media: "Kodi isn't installed (run the box installer again)", games: "Plug in the Batocera game stick, then pick Games" };
+
+function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove("on"), ms || 2600); }
+function paint() {
+  tiles.forEach((t, i) => {
+    t.classList.toggle("sel", i === sel);
+    const a = t.dataset.app, has = !!apps[a];
+    t.classList.toggle("off", !has && a !== "games");
+    let b = t.querySelector(".badge");
+    const txt = a === "games" ? (has ? "Stick in" : "No stick") : !has ? "Not installed" : "";
+    if (txt && !b) { b = document.createElement("span"); b.className = "badge"; t.appendChild(b); }
+    if (b) { if (txt) b.textContent = txt; else b.remove(); }
+  });
+}
+let busy = false;
+async function open(i) {
+  if (busy) return;
+  sel = i; paint();
+  const a = tiles[i].dataset.app;
+  if (!apps[a]) return toast(NOT[a] || "Not available");
+  if (!B) return toast("Opens " + tiles[i].querySelector(".n").textContent + " (on the box)");
+  busy = true;
+  toast(a === "games" ? "Restarting into the game stick…" : "Opening " + tiles[i].querySelector(".n").textContent + "…", 8000);
+  const r = await B.go(a).catch(e => ({ ok: false, error: String(e) }));
+  busy = false;
+  if (!r || !r.ok) toast("Couldn't open it" + (r && r.error ? ": " + r.error : ""));
+}
+function move(d) { sel = (sel + d + tiles.length) % tiles.length; paint(); }
+tiles.forEach((t, i) => t.addEventListener("click", () => open(i)));
+
+/* keyboard (a Bluetooth keyboard works here too) */
+addEventListener("keydown", e => {
+  if ($("#sheet").classList.contains("on")) { if (e.key === "Escape") closeSheet(); return; }
+  if (e.key === "ArrowRight") move(1); else if (e.key === "ArrowLeft") move(-1);
+  else if (e.key === "ArrowDown") move(3); else if (e.key === "ArrowUp") move(-3);
+  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(sel); }
+  else if (/^[1-6]$/.test(e.key)) open(+e.key - 1);
+  else return;
+  e.preventDefault();
+});
+
+/* MIDI: the MiniLab's or KeyLab's big knob (Arturia program: CC 114 turn, 115 click; DAW program: 28 / 118) */
+function relStep(v) { if (v === 64 || v === 0) return 0; if (v > 64) return v <= 96 ? 1 : -1; return v >= 32 ? -1 : 1; }
+let lastTurn = 0;
+function onMidi(m) {
+  const [st, d1, d2] = m.data; if ((st & 0xf0) !== 0xb0) return;
+  if (d1 === 114 || d1 === 28) { const s = relStep(d2), now = performance.now(); if (s && now - lastTurn > 60) { lastTurn = now; if ($("#sheet").classList.contains("on")) return; move(s); } }
+  else if ((d1 === 115 || d1 === 118) && d2 > 0) { if ($("#sheet").classList.contains("on")) closeSheet(); else open(sel); }
+}
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => {
+  const hook = () => acc.inputs.forEach(i => { i.onmidimessage = onMidi; });
+  hook(); acc.onstatechange = hook;
+}).catch(() => {});
+
+/* game controller (the Xbox controller, wired or Bluetooth): d-pad / left stick moves, A opens, B closes settings */
+const pads = { held: {}, next: 0 };
+function padLoop(t) {
+  const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean);
+  if (gp) {
+    const b = i => !!(gp.buttons[i] && gp.buttons[i].pressed);
+    const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
+    const dir = b(15) || ax > .6 ? 1 : b(14) || ax < -.6 ? -1 : b(13) || ay > .6 ? 3 : b(12) || ay < -.6 ? -3 : 0;
+    if (dir && t > pads.next && !$("#sheet").classList.contains("on")) { move(dir); pads.next = t + (pads.dir === dir ? 170 : 380); }
+    pads.dir = dir; if (!dir) pads.next = 0;
+    const a = b(0), bb = b(1);
+    if (a && !pads.held.a) { if ($("#sheet").classList.contains("on")) {} else open(sel); }
+    if (bb && !pads.held.b && $("#sheet").classList.contains("on")) closeSheet();
+    pads.held.a = a; pads.held.b = bb;
+  }
+  requestAnimationFrame(padLoop);
+}
+requestAnimationFrame(padLoop);
+
+/* top bar */
+const ICON = {
+  temp: '<svg viewBox="0 0 24 24"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg>',
+  out: '<svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>',
+  bt: '<svg viewBox="0 0 24 24"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>',
+  kb: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>',
+  pad: '<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><circle cx="16" cy="12" r="1"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.6 6.2A2.8 2.8 0 0 0 7 17.2L9 15h6l2 2.2a2.8 2.8 0 0 0 4.9-2.4l-.6-6.2A4 4 0 0 0 17.3 5z"/></svg>',
+  ph: '<svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>',
+  dev: '<svg viewBox="0 0 24 24"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>',
+};
+const kindIcon = k => /keyboard/.test(k) ? ICON.kb : /gaming|joystick/.test(k) ? ICON.pad : /audio|headset|headphone/.test(k) ? ICON.ph : ICON.dev;
+const kindName = k => /keyboard/.test(k) ? "Keyboard" : /gaming|joystick/.test(k) ? "Controller" : /audio|headset|headphone/.test(k) ? "Headphones / speaker" : /mouse/.test(k) ? "Mouse" : "Device";
+function clock() { const d = new Date(); $("#clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+clock(); setInterval(clock, 10000);
+async function status() {
+  if (!B) return;
+  const s = await B.status().catch(() => null); if (!s) return;
+  const t = $("#cTemp");
+  if (s.temp != null) { t.hidden = false; t.innerHTML = ICON.temp + Math.round(s.temp) + "°C" + (s.undervolt ? " · low power" : ""); t.classList.toggle("warn", !!(s.hot || s.undervolt)); }
+  const o = $("#cOut"); o.hidden = !s.output; if (s.output) o.innerHTML = ICON.out + esc(s.output.length > 22 ? s.output.slice(0, 21) + "…" : s.output);
+}
+async function refreshApps() { if (!B) return paint(); const a = await B.apps().catch(() => null); if (a) apps = a; paint(); paintStart(); }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+/* settings */
+function openSheet() { $("#sheet").classList.add("on"); btList(false); paintStart(); }
+function closeSheet() { $("#sheet").classList.remove("on"); }
+$("#gear").onclick = openSheet; $("#close").onclick = closeSheet;
+$("#sheet").addEventListener("click", e => { if (e.target.id === "sheet") closeSheet(); });
+function paintStart() { $$("#start [data-start]").forEach(b => b.classList.toggle("on", b.dataset.start === (apps.start || "ask"))); }
+$$("#start [data-start]").forEach(b => b.onclick = async () => { if (!B) return; const r = await B.run("start-" + b.dataset.start); if (r && r.ok) { apps.start = b.dataset.start; paintStart(); toast("At power-on: " + b.textContent); } else toast("Couldn't save that"); });
+$("#restart").onclick = () => B && B.run("restart-app");
+$("#reboot").onclick = () => { if (B) { toast("Rebooting…", 9000); B.run("reboot"); } };
+(() => {   // hold to shut down: 1.5 s
+  const el = $("#off"), bar = el.querySelector("i"); let t0 = 0, raf = 0;
+  const stop = () => { t0 = 0; cancelAnimationFrame(raf); bar.style.width = "0"; };
+  const tick = t => { const p = Math.min(1, (performance.now() - t0) / 1500); bar.style.width = p * 100 + "%"; if (p >= 1) { stop(); toast("Shutting down…", 15000); B && B.run("shutdown"); return; } raf = requestAnimationFrame(tick); };
+  el.addEventListener("pointerdown", e => { e.preventDefault(); t0 = performance.now(); raf = requestAnimationFrame(tick); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, stop));
+})();
+
+let btDevs = [];
+function btPaint() {
+  const el = $("#bt");
+  if (!btDevs.length) { el.innerHTML = '<div class="note">Nothing paired yet. Tap Find devices with the keyboard or controller in pairing mode.</div>'; return; }
+  el.innerHTML = btDevs.map(d => `<div class="dev"><span class="k">${kindIcon(d.kind)}</span><span class="x"><b>${esc(d.name)}</b><span class="${d.connected ? "ok" : ""}">${kindName(d.kind)} · ${d.paired ? (d.connected ? "connected" : "paired, not connected") : "found"}</span></span>${
+    d.paired ? (d.connected ? "" : `<button class="btn" data-bt="connect" data-mac="${d.mac}">Connect</button>`) + `<button class="btn" data-bt="forget" data-mac="${d.mac}">Forget</button>` : `<button class="btn on" data-bt="pair" data-mac="${d.mac}">Pair</button>`}</div>`).join("");
+  const n = btDevs.filter(d => d.connected), c = $("#cBt");
+  c.hidden = !n.length; if (n.length) c.innerHTML = ICON.bt + (n.length === 1 ? esc(n[0].name.slice(0, 18)) : n.length + " connected");
+}
+async function btList(scan) {
+  if (!B) { btPaint(); return; }
+  if (scan) { $("#scan").disabled = true; $("#scanNote").textContent = "Looking for 10 seconds…"; }
+  const r = await B.bt(scan ? "scan" : "list").catch(() => null);
+  if (scan) { $("#scan").disabled = false; $("#scanNote").textContent = "Put the device in pairing mode first."; }
+  if (r && r.ok) { btDevs = r.devices.sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired)); btPaint(); }
+  else if (scan) toast("Bluetooth isn't answering: try Reboot");
+}
+$("#scan").onclick = () => btList(true);
+$("#bt").addEventListener("click", async e => {
+  const b = e.target.closest("[data-bt]"); if (!b || !B) return;
+  const cmd = b.dataset.bt; b.disabled = true;
+  toast(cmd === "pair" ? "Pairing… (keep it in pairing mode)" : cmd === "connect" ? "Connecting…" : "Forgetting…", 30000);
+  const r = await B.bt(cmd, b.dataset.mac).catch(() => null);
+  toast(r && r.ok ? (cmd === "pair" ? "Paired" : cmd === "connect" ? "Connected" : "Forgotten") : (r && r.error) || "Didn't work: try again");
+  btList(false);
+});
+
+refreshApps(); status(); setInterval(status, 10000); setInterval(refreshApps, 4000);
+if (B) { B.bt("on").catch(() => {}); btList(false); setInterval(() => btList(false), 15000); }
+paint();
+</script>
+</body>
+</html>

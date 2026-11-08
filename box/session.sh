@@ -1,6 +1,9 @@
 #!/bin/sh
 # Runs inside cage (nb-box.service): turns the 5" panel to landscape, then starts Nate Bloom full screen.
-# When Nate Bloom exits, cage exits and systemd starts it all again.
+# The app shows the home screen (Nate Bloom, Keys, Listen, Stream, Media, Games). Stream and Media are programs of their
+# own: the app writes "stream" or "media" into /run/nb-box/next and quits, this runs that program, and when it closes
+# (or the power button is pressed) the app comes back on the home screen. When the app closes without asking for
+# anything, this script ends, cage exits and systemd starts it all again.
 . /etc/nb-box.conf
 ROTATE="${ROTATE:-90}"
 SCALE="${SCALE:-1.333}"   # (1280 x 720 on 5": the page drawn at 960 x 540, so text reads at arm's length)
@@ -18,8 +21,26 @@ export NB_BOX=1
 # the native synth engine: its own thread plus two workers on the Pi 5's four cores (the desktop default leaves three
 # cores to other programs; the box has none). The fourth core keeps the browser's audio thread and the screen.
 export NB_ENG_THREADS="${NB_ENG_THREADS:-3}"
+RUN=/run/nb-box; NEXT="$RUN/next"
+mkdir -p "$RUN" 2>/dev/null || true
+rm -f "$NEXT" "$RUN/home"
 if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
-  exec nate-bloom --box --ozone-platform=wayland --force-device-scale-factor="$SCALE"
+  START=""   # (the first time: /etc/nb-box.conf's START decides, normally the home screen)
+  while :; do
+    nb_start="$START"; START=""
+    if [ -f "$NEXT" ]; then nb_start=$(head -c 16 "$NEXT" | tr -cd 'a-z'); rm -f "$NEXT"; fi
+    case "$nb_start" in
+      stream)   # Moonlight: games streamed from the PC (controller-driven; power button = home)
+        QT_QPA_PLATFORM=wayland moonlight-qt || true
+        START=home; continue ;;
+      media)    # Kodi
+        kodi --windowing=wayland || kodi || true
+        START=home; continue ;;
+    esac
+    NB_BOX_START="$nb_start" nate-bloom --box --ozone-platform=wayland --force-device-scale-factor="$SCALE"
+    rc=$?
+    [ -f "$NEXT" ] || exit $rc
+  done
 fi
 
 # fallback: the website's own files from /opt/nb-box/site in the browser, served on this machine only

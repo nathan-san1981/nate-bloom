@@ -44,7 +44,52 @@ Chromium kiosk.
    It installs everything, tunes the system, and reboots into Nate Bloom.
    Options go after `bash -s --`, e.g. `… | bash -s -- --dsi0 --rotate 270`.
 
-## Using it
+## The home screen
+
+At power-on the box opens a home screen with six tiles. Tap one, or turn a controller's big knob and click; a game
+controller's d-pad and A, or a keyboard's arrows and Enter, work too.
+
+| Tile | What it is |
+| --- | --- |
+| **Nate Bloom** | the synth, drums, sampling and DJ (everything below). **⌂ Home** in Play's top bar comes back here. |
+| **Keys** | piano lessons, with the MiniLab, KeyLab or the Yamaha. Settings › Raspberry Pi box › Home screen comes back. |
+| **Listen** | the box becomes a speaker for your phone: pick **Nate Bloom Box** in Spotify or AirPlay (same Wi-Fi). It plays through whatever the box's sound goes to (the headphone adapter, the FiiO KA11 or Bluetooth headphones) and stops when you leave the screen. |
+| **Stream** | Moonlight: games from your PC streamed over Wi-Fi, played with the Xbox controller. The PC runs Sunshine (or NVIDIA GameStream); pair once with the code Moonlight shows. Set the stream to H.265/HEVC: the Pi 5 decodes that in hardware. |
+| **Media** | Kodi for movies, music and photos from a USB stick or the network. Controller-driven; Power › Exit comes back. |
+| **Games** | retro games from a Batocera USB stick (below). Shows **No stick** until one is plugged in. |
+
+- **The power button is Home:** press it from anything (Moonlight and Kodi included) to come back here; **hold it
+  2 seconds to shut down**. When the box is off, a press turns it on.
+- **Settings** (⚙ top right): Bluetooth pairing, what opens at power-on (home screen, Nate Bloom, Keys or Listen),
+  restart, reboot, hold to shut down.
+
+### Bluetooth: keyboard, Xbox controller, headphones
+
+Settings › **Find devices** with the device in pairing mode, then **Pair**. It reconnects by itself after that.
+- **A keyboard** types wherever there's a text field and plays notes in Nate Bloom. Keys' on-screen keyboard steps
+  aside once you type on a real one. Touch and the controller still do everything; the keyboard is a nicety.
+- **Xbox controller:** the Xbox One S and later models (Bluetooth, model 1708 and newer) pair here. The original 2013
+  Xbox One controller has no Bluetooth: plug it in with a micro-USB cable instead. Wired always works with no setup.
+- **Headphones or a speaker:** they become the sound output. Fine for Listen, Media and Stream; for playing Nate Bloom
+  or Keys, use the wired adapter (Bluetooth adds a delay you can hear).
+
+### Games: the Batocera stick
+
+Batocera is its own system (200+ consoles: everything through PS1 runs perfectly, N64/Dreamcast/PSP well, GameCube
+and many PS2 games playably). It lives on a USB stick so Nate Bloom's card is never touched. The installer sets the
+box to start from USB first, then the card, so:
+- **stick in** at power-on, or picking **Games** on the home screen = games;
+- **stick out** = Nate Bloom as usual. (A USB stick of songs isn't bootable: the box skips it in a few seconds.)
+
+Make the stick once (32 GB or more; ROMs go on it too):
+1. Download Batocera for the **Raspberry Pi 5** from batocera.org/download (a `.img.gz`).
+2. Plug the stick into the box and, over SSH: `bash box/make-game-stick.sh ~/batocera-*.img.gz /dev/sda`
+   (the script only writes to a USB drive, asks you to type `yes`, sets up the 5" screen and turns the picture to
+   landscape). If the picture comes up upside down, run it again with `--rotate 270`.
+3. Copy games onto the stick's SHARE partition (or over the network, from Batocera's own menu).
+Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next power-on is Nate Bloom.
+
+## Using Nate Bloom
 
 - Plug in the controller and the headphone cable before or after power-on; both are picked up when plugged in.
 - The MiniLab's big knob turns through sounds, pads play the drums, knobs and faders follow the screen.
@@ -60,7 +105,16 @@ Chromium kiosk.
 
 ## What the installer changes
 
-- Packages: `cage`, `wlr-randr`, `exfatprogs`, `ntfs-3g`, PipeWire + WirePlumber, `rtkit`, the ARM64 Nate Bloom package (or Chromium).
+- Packages: `cage`, `wlr-randr`, `exfatprogs`, `ntfs-3g`, PipeWire + WirePlumber, `rtkit`, BlueZ, `python3-evdev`, the ARM64 Nate Bloom package (or Chromium).
+  For the home screen: `shairport-sync` and raspotify's `librespot` (Listen; their own services are switched off, the
+  app runs them only while Listen is open), `moonlight-qt` from Moonlight's package repository (Stream), `kodi` (Media).
+  Skip any with `--no-listen`, `--no-stream`, `--no-media`.
+- The home screen, Listen and Keys in `/opt/nb-box/apps`; `session.sh` runs Moonlight or Kodi when asked and comes
+  back to the home screen; `/run/nb-box` passes those requests and the power button's "home".
+- The power button: logind ignores it (`/etc/systemd/logind.conf.d/nb-box.conf`) and `nb-box-power.service` makes a
+  press go home and a 2-second hold shut down.
+- Boot order: USB first, then the card (`BOOT_ORDER=0xf614` in the Pi's EEPROM), for the Batocera stick. Keep the old
+  order with `--no-games-boot`.
 - `/boot/firmware/config.txt`: one marked `nb-box` block (Touch Display 2 overlay, `usb_max_current_enable=1` so the
   Pi powers the controller and the cable at full current, no splash) and HDMI audio off (`vc4-kms-v3d,noaudio`) so the
   USB cable is the only sound output. The original is kept as `config.txt.before-nb-box`.
@@ -83,4 +137,8 @@ Chromium kiosk.
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |
 | Clicks or dropouts | ⚡ low power showing? Use the 45 W supply. Otherwise Settings › App › sound buffer: Steady |
 | App closes right after starting (screen flashes back) | rerun the installer with `--4k-kernel` (the Pi 5's default kernel uses 16 KB memory pages) |
+| Listen doesn't show up on the phone | phone and box on the same Wi-Fi? Leave Listen and open it again; `systemctl status avahi-daemon` over SSH |
+| Moonlight or Kodi stuck | press the power button once: it closes them and the home screen comes back |
+| Bluetooth keyboard won't pair | put it in pairing mode right before **Find devices**; keyboards that insist on typing a code can be paired once over SSH with `bluetoothctl` |
+| Games boots Nate Bloom instead | the stick isn't seen as bootable: remake it; check `sudo rpi-eeprom-config` shows `BOOT_ORDER=0xf614` |
 | Want the desktop back | `sudo systemctl disable nb-box && sudo systemctl enable getty@tty1 && sudo reboot` |

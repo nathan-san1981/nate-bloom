@@ -3,6 +3,9 @@
 #   nb-box-helper status | shutdown | reboot | wifi-on | wifi-off | rotate-90 | rotate-270 | scale-125 | scale-133 | scale-150 | restart-app
 #   nb-box-helper install-deb /home/<user>/Downloads/Nate Bloom/<file>.deb
 #   nb-box-helper usb-mount sda1 | usb-unmount sda1    (from udev / nb-box-usb@.service: USB sticks for the DJ)
+#   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
+#   nb-box-helper games          (reboot into the Batocera USB stick, if one is plugged in)
+#   nb-box-helper start-ask | start-bloom | start-keys | start-listen   (what the box opens at power-on)
 set -eu
 CONF=/etc/nb-box.conf
 
@@ -38,6 +41,51 @@ case "${1:-}" in
     later restart "systemctl restart nb-box.service"
     ;;
   restart-app) later restart "systemctl restart nb-box.service" ;;
+  start-ask|start-bloom|start-keys|start-listen)
+    V=${1#start-}
+    if grep -q '^START=' "$CONF"; then sed -i "s/^START=.*/START=$V/" "$CONF"; else echo "START=$V" >> "$CONF"; fi
+    ;;
+  games)
+    # the box boots USB first (install.sh sets the boot order), so a reboot with the stick in starts Batocera
+    D=$(blkid -L BATOCERA 2>/dev/null || true)
+    case "$D" in /dev/sd*) ;; *) echo "no game stick: plug in the Batocera USB stick" >&2; exit 3 ;; esac
+    later reboot "systemctl reboot"
+    ;;
+  bt-on) rfkill unblock bluetooth 2>/dev/null || true; bluetoothctl power on >/dev/null ;;
+  bt-list|bt-scan)
+    rfkill unblock bluetooth 2>/dev/null || true; bluetoothctl power on >/dev/null 2>&1 || true
+    [ "$1" = bt-scan ] && bluetoothctl --timeout 10 scan on >/dev/null 2>&1 || true
+    # one JSON line per device: address, name, kind (from its icon), paired, connected
+    printf '['; SEP=""
+    bluetoothctl devices 2>/dev/null | while read -r _ M NAME; do
+      case "$M" in ??:??:??:??:??:??) ;; *) continue ;; esac
+      I=$(bluetoothctl info "$M" 2>/dev/null)
+      P=false; echo "$I" | grep -q 'Paired: yes' && P=true
+      C=false; echo "$I" | grep -q 'Connected: yes' && C=true
+      K=$(echo "$I" | sed -n 's/.*Icon: //p' | head -1)
+      N=$(printf '%s' "$NAME" | tr -d '"\\' | cut -c1-40)
+      # (unnamed devices found while scanning are noise: only show them once paired)
+      [ "$P" = false ] && [ "$N" = "$(echo "$M" | tr ':' '-')" ] && continue
+      printf '%s{"mac":"%s","name":"%s","kind":"%s","paired":%s,"connected":%s}' "$SEP" "$M" "$N" "$K" "$P" "$C"
+      SEP=","
+    done
+    printf ']\n'
+    ;;
+  bt-pair|bt-connect|bt-forget)
+    M="${2:-}"
+    case "$M" in [0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]) ;; *) echo "bad address" >&2; exit 2 ;; esac
+    case "$1" in
+      bt-forget) bluetoothctl remove "$M" >/dev/null ;;
+      bt-connect) bluetoothctl --timeout 15 connect "$M" | tail -1 ;;
+      bt-pair)
+        # no screen agent: keyboards and controllers that ask for a code fall back to "just works" pairing
+        bluetoothctl --agent NoInputNoOutput --timeout 30 pair "$M" | tail -1 || true
+        bluetoothctl trust "$M" >/dev/null
+        bluetoothctl --timeout 15 connect "$M" | tail -1
+        bluetoothctl info "$M" | grep -q 'Paired: yes' || { echo "pairing didn't finish: put it in pairing mode and try again" >&2; exit 4; }
+        ;;
+    esac
+    ;;
   usb-mount|usb-unmount)
     D="${2:-}"
     case "$D" in sd[a-z]|sd[a-z][0-9]|sd[a-z][0-9][0-9]) ;; *) echo "not a USB disk: $D" >&2; exit 2 ;; esac
@@ -60,5 +108,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen" >&2; exit 2 ;;
 esac

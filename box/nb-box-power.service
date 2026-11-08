@@ -1,0 +1,11 @@
+[Unit]
+Description=Nate Bloom Box: power button = Home (hold 2 s = shut down)
+After=systemd-udevd.service
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/lib/nb-box/nb-box-power.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

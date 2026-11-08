@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Listen · Nate Bloom Box</title>
+<style>
+/* Listen (box/apps/listen.html): the box as a Spotify Connect and AirPlay speaker while this page is open. The app
+   runs librespot and shairport-sync as the box's user (linux/main.js) and stops them when you leave. 960 x 540. */
+:root { --bg: #0f1013; --tile: #1a1c21; --tile2: #22252c; --line: #2c2f37; --ink: #f2efe8; --ink2: #a4a7ae; --ink3: #74777e; --acc: #7fdcae; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, "Noto Sans", sans-serif; overflow: hidden; user-select: none; }
+button { font: inherit; color: inherit; }
+#top { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+#top .t { font-size: 19px; font-weight: 700; flex: 1; }
+.btn { height: 46px; padding: 0 18px; border-radius: 12px; border: 0; background: var(--tile2); font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.chip { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--tile); font-size: 13px; color: var(--ink2); }
+#main { position: absolute; left: 16px; right: 16px; top: 70px; bottom: 16px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
+.card { background: var(--tile); border-radius: 18px; padding: 20px 22px; }
+#now { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+#now .k { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); font-weight: 650; }
+#now .song { font-size: 40px; font-weight: 750; letter-spacing: -.02em; line-height: 1.05; }
+#now .art { font-size: 19px; color: var(--ink2); }
+#now .state { margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; color: var(--acc); font-weight: 600; }
+#now .state i { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); }
+#how { display: flex; flex-direction: column; gap: 12px; }
+.way { display: flex; gap: 14px; align-items: flex-start; }
+.way .ic { width: 44px; height: 44px; border-radius: 12px; flex: none; display: grid; place-items: center; font-weight: 800; font-size: 14px; color: #0f1013; }
+.way b { display: block; font-size: 17px; margin-bottom: 3px; } .way span { font-size: 14px; color: var(--ink2); line-height: 1.4; }
+.way.off { opacity: .4; }
+.note { font-size: 12.5px; color: var(--ink3); line-height: 1.45; margin-top: auto; }
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="btn" id="home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
+  <div class="t">Listen</div>
+  <span class="chip" id="out">…</span>
+</div>
+<div id="main">
+  <div class="card" id="now">
+    <div class="k">Now playing</div>
+    <div class="song" id="song">Waiting for your phone</div>
+    <div class="art" id="art">Pick “Nate Bloom Box” as the speaker</div>
+    <div class="state" id="st" hidden><i></i><span></span></div>
+  </div>
+  <div class="card" id="how">
+    <div class="way" id="wSp"><span class="ic" style="background:#7fdcae">S</span><div><b>Spotify</b><span>In Spotify, tap the speaker icon under the song, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
+    <div class="way" id="wAp"><span class="ic" style="background:#c9b6ff">A</span><div><b>AirPlay (iPhone)</b><span>Control Center, hold the music player, tap the AirPlay icon, then <b style="display:inline;font-size:inherit">Nate Bloom Box</b>.</span></div></div>
+    <div class="note">Your phone and the box need to be on the same Wi-Fi. Volume is on the phone. Sound comes out wherever the box's audio goes now (the headphone adapter or Bluetooth headphones). Leaving this screen stops it.</div>
+  </div>
+</div>
+<script>
+"use strict";
+const B = window.NBBox || null, $ = s => document.querySelector(s);
+const home = () => B ? B.go("home") : history.back();
+$("#home").onclick = home;
+addEventListener("keydown", e => { if (e.key === "Escape" || e.key === "Backspace" || e.key === "Home") home(); });
+// the big knob's click goes home too (CC 115 / 118); a game controller's B
+if (navigator.requestMIDIAccess) navigator.requestMIDIAccess().then(acc => { const h = () => acc.inputs.forEach(i => { i.onmidimessage = m => { const [s, a, v] = m.data; if ((s & 0xf0) === 0xb0 && (a === 115 || a === 118) && v > 0) home(); }; }); h(); acc.onstatechange = h; }).catch(() => {});
+(function pad() { const g = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(Boolean); if (g && g.buttons[1] && g.buttons[1].pressed) return home(); requestAnimationFrame(pad); })();
+
+async function tick() {
+  if (!B) return;
+  const s = await B.listen("status").catch(() => null);
+  if (s) {
+    $("#wSp").classList.toggle("off", !s.spotify); $("#wAp").classList.toggle("off", !s.airplay);
+    const n = s.now;
+    if (n && n.state && n.state !== "idle") {
+      $("#song").textContent = n.name || (n.state === "playing" ? "Playing" : n.state === "paused" ? "Paused" : "Connected");
+      $("#art").textContent = [n.artists, n.album].filter(Boolean).join(" · ") || n.source || "";
+      const st = $("#st"); st.hidden = false; st.querySelector("span").textContent = (n.source ? n.source + " · " : "") + n.state;
+    } else { $("#song").textContent = "Waiting for your phone"; $("#art").textContent = "Pick “" + (s.name || "Nate Bloom Box") + "” as the speaker"; $("#st").hidden = true; }
+  }
+  const b = await B.status().catch(() => null);
+  if (b) $("#out").textContent = b.output ? "Sound: " + b.output : "Sound: default output";
+}
+if (B) { B.listen("start").then(tick); setInterval(tick, 1500); }
+</script>
+</body>
+</html>
