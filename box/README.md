@@ -46,8 +46,9 @@ Chromium kiosk.
 
 ## The home screen
 
-At power-on the box opens a home screen with nine tiles. Tap one, or turn a controller's big knob and click; a game
-controller's d-pad and A, or a keyboard's arrows and Enter, work too.
+At power-on the box opens a main screen in the CarPlay style: the clock and what's playing on the left, pages of big
+app icons on the right (eight to a page; swipe, or turn a controller's big knob, or a gamepad's bumpers to turn the
+page). Tap an icon, or d-pad and A, or arrows and Enter. Settings is the last icon as well as the gear.
 
 | Tile | What it is |
 | --- | --- |

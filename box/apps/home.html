@@ -21,26 +21,39 @@ button { font: inherit; color: inherit; }
 #clock { font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink2); min-width: 54px; text-align: right; }
 .ib { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--tile); display: grid; place-items: center; cursor: pointer; }
 .ib svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-#grid { position: absolute; left: 16px; right: 16px; top: 68px; bottom: 40px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10px; }
-.tile { position: relative; border: 0; border-radius: 16px; background: var(--tile); text-align: left; padding: 12px 14px 11px; display: flex; flex-direction: column; gap: 2px; cursor: pointer; outline: none; transition: transform .08s, background .12s; overflow: hidden; }
-.tile:active { transform: scale(.98); }
-.tile .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; margin-bottom: auto; }
-.tile .ic svg { width: 22px; height: 22px; stroke: #0f1013; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.tile .n { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-.tile .d { font-size: 12.5px; color: var(--ink2); line-height: 1.3; }
+/* CarPlay-style main screen: a sidebar with the clock and what's playing, pages of big icons that scroll sideways */
+#main { position: absolute; left: 16px; right: 16px; top: 66px; bottom: 36px; display: flex; gap: 14px; }
+#side { width: 196px; flex: none; display: flex; flex-direction: column; gap: 10px; }
+#side .card { background: var(--tile); border-radius: 18px; padding: 14px 16px; }
+#side .big { font-size: 44px; font-weight: 300; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+#side .big small { font-size: 16px; font-weight: 500; color: var(--ink2); margin-left: 4px; letter-spacing: 0; }
+#side .date { font-size: 13px; color: var(--ink2); margin-top: 6px; }
+#np { display: none; cursor: pointer; border: 0; text-align: left; color: inherit; font: inherit; width: 100%; }
+#np.on { display: block; background: #1a2620; }
+#np .k { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); font-weight: 650; }
+#np .s { font-size: 16px; font-weight: 750; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#np .a { font-size: 12px; color: var(--ink2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#np .bar { height: 5px; border-radius: 3px; background: #2a2d35; margin-top: 8px; } #np .bar b { display: block; height: 100%; border-radius: 3px; background: #7fdcae; }
+#np .h { font-size: 11px; color: var(--ink3); margin-top: 6px; }
+#side .fill { flex: 1; }
+#side .tip { font-size: 12px; color: var(--ink3); line-height: 1.45; padding: 0 4px; }
+#pages { flex: 1; min-width: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; border-radius: 18px; }
+#pages::-webkit-scrollbar { display: none; }
+.page { flex: none; width: 100%; height: 100%; scroll-snap-align: start; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; padding: 2px; }
+.tile { position: relative; border: 0; border-radius: 18px; background: var(--tile); text-align: center; padding: 14px 10px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; outline: none; transition: transform .08s, background .12s; }
+.tile:active { transform: scale(.97); }
+.tile .ic { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; box-shadow: 0 8px 18px -10px #000, inset 0 -3px 0 rgba(0,0,0,.18); }
+.tile .ic svg { width: 40px; height: 40px; stroke: #0f1013; fill: none; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.tile .n { font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+.tile .d { display: none; }
 .tile.sel { background: var(--tile2); box-shadow: 0 0 0 3px var(--acc) inset; }
-.tile.off { opacity: .45; }
-/* Listen as a now-playing card while music plays (Jam along) */
-.tile .np { display: none; position: absolute; left: 14px; right: 14px; top: 54px; }
-.tile.playing .np { display: block; } .tile.playing .d { display: none; }
-.tile .np .k, .tile .np .s, .tile .np .a, .tile .np .bar { display: block; }
-.tile .np .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); font-weight: 650; }
-.tile .np .s { font-size: 17px; font-weight: 750; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tile .np .a { font-size: 12px; color: var(--ink2); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tile .np .bar { height: 5px; border-radius: 3px; background: #2a2d35; margin-top: 6px; } .tile .np .bar b { display: block; height: 100%; border-radius: 3px; background: #7fdcae; }
+.tile.off { opacity: .4; }
+.tile .badge { position: absolute; right: 10px; top: 10px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: #2a2d35; color: var(--ink2); }
 .tile .badge.res { background: var(--acc); color: #17181c; }
-.tile .badge { position: absolute; right: 14px; top: 14px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: #2a2d35; color: var(--ink2); }
-#hint { position: absolute; left: 16px; right: 16px; bottom: 10px; height: 22px; font-size: 12.5px; color: var(--ink3); display: flex; gap: 18px; align-items: center; }
+.tile .badge.live { background: #1e2a24; color: #9fe3bd; }
+#dots { position: absolute; left: 226px; right: 16px; bottom: 14px; display: flex; justify-content: center; gap: 8px; }
+#dots i { width: 7px; height: 7px; border-radius: 50%; background: #3a3d45; } #dots i.on { background: var(--ink2); }
+#hint { position: absolute; left: 16px; width: 196px; bottom: 10px; height: 22px; font-size: 12.5px; color: var(--ink3); display: flex; gap: 18px; align-items: center; }
 #toast { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 30; max-width: 900px; text-align: center; }
 #toast.on { opacity: 1; }
 /* settings sheet */
@@ -95,19 +108,29 @@ button { font: inherit; color: inherit; }
   <button class="ib" id="gear" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </div>
 
-<div id="grid">
+<div id="main">
+  <div id="side">
+    <div class="card"><div class="big" id="bigClock"></div><div class="date" id="bigDate"></div></div>
+    <button class="card" id="np"><div class="k"></div><div class="s"></div><div class="a"></div><div class="bar"><b></b></div><div class="h">Tap for the level · Stop</div></button>
+    <div class="fill"></div>
+    <div class="tip">Swipe or turn the big knob for more. Power button: back here · hold 2 s: off.</div>
+  </div>
+  <div id="pages" aria-label="Apps">
   <button class="tile" data-app="bloom"><span class="ic" style="background:#c9b6ff"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="n">Nate Bloom</span><span class="d">Synths, drums, sampling, DJ</span></button>
   <button class="tile" data-app="keys"><span class="ic" style="background:#8fc3ff"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v10M12 4v10M16 4v10M8 14v6M12 14v6M16 14v6"/></svg></span><span class="n">Keys</span><span class="d">Piano lessons</span></button>
-  <button class="tile" data-app="listen"><span class="ic" style="background:#7fdcae"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="np"><span class="k"></span><span class="s"></span><span class="a"></span><span class="bar"><b></b></span></span><span class="n">Listen</span><span class="d">Spotify, YouTube &amp; AirPlay from your phone</span></button>
+  <button class="tile" data-app="listen"><span class="ic" style="background:#7fdcae"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span><span class="n">Listen</span><span class="d">Spotify, YouTube &amp; AirPlay from your phone</span></button>
   <button class="tile" data-app="radio"><span class="ic" style="background:#ffb3a7"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="m7 8 10-5"/><circle cx="9" cy="14" r="2.5"/><path d="M15 12h3M15 16h3"/></svg></span><span class="n">Radio</span><span class="d">Internet radio, no phone needed</span></button>
   <button class="tile" data-app="sheets"><span class="ic" style="background:#8fc3ff"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 13h6M9 17h6M9 9h2"/></svg></span><span class="n">Sheets</span><span class="d">Sheet music &amp; chord charts (PDF)</span></button>
   <button class="tile" data-app="stream"><span class="ic" style="background:#ffc477"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 3-5 3z"/></svg></span><span class="n">Stream</span><span class="d">PC games over Wi-Fi (Moonlight)</span></button>
   <button class="tile" data-app="media"><span class="ic" style="background:#ff9fb8"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 8h5M2 16h5M17 8h5M17 16h5"/></svg></span><span class="n">Media</span><span class="d">Movies, music, photos (Kodi)</span></button>
   <button class="tile" data-app="retro"><span class="ic" style="background:#f2b880"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="3"/><path d="M6 10v4M4 12h4"/><circle cx="16" cy="11" r=".9"/><circle cx="18.5" cy="13" r=".9"/></svg></span><span class="n">Retro</span><span class="d">Games without rebooting (RetroArch)</span></button>
   <button class="tile" data-app="games"><span class="ic" style="background:#f2e27a"><svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".8"/><circle cx="18" cy="10" r=".8"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.6 6.2A2.8 2.8 0 0 0 7 17.2L9 15h6l2 2.2a2.8 2.8 0 0 0 4.9-2.4l-.6-6.2A4 4 0 0 0 17.3 5z"/></svg></span><span class="n">Games</span><span class="d">Batocera stick (reboots into it)</span></button>
+  <button class="tile" data-app="settings"><span class="ic" style="background:#9a9da4"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="n">Settings</span><span class="d"></span></button>
+  </div>
 </div>
+<div id="dots"></div>
 
-<div id="hint"><span>Tap, or turn the big knob and click</span><span>Power button: back here · hold 2 s: off</span></div>
+<div id="hint"></div>
 <div id="toast"></div>
 <div id="pair" role="dialog" aria-label="Bluetooth pairing"><div class="box">
   <h3 id="pairT">Pairing</h3><div class="msg" id="pairM"></div><div class="code" id="pairC"></div>
@@ -141,8 +164,15 @@ button { font: inherit; color: inherit; }
 "use strict";
 const B = window.NBBox || null;   // (only inside the box app)
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-const tiles = $$(".tile");
-let sel = 0, apps = { bloom: true, keys: true, listen: true, radio: true, sheets: true, retro: true, stream: true, media: true, games: false, start: "ask" };
+const tiles = $$(".tile"), PER = 8;
+// lay the tiles out in pages of 8 (4 x 2); the list order is the order on screen
+(() => { const host = $("#pages"); const all = [...host.querySelectorAll(".tile")]; host.innerHTML = "";
+  for (let i = 0; i < all.length; i += PER) { const pg = document.createElement("div"); pg.className = "page"; all.slice(i, i + PER).forEach(t => pg.appendChild(t)); host.appendChild(pg); }
+  $("#dots").innerHTML = Array.from({ length: host.children.length }, () => "<i></i>").join(""); })();
+const pageOf = i => Math.floor(i / PER);
+function showPage(n) { const host = $("#pages"); host.scrollTo({ left: n * host.clientWidth, behavior: "smooth" }); $$("#dots i").forEach((d, k) => d.classList.toggle("on", k === n)); }
+$("#pages").addEventListener("scroll", () => { const host = $("#pages"); const n = Math.round(host.scrollLeft / Math.max(1, host.clientWidth)); $$("#dots i").forEach((d, k) => d.classList.toggle("on", k === n)); });
+let sel = 0, apps = { bloom: true, keys: true, listen: true, radio: true, sheets: true, retro: true, stream: true, media: true, games: false, settings: true, start: "ask" };
 const NOT = { keys: "Keys isn't installed on this box", listen: "Listen isn't installed (run the box installer again)", stream: "Moonlight isn't installed (run the box installer again)",
   media: "Kodi isn't installed (run the box installer again)", radio: "Radio needs mpv (run the box installer again)", sheets: "Sheets needs poppler (run the box installer again)",
   retro: "RetroArch isn't installed (run the box installer again)", games: "Plug in the Batocera game stick, then pick Games" };
@@ -151,28 +181,30 @@ function toast(t, ms) { const e = $("#toast"); e.textContent = t; e.classList.ad
 function paint() {
   tiles.forEach((t, i) => {
     t.classList.toggle("sel", i === sel);
-    const a = t.dataset.app, has = !!apps[a];
+    const a = t.dataset.app, has = a === "settings" || !!apps[a];
     t.classList.toggle("off", !has && a !== "games");
     let b = t.querySelector(".badge");
     const J = window.NBJam, music = !!(J && J.playing()), st = J && J.st;
     const resume = music && apps.last === a;
-    const txt = a === "games" ? (has ? "Stick in" : "No stick") : !has ? "Not installed" : a === "listen" && music ? "● " + st.now.state : resume ? "Resume ▸" : "";
+    const txt = a === "settings" ? "" : a === "games" ? (has ? "Stick in" : "No stick") : !has ? "Not installed" : a === "listen" && music ? "● " + st.now.state : resume ? "Resume ▸" : "";
     if (txt && !b) { b = document.createElement("span"); b.className = "badge"; t.appendChild(b); }
-    if (b) { if (txt) { b.textContent = txt; b.classList.toggle("res", resume); } else b.remove(); }
-    if (a === "listen") {
-      t.classList.toggle("playing", music);
-      if (music) { t.querySelector(".np .k").textContent = "Now playing · " + (st.now.source || "phone");
-        t.querySelector(".np .s").textContent = st.now.name || "Playing"; t.querySelector(".np .a").textContent = st.now.artists || "";
-        t.querySelector(".np .bar b").style.width = Math.round((st.muted ? 0 : st.level != null ? st.level : 1) * 100) + "%"; }
-    }
+    if (b) { if (txt) { b.textContent = txt; b.classList.toggle("res", resume); b.classList.toggle("live", a === "listen" && music); } else b.remove(); }
   });
+  // what's playing, in the sidebar (Jam along)
+  const J = window.NBJam, music = !!(J && J.playing()), st = J && J.st, np = $("#np");
+  np.classList.toggle("on", music);
+  if (music) { np.querySelector(".k").textContent = "Now playing · " + (st.now.source || "phone"); np.querySelector(".s").textContent = st.now.name || "Playing";
+    np.querySelector(".a").textContent = st.now.artists || ""; np.querySelector(".bar b").style.width = Math.round((st.muted ? 0 : st.level != null ? st.level : 1) * 100) + "%"; }
+  if (paint.lastSel !== sel) { paint.lastSel = sel; showPage(pageOf(sel)); }
 }
+$("#np").onclick = () => { if (window.NBJam && NBJam.playing()) NBJam.openSheet(); };
 let busy = false;
 const jamOpen = () => !!(window.NBJam && NBJam.open);
 async function open(i) {
   if (busy || jamOpen()) return;
   sel = i; paint();
   const a = tiles[i].dataset.app;
+  if (a === "settings") return openSheet();
   if (!apps[a]) return toast(NOT[a] || "Not available");
   if (a === "listen" && window.NBJam && NBJam.playing()) return NBJam.openSheet();   // (music playing: its level and stop)
   if (!B) return toast("Opens " + tiles[i].querySelector(".n").textContent + " (on the box)");
@@ -189,7 +221,8 @@ tiles.forEach((t, i) => t.addEventListener("click", () => open(i)));
 addEventListener("keydown", e => {
   if ($("#sheet").classList.contains("on")) { if (e.key === "Escape") closeSheet(); return; }
   if (e.key === "ArrowRight") move(1); else if (e.key === "ArrowLeft") move(-1);
-  else if (e.key === "ArrowDown") move(3); else if (e.key === "ArrowUp") move(-3);
+  else if (e.key === "ArrowDown") move(4); else if (e.key === "ArrowUp") move(-4);
+  else if (e.key === "PageDown") { sel = Math.min(tiles.length - 1, (pageOf(sel) + 1) * PER); paint(); } else if (e.key === "PageUp") { sel = Math.max(0, (pageOf(sel) - 1) * PER); paint(); }
   else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(sel); }
   else if (/^[1-9]$/.test(e.key)) open(+e.key - 1);
   else return;
@@ -216,7 +249,10 @@ function padLoop(t) {
   if (gp) {
     const b = i => !!(gp.buttons[i] && gp.buttons[i].pressed);
     const ax = gp.axes[0] || 0, ay = gp.axes[1] || 0;
-    const dir = b(15) || ax > .6 ? 1 : b(14) || ax < -.6 ? -1 : b(13) || ay > .6 ? 3 : b(12) || ay < -.6 ? -3 : 0;
+    const dir = b(15) || ax > .6 ? 1 : b(14) || ax < -.6 ? -1 : b(13) || ay > .6 ? 4 : b(12) || ay < -.6 ? -4 : 0;
+    const rb = b(5), lb = b(4);   // bumpers turn the page
+    if (rb && !pads.held.rb) { sel = Math.min(tiles.length - 1, (pageOf(sel) + 1) * PER); paint(); } if (lb && !pads.held.lb) { sel = Math.max(0, (pageOf(sel) - 1) * PER); paint(); }
+    pads.held.rb = rb; pads.held.lb = lb;
     if (dir && t > pads.next && !$("#sheet").classList.contains("on")) { move(dir); pads.next = t + (pads.dir === dir ? 170 : 380); }
     pads.dir = dir; if (!dir) pads.next = 0;
     const a = b(0), bb = b(1);
@@ -240,7 +276,9 @@ const ICON = {
 };
 const kindIcon = k => /keyboard/.test(k) ? ICON.kb : /gaming|joystick/.test(k) ? ICON.pad : /audio|headset|headphone/.test(k) ? ICON.ph : ICON.dev;
 const kindName = k => /keyboard/.test(k) ? "Keyboard" : /gaming|joystick/.test(k) ? "Controller" : /audio|headset|headphone/.test(k) ? "Headphones / speaker" : /mouse/.test(k) ? "Mouse" : "Device";
-function clock() { const d = new Date(); $("#clock").textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function clock() { const d = new Date(); const t = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); $("#clock").textContent = t;
+  const m = /^(\S+)\s*(\S*)$/.exec(t) || []; $("#bigClock").innerHTML = (m[1] || t) + (m[2] ? "<small>" + m[2] + "</small>" : "");
+  $("#bigDate").textContent = d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" }); }
 clock(); setInterval(clock, 10000);
 async function status() {
   if (!B) return;

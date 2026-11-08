@@ -8,7 +8,9 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
-**New: Radio, Sheets, Retro and an idle screen.** Internet radio on the touch screen; sheet music and chord charts
+**New: a CarPlay-style main screen.** Pages of big icons that scroll sideways, the clock and what's playing beside them.
+
+**Radio, Sheets, Retro and an idle screen.** Internet radio on the touch screen; sheet music and chord charts
 (PDFs from `~/Sheets` or a stick, page turns from the pads, the pedal or a tap); RetroArch games without rebooting
 into the stick (NES to PlayStation keep the music going); and, off until you switch it on, a clock-and-weather screen
 when the box sits untouched. One app on the screen plus one music source is the rule; zram is the safety net. Run the
