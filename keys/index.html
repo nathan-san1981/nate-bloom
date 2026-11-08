@@ -421,10 +421,10 @@ const State = {
 };
 function defaultChild() {
   return {
-    features: { letters: false, copy: false, songs: false, beat: false, stickers: false, freeplay: false },
-    levels: { letters: 1, copy: 1, beat: 1 },
+    features: { letters: false, copy: false, songs: false, beat: false, fingers: false, reading: false, stickers: false, freeplay: false },
+    levels: { letters: 1, copy: 1, beat: 1, fingers: 1, reading: 1 },
     songs: { hcb: false, mary: false, twinkle: false, row: false, ode: false, london: false },
-    beatClick: false,
+    beatClick: false, beatMarch: false, songsListen: false,
     stickers: []
   };
 }
@@ -1666,7 +1666,7 @@ class Session {
   start() {
     this.running = true;
     this.unsub.push(Bus.on('note', e => this.onNote(e)));
-    this.unsub.push(Bus.on('pedal', e => this.pedalEvents.push(e)));
+    this.unsub.push(Bus.on('pedal', e => { this.pedalEvents.push(e); (this.rec ||= []).push({ pedal: e.down, t: e.t }); }));
     if (this.o.mode === 'wait' || this.o.kind === 'rit') this.startWait(); else this.startFlow();
   }
   stop(silent = true) {
@@ -1744,6 +1744,7 @@ class Session {
   /* ---------- input ---------- */
   onNote(e) {
     if (!this.running || e.src === 'demo') return;
+    (this.rec ||= []).push({ on: e.type !== 'off', midi: e.note, vel: e.vel, t: e.t });     // for "Hear yourself"
     if (e.type === 'off') {
       const m = this.exp.find(x => x.matched && x.midi === e.note && x.offT === null);
       if (m) m.offT = e.t;
@@ -1846,6 +1847,21 @@ class Session {
     r.passed = r.pitch >= GRADE.pitch && (r.timing === null || r.timing >= GRADE.timing);
     if (this.o.kind === 'sight') r.passed = r.continuity >= 0.85;
     if (r.improvDone) { r.passed = r.improvPassed; r.issues = r.issues.slice(0, 2); }
+    r.rec = this.rec || [];
+    // evenness: in runs of equal note values (scales, five-finger patterns), how much the notes wander in time
+    if (flow && matched.length >= 8) {
+      const byHand = {};
+      exp.forEach(x => { if (x.matched) (byHand[x.hand] ||= []).push(x); });
+      let worst = null;
+      Object.values(byHand).forEach(arr => {
+        arr.sort((a, b) => a.start - b.start);
+        let run = [arr[0]];
+        const close = () => { if (run.length >= 8) { const errs = run.map(x => x.err), m = errs.reduce((a, b) => a + b, 0) / errs.length; const sd = Math.sqrt(errs.reduce((a, b) => a + (b - m) ** 2, 0) / errs.length); if (worst === null || sd > worst) worst = sd; } };
+        for (let i = 1; i < arr.length; i++) { if (Math.abs(arr[i].n.dur - arr[i - 1].n.dur) < 1e-6 && arr[i].n.dur <= 1) run.push(arr[i]); else { close(); run = [arr[i]]; } }
+        close();
+      });
+      if (worst !== null) { r.extra.evenMs = Math.round(worst); r.issues.push(worst <= 25 ? `Even runs: notes within ±${Math.round(worst)} ms of the beat grid` : `Uneven runs: notes wander ±${Math.round(worst)} ms — play the run slower and listen for equal spacing`); }
+    }
     return r;
   }
   barOf(beat) {
@@ -3880,10 +3896,33 @@ function showResults(P, r, { title = '', note = '', onAgain, onNext, nextLabel =
     ${r.bars && r.bars.length && onLoop ? `<div class="row" style="margin-top:14px"><span class="muted">Work on bar${r.bars.length > 1 ? 's' : ''} ${r.bars.map(b => b + 1).join(', ')}</span><span class="spacer"></span><button class="btn" data-act="loopbars">${ICONS.loop}Loop those bars</button></div>` : ''}
     ${extraHTML}
   </div>`;
+  // hear yourself: play back exactly what was played (self-assessment by ear)
+  const rec = (r.rec || []).filter(x => x.midi !== undefined || x.pedal !== undefined);
+  if (rec.filter(x => x.on).length >= 4 && r.kind !== 'ear' && r.kind !== 'find') {
+    $('.results', P.stage).insertAdjacentHTML('beforeend', `<div class="row" style="margin-top:12px"><span class="muted small">Listen back with the score in mind: is it even, does it breathe?</span><span class="spacer"></span><button class="btn" data-act="hearself">${ICONS.ear}Hear yourself</button></div>`);
+    P.handlers.hearself = () => playRecording(rec);
+  }
   const ap = againPrimary ?? (!r.passed && !!onNext && nextLabel === 'Skip ahead');
   setActions(P, [{ label: 'Again', act: 'again', icon: 'again', primary: ap }, ...(onNext ? [{ label: nextLabel, act: 'next', primary: !ap, ghost: ap, icon: ap ? null : 'next' }] : [])]);
   P.handlers.again = onAgain; if (onNext) P.handlers.next = onNext;
   if (onLoop) P.handlers.loopbars = () => onLoop(r.bars);
+}
+
+function playRecording(rec) {
+  Audio.unlock().then(() => {
+    DemoOut.stopAll();
+    const t0 = rec[0].t, base = now() + 300;
+    let pedal = false; const ups = [];
+    rec.forEach(x => { if (x.pedal !== undefined) { if (pedal && !x.pedal) ups.push(x.t); pedal = x.pedal; } });
+    const pedalDownAt = t => { let d = false; for (const x of rec) { if (x.t > t) break; if (x.pedal !== undefined) d = x.pedal; } return d; };
+    const open = {};
+    rec.forEach(x => {
+      if (x.midi === undefined) { if (DemoOut.usePiano()) Midi.send([0xB0, 64, x.pedal ? 127 : 0], base + x.t - t0); return; }
+      if (x.on) { open[x.midi] = x; DemoOut.on(x.midi, x.vel || 80, base + x.t - t0); }
+      else if (open[x.midi]) { let off = x.t; if (!DemoOut.usePiano() && pedalDownAt(x.t)) off = ups.find(u => u > x.t) || off + 1500; DemoOut.off(x.midi, base + off - t0); delete open[x.midi]; }
+    });
+    Object.values(open).forEach(x => DemoOut.off(x.midi, base + x.t - t0 + 800));
+  });
 }
 
 /* ===================== step renderers ===================== */
@@ -3903,8 +3942,13 @@ STEP_RENDER.concept = (P) => {
   // keyboard: also show the figure's keys on the real keyboard view
   if (fig.kb) P.kb.setTargets(fig.kb.map((m, i) => ({ midi: m, finger: fig.fingers ? fig.fingers[i] : null, hand: fig.hand || 'R' })));
   const next = P.cfg.steps[P.si + 1];
-  setActions(P, [{ label: next && next.type === 'demo' ? 'Hear it' : 'Start', act: 'go', primary: true, icon: 'next' }]);
+  // hear the idea before reading more about it: the figure plays (a score, or the highlighted keys one by one)
+  const figSc = fig.score ? compileScore(typeof fig.score === 'function' ? fig.score(key) : fig.score) : fig.kb ? compileScore({ key: 'C', time: [4, 4], tempo: 84, rh: fig.kb.filter(m => m >= 60).map(m => spellStr(m, 'C') + 'q').join(' ') || 'rq', lh: fig.kb.filter(m => m < 60).map(m => spellStr(m, 'C') + 'q').join(' ') || '' }) : null;
+  const acts = [{ label: next && next.type === 'demo' ? 'Demo' : 'Start', act: 'go', primary: true, icon: 'next' }];
+  if (figSc && figSc.notes.length) acts.unshift({ label: 'Listen', act: 'figplay', icon: 'ear' });
+  setActions(P, acts);
   P.handlers.go = () => { Audio.unlock(); nextStep(P); };
+  P.handlers.figplay = () => { Audio.unlock().then(() => { const s = new Session({ score: figSc, mode: 'demo', tempo: figSc.tempo, onEnd: () => { } }); P.session = s; s.start(); }); };
 };
 
 function lessonDefaults(P, which) {
@@ -3927,7 +3971,7 @@ STEP_RENDER.demo = (P) => {
   };
   draw();
   bindCommon(P, () => { draw(); play(); });
-  const play = () => { setActions(P, [{ label: 'Stop', act: 'stopdemo', icon: 'stop' }]); startSession(P, sc, { mode: 'demo', tempo: sc.tempo * (L.demoFactor || 0.85), onEnd: () => { setActions(P, [{ label: 'Play again', act: 'replay', icon: 'again' }, { label: 'Try it', act: 'go', primary: true, icon: 'next' }]); } }); };
+  const play = () => { setActions(P, [{ label: 'Stop', act: 'stopdemo', icon: 'stop' }]); setFeedback(P, '<span class="muted">Listen and watch the keys.</span>'); startSession(P, sc, { mode: 'demo', tempo: sc.tempo * (L.demoFactor || 0.85), onEnd: () => { setActions(P, [{ label: 'Play again', act: 'replay', icon: 'again' }, { label: 'Try it', act: 'go', primary: true, icon: 'next' }]); if (L.kind !== 'lead' && L.kind !== 'improv' && L.kind !== 'rhythm') setFeedback(P, '<span class="muted">Now hum or sing it back once, out loud, before you play. If you can sing it, your fingers have a target.</span>'); } }); };
   P.handlers.replay = play; P.handlers.go = () => nextStep(P);
   P.handlers.stopdemo = () => { stopSession(P); setActions(P, [{ label: 'Play again', act: 'replay', icon: 'again' }, { label: 'Try it', act: 'go', primary: true, icon: 'next' }]); };
   setFeedback(P, '<span class="muted">Listen and watch the keys.</span>');
@@ -4632,6 +4676,7 @@ function repitchHand(bars, barPcs = null, noRepeat = false) {
 }
 /* a new drill passage for this lesson. Returns {def, label} or null if the lesson keeps its written drill */
 function genDrill(L) {
+  if (L && typeof L.gen === 'function') { try { const g = L.gen(); compileScore(g.def); return g; } catch (e) { console.warn('gen', L.id, e); return null; } }
   if (!canVary(L)) return null;
   const ex = L.ex, k = L.kind || 'play';
   let R = splitBars(ex.rh), Lh = splitBars(ex.lh);
@@ -4927,6 +4972,25 @@ function runImprov(P, which) {
   P.handlers.stop = () => { stopSession(P); renderStep(P); };
 }
 
+/* ---------- generated drills for lessons whose material is a pattern (scales, pedal progressions) ---------- */
+const PROGS_8 = [['C', 'F', 'G', 'C', 'Am', 'F', 'G', 'C'], ['C', 'Am', 'F', 'G', 'C', 'F', 'G', 'C'], ['C', 'G', 'Am', 'F', 'C', 'F', 'G', 'C'], ['C', 'F', 'C', 'G', 'Am', 'Dm', 'G', 'C'], ['C', 'Em', 'F', 'G', 'Am', 'F', 'G', 'C']];
+const CLOSE_RH = { C: '[C4 E4 G4]', F: '[C4 F4 A4]', G: '[B3 D4 G4]', Am: '[C4 E4 A4]', Dm: '[D4 F4 A4]', Em: '[B3 E4 G4]' };
+const OPEN_RH = { C: '[E4 G4 C5]', F: '[F4 A4 C5]', G: '[D4 G4 B4]', Am: '[E4 A4 C5]', Dm: '[F4 A4 D5]', Em: '[E4 G4 B4]' };
+const ROOT_LH = { C: 'C3', F: 'F2', G: 'G2', Am: 'A2', Dm: 'D3', Em: 'E3' };
+function genPedalDrill(voicing) {
+  const pr = pick(PROGS_8), V = voicing === 'open' ? OPEN_RH : CLOSE_RH;
+  const rh = [], lh = [];
+  for (let b = 0; b < 4; b++) { const a = pr[b * 2], c = pr[b * 2 + 1]; rh.push(`P ${V[a]}h P ${V[c]}h`); lh.push(`${ROOT_LH[a]}h ${ROOT_LH[c]}h`); }
+  return { def: { key: 'C', time: [4, 4], tempo: voicing === 'open' ? 56 : 60, rh: rh.join(' | ') + ' *', lh: lh.join(' | ') }, label: pr.slice(0, 4).join(' – ') + ' …' };
+}
+function genScaleDrill(keys, hands = 'R') { const k = pick(keys); return { def: scaleScore(k, { hands, tempo: 80 }), label: `${k} major` }; }
+(function attachGenerators() {
+  const set = (id, fn) => { const L = UNITS.flatMap(u => u.lessons).find(x => x.id === id); if (L) L.gen = fn; };
+  set('u5-3', () => genScaleDrill(['G', 'F']));
+  set('u7-2', () => genPedalDrill('close'));
+  set('u7-3', () => genPedalDrill('open'));
+})();
+
 /* ==== mymusic.js ==== */
 'use strict';
 /* ===================== My music: imported pieces, synced from the computer =====================
@@ -5191,6 +5255,8 @@ const CHILD_FEATURES = [
   ['copy', 'Copy me', 'The piano plays notes, she plays them back. Level = number of notes (1–3)', '#0090ff'],
   ['songs', 'Letter songs', 'Songs as coloured letter blocks. Each song is switched on separately below', '#30a46c'],
   ['beat', 'Steady beat', 'A pulsing circle to tap along with. Level 1: slow · 2: medium · 3: faster', '#8e4ec6'],
+  ['fingers', 'Finger numbers', 'A big number appears; she plays the key under that finger (thumb on middle C). Level 1: fingers 1–3 · 2: 1–5 · 3: both hands', '#12a594'],
+  ['reading', 'Big-note reading', 'Coloured notes on a few lines, growing toward the real staff. Level 1: 2 lines, C D E · 2: 3 lines, C–G · 3: the real staff, C–G', '#3e63dd'],
   ['stickers', 'Sticker page', 'A sticker for each finished round', '#f76b15'],
   ['freeplay', 'Free play', 'Coloured keys, no task', '#d6409f']
 ];
@@ -5199,6 +5265,8 @@ const CHILD_ICONS = {
   copy: '<svg viewBox="0 0 96 96" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M66 14l12 12-12 12"/><path d="M18 46v-6a14 14 0 0 1 14-14h46"/><path d="M30 82L18 70l12-12"/><path d="M78 50v6a14 14 0 0 1-14 14H18"/></svg>',
   songs: '<svg viewBox="0 0 96 96" fill="#fff"><ellipse cx="30" cy="70" rx="13" ry="10"/><ellipse cx="70" cy="62" rx="13" ry="10"/><rect x="39" y="18" width="7" height="52"/><rect x="79" y="10" width="7" height="52"/><path d="M39 18l47-8v12l-47 8z"/></svg>',
   beat: '<svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="30" fill="#fff"/><circle cx="48" cy="48" r="42" fill="none" stroke="#fff" stroke-width="5" opacity=".5"/></svg>',
+  fingers: '<svg viewBox="0 0 96 96" fill="#fff"><rect x="18" y="34" width="11" height="34" rx="5"/><rect x="32" y="16" width="11" height="52" rx="5"/><rect x="46" y="12" width="11" height="56" rx="5"/><rect x="60" y="18" width="11" height="50" rx="5"/><rect x="74" y="28" width="10" height="40" rx="5"/><rect x="18" y="56" width="66" height="26" rx="12"/></svg>',
+  reading: '<svg viewBox="0 0 96 96"><g stroke="#fff" stroke-width="4"><line x1="8" y1="36" x2="88" y2="36"/><line x1="8" y1="60" x2="88" y2="60"/></g><circle cx="30" cy="72" r="10" fill="#fff"/><circle cx="52" cy="60" r="10" fill="#fff"/><circle cx="74" cy="48" r="10" fill="#fff"/></svg>',
   stickers: '<svg viewBox="0 0 96 96" fill="#fff"><path d="M48 10l11 24 26 3-19 18 5 26-23-13-23 13 5-26-19-18 26-3z"/></svg>',
   freeplay: '<svg viewBox="0 0 96 96"><rect x="12" y="22" width="72" height="52" rx="6" fill="#fff"/><g fill="#555"><rect x="26" y="22" width="8" height="30"/><rect x="42" y="22" width="8" height="30"/><rect x="62" y="22" width="8" height="30"/></g></svg>'
 };
@@ -5243,12 +5311,19 @@ function bindHold(btn, fn) {
 /* parent controls */
 SCREENS.parent = () => {
   const p = State.profile, c = p.child;
+  c.levels.fingers ??= 1; c.levels.reading ??= 1;
+  const days7 = [...Array(7)].map((_, i) => addDays(todayStr(), -i));
+  const played = days7.filter(d => (p.stats.days[d] || 0) >= 1).length, mins = Math.round(days7.reduce((a, d) => a + (p.stats.days[d] || 0), 0));
+  const rounds = c.stickers.filter(x => x.d >= days7[6]).length;
   const lvl = (k, max = 3) => `<div class="seg" data-lvl="${k}">${[...Array(max)].map((_, i) => `<button data-v="${i + 1}" class="${c.levels[k] === i + 1 ? 'on' : ''}">Level ${i + 1}</button>`).join('')}</div>`;
   const el = h(`<div class="screen"><div class="topbar"><button class="iconbtn" data-back>${ICONS.back}</button><div class="title"><div class="t1">Parent controls — ${esc(p.name)}</div><div class="t2">Everything starts off. Only what you switch on appears.</div></div><span class="pillslot"></span></div>
     <div class="scroll" style="flex:1"><div class="wrap grid" style="max-width:900px">
+      <div class="card"><h3>This week</h3><p class="muted" style="margin-top:6px">Played on ${played} of the last 7 days · ${mins} minutes · ${rounds} round${rounds === 1 ? '' : 's'} finished. Five to ten minutes a day is plenty at this age.</p></div>
       <div class="card">${CHILD_FEATURES.map(([k, t, d]) => `<div class="field"><div class="lbl"><b>${t}</b><div class="h">${d}</div>${c.levels[k] !== undefined ? `<div style="margin-top:8px">${lvl(k)}</div>` : ''}</div><button class="switch ${c.features[k] ? 'on' : ''}" data-feat="${k}" aria-label="${t}"></button></div>`).join('')}</div>
       <div class="card"><h3>Letter songs</h3>${Object.entries(CHILD_SONGS).map(([k, s]) => `<div class="field"><div class="lbl">${esc(s.title)}</div><button class="switch ${c.songs[k] ? 'on' : ''}" data-song="${k}"></button></div>`).join('')}</div>
       <div class="card"><div class="field"><div class="lbl"><b>Click in Steady beat</b><div class="h">Off = the circle only, silent</div></div><button class="switch ${c.beatClick ? 'on' : ''}" data-click></button></div>
+        <div class="field"><div class="lbl"><b>March first in Steady beat</b><div class="h">Before tapping, a marching figure shows the beat for 8 counts so she can march or clap it first</div></div><button class="switch ${c.beatMarch ? 'on' : ''}" data-opt="beatMarch"></button></div>
+        <div class="field"><div class="lbl"><b>Listen and sing first in Letter songs</b><div class="h">The piano plays the song once with the keys lighting up, then it's her turn</div></div><button class="switch ${c.songsListen ? 'on' : ''}" data-opt="songsListen"></button></div>
         <div class="field"><div class="lbl"><b>Stickers earned</b><div class="h">${c.stickers.length}</div></div><button class="btn ghost" data-clearst style="color:var(--bad)">Clear</button></div></div>
       <div class="row"><button class="btn" data-profiles>Switch profile</button><span class="spacer"></span><button class="btn primary" data-done>Back to ${esc(p.name)}'s screen</button></div>
     </div></div></div>`);
@@ -5259,6 +5334,7 @@ SCREENS.parent = () => {
     if (e.target.closest('[data-profiles]')) { State.data.active = null; State.save(); return go('profiles'); }
     const f = e.target.closest('[data-feat]'); if (f) { c.features[f.dataset.feat] = !c.features[f.dataset.feat]; f.classList.toggle('on'); State.save(); }
     const s = e.target.closest('[data-song]'); if (s) { c.songs[s.dataset.song] = !c.songs[s.dataset.song]; s.classList.toggle('on'); State.save(); }
+    const o = e.target.closest('[data-opt]'); if (o) { c[o.dataset.opt] = !c[o.dataset.opt]; o.classList.toggle('on'); State.save(); }
     if (e.target.closest('[data-click]')) { c.beatClick = !c.beatClick; e.target.closest('[data-click]').classList.toggle('on'); State.save(); }
     const lv = e.target.closest('[data-lvl] button'); if (lv) { const k = lv.parentElement.dataset.lvl; c.levels[k] = +lv.dataset.v; $$('button', lv.parentElement).forEach(b => b.classList.toggle('on', b === lv)); State.save(); }
     if (e.target.closest('[data-clearst]')) ask('Clear all stickers?', { ok: 'Clear', danger: true }).then(y => { if (y) { c.stickers = []; State.save(); go('parent'); } });
@@ -5349,15 +5425,22 @@ SCREENS.child_songs = () => {
   const c = State.profile.child;
   const list = Object.entries(CHILD_SONGS).filter(([k]) => c.songs[k]);
   const F = childFrame('Letter songs');
-  let off = null;
+  let off = null, demoS = null;
   const menu = () => {
     off && off(); F.kb.setTargets([]);
     F.stage.innerHTML = list.length ? `<div style="display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:20px">${list.map(([k, s]) => `<button class="ctile" data-s="${k}" style="background:#30a46c;min-height:150px;min-width:240px;font-size:24px">${CHILD_ICONS.songs}<span>${esc(s.title)}</span></button>`).join('')}</div>` : '<p class="muted">No songs switched on.</p>';
     F.stage.onclick = e => { const b = e.target.closest('[data-s]'); if (b) play(b.dataset.s); };
   };
-  const play = k => {
+  const play = (k, listened = false) => {
     F.stage.onclick = null;
     const sc = compileScore({ rh: CHILD_SONGS[k].rh, tempo: 80 });
+    if (c.songsListen && !listened) {
+      F.stage.innerHTML = `<div style="text-align:center"><div style="font-size:30px;font-weight:700">Listen and sing along</div><button class="btn primary big" data-myturn style="margin-top:30px;display:none">${ICONS.play}My turn</button></div>`;
+      const s = new Session({ score: sc, mode: 'demo', tempo: 80, onEnd: () => { const b = F.stage.querySelector('[data-myturn]'); if (b) b.style.display = ''; } });
+      demoS = s; Audio.unlock().then(() => s.start());
+      F.stage.querySelector('[data-myturn]').addEventListener('click', () => { F.stage.innerHTML = ''; play(k, true); });
+      return;
+    }
     const strip = new LetterStrip(F.stage, sc.notes, { colors: true, fingers: false });
     F.stage.style.display = 'block';
     const groups = strip.groups; let i = 0;
@@ -5373,7 +5456,7 @@ SCREENS.child_songs = () => {
     });
   };
   menu();
-  return () => { off && off(); F.cleanup(); };
+  return () => { off && off(); demoS && demoS.stop(); F.cleanup(); };
 };
 
 SCREENS.child_beat = () => {
@@ -5383,7 +5466,19 @@ SCREENS.child_beat = () => {
   let tr = null, off = null, hits = 0, taps = 0;
   F.stage.innerHTML = `<div style="text-align:center"><div class="beat"></div><div class="bdots" style="display:flex;gap:8px;justify-content:center;margin-top:28px;flex-wrap:wrap;max-width:600px"></div><button class="btn primary big" data-go style="margin-top:24px">${ICONS.play}Start</button></div>`;
   const beat = $('.beat', F.stage), dots = $('.bdots', F.stage);
+  let marched = false;
+  // march first: a figure steps left-right on the beat for 8 counts, no tapping yet
+  const march = () => {
+    $('[data-go]', F.stage).classList.add('hidden');
+    const fig = h(`<div class="marcher" style="font-size:22px;font-weight:700;margin-top:18px">March!</div>`); dots.innerHTML = ''; dots.appendChild(fig);
+    const mt = new Transport({ tempo, countIn: 0, metro: c.beatClick, length: 8 });
+    mt.onTick = b => { const k = Math.floor(b); const f = b - k; beat.style.transform = `translateX(${k % 2 ? 26 : -26}px) scale(${f < 0.12 ? 1.1 : 1})`; beat.style.opacity = f < 0.12 ? 1 : 0.6; fig.textContent = `March! ${Math.min(8, k + 1)}`; };
+    mt.onEnd = () => { beat.style.transform = ''; fig.textContent = 'Now tap the beat on the piano'; marched = true; tr = null; setTimeout(start, 900); };
+    tr = mt; Audio.unlock().then(() => mt.start(400));
+  };
   const start = () => {
+    if (c.beatMarch && !marched) return march();
+    marched = false;
     hits = 0; taps = 0; dots.innerHTML = ''; $('[data-go]', F.stage).classList.add('hidden');
     const saved = State.settings.metroSound;
     tr = new Transport({ tempo, countIn: 0, metro: c.beatClick, length: 16 });
@@ -5414,6 +5509,66 @@ SCREENS.child_freeplay = () => {
   const F = childFrame('Free play');
   F.stage.innerHTML = '';
   return F.cleanup;
+};
+
+/* ---------- finger numbers: play the key under the finger shown (C position) ---------- */
+SCREENS.child_fingers = () => {
+  const c = State.profile.child, lv = c.levels.fingers || 1;
+  const F = childFrame('Finger numbers');
+  const RH = [60, 62, 64, 65, 67], LH = [55, 53, 52, 50, 48];      // finger 1..5
+  let n = 0, off = null;
+  const handSVG = (hand, fin) => `<svg viewBox="0 0 200 170" width="360" height="306" style="${hand === 'L' ? 'transform:scaleX(-1)' : ''}">${[[30, 70, 26, 74], [62, 26, 26, 118], [94, 14, 26, 130], [126, 24, 26, 120], [156, 46, 24, 98]].map(([x, y, w, hh], i) => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="13" fill="${i + 1 === fin ? 'var(--accent)' : 'var(--panel2)'}"/>`).join('')}<rect x="30" y="110" width="150" height="56" rx="24" fill="var(--panel2)"/>${[44, 75, 107, 139, 168].map((x, i) => `<text x="${x}" y="${[96, 52, 40, 50, 72][i]}" text-anchor="middle" font-size="18" font-weight="700" fill="${i + 1 === fin ? '#fff' : 'var(--ink2)'}" style="${hand === 'L' ? 'transform:scaleX(-1);transform-origin:' + x + 'px 0' : ''}">${i + 1}</text>`).join('')}</svg>`;
+  const round = () => {
+    n = 0;
+    const ask = () => {
+      if (n >= 5) { off && off(); return roundDone(F, round); }
+      const hand = lv === 3 ? pick(['R', 'L']) : 'R';
+      const fin = 1 + Math.floor(Math.random() * (lv === 1 ? 3 : 5));
+      const target = (hand === 'R' ? RH : LH)[fin - 1];
+      F.stage.innerHTML = `<div style="text-align:center"><div style="font-size:120px;font-weight:800;line-height:1;color:var(--accent)">${fin}</div><div class="muted" style="font-size:22px;margin:6px 0">${hand === 'R' ? 'right hand' : 'left hand'}</div>${handSVG(hand, fin)}</div>`;
+      F.kb.setTargets(lv === 1 ? [{ midi: target }] : []);
+      off && off();
+      off = Bus.on('note', e => { if (e.type !== 'on' || e.src === 'demo') return; if (e.note === target) { F.kb.mark(e.note, 'ok', 400); n++; off(); off = null; setTimeout(ask, 450); } });
+    };
+    ask();
+  };
+  round();
+  return () => { off && off(); F.cleanup(); };
+};
+
+/* ---------- big-note reading: 2 lines → 3 lines → the real staff ---------- */
+SCREENS.child_reading = () => {
+  const c = State.profile.child, lv = c.levels.reading || 1;
+  const F = childFrame('Big-note reading');
+  const pool = lv === 1 ? [60, 62, 64] : [60, 62, 64, 65, 67];
+  const lines = lv === 1 ? 2 : lv === 2 ? 3 : 5;
+  const STEP = { 60: 0, 62: 1, 64: 2, 65: 3, 67: 4 };
+  let n = 0, off = null;
+  const draw = m => {
+    // positions: each step = half a line gap; bottom line = E on the real staff, here the lowest line sits on E too
+    const gap = lv === 3 ? 26 : 44, W = 520, H = lines === 5 ? 260 : 220, base = H - 60;       // y of the bottom line
+    const yOf = st => base - (st - 2) * gap / 2;      // C (step 0) sits one gap below the bottom line (ledger)
+    const col = `var(--c-${letterOf(m)})`, y = yOf(STEP[m]);
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:90vw">`;
+    for (let i = 0; i < lines; i++) svg += `<line x1="40" x2="${W - 40}" y1="${base - i * gap}" y2="${base - i * gap}" stroke="var(--ink2)" stroke-width="${lv === 3 ? 2 : 4}"/>`;
+    if (m === 60) svg += `<line x1="${W / 2 - 46}" x2="${W / 2 + 46}" y1="${y}" y2="${y}" stroke="var(--ink2)" stroke-width="${lv === 3 ? 2 : 4}"/>`;
+    svg += `<ellipse cx="${W / 2}" cy="${y}" rx="${lv === 3 ? 17 : 30}" ry="${lv === 3 ? 13 : 24}" fill="${lv === 3 ? 'var(--ink)' : col}"/>`;
+    if (lv < 3) svg += `<text x="${W / 2}" y="${y + 10}" text-anchor="middle" font-size="28" font-weight="800" fill="#fff">${letterOf(m)}</text>`;
+    return svg + '</svg>';
+  };
+  const round = () => {
+    n = 0; let prev = null;
+    const ask = () => {
+      if (n >= 5) { off && off(); return roundDone(F, round); }
+      let m; do { m = pick(pool); } while (m === prev && pool.length > 1); prev = m;
+      F.stage.innerHTML = `<div style="text-align:center">${draw(m)}<div style="display:flex;gap:10px;justify-content:center;margin-top:14px">${[...Array(5)].map((_, i) => `<span style="width:22px;height:22px;border-radius:50%;background:${i < n ? 'var(--ok)' : 'var(--panel2)'}"></span>`).join('')}</div></div>`;
+      off && off();
+      off = Bus.on('note', e => { if (e.type !== 'on' || e.src === 'demo') return; if (e.note % 12 === m % 12 && !isBlack(e.note)) { F.kb.mark(e.note, 'ok', 400); n++; off(); off = null; setTimeout(ask, 450); } });
+    };
+    ask();
+  };
+  round();
+  return () => { off && off(); F.cleanup(); };
 };
 
 /* ==== harness.js ==== */
