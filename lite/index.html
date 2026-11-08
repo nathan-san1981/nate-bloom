@@ -40520,8 +40520,8 @@ body.nbosk-up{--nbosk-h:0px}`;
   // (the short link synths/ and its own install, "Synths"). One screen: pick a synth, big sliders for its sound, the
   // effects each with an On/Off, Volume, ● Record (Play / Save MP3 / Delete), and keys on screen for when the piano isn't plugged in. When the Yamaha's USB
   // port shows up, every synth goes back to its default sound (once each time it's plugged in) and chords and scale
-  // lock go off, so the piano plays plain notes. The Yamaha's own piano sound is left alone unless "Piano sound" is
-  // tapped (MIDI Local Control). Off ?synths=1 none of this exists; the Box (?box=1) never sees it.
+  // lock go off, so the piano plays plain notes. "Plays" picks Piano / Synth / Piano + Synth
+  // (Synth turns the Yamaha's own sound off with MIDI Local Control). Off ?synths=1 none of this exists; the Box (?box=1) never sees it.
   // ======================================================================
   {
     let on = false;
@@ -40562,6 +40562,11 @@ html.nb-synths .uitoast { z-index: 2147483002; }
 .sy-take { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--raised); border: 1px solid #e5484d66; border-radius: 16px; padding: 8px 12px; font-size: 1rem; }
 .sy-take .sy-tk-dot { color: #e5484d; }
 html.nb-synths .recbanner { display: none !important; }
+.sy-mode { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 14px; background: var(--raised); border: 1px solid var(--line); }
+.sy-mode > span { font: 600 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); padding: 0 6px 0 8px; }
+.sy-mode button { height: 40px; padding: 0 16px; border-radius: 10px; border: 0; background: transparent; color: var(--ink); font: 600 1rem var(--font-body); cursor: pointer; white-space: nowrap; }
+.sy-mode button[aria-pressed="true"] { background: var(--lilac); color: var(--panel); }
+.sy.pianoonly .sy-sec:not(.sy-kb) { opacity: 0.45; }
 .sy-sec { background: var(--raised); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
 .sy-h { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .sy-h b { font: 600 0.8rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
@@ -40618,11 +40623,10 @@ html.nb-synths .recbanner { display: none !important; }
 <div class="sy-top">
   <h1>Nate <span>Bloom</span> Synths</h1>
   <span class="sy-chip" id="syKbChip"><i></i><span>No keyboard yet</span></span>
-  <button class="sy-b" id="syLocal" hidden title="The Yamaha's own piano sound under the synth (MIDI Local Control)">Piano sound: On</button>
+  <div class="sy-mode" id="syMode" role="group" aria-label="What the Yamaha plays" hidden><span>Plays</span><button type="button" data-m="piano">Piano</button><button type="button" data-m="synth">Synth</button><button type="button" data-m="both">Piano + Synth</button></div>
   <span class="sy-sp"></span>
   <button class="sy-b sy-rec" id="syRec" title="Record what you play">● Record</button>
   <button class="sy-b" id="syKeysBtn" title="Keys on the screen">Keys on screen</button>
-  <button class="sy-b ghost" id="syFull" title="The whole of Nate Bloom">Full app</button>
 </div>
 <div class="sy-take" id="syTake" hidden><span class="sy-tk-dot">●</span><span id="syTakeInfo">Recording ready</span><span class="sy-sp"></span><button class="sy-b on" id="syTakePlay">▶ Play</button><button class="sy-b" id="syTakeSave" title="Save it as an MP3 (to Downloads, or share it)">Save</button><button class="sy-b ghost" id="syTakeDel">Delete</button></div>
 <div class="sy-sec"><div class="sy-h"><b>Synth</b><em id="syName"></em><small id="syAfter"></small></div><div class="sy-tiles" id="syTiles"></div></div>
@@ -40634,7 +40638,7 @@ html.nb-synths .recbanner { display: none !important; }
   <div class="sy-h"><b>Keys</b><span class="sy-sp"></span><span class="sy-oct"><button class="sy-b" id="syOctDn" aria-label="Octave down">−</button><span id="syOct">C3</span><button class="sy-b" id="syOctUp" aria-label="Octave up">+</button></span></div>
   <div class="sy-keys" id="syKeys"></div>
 </div>
-<div class="sy-note" id="syNote"></div>`;
+<div class="sy-h"><div class="sy-note" id="syNote" style="flex:1"></div><button class="sy-b ghost" id="syFull" title="The whole of Nate Bloom">Full app</button></div>`;
       document.body.appendChild(root);
 
       // ---- a slider: tap the track to jump, slide the thumb; ↺ goes back to the default (the mark on the track) ----
@@ -40818,18 +40822,38 @@ html.nb-synths .recbanner { display: none !important; }
         outs.forEach(o => { try { for (let ch = 0; ch < 16; ch++) o.send([0xb0 | ch, 122, onv ? 127 : 0]); } catch (e) {} });
         return true;
       }
-      function paintLocal() { const b = $s("syLocal"); b.hidden = !SY.yamaha; b.textContent = "Piano sound: " + (SY.localOff ? "Off" : "On"); b.classList.toggle("on", !SY.localOff); b.setAttribute("aria-pressed", String(!SY.localOff)); }
-      $s("syLocal").addEventListener("click", () => {
-        const want = !SY.localOff;
-        if (!sendLocal(!want)) { say("Couldn't reach the Yamaha. Turn its volume knob down to hear only the synth."); return; }
-        SY.localOff = want; paintLocal();
-        say(want ? "The Yamaha's piano sound is off: you hear only the synth. Tap again to bring it back." : "The Yamaha's piano sound is back.");
-      });
-      // the piano gets its own sound back when this closes
+      // What the Yamaha plays: Piano (its own sound; the synth ignores its keys), Synth (Local Control off: the piano's
+      // keys only reach the synth), Piano + Synth (both). Her choice is kept, and sent again each time it's plugged in
+      // (the piano turns Local Control back on at power-up). Piano gets its own sound back when this closes.
+      let mode = "both"; try { const m = localStorage.getItem("nb-synths-mode"); if (["piano", "synth", "both"].includes(m)) mode = m; } catch (e) {}
+      SY.mode = () => mode;
+      function paintMode() {
+        const g = $s("syMode"); g.hidden = !SY.yamaha;
+        g.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === mode)));
+        root.classList.toggle("pianoonly", !!SY.yamaha && mode === "piano");
+      }
+      function applyMode(quiet) {
+        const wantLocal = mode !== "synth";
+        if (!wantLocal || SY.localOff) { const ok = sendLocal(wantLocal); if (ok) SY.localOff = !wantLocal; else if (!quiet) say("Couldn't reach the Yamaha's MIDI. Turn its volume knob down to hear only the synth."); }
+        if (mode === "piano") { try { allOff(); } catch (e) {} try { nbSustain(false); } catch (e) {} }
+        paintMode();
+      }
+      $s("syMode").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+        mode = b.dataset.m; try { localStorage.setItem("nb-synths-mode", mode); } catch (e) {}
+        try { start(); } catch (e) {}
+        applyMode(false);
+        say(mode === "piano" ? "Piano: the Yamaha's own sound, no synth" : mode === "synth" ? "Synth: only the synth (the Yamaha's piano sound is off)" : "Piano + Synth: both together");
+      }));
+      // Piano: the Yamaha's notes and pedal don't reach the synth (other keyboards and the screen still play it)
+      { const t0 = window.__midiTap; window.__midiTap = function (e) {
+          try { if (mode === "piano" && SY.yamaha && e && e.target && e.target.id === SY.yamaha.id) { const c = e.data[0] & 0xf0; if (c === 0x90 || c === 0x80 || c === 0xb0 || c === 0xe0 || c === 0xd0 || c === 0xa0) return true; } } catch (er) {}
+          return t0 ? t0.apply(this, arguments) : false;
+        }; }
+      function paintLocal() { paintMode(); }
       window.addEventListener("pagehide", () => { if (SY.localOff) sendLocal(true); });
       function paintChip() {
         const c = $s("syKbChip"); c.classList.toggle("ok", !!SY.yamaha);
-        c.querySelector("span").textContent = SY.yamaha ? "Yamaha connected · default sounds" : SY.other ? SY.other + " connected" : (md.access ? "Plug in the Yamaha (USB)" : "Tap to connect the keyboard");
+        c.querySelector("span").textContent = SY.yamaha ? "Yamaha connected" : SY.other ? SY.other + " connected" : (md.access ? "Plug in the Yamaha (USB)" : "Tap to connect the keyboard");
         paintLocal();
       }
       function scanPorts() {
@@ -40841,6 +40865,7 @@ html.nb-synths .recbanner { display: none !important; }
         if (y && (!was || was.id !== y.id)) {
           yamahaDefaults();
           showKeys(false);
+          SY.localOff = false; setTimeout(() => applyMode(true), 300);
           say("Yamaha connected · every synth is on its default sound");
         }
         if (!y && was) { SY.localOff = false; showKeys(true); say("The Yamaha was unplugged · keys on screen"); }
@@ -40873,7 +40898,7 @@ html.nb-synths .recbanner { display: none !important; }
       function paintAll(force) { paintTiles(); paintDials(force); paintFx(force); paintChip(); }
       // the base app plays the synths (not samples or drums)
       function toSynths() { try { const b = $s("mSynths"); if (b && b.getAttribute("aria-pressed") !== "true") b.click(); } catch (e) {} if (!curEng()) { const f = synthItems()[0]; if (f) { state.engine = f.eng; try { renderEngine(); } catch (e) {} } } }
-      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. To hear only the synth, tap <b>Piano sound</b> (or turn the Yamaha's volume down). Sliders: slide or tap the track; the small mark is the default, and ↺ goes back to it.";
+      $s("syNote").innerHTML = "The Yamaha plays whichever synth is lit, with its sustain pedal. <b>Plays</b> picks Piano, Synth or both. If Synth still has the piano under it, turn the Yamaha's volume knob down: the synth keeps playing. Sliders: slide or tap the track; the small mark is the default, and ↺ goes back to it.";
       showKeys(true);
       setTimeout(() => { toSynths(); paintAll(true); }, 0);
       $s("startBtn") && $s("startBtn").addEventListener("click", () => setTimeout(() => { toSynths(); paintAll(true); }, 50));
