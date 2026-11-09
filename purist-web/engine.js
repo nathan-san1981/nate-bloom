@@ -137,6 +137,7 @@ export class Player {
     this.pos0 = 0; this.t0 = 0; this.pausedAt = 0;
     this.loopMix = { on: false, start: 0, end: 0 };
     this.voices = [];             // live nodes for the current pass
+    this.gen = 0;                 // bumps on every play/pause; stale async work checks it
     this.stretchers = new Map();  // track id -> { node, url }
     this.onEnded = null;
     this.timer = null;
@@ -254,45 +255,62 @@ export class Player {
     }
   }
 
-  async play(from) {
-    if (this.playing) await this.pause();
+  /** play/pause/seek/refresh run one at a time, in order: a second tap can't start while the first
+   *  is still preparing, so there is only ever one set of voices, and pause always reaches it. */
+  run(fn) {
+    const next = (this.queue || Promise.resolve()).then(fn, fn);
+    this.queue = next.catch(() => {});
+    return next;
+  }
+  play(from) { this.intent = true; return this.run(() => this._play(from)); }
+  pause() { this.intent = false; return this.run(() => this._pause()); }
+  seek(to) {
+    return this.run(async () => {
+      to = Math.max(0, to);
+      if (this.playing) await this._play(to);
+      else this.pausedAt = to;
+    });
+  }
+  /** Settings that change what is scheduled (start offset, loop, tempo, key, source): restart in place. */
+  refresh() { return this.run(async () => { if (this.playing) await this._play(this.position); }); }
+
+  /** Stop every voice this player has scheduled, whatever state it thinks it's in. */
+  silenceAll(at) {
+    this.silenceVoices(this.voices, at);
+    if (this.oldVoices) this.silenceVoices(this.oldVoices, at);
+    this.voices = []; this.oldVoices = null;
+  }
+
+  async _play(from) {
+    if (this.playing) await this._pause();
     if (this.ctx.state !== 'running') await this.ctx.resume();
     if (from == null) from = this.pausedAt;
     const len = this.length;
     if (!this.loopMix.on && from >= len - 0.01) from = 0;
     this.levels();
     await this.prepare();
+    const gen = ++this.gen;
     const when = this.ctx.currentTime + LEAD;
+    this.silenceAll(this.ctx.currentTime);          // safety net: nothing from an earlier pass survives
     const g = this.bus.gain;
     g.cancelScheduledValues(0); g.setValueAtTime(0, when - 0.001); g.linearRampToValueAtTime(1, when + FADE);
-    this.voices = await this.schedule(from, when);
+    const v = await this.schedule(from, when);
+    if (gen !== this.gen) { this.silenceVoices(v, this.ctx.currentTime); return; }
+    this.voices = v;
     this.pos0 = from; this.t0 = when; this.playing = true;
     this.nextLoopAt = null;
     clearInterval(this.timer);
     this.timer = setInterval(() => this.tick(), 40);
   }
 
-  async pause() {
-    if (!this.playing) return;
-    const pos = this.position;
-    this.playing = false;
+  async _pause() {
+    this.gen++;
     clearInterval(this.timer);
     const now = this.ctx.currentTime, g = this.bus.gain;
     g.cancelScheduledValues(0); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(0, now + FADE);
-    this.silenceVoices(this.voices, now + FADE + 0.005);
-    if (this.oldVoices) this.silenceVoices(this.oldVoices, now + FADE + 0.005);
-    this.voices = []; this.oldVoices = null;
-    this.pausedAt = Math.max(0, pos);
-  }
-
-  async seek(to) {
-    to = Math.max(0, to);
-    if (this.playing) await this.play(to);
-    else this.pausedAt = to;
-  }
-  /** Settings that change what is scheduled (start offset, loop, tempo, key, source): restart in place. */
-  async refresh() {
-    if (this.playing) await this.play(this.position);
+    this.silenceAll(now + FADE + 0.005);
+    if (this.playing) this.pausedAt = Math.max(0, this.position);
+    this.playing = false;
   }
 
   tick() {
@@ -304,9 +322,11 @@ export class Player {
       if (this.nextLoopAt == null && pos >= L.end - 0.35) {
         const boundary = this.t0 + (L.end - this.pos0);
         this.nextLoopAt = boundary;
-        const old = this.voices;
+        const old = this.voices, gen = this.gen;
         this.schedule(L.start, boundary).then((v) => {
+          if (gen !== this.gen || !this.playing) { this.silenceVoices(v, this.ctx.currentTime); return; }
           this.silenceVoices(old.filter((x) => x.kind === 'src'), boundary);
+          this.oldVoices = old.filter((x) => x.kind === 'src');
           this.voices = v;
         });
       }

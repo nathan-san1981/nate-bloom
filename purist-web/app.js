@@ -154,12 +154,14 @@ function snapToBar(t, bpm, first) {
   return Math.max(0, first + Math.floor((t - first) / bar + 1e-6) * bar);
 }
 
+const loadReq = { A: 0, B: 0 };
 async function loadInto(id, song, kind, keepPlace) {
+  const req = ++loadReq[id];
   await audio();
   const t = T[id], m = meta[id];
   const url = song.url(kind);
   if (!url) return;
-  const wasPlaying = M.playing, pos = M.position;
+  const wasPlaying = M.intent, pos = M.position;
   m.loading = 'Loading ' + SOURCE_NAMES[kind] + '…'; m.err = '';
   if (S.view === 'mixer' || !wide) render();
   try {
@@ -168,6 +170,7 @@ async function loadInto(id, song, kind, keepPlace) {
       const el = document.querySelector('[data-load="' + id + '"]');
       if (el) el.textContent = m.loading;
     });
+    if (req !== loadReq[id]) return;
     const sameSong = m.song && m.song.id === song.id;
     if (wasPlaying) await M.pause();
     t.buffer = buf; t.url = url; t.label = song.title + ' · ' + SOURCE_NAMES[kind];
@@ -201,9 +204,10 @@ async function loadInto(id, song, kind, keepPlace) {
     if (wasPlaying) await M.play(pos); else M.levels();
     updateSession();
   } catch (e) {
+    if (req !== loadReq[id]) return;
     m.loading = ''; m.err = e.message || String(e);
   }
-  render();
+  if (req === loadReq[id]) render();
 }
 
 async function swapAB() {
@@ -259,12 +263,14 @@ function stemKinds(song, mode) {
   if (song.has4) return ['vocals', 'drums', 'bass', 'other'].filter((k) => song.files[k]);
   return ['vocals', 'instrumental'].filter((k) => song.files[k]);
 }
+let songReq = 0;
 async function openSong(song, mode, autoplay) {
+  const req = ++songReq;
   await audio();
   const st = S.song;
   const same = st.song && st.song.id === song.id;
-  const wasPlaying = P.playing, pos = same ? P.position : 0;
-  if (M.playing && autoplay) { await M.pause(); }
+  const wasPlaying = P.intent, pos = same ? P.position : 0;
+  if (autoplay) { M.pause(); P.pause(); }
   st.song = song; st.mode = mode;
   S.view = 'song'; S.open = null;
   const kinds = stemKinds(song, mode);
@@ -277,7 +283,9 @@ async function openSong(song, mode, autoplay) {
         const el = document.querySelector('[data-load="song"]'); if (el) el.textContent = st.loading;
       }));
     }
-    if (P.playing) await P.pause();
+    if (req !== songReq) return;              // a newer tap took over while this one loaded
+    await P.pause();
+    if (req !== songReq) return;
     const old = new Map(P.tracks.map((t) => [t.id, t]));
     P.tracks = kinds.map((k, i) => {
       const t = (same && old.get(k)) || new Track(k);
@@ -292,9 +300,9 @@ async function openSong(song, mode, autoplay) {
     st.loading = '';
     P.levels();
     if (autoplay || wasPlaying) await P.play(pos);
-    else P.pausedAt = pos;
+    else await P.seek(pos);
     updateSession();
-  } catch (e) { st.loading = ''; st.err = e.message || String(e); }
+  } catch (e) { if (req === songReq) { st.loading = ''; st.err = e.message || String(e); } }
   render();
 }
 function mixPeaksSource(bufs) {
@@ -309,10 +317,10 @@ const activePlayer = () => (S.view === 'song' ? P : M);
 async function togglePlay(player) {
   await audio();
   player = player || activePlayer();
-  if (player.playing) { await player.pause(); render(); return; }
+  if (player.intent) { await player.pause(); render(); return; }
   if (!player.tracks.some((t) => t.buffer)) { toast(player === M ? 'Load a song into A or B from the Library first' : 'Pick a song in the Library first'); return; }
   const other = player === M ? P : M;
-  if (other.playing) await other.pause();
+  if (other.intent) other.pause();
   await player.play();
   updateSession();
   render();
@@ -436,7 +444,7 @@ function wideRows() {
     h('span', { class: 'n dim' }, s.duration ? fmt(s.duration, false) : ''), h('span', { class: 'st' + (s.has4 ? ' four' : '') }, stemText(s))));
 }
 function quickButtons(s, lead) {
-  const q = (mode, label, sub) => h('button', { type: 'button', class: 'qbtn' + (lead === mode ? ' lead' : ''), disabled: stemKinds(s, mode).length ? null : true, onClick: () => openSong(s, mode, true) }, label, h('span', null, sub));
+  const q = (mode, label, sub) => h('button', { type: 'button', class: 'qbtn' + (lead === mode ? ' lead' : ''), disabled: stemKinds(s, mode).length && !S.song.loading ? null : true, onClick: () => openSong(s, mode, true) }, label, h('span', null, sub));
   return h('div', { class: 'quick', role: 'group', 'aria-label': 'Play ' + s.title },
     q('original', 'Original', 'the MP3'), q('vocals', 'Vocals only', 'vocals stem'),
     q('instrumental', 'Instrumental', 'instrumental stem'), q('custom', 'Custom mix', 'set each stem'));
@@ -505,7 +513,8 @@ function viewLibrary() {
 // ------------------------------------------------------------------ views: mixer
 function transportCard(player, opts) {
   const len = player.length;
-  const playBtn = h('button', { type: 'button', class: 'play', 'aria-label': player.playing ? 'Pause' : 'Play', onClick: () => togglePlay(player) }, playIcon(player.playing, wide ? 20 : 22));
+  const busy = meta.A.loading || meta.B.loading;
+  const playBtn = h('button', { type: 'button', class: 'play', 'aria-label': player.intent ? 'Pause' : 'Play', disabled: busy && !player.intent ? true : null, onClick: () => togglePlay(player) }, playIcon(player.intent, wide ? 20 : 22));
   const time = h('div', { class: 'time', 'data-time': opts.id }, fmt(player.position), ' ', h('small', null, '/ ' + fmt(len, wide)));
   const bars = h('div', { class: 'bars', 'data-bars': opts.id }, opts.barsText());
   const ov = h('div', { class: 'overview', role: 'slider', tabindex: 0, 'aria-label': 'Position in the mix', 'aria-valuemin': 0, 'aria-valuemax': Math.round(len) },
@@ -779,7 +788,7 @@ function viewSong() {
     h('div', { class: 'empty' }, 'Pick a song in the Library, then choose Original, Vocals only, Instrumental or Custom mix.',
       h('div', { style: { marginTop: '12px' } }, h('button', { type: 'button', class: 'btn', onClick: () => { S.view = 'library'; render(); } }, 'Library'))));
   const k = parseKey(s.key);
-  const mode = (m, label, sub) => h('button', { type: 'button', class: 'qbtn', style: { height: wide ? '54px' : '48px', fontSize: wide ? '15px' : '14px' }, 'aria-pressed': st.mode === m ? 'true' : 'false', disabled: stemKinds(s, m).length ? null : true, onClick: () => openSong(s, m, P.playing) }, label, wide ? h('span', null, sub) : null);
+  const mode = (m, label, sub) => h('button', { type: 'button', class: 'qbtn', style: { height: wide ? '54px' : '48px', fontSize: wide ? '15px' : '14px' }, 'aria-pressed': st.mode === m ? 'true' : 'false', disabled: stemKinds(s, m).length && !st.loading ? null : true, onClick: () => openSong(s, m, P.intent) }, label, wide ? h('span', null, sub) : null);
   const head = h('header', { class: 'vhead' }, h('h1', null, s.title), h('span', { class: 'dim', style: { fontSize: '14px' } }, s.artist),
     s.bpm ? h('span', { class: 'chip' }, fmtBpm(s.bpm) + ' BPM') : null, k ? h('span', { class: 'chip' }, keyName(k)) : null,
     h('div', { class: 'grow' }),
@@ -796,7 +805,7 @@ function viewSong() {
   const loopBtn = h('button', { type: 'button', class: 'btn ' + (L.on ? 'a-on' : 'off'), 'aria-pressed': L.on ? 'true' : 'false', disabled: len ? null : true, onClick: () => songLoop(!L.on, L.bars || 8) }, L.on ? 'Loop ' + fmt1(L.start) + '–' + fmt1(L.end) : 'Loop: off');
   const transport = h('section', { class: 'card', 'aria-label': 'Transport', style: { padding: wide ? '12px 16px' : '12px' } },
     h('div', { class: 'row', style: { gap: wide ? '16px' : '12px', flexWrap: wide ? 'nowrap' : 'wrap' } },
-      h('button', { type: 'button', class: 'play', 'aria-label': P.playing ? 'Pause' : 'Play', onClick: () => togglePlay(P) }, playIcon(P.playing)),
+      h('button', { type: 'button', class: 'play', 'aria-label': P.intent ? 'Pause' : 'Play', disabled: st.loading && !P.intent ? true : null, onClick: () => togglePlay(P) }, playIcon(P.intent)),
       h('div', { class: 'time', 'data-time': 'P', style: { minWidth: wide ? '176px' : 0 } }, fmt(P.position), ' ', h('small', null, '/ ' + fmt(len, wide))),
       wide ? wave : null, wide ? loopBtn : h('div', { class: 'grow' }), wide ? null : loopBtn),
     wide ? null : wave,
@@ -851,7 +860,7 @@ function miniPlayer() {
     h('button', { type: 'button', class: 'grow', style: { minWidth: 0, background: 'none', border: 0, textAlign: 'left', padding: '8px 0', display: 'flex', alignItems: 'center', gap: '10px' }, onClick: () => { S.view = songActive ? 'song' : 'mixer'; render(); } },
       songActive ? null : h('div', { class: 'row', style: { gap: '3px', flex: 'none' } }, h('span', { class: 'badge A', style: { width: '18px', height: '18px', fontSize: '10px' } }, 'A'), h('span', { class: 'badge B', style: { width: '18px', height: '18px', fontSize: '10px' } }, 'B')),
       h('div', { style: { minWidth: 0 } }, h('div', { class: 'title', style: { fontSize: '13.5px' } }, title), h('div', { class: 'mono dim', style: { fontSize: '11.5px' }, 'data-time': songActive ? 'Pmini' : 'Mmini' }, fmt(player.position, false) + ' / ' + fmt(player.length, false)))),
-    h('button', { type: 'button', class: 'play', style: { width: '40px', height: '40px' }, 'aria-label': player.playing ? 'Pause' : 'Play', onClick: () => togglePlay(player) }, playIcon(player.playing, 16)));
+    h('button', { type: 'button', class: 'play', style: { width: '40px', height: '40px' }, 'aria-label': player.intent ? 'Pause' : 'Play', onClick: () => togglePlay(player) }, playIcon(player.intent, 16)));
   return el;
 }
 
