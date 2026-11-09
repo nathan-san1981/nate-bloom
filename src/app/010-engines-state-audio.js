@@ -274,8 +274,9 @@
     let nbLowest = false; try { nbLowest = !window.NB_LITE && !!(window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && window.NB_NATIVE.lowLatency && window.NB_NATIVE.lowLatency.frames > 0); } catch (e) {}
     if (nbLowest) nbSteady = false;
     // (synths) "Piano speakers": the sound goes to the Yamaha P-225 over USB at its own rate (44.1 kHz), with a steadier buffer
-    let nbPianoOut = false; try { nbPianoOut = new URLSearchParams(location.search).get("synths") === "1" && localStorage.getItem("nb-synths-out") === "piano"; } catch (e) {}
-    if (nbPianoOut) { try { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced", sampleRate: 44100 }); } catch (e) { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" }); } }
+    // (fastest by default; "steady" trades a little delay for a bigger buffer if the sound breaks up)
+    let nbPianoOut = ""; try { if (new URLSearchParams(location.search).get("synths") === "1") nbPianoOut = { piano: "interactive", pianoSteady: "balanced" }[localStorage.getItem("nb-synths-out")] || ""; } catch (e) {}
+    if (nbPianoOut) { try { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: nbPianoOut, sampleRate: 44100 }); } catch (e) { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: nbPianoOut }); } }
     else if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
     else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
     ctx.__nbBuf = nbLowest ? "lowest" : nbSteady ? "steady" : "fast";
