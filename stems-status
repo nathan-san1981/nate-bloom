@@ -1,0 +1,24 @@
+#!/bin/bash
+# stems-status — progress, finish estimate, failures, machines, background jobs, disk for the 80s stems batch
+S="/srv/tandem-pool/Done/80s Hits"; I="/srv/tandem-pool/Inbox/Separate stems"
+done=$(find "$S" -type f -iname '*vocal*' | wc -l)
+left=$(find "$I/80s Hits" -type f \( -iname '*.mp3' -o -iname '*.flac' -o -iname '*.wav' -o -iname '*.m4a' \) 2>/dev/null | wc -l)
+failed=$(find "$I/Not done" -type f 2>/dev/null | wc -l)
+first=$(find "$S" -type f -iname '*vocal*' -printf '%T@\n' | sort -n | head -1)
+echo "== Separation"
+echo "  done: $done   waiting: $left   failed: $failed"
+if [ "$done" -gt 1 ] && [ "$left" -gt 0 ]; then
+  per=$(( ( $(date +%s) - ${first%.*} ) / done ))
+  echo "  about $((per/60)) min $((per%60)) s per song · finish around $(date -d "+$((per*left)) seconds" '+%a %-I:%M %p')"
+fi
+echo "== Machines"
+curl -s -m 3 127.0.0.1:8740/api/ping >/dev/null && echo "  Beelink Tandem: running" || echo "  Beelink Tandem: NOT ANSWERING"
+curl -s -m 3 10.77.0.51:8740/api/ping >/dev/null && echo "  GPU box Tandem: running" || echo "  GPU box Tandem: NOT ANSWERING"
+h=$(ssh -o BatchMode=yes -o ConnectTimeout=4 nathan@10.77.0.51 'tail -1 ~/logs/health.log' 2>/dev/null)
+[ -n "$h" ] && echo "  GPU box health: $h  (GPU °C, watts, load, VRAM, CPU °C, free RAM)" \
+  || echo "  GPU box health: not readable (run once: ssh-copy-id nathan@10.77.0.51)"
+echo "== Background jobs (every 10 min)"
+echo "  FLAC:      $(tail -1 ~/stems-flac.log 2>/dev/null)"
+echo "  collector: $(tail -1 ~/stems-collect.log 2>/dev/null)"
+echo "== Disk"
+df -h /srv/tandem-pool | awk 'NR==2{print "  free: " $4 " of " $2}'
