@@ -162,6 +162,7 @@ html.nb-synths .recbanner { display: none !important; }
   <div class="sy-h"><b>Keys</b><span class="sy-sp"></span><span class="sy-oct"><button class="sy-b" id="syOctDn" aria-label="Octave down">−</button><span id="syOct">C3</span><button class="sy-b" id="syOctUp" aria-label="Octave up">+</button></span></div>
   <div class="sy-keys" id="syKeys"></div>
 </div>
+<div class="sy-h"><div class="sy-mode" id="syOut" role="group" aria-label="Where the synth sound comes out"><span>Sound out</span><button type="button" data-o="tablet">Tablet</button><button type="button" data-o="piano">Piano speakers</button></div></div>
 <div class="sy-h"><div class="sy-note" id="syNote" style="flex:1"></div><button class="sy-b ghost" id="syFull" title="The whole of Nate Bloom">Full app</button></div>`;
       document.body.appendChild(root);
 
@@ -511,6 +512,19 @@ html.nb-synths .recbanner { display: none !important; }
           } catch (e) {}
         }, 120);
       });
+
+      // ---- Sound out: Tablet, or the piano's speakers over USB (Android's own setting decides the route: with "Disable USB
+      // audio routing" on, the tablet; off, the piano). Piano speakers runs the sound at 44.1 kHz, the P-225's rate. ----
+      { let out = "tablet"; try { if (localStorage.getItem("nb-synths-out") === "piano") out = "piano"; } catch (e) {}
+        const g = $s("syOut"), paintOut = () => g.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.o === out)));
+        paintOut();
+        g.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+          if (b.dataset.o === out) return;
+          out = b.dataset.o; try { localStorage.setItem("nb-synths-out", out); } catch (e) {} paintOut();
+          say(out === "piano" ? "Piano speakers: in Android's Developer options, turn OFF Disable USB audio routing. Reloading…" : "Tablet: in Developer options, turn ON Disable USB audio routing. Reloading…");
+          setTimeout(() => { try { if (SY.localOff) sendLocal(true); } catch (e) {} location.reload(); }, 2600);
+        }));
+      }
 
       function paintAll(force) { paintTiles(); paintDials(force); paintFx(force); paintChip(); }
       // the base app plays the synths (not samples or drums)

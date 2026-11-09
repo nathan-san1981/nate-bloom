@@ -273,7 +273,10 @@
     // quickest path, so Steady's bigger buffer doesn't put the delay back
     let nbLowest = false; try { nbLowest = !window.NB_LITE && !!(window.NB_NATIVE && window.NB_NATIVE.platform === "linux" && window.NB_NATIVE.lowLatency && window.NB_NATIVE.lowLatency.frames > 0); } catch (e) {}
     if (nbLowest) nbSteady = false;
-    if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
+    // (synths) "Piano speakers": the sound goes to the Yamaha P-225 over USB at its own rate (44.1 kHz), with a steadier buffer
+    let nbPianoOut = false; try { nbPianoOut = new URLSearchParams(location.search).get("synths") === "1" && localStorage.getItem("nb-synths-out") === "piano"; } catch (e) {}
+    if (nbPianoOut) { try { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced", sampleRate: 44100 }); } catch (e) { ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" }); } }
+    else if (nbSteady) ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "balanced" });   // (145: Steady, chosen in Live's CPU panel)
     else ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "interactive" });
     ctx.__nbBuf = nbLowest ? "lowest" : nbSteady ? "steady" : "fast";
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
