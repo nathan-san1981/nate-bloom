@@ -8,6 +8,8 @@ Input: one folder of songs as stems-collect makes it:
   samplehunt.py run   "/srv/tandem-pool/All stems" --out /srv/tandem-pool/Samples      analyse + rank + cut
   samplehunt.py serve /srv/tandem-pool/Samples                                          audition page with thumbs
   samplehunt.py run   ... --bpm 120 --key Am        also export copies stretched/shifted to your project
+  samplehunt.py restem "/srv/tandem-pool/All stems" --out /srv/tandem-pool/Samples --top 200
+                                                    queue the best songs for riffs/bass/drums for a 4-stem split
 
 Every 2-, 4- and 8-bar stretch (on the bar), every vocal phrase and every hit is scored on what makes material good to
 sample, compared across the whole library:
@@ -55,7 +57,7 @@ try:
 except ImportError as e:
     sys.exit(f"Needs numpy, scipy and Tandem's tandem_tools.py (install Tandem): {e}")
 
-VERSION = 2
+VERSION = 3
 AUDIO = {".wav", ".flac", ".mp3", ".m4a", ".ogg", ".opus", ".aif", ".aiff"}
 KINDS = ("vocals", "instrumental", "drums", "bass", "other")
 SR, HOP, FPS, NFFT = tt.SR, tt.HOP, tt.FPS, tt.NFFT
@@ -135,7 +137,12 @@ def analyse(name, files):
         st["mix"] = tt.load(files["mix"])
     n = min(len(v) for v in st.values())
     st = {k: v[:n] for k, v in st.items()}
-    mix = st.pop("mix") if "mix" in st else sum(st.values())
+    if "mix" in st:
+        mix = st.pop("mix")
+    elif all(x in st for x in ("drums", "bass", "other")):
+        mix = sum(st[x] for x in ("vocals", "drums", "bass", "other") if x in st)
+    else:
+        mix = sum(st.values())
     dur = len(mix) / SR
     if dur < 30:
         return {"song": name, "skip": "under 30 s"}
@@ -584,6 +591,82 @@ def glob_escape(s):
     return re.sub(r"([*?\[])", r"[\1]", s)
 
 
+# ----------------------------------------------------------------------------- restem: best songs -> 4 stems
+RESTEM_CATS = ("Synth & lead riffs", "Bass lines", "Drum breaks", "Chord loops", "One-shots")
+
+
+def restem(a):
+    """Rank whole songs by how good their riffs, bass, drums and chords are, and queue the best for a 4-stem split."""
+    import urllib.request
+    folder, out = Path(a.folder).expanduser(), Path(a.out).expanduser()
+    songs = find_songs(folder)
+    cdir = out / ".cache"
+    res = []
+    for nm, f in songs.items():
+        cp = cdir / f"{cache_key(f)}.json"
+        if cp.exists():
+            try:
+                res.append(json.loads(cp.read_text()))
+            except ValueError:
+                pass
+    good = [r for r in res if not r.get("skip")]
+    if not good:
+        sys.exit("No analysed songs yet: run 'samplehunt.py run' first")
+    cands = gather(good)
+    best = {}
+    for cat in RESTEM_CATS:
+        items = cands.get(cat) or []
+        if not items:
+            continue
+        X = np.array([[it.get(f, 0.0) for f in FEATS] for _, it in items], dtype=float)
+        fp = np.array([it["fp"] for _, it in items], dtype=float)
+        fpz = (fp - fp.mean(axis=0)) / (fp.std(axis=0) + 1e-9)
+        X[:, FEATS.index("distinct")] = np.linalg.norm(fpz, axis=1) / math.sqrt(fpz.shape[1])
+        Xz = (X - X.mean(axis=0)) / (X.std(axis=0) + 1e-9)
+        sc = Xz @ np.array([CATS[cat]["w"].get(f, 0.0) for f in FEATS])
+        top = {}
+        for (r, _), v in zip(items, sc):
+            top[r["song"]] = max(top.get(r["song"], -1e9), float(v))
+        for song, v in top.items():
+            best.setdefault(song, []).append(v)
+    done_p = out / ".restem.json"
+    try:
+        queued = set(json.loads(done_p.read_text()))
+    except (OSError, ValueError):
+        queued = set()
+    ranked = sorted(best.items(), key=lambda kv: -float(np.mean(kv[1])))
+    pick = []
+    for song, v in ranked:
+        f = songs.get(song, {})
+        if "drums" in f or song in queued or "mix" not in f:
+            continue  # already 4 stems, already queued, or no original to split
+        pick.append((song, str(Path(f["mix"]).resolve()), float(np.mean(v))))
+        if len(pick) >= a.top:
+            break
+    if not pick:
+        print("Nothing new to queue: the best songs already have 4 stems or are queued.")
+        return
+    print(f"Best {len(pick)} songs for riffs, bass, drums and chords:")
+    for i, (song, _, v) in enumerate(pick[:15], 1):
+        print(f"  {i:3d}. {song}  ({v:+.2f})")
+    if len(pick) > 15:
+        print(f"  … and {len(pick) - 15} more")
+    if a.dry_run:
+        print("(dry run: nothing queued)")
+        return
+    body = json.dumps({"type": "stems", "paths": [p for _, p, _ in pick], "opts": {"stems": "4"}, "each": True}).encode()
+    req = urllib.request.Request("http://127.0.0.1:8740/api/jobs", data=body, method="POST",
+                                 headers={"Content-Type": "application/json", "X-Tandem-UI": "1"})
+    try:
+        r = json.loads(urllib.request.urlopen(req, timeout=60).read())
+    except OSError as e:
+        sys.exit(f"Couldn't reach Tandem on this computer ({e}). Run this on the Beelink, with Tandem running.")
+    queued |= {s for s, _, _ in pick}
+    done_p.write_text(json.dumps(sorted(queued)))
+    print(f"Queued {len(r.get('jobs', []))} four-stem splits in Tandem. Results land in ~/Tandem/Done on this computer;"
+          f" stems-collect adds their drums, bass and other to {folder}.")
+
+
 # ----------------------------------------------------------------------------- audition page + ratings
 def load_ratings(out):
     try:
@@ -729,15 +812,22 @@ def main():
     r.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) - 2))
     r.add_argument("--bpm", type=float, help="also export picks stretched to this tempo")
     r.add_argument("--key", help="also export picks shifted to this key, e.g. Am or F#")
+    rs = sub.add_parser("restem", help="queue the best songs for a 4-stem split in Tandem (run on the Beelink)")
+    rs.add_argument("folder")
+    rs.add_argument("--out", default=str(Path.home() / "Tandem" / "Samples"))
+    rs.add_argument("--top", type=int, default=200, help="how many songs (default 200)")
+    rs.add_argument("--dry-run", action="store_true", help="show the list, queue nothing")
     s = sub.add_parser("serve", help="audition page with thumbs up/down")
     s.add_argument("folder")
     s.add_argument("--port", type=int, default=8765)
     argv = sys.argv[1:]
-    if argv and argv[0] not in ("run", "serve", "-h", "--help"):
+    if argv and argv[0] not in ("run", "serve", "restem", "-h", "--help"):
         argv = ["run"] + argv  # old style: samplehunt.py FOLDER ...
     a = ap.parse_args(argv)
     if a.cmd == "serve":
         serve(a)
+    elif a.cmd == "restem":
+        restem(a)
     elif a.cmd == "run":
         run(a)
     else:

@@ -52,6 +52,8 @@ def place(src: Path, dst: Path, move: bool):
         s, d = src.stat(), dst.stat()
         if (s.st_ino == d.st_ino and s.st_dev == d.st_dev) or s.st_size == d.st_size:
             return "same"
+        if re.search(r" - (vocals|instrumental|drums|bass|other|piano|guitar)$", dst.stem):
+            return "same"  # that stem is already there (e.g. vocals from the first split): keep it, no "(2)" copy
         stem, i = dst.stem, 2
         while dst.exists():
             dst = dst.with_name(f"{stem} ({i}){dst.suffix}")
