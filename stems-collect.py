@@ -25,7 +25,13 @@ VOCAL = re.compile(r"vocals?|vox|acapella|a[ _-]cappella", re.I)
 
 
 def kind(p: Path):
+    """Which stem a file is, or None. The original song (named like its folder) is never a stem."""
     n = p.stem
+    if n.lower() == p.parent.name.lower():
+        return None
+    m = re.search(r"[ _\-(\[](drums|bass|other|piano|guitar)[)\]]*$", n, re.I)
+    if m:
+        return m.group(1).lower()
     if INSTR.search(n):
         return "instrumental"
     if VOCAL.search(n) and not re.search(r"backing", n, re.I):
@@ -37,7 +43,7 @@ def song_name(stem: Path, root: Path):
     """The song's name: its folder (Tandem/Prism make one per song), or the file name minus the stem word."""
     if stem.parent != root:
         return stem.parent.name
-    n = re.sub(r"[ _.\-(\[]*(instrumental|instrument|no[ _-]?vocals?|accompaniment|vocals?)[)\]]*$", "", stem.stem, flags=re.I)
+    n = re.sub(r"[ _.\-(\[]*(instrumental|instrument|no[ _-]?vocals?|accompaniment|vocals?|drums|bass|other|piano|guitar)[)\]]*$", "", stem.stem, flags=re.I)
     return n.strip(" _-") or stem.stem
 
 
@@ -86,7 +92,7 @@ def collect(roots, out: Path, move: bool, quiet=False):
                 r = place(p, out / f"{name} - {k}{p.suffix.lower()}", move)
                 counts[r] += 1
                 songs.setdefault(name, set()).add(k)
-    pairs = sum(1 for v in songs.values() if v == {"vocals", "instrumental"})
+    pairs = sum(1 for v in songs.values() if "vocals" in v and len(v) >= 2)
     if not quiet or counts["linked"] + counts["copied"] + counts["moved"]:
         new = counts["linked"] + counts["copied"] + counts["moved"]
         print(f"{time.strftime('%H:%M')}  {len(songs)} songs ({pairs} with both stems) in {out}  · new files: {new}"

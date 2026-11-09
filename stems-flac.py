@@ -24,10 +24,17 @@ INSTR = re.compile(r"(instrumental|instrument|no[ _-]?vocals?|accompaniment|kara
 VOCAL = re.compile(r"vocals?|vox|acapella|a[ _-]cappella", re.I)
 
 
-def kind(p):
-    if INSTR.search(p.stem):
+def kind(p: Path):
+    """Which stem a file is, or None. The original song (named like its folder) is never a stem."""
+    n = p.stem
+    if n.lower() == p.parent.name.lower():
+        return None
+    m = re.search(r"[ _\-(\[](drums|bass|other|piano|guitar)[)\]]*$", n, re.I)
+    if m:
+        return m.group(1).lower()
+    if INSTR.search(n):
         return "instrumental"
-    if VOCAL.search(p.stem) and not re.search(r"backing", p.stem, re.I):
+    if VOCAL.search(n) and not re.search(r"backing", n, re.I):
         return "vocals"
     return None
 
@@ -35,7 +42,7 @@ def kind(p):
 def song_name(p, root):
     if p.parent != root:
         return p.parent.name
-    n = re.sub(r"[ _.\-(\[]*(instrumental|instrument|no[ _-]?vocals?|accompaniment|vocals?)[)\]]*$", "", p.stem, flags=re.I)
+    n = re.sub(r"[ _.\-(\[]*(instrumental|instrument|no[ _-]?vocals?|accompaniment|vocals?|drums|bass|other|piano|guitar)[)\]]*$", "", p.stem, flags=re.I)
     return n.strip(" _-") or p.stem
 
 
