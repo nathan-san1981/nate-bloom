@@ -1,0 +1,1 @@
+Signalsmith Stretch web release, from github.com/Signalsmith-Audio/signalsmith-stretch commit 88061fd4eda56a2353c5d65c74aa3f4ccf76f9da (Thu Oct 22 14:45:18 2026 +0100), web/release/SignalsmithStretch.mjs, MIT licence.
