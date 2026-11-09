@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """stems-collect — gather Prism results into ONE flat folder:
+     <Song name>.<ext>   (the original, name unchanged)
      <Song name> - vocals.<ext>      <Song name> - instrumental.<ext>
 
 Tandem files each song's results in its own folder (Done/<Song name>/...). This finds every vocal/instrumental
@@ -72,12 +73,14 @@ def collect(roots, out: Path, move: bool, quiet=False):
                 dns[:] = []
                 continue
             dns[:] = [d for d in dns if not d.startswith(".")]
-            for fn in fns:
-                p = Path(dp) / fn
-                if p.suffix.lower() not in AUDIO:
-                    continue
+            audio = [Path(dp) / fn for fn in fns if Path(fn).suffix.lower() in AUDIO and not fn.startswith(".")]
+            has_stems = any(kind(p) for p in audio)
+            for p in audio:
                 k = kind(p)
                 if not k:
+                    # the original song, filed by Tandem next to its stems: keep its own name, unchanged
+                    if has_stems and Path(dp) != root:
+                        counts[place(p, out / p.name, move)] += 1
                     continue
                 name = song_name(p, root)
                 r = place(p, out / f"{name} - {k}{p.suffix.lower()}", move)
