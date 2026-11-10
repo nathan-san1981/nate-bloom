@@ -8,6 +8,10 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: Karaoke.** A Karaoke tile on the home screen opens the karaoke big screen from another computer on your
+Wi-Fi (KARAOKE= and KARAOKE_CERT= in /etc/nb-box.conf): songs stream from there and nothing is kept on the box.
+Phones scan the QR code and sing into their own mic.
+
 **New: any screen.** The box fills whatever it's plugged into at that screen's own resolution: the 5" panel, a
 monitor or a TV over HDMI. Text size Auto (the new default) is 1.333× on the panel and 1× on a TV or monitor; Small,
 Medium and Large still force one. Run the box installer again to get it.

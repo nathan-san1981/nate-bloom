@@ -28,7 +28,7 @@ if (BOX) {
   app.commandLine.appendSwitch("ignore-gpu-blocklist");
   app.commandLine.appendSwitch("disable-renderer-backgrounding");
   app.commandLine.appendSwitch("disable-background-timer-throttling");
-  app.commandLine.appendSwitch("disable-features", "AudioServiceOutOfProcess,Translate,MediaRouter,HardwareMediaKeyHandling");
+  app.commandLine.appendSwitch("disable-features", "AudioServiceOutOfProcess,Translate,MediaRouter,HardwareMediaKeyHandling,WebRtcHideLocalIpsWithMdns");
   app.commandLine.appendSwitch("noerrdialogs");
 }
 app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
@@ -285,7 +285,7 @@ function createWindow() {
   win.webContents.on("before-input-event", (e, i) => { if (i.type === "keyDown" && i.control && i.shift && !i.alt && !i.meta && i.code === "KeyF") { e.preventDefault(); setWide(!WIDE); } });
   if (!BOX) win.on("close", saveState);
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
-  win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
+  win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off
   // (preload reads engine-crash.json), so a fault in it can never keep the app from working. 10 minutes without one clears it.
   const crashPath = path.join(app.getPath("userData"), "engine-crash.json");
@@ -336,6 +336,11 @@ const SHEETS_DIR = path.join(app.getPath("home"), "Sheets"), ROMS_DIR = path.joi
 let boxLast = "";   // (the last of Nate Bloom / Keys opened: the home screen offers Resume on it)
 const hasFile = p => { try { return fs.statSync(p).isFile(); } catch (e) { return false; } };
 function boxConf(key) { try { return (new RegExp("^" + key + "=(\\S*)", "m").exec(fs.readFileSync("/etc/nb-box.conf", "utf8")) || [])[1] || ""; } catch (e) { return ""; } }
+// (box) Karaoke: the big screen of the karaoke server on another computer (KARAOKE= in /etc/nb-box.conf, e.g.
+// https://192.168.4.185:8800), streamed from there, nothing kept here. KARAOKE_CERT= pins its self-made certificate (sha256/...)
+const KARAOKE = BOX ? boxConf("KARAOKE").replace(/\/+$/, "") : "";
+const KARAOKE_CERT = BOX ? boxConf("KARAOKE_CERT") : "";
+function karaokeUrl(u) { if (!KARAOKE || !u) return false; try { return new URL(u).origin === new URL(KARAOKE).origin; } catch (e) { return false; } }
 function boxStartPage() {
   if (!hasFile(path.join(BOX_APPS, "home.html"))) return BOX_PAGES.bloom;   // (an install without the home screen, or CI: straight to Play)
   const want = process.env.NB_BOX_START || boxConf("START");
@@ -346,7 +351,7 @@ function gameStick() {   // the Batocera stick: its boot partition is labelled B
 }
 async function boxApps() {
   return {
-    home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true,
+    home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true, karaoke: !!KARAOKE,
     keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
     listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync") || ytcastReady()),
     radio: hasFile(path.join(BOX_APPS, "radio.html")) && hasFile("/usr/bin/mpv"),
@@ -359,6 +364,7 @@ async function boxApps() {
 const RETRO_HEAVY = /mupen64|parallel_n64|ppsspp|flycast|dolphin|pcsx2/i;
 async function boxGo(a, arg) {
   a = String(a || "");
+  if (a === "karaoke") { if (!KARAOKE) return { ok: false, error: "not set up" }; win.loadURL(KARAOKE + "/host"); return { ok: true }; }
   if (BOX_PAGES[a]) {
     if (a !== "bloom" && !hasFile(path.join(BOX_APPS, BOX_PAGES[a].replace(/^\/box\//, "").replace(/\?.*$/, "")))) return { ok: false, error: "not installed" };
     win.loadURL(ORIGIN + BOX_PAGES[a]); return { ok: true };
@@ -764,8 +770,17 @@ app.whenReady().then(async () => {
   const ses = session.defaultSession;
   // MIDI (with SysEx), the microphone, choosing the sound output, and nothing else
   const ok = new Set(["midi", "midiSysex", "media", "speaker-selection", "clipboard-sanitized-write", "fullscreen"]);
-  ses.setPermissionRequestHandler((wc, perm, cb, details) => cb(ok.has(perm) && (details.requestingUrl || "").startsWith(ORIGIN)));
-  ses.setPermissionCheckHandler((wc, perm, origin) => ok.has(perm) && (origin || "").startsWith(ORIGIN));
+  ses.setPermissionRequestHandler((wc, perm, cb, details) => cb(ok.has(perm) && ((details.requestingUrl || "").startsWith(ORIGIN) || karaokeUrl(details.requestingUrl))));
+  ses.setPermissionCheckHandler((wc, perm, origin) => ok.has(perm) && ((origin || "").startsWith(ORIGIN) || karaokeUrl(origin)));
+  if (KARAOKE) {   // (box) Karaoke: only its own self-made certificate is trusted, and nothing it sends is kept on disk
+    const kHost = new URL(KARAOKE).hostname;
+    ses.setCertificateVerifyProc((req, cb) => cb(req.hostname === kHost && KARAOKE_CERT && req.certificate && req.certificate.fingerprint === KARAOKE_CERT ? 0 : -3));
+    ses.webRequest.onHeadersReceived({ urls: ["https://*/*", "wss://*/*"] }, (d, cb) => {
+      if (!karaokeUrl(d.url)) return cb({});
+      const h = d.responseHeaders || {}; for (const k of Object.keys(h)) if (k.toLowerCase() === "cache-control") delete h[k];
+      h["Cache-Control"] = ["no-store"]; cb({ responseHeaders: h });
+    });
+  }
   // saves go to Downloads/Nate Bloom, never over an older file
   ses.on("will-download", (e, item) => {
     if (process.env.NB_DEBUG) console.log("[nb] will-download", item.getFilename(), item.getURL().slice(0, 60), SAVE_DIR);

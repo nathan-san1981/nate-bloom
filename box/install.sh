@@ -94,7 +94,7 @@ fetch nb-box-usb@.service /etc/systemd/system/nb-box-usb@.service   # (USB stick
 fetch 99-nb-box-usb.rules /etc/udev/rules.d/99-nb-box-usb.rules
 sudo mkdir -p /media/nb-usb
 START="$(sed -n 's/^START=//p' /etc/nb-box.conf 2>/dev/null || true)"   # (kept when this runs again)
-KEEP="$(grep '^STREAM_' /etc/nb-box.conf 2>/dev/null || true)"   # (stream-setup.sh's settings, kept too)
+KEEP="$(grep -E '^(STREAM_|KARAOKE)' /etc/nb-box.conf 2>/dev/null || true)"   # (stream-setup.sh's settings, kept too)
 sudo tee /etc/nb-box.conf >/dev/null <<EOF
 # Nate Bloom Box settings (Box… in the app changes ROTATE and SCALE; MODE is app or chromium;
 # START is what opens at power-on: ask = the home screen, or bloom, keys, listen, stream;
