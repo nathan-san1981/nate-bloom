@@ -221,7 +221,7 @@ say "The screen (Touch Display 2, 5\") and USB power"
 CFG=/boot/firmware/config.txt; [ -f "$CFG" ] || CFG=/boot/config.txt
 sudo cp -n "$CFG" "$CFG.before-nb-box" 2>/dev/null || true
 sudo sed -i '/^# >>> nb-box/,/^# <<< nb-box/d' "$CFG"
-sudo sed -i 's/^dtoverlay=vc4-kms-v3d$/dtoverlay=vc4-kms-v3d,noaudio/' "$CFG"   # (no HDMI sound devices: the USB cable is the only output)
+sudo sed -i 's/^dtoverlay=vc4-kms-v3d,noaudio$/dtoverlay=vc4-kms-v3d/' "$CFG"   # (HDMI sound on: a TV or monitor can play; a USB output still wins whenever it is plugged in)
 OVL="dtoverlay=vc4-kms-dsi-ili9881-5inch"; [ "$DSI" = 0 ] && OVL="$OVL,dsi0"   # (landscape is done in session.sh, so touch turns with it)
 sudo tee -a "$CFG" >/dev/null <<EOF
 # >>> nb-box (Nate Bloom Box: written by box/install.sh, replaced when it runs again)

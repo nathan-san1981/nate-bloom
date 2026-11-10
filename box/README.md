@@ -161,8 +161,8 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 - Boot order: USB first, then the card (`BOOT_ORDER=0xf614` in the Pi's EEPROM), for the Batocera stick. Keep the old
   order with `--no-games-boot`.
 - `/boot/firmware/config.txt`: one marked `nb-box` block (Touch Display 2 overlay, `usb_max_current_enable=1` so the
-  Pi powers the controller and the cable at full current, no splash) and HDMI audio off (`vc4-kms-v3d,noaudio`) so the
-  USB cable is the only sound output. The original is kept as `config.txt.before-nb-box`.
+  Pi powers the controller and the cable at full current, no splash) and HDMI audio on (an older install's `vc4-kms-v3d,noaudio`
+  is undone), so a TV or monitor can play sound; a USB output is still preferred whenever it's plugged in. The original is kept as `config.txt.before-nb-box`.
 - Sound: PipeWire fixed at 48 kHz with 256-frame buffers, a USB output always preferred and never suspended,
   real-time limits for the `audio` group.
 - Steadiness: CPU governor `performance`, the journal in memory, Wi-Fi power saving off, printing/modem/apt timers off;
