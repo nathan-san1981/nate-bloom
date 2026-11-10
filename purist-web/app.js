@@ -386,13 +386,19 @@ function nav() {
 const isChromeOS = () => /CrOS/.test(navigator.userAgent);
 
 let root;
+// Rebuilding the page makes new scroll boxes; keep where the list and page were scrolled (same view only).
+const SCROLLERS = ['.lbody', 'main.view'];
 function render() {
+  const sameView = root.dataset.view === S.view;
+  const kept = SCROLLERS.map((q) => { const el = root.querySelector(q); return el ? el.scrollTop : 0; });
   wide = matchMedia('(min-width: 820px)').matches;
   document.body.className = wide ? 'wide' : 'narrow';
   pendingDraws.length = 0;
   const view = S.view === 'library' ? viewLibrary() : S.view === 'mixer' ? viewMixer() : S.view === 'song' ? viewSong() : viewSettings();
   const parts = wide ? [nav(), view] : [view, miniPlayer(), nav()];
   root.replaceChildren(...parts.filter(Boolean));
+  root.dataset.view = S.view;
+  if (sameView) SCROLLERS.forEach((q, i) => { const el = root.querySelector(q); if (el && kept[i]) el.scrollTop = kept[i]; });
   if (S.sheet) root.append(viewSheet(S.sheet));
   if (S.dialog) root.append(S.dialog());
   renderBanner(); renderToast();
