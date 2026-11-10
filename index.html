@@ -40123,7 +40123,7 @@ registerProcessor("nb-aw", NBAwProc);
         el.innerHTML = `<div class="bx-card">
             <div class="bx-head"><strong>Box</strong><span class="bx-sp"></span><button type="button" class="btn primary" id="bxClose">Done</button></div>
             <div class="bx-info" id="bxInfo"></div>
-            <div class="bx-row"><span>Text size</span><button type="button" class="btn" data-a="scale-125">Small</button><button type="button" class="btn" data-a="scale-133">Medium</button><button type="button" class="btn" data-a="scale-150">Large</button></div>
+            <div class="bx-row"><span>Text size</span><button type="button" class="btn" data-a="scale-auto">Auto</button><button type="button" class="btn" data-a="scale-125">Small</button><button type="button" class="btn" data-a="scale-133">Medium</button><button type="button" class="btn" data-a="scale-150">Large</button></div>
             <div class="bx-row"><span>Screen</span><button type="button" class="btn" data-a="rotate-90">Turn one way</button><button type="button" class="btn" data-a="rotate-270">Turn the other</button></div>
             <div class="bx-row"><span>Wi-Fi</span><button type="button" class="btn" data-a="wifi-on">On</button><button type="button" class="btn" data-a="wifi-off">Off</button></div>
             <div class="bx-row"><span>App</span><button type="button" class="btn" id="bxUpd">Check for an update</button><button type="button" class="btn" data-a="restart-app">Restart</button></div>
@@ -40133,7 +40133,7 @@ registerProcessor("nb-aw", NBAwProc);
         document.body.appendChild(el); BX.sheet = el;
         el.addEventListener("click", e => { if (e.target === el) el.hidden = true; });
         $b("bxClose").addEventListener("click", () => { el.hidden = true; });
-        const LABEL = { "scale-125": "Text size: small", "scale-133": "Text size: medium", "scale-150": "Text size: large", "rotate-90": "Turning the screen", "rotate-270": "Turning the screen", "wifi-on": "Wi-Fi on", "wifi-off": "Wi-Fi off", "restart-app": "Restarting", reboot: "Rebooting" };
+        const LABEL = { "scale-auto": "Text size: auto", "scale-125": "Text size: small", "scale-133": "Text size: medium", "scale-150": "Text size: large", "rotate-90": "Turning the screen", "rotate-270": "Turning the screen", "wifi-on": "Wi-Fi on", "wifi-off": "Wi-Fi off", "restart-app": "Restarting", reboot: "Rebooting" };
         el.querySelectorAll("[data-a]").forEach(b => b.addEventListener("click", () => { const a = b.dataset.a; bxRun(a, LABEL[a] || a).then(() => { setTimeout(bxPoll, 1500); }); }));
         // shut down: a hold, so a stray tap mid-set can't end it
         const off = $b("bxOff");

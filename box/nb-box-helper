@@ -1,6 +1,6 @@
 #!/bin/sh
 # Nate Bloom Box helper: the only things the app may do as root (sudoers allows this script, nothing else).
-#   nb-box-helper status | shutdown | reboot | wifi-on | wifi-off | rotate-90 | rotate-270 | scale-125 | scale-133 | scale-150 | restart-app
+#   nb-box-helper status | shutdown | reboot | wifi-on | wifi-off | rotate-90 | rotate-270 | scale-auto | scale-125 | scale-133 | scale-150 | restart-app
 #   nb-box-helper install-deb /home/<user>/Downloads/Nate Bloom/<file>.deb
 #   nb-box-helper usb-mount sda1 | usb-unmount sda1    (from udev / nb-box-usb@.service: USB sticks for the DJ)
 #   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
@@ -35,8 +35,8 @@ case "${1:-}" in
     sed -i "s/^ROTATE=.*/ROTATE=$R/" "$CONF"
     later restart "systemctl restart nb-box.service"
     ;;
-  scale-125|scale-133|scale-150)
-    case "$1" in scale-125) S=1.25 ;; scale-133) S=1.333 ;; *) S=1.5 ;; esac
+  scale-auto|scale-125|scale-133|scale-150)
+    case "$1" in scale-auto) S=auto ;; scale-125) S=1.25 ;; scale-133) S=1.333 ;; *) S=1.5 ;; esac
     if grep -q '^SCALE=' "$CONF"; then sed -i "s/^SCALE=.*/SCALE=$S/" "$CONF"; else echo "SCALE=$S" >> "$CONF"; fi
     later restart "systemctl restart nb-box.service"
     ;;
@@ -112,5 +112,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-auto|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
 esac

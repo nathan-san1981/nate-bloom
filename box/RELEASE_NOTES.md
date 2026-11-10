@@ -8,9 +8,9 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
-**New: any monitor or TV.** With no 5" panel connected, the box scales the HDMI screen itself and the app fills
-it: 1080p, 1440p and 4K all show the pages at the panel's size. `HDMI_SCALE` in `/etc/nb-box.conf` overrides it. Run
-the box installer again to get it.
+**New: any screen.** The box fills whatever it's plugged into at that screen's own resolution: the 5" panel, a
+monitor or a TV over HDMI. Text size Auto (the new default) is 1.333× on the panel and 1× on a TV or monitor; Small,
+Medium and Large still force one. Run the box installer again to get it.
 
 **New: a CarPlay-style main screen.** Pages of big icons that scroll sideways, the clock and what's playing beside them.
 

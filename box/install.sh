@@ -101,7 +101,7 @@ sudo tee /etc/nb-box.conf >/dev/null <<EOF
 # STREAM_* (box/stream-setup.sh): the GPU box, app and stream settings for power-on into a stream)
 MODE=$MODE
 ROTATE=$ROTATE
-SCALE=1.333
+SCALE=auto
 BOXUSER=$BOXUSER
 START=${START:-ask}
 EOF

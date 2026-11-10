@@ -6,7 +6,9 @@
 # anything, this script ends, cage exits and systemd starts it all again.
 . /etc/nb-box.conf
 ROTATE="${ROTATE:-90}"
-SCALE="${SCALE:-1.333}"   # (1280 x 720 on 5": the page drawn at 960 x 540, so text reads at arm's length)
+SCALE="${SCALE:-auto}"   # (the app's zoom: auto = 1.333 on the 5" panel, so pages read at arm's length, and 1 on a TV or
+                          # monitor at its own resolution; 1.25 / 1.333 / 1.5 force one. Never a forced device scale: under cage a
+                          # fractional one draws the page into a corner of a big screen)
 
 # the panel is portrait (720 x 1280); the box is landscape. cage maps touch to the output, so touch turns with it.
 i=0
@@ -16,20 +18,6 @@ while [ $i -lt 20 ]; do
   i=$((i + 1)); sleep 0.25
 done
 [ -n "$OUT" ] && wlr-randr --output "$OUT" --transform "$ROTATE" || true
-
-# no panel, a monitor or TV on HDMI instead: the screen itself is scaled (by cage) so the pages come out the size they
-# are on the 5" panel at any resolution (720p x SCALE/1.333 ... 1080p x 2, 1440p x 2.667, 4K x 4), and the app fills it
-# at its own size. HDMI_SCALE in /etc/nb-box.conf sets the scale by hand.
-SCALEFLAG="--force-device-scale-factor=$SCALE"
-if [ -z "$OUT" ]; then
-  HOUT=$(wlr-randr 2>/dev/null | awk '/^[^ ]/ {print $1; exit}')
-  if [ -n "$HOUT" ]; then
-    H=$(wlr-randr 2>/dev/null | awk -v o="$HOUT" '/^[^ ]/ {on = ($1 == o)} on && /current/ {split($1, m, "x"); print m[2]; exit}')
-    S="${HDMI_SCALE:-$(awk -v h="${H:-720}" -v s="$SCALE" 'BEGIN { v = h / 720 * s; if (v < 1) v = 1; printf "%.2f", v }')}"
-    wlr-randr --output "$HOUT" --scale "$S" || true
-    SCALEFLAG=""
-  fi
-fi
 
 export NB_BOX=1
 # the native synth engine: its own thread plus two workers on the Pi 5's four cores (the desktop default leaves three
@@ -63,7 +51,7 @@ if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
         [ -n "$CORE" ] && [ -f "$ROM" ] && retroarch --fullscreen -L "$CORE" "$ROM" || true
         START=home; continue ;;
     esac
-    NB_BOX_START="$nb_start" nate-bloom --box --ozone-platform=wayland $SCALEFLAG
+    NB_BOX_START="$nb_start" NB_BOX_ZOOM="$SCALE" nate-bloom --box --ozone-platform=wayland
     rc=$?
     [ -f "$NEXT" ] || exit $rc
   done
@@ -74,7 +62,7 @@ cd /opt/nb-box/site || exit 1
 python3 -m http.server 8080 --bind 127.0.0.1 >/dev/null 2>&1 &
 sleep 1
 CHR=$(command -v chromium || command -v chromium-browser)
-exec "$CHR" --kiosk --ozone-platform=wayland $SCALEFLAG --noerrdialogs --no-first-run --disable-translate --disable-sync \
+exec "$CHR" --kiosk --ozone-platform=wayland --noerrdialogs --no-first-run --disable-translate --disable-sync \
   --autoplay-policy=no-user-gesture-required --enable-gpu-rasterization --ignore-gpu-blocklist \
   --disable-features=AudioServiceOutOfProcess,Translate --disable-background-timer-throttling \
   --disable-renderer-backgrounding --audio-buffer-size=256 --password-store=basic \

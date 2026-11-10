@@ -246,11 +246,13 @@ function createWindow() {
   const statePath = path.join(app.getPath("userData"), "window.json");
   let st = { width: 1280, height: 800 };
   try { st = Object.assign(st, JSON.parse(fs.readFileSync(statePath, "utf8"))); } catch (e) {}
-  // (box: the whole screen, nothing remembered. On the 5" panel the scale is forced and 1280 x 720 is the panel; on a
-  // monitor or TV, session.sh scales the screen instead and the window takes the screen's size, whatever it is)
-  const boxFit = BOX && !app.commandLine.hasSwitch("force-device-scale-factor");
+  // (box: the whole screen at its own resolution, whatever is plugged in, nothing remembered. Text size is the page
+  // zoom, NB_BOX_ZOOM from /etc/nb-box.conf's SCALE: auto = 1.333 on a screen 800 px tall or less (the 5" panel, 720
+  // once turned) and 1 on a TV or monitor; 1.25 / 1.333 / 1.5 force one)
   const boxBounds = () => screen.getPrimaryDisplay().bounds;
-  if (BOX) st = boxFit ? { width: boxBounds().width, height: boxBounds().height } : { width: 1280, height: 720 };
+  const boxZoom = () => { const z = parseFloat(process.env.NB_BOX_ZOOM); return z >= 0.5 && z <= 4 ? z : (boxBounds().height <= 800 ? 1.333 : 1); };
+  const boxFit = () => { if (!win || win.isDestroyed()) return; win.setBounds(boxBounds()); win.setFullScreen(true); win.webContents.setZoomFactor(boxZoom()); };
+  if (BOX) st = { width: boxBounds().width, height: boxBounds().height };
   win = new BrowserWindow({
     width: st.width, height: st.height, x: st.x, y: st.y, minWidth: BOX ? 320 : 360, minHeight: BOX ? 240 : 560, show: false,
     title: "Nate Bloom", backgroundColor: "#13111b", autoHideMenuBar: true,
@@ -261,21 +263,21 @@ function createWindow() {
   if (st.max && !st.wide && !BOX) win.maximize();
   win.once("ready-to-show", () => {
     win.show();
-    if (boxFit) { win.setBounds(boxBounds()); win.setFullScreen(true); }
+    if (BOX) boxFit();
     if (st.wide) {
       wideMax = !!st.max; wideBack = !wideMax && Number.isFinite(st.x) ? { x: st.x, y: st.y, width: st.width, height: st.height } : null;
       wideHow = "starting"; setTimeout(() => setWide(true), 600);   // (once the desktop has the window)
     }
   });
   const saveState = () => { try { const b = WIDE ? (wideBack || { width: 1280, height: 800 }) : win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: WIDE ? wideMax : win.isMaximized(), wide: WIDE })); } catch (e) {} };
-  win.webContents.on("did-finish-load", () => { if (WIDE) win.webContents.send("nb:wide", true); });
+  win.webContents.on("did-finish-load", () => { if (WIDE) win.webContents.send("nb:wide", true); if (BOX) win.webContents.setZoomFactor(boxZoom()); });
   // screens plugged in or out while it's across them: it fits what's there now (not on every small change)
   let lastScreens = "";
   const screensKey = () => screen.getAllDisplays().map(d => [d.bounds.x, d.bounds.y, d.bounds.width, d.bounds.height].join(",")).join(" ");
   lastScreens = screensKey();
   for (const ev of ["display-added", "display-removed", "display-metrics-changed"]) screen.on(ev, () => {
     setTimeout(() => { const k = screensKey(); if (k === lastScreens) return; lastScreens = k; if (WIDE && win && !win.isDestroyed()) setWide(true);
-      if (boxFit && win && !win.isDestroyed()) { win.setBounds(boxBounds()); win.setFullScreen(true); } }, 600);
+      if (BOX) boxFit(); }, 600);
   });
   // F11 (or the desktop) taking it out of fullscreen while it's across the screens: that's across both screens off
   win.on("leave-full-screen", () => { if (WIDE && wideHow === "fullscreen" && Date.now() - ownFs > 1500) { WIDE = false; wideHow = ""; ++wideSeq; xSpan("off"); wideBack = null; wideMax = false; wideTell(); } });
@@ -308,7 +310,7 @@ function createWindow() {
 
 // (box) what only the Box asks of the computer: temperature, power, Wi-Fi, shutdown. Everything that needs root goes
 // through one small script (box/nb-box-helper, allowed for the box's user by sudoers) and only with the actions it knows.
-const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-125", "scale-133", "scale-150", "restart-app",
+const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-auto", "scale-125", "scale-133", "scale-150", "restart-app",
   "bt-on", "bt-list", "bt-scan", "start-ask", "start-bloom", "start-keys", "start-listen", "start-stream"]);
 const boxRun = args => new Promise(res => execFile("sudo", ["-n", BOX_HELPER, ...args], { timeout: 120000 }, (err, out, errOut) => res({ ok: !err, out: String(out || "").trim(), error: err ? String(errOut || err.message || err).trim() : "" })));
 async function boxStatus() {

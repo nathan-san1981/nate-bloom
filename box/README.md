@@ -178,7 +178,7 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 | What | Do |
 | --- | --- |
 | Screen upside down | Box… → Screen → the other button, or `sudo nb-box-helper rotate-270` over SSH |
-| On a monitor or TV instead of the 5" panel, the picture is small or cut off | Nothing to set: with no panel connected the box scales the HDMI screen itself (1080p × 2, 1440p × 2.67, 4K × 4) and fills it. To change it, add `HDMI_SCALE=2.5` (for example) to `/etc/nb-box.conf`, then `sudo nb-box-helper restart-app`. Needs the box updated to Nov 10 or later (run the installer again). |
+| On a TV or monitor the text is small from across the room | The box fills any screen at its own resolution. Text size **Auto** (the default) is 1.333× on the 5" panel and 1× on anything taller than 800 px; Box… → Text size → Small, Medium or Large forces one (or `SCALE=` in `/etc/nb-box.conf`). |
 | Black screen | `journalctl -u nb-box -b` over SSH; check the ribbon is in DISP 1 (or reinstall with `--dsi0`) |
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |
 | Clicks or dropouts | ⚡ low power showing? Use the 45 W supply. Otherwise Settings › App › sound buffer: Steady |
