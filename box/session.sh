@@ -4,7 +4,10 @@
 # Retro are programs of their own: the app writes "stream", "media" or "retro" into /run/nb-box/next and quits, this runs that program, and when it closes
 # (or the power button is pressed) the app comes back on the home screen. When the app closes without asking for
 # anything, this script ends, cage exits and systemd starts it all again.
-. /etc/nb-box.conf
+set -a; . /etc/nb-box.conf; set +a   # (exported: the programs run through outside.sh see STREAM_* too)
+# Kodi, Moonlight and RetroArch run through outside.sh: in a small labwc with an on-screen Home button over them
+OUTSIDE=/usr/local/lib/nb-box/outside.sh
+outside() { if [ -x "$OUTSIDE" ]; then "$OUTSIDE" "$1"; else sh -c "$1"; fi; }
 ROTATE="${ROTATE:-90}"
 SCALE="${SCALE:-auto}"   # (the app's zoom: auto = 1.333 on the 5" panel, so pages read at arm's length, and 1 on a TV or
                           # monitor at its own resolution; 1.25 / 1.333 / 1.5 force one. Never a forced device scale: under cage a
@@ -35,20 +38,21 @@ if [ "${MODE:-app}" = app ] && command -v nate-bloom >/dev/null 2>&1; then
     case "$nb_start" in
       streamboot)   # power-on straight into the game on the GPU box (box/stream-setup.sh --boot-into-stream)
         i=0; while [ $i -lt 15 ] && ! tailscale ping -c 1 --timeout 2s "${STREAM_HOST:-gpu-box}" >/dev/null 2>&1; do i=$((i + 1)); sleep 1; done
-        QT_QPA_PLATFORM=wayland moonlight-qt stream "${STREAM_HOST:-gpu-box}" "${STREAM_APP:-Steam Big Picture}" --display-mode fullscreen \
-          --resolution "${STREAM_RES:-1280x720}" --fps "${STREAM_FPS:-60}" --bitrate "${STREAM_BITRATE:-12000}" --video-codec "${STREAM_CODEC:-HEVC}" || true
+        outside 'QT_QPA_PLATFORM=wayland moonlight-qt stream "${STREAM_HOST:-gpu-box}" "${STREAM_APP:-Steam Big Picture}" --display-mode fullscreen \
+          --resolution "${STREAM_RES:-1280x720}" --fps "${STREAM_FPS:-60}" --bitrate "${STREAM_BITRATE:-12000}" --video-codec "${STREAM_CODEC:-HEVC}"' || true
         START=home; continue ;;
       stream)   # Moonlight: games streamed from the PC (controller-driven; power button = home)
-        QT_QPA_PLATFORM=wayland moonlight-qt || true
+        outside 'QT_QPA_PLATFORM=wayland moonlight-qt' || true
         START=home; continue ;;
       media)    # Kodi
-        kodi --windowing=wayland || kodi || true
+        outside 'kodi --windowing=wayland' || true   # (no plain-kodi fallback: Home closing it would start it again)
         START=home; continue ;;
       retro)    # RetroArch with the core and game the Retro page picked (/run/nb-box/retro); power button = home
         CORE=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["core"])' "$RUN/retro" 2>/dev/null)
         ROM=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["rom"])' "$RUN/retro" 2>/dev/null)
         rm -f "$RUN/retro"
-        [ -n "$CORE" ] && [ -f "$ROM" ] && retroarch --fullscreen -L "$CORE" "$ROM" || true
+        export CORE ROM
+        [ -n "$CORE" ] && [ -f "$ROM" ] && outside 'retroarch --fullscreen -L "$CORE" "$ROM"' || true
         START=home; continue ;;
     esac
     NB_BOX_START="$nb_start" NB_BOX_ZOOM="$SCALE" nate-bloom --box --ozone-platform=wayland

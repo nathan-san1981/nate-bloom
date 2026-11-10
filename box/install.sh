@@ -122,6 +122,13 @@ fetch listen-airplay.py /usr/local/lib/nb-box/listen-airplay.py 0755
 fetch bt-pair.py /usr/local/lib/nb-box/bt-pair.py 0755
 fetch nb-box-power.py /usr/local/lib/nb-box/nb-box-power.py 0755
 fetch nb-box-power.service /etc/systemd/system/nb-box-power.service
+# Kodi, Moonlight and RetroArch run in a small labwc inside cage with an on-screen Home button over them (outside.sh)
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends labwc gir1.2-gtk-3.0 gir1.2-gtklayershell-0.1 \
+  || warn "labwc didn't install: no on-screen Home button over Kodi, Moonlight and RetroArch (the power button still works)"
+sudo install -d /usr/local/lib/nb-box/labwc
+fetch outside.sh /usr/local/lib/nb-box/outside.sh 0755
+fetch home-button.py /usr/local/lib/nb-box/home-button.py
+fetch labwc/rc.xml /usr/local/lib/nb-box/labwc/rc.xml
 # /run/nb-box: the app and session.sh pass "open Stream / Media" and the power button's "home" through it
 echo "d /run/nb-box 0775 $BOXUSER $BOXUSER -" | sudo tee /etc/tmpfiles.d/nb-box.conf >/dev/null
 sudo systemd-tmpfiles --create /etc/tmpfiles.d/nb-box.conf

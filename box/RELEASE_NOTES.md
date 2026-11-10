@@ -8,6 +8,10 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: a Home button everywhere.** Keys and Karaoke get one (bottom-left), and Kodi, Moonlight and RetroArch now run in a
+small labwc inside cage with an on-screen Home button floating over them (box/outside.sh, box/home-button.py), so there is
+always a way back to the home screen without the power button.
+
 **New: Karaoke.** A Karaoke tile on the home screen opens the karaoke big screen from another computer on your
 Wi-Fi (KARAOKE= and KARAOKE_CERT= in /etc/nb-box.conf): songs stream from there and nothing is kept on the box.
 Phones scan the QR code and sing into their own mic.

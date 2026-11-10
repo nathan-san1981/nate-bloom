@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- Nate Bloom Box: labwc for Kodi, Moonlight and RetroArch inside cage (outside.sh). No decorations, every window
+     fills the screen, nothing to drag or close by accident; the Home button (home-button.py) is the way out. -->
+<labwc_config>
+  <core><decoration>client</decoration><gap>0</gap></core>
+  <theme><titlebar><layout></layout><showTitle>no</showTitle></titlebar><cornerRadius>0</cornerRadius></theme>
+  <windowRules>
+    <windowRule identifier="*" serverDecoration="no">
+      <action name="Maximize"/>
+    </windowRule>
+  </windowRules>
+  <keyboard><default/></keyboard>
+  <mouse><default/></mouse>
+  <libinput><device category="default"><tap>yes</tap></device></libinput>
+</labwc_config>
