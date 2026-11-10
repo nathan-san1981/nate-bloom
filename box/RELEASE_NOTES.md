@@ -8,6 +8,9 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: Karaoke from your phone.** The karaoke phone page can open Karaoke on the TV and send it back home (the app asks
+the karaoke server every 2 s, /api/box); on the box the karaoke screen starts by itself, so the phone is the whole remote.
+
 **New: a Home button everywhere.** Keys and Karaoke get one (bottom-left), and Kodi, Moonlight and RetroArch now run in a
 small labwc inside cage with an on-screen Home button floating over them (box/outside.sh, box/home-button.py), so there is
 always a way back to the home screen without the power button.

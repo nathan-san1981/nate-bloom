@@ -792,6 +792,25 @@ app.whenReady().then(async () => {
       h["Cache-Control"] = ["no-store"]; cb({ responseHeaders: h });
     });
   }
+  // (box) Karaoke from a phone: the karaoke page (its TV remote) asks the karaoke server to open Karaoke on the TV or
+  // to go back home; this asks the server every 2 s (net.fetch: the pinned certificate above applies). Only commands
+  // newer than the last one seen run, and only within 30 s, so nothing stale fires after a restart.
+  if (KARAOKE) {
+    let boxN = null;
+    setInterval(async () => {
+      try {
+        const r = await net.fetch(KARAOKE + "/api/box", { cache: "no-store" }); if (!r.ok) return;
+        const b = await r.json(); if (typeof b.n !== "number") return;
+        if (boxN === null) boxN = b.age < 8 ? b.n - 1 : b.n;   // (one sent just before the app started still counts)
+        if (b.n <= boxN) return;
+        boxN = b.n;
+        if (b.age > 30 || !win || win.isDestroyed()) return;
+        const onK = karaokeUrl(win.webContents.getURL());
+        if (b.cmd === "karaoke" && !onK) boxGo("karaoke");
+        else if (b.cmd === "home" && onK) boxGo("home");
+      } catch (e) {}
+    }, 2000);
+  }
   // saves go to Downloads/Nate Bloom, never over an older file
   ses.on("will-download", (e, item) => {
     if (process.env.NB_DEBUG) console.log("[nb] will-download", item.getFilename(), item.getURL().slice(0, 60), SAVE_DIR);
