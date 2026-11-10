@@ -362,7 +362,7 @@ function gameStick() {   // the Batocera stick: its boot partition is labelled B
 }
 async function boxApps() {
   return {
-    home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true, karaoke: !!KARAOKE,
+    home: hasFile(path.join(BOX_APPS, "home.html")), bloom: true, karaoke: !!KARAOKE, karaokeQr: KARAOKE ? KARAOKE + "/qr.svg" : "",
     keys: hasFile(path.join(BOX_APPS, "keys/index.html")),
     listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync") || ytcastReady()),
     radio: hasFile(path.join(BOX_APPS, "radio.html")) && hasFile("/usr/bin/mpv"),

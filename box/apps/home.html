@@ -48,6 +48,9 @@ button { font: inherit; color: inherit; }
 .tile .d { display: none; }
 .tile.sel { background: var(--tile2); box-shadow: 0 0 0 3px var(--acc) inset; }
 .tile.off { opacity: .4; }
+/* Karaoke's tile shows the karaoke server's QR code: scan it from the couch to sing and run the TV from the phone */
+.tile .qr { width: 112px; height: 112px; background: #fff; border-radius: 14px; padding: 6px; box-shadow: 0 8px 18px -10px #000; }
+.tile .qs { font-size: 12px; color: var(--ink2); margin-top: -6px; }
 .tile .badge { position: absolute; right: 10px; top: 10px; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: #2a2d35; color: var(--ink2); }
 .tile .badge.res { background: var(--acc); color: #17181c; }
 .tile .badge.live { background: #1e2a24; color: #9fe3bd; }
@@ -288,7 +291,14 @@ async function status() {
   if (s.temp != null) { t.hidden = false; t.innerHTML = ICON.temp + Math.round(s.temp) + "°C" + (s.undervolt ? " · low power" : ""); t.classList.toggle("warn", !!(s.hot || s.undervolt)); }
   const o = $("#cOut"); o.hidden = !s.output; if (s.output) o.innerHTML = ICON.out + esc(s.output.length > 22 ? s.output.slice(0, 21) + "…" : s.output);
 }
-async function refreshApps() { if (!B) return paint(); const a = await B.apps().catch(() => null); if (a) apps = a; paint(); paintStart(); }
+async function refreshApps() { if (!B) return paint(); const a = await B.apps().catch(() => null); if (a) apps = a; paint(); paintStart(); qrTile(); }
+function qrTile() {   // (only once the code has loaded: with the karaoke computer off, the tile keeps its icon)
+  const t = document.querySelector('.tile[data-app="karaoke"]'); if (!t || !apps.karaoke || !apps.karaokeQr || t.querySelector(".qr")) return;
+  const img = new Image(); img.className = "qr"; img.alt = "QR code: scan to sing";
+  img.onload = () => { const ic = t.querySelector(".ic"); if (!ic || t.querySelector(".qr")) return; ic.replaceWith(img);
+    const q = document.createElement("span"); q.className = "qs"; q.textContent = "Scan with your phone"; t.querySelector(".n").after(q); };
+  img.src = apps.karaokeQr;
+}
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 /* settings */
