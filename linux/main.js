@@ -246,7 +246,11 @@ function createWindow() {
   const statePath = path.join(app.getPath("userData"), "window.json");
   let st = { width: 1280, height: 800 };
   try { st = Object.assign(st, JSON.parse(fs.readFileSync(statePath, "utf8"))); } catch (e) {}
-  if (BOX) st = { width: 1280, height: 720 };   // (box: the whole screen, nothing remembered)
+  // (box: the whole screen, nothing remembered. On the 5" panel the scale is forced and 1280 x 720 is the panel; on a
+  // monitor or TV, session.sh scales the screen instead and the window takes the screen's size, whatever it is)
+  const boxFit = BOX && !app.commandLine.hasSwitch("force-device-scale-factor");
+  const boxBounds = () => screen.getPrimaryDisplay().bounds;
+  if (BOX) st = boxFit ? { width: boxBounds().width, height: boxBounds().height } : { width: 1280, height: 720 };
   win = new BrowserWindow({
     width: st.width, height: st.height, x: st.x, y: st.y, minWidth: BOX ? 320 : 360, minHeight: BOX ? 240 : 560, show: false,
     title: "Nate Bloom", backgroundColor: "#13111b", autoHideMenuBar: true,
@@ -257,6 +261,7 @@ function createWindow() {
   if (st.max && !st.wide && !BOX) win.maximize();
   win.once("ready-to-show", () => {
     win.show();
+    if (boxFit) { win.setBounds(boxBounds()); win.setFullScreen(true); }
     if (st.wide) {
       wideMax = !!st.max; wideBack = !wideMax && Number.isFinite(st.x) ? { x: st.x, y: st.y, width: st.width, height: st.height } : null;
       wideHow = "starting"; setTimeout(() => setWide(true), 600);   // (once the desktop has the window)
@@ -269,7 +274,8 @@ function createWindow() {
   const screensKey = () => screen.getAllDisplays().map(d => [d.bounds.x, d.bounds.y, d.bounds.width, d.bounds.height].join(",")).join(" ");
   lastScreens = screensKey();
   for (const ev of ["display-added", "display-removed", "display-metrics-changed"]) screen.on(ev, () => {
-    setTimeout(() => { const k = screensKey(); if (k === lastScreens) return; lastScreens = k; if (WIDE && win && !win.isDestroyed()) setWide(true); }, 600);
+    setTimeout(() => { const k = screensKey(); if (k === lastScreens) return; lastScreens = k; if (WIDE && win && !win.isDestroyed()) setWide(true);
+      if (boxFit && win && !win.isDestroyed()) { win.setBounds(boxBounds()); win.setFullScreen(true); } }, 600);
   });
   // F11 (or the desktop) taking it out of fullscreen while it's across the screens: that's across both screens off
   win.on("leave-full-screen", () => { if (WIDE && wideHow === "fullscreen" && Date.now() - ownFs > 1500) { WIDE = false; wideHow = ""; ++wideSeq; xSpan("off"); wideBack = null; wideMax = false; wideTell(); } });

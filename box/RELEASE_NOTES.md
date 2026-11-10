@@ -8,6 +8,10 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: any monitor or TV.** With no 5" panel connected, the box scales the HDMI screen itself and the app fills
+it: 1080p, 1440p and 4K all show the pages at the panel's size. `HDMI_SCALE` in `/etc/nb-box.conf` overrides it. Run
+the box installer again to get it.
+
 **New: a CarPlay-style main screen.** Pages of big icons that scroll sideways, the clock and what's playing beside them.
 
 **Radio, Sheets, Retro and an idle screen.** Internet radio on the touch screen; sheet music and chord charts
