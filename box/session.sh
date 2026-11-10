@@ -21,6 +21,25 @@ while [ $i -lt 20 ]; do
   i=$((i + 1)); sleep 0.25
 done
 [ -n "$OUT" ] && wlr-randr --output "$OUT" --transform "$ROTATE" || true
+# a 4K TV: 1080p at 60 Hz instead of its preferred 4K (the Pi 5 does 4K at 30 Hz at most: choppy, and the pages come
+# out small). HDMI_MODE= in /etc/nb-box.conf picks another (e.g. 1280x720@60Hz), or "native" keeps the TV's own.
+if [ "${HDMI_MODE:=1920x1080@60Hz}" != native ]; then
+  for H in $(wlr-randr 2>/dev/null | awk '/^HDMI/ {print $1}'); do
+    CUR=$(wlr-randr 2>/dev/null | awk -v o="$H" '$1 == o {f = 1; next} /^[^ ]/ {f = 0} f && /current/ {print $1; exit}')
+    W=${CUR%%x*}
+    [ -n "$W" ] && [ "$W" -gt "${HDMI_MODE%%x*}" ] && wlr-randr --output "$H" --mode "$HDMI_MODE" 2>/dev/null || true
+  done
+fi
+
+# a TV across the room (a screen 70 cm wide or more, from its EDID): SCALE=auto zooms the pages to the 960 x 540 layout
+# they're drawn for, as on the 5" panel, so a 1080p TV gets everything twice the size (zoom 2). A desk monitor keeps 1.
+if [ "$SCALE" = auto ]; then
+  TV_ZOOM=$(wlr-randr 2>/dev/null | awk '
+    /^[^ ]/ { tv = ($1 ~ /^HDMI/) } tv && /Physical size:/ { split($3, a, "x"); mm = a[1] + 0 }
+    tv && /current/ { split($1, r, "x"); h = r[2] + 0 }
+    END { if (mm >= 700 && h >= 720) printf "%.3f", h / 540 }')
+  [ -n "$TV_ZOOM" ] && SCALE="$TV_ZOOM" && export NB_TV=1   # (outside.sh: a bigger Home button over Kodi, Moonlight and RetroArch)
+fi
 
 export NB_BOX=1
 # the native synth engine: its own thread plus two workers on the Pi 5's four cores (the desktop default leaves three
