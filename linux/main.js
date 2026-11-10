@@ -284,6 +284,17 @@ function createWindow() {
   // Ctrl+Shift+F works with the menu bar hidden too (and only once)
   win.webContents.on("before-input-event", (e, i) => { if (i.type === "keyDown" && i.control && i.shift && !i.alt && !i.meta && i.code === "KeyF") { e.preventDefault(); setWide(!WIDE); } });
   if (!BOX) win.on("close", saveState);
+  // (box) a Home button on the pages that have no way back of their own (Keys, Karaoke): always on top, bottom-left
+  if (BOX) win.webContents.on("did-finish-load", () => {
+    const u = win.webContents.getURL();
+    if (!(u.startsWith(ORIGIN + "/box/keys/") || karaokeUrl(u))) return;
+    win.webContents.executeJavaScript(`(() => { if (document.getElementById("nbBoxHome")) return;
+      const b = document.createElement("button"); b.id = "nbBoxHome"; b.type = "button"; b.title = "Back to the home screen";
+      b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg><span>Home</span>';
+      b.style.cssText = "position:fixed;left:14px;bottom:14px;z-index:2147483647;display:flex;align-items:center;gap:8px;height:48px;padding:0 18px 0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(20,21,26,.88);color:#fff;font:600 16px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45);-webkit-tap-highlight-color:transparent";
+      b.addEventListener("click", e => { e.stopPropagation(); if (window.NBBox && NBBox.go) NBBox.go("home"); else location.href = ${JSON.stringify(ORIGIN + "/box/home.html")}; });
+      document.documentElement.appendChild(b); })()`).catch(() => {});
+  });
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off
