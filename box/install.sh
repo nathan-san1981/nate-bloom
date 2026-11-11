@@ -114,6 +114,7 @@ fetch apps/listen.html /opt/nb-box/apps/listen.html
 fetch apps/radio.html /opt/nb-box/apps/radio.html
 fetch apps/sheets.html /opt/nb-box/apps/sheets.html
 fetch apps/retro.html /opt/nb-box/apps/retro.html
+fetch apps/players.html /opt/nb-box/apps/players.html
 fetch apps/jam.js /opt/nb-box/apps/jam.js
 fetch apps/idle.js /opt/nb-box/apps/idle.js
 fetch apps/keys/index.html /opt/nb-box/apps/keys/index.html
@@ -142,6 +143,9 @@ if [ -d "$HOME/.config/retroarch" ]; then   # RetroArch knows the phone pads (an
   mkdir -p "$HOME/.config/retroarch/autoconfig/udev"
   if [ -n "$SRC" ]; then cp "$SRC/retroarch/Nate Bloom Pad.cfg" "$HOME/.config/retroarch/autoconfig/udev/"
   else curl -fsSL "$RAW/retroarch/Nate%20Bloom%20Pad.cfg" -o "$HOME/.config/retroarch/autoconfig/udev/Nate Bloom Pad.cfg" || true; fi
+  # controller profiles from libretro (8BitDo, Xbox, PlayStation, Switch Pro and hundreds more), next to the phone pads' one
+  curl -fsSL https://github.com/libretro/retroarch-joypad-autoconfig/archive/refs/heads/master.tar.gz | \
+    tar xz -C "$HOME/.config/retroarch/autoconfig/udev" --strip-components=2 --wildcards '*/udev/*.cfg' 2>/dev/null || warn "controller profiles didn't download"
   RA="$HOME/.config/retroarch/retroarch.cfg"; touch "$RA"
   kv="joypad_autoconfig_dir = \"$HOME/.config/retroarch/autoconfig\""
   grep -q "^joypad_autoconfig_dir = " "$RA" && sed -i "s|^joypad_autoconfig_dir = .*|$kv|" "$RA" || echo "$kv" >> "$RA"

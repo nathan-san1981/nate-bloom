@@ -304,7 +304,7 @@ function createWindow() {
     win.webContents.on("did-finish-load", () => {
       padKey = "";
       if (!padPage()) return;
-      win.webContents.executeJavaScript(`(() => { if (window.__nbPadQr) return;
+      win.webContents.executeJavaScript(`(() => { if (window.__nbPadQr || location.pathname.endsWith("/box/players.html")) return;   // (Players shows its own big code)
         const c = document.createElement("div"); c.id = "nbPadQr";
         c.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:2147483646;width:150px;padding:10px;border-radius:14px;background:rgba(20,21,26,.92);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.45);font:600 13px Inter,system-ui,sans-serif;color:#fff;text-align:center;display:none;pointer-events:none";
         document.documentElement.appendChild(c);
@@ -324,10 +324,10 @@ function createWindow() {
       if (!padPage()) return;
       let st = null;
       try { const r = await net.fetch("http://127.0.0.1:8810/api/state", { cache: "no-store" }); if (r.ok) st = await r.json(); } catch (e) {}
-      const key = st ? JSON.stringify([st.qr, st.url, st.players]) : "off";
+      const key = st ? JSON.stringify([st.qr, st.url, st.players, st.controllers]) : "off";
       if (key === padKey) return;
       padKey = key;
-      win.webContents.executeJavaScript(`window.__nbPadQr && window.__nbPadQr(${JSON.stringify(st)})`).catch(() => {});
+      win.webContents.executeJavaScript(`window.__nbPadQr && window.__nbPadQr(${JSON.stringify(st)}); window.__nbPadState && window.__nbPadState(${JSON.stringify(st)})`).catch(() => {});
     }, 1500);
   }
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
@@ -375,7 +375,7 @@ ipcMain.handle("nb:box-status", async () => BOX ? boxStatus() : null);
 // screen. Games reboots into the Batocera USB stick (the box boots USB first, then the card).
 const BOX_APPS = process.env.NB_BOX_APPS || "/opt/nb-box/apps";
 const BOX_RUN = process.env.NB_BOX_RUN || "/run/nb-box";
-const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html", radio: "/box/radio.html", sheets: "/box/sheets.html", retro: "/box/retro.html" };
+const BOX_PAGES = { home: "/box/home.html", bloom: "/?box=1", keys: "/box/keys/index.html?box=1", listen: "/box/listen.html", radio: "/box/radio.html", sheets: "/box/sheets.html", retro: "/box/retro.html", players: "/box/players.html" };
 const BOX_OUT = { stream: "/usr/bin/moonlight-qt", media: "/usr/bin/kodi" };
 const RETROARCH = "/usr/bin/retroarch", CORES = "/usr/lib/aarch64-linux-gnu/libretro";
 const SHEETS_DIR = path.join(app.getPath("home"), "Sheets"), ROMS_DIR = path.join(app.getPath("home"), "ROMs");
@@ -402,7 +402,7 @@ async function boxApps() {
     listen: hasFile(path.join(BOX_APPS, "listen.html")) && (hasFile("/usr/bin/librespot") || hasFile("/usr/bin/shairport-sync") || ytcastReady()),
     radio: hasFile(path.join(BOX_APPS, "radio.html")) && hasFile("/usr/bin/mpv"),
     sheets: hasFile(path.join(BOX_APPS, "sheets.html")) && hasFile("/usr/bin/pdftoppm"),
-    retro: hasFile(path.join(BOX_APPS, "retro.html")) && hasFile(RETROARCH),
+    retro: hasFile(path.join(BOX_APPS, "retro.html")) && hasFile(RETROARCH), players: hasFile(path.join(BOX_APPS, "players.html")),
     stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
     start: boxConf("START") || "ask", last: boxLast,
   };

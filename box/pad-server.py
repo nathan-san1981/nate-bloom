@@ -169,8 +169,35 @@ def karaoke():
         return ""
 
 
+def controllers():
+    """Every game controller on the box, phones' pads included, in the order RetroArch numbers players (by device
+    number). Phones show their name and colour; real controllers (8BitDo, Xbox, PlayStation, Switch...) their own name."""
+    out = []
+    try:
+        blocks = Path("/proc/bus/input/devices").read_text().split("\n\n")
+    except OSError:
+        return out
+    for b in blocks:
+        nm = re.search(r'^N: Name="(.*)"', b, re.M); h = re.search(r"^H: Handlers=(.*)$", b, re.M)
+        if not nm or not h or not re.search(r"\bjs\d+", h.group(1)):
+            continue
+        ev = re.search(r"\bevent(\d+)", h.group(1)); name = nm.group(1)
+        m = re.match(r"Nate Bloom Pad (\d+)$", name)
+        if m:
+            p = players.get(int(m.group(1)))
+            if not p: continue   # (a phone that left: its pad stays for the game's sake but isn't a player now)
+            out.append({"kind": "phone", "dev": name, "name": p.name, "color": COLORS[(p.num - 1) % 4], "slot": p.num, "ev": int(ev.group(1)) if ev else 999})
+        else:
+            out.append({"kind": "pad", "dev": name, "name": name, "ev": int(ev.group(1)) if ev else 999})
+    out.sort(key=lambda c: c["ev"])
+    for i, c in enumerate(out):
+        c["port"] = i + 1
+    return out
+
+
 def state():
-    return {"qr": bool(qr_on or not players), "url": url(), "n": state_n,
+    cs = controllers()
+    return {"qr": bool(qr_on or not players), "url": url(), "n": state_n, "controllers": cs,
             "players": [{"num": p.num, "name": p.name, "color": COLORS[(p.num - 1) % 4]} for p in sorted(players.values(), key=lambda p: p.num)]}
 
 
@@ -178,9 +205,10 @@ async def broadcast():
     global state_n
     state_n += 1
     s = state()
+    ports = {c.get("slot"): c["port"] for c in s["controllers"] if c["kind"] == "phone"}
     for p in list(players.values()):
         try:
-            await p.ws.send(json.dumps({"t": "state", **s, "you": p.num}))
+            await p.ws.send(json.dumps({"t": "state", **s, "you": ports.get(p.num, p.num)}))
         except Exception:
             pass
 
@@ -286,6 +314,17 @@ async def ws_handler(ws):
             await broadcast()
 
 
+async def watch_controllers():
+    """A controller plugged in, paired or switched off: tell the phones (their player numbers can change)."""
+    last = None
+    while True:
+        cur = [(c["kind"], c["name"]) for c in controllers()]
+        if cur != last and last is not None and players:
+            await broadcast()
+        last = cur
+        await asyncio.sleep(2)
+
+
 def respond(status, body, ctype):
     b = body if isinstance(body, bytes) else body.encode()
     return Response(status.value, status.phrase, Headers([
@@ -307,8 +346,8 @@ def http(conn, req):
 
 
 async def main():
-    devices()
-    pad(1)   # (player 1's pad exists from the start: games started before any phone joined still see it)
+    devices()   # (phone pads are made when a phone joins: with no phone, a real controller is player 1)
+    asyncio.create_task(watch_controllers())
     async with serve(ws_handler, "0.0.0.0", PORT, process_request=http, ping_interval=10, ping_timeout=10,
                      compression=None) as srv:
         for s in srv.sockets:
