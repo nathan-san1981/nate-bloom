@@ -118,6 +118,9 @@ class Source:
 
 sources = {}     # id -> Source (connected, or a phone that left less than GRACE s ago)
 remembered = {}  # id -> the slot it had (a controller switched off and on again, a phone reconnecting, keeps it)
+gone_at = {}     # id -> when it went away (its old number is kept for it only REJOIN s)
+REJOIN = 120     # a controller back within this (fell asleep mid-game, battery swap) gets its old number back;
+                 # later it takes the lowest free one, so a lone controller is always player 1
 order_t = 0.0    # when the order last changed (the TV shows it for a moment)
 pick = None      # while choosing the order: {"order": [ids], "t": last press, "t0": started}
 
@@ -125,9 +128,10 @@ pick = None      # while choosing the order: {"order": [ids], "t": last press, "
 def free_slot(src):
     used = {s.slot for s in sources.values() if s is not src and s.slot}
     want = remembered.get(src.id)
-    if want and want not in used: return want
+    if want and want not in used and time.time() - gone_at.get(src.id, 0) < REJOIN: return want
+    held = [remembered[k] for k, t in gone_at.items() if k != src.id and time.time() - t < REJOIN and k in remembered]
     for n in range(1, SLOTS + 1):
-        if n not in used and n not in [v for k, v in remembered.items() if k != src.id and k in sources]:
+        if n not in used and n not in held:
             return n
     for n in range(1, SLOTS + 1):
         if n not in used: return n
@@ -154,7 +158,33 @@ def add_source(src):
 
 def remove_source(sid):
     src = sources.pop(sid, None)
-    if src: src.release(); src.slot = None
+    if src: src.release(); src.slot = None; gone_at[sid] = time.time()
+
+
+GAMES = ("retroarch", "moonlight-qt", "kodi.bin")
+
+
+def in_game():
+    try:
+        return subprocess.run(["pgrep", "-x", "|".join(GAMES)], capture_output=True, timeout=3).returncode == 0
+    except Exception:
+        return True   # unsure: leave the numbers alone
+
+
+def close_gaps():
+    """Outside a game, players are always 1, 2, 3... with no holes (someone who left for good gives up their
+    number). Never during a game: numbers changing under people mid-game is worse than a hole."""
+    global order_t
+    if pick or in_game(): return False
+    if any(time.time() - t < REJOIN for k, t in gone_at.items() if k not in sources): return False
+    seated = sorted((s for s in sources.values() if s.slot), key=lambda s: s.slot)
+    if [s.slot for s in seated] == list(range(1, len(seated) + 1)): return False
+    for s in seated: s.release()
+    for i, s in enumerate(seated):
+        s.slot = i + 1; remembered[s.id] = s.slot
+    order_t = time.time()
+    print("closed gaps:", ", ".join(f"{s.slot}={s.name}" for s in seated), flush=True)
+    return True
 
 
 def pick_start():
@@ -573,6 +603,7 @@ async def watch_controllers():
         for sid, t in list(left_at.items()):
             if time.time() - t > GRACE:
                 left_at.pop(sid, None); remove_source(sid)
+        close_gaps()
         cur = json.dumps(controllers())
         if cur != last and last is not None:
             await broadcast()
