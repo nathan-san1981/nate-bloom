@@ -17,6 +17,9 @@ html, body { height:100%; background:var(--bg); color:var(--ink); font:500 15px/
 body { display:flex; flex-direction:column; padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
 header { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--line); flex:none; }
 .me { display:flex; align-items:center; gap:8px; font-weight:700; }
+#pick { margin:6px 10px 0; padding:10px 12px; border-radius:14px; background:#ffc23d; color:#111; font:500 14px/1.35 inherit; display:flex; gap:10px; align-items:center; }
+#pick[hidden] { display:none; }
+#pick .k { flex:0 0 auto; height:38px; padding:0 14px; background:#111; color:#fff; }
 .me .dot { width:30px; height:30px; border-radius:50%; background:var(--me); display:grid; place-items:center; font:800 14px/1 inherit; color:#fff; }
 .me .nm { font-size:13px; color:var(--ink2); font-weight:600; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .conn { width:8px; height:8px; border-radius:50%; background:#e5484d; flex:none; }
@@ -104,6 +107,7 @@ main { flex:1; position:relative; min-height:0; }
   <button class="hbtn" id="qr">QR</button>
   <button class="hbtn" id="mic" hidden>🎤</button>
 </header>
+<div id="pick" class="ctl" hidden></div>
 <main>
   <section class="view on" id="remote">
     <div class="ring ctl">
@@ -119,6 +123,9 @@ main { flex:1; position:relative; min-height:0; }
     <div class="row ctl">
       <button class="k" data-act="players"><span><span class="i">👥</span>Players</span></button>
       <button class="k" data-act="retro"><span><span class="i">🕹</span>Games</span></button>
+    </div>
+    <div class="row ctl">
+      <button class="k" data-act="pick"><span><span class="i">🔢</span>Player order</span></button>
     </div>
     <div class="row ctl">
       <button class="k" data-act="vol-"><span><span class="i">−</span>Volume</span></button>
@@ -139,7 +146,7 @@ main { flex:1; position:relative; min-height:0; }
     <div class="mid ctl">
       <div class="pair"><button class="k" data-b="select">Select</button><button class="k" data-b="start">Start</button></div>
       <button class="k" data-b="menu">Game menu</button>
-      <div class="pair"><button class="k" data-act="home">⌂ Home</button><button class="k" data-act="players">Players</button></div>
+      <div class="pair"><button class="k" data-act="home">⌂ Home</button><button class="k" data-act="pick">Player order</button></div>
       <button class="k" id="showqr" data-act="showqr" style="height:34px;font-size:12px">Show QR on TV</button>
       <button class="mini" id="analog">Use stick</button>
       <button class="mini" id="rs">Right stick</button>
@@ -182,14 +189,19 @@ function connect() {
   ws.onmessage = e => {
     const m = JSON.parse(e.data);
     if (m.t === "hello") {
-      me = m.you; document.documentElement.style.setProperty("--me", m.color);
-      $("#pnum").textContent = "P" + me; $("#pname").textContent = name || "Player " + me;
+      me = m.you; $("#pname").textContent = name || "Phone";
       if (m.karaoke) { $("#mic").hidden = false; $("#mic").onclick = () => location.href = m.karaoke; }
     } else if (m.t === "state") { st = m; paintState(); }
     else if (m.t === "full") { $("#full").style.display = "grid"; ws.onclose = null; }
   };
 }
 function paintState() {
+  me = st.you; const mine = me && (st.controllers || [])[me - 1];
+  document.documentElement.style.setProperty("--me", mine ? mine.color : "#4f8cff");
+  $("#pnum").textContent = me ? "P" + me : "–"; $("#pname").textContent = name || (me ? "Player " + me : "Phone");
+  const o = st.order || {}, pk = $("#pick");
+  pk.hidden = !o.picking;
+  if (o.picking) pk.innerHTML = `<b>Choosing players</b> · Player ${o.next}: press A on your controller (or here on the Pad tab)<button class="k" data-act="pick">Done</button>`;
   $("#players").innerHTML = st.players.map(p => `<span title="${p.name}" style="background:${p.color}"></span>`).join("");
   const q = $("#qr"); q.textContent = st.qr ? "Everyone's in" : "Show QR"; q.classList.toggle("hl", !!st.qr);
 }
@@ -201,7 +213,7 @@ $("#tabs").onclick = e => { const b = e.target.closest("button"); if (!b) return
 const lastTab = store("nbpad-tab"); if (lastTab) { const b = document.querySelector(`#tabs [data-v="${lastTab}"]`); if (b) b.click(); }
 
 /* actions that are one tap */
-function act(a) { if (a === "players" || a === "retro") send({ t: "open", app: a }); else if (a === "showqr") send({ t: "qr", on: true }); else if (a === "home") send({ t: "home" }); else if (a === "vol+") send({ t: "vol", d: 1 }); else if (a === "vol-") send({ t: "vol", d: -1 }); }
+function act(a) { if (a === "pick") { send({ t: "pick" }); return; } if (a === "players" || a === "retro") send({ t: "open", app: a }); else if (a === "showqr") send({ t: "qr", on: true }); else if (a === "home") send({ t: "home" }); else if (a === "vol+") send({ t: "vol", d: 1 }); else if (a === "vol-") send({ t: "vol", d: -1 }); }
 
 /* every finger on the controls: which button is under it (sliding from one to the next works, like a real pad) */
 const owned = new Map();   // touch id -> "stick" | "rstick" | "tp" | "btn"

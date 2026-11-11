@@ -136,10 +136,19 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommen
 fetch pad-server.py /usr/local/lib/nb-box/pad-server.py 0755
 fetch pad.html /usr/local/lib/nb-box/pad.html
 fetch 99-nb-box-uinput.rules /etc/udev/rules.d/99-nb-box-uinput.rules
+fetch 99-nb-box-pads.rules /etc/udev/rules.d/99-nb-box-pads.rules   # (real controllers hidden from games: pad-server routes them to players 1-4)
+sudo udevadm control --reload 2>/dev/null; sudo udevadm trigger --subsystem-match=input --action=change 2>/dev/null || true
 sudo usermod -aG input "$BOXUSER"
 fetch nb-box-pad.service /tmp/nb-box-pad.service.$$
 sudo sed "s/__USER__/$BOXUSER/g; s/__UID__/$(id -u "$BOXUSER")/g" /tmp/nb-box-pad.service.$$ | sudo tee /etc/systemd/system/nb-box-pad.service >/dev/null; sudo rm -f /tmp/nb-box-pad.service.$$
 if [ -d "$HOME/.config/retroarch" ]; then   # RetroArch knows the phone pads (and Xbox 360 pads) without setup
+  RC="$HOME/.config/retroarch/retroarch.cfg"   # (ports 1-4 = Nate Bloom Pad 1-4, whatever order the system lists them in)
+  [ -f "$RC" ] && for n in 1 2 3 4; do
+    sed -i "/^input_player${n}_reserved_device = /d; /^input_player${n}_device_reservation_type = /d" "$RC"
+    printf input_player%s_reserved_device = Nate Bloom Pad %s
+input_player%s_device_reservation_type = 2
+ $n $n $n >> "$RC"
+  done
   mkdir -p "$HOME/.config/retroarch/autoconfig/udev"
   if [ -n "$SRC" ]; then cp "$SRC/retroarch/Nate Bloom Pad.cfg" "$HOME/.config/retroarch/autoconfig/udev/"
   else curl -fsSL "$RAW/retroarch/Nate%20Bloom%20Pad.cfg" -o "$HOME/.config/retroarch/autoconfig/udev/Nate Bloom Pad.cfg" || true; fi

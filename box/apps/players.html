@@ -59,7 +59,8 @@ button { font: inherit; color: inherit; }
 <div id="top">
   <button class="btn" id="home" data-f="0"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>Home</button>
   <div class="t">Players</div>
-  <span class="chip">Press any button on a controller to see which player it is</span>
+  <span class="chip" id="chip">Press any button on a controller to see which player it is</span>
+  <button class="btn" id="order" data-f="1">Change order</button>
 </div>
 <div id="slots"></div>
 <div id="more"></div>
@@ -80,7 +81,7 @@ button { font: inherit; color: inherit; }
     <div id="status" class="off"><i></i><span id="st">Starting Bluetooth…</span></div>
     <div id="acts">
       <span class="sp">Wired controllers: just plug them in. Paired ones come back by themselves when switched on.</span>
-      <button class="btn go" id="play" data-f="1">Play games ▸</button>
+      <button class="btn go" id="play" data-f="2">Play games ▸</button>
     </div>
   </div>
 </div>
@@ -93,18 +94,28 @@ const IC = {
   phone: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
   pad: '<svg viewBox="0 0 24 24"><path d="M6 11h4M8 9v4"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.2 2L9 15h6l1.8 2a3 3 0 0 0 5.2-2l-.7-6.4A4 4 0 0 0 17.3 5z"/></svg>' };
 const home = () => B ? B.go("home") : history.back();
-let st = { controllers: [] }, focus = 1;
+let st = { controllers: [] }, focus = 2;
 
 /* who's playing: four slots in game order (state from the pad server, handed in by the app every 1.5 s) */
 function nice(n) { return String(n || "Controller").replace(/^Microsoft X-Box 360 pad.*$/i, "Xbox controller").replace(/Wireless Controller$/i, "PlayStation controller").replace(/^Pro Controller$/, "Switch Pro controller"); }
 function paint() {
-  const cs = st.controllers || [];
+  const cs = st.controllers || [], o = st.order || {};
+  $("#chip").textContent = o.picking ? `Player ${o.next}: press A on your controller · Start = done` : "Press any button on a controller to see which player it is";
+  $("#chip").style.cssText = o.picking ? "background:#ffc23d;color:#111;font-weight:700" : "";
+  $("#order").textContent = o.picking ? "Done" : "Change order";
+  if (o.picking) {
+    const ch = o.chosen || [];
+    $("#slots").innerHTML = [0, 1, 2, 3].map(i => i < ch.length
+      ? `<div class="slot" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>${esc(nice(ch[i]))}</b><span>Chosen</span></div>`
+      : `<div class="slot empty${i === ch.length ? " flash" : ""}" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>Player ${i + 1}</b><span>${i === ch.length ? "Press A now" : "Next"}</span></div>`).join("");
+    $("#more").textContent = ""; return;
+  }
   $("#slots").innerHTML = [0, 1, 2, 3].map(i => {
     const c = cs[i];
     if (!c) return `<div class="slot empty" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>Player ${i + 1}</b><span>Empty</span></div>`;
     return `<div class="slot" data-i="${i}" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>${esc(c.kind === "phone" ? c.name : nice(c.name))}</b><span>${c.away ? IC.phone + "Gone in a minute unless it comes back" : c.kind === "phone" ? IC.phone + "Phone" : IC.pad + "Controller"}</span></div>`;
   }).join("");
-  $("#more").textContent = cs.length > 4 ? `+${cs.length - 4} more controller${cs.length > 5 ? "s" : ""}` : "";
+  $("#more").textContent = cs.length > 4 ? `+${cs.length - 4} more watching (change the order to swap them in)` : "";
   if (st.matrix) {
     const m = st.matrix, n = m.length; let d = "";
     m.forEach((row, y) => row.forEach((v, x) => { if (v) d += `M${x} ${y}h1v1h-1z`; }));
@@ -114,12 +125,13 @@ function paint() {
 window.__nbPadState = s => { if (s) { st = s; paint(); } };
 
 /* focus: Home and Play games, moved with the d-pad / arrows */
-const btns = [$("#home"), $("#play")];
+const btns = [$("#home"), $("#order"), $("#play")];
+$("#order").onclick = () => fetch("http://127.0.0.1:8810/api/pick", { cache: "no-store" }).catch(() => {});
 function paintFocus() { btns.forEach((b, i) => b.classList.toggle("sel", i === focus)); }
 $("#home").onclick = home;
 $("#play").onclick = () => B ? B.go("retro") : null;
 addEventListener("keydown", e => {
-  if (e.key === "ArrowLeft" || e.key === "ArrowUp") focus = 0; else if (e.key === "ArrowRight" || e.key === "ArrowDown") focus = 1;
+  if (e.key === "ArrowLeft" || e.key === "ArrowUp") focus = Math.max(0, focus - 1); else if (e.key === "ArrowRight" || e.key === "ArrowDown") focus = Math.min(btns.length - 1, focus + 1);
   else if (e.key === "Enter" || e.key === " ") btns[focus].click(); else if (e.key === "Escape" || e.key === "Backspace") home(); else return;
   e.preventDefault(); paintFocus();
 });
@@ -136,7 +148,7 @@ const prev = {};
       const idx = cs.findIndex(c => c.dev && gp.id.startsWith(c.dev));
       const slot = document.querySelector(`.slot[data-i="${idx >= 0 ? idx : gp.index}"]`);
       if (slot) { slot.classList.add("flash"); clearTimeout(slot._t); slot._t = setTimeout(() => slot.classList.remove("flash"), 700); }
-      if (down[14] && !was[14]) { focus = 0; paintFocus(); } if (down[15] && !was[15]) { focus = 1; paintFocus(); }
+      if (down[14] && !was[14]) { focus = Math.max(0, focus - 1); paintFocus(); } if (down[15] && !was[15]) { focus = Math.min(btns.length - 1, focus + 1); paintFocus(); }
       if (down[0] && !was[0]) btns[focus].click(); if (down[1] && !was[1]) home();
     }
     prev[gp.index] = down; prev[gp.index].axis = gp.axes.some(a => Math.abs(a) > .7);

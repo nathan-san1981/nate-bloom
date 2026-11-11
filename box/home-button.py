@@ -126,6 +126,78 @@ def apply(st):
     return False
 
 
+# ---- the player order, top middle: while choosing it ("Player 2: press A") and for SHOW_S s after it changes
+SHOW_S = 5
+ost = {"o": None, "cs": []}
+owin = Gtk.Window()
+GtkLayerShell.init_for_window(owin)
+GtkLayerShell.set_layer(owin, GtkLayerShell.Layer.OVERLAY)
+GtkLayerShell.set_namespace(owin, "nb-box-order")
+GtkLayerShell.set_anchor(owin, GtkLayerShell.Edge.TOP, True); GtkLayerShell.set_margin(owin, GtkLayerShell.Edge.TOP, round(24 * Z))
+GtkLayerShell.set_keyboard_mode(owin, GtkLayerShell.KeyboardMode.NONE)
+if vis: owin.set_visual(vis)
+owin.set_app_paintable(True)
+OW, OH = round(560 * Z), round(250 * Z)
+oarea = Gtk.DrawingArea(); oarea.set_size_request(OW, OH); owin.add(oarea)
+
+
+def rgb(h):
+    h = (h or "#888888").lstrip("#"); return int(h[0:2], 16) / 255, int(h[2:4], 16) / 255, int(h[4:6], 16) / 255
+
+
+def odraw(_w, cr):
+    import math
+    o = ost["o"]
+    if not o: return
+    rr(cr, 0, 0, OW, OH, 18 * Z); cr.set_source_rgba(0.08, 0.085, 0.1, 0.94); cr.fill()
+    cr.select_font_face("Inter"); cr.set_source_rgb(1, 1, 1); cr.set_font_size(26 * Z)
+    if o.get("picking"):
+        t = "Player %d: press A" % o.get("next", 1)
+        sub = "on your controller · Start = done"
+    else:
+        t, sub = "Players", "Change: hold Select, or “Player order” on a phone"
+    e = cr.text_extents(t); cr.move_to((OW - e.width) / 2 - e.x_bearing, 44 * Z); cr.show_text(t)
+    cr.set_font_size(14 * Z); cr.set_source_rgba(1, 1, 1, 0.6)
+    e = cr.text_extents(sub); cr.move_to((OW - e.width) / 2 - e.x_bearing, 70 * Z); cr.show_text(sub)
+    cs = ost["cs"]; colors = ["#4f8cff", "#ff5a5f", "#3ccf7a", "#ffc23d"]
+    chosen = o.get("chosen") or []
+    w = (OW - 40 * Z) / 4
+    for i in range(4):
+        x = 20 * Z + i * w; cx = x + w / 2
+        if o.get("picking"):
+            name = chosen[i] if i < len(chosen) else ("?" if i == len(chosen) else "")
+            filled = i < len(chosen); cur = i == len(chosen)
+        else:
+            c = cs[i] if i < len(cs) else None
+            name = c["name"] if c else "—"; filled = bool(c); cur = False
+        cr.new_path(); cr.arc(cx, 128 * Z, 30 * Z, 0, 2 * math.pi)
+        if filled:
+            cr.set_source_rgb(*rgb(colors[i])); cr.fill()
+        else:
+            cr.set_source_rgba(*rgb(colors[i]), 1 if cur else 0.35); cr.set_line_width((5 if cur else 3) * Z); cr.stroke()
+        cr.set_source_rgb(1, 1, 1); cr.set_font_size(26 * Z)
+        e = cr.text_extents(str(i + 1)); cr.move_to(cx - e.width / 2 - e.x_bearing, 128 * Z + e.height / 2); cr.show_text(str(i + 1))
+        cr.set_font_size(14 * Z); cr.set_source_rgba(1, 1, 1, 0.9 if filled else 0.45)
+        nm = name if len(name) <= 16 else name[:15] + "…"
+        e = cr.text_extents(nm); cr.move_to(cx - e.width / 2 - e.x_bearing, 186 * Z); cr.show_text(nm)
+
+
+oarea.connect("draw", odraw)
+oshow = {"on": False}
+
+
+def oapply(st):
+    o = (st or {}).get("order") or {}
+    want = bool(o.get("picking") or (o.get("age") is not None and o["age"] < SHOW_S and o.get("here")))
+    ost.update(o=o, cs=(st or {}).get("controllers") or [])
+    if want:
+        if not oshow["on"]: owin.show_all()
+        oarea.queue_draw()
+    elif oshow["on"]:
+        owin.hide()
+    oshow["on"] = want
+
+
 def poll():
     while True:
         try:
@@ -133,8 +205,8 @@ def poll():
                 st = json.load(r)
         except Exception:
             st = None
-        GLib.idle_add(apply, st)
-        time.sleep(1)
+        GLib.idle_add(apply, st); GLib.idle_add(oapply, st)
+        time.sleep(0.4)
 
 
 threading.Thread(target=poll, daemon=True).start()

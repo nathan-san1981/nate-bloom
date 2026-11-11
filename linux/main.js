@@ -308,7 +308,20 @@ function createWindow() {
         const c = document.createElement("div"); c.id = "nbPadQr";
         c.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:2147483646;width:150px;padding:10px;border-radius:14px;background:rgba(20,21,26,.92);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.45);font:600 13px Inter,system-ui,sans-serif;color:#fff;text-align:center;display:none;pointer-events:none";
         document.documentElement.appendChild(c);
-        window.__nbPadQr = st => {
+        const oc = document.createElement("div"); oc.id = "nbPadOrder";   // (the player order: while choosing it, and a moment after it changes)
+        oc.style.cssText = "position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:2147483646;width:560px;padding:16px 20px 18px;border-radius:18px;background:rgba(20,21,26,.95);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.5);font:600 15px Inter,system-ui,sans-serif;color:#fff;text-align:center;display:none;pointer-events:none";
+        document.documentElement.appendChild(oc);
+        const PC = ["#4f8cff", "#ff5a5f", "#3ccf7a", "#ffc23d"], esc = t => String(t).replace(/[&<>"]/g, ch => "&#" + ch.charCodeAt(0) + ";");
+        const order = st => {
+          const o = st && st.order || {}, on = !!(o.picking || (o.age != null && o.age < 5 && o.here));
+          oc.style.display = on ? "block" : "none"; if (!on) return;
+          const cs = st.controllers || [], ch = o.chosen || [];
+          const dots = [0, 1, 2, 3].map(i => { const nm = o.picking ? (ch[i] || (i === ch.length ? "?" : "")) : (cs[i] ? cs[i].name : "—"), full = o.picking ? i < ch.length : !!cs[i], cur = o.picking && i === ch.length;
+            return '<div style="flex:1;min-width:0"><div style="width:58px;height:58px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font-size:24px;font-weight:800;' + (full ? "background:" + PC[i] : "border:" + (cur ? 5 : 3) + "px solid " + PC[i] + ";opacity:" + (cur ? 1 : .45)) + '">' + (i + 1) + '</div><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:' + (full ? .95 : .5) + '">' + esc(nm) + '</div></div>'; }).join("");
+          oc.innerHTML = '<div style="font-size:24px">' + (o.picking ? "Player " + o.next + ": press A" : "Players") + '</div><div style="font-size:13px;opacity:.6;margin:4px 0 14px;font-weight:500">' + (o.picking ? "on your controller · Start = done" : "Change: hold Select, or “Player order” on a phone") + '</div><div style="display:flex;gap:8px">' + dots + '</div>';
+        };
+        window.__nbPadQr = st => { order(st); qr(st); };
+        const qr = st => {
           const on = !!(st && st.qr && st.matrix); c.style.display = on ? "block" : "none";
           const main = document.getElementById("main"); if (main && location.pathname.endsWith("/box/home.html")) main.style.right = on ? "182px" : "";   // (the tiles make room)
           if (!on) return;
@@ -324,11 +337,12 @@ function createWindow() {
       if (!padPage()) return;
       let st = null;
       try { const r = await net.fetch("http://127.0.0.1:8810/api/state", { cache: "no-store" }); if (r.ok) st = await r.json(); } catch (e) {}
-      const key = st ? JSON.stringify([st.qr, st.url, st.players, st.controllers]) : "off";
+      const o = st && st.order || {};
+      const key = st ? JSON.stringify([st.qr, st.url, st.players, st.controllers, o.picking, o.next, o.chosen, o.age != null && o.age < 5]) : "off";
       if (key === padKey) return;
       padKey = key;
       win.webContents.executeJavaScript(`window.__nbPadQr && window.__nbPadQr(${JSON.stringify(st)}); window.__nbPadState && window.__nbPadState(${JSON.stringify(st)})`).catch(() => {});
-    }, 1500);
+    }, 600);
   }
   // (box) screensaver: after SAVER_S (10 minutes) with no button pressed anywhere (the box's keyboard and mouse, a phone,
   // an 8BitDo...) on the box's own menus, a dark screen with a slowly drifting clock. Any button wakes it, and that press

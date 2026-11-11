@@ -1,0 +1,7 @@
+# Nate Bloom Box: real game controllers are hidden from games (RetroArch, Moonlight, Kodi, the browser), which see
+# only the four player pads "Nate Bloom Pad 1-4" made by pad-server.py; it reads the real controllers itself and routes
+# each one to a player, so the player order can change in the middle of a game.
+SUBSYSTEM!="input", GOTO="nb_pads_end"
+ATTRS{name}=="Nate Bloom*", GOTO="nb_pads_end"
+ENV{ID_INPUT_JOYSTICK}=="1", ENV{ID_INPUT_JOYSTICK}="", ENV{NB_REAL_PAD}="1"
+LABEL="nb_pads_end"
