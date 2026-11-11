@@ -330,6 +330,50 @@ function createWindow() {
       win.webContents.executeJavaScript(`window.__nbPadQr && window.__nbPadQr(${JSON.stringify(st)}); window.__nbPadState && window.__nbPadState(${JSON.stringify(st)})`).catch(() => {});
     }, 1500);
   }
+  // (box) screensaver: after SAVER_S (10 minutes) with no button pressed anywhere (the box's keyboard and mouse, a phone,
+  // an 8BitDo...) on the box's own menus, a dark screen with a slowly drifting clock. Any button wakes it, and that press
+  // does nothing else. Never over a game, Kodi, Moonlight, Keys or karaoke.
+  if (BOX) {
+    const SAVER_S = +(process.env.NB_SAVER_S || 600);
+    let lastInput = Date.now(), saverOn = false;
+    win.webContents.on("input-event", () => { lastInput = Date.now(); });
+    win.webContents.on("did-finish-load", () => { lastInput = Date.now(); saverOn = false; });
+    const SAVER_JS = on => `(on => { let s = document.getElementById("nbSaver");
+      if (!s) {
+        s = document.createElement("div"); s.id = "nbSaver";
+        s.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;cursor:none;overflow:hidden";
+        s.innerHTML = '<div id="nbSaverC" style="position:absolute;left:30%;top:30%;color:rgba(255,255,255,.8);font:200 132px/1 Inter,system-ui,sans-serif;text-align:center;white-space:nowrap;transition:opacity 2s"><div id="nbSaverT"></div><div id="nbSaverD" style="font-size:32px;font-weight:400;margin-top:16px;color:rgba(255,255,255,.5)"></div><div style="font-size:19px;font-weight:400;margin-top:30px;color:rgba(255,255,255,.28)">Press any button</div></div>';
+        document.documentElement.appendChild(s);
+        const c = s.querySelector("#nbSaverC");
+        let woke = 0, tick = null, n = 0;
+        const draw = () => { const d = new Date();
+          s.querySelector("#nbSaverT").textContent = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+          s.querySelector("#nbSaverD").textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+          if (++n % 30 === 0) { c.style.opacity = "0"; setTimeout(() => { const W = innerWidth - c.offsetWidth, H = innerHeight - c.offsetHeight;
+            c.style.left = Math.max(0, Math.random() * W) + "px"; c.style.top = Math.max(0, Math.random() * H) + "px"; c.style.opacity = "1"; }, 2100); } };
+        s.__set = v => { s.__on = v; s.style.pointerEvents = v ? "auto" : "none"; s.style.opacity = v ? "1" : "0";
+          clearInterval(tick); if (v) { n = 0; draw(); tick = setInterval(draw, 1000); } else woke = Date.now(); };
+        const eat = e => { if (s.__on) { e.preventDefault(); e.stopImmediatePropagation(); s.__set(false); }
+          else if (Date.now() - woke < 500) { e.preventDefault(); e.stopImmediatePropagation(); } };
+        for (const t of ["keydown", "keyup", "pointerdown", "pointerup", "mousedown", "mouseup", "click", "wheel", "touchstart"]) addEventListener(t, eat, { capture: true, passive: false });
+      }
+      s.__set(on); })(${on})`;
+    setInterval(async () => {
+      if (!win || win.isDestroyed()) return;
+      let u = ""; try { u = win.webContents.getURL(); } catch (e) { return; }
+      const here = u.startsWith(ORIGIN + "/box/") && !u.startsWith(ORIGIN + "/box/keys/");
+      let padIdle = Infinity;
+      try { const r = await net.fetch("http://127.0.0.1:8810/api/state", { cache: "no-store" }); if (r.ok) { const st = await r.json(); if (typeof st.idle === "number") padIdle = st.idle; } } catch (e) {}
+      let want = here && Math.min((Date.now() - lastInput) / 1000, padIdle) >= SAVER_S;
+      if (want && !saverOn) {   // (a game or Kodi over the top: that counts as being used)
+        let busy = false; try { busy = require("child_process").spawnSync("pgrep", ["-x", "retroarch|moonlight-qt|kodi.bin"], { timeout: 1000 }).status === 0; } catch (e) {}
+        if (busy) { lastInput = Date.now(); want = false; }
+      }
+      if (want === saverOn) return;
+      saverOn = want;
+      win.webContents.executeJavaScript(SAVER_JS(want)).catch(() => {});
+    }, 1500);
+  }
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off

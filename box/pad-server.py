@@ -213,7 +213,7 @@ def controllers():
 
 def state():
     cs = controllers()
-    return {"qr": bool(qr_on or not players), "url": url(), "n": state_n, "controllers": cs, "qr_age": round(time.time() - qr_t, 1) if qr_t else None,
+    return {"idle": round(time.time() - last_act, 1), "qr": bool(qr_on or not players), "url": url(), "n": state_n, "controllers": cs, "qr_age": round(time.time() - qr_t, 1) if qr_t else None,
             "players": [{"num": p.num, "name": p.name, "color": COLORS[(p.num - 1) % 4]} for p in sorted(players.values(), key=lambda p: p.num)]}
 
 
@@ -245,7 +245,12 @@ def volume(d):
 
 
 # ---------- messages from a phone
+last_act = time.time()   # (the last button pressed anywhere: a phone or a real controller; the TV app's screensaver)
+
+
 def handle(p, m):
+    global last_act
+    last_act = time.time()
     t = m.get("t")
     if t == "b":       # pad button {b, v}
         code = PAD_BTNS.get(m.get("b")); pd = pad(p.num)
@@ -315,7 +320,8 @@ async def ws_handler(ws):
     if num is not None: left_at.pop(num, None)
     if num is None:
         await ws.send(json.dumps({"t": "full"})); await ws.close(); return
-    devices(); pad(num)
+    devices()   # (no game pad yet: a phone becomes a controller only when its Pad tab is used, so a phone used as
+                # a remote never takes a player number from the 8BitDos)
     p = Player(cid, name or f"Player {num}", num, ws)
     players[num] = p; last_slot[cid] = num
     await ws.send(json.dumps({"t": "hello", "you": num, "color": COLORS[(num - 1) % 4], "karaoke": karaoke()}))
@@ -358,6 +364,9 @@ async def watch_home(path):
         dev = evdev.InputDevice(path)
         down = None
         async for e in dev.async_read_loop():
+            global last_act
+            if (e.type == E.EV_KEY and e.value == 1) or (e.type == E.EV_ABS and e.code in (E.ABS_HAT0X, E.ABS_HAT0Y) and e.value):
+                last_act = time.time()   # (the TV's screensaver wakes up)
             if e.type == E.EV_KEY and e.code == E.BTN_MODE:
                 if e.value == 1:
                     down = time.time()
@@ -405,9 +414,7 @@ async def game_started():
             if p.num == n: p.held.clear()
         drop_pad(n)
     await asyncio.sleep(2.5)
-    for n in sorted(players):
-        pad(n)
-    await broadcast()
+    await broadcast()   # (each phone's pad comes back on its next Pad-tab press, after the real controllers)
 
 
 async def watch_controllers():
