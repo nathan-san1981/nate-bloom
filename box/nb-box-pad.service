@@ -1,0 +1,14 @@
+[Unit]
+Description=Nate Bloom Box: phones as controllers (scan the QR code on the TV; port 8810)
+After=network-online.target systemd-udev-settle.service
+Wants=network-online.target
+
+[Service]
+User=__USER__
+Environment=XDG_RUNTIME_DIR=/run/user/__UID__
+ExecStart=/usr/bin/python3 -u /usr/local/lib/nb-box/pad-server.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

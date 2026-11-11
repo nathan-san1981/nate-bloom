@@ -295,6 +295,41 @@ function createWindow() {
       b.addEventListener("click", e => { e.stopPropagation(); if (window.NBBox && NBBox.go) NBBox.go("home"); else location.href = ${JSON.stringify(ORIGIN + "/box/home.html")}; });
       document.documentElement.appendChild(b); })()`).catch(() => {});
   });
+  // (box) the phone controllers' QR code (box/pad-server.py, port 8810), bottom-right on the box's own pages: scan it and
+  // the phone is a remote, a game pad (one per phone), a touchpad and a keyboard. It goes once a phone says "Everyone's
+  // in" and comes back from any phone's "Show QR". The app asks the pad server (net.fetch) and hands the page its state.
+  if (BOX) {
+    let padKey = "";
+    const padPage = () => { try { return win && !win.isDestroyed() && win.webContents.getURL().startsWith(ORIGIN + "/box/"); } catch (e) { return false; } };
+    win.webContents.on("did-finish-load", () => {
+      padKey = "";
+      if (!padPage()) return;
+      win.webContents.executeJavaScript(`(() => { if (window.__nbPadQr) return;
+        const c = document.createElement("div"); c.id = "nbPadQr";
+        c.style.cssText = "position:fixed;right:14px;bottom:14px;z-index:2147483646;width:150px;padding:10px;border-radius:14px;background:rgba(20,21,26,.92);border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 24px rgba(0,0,0,.45);font:600 13px Inter,system-ui,sans-serif;color:#fff;text-align:center;display:none;pointer-events:none";
+        document.documentElement.appendChild(c);
+        window.__nbPadQr = st => {
+          const on = !!(st && st.qr && st.matrix); c.style.display = on ? "block" : "none";
+          const main = document.getElementById("main"); if (main && location.pathname.endsWith("/box/home.html")) main.style.right = on ? "182px" : "";   // (the tiles make room)
+          if (!on) return;
+          const m = st.matrix, n = m.length; let d = "";
+          m.forEach((row, y) => row.forEach((v, x) => { if (v) d += "M" + x + " " + y + "h1v1h-1z"; }));
+          const dots = (st.players || []).map(p => '<i style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 3px;background:' + p.color + '"></i>').join("");
+          c.innerHTML = '<div style="background:#fff;border-radius:10px;padding:7px"><svg viewBox="0 0 ' + n + ' ' + n + '" width="116" height="116" shape-rendering="crispEdges" style="display:block"><path d="' + d + '" fill="#000"/></svg></div>'
+            + '<div style="margin-top:8px">Scan to play</div>' + (dots ? '<div style="margin-top:6px;line-height:0">' + dots + '</div>' : "");
+        };
+      })()`).catch(() => {});
+    });
+    setInterval(async () => {
+      if (!padPage()) return;
+      let st = null;
+      try { const r = await net.fetch("http://127.0.0.1:8810/api/state", { cache: "no-store" }); if (r.ok) st = await r.json(); } catch (e) {}
+      const key = st ? JSON.stringify([st.qr, st.url, st.players]) : "off";
+      if (key === padKey) return;
+      padKey = key;
+      win.webContents.executeJavaScript(`window.__nbPadQr && window.__nbPadQr(${JSON.stringify(st)})`).catch(() => {});
+    }, 1500);
+  }
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off

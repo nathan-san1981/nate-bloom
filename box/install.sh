@@ -129,6 +129,23 @@ sudo install -d /usr/local/lib/nb-box/labwc
 fetch outside.sh /usr/local/lib/nb-box/outside.sh 0755
 fetch home-button.py /usr/local/lib/nb-box/home-button.py
 fetch labwc/rc.xml /usr/local/lib/nb-box/labwc/rc.xml
+# phones as controllers: scan the QR code on the TV; each phone is a remote and a game pad (pad-server.py, uinput)
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-evdev python3-websockets python3-qrcode \
+  || warn "python3-evdev/websockets/qrcode didn't install: no phone controllers"
+fetch pad-server.py /usr/local/lib/nb-box/pad-server.py 0755
+fetch pad.html /usr/local/lib/nb-box/pad.html
+fetch 99-nb-box-uinput.rules /etc/udev/rules.d/99-nb-box-uinput.rules
+sudo usermod -aG input "$BOXUSER"
+fetch nb-box-pad.service /tmp/nb-box-pad.service.$$
+sudo sed "s/__USER__/$BOXUSER/g; s/__UID__/$(id -u "$BOXUSER")/g" /tmp/nb-box-pad.service.$$ | sudo tee /etc/systemd/system/nb-box-pad.service >/dev/null; sudo rm -f /tmp/nb-box-pad.service.$$
+if [ -d "$HOME/.config/retroarch" ]; then   # RetroArch knows the phone pads (and Xbox 360 pads) without setup
+  mkdir -p "$HOME/.config/retroarch/autoconfig/udev"
+  if [ -n "$SRC" ]; then cp "$SRC/retroarch/Nate Bloom Pad.cfg" "$HOME/.config/retroarch/autoconfig/udev/"
+  else curl -fsSL "$RAW/retroarch/Nate%20Bloom%20Pad.cfg" -o "$HOME/.config/retroarch/autoconfig/udev/Nate Bloom Pad.cfg" || true; fi
+  RA="$HOME/.config/retroarch/retroarch.cfg"; touch "$RA"
+  kv="joypad_autoconfig_dir = \"$HOME/.config/retroarch/autoconfig\""
+  grep -q "^joypad_autoconfig_dir = " "$RA" && sed -i "s|^joypad_autoconfig_dir = .*|$kv|" "$RA" || echo "$kv" >> "$RA"
+fi
 # /run/nb-box: the app and session.sh pass "open Stream / Media" and the power button's "home" through it
 echo "d /run/nb-box 0775 $BOXUSER $BOXUSER -" | sudo tee /etc/tmpfiles.d/nb-box.conf >/dev/null
 sudo systemd-tmpfiles --create /etc/tmpfiles.d/nb-box.conf
@@ -255,7 +272,7 @@ sudo visudo -cf /etc/sudoers.d/nb-box >/dev/null
 say "Start on power-up"
 sudo systemctl daemon-reload
 sudo udevadm control --reload-rules 2>/dev/null || true
-sudo systemctl enable nb-box-cpu.service nb-box.service nb-box-power.service bluetooth.service >/dev/null
+sudo systemctl enable nb-box-cpu.service nb-box.service nb-box-power.service nb-box-pad.service bluetooth.service >/dev/null
 sudo systemctl set-default graphical.target >/dev/null
 sudo systemctl disable getty@tty1.service >/dev/null 2>&1 || true
 
