@@ -19,6 +19,7 @@ from pathlib import Path
 import evdev
 from evdev import UInput, AbsInfo, ecodes as E
 from websockets.asyncio.server import serve
+from websockets.exceptions import ConnectionClosed
 from websockets.datastructures import Headers
 from websockets.http11 import Response
 
@@ -315,6 +316,8 @@ async def ws_handler(ws):
                     await broadcast()
             except Exception as e:
                 print("message failed:", m.get("t"), e, flush=True)
+    except ConnectionClosed:
+        pass   # (a phone that went to sleep or left Wi-Fi without saying goodbye)
     finally:
         if players.get(num) is p:
             p.release(); players.pop(num, None); left_at[num] = time.time()
