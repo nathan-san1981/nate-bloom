@@ -119,6 +119,7 @@ class Player:
 players = {}     # player number -> Player (connected)
 last_slot = {}   # client id -> player number it had (so a phone that reconnects gets its number back)
 qr_on = True
+qr_t = 0.0       # when a phone last asked to see the QR code (over games it shows for a while, then fades)
 state_n = 0
 
 
@@ -201,7 +202,7 @@ def controllers():
 
 def state():
     cs = controllers()
-    return {"qr": bool(qr_on or not players), "url": url(), "n": state_n, "controllers": cs,
+    return {"qr": bool(qr_on or not players), "url": url(), "n": state_n, "controllers": cs, "qr_age": round(time.time() - qr_t, 1) if qr_t else None,
             "players": [{"num": p.num, "name": p.name, "color": COLORS[(p.num - 1) % 4]} for p in sorted(players.values(), key=lambda p: p.num)]}
 
 
@@ -275,8 +276,9 @@ def handle(p, m):
     elif t == "vol":
         volume(int(m.get("d", 1)))
     elif t == "qr":
-        global qr_on
+        global qr_on, qr_t
         qr_on = bool(m.get("on"))
+        if qr_on: qr_t = time.time()   # ("Show QR": over a game it comes back for a while)
         return "state"
     elif t == "name":
         p.name = str(m.get("name", ""))[:20] or p.name

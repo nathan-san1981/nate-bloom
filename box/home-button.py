@@ -95,11 +95,34 @@ def draw(_w, cr):
 area.connect("draw", draw)
 
 
+# Over a game the code shows for FIRST_S s when the game starts, then fades away; a phone's "Show QR on TV" brings it
+# back for AGAIN_S s. (Nobody connected or "Everyone's in" still decide whether it may show at all.)
+FIRST_S, AGAIN_S = 12, 15
+T0 = time.time()
+fade = {"on": False, "a": 0.0, "tid": 0}
+
+
+def fade_to(target):
+    def step():
+        a = fade["a"] + (0.1 if target > fade["a"] else -0.1)
+        fade["a"] = max(0.0, min(1.0, a)); area.set_opacity(fade["a"])
+        if abs(fade["a"] - target) < 0.05:
+            fade["a"] = target; area.set_opacity(target); fade["tid"] = 0
+            if target == 0: qwin.hide()
+            return False
+        return True
+    if fade["tid"]: GLib.source_remove(fade["tid"])
+    if target > 0: qwin.show_all()
+    fade["tid"] = GLib.timeout_add(40, step)
+
+
 def apply(st):
-    show = bool(st and st.get("qr") and st.get("matrix"))
-    if st: qst.update(m=st.get("matrix"), players=st.get("players", []), qr=show)
-    if show: qwin.show_all(); area.queue_draw()
-    else: qwin.hide()
+    ok = bool(st and st.get("qr") and st.get("matrix"))
+    recent = st and st.get("qr_age") is not None and st["qr_age"] < AGAIN_S
+    want = ok and (time.time() - T0 < FIRST_S or recent)
+    if st: qst.update(m=st.get("matrix"), players=st.get("players", []), qr=want); area.queue_draw()
+    if want != fade["on"]:
+        fade["on"] = want; fade_to(1.0 if want else 0.0)
     return False
 
 
@@ -111,7 +134,7 @@ def poll():
         except Exception:
             st = None
         GLib.idle_add(apply, st)
-        time.sleep(2)
+        time.sleep(1)
 
 
 threading.Thread(target=poll, daemon=True).start()
