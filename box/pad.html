@@ -68,8 +68,10 @@ main { flex:1; position:relative; min-height:0; }
 .analog #dpad { display:none; } .analog #stick { display:block; }
 #abxy { width:min(100%, 72vh, 260px); aspect-ratio:1; position:relative; }
 #abxy .k { position:absolute; width:36%; height:36%; border-radius:50%; font-size:20px; }
-#abxy [data-b=y] { left:32%; top:0; color:#ffc23d; } #abxy [data-b=a] { left:32%; bottom:0; color:#3ccf7a; }
-#abxy [data-b=x] { top:32%; left:0; color:#4f8cff; } #abxy [data-b=b] { top:32%; right:0; color:#ff5a5f; }
+/* Nintendo layout, like the games (and an 8BitDo): A right, B bottom, X top, Y left. Each position sends the same
+   button as an Xbox pad's button in that spot, so only the letters differ from Xbox. */
+#abxy [data-b=y] { left:32%; top:0; color:#6f8cff; } #abxy [data-b=a] { left:32%; bottom:0; color:#ffc23d; }
+#abxy [data-b=x] { top:32%; left:0; color:#3ccf7a; } #abxy [data-b=b] { top:32%; right:0; color:#ff5a5f; }
 #abxy .k.on { color:#fff; }
 .rstick-on #abxy { display:none; } .rstick-on #rstick { display:block; }
 .mid .k { width:100%; height:40px; font-size:13px; border-radius:12px; }
@@ -124,7 +126,7 @@ main { flex:1; position:relative; min-height:0; }
 
   <section class="view" id="pad">
     <div class="side ctl" id="left">
-      <div class="shoulders"><button class="k" data-b="l2">LT</button><button class="k" data-b="l">LB</button></div>
+      <div class="shoulders"><button class="k" data-b="l2">ZL</button><button class="k" data-b="l">L</button></div>
       <div class="zone">
         <div id="dpad"><div class="h"></div><div class="v"></div><div class="c"></div></div>
         <div id="stick"><div class="knob"></div></div>
@@ -138,9 +140,9 @@ main { flex:1; position:relative; min-height:0; }
       <button class="mini" id="rs">Right stick</button>
     </div>
     <div class="side ctl" id="right">
-      <div class="shoulders"><button class="k" data-b="r">RB</button><button class="k" data-b="r2">RT</button></div>
+      <div class="shoulders"><button class="k" data-b="r">R</button><button class="k" data-b="r2">ZR</button></div>
       <div class="zone">
-        <div id="abxy"><button class="k" data-b="y">Y</button><button class="k" data-b="x">X</button><button class="k" data-b="b">B</button><button class="k" data-b="a">A</button></div>
+        <div id="abxy"><button class="k" data-b="y">X</button><button class="k" data-b="x">Y</button><button class="k" data-b="b">A</button><button class="k" data-b="a">B</button></div>
         <div id="rstick"><div class="knob"></div></div>
       </div>
     </div>
