@@ -67,7 +67,9 @@ for c, (k, s) in {" ": ("SPACE", 0), "\n": ("ENTER", 0), "-": ("MINUS", 0), "_":
 KB_CAPS = {E.EV_KEY: sorted(set(KEYS.values()) | {k for k, _ in CHARS.values()} | {E.KEY_LEFTSHIFT})}
 MOUSE_CAPS = {E.EV_KEY: [E.BTN_LEFT, E.BTN_RIGHT, E.BTN_MIDDLE], E.EV_REL: [E.REL_X, E.REL_Y, E.REL_WHEEL, E.REL_HWHEEL]}
 
-pads = {}        # player number -> UInput (made when that player first joins, kept so ports never shift)
+pads = {}        # player number -> UInput (made when that player joins; removed GRACE s after the phone leaves)
+GRACE = 60       # (a phone that drops off Wi-Fi and comes back within this keeps its pad, so its player number stays)
+left_at = {}     # player number -> when its phone left
 kb = mouse = None
 
 
@@ -184,9 +186,11 @@ def controllers():
         ev = re.search(r"\bevent(\d+)", h.group(1)); name = nm.group(1)
         m = re.match(r"Nate Bloom Pad (\d+)$", name)
         if m:
-            p = players.get(int(m.group(1)))
-            if not p: continue   # (a phone that left: its pad stays for the game's sake but isn't a player now)
-            out.append({"kind": "phone", "dev": name, "name": p.name, "color": COLORS[(p.num - 1) % 4], "slot": p.num, "ev": int(ev.group(1)) if ev else 999})
+            n = int(m.group(1)); p = players.get(n)
+            if p:
+                out.append({"kind": "phone", "dev": name, "name": p.name, "color": COLORS[(p.num - 1) % 4], "slot": p.num, "ev": int(ev.group(1)) if ev else 999})
+            else:   # (its phone left a moment ago: the pad goes in a minute unless the phone comes back)
+                out.append({"kind": "phone", "dev": name, "name": "Phone (reconnecting…)", "color": "#74777e", "slot": n, "away": True, "ev": int(ev.group(1)) if ev else 999})
         else:
             out.append({"kind": "pad", "dev": name, "name": name, "ev": int(ev.group(1)) if ev else 999})
     out.sort(key=lambda c: c["ev"])
@@ -290,6 +294,7 @@ async def ws_handler(ws):
         try: await old.ws.close()
         except Exception: pass
     num = take_slot(cid)
+    if num is not None: left_at.pop(num, None)
     if num is None:
         await ws.send(json.dumps({"t": "full"})); await ws.close(); return
     devices(); pad(num)
@@ -310,14 +315,68 @@ async def ws_handler(ws):
                 print("message failed:", m.get("t"), e, flush=True)
     finally:
         if players.get(num) is p:
-            p.release(); players.pop(num, None)
+            p.release(); players.pop(num, None); left_at[num] = time.time()
             await broadcast()
 
 
+def drop_pad(n):
+    pd = pads.pop(n, None)
+    if pd:
+        try: pd.close()
+        except Exception: pass
+        print(f"removed the pad of player {n} (its phone left)", flush=True)
+
+
+HOLD = 0.8   # seconds the Home / Guide button is held to leave a game
+watched = {}   # device path -> task
+
+
+async def watch_home(path):
+    """A real controller's Home (Guide) button held for HOLD s = back to the home screen, from any game or app.
+    A short press still reaches the game (RetroArch's menu, Steam...). Read alongside the game, never grabbed."""
+    try:
+        dev = evdev.InputDevice(path)
+        down = None
+        async for e in dev.async_read_loop():
+            if e.type == E.EV_KEY and e.code == E.BTN_MODE:
+                if e.value == 1:
+                    down = time.time()
+                    async def fire(t0):
+                        await asyncio.sleep(HOLD)
+                        if down == t0:
+                            print(f"{dev.name}: Home held, going home", flush=True); go_home()
+                    asyncio.create_task(fire(down))
+                elif e.value == 0:
+                    down = None
+    except (OSError, asyncio.CancelledError):
+        pass
+    finally:
+        watched.pop(path, None)
+
+
+def scan_homes():
+    for path in evdev.list_devices():
+        if path in watched: continue
+        try:
+            d = evdev.InputDevice(path)
+            ok = not d.name.startswith("Nate Bloom") and E.BTN_MODE in d.capabilities().get(E.EV_KEY, []) and \
+                 E.BTN_SOUTH in d.capabilities().get(E.EV_KEY, [])
+            d.close()
+        except OSError:
+            continue
+        if ok:
+            watched[path] = asyncio.create_task(watch_home(path))
+
+
 async def watch_controllers():
-    """A controller plugged in, paired or switched off: tell the phones (their player numbers can change)."""
+    """A controller plugged in, paired or switched off: tell the phones (their player numbers can change). Pads of
+    phones that left more than GRACE s ago are removed, so they never hold a player number a real controller needs."""
     last = None
     while True:
+        scan_homes()
+        for n, t in list(left_at.items()):
+            if n not in players and time.time() - t > GRACE:
+                left_at.pop(n, None); drop_pad(n)
         cur = [(c["kind"], c["name"]) for c in controllers()]
         if cur != last and last is not None and players:
             await broadcast()

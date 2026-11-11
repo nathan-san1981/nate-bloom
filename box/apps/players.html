@@ -102,7 +102,7 @@ function paint() {
   $("#slots").innerHTML = [0, 1, 2, 3].map(i => {
     const c = cs[i];
     if (!c) return `<div class="slot empty" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>Player ${i + 1}</b><span>Empty</span></div>`;
-    return `<div class="slot" data-i="${i}" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>${esc(c.kind === "phone" ? c.name : nice(c.name))}</b><span>${c.kind === "phone" ? IC.phone + "Phone" : IC.pad + "Controller"}</span></div>`;
+    return `<div class="slot" data-i="${i}" style="--c:${PCOL[i]}"><div class="num">${i + 1}</div><b>${esc(c.kind === "phone" ? c.name : nice(c.name))}</b><span>${c.away ? IC.phone + "Gone in a minute unless it comes back" : c.kind === "phone" ? IC.phone + "Phone" : IC.pad + "Controller"}</span></div>`;
   }).join("");
   $("#more").textContent = cs.length > 4 ? `+${cs.length - 4} more controller${cs.length > 5 ? "s" : ""}` : "";
   if (st.matrix) {

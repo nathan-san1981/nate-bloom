@@ -192,7 +192,7 @@ if [ "$RETRO" = 1 ]; then
   mkdir -p "$HOME/.config/retroarch"
   RA="$HOME/.config/retroarch/retroarch.cfg"; touch "$RA"
   for kv in 'video_fullscreen = "true"' 'video_driver = "gl"' 'audio_driver = "pulse"' 'menu_driver = "ozone"' 'input_autodetect_enable = "true"' \
-            'input_menu_toggle_gamepad_combo = "2"' 'input_quit_gamepad_combo = "4"' 'quit_on_close_content = "1"' 'savestate_auto_save = "true"' 'savestate_auto_load = "true"' 'pause_nonactive = "false"'; do
+            'input_menu_toggle_gamepad_combo = "2"' 'input_quit_gamepad_combo = "4"' 'input_quit_press_twice = "false"' 'quit_on_close_content = "1"' 'savestate_auto_save = "true"' 'savestate_auto_load = "true"' 'pause_nonactive = "false"'; do
     k=${kv%% =*}; grep -q "^$k = " "$RA" && sed -i "s|^$k = .*|$kv|" "$RA" || echo "$kv" >> "$RA"
   done
 fi
