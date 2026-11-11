@@ -130,7 +130,7 @@ fetch outside.sh /usr/local/lib/nb-box/outside.sh 0755
 fetch home-button.py /usr/local/lib/nb-box/home-button.py
 fetch labwc/rc.xml /usr/local/lib/nb-box/labwc/rc.xml
 # phones as controllers: scan the QR code on the TV; each phone is a remote and a game pad (pad-server.py, uinput)
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-evdev python3-websockets python3-qrcode \
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-evdev python3-websockets python3-qrcode python3-gi-cairo \
   || warn "python3-evdev/websockets/qrcode didn't install: no phone controllers"
 fetch pad-server.py /usr/local/lib/nb-box/pad-server.py 0755
 fetch pad.html /usr/local/lib/nb-box/pad.html

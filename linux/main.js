@@ -411,7 +411,7 @@ const RETRO_HEAVY = /mupen64|parallel_n64|ppsspp|flycast|dolphin|pcsx2/i;
 async function boxGo(a, arg) {
   a = String(a || "");
   if (a === "karaoke") { if (!KARAOKE) return { ok: false, error: "not set up" }; win.loadURL(KARAOKE + "/host"); return { ok: true }; }
-  if (BOX_PAGES[a]) {
+  if (BOX_PAGES[a] && !(a === "retro" && arg && arg.rom)) {   // (retro with a game starts it: below)
     if (a !== "bloom" && !hasFile(path.join(BOX_APPS, BOX_PAGES[a].replace(/^\/box\//, "").replace(/\?.*$/, "")))) return { ok: false, error: "not installed" };
     win.loadURL(ORIGIN + BOX_PAGES[a]); return { ok: true };
   }
