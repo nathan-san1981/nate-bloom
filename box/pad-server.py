@@ -74,7 +74,17 @@ left_at = {}     # player number -> when its phone left
 kb = mouse = None
 
 
+class _Aside:   # (a phone pad while a game is starting: presses go nowhere for those two seconds)
+    def write(self, *a): pass
+    def syn(self): pass
+
+
+aside_until = 0.0
+
+
 def pad(n):
+    if time.time() < aside_until:
+        return _Aside()
     if n not in pads:
         pads[n] = UInput(PAD_CAPS, name=f"Nate Bloom Pad {n}", vendor=0x045e, product=0x028e, version=0x110,
                          bustype=E.BUS_USB)
@@ -195,7 +205,7 @@ def controllers():
                 out.append({"kind": "phone", "dev": name, "name": "Phone (reconnecting…)", "color": "#74777e", "slot": n, "away": True, "ev": int(ev.group(1)) if ev else 999})
         else:
             out.append({"kind": "pad", "dev": name, "name": name, "ev": int(ev.group(1)) if ev else 999})
-    out.sort(key=lambda c: c["ev"])
+    out.sort(key=lambda c: (c["kind"] == "phone", c["ev"]))   # (real controllers first: see game_started)
     for i, c in enumerate(out):
         c["port"] = i + 1
     return out
@@ -274,6 +284,11 @@ def handle(p, m):
             mouse.write(E.EV_KEY, code, 1); mouse.syn(); mouse.write(E.EV_KEY, code, 0); mouse.syn()
     elif t == "home":
         go_home()
+    elif t == "open" and m.get("app") in ("players", "retro", "home"):
+        for name in OTHERS:   # (leave a game first; the app opens the screen when it comes back)
+            subprocess.run(["pkill", "-x", name], capture_output=True)
+        try: (RUN / "open").write_text(m["app"])
+        except OSError: pass
     elif t == "vol":
         volume(int(m.get("d", 1)))
     elif t == "qr":
@@ -329,7 +344,7 @@ def drop_pad(n):
     if pd:
         try: pd.close()
         except Exception: pass
-        print(f"removed the pad of player {n} (its phone left)", flush=True)
+        print(f"removed the pad of player {n}", flush=True)
 
 
 HOLD = 0.8   # seconds the Home / Guide button is held to leave a game
@@ -373,12 +388,39 @@ def scan_homes():
             watched[path] = asyncio.create_task(watch_home(path))
 
 
+GAMES = ("retroarch", "moonlight-qt")
+
+
+def game_running():
+    return any(subprocess.run(["pgrep", "-x", g], capture_output=True).returncode == 0 for g in GAMES)
+
+
+async def game_started():
+    """A game is starting: take the phones' pads away for a moment, so the game numbers the real controllers (8BitDo,
+    Xbox...) first; then the phones come back as the next players. (Otherwise a phone joined earlier is always player 1.)"""
+    global aside_until
+    aside_until = time.time() + 2.5
+    for n in list(pads):
+        for p in players.values():
+            if p.num == n: p.held.clear()
+        drop_pad(n)
+    await asyncio.sleep(2.5)
+    for n in sorted(players):
+        pad(n)
+    await broadcast()
+
+
 async def watch_controllers():
     """A controller plugged in, paired or switched off: tell the phones (their player numbers can change). Pads of
     phones that left more than GRACE s ago are removed, so they never hold a player number a real controller needs."""
     last = None
+    was_game = game_running()
     while True:
         scan_homes()
+        g = game_running()
+        if g and not was_game:
+            asyncio.create_task(game_started())
+        was_game = g
         for n, t in list(left_at.items()):
             if n not in players and time.time() - t > GRACE:
                 left_at.pop(n, None); drop_pad(n)

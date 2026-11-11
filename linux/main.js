@@ -441,6 +441,12 @@ ipcMain.handle("nb:box-apps", () => BOX ? boxApps() : null);
 // ytcast.js asks the radio to stop (a cast starting) with radio-stop
 if (BOX) setInterval(() => {
   const rs = path.join(BOX_RUN, "radio-stop"); if (hasFile(rs)) { try { fs.unlinkSync(rs); } catch (e) {} if (listenProcs().some(x => x.name === "radio")) radioStop(); }
+  // the phones (box/pad-server.py) ask for a box screen (Players, Games) with /run/nb-box/open; a game being left first
+  const op = path.join(BOX_RUN, "open");
+  if (hasFile(op)) {
+    let busy = false; try { busy = require("child_process").spawnSync("pgrep", ["-x", "retroarch|moonlight-qt|kodi.bin"], { timeout: 1000 }).status === 0; } catch (e) {}
+    if (!busy) { let a = ""; try { a = fs.readFileSync(op, "utf8").trim(); fs.unlinkSync(op); } catch (e) {} if (BOX_PAGES[a]) setTimeout(() => boxGo(a), 800); }
+  }
   const f = path.join(BOX_RUN, "home");
   if (!hasFile(f)) return;
   try { fs.unlinkSync(f); } catch (e) {}
