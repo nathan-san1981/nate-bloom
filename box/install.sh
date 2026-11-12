@@ -274,7 +274,31 @@ EOF
 # screen, box/apps/startup.html, is the first thing on screen)
 CMD=/boot/firmware/cmdline.txt; [ -f "$CMD" ] || CMD=/boot/cmdline.txt
 sudo cp -n "$CMD" "$CMD.before-nb-box" 2>/dev/null || true
-for opt in usbcore.autosuspend=-1 threadirqs quiet loglevel=3 logo.nologo vt.global_cursor_default=0; do grep -qw -- "$opt" "$CMD" || sudo sed -i "1 s/\$/ $opt/" "$CMD"; done
+for opt in usbcore.autosuspend=-1 threadirqs quiet loglevel=3 logo.nologo vt.global_cursor_default=0 \
+           systemd.show_status=false rd.udev.log_level=3 udev.log_priority=3 splash plymouth.ignore-serial-consoles; do
+  grep -qw -- "$opt" "$CMD" || sudo sed -i "1 s/\$/ $opt/" "$CMD"
+done
+sudo sed -i '1 s/console=tty1/console=tty3/' "$CMD"   # (what boot text there is goes to a console nobody looks at)
+
+say "Boot splash: the Bloom flower's centre from power-on until the startup screen"
+if sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends plymouth >/dev/null; then
+  sudo mkdir -p /usr/share/plymouth/themes/nb-bloom
+  for f in nb-bloom.plymouth nb-bloom.script bg-land.png bg-port-270.png bg-port-90.png dot.png; do
+    fetch "plymouth/nb-bloom/$f" "/usr/share/plymouth/themes/nb-bloom/$f"
+  done
+  sudo sed -i "s/^rot = .*;/rot = $ROTATE;/" /usr/share/plymouth/themes/nb-bloom/nb-bloom.script
+  sudo plymouth-set-default-theme nb-bloom
+  sudo update-initramfs -u >/dev/null 2>&1 || warn "couldn't rebuild the initramfs: the splash shows a moment later"
+else warn "plymouth didn't install: a dark screen until the startup screen"; fi
+# the Pi's own boot screen (its bootloader's text, and the network-install offer) never shows unless it can't start
+if command -v rpi-eeprom-config >/dev/null 2>&1; then
+  CUR="$(sudo rpi-eeprom-config 2>/dev/null || true)"
+  if [ -n "$CUR" ] && ! { echo "$CUR" | grep -qx 'DISABLE_HDMI=1' && echo "$CUR" | grep -qx 'NET_INSTALL_AT_POWER_ON=0'; }; then
+    { echo "$CUR" | grep -v -E '^(DISABLE_HDMI|NET_INSTALL_AT_POWER_ON)='; echo DISABLE_HDMI=1; echo NET_INSTALL_AT_POWER_ON=0; } > /tmp/nb-box-eeprom.conf
+    sudo rpi-eeprom-config --apply /tmp/nb-box-eeprom.conf >/dev/null 2>&1 || warn "couldn't hide the Pi's boot screen"
+    rm -f /tmp/nb-box-eeprom.conf
+  fi
+fi
 
 say "Tuning: CPU at full speed, logs in memory, Wi-Fi without power saving, idle services off"
 sudo mkdir -p /etc/systemd/journald.conf.d /etc/NetworkManager/conf.d

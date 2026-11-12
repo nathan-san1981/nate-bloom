@@ -361,7 +361,7 @@ function createWindow() {
     }, 600);
   }
   // (box) screensaver: after SAVER_S (10 minutes) with no button pressed anywhere (the box's keyboard and mouse, a phone,
-  // an 8BitDo...) on the box's own menus, a dark screen with a slowly drifting clock. Any button wakes it, and that press
+  // an 8BitDo...) on the box's own menus, a dark screen with the Bloom flower turning slowly, "Nate Bloom Box" and the clock, centred. Any button wakes it, and that press
   // does nothing else. Never over a game, Kodi, Moonlight, Keys or karaoke.
   if (BOX) {
     const SAVER_S = +(process.env.NB_SAVER_S || 600);
@@ -372,17 +372,15 @@ function createWindow() {
       if (!s) {
         s = document.createElement("div"); s.id = "nbSaver";
         s.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;cursor:none;overflow:hidden";
-        s.innerHTML = '<div id="nbSaverC" style="position:absolute;left:30%;top:30%;color:rgba(255,255,255,.8);font:200 132px/1 Inter,system-ui,sans-serif;text-align:center;white-space:nowrap;transition:opacity 2s"><div id="nbSaverT"></div><div id="nbSaverD" style="font-size:32px;font-weight:400;margin-top:16px;color:rgba(255,255,255,.5)"></div><div style="font-size:19px;font-weight:400;margin-top:30px;color:rgba(255,255,255,.28)">Press any button</div></div>';
+        s.innerHTML = '<style>@keyframes nbSvSpin{to{transform:rotate(360deg)}}@keyframes nbSvDot{0%,100%{opacity:.75;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}#nbSaver .rings{transform-origin:256px 256px;animation:nbSvSpin 90s linear infinite}#nbSaver .dot{transform-origin:256px 256px;animation:nbSvDot 5s ease-in-out infinite}</style><div id="nbSaverC" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6vh;text-align:center;white-space:nowrap;font-family:Inter,system-ui,sans-serif;background:radial-gradient(ellipse at 50% 42%,#1b1730 0%,#000 70%)"><svg viewBox="0 0 512 512" style="width:24vh;height:24vh;overflow:visible" aria-hidden="true"><g class="rings" fill="none" stroke="#c9b6ff" stroke-width="14" opacity=".85"><circle cx="331" cy="256" r="92"/><circle cx="309" cy="309" r="92"/><circle cx="256" cy="331" r="92"/><circle cx="203" cy="309" r="92"/><circle cx="181" cy="256" r="92"/><circle cx="203" cy="203" r="92"/><circle cx="256" cy="181" r="92"/><circle cx="309" cy="203" r="92"/></g><circle class="dot" cx="256" cy="256" r="48" fill="#f6ad55"/></svg><div style="font-weight:600;font-size:4.6vh;letter-spacing:.02em;color:#f2efe8">Nate Bloom <span style="color:#c9b6ff">Box</span></div><div id="nbSaverT" style="font-weight:200;font-size:19vh;line-height:1;margin-top:1.5vh;color:rgba(255,255,255,.88)"></div><div id="nbSaverD" style="font-size:4.4vh;color:rgba(255,255,255,.5)"></div><div style="font-size:2.8vh;margin-top:2.5vh;color:rgba(255,255,255,.28)">Press any button</div></div>';
         document.documentElement.appendChild(s);
-        const c = s.querySelector("#nbSaverC");
-        let woke = 0, tick = null, n = 0;
+        let woke = 0, tick = null;
         const draw = () => { const d = new Date();
           s.querySelector("#nbSaverT").textContent = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
           s.querySelector("#nbSaverD").textContent = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-          if (++n % 30 === 0) { c.style.opacity = "0"; setTimeout(() => { const W = innerWidth - c.offsetWidth, H = innerHeight - c.offsetHeight;
-            c.style.left = Math.max(0, Math.random() * W) + "px"; c.style.top = Math.max(0, Math.random() * H) + "px"; c.style.opacity = "1"; }, 2100); } };
+        };
         s.__set = v => { s.__on = v; s.style.pointerEvents = v ? "auto" : "none"; s.style.opacity = v ? "1" : "0";
-          clearInterval(tick); if (v) { n = 0; draw(); tick = setInterval(draw, 1000); } else woke = Date.now(); };
+          clearInterval(tick); if (v) { draw(); tick = setInterval(draw, 1000); } else woke = Date.now(); };
         const eat = e => { if (s.__on) { e.preventDefault(); e.stopImmediatePropagation(); s.__set(false); }
           else if (Date.now() - woke < 500) { e.preventDefault(); e.stopImmediatePropagation(); } };
         for (const t of ["keydown", "keyup", "pointerdown", "pointerup", "mousedown", "mouseup", "click", "wheel", "touchstart"]) addEventListener(t, eat, { capture: true, passive: false });

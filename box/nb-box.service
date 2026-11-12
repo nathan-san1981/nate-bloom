@@ -1,6 +1,6 @@
 [Unit]
 Description=Nate Bloom Box (Nate Bloom full screen in cage on tty1)
-After=systemd-user-sessions.service plymouth-quit-wait.service nb-box-cpu.service
+After=systemd-user-sessions.service nb-box-cpu.service
 Wants=nb-box-cpu.service
 Conflicts=getty@tty1.service
 After=getty@tty1.service
@@ -19,6 +19,8 @@ UtmpIdentifier=tty1
 UtmpMode=user
 Environment=XDG_SESSION_TYPE=wayland
 Environment=NB_BOX=1
+# the boot splash (box/plymouth/nb-bloom) stays on screen until cage draws: no black gap, no wait for the end of boot
+ExecStartPre=-+/usr/bin/plymouth quit --retain-splash
 ExecStart=/usr/local/lib/nb-box/box-cursor.sh /usr/bin/cage -s -d -- /usr/local/lib/nb-box/session.sh
 Restart=always
 RestartSec=2

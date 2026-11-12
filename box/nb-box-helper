@@ -6,7 +6,7 @@
 #   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
 #   nb-box-helper games          (reboot into the Batocera USB stick, if one is plugged in)
 #   nb-box-helper start-ask | start-bloom | start-keys | start-listen | start-stream   (what the box opens at power-on)
-#   nb-box-helper touch-rule     (touch turned to match ROTATE; rotate-90/270 and install.sh run it)
+#   nb-box-helper touch-rule     (touch and the boot splash turned to match ROTATE; rotate-90/270 and install.sh run it)
 set -eu
 CONF=/etc/nb-box.conf
 
@@ -19,6 +19,14 @@ SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_TOUCHSCREEN}=="1", ATTRS{name
 R
   udevadm control --reload 2>/dev/null || true
   udevadm trigger --subsystem-match=input --action=change 2>/dev/null || true
+}
+
+splash_rule() {   # the boot splash (box/plymouth/nb-bloom) is drawn pre-turned for the panel: give it ROTATE too
+  T=/usr/share/plymouth/themes/nb-bloom/nb-bloom.script; [ -f "$T" ] || return 0
+  R="$(sed -n 's/^ROTATE=//p' "$CONF")"; [ "$R" = 90 ] || R=270
+  grep -qx "rot = $R;" "$T" && return 0
+  sed -i "s/^rot = .*;/rot = $R;/" "$T"
+  later initramfs "update-initramfs -u >/dev/null 2>&1"   # (the splash's copy in the initramfs, shown first)
 }
 
 later() {   # run after this script (and the app that called it) has finished, outside the app's service
@@ -38,7 +46,7 @@ case "${1:-}" in
     fi
     printf '{"throttled":%d,"wifi":"%s","output":"%s"}\n' "$T" "$W" "$O"
     ;;
-  touch-rule) touch_rule ;;
+  touch-rule) touch_rule; splash_rule ;;
   shutdown) later off "systemctl poweroff" ;;
   reboot) later reboot "systemctl reboot" ;;
   wifi-on) rfkill unblock wifi || true; nmcli radio wifi on ;;
@@ -46,7 +54,7 @@ case "${1:-}" in
   rotate-90|rotate-270)
     R=${1#rotate-}
     sed -i "s/^ROTATE=.*/ROTATE=$R/" "$CONF"
-    touch_rule
+    touch_rule; splash_rule
     later restart "systemctl restart nb-box.service"
     ;;
   scale-auto|scale-125|scale-133|scale-150)

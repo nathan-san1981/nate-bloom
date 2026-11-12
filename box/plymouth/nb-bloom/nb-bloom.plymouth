@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Nate Bloom Box
+Description=The Bloom flower's centre on the box's dark background, from power-on until the app's own startup screen
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/nb-bloom
+ScriptFile=/usr/share/plymouth/themes/nb-bloom/nb-bloom.script

@@ -1,0 +1,18 @@
+# Nate Bloom Box boot splash (box/plymouth/nb-bloom): from power-on until the app's startup screen (box/apps/startup.html)
+# takes over, the box's dark background with the Bloom flower's orange centre breathing where the startup screen pops it.
+# The 5" panel scans in portrait; the box turns it in cage, so here the pictures are pre-turned. nb-box-helper touch-rule
+# writes the ROTATE of /etc/nb-box.conf into the next line.
+rot = 270;
+W = Window.GetWidth(); H = Window.GetHeight();
+if (W > H) { bg = Image("bg-land.png"); cx = W * 0.5; cy = H * 0.409; L = W; }
+else {
+  if (rot == 90) { bg = Image("bg-port-90.png"); cx = W * 0.409; }
+  else { bg = Image("bg-port-270.png"); cx = W * (1 - 0.409); }
+  cy = H * 0.5; L = H;
+}
+back = Sprite(bg.Scale(W, H)); back.SetPosition(0, 0, -10);
+d = Math.Int(L * 48 / 1280);
+dot = Sprite(Image("dot.png").Scale(d, d)); dot.SetPosition(Math.Int(cx - d / 2), Math.Int(cy - d / 2), 10);
+t = 0;
+fun refresh() { t++; dot.SetOpacity(0.6 + 0.4 * Math.Sin(t / 20)); }
+Plymouth.SetRefreshFunction(refresh);
