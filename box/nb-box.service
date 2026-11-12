@@ -19,7 +19,7 @@ UtmpIdentifier=tty1
 UtmpMode=user
 Environment=XDG_SESSION_TYPE=wayland
 Environment=NB_BOX=1
-ExecStart=/usr/bin/cage -s -d -- /usr/local/lib/nb-box/session.sh
+ExecStart=/usr/local/lib/nb-box/box-cursor.sh /usr/bin/cage -s -d -- /usr/local/lib/nb-box/session.sh
 Restart=always
 RestartSec=2
 

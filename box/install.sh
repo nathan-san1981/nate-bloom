@@ -86,6 +86,8 @@ fi
 say "The box's files"
 sudo mkdir -p /usr/local/lib/nb-box
 fetch session.sh /usr/local/lib/nb-box/session.sh 0755
+fetch box-cursor.sh /usr/local/lib/nb-box/box-cursor.sh 0755   # (no mouse pointer on the touch screen alone)
+fetch make-nb-none.py /tmp/nb-box-make-nb-none.py && sudo python3 /tmp/nb-box-make-nb-none.py >/dev/null && sudo rm -f /tmp/nb-box-make-nb-none.py
 fetch nb-box-helper /usr/local/sbin/nb-box-helper 0755
 fetch nb-box.service /tmp/nb-box.service.$$
 sudo sed "s/__USER__/$BOXUSER/g" /tmp/nb-box.service.$$ | sudo tee /etc/systemd/system/nb-box.service >/dev/null; sudo rm -f /tmp/nb-box.service.$$
@@ -110,6 +112,8 @@ EOF
 say "The home screen: Nate Bloom, Keys, Listen, Stream, Media, Games"
 sudo mkdir -p /opt/nb-box/apps/keys
 fetch apps/home.html /opt/nb-box/apps/home.html
+fetch apps/startup.html /opt/nb-box/apps/startup.html
+fetch apps/startup-petals.wav /opt/nb-box/apps/startup-petals.wav
 fetch apps/listen.html /opt/nb-box/apps/listen.html
 fetch apps/radio.html /opt/nb-box/apps/radio.html
 fetch apps/sheets.html /opt/nb-box/apps/sheets.html
@@ -263,10 +267,11 @@ $([ "$K4" = 1 ] && echo "kernel=kernel8.img")
 # <<< nb-box
 EOF
 # kernel command line: USB devices never autosuspend (no lost first note or click from the headphone adapter or the
-# controller waking up), interrupts in threads so the audio threads can outrank them
+# controller waking up), interrupts in threads so the audio threads can outrank them; no boot text (the Bloom startup
+# screen, box/apps/startup.html, is the first thing on screen)
 CMD=/boot/firmware/cmdline.txt; [ -f "$CMD" ] || CMD=/boot/cmdline.txt
 sudo cp -n "$CMD" "$CMD.before-nb-box" 2>/dev/null || true
-for opt in usbcore.autosuspend=-1 threadirqs; do grep -qw -- "$opt" "$CMD" || sudo sed -i "1 s/\$/ $opt/" "$CMD"; done
+for opt in usbcore.autosuspend=-1 threadirqs quiet loglevel=3 logo.nologo vt.global_cursor_default=0; do grep -qw -- "$opt" "$CMD" || sudo sed -i "1 s/\$/ $opt/" "$CMD"; done
 
 say "Tuning: CPU at full speed, logs in memory, Wi-Fi without power saving, idle services off"
 sudo mkdir -p /etc/systemd/journald.conf.d /etc/NetworkManager/conf.d

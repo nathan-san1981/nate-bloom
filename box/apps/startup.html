@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nate Bloom Box</title>
+<style>
+/* Nate Bloom Box power-on screen ("Bloom", box/apps/startup.html, served as /box/startup.html). The app shows it once
+   per boot (main.js boxStartPage), plays startup-petals.wav with it, then goes on to ?next= (the home screen or the
+   START= page). A key, click or tap skips it. STARTUP=off in /etc/nb-box.conf turns it off. */
+:root { --acc: #c9b6ff; --sun: #f6ad55; --ink: #f2efe8; }
+html, body { margin: 0; height: 100%; background: #0b0b10; overflow: hidden; cursor: none; }
+.a { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(ellipse at 50% 45%, #1b1730 0%, #0b0b10 65%);
+  font-family: Inter, system-ui, "Noto Sans", sans-serif; transition: opacity .5s; }
+.a.out { opacity: 0; }
+.stack { display: grid; justify-items: center; gap: 2.4vw; }
+.logo { width: 20vw; height: 20vw; overflow: visible; }
+.logo circle.r { fill: none; stroke: var(--acc); stroke-width: 14; transform-origin: 256px 256px; opacity: 0; }
+.logo circle.c { fill: var(--sun); transform-origin: 256px 256px; transform: scale(0); }
+.glow { position: fixed; inset: 0; background: radial-gradient(circle at 50% 42%, rgba(201,182,255,.35), transparent 45%); opacity: 0; }
+.word { font-weight: 600; font-size: 4.2vw; letter-spacing: .02em; color: var(--ink); opacity: 0; }
+.word span { color: var(--acc); }
+.bar { width: 22vw; height: .35vw; min-height: 2px; background: #26232f; border-radius: 1vw; overflow: hidden; opacity: 0; }
+.bar i { display: block; height: 100%; width: 100%; background: var(--acc); transform-origin: left; transform: scaleX(0); }
+.run .logo circle.r { animation: ring 7s both; }
+.run .logo circle.c { animation: dot 7s both; }
+.run .word, .run .bar { animation: fade 7s both; }
+.run .bar i { animation: bar 7s both; }
+.run .glow { animation: glow 7s both; }
+@keyframes dot { 0% { transform: scale(0); } 8% { transform: scale(1.15); } 12%, 100% { transform: scale(1); } }
+@keyframes ring { 0%, 6% { opacity: 0; transform: scale(.3) rotate(-40deg); } 30%, 100% { opacity: 1; transform: none; } }
+@keyframes fade { 0%, 30% { opacity: 0; transform: translateY(1vw); } 42%, 100% { opacity: 1; transform: none; } }
+@keyframes bar { 0%, 35% { transform: scaleX(0); } 90%, 100% { transform: scaleX(1); } }
+@keyframes glow { 0%, 30% { opacity: 0; } 33% { opacity: 1; } 70%, 100% { opacity: .25; } }
+</style>
+</head>
+<body>
+<div class="a" id="a">
+  <div class="glow"></div>
+  <div class="stack">
+    <svg class="logo" viewBox="0 0 512 512" aria-hidden="true">
+      <circle class="r" cx="331" cy="256" r="92" style="animation-delay:.0s"/><circle class="r" cx="309" cy="309" r="92" style="animation-delay:.12s"/>
+      <circle class="r" cx="256" cy="331" r="92" style="animation-delay:.24s"/><circle class="r" cx="203" cy="309" r="92" style="animation-delay:.36s"/>
+      <circle class="r" cx="181" cy="256" r="92" style="animation-delay:.48s"/><circle class="r" cx="203" cy="203" r="92" style="animation-delay:.6s"/>
+      <circle class="r" cx="256" cy="181" r="92" style="animation-delay:.72s"/><circle class="r" cx="309" cy="203" r="92" style="animation-delay:.84s"/>
+      <circle class="c" cx="256" cy="256" r="48"/>
+    </svg>
+    <div class="word">Nate Bloom <span>Box</span></div>
+    <div class="bar"><i></i></div>
+  </div>
+</div>
+<audio id="snd" src="startup-petals.wav" preload="auto"></audio>
+<script>
+(() => {
+  const q = new URLSearchParams(location.search).get("next") || "/box/home.html";
+  const next = /^\/(?!\/)/.test(q) ? q : "/box/home.html";   // (only a page of the app itself)
+  const a = document.getElementById("a"), snd = document.getElementById("snd");
+  let started = false, left = false;
+  function go() { if (left) return; left = true; a.classList.add("out"); setTimeout(() => location.replace(next), 450); }
+  function start() { if (started) return; started = true; a.classList.add("run"); setTimeout(go, 6600); }
+  snd.volume = 0.8;
+  snd.addEventListener("playing", start);
+  snd.addEventListener("error", start);
+  snd.play().catch(start);
+  setTimeout(start, 1500);          // (no sound device yet: the screen plays anyway)
+  setTimeout(go, 12000);            // (never stuck here)
+  for (const ev of ["keydown", "pointerdown", "touchstart"]) addEventListener(ev, () => { snd.pause(); go(); });
+})();
+</script>
+</body>
+</html>

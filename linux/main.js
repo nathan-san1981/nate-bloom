@@ -271,6 +271,9 @@ function createWindow() {
   });
   const saveState = () => { try { const b = WIDE ? (wideBack || { width: 1280, height: 800 }) : win.getNormalBounds(); fs.writeFileSync(statePath, JSON.stringify({ ...b, max: WIDE ? wideMax : win.isMaximized(), wide: WIDE })); } catch (e) {} };
   win.webContents.on("did-finish-load", () => { if (WIDE) win.webContents.send("nb:wide", true); if (BOX) win.webContents.setZoomFactor(boxZoom()); });
+  // (box) the 5" touch screen alone: no mouse pointer anywhere. box/box-cursor.sh gives cage the invisible cursor theme
+  // (XCURSOR_THEME=nb-none); web pages pick their own pointers (hand over buttons), so they get cursor: none as well
+  if (BOX && process.env.XCURSOR_THEME === "nb-none") win.webContents.on("dom-ready", () => { win.webContents.insertCSS("*, *::before, *::after { cursor: none !important; }").catch(() => {}); });
   // screens plugged in or out while it's across them: it fits what's there now (not on every small change)
   let lastScreens = "";
   const screensKey = () => screen.getAllDisplays().map(d => [d.bounds.x, d.bounds.y, d.bounds.width, d.bounds.height].join(",")).join(" ");
@@ -448,7 +451,15 @@ function karaokeUrl(u) { if (!KARAOKE || !u) return false; try { return new URL(
 function boxStartPage() {
   if (!hasFile(path.join(BOX_APPS, "home.html"))) return BOX_PAGES.bloom;   // (an install without the home screen, or CI: straight to Play)
   const want = process.env.NB_BOX_START || boxConf("START");
-  return BOX_PAGES[want] || BOX_PAGES.home;
+  const page = BOX_PAGES[want] || BOX_PAGES.home;
+  // power-on: the Bloom startup screen and sound (box/apps/startup.html) once per boot, then that page. /run/nb-box is
+  // emptied at every boot, so coming back from a game or Kodi goes straight to the page. STARTUP=off turns it off.
+  const flag = "/run/nb-box/started";
+  if (hasFile(path.join(BOX_APPS, "startup.html")) && !hasFile(flag) && boxConf("STARTUP") !== "off") {
+    try { fs.writeFileSync(flag, ""); } catch (e) { return page; }
+    return "/box/startup.html?next=" + encodeURIComponent(page);
+  }
+  return page;
 }
 function gameStick() {   // the Batocera stick: its boot partition is labelled BATOCERA
   return new Promise(res => execFile("lsblk", ["-rno", "LABEL,TRAN,PKNAME"], { timeout: 4000 }, (err, out) => res(!err && /^BATOCERA\b/m.test(String(out)))));
