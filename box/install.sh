@@ -18,7 +18,7 @@ set -euo pipefail
 REPO="nathan-san1981/nate-bloom"
 RAW="https://raw.githubusercontent.com/$REPO/main/box"
 DEB_URL="https://github.com/$REPO/releases/download/pi-latest/NateBloom-pi-arm64.deb"
-MODE=app DSI=1 ROTATE=90 REBOOT=1 K4=0 LISTEN=1 YOUTUBE=1 STREAM=1 MEDIA=1 RETRO=1 GAMESBOOT=1
+MODE=app DSI=1 ROTATE= REBOOT=1 K4=0 LISTEN=1 YOUTUBE=1 STREAM=1 MEDIA=1 RETRO=1 GAMESBOOT=1
 while [ $# -gt 0 ]; do
   case "$1" in
     --chromium) MODE=chromium ;;
@@ -36,6 +36,8 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+[ -n "$ROTATE" ] || ROTATE="$(sed -n "s/^ROTATE=//p" /etc/nb-box.conf 2>/dev/null || true)"   # (run again: the way it was turned stays)
+[ -n "$ROTATE" ] || ROTATE=90
 case "$ROTATE" in 90|270) ;; *) echo "--rotate takes 90 or 270" >&2; exit 2 ;; esac
 
 say() { printf '\n\033[1;35m==> %s\033[0m\n' "$*"; }
@@ -108,6 +110,7 @@ BOXUSER=$BOXUSER
 START=${START:-ask}
 EOF
 [ -n "$KEEP" ] && echo "$KEEP" | sudo tee -a /etc/nb-box.conf >/dev/null
+sudo /usr/local/sbin/nb-box-helper touch-rule   # (the 5" touch screen turned to match ROTATE: a tap lands where it is drawn)
 
 say "The home screen: Nate Bloom, Keys, Listen, Stream, Media, Games"
 sudo mkdir -p /opt/nb-box/apps/keys

@@ -177,7 +177,8 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 
 | What | Do |
 | --- | --- |
-| Screen upside down | Box… → Screen → the other button, or `sudo nb-box-helper rotate-270` over SSH |
+| Screen upside down | Box… → Screen → the other button, or `sudo nb-box-helper rotate-270` over SSH (touch turns with it) |
+| Taps open the wrong thing | `sudo nb-box-helper touch-rule` over SSH, then restart the app: it turns touch to match `ROTATE` in `/etc/nb-box.conf` |
 | On a TV or monitor the text is small from across the room | The box fills any screen at its own resolution. Text size **Auto** (the default) is 1.333× on the 5" panel and 1× on anything taller than 800 px; Box… → Text size → Small, Medium or Large forces one (or `SCALE=` in `/etc/nb-box.conf`). |
 | Black screen | `journalctl -u nb-box -b` over SSH; check the ribbon is in DISP 1 (or reinstall with `--dsi0`) |
 | No sound | is the chip showing your cable? `wpctl status` over SSH lists outputs; try another USB port |

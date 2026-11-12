@@ -6,8 +6,20 @@
 #   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
 #   nb-box-helper games          (reboot into the Batocera USB stick, if one is plugged in)
 #   nb-box-helper start-ask | start-bloom | start-keys | start-listen | start-stream   (what the box opens at power-on)
+#   nb-box-helper touch-rule     (touch turned to match ROTATE; rotate-90/270 and install.sh run it)
 set -eu
 CONF=/etc/nb-box.conf
+
+touch_rule() {   # the 5" Touch Display 2 reports portrait touches and cage doesn't turn them with the picture, so libinput
+                 # turns them: a tap lands where it's drawn (with ROTATE=270 and no rule, top left landed top right)
+  case "$(sed -n 's/^ROTATE=//p' "$CONF")" in 270) M="0 1 0 -1 0 1" ;; *) M="0 -1 1 1 0 0" ;; esac
+  cat > /etc/udev/rules.d/98-nb-box-touch.rules <<R
+# Nate Bloom Box (nb-box-helper touch-rule): the 5" touch screen turned to match ROTATE in $CONF
+SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT_TOUCHSCREEN}=="1", ATTRS{name}=="*Goodix*", ENV{LIBINPUT_CALIBRATION_MATRIX}="$M"
+R
+  udevadm control --reload 2>/dev/null || true
+  udevadm trigger --subsystem-match=input --action=change 2>/dev/null || true
+}
 
 later() {   # run after this script (and the app that called it) has finished, outside the app's service
   systemd-run --quiet --collect --on-active=2 --unit="nb-box-$1-$$" /bin/sh -c "$2"
@@ -26,6 +38,7 @@ case "${1:-}" in
     fi
     printf '{"throttled":%d,"wifi":"%s","output":"%s"}\n' "$T" "$W" "$O"
     ;;
+  touch-rule) touch_rule ;;
   shutdown) later off "systemctl poweroff" ;;
   reboot) later reboot "systemctl reboot" ;;
   wifi-on) rfkill unblock wifi || true; nmcli radio wifi on ;;
@@ -33,6 +46,7 @@ case "${1:-}" in
   rotate-90|rotate-270)
     R=${1#rotate-}
     sed -i "s/^ROTATE=.*/ROTATE=$R/" "$CONF"
+    touch_rule
     later restart "systemctl restart nb-box.service"
     ;;
   scale-auto|scale-125|scale-133|scale-150)
@@ -112,5 +126,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|scale-auto|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|touch-rule|scale-auto|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
 esac

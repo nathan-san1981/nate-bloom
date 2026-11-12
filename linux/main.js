@@ -287,9 +287,22 @@ function createWindow() {
   // Ctrl+Shift+F works with the menu bar hidden too (and only once)
   win.webContents.on("before-input-event", (e, i) => { if (i.type === "keyDown" && i.control && i.shift && !i.alt && !i.meta && i.code === "KeyF") { e.preventDefault(); setWide(!WIDE); } });
   if (!BOX) win.on("close", saveState);
-  // (box) a Home button on the pages that have no way back of their own (Keys, Karaoke): always on top, bottom-left
+  // (box) a Home button on the pages that have no way back of their own: Keys and Karaoke (always on top, bottom-left)
+  // and Nate Bloom's main screen (in its top bar)
   if (BOX) win.webContents.on("did-finish-load", () => {
     const u = win.webContents.getURL();
+    // Nate Bloom's own main screen (Synths, Samples, Drums…): a ⌂ Home in its top bar, first, beside Mix and Rec. Play has its
+    // own (899i-box.js) and covers this bar; the box's own pages (/box/) have theirs. The power button can be out of reach in the case
+    if (u.startsWith(ORIGIN + "/") && !u.startsWith(ORIGIN + "/box/") && !karaokeUrl(u)) {
+      win.webContents.executeJavaScript(`(() => { const add = () => { const bar = document.querySelector("header .hright");
+          if (!bar || document.getElementById("nbHdrHome")) return !!bar;
+          const b = document.createElement("button"); b.id = "nbHdrHome"; b.type = "button"; b.className = "btn"; b.textContent = "⌂ Home";
+          b.title = "Back to the box's home screen"; b.setAttribute("aria-label", "Home screen");
+          b.addEventListener("click", e => { e.stopPropagation(); if (window.NBBox && NBBox.go) NBBox.go("home"); else location.href = ${JSON.stringify(ORIGIN + "/box/home.html")}; });
+          bar.insertBefore(b, bar.firstChild); return true; };
+        if (!add()) { let n = 0; const t = setInterval(() => { if (add() || ++n > 40) clearInterval(t); }, 250); } })()`).catch(() => {});
+      return;
+    }
     if (!(u.startsWith(ORIGIN + "/box/keys/") || karaokeUrl(u))) return;
     win.webContents.executeJavaScript(`(() => { if (document.getElementById("nbBoxHome")) return;
       const b = document.createElement("button"); b.id = "nbBoxHome"; b.type = "button"; b.title = "Back to the home screen";
