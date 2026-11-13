@@ -41279,17 +41279,24 @@ html.nb-synths .recbanner { display: none !important; }
         return ids.slice(0, 15).map(id => allEntries().find(e => e.id === "e:" + id)).filter(Boolean);
       };
       window.__box15 = box15;
-      const BR = { i: -1, t: 0 };
-      function curIdx(list) { let i = list.findIndex(e => state.cur && e.id === state.cur.id); if (i < 0) i = list.findIndex(e => e.id === "e:" + state.engine); return i; }
+      const BR = { i: -1, t: 0, last: "" };
+      // where the knob is: the sound it last picked, unless something else changed the sound since (the engine is the truth,
+      // not state.cur, which can still name a sound that was swapped out)
+      function curIdx(list) { const eng = "e:" + state.engine; let i = list.findIndex(e => e.id === eng); if (i < 0) i = list.findIndex(e => state.cur && e.id === state.cur.id); return i; }
       function browse15(d) {
         const list = box15(); if (!list.length) return;
-        if (BR.i < 0 || !BR.t) { const i = curIdx(list); BR.i = i < 0 ? (d > 0 ? -1 : 0) : i; }
+        if (!BR.t && !(BR.i >= 0 && BR.i < list.length && list[BR.i].id === BR.last && "e:" + state.engine === BR.last)) { const i = curIdx(list); BR.i = i < 0 ? (d > 0 ? -1 : 0) : i; }
         BR.i = (BR.i + d + list.length) % list.length;
         const e = list[BR.i];
         try { window.__pk.flashOn(e.name, (BR.i + 1) + " of " + list.length + " · plays when you stop"); } catch (x) {}
         clearTimeout(BR.t); BR.t = setTimeout(() => { BR.t = 0; play15(e); }, 450);
       }
-      function play15(e) { start(); try { chooseEntry(e); } catch (x) {} setTimeout(() => { ML.lay = null; try { mlRefresh(true); lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 100); }
+      // a picked sound is the only one playing (layers come back with + Layer); before, the old sound kept playing under it
+      async function play15(e) {
+        start(); BR.last = e.id; const L15 = box15(); BR.i = L15.findIndex(x => x.id === e.id);
+        try { await chooseEntry(e); } catch (x) {}
+        try { const k = e.id.slice(2), it = window.__stk.items().find(x => x.t === "syn" && x.id === k); if (it) window.__stk.only(it); else { for (const q in state.layers) state.layers[q].on = q === k; state.engine = k; state.melodic = k; renderEngine(); save(); } } catch (x) {}
+        setTimeout(() => { ML.lay = null; try { mlRefresh(true); lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 100); }
       async function add15(e) {
         start(); let ok = false; try { ok = await window.__stk.together(e); } catch (x) {}
         mlHud(ok === false ? e.name : "Layered: " + e.name, ok === false ? "already playing" : "added on top", null);
