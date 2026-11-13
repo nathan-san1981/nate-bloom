@@ -41289,6 +41289,17 @@ html.nb-synths .recbanner { display: none !important; }
           while (voices.size > BOX_MAX && order.length) { const o = order.shift(); const v = voices.get(o); if (v) { try { v.stop(); } catch (e) {} voices.delete(o); try { markTones(v.tones, markKey, false); } catch (e) {} } }
           return r;
         }; }
+      // Saturation: the FX knobs (Drive, Echo, Space) are global and stayed wherever the MiniLab left them, on every sound
+      // after: the box was found at Drive 0.81, Echo 0.62, Space 1 (defaults 0.15 / 0.3 / 0.55), so everything came out
+      // fuzzed and washed. Each of the fifteen now starts clean (below), and on the box the Drive knob's top is a warm
+      // drive (45 % of the desktop's), not a fuzz box. Turned up once by hand it still does what it says.
+      const FX_CLEAN = { drive: 0.1, wobble: 0.15, echo: 0.2, space: 0.3 };
+      const fxClean = () => { try { Object.assign(state.fx, FX_CLEAN); if (ctx) applyFx(); try { refreshFxKnobs(); } catch (e) {} save(); } catch (e) {} };
+      { const a0 = applyFx; applyFx = function () {
+          const d = state.fx.drive; state.fx.drive = d * 0.45;
+          try { return a0.apply(this, arguments); } finally { state.fx.drive = d; }
+        }; }
+      try { if (localStorage.getItem("nb-box-fxclean") !== "1") { localStorage.setItem("nb-box-fxclean", "1"); setTimeout(fxClean, 1500); } } catch (e) {}   // (once: the settings it was found with)
       // (a look at the output stages, for checks: what the drive, compressor and limiter are doing right now)
       window.__nbStages = () => { try { return { fx: Object.assign({}, state.fx), comp: fx.comp && +fx.comp.reduction.toFixed(1), lim: fx.limiter && +fx.limiter.reduction.toFixed(1), level: (() => { try { return __nbTest.level(); } catch (e) { return null; } })(), sound: state.cur && state.cur.name, layers: Object.keys(state.layers).filter(k => state.layers[k].on).map(k => [k, state.layers[k].level]) }; } catch (e) { return String(e); } };
       // ---------- the fifteen ----------
@@ -41324,6 +41335,7 @@ html.nb-synths .recbanner { display: none !important; }
         start(); BR.last = e.id; const L15 = box15(); BR.i = L15.findIndex(x => x.id === e.id);
         try { await chooseEntry(e); } catch (x) {}
         try { const k = e.id.slice(2), it = window.__stk.items().find(x => x.t === "syn" && x.id === k); if (it) window.__stk.only(it); else { for (const q in state.layers) state.layers[q].on = q === k; state.engine = k; state.melodic = k; renderEngine(); save(); } } catch (x) {}
+        fxClean();
         setTimeout(() => { ML.lay = null; try { mlRefresh(true); lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 100); }
       async function add15(e) {
         start(); let ok = false; try { ok = await window.__stk.together(e); } catch (x) {}
