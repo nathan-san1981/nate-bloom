@@ -46,6 +46,8 @@
         return ids.slice(0, 15).map(id => allEntries().find(e => e.id === "e:" + id)).filter(Boolean);
       };
       window.__box15 = box15;
+      // the Quick row of sounds (and Play's tabs) shows the same fifteen synths, not every engine (only on the box, not saved)
+      try { tabCfg.hidden = Object.keys(ENGINES).filter(id => !PICK.includes(id) && !(id === "fm" && !ENGINES.alpha)); } catch (e) {}
       const BR = { i: -1, t: 0, last: "" };
       // where the knob is: the sound it last picked, unless something else changed the sound since (the engine is the truth,
       // not state.cur, which can still name a sound that was swapped out)
@@ -107,10 +109,13 @@
       document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#plPick"); if (!b || !document.documentElement.classList.contains("nb-tabs")) return; e.preventDefault(); e.stopImmediatePropagation(); sheet("add"); }, true);
 
       // ---------- the loops ----------
-      const LP = { bars: 2, parts: [{ ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }], beatMute: false, style: "Boom bap",
+      const LP = { bars: 2, parts: [{ ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }], beatMute: false, style: "Boom bap", snap: true,
         rec: -1, recStart: 0, pass: 0, sched: null, inPlay: false, timer: 0 };
-      try { const o = JSON.parse(localStorage.getItem("nb-box-loops") || "null"); if (o && Array.isArray(o.parts)) { LP.bars = [1, 2, 4].includes(o.bars) ? o.bars : 2; o.parts.slice(0, 3).forEach((p, i) => { LP.parts[i] = { ev: Array.isArray(p.ev) ? p.ev : [], snd: p.snd || "", mute: !!p.mute }; }); LP.beatMute = !!o.beatMute; if (o.style) LP.style = o.style; } } catch (e) {}
-      const lpSave = () => { try { localStorage.setItem("nb-box-loops", JSON.stringify({ bars: LP.bars, parts: LP.parts.map(p => ({ ev: p.ev.map(e => ({ s: e.s, m: e.m, id: e.id, mix: e.mix, d: e.d })), snd: p.snd, mute: p.mute })), beatMute: LP.beatMute, style: LP.style })); } catch (e) {} };
+      try { const o = JSON.parse(localStorage.getItem("nb-box-loops") || "null"); if (o && Array.isArray(o.parts)) { LP.bars = [1, 2, 4].includes(o.bars) ? o.bars : 2; o.parts.slice(0, 3).forEach((p, i) => { LP.parts[i] = { ev: Array.isArray(p.ev) ? p.ev : [], snd: p.snd || "", mute: !!p.mute }; }); LP.beatMute = !!o.beatMute; if (o.style) LP.style = o.style; if (o.snap === false) LP.snap = false; } } catch (e) {}
+      const lpSave = () => { try { localStorage.setItem("nb-box-loops", JSON.stringify({ bars: LP.bars, parts: LP.parts.map(p => ({ ev: p.ev.map(e => ({ s: e.s, m: e.m, id: e.id, mix: e.mix, d: e.d })), snd: p.snd, mute: p.mute })), beatMute: LP.beatMute, style: LP.style, snap: LP.snap })); } catch (e) {} };
+      // Snap: what was just recorded lands on the nearest 16th (and lasts whole 16ths), so a loop plays back tight; you
+      // hear it as you play it while recording, snapped from the first time round
+      const snapPass = P => { if (!LP.snap) return; P.ev.forEach(e => { if (e.pass === LP.pass) { e.s = Math.round(e.s) % L(); e.d = Math.max(1, Math.round(e.d || 1)); } }); };
       const L = () => LP.bars * 16;
       const sd = () => rcStepDur();
       const posAt = t => RC.step - (RC.nextT - t) / sd();
@@ -135,7 +140,7 @@
         const now = ctx.currentTime;
         // a recording ends after one loop
         if (LP.rec >= 0 && posAt(now) >= LP.recStart + L()) {
-          const P = LP.parts[LP.rec]; P.ev.forEach(e => { if (e.open != null) { e.d = Math.max(0.25, LP.recStart + L() - (LP.recStart + e.s)); e.open = null; } delete e.pass; });
+          const P = LP.parts[LP.rec]; P.ev.forEach(e => { if (e.open != null) { e.d = Math.max(0.25, LP.recStart + L() - (LP.recStart + e.s)); e.open = null; } }); snapPass(P); P.ev.forEach(e => { delete e.pass; });
           mlHud("Keys " + (LP.rec + 1), "recorded · it plays back now", null); LP.rec = -1; lpSave(); paint();
         }
         const from = LP.sched == null ? posAt(now) : LP.sched, to = posAt(now + NB_LA);
@@ -167,7 +172,7 @@
       }
       function recKeys(i) {
         start(); if (!ctx) return;
-        if (LP.rec === i) { LP.rec = -1; LP.parts[i].ev.forEach(e => { if (e.open != null) { e.d = 1; e.open = null; } delete e.pass; }); lpSave(); paint(); return; }
+        if (LP.rec === i) { LP.rec = -1; LP.parts[i].ev.forEach(e => { if (e.open != null) { e.d = 1; e.open = null; } }); snapPass(LP.parts[i]); LP.parts[i].ev.forEach(e => { delete e.pass; }); lpSave(); paint(); return; }
         if (!RC.playing) go(true);
         LP.pass++; LP.rec = i;
         const p = posAt(ctx.currentTime + 0.05); LP.recStart = Math.ceil(p / 16) * 16; if (LP.recStart - p < 1) LP.recStart += 16;
@@ -219,6 +224,7 @@
             <button type="button" class="tk-arrow" id="tkNext" aria-label="Next style">›</button>
             <button type="button" class="tk-btn" id="tkNew">New</button><button type="button" class="tk-btn" id="tkVary">Vary</button>
             <button type="button" class="tk-btn tk-two" id="tkBars" title="How long a loop is"><small>loop</small><b></b></button>
+            <button type="button" class="tk-btn tk-two" id="tkSnap" title="Snap: recorded notes land on the beat (16ths)"><small>snap</small><b></b></button>
             <button type="button" class="tk-btn tk-two" id="tkBeatOn" title="The beat on or off (the loops keep its time)"><small>beat</small><b></b></button>
             <button type="button" class="tk-btn tk-go" id="tkGo">▶</button></div>
           <div class="tk-parts">
@@ -238,11 +244,13 @@
         }));
         $id("tkBars").addEventListener("click", () => { LP.bars = { 1: 2, 2: 4, 4: 1 }[LP.bars] || 2; lpSave(); paint(); mlHud("Loop", LP.bars + (LP.bars === 1 ? " bar" : " bars") + " · for the next recording", null); });
         $id("tkBeatOn").addEventListener("click", () => { LP.beatMute = !LP.beatMute; lpSave(); paint(); });
+        $id("tkSnap").addEventListener("click", () => { LP.snap = !LP.snap; lpSave(); paint(); mlHud("Snap " + (LP.snap ? "on" : "off"), LP.snap ? "recorded notes land on the beat" : "recorded as you play them", null); });
       }
       function paint() {
         const sec = $id("tbTrack"); if (!sec) return;
         nbT($id("tkStyle"), LP.style); nbT($id("tkBpm"), Math.round(rcBpm()) + " bpm");
         nbT($id("tkGo"), RC.playing ? "■" : "▶"); $id("tkGo").classList.toggle("on", RC.playing);
+        nbT($id("tkSnap").querySelector("b"), LP.snap ? "On" : "Off"); $id("tkSnap").classList.toggle("off", !LP.snap);
         nbT($id("tkBeatOn").querySelector("b"), LP.beatMute ? "Off" : "On"); $id("tkBeatOn").classList.toggle("off", LP.beatMute);
         let padsRec = false, padsN = 0; try { padsRec = BP.rec || BP.armed; padsN = BPS.ev.length; } catch (e) {}
         nbT($id("tkPadsSub"), padsRec ? "recording: play the pads · " + padsN + " hits" : padsN ? padsN + " hits" + (LP.beatMute ? " · pads only" : "") : "your finger drums");

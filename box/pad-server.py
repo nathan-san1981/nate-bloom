@@ -376,6 +376,7 @@ def go_home():
 def volume(d):
     arg = "5%+" if d > 0 else "5%-"
     subprocess.run(["wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", arg], capture_output=True)
+    subprocess.run(["python3", "/usr/local/lib/nb-box/balance.py"], capture_output=True)   # (wpctl sets both sides the same: the headphone balance back)
 
 
 # ---------- messages from a phone

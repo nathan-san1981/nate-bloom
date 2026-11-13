@@ -143,7 +143,8 @@ async function checkForUpdate(win) {
   }
   if (changed) {
     await fsp.writeFile(path.join(CACHE, "FETCHED.txt"), new Date().toISOString());
-    if (win && !win.isDestroyed()) win.webContents.send("nb:update-ready");
+    // (box: no banner; the box opens each page fresh, so the new one is simply there the next time it opens)
+    if (win && !win.isDestroyed() && !BOX) win.webContents.send("nb:update-ready");
   }
 }
 
@@ -349,7 +350,9 @@ function createWindow() {
       b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg><span>Home</span>';
       b.style.cssText = "position:fixed;left:14px;bottom:14px;z-index:2147483647;display:flex;align-items:center;gap:8px;height:48px;padding:0 18px 0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(20,21,26,.88);color:#fff;font:600 16px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45);-webkit-tap-highlight-color:transparent";
       b.addEventListener("click", e => { e.stopPropagation(); if (window.NBBox && NBBox.go) NBBox.go("home"); else location.href = ${JSON.stringify(ORIGIN + "/box/home.html")}; });
-      document.documentElement.appendChild(b); })()`).catch(() => {});
+      document.documentElement.appendChild(b);
+      if (location.port === "8797") { const st = document.createElement("style"); st.textContent = "body{padding-bottom:84px!important}"; document.head.appendChild(st); }   // (Sound Map: its list scrolls clear of Home)
+      })()`).catch(() => {});
   });
   // (box) the phone controllers' QR code (box/pad-server.py, port 8810), bottom-right on the box's own pages: scan it and
   // the phone is a remote, a game pad (one per phone), a touchpad and a keyboard. It goes once a phone says "Everyone's
@@ -576,6 +579,16 @@ async function boxGo(a, arg) {
 }
 ipcMain.handle("nb:box-go", (e, a, arg) => BOX ? boxGo(a, arg) : null);
 ipcMain.handle("nb:box-apps", () => BOX ? boxApps() : null);
+// (box) headphone balance: box/balance.py turns one side of the output down (PipeWire's channel volumes), kept in
+// ~/.config/nb-box/balance and put back at start and after the phone remote's volume buttons (pad-server.py)
+const BALANCE = "/usr/local/lib/nb-box/balance.py";
+const balRun = args => new Promise(res => execFile("python3", [BALANCE, ...args], { timeout: 6000 }, (err, out) => res(err ? null : String(out || "").trim())));
+ipcMain.handle("nb:box-balance", async (e, cmd, v) => {
+  if (!BOX || !hasFile(BALANCE)) return null;
+  if (cmd === "set") { const b = Math.max(-0.6, Math.min(0.6, Number(v) || 0)); await balRun([b.toFixed(2)]); return { ok: true, balance: b }; }
+  const g = await balRun(["get"]); return { ok: true, balance: Number(g) || 0 };
+});
+if (BOX) setTimeout(() => { if (hasFile(BALANCE)) balRun([]); }, 6000);
 // the power button (box/nb-box-power.py, as root) asks for the home screen by creating /run/nb-box/home;
 // ytcast.js asks the radio to stop (a cast starting) with radio-stop
 if (BOX) setInterval(() => {

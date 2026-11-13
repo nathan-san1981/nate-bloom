@@ -25,7 +25,8 @@ if (process.argv.includes("--nb-box")) contextBridge.exposeInMainWorld("NBBox", 
   idle: (cmd, arg) => ipcRenderer.invoke("nb:box-idle", String(cmd || "get"), arg),        // get | set {on, minutes, place, unit} | weather
   apps: () => ipcRenderer.invoke("nb:box-apps"),   // which of them this box has: { keys, listen, stream, media, games, start }
   listen: (cmd, arg) => ipcRenderer.invoke("nb:box-listen", String(cmd || "status"), arg),   // start | stop | status | keep on/off | level 0–1 | mute on/off
-  bt: (cmd, mac) => ipcRenderer.invoke("nb:box-bt", String(cmd), mac == null ? "" : String(mac)),   // on | list | scan | pair | connect | forget | pair-status | reply <digits|cancel>
+  bt: (cmd, mac) => ipcRenderer.invoke("nb:box-bt", String(cmd), mac == null ? "" : String(mac)),
+  balance: (cmd, v) => ipcRenderer.invoke("nb:box-balance", String(cmd || "get"), v),   // get | set -0.6 to 0.6 (below 0: leans left)   // on | list | scan | pair | connect | forget | pair-status | reply <digits|cancel>
 });
 
 contextBridge.exposeInMainWorld("NB_NATIVE", {

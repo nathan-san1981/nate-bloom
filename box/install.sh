@@ -141,6 +141,7 @@ fetch labwc/rc.xml /usr/local/lib/nb-box/labwc/rc.xml
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends python3-evdev python3-websockets python3-qrcode python3-gi-cairo \
   || warn "python3-evdev/websockets/qrcode didn't install: no phone controllers"
 fetch pad-server.py /usr/local/lib/nb-box/pad-server.py 0755
+fetch balance.py /usr/local/lib/nb-box/balance.py 0755   # (the headphone balance in Settings)
 fetch pad.html /usr/local/lib/nb-box/pad.html
 fetch 99-nb-box-uinput.rules /etc/udev/rules.d/99-nb-box-uinput.rules
 fetch 99-nb-box-pads.rules /etc/udev/rules.d/99-nb-box-pads.rules   # (real controllers hidden from games: pad-server routes them to players 1-4)

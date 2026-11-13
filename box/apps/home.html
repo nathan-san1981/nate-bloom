@@ -149,6 +149,8 @@ button { font: inherit; color: inherit; }
   <h3>Bluetooth · keyboard, controller, headphones</h3>
   <div id="bt"><div class="note">Loading…</div></div>
   <div class="row"><button class="btn" id="scan">Find devices</button><span class="note" id="scanNote">Put the device in pairing mode first.</span></div>
+  <h3>Headphones · left / right balance</h3>
+  <div class="row" id="bal"><button class="btn" data-bal="-1">◀ Left</button><span class="note" id="balD" style="min-width:9em;text-align:center">Centre</span><button class="btn" data-bal="1">Right ▶</button><button class="btn" data-bal="0">Centre</button></div>
   <h3>At power-on</h3>
   <div class="row" id="start">
     <button class="btn" data-start="ask">Home screen</button><button class="btn" data-start="bloom">Nate Bloom</button><button class="btn" data-start="keys">Keys</button><button class="btn" data-start="listen">Listen</button><button class="btn" data-start="stream">Stream (straight into the game)</button>
@@ -321,6 +323,15 @@ function paintIdle() {
 }
 async function idleSet(o) { if (!B) return; const r = await B.idle("set", o).catch(() => null); if (r) { idle = r; paintIdle(); } }
 $("#idleOn").onclick = () => idleSet({ on: !idle.on });
+/* headphone balance: a step is 0.05 (about 0.4 dB); the side it leans away from gets quieter */
+let bal = 0;
+const balPaint = () => { const db = (20 * Math.log10(1 - Math.abs(bal))).toFixed(1); $("#balD").textContent = Math.abs(bal) < 0.001 ? "Centre" : (bal < 0 ? "Left · right " : "Right · left ") + db + " dB"; };
+if (B && B.balance) B.balance("get").then(r => { if (r && r.ok) { bal = r.balance; balPaint(); } }).catch(() => {});
+else $("#bal").hidden = true;
+document.querySelectorAll("#bal [data-bal]").forEach(b => b.onclick = async () => {
+  const d = +b.dataset.bal; bal = d === 0 ? 0 : Math.round(Math.max(-0.6, Math.min(0.6, bal + d * 0.05)) * 100) / 100; balPaint();
+  try { await B.balance("set", bal); } catch (e) {}
+});
 $$("#idleOpts [data-min]").forEach(b => b.onclick = () => idleSet({ minutes: +b.dataset.min }));
 $$("#idlePlace [data-unit]").forEach(b => b.onclick = () => idleSet({ unit: b.dataset.unit }));
 $("#placeGo").onclick = () => { $("#place").blur(); idleSet({ place: $("#place").value }); };
