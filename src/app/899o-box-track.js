@@ -29,10 +29,19 @@
         const list = box15(); if (!list.length) return;
         if (!BR.t && !(BR.i >= 0 && BR.i < list.length && list[BR.i].id === BR.last && "e:" + state.engine === BR.last)) { const i = curIdx(list); BR.i = i < 0 ? (d > 0 ? -1 : 0) : i; }
         BR.i = (BR.i + d + list.length) % list.length;
-        const e = list[BR.i];
-        try { window.__pk.flashOn(e.name, (BR.i + 1) + " of " + list.length + " · plays when you stop"); } catch (x) {}
-        clearTimeout(BR.t); BR.t = setTimeout(() => { BR.t = 0; play15(e); }, 450);
+        const e = list[BR.i]; window.__box15pend = e.name;
+        try { window.__pk.flashOn(e.name, (BR.i + 1) + " of " + list.length); } catch (x) {}
+        try { const nb = $id("tbName"); if (nb) { nbT(nb.querySelector("b"), e.name); nbT($id("tbSub"), (BR.i + 1) + " of " + list.length); } } catch (x) {}
+        clearTimeout(BR.t); BR.t = setTimeout(() => { BR.t = 0; window.__box15pend = ""; play15(e); }, 250);
+        return true;   // (899j: the name's already up; don't put the old one back)
       }
+      // the MiniLab counts as using the box: its screen draws at full speed while you turn and play, not the 12 frames a
+      // second the box drops to after two minutes without a touch (the app only sees touches and keys)
+      { let back = 0, was = 0;
+        window.__nbMidiTick = () => {
+          if (window.__nbFps && window.__nbFps < 30) { was = window.__nbFps; window.__nbFps = 30; }
+          if (was) { clearTimeout(back); back = setTimeout(() => { if (window.__nbFps === 30) window.__nbFps = was; was = 0; }, 120000); }
+        }; }
       // a picked sound is the only one playing (layers come back with + Layer); before, the old sound kept playing under it
       async function play15(e) {
         start(); BR.last = e.id; const L15 = box15(); BR.i = L15.findIndex(x => x.id === e.id);

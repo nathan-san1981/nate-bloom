@@ -21,7 +21,7 @@
     }
     function pkTurn(d) {
       const b = L4().browse; if (!b) return;
-      b(d);
+      if (b(d) === true) return;   // (the box's fifteen show their own name)
       const s = document.getElementById("lvSnd");
       pkFlash(s && s.querySelector("b") ? s.querySelector("b").textContent : "", s && s.querySelector("small") ? s.querySelector("small").textContent.replace(/\s*·\s*plays when you stop.*/, "") : "");
     }

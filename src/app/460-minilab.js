@@ -632,6 +632,7 @@
     // what the big knob just picked, in words
     function mlPickNow(pg, a) {
       try {
+        if (pg === "synths" && a === "turn" && window.__box15pend) return window.__box15pend;   // (box: the one the knob is on, before it plays)
         if (pg === "synths" && a === "turn") return $id("sndName") ? $id("sndName").textContent : "";
         if ((pg === "synths" || pg === "samples" || pg === "drums") && a === "sturn") return state.seq.bpm + " bpm";
         if (pg === "samples") return state.engine === "pads" ? "P" + (state.pads.sel + 1) : "S" + (state.samp.slot + 1);
@@ -661,6 +662,7 @@
         if (st >= 0xf0) { ML.src = false; return om.apply(this, arguments); }
         if (!ML.seen) { ML.seen = true; setTimeout(() => mlRefresh(true), 0); }
         mlMon(st, d1, d2);
+        if (window.__nbMidiTick) { try { window.__nbMidiTick(); } catch (e) {} }
         // pads: on their own channel, notes 36–51 (bank A 36–43, bank B 44–51)
         if (ch === ML.padCh && (cmd === 0x90 || cmd === 0x80)) {
           const i = d1 - 36; if (i >= 0 && i < 16) { if (cmd === 0x90 && d2 > 0) mlPadHit(i, d2); else mlPadUp(i); }
