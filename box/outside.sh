@@ -15,6 +15,7 @@ if [ -n "$NB_OUTSIDE_INNER" ]; then
   exit $rc
 fi
 export NB_OUTSIDE_CMD="$1"
+sudo -n /usr/local/sbin/nb-box-helper cpu-fast >/dev/null 2>&1 || true   # (games and video want full speed)
 if command -v labwc >/dev/null 2>&1 && python3 -c 'import gi; gi.require_version("GtkLayerShell", "0.1")' 2>/dev/null; then
   export NB_OUTSIDE_INNER=1; exec labwc -C "$D/labwc" -S "$0"
 fi

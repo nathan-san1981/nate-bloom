@@ -6,6 +6,9 @@
 #   nb-box-helper bt-on | bt-list | bt-scan | bt-pair MAC | bt-connect MAC | bt-forget MAC   (keyboard, controller, headphones)
 #   nb-box-helper games          (reboot into the Batocera USB stick, if one is plugged in)
 #   nb-box-helper start-ask | start-bloom | start-keys | start-listen | start-stream   (what the box opens at power-on)
+#   nb-box-helper cpu-fast | cpu-save   (full speed while music or a game runs, scaling speed otherwise; CPU=full keeps it fast)
+#   nb-box-helper screen-off | screen-on   (the 5" panel's backlight, for the screensaver)
+#   nb-box-helper power          (watts the Pi's own rails use right now, from the PMIC; the screen and USB devices come on top)
 #   nb-box-helper touch-rule     (touch and the boot splash turned to match ROTATE; rotate-90/270 and install.sh run it)
 set -eu
 CONF=/etc/nb-box.conf
@@ -47,6 +50,16 @@ case "${1:-}" in
     printf '{"throttled":%d,"wifi":"%s","output":"%s"}\n' "$T" "$W" "$O"
     ;;
   touch-rule) touch_rule; splash_rule ;;
+  cpu-fast|cpu-save)   # (CPU=full in nb-box.conf: always full speed, as before)
+    G=schedutil; { [ "$1" = cpu-fast ] || [ "$(sed -n 's/^CPU=//p' "$CONF")" = full ]; } && G=performance
+    for g in /sys/devices/system/cpu/cpufreq/policy*/scaling_governor; do [ -w "$g" ] && echo "$G" > "$g"; done; true ;;
+  screen-off|screen-on)
+    V=0; [ "$1" = screen-off ] && V=4
+    for b in /sys/class/backlight/*/bl_power; do [ -w "$b" ] && echo "$V" > "$b"; done; true ;;
+  power)
+    vcgencmd pmic_read_adc 2>/dev/null | awk '{ k = $1; sub(/_[AV]$/, "", k); v = $2; sub(/.*=/, "", v); v += 0
+      if ($1 ~ /_A$/) a[k] = v; else if ($1 ~ /_V$/) u[k] = v }
+      END { for (k in a) if (k in u) w += a[k] * u[k]; printf "%.2f W (Pi rails), input %.2f V\n", w, u["EXT5V"] }' ;;
   shutdown) later off "systemctl poweroff" ;;
   reboot) later reboot "systemctl reboot" ;;
   wifi-on) rfkill unblock wifi || true; nmcli radio wifi on ;;
@@ -134,5 +147,5 @@ case "${1:-}" in
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$F"
     later restart "systemctl restart nb-box.service"
     ;;
-  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|touch-rule|scale-auto|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
+  *) echo "usage: nb-box-helper status|shutdown|reboot|wifi-on|wifi-off|rotate-90|rotate-270|touch-rule|cpu-fast|cpu-save|screen-off|screen-on|power|scale-auto|scale-125|scale-133|scale-150|restart-app|install-deb FILE|usb-mount DEV|usb-unmount DEV|bt-on|bt-list|bt-scan|bt-pair MAC|bt-connect MAC|bt-forget MAC|games|start-ask|start-bloom|start-keys|start-listen|start-stream" >&2; exit 2 ;;
 esac

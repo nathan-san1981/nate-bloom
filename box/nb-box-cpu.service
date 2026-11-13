@@ -1,11 +1,11 @@
 [Unit]
-Description=Nate Bloom Box: CPU at full speed (performance governor) for steady audio
+Description=Nate Bloom Box: CPU speed that follows the load (the app asks for full speed for music and games; CPU=full in nb-box.conf keeps it fast)
 After=sysinit.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/sh -c 'for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > "$g"; done'
+ExecStart=/usr/local/sbin/nb-box-helper cpu-save
 
 [Install]
 WantedBy=multi-user.target

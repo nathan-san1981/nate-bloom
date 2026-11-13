@@ -289,6 +289,26 @@ function createWindow() {
   // (box) the 5" touch screen alone: no mouse pointer anywhere. box/box-cursor.sh gives cage the invisible cursor theme
   // (XCURSOR_THEME=nb-none); web pages pick their own pointers (hand over buttons), so they get cursor: none as well
   if (BOX && process.env.XCURSOR_THEME === "nb-none") win.webContents.on("dom-ready", () => { win.webContents.insertCSS("*, *::before, *::after { cursor: none !important; }").catch(() => {}); });
+  // (box, battery) Chromium draws every animation 60 times a second, and the pages poll controllers and draw scopes in
+  // requestAnimationFrame loops that never stop. On the box that's capped at window.__nbFps (30; 12 after 2 idle minutes,
+  // set by the screensaver timer below). Keys keeps 60 (falling notes). And the CPU runs at full speed only for music
+  // (Nate Bloom, Keys, Karaoke) and games (outside.sh); menus, Listen and the rest let it scale down.
+  if (BOX) {
+    const FPS_JS = `(() => { if (window.__nbFpsOn) return; window.__nbFpsOn = 1; window.__nbFps = window.__nbFps || 30;
+      const raf = window.requestAnimationFrame.bind(window), caf = window.cancelAnimationFrame.bind(window), ids = new Map(); let n = 0, last = 0;
+      window.requestAnimationFrame = cb => { const id = ++n, go = () => ids.set(id, { r: raf(t => { ids.delete(id); last = performance.now(); cb(t); }) });
+        const wait = 1000 / window.__nbFps - (performance.now() - last) - 4;
+        if (wait < 4) go(); else ids.set(id, { t: setTimeout(go, wait) }); return id; };
+      window.cancelAnimationFrame = id => { const x = ids.get(id); if (!x) return; ids.delete(id); x.t != null ? clearTimeout(x.t) : caf(x.r); };
+    })()`;
+    let cpuFast = null;
+    const pageCpu = () => { let u = ""; try { u = win.webContents.getURL(); } catch (e) { return; }
+      const fast = !u.startsWith(ORIGIN + "/box/") || u.startsWith(ORIGIN + "/box/keys/");   // (Nate Bloom itself and Karaoke are outside /box/)
+      if (fast !== cpuFast) { cpuFast = fast; boxRun([fast ? "cpu-fast" : "cpu-save"]); } };
+    win.webContents.on("dom-ready", () => { let u = ""; try { u = win.webContents.getURL(); } catch (e) {}
+      if (u.startsWith(ORIGIN) && !u.startsWith(ORIGIN + "/box/keys/")) win.webContents.executeJavaScript(FPS_JS).catch(() => {}); });
+    win.webContents.on("did-navigate", pageCpu); win.webContents.on("did-navigate-in-page", pageCpu); win.webContents.once("did-finish-load", () => { cpuFast = null; pageCpu(); });
+  }
   // screens plugged in or out while it's across them: it fits what's there now (not on every small change)
   let lastScreens = "";
   const screensKey = () => screen.getAllDisplays().map(d => [d.bounds.x, d.bounds.y, d.bounds.width, d.bounds.height].join(",")).join(" ");
@@ -376,18 +396,22 @@ function createWindow() {
     }, 600);
   }
   // (box) screensaver: after SAVER_S (10 minutes) with no button pressed anywhere (the box's keyboard and mouse, a phone,
-  // an 8BitDo...) on the box's own menus, a dark screen with the Bloom flower turning slowly, "Nate Bloom Box" and the clock, centred. Any button wakes it, and that press
+  // an 8BitDo...) on the box's own menus, a dark screen with the Bloom flower (still: an animation would keep redrawing), "Nate Bloom Box" and the clock, centred. Any button wakes it, and that press
   // does nothing else. Never over a game, Kodi, Moonlight, Keys or karaoke.
   if (BOX) {
     const SAVER_S = +(process.env.NB_SAVER_S || 600);
     let lastInput = Date.now(), saverOn = false;
-    win.webContents.on("input-event", () => { lastInput = Date.now(); });
-    win.webContents.on("did-finish-load", () => { lastInput = Date.now(); saverOn = false; });
+    // (battery) SCREEN_OFF_S (2 minutes) into the screensaver the 5" panel's backlight goes off; any touch or button brings it back
+    const OFF_S = +(process.env.NB_SCREEN_OFF_S || boxConf("SCREEN_OFF_S") || 120);
+    let saverAt = 0, darkOn = false, fps = 30;
+    const dark = v => { if (v === darkOn) return; darkOn = v; boxRun([v ? "screen-off" : "screen-on"]); };
+    win.webContents.on("input-event", () => { lastInput = Date.now(); if (darkOn) dark(false); });
+    win.webContents.on("did-finish-load", () => { lastInput = Date.now(); saverOn = false; fps = 30; dark(false); });
     const SAVER_JS = on => `(on => { let s = document.getElementById("nbSaver");
       if (!s) {
         s = document.createElement("div"); s.id = "nbSaver";
         s.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;cursor:none;overflow:hidden";
-        s.innerHTML = '<style>@keyframes nbSvSpin{to{transform:rotate(360deg)}}@keyframes nbSvDot{0%,100%{opacity:.75;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}#nbSaver .rings{transform-origin:256px 256px;animation:nbSvSpin 90s linear infinite}#nbSaver .dot{transform-origin:256px 256px;animation:nbSvDot 5s ease-in-out infinite}</style><div id="nbSaverC" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6vh;text-align:center;white-space:nowrap;font-family:Inter,system-ui,sans-serif;background:radial-gradient(ellipse at 50% 42%,#1b1730 0%,#000 70%)"><svg viewBox="0 0 512 512" style="width:24vh;height:24vh;overflow:visible" aria-hidden="true"><g class="rings" fill="none" stroke="#c9b6ff" stroke-width="14" opacity=".85"><circle cx="331" cy="256" r="92"/><circle cx="309" cy="309" r="92"/><circle cx="256" cy="331" r="92"/><circle cx="203" cy="309" r="92"/><circle cx="181" cy="256" r="92"/><circle cx="203" cy="203" r="92"/><circle cx="256" cy="181" r="92"/><circle cx="309" cy="203" r="92"/></g><circle class="dot" cx="256" cy="256" r="48" fill="#f6ad55"/></svg><div style="font-weight:600;font-size:4.6vh;letter-spacing:.02em;color:#f2efe8">Nate Bloom <span style="color:#c9b6ff">Box</span></div><div id="nbSaverT" style="font-weight:200;font-size:19vh;line-height:1;margin-top:1.5vh;color:rgba(255,255,255,.88)"></div><div id="nbSaverD" style="font-size:4.4vh;color:rgba(255,255,255,.5)"></div><div style="font-size:2.8vh;margin-top:2.5vh;color:rgba(255,255,255,.28)">Press any button</div></div>';
+        s.innerHTML = '<style></style><div id="nbSaverC" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6vh;text-align:center;white-space:nowrap;font-family:Inter,system-ui,sans-serif;background:radial-gradient(ellipse at 50% 42%,#1b1730 0%,#000 70%)"><svg viewBox="0 0 512 512" style="width:24vh;height:24vh;overflow:visible" aria-hidden="true"><g class="rings" fill="none" stroke="#c9b6ff" stroke-width="14" opacity=".85"><circle cx="331" cy="256" r="92"/><circle cx="309" cy="309" r="92"/><circle cx="256" cy="331" r="92"/><circle cx="203" cy="309" r="92"/><circle cx="181" cy="256" r="92"/><circle cx="203" cy="203" r="92"/><circle cx="256" cy="181" r="92"/><circle cx="309" cy="203" r="92"/></g><circle class="dot" cx="256" cy="256" r="48" fill="#f6ad55"/></svg><div style="font-weight:600;font-size:4.6vh;letter-spacing:.02em;color:#f2efe8">Nate Bloom <span style="color:#c9b6ff">Box</span></div><div id="nbSaverT" style="font-weight:200;font-size:19vh;line-height:1;margin-top:1.5vh;color:rgba(255,255,255,.88)"></div><div id="nbSaverD" style="font-size:4.4vh;color:rgba(255,255,255,.5)"></div><div style="font-size:2.8vh;margin-top:2.5vh;color:rgba(255,255,255,.28)">Press any button</div></div>';
         document.documentElement.appendChild(s);
         let woke = 0, tick = null;
         const draw = () => { const d = new Date();
@@ -407,13 +431,18 @@ function createWindow() {
       const here = u.startsWith(ORIGIN + "/box/") && !u.startsWith(ORIGIN + "/box/keys/");
       let padIdle = Infinity;
       try { const r = await net.fetch("http://127.0.0.1:8810/api/state", { cache: "no-store" }); if (r.ok) { const st = await r.json(); if (typeof st.idle === "number") padIdle = st.idle; } } catch (e) {}
-      let want = here && Math.min((Date.now() - lastInput) / 1000, padIdle) >= SAVER_S;
+      const idleS = Math.min((Date.now() - lastInput) / 1000, padIdle);
+      if (darkOn && padIdle < 3) dark(false);   // (a phone or controller press)
+      const f = idleS >= 120 ? 12 : 30;   // (battery: the box's pages draw at most 30 times a second, 12 when nobody's touched it for 2 minutes)
+      if (f !== fps) { fps = f; win.webContents.executeJavaScript(`window.__nbFps = ${f}`).catch(() => {}); }
+      if (saverOn && OFF_S > 0 && Date.now() - saverAt > OFF_S * 1000) dark(true);
+      let want = here && idleS >= SAVER_S;
       if (want && !saverOn) {   // (a game or Kodi over the top: that counts as being used)
         let busy = false; try { busy = require("child_process").spawnSync("pgrep", ["-x", "retroarch|moonlight-qt|kodi.bin"], { timeout: 1000 }).status === 0; } catch (e) {}
         if (busy) { lastInput = Date.now(); want = false; }
       }
       if (want === saverOn) return;
-      saverOn = want;
+      saverOn = want; saverAt = Date.now(); if (!want) dark(false);
       win.webContents.executeJavaScript(SAVER_JS(want)).catch(() => {});
     }, 1500);
   }
@@ -444,7 +473,7 @@ function createWindow() {
 // (box) what only the Box asks of the computer: temperature, power, Wi-Fi, shutdown. Everything that needs root goes
 // through one small script (box/nb-box-helper, allowed for the box's user by sudoers) and only with the actions it knows.
 const BOX_ACTIONS = new Set(["shutdown", "reboot", "wifi-on", "wifi-off", "rotate-90", "rotate-270", "scale-auto", "scale-125", "scale-133", "scale-150", "restart-app",
-  "bt-on", "bt-list", "bt-scan", "start-ask", "start-bloom", "start-keys", "start-listen", "start-stream"]);
+  "bt-on", "bt-list", "bt-scan", "cpu-fast", "cpu-save", "screen-off", "screen-on", "start-ask", "start-bloom", "start-keys", "start-listen", "start-stream"]);
 const boxRun = args => new Promise(res => execFile("sudo", ["-n", BOX_HELPER, ...args], { timeout: 120000 }, (err, out, errOut) => res({ ok: !err, out: String(out || "").trim(), error: err ? String(errOut || err.message || err).trim() : "" })));
 async function boxStatus() {
   const s = { temp: null, throttled: null, undervolt: false, hot: false, wifi: null, output: null };

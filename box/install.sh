@@ -300,7 +300,7 @@ if command -v rpi-eeprom-config >/dev/null 2>&1; then
   fi
 fi
 
-say "Tuning: CPU at full speed, logs in memory, Wi-Fi without power saving, idle services off"
+say "Tuning: CPU speed follows the load (full for music and games), logs in memory, Wi-Fi without power saving, idle services off"
 sudo mkdir -p /etc/systemd/journald.conf.d /etc/NetworkManager/conf.d
 printf '[Journal]\nStorage=volatile\nRuntimeMaxUse=32M\n' | sudo tee /etc/systemd/journald.conf.d/nb-box.conf >/dev/null
 printf '[connection]\nwifi.powersave = 2\n' | sudo tee /etc/NetworkManager/conf.d/nb-box-wifi.conf >/dev/null
