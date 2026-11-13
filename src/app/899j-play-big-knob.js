@@ -10,6 +10,7 @@
   // ======================================================================
   {
     const PK = window.__pk = { flashT: 0, el: null };
+    PK.flashOn = (a, b) => pkFlash(a, b);   // (899m: the box MiniLab layer flashes the same way)
     const L4 = () => window.__live4 || {};
     function pkFlash(name, sub) {
       if (!name) return;

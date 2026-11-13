@@ -54,7 +54,10 @@
         if (mom) { if (!was) arpSet(false); } else { arpSet(!was); arpSay(!was); } };
       b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up);
       b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); arpSet(!arpLive()); } });
-      b.addEventListener("click", e => e.preventDefault()); }
+      b.addEventListener("click", e => e.preventDefault());
+      // (a tap from elsewhere: Play's Arp and the box MiniLab's Shift + click. b.click() did nothing here, since this
+      // button works on press and release and swallows the click: Play's Arp never switched the arp on)
+      window.__arpTap = () => { start(); const w = arpLive(); arpSet(!w); try { arpSay(!w); } catch (x) {} return !w; }; }
     $id("lvArpOct").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { start(); arpOct(+b.dataset.o); }));
     $id("lvArpMore").addEventListener("click", () => { start(); openArp(); });
     function openArp() {

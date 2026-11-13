@@ -6,6 +6,7 @@
 D=/usr/local/lib/nb-box
 if [ -n "$NB_OUTSIDE_INNER" ]; then
   export QT_WAYLAND_DISABLE_WINDOWDECORATION=1   # (Moonlight: no title bar of its own)
+  case "$(cat /run/nb-box/display 2>/dev/null)" in tv*) NB_TV=1 ;; panel*) NB_TV= ;; esac   # (what shows now: session.sh keeps it)
   NB_HOME_SCALE="${NB_TV:+2}" python3 "$D/home-button.py" >/dev/null 2>&1 &   # (twice the size on a TV)
   B=$!
   sh -c "$NB_OUTSIDE_CMD"

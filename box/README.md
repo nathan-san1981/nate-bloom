@@ -192,4 +192,7 @@ Quit from Batocera's menu (Quit › Shut down), take the stick out, and the next
 | Moonlight or Kodi stuck | press the power button once: it closes them and the home screen comes back |
 | Bluetooth keyboard won't pair | put it in pairing mode right before **Find devices**. If it wants a code, the box shows it large: type it on the keyboard and press Enter. A device that shows its own code gets a keypad on the screen. |
 | Games boots Nate Bloom instead | the stick isn't seen as bootable: remake it; check `sudo rpi-eeprom-config` shows `BOOT_ORDER=0xf614` |
+| Plugged into a TV and the picture is too wide, or half of it is on the 5" screen | fixed: one screen at a time. With HDMI plugged in the TV gets the picture and the 5" screen goes dark; unplug it and the 5" screen comes back within 2 s. `SCREEN=panel` in `/etc/nb-box.conf` keeps the 5" screen even with a TV on HDMI |
+| Nate Bloom too small on the 5" screen | it's zoomed to 1.6 there (the box's own pages stay at 1.333); `BLOOM_ZOOM=1.8` in `/etc/nb-box.conf` for bigger, then restart the box |
+| How do I layer, arp or hold from the MiniLab? | in Play: **click** the big knob, then turn to the sound to add on top (it's added when you stop); **Shift + click** = Arp on/off; the MiniLab's **Hold** button = Play's Hold (notes and arps keep going until you press it again). On screen: **+ Layer**, **Arp**, **Hold** |
 | Want the desktop back | `sudo systemctl disable nb-box && sudo systemctl enable getty@tty1 && sudo reboot` |

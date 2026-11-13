@@ -3701,6 +3701,38 @@ html.nb-box #djView .dj-align { height: 52px; }
 html.nb-box #djView .dj-dial { width: 112px; height: 112px; }
 html.nb-box #djView .dj-mid { gap: 6px; }
 html.nb-box #djlBox { display: none !important; }
+/* (box) Play on the 5" panel: the app zooms Nate Bloom to 1.6 there (800 x 450), so everything is bigger to the finger
+   and the eye. What the MiniLab already has in hand (the four faders) and what's for bigger screens (the set list,
+   Capture, the takes list, the Log, the status chips) steps aside so the knobs, the pads and the thumb controls fit. */
+@media (max-width: 860px) {
+  html.nb-box .pl-top { gap: 6px; padding: 4px 6px; min-height: 48px; }
+  html.nb-box .pl-top > strong, html.nb-box #plLog, html.nb-box .bx-chip:not(.warn):not(.bad) { display: none; }
+  html.nb-box .pl-top .btn { min-height: 40px; padding: 0 10px; }
+  html.nb-box .pl-snd { flex: 1 1 auto; max-width: none; min-width: 0; padding: 2px 10px; }
+  html.nb-box .pl-snd b { font-size: 1.05rem; }
+  html.nb-box .pl-sp { display: none; }
+  html.nb-box .pl-body { grid-template-columns: 172px minmax(0, 1fr) 104px; }
+  html.nb-box .pl-stack { padding: 6px; }
+  html.nb-box #plPick { height: 36px; font-size: 0.95rem; font-weight: 600; background: var(--lilac); color: #1a1426; border-color: var(--lilac); }
+  html.nb-box .pl-h > span:not(.pl-sp):not(.pl-note) { font-size: 0.95rem; }
+  html.nb-box .pl-h .btn { height: 32px; min-width: 32px; }
+  html.nb-box .pl-mid { padding: 4px 6px; gap: 4px; }
+  html.nb-box #plFaders { display: none; }
+  html.nb-box .pl-mid .lv-knobs { --kz: 50px; gap: 0 4px; }
+  html.nb-box .pl-mid .lv-name { font-size: 0.78rem; min-height: 20px; }
+  html.nb-box .pl-pads .lv-pads { gap: 6px; }
+  html.nb-box .pl-thumb { gap: 5px; padding: 6px; }
+  html.nb-box .pl-thumb button { font-size: 1rem; min-height: 0; }
+  html.nb-box .pl-thumb button.on-sus { background: #3b2f5c; border-color: var(--lilac); }
+  html.nb-box .pl-bar { min-height: 52px; padding: 4px 6px; gap: 6px; }
+  html.nb-box .pl-tr { flex-wrap: nowrap; }
+  html.nb-box .pl-tr .btn { height: 42px; }
+  html.nb-box #plCap, html.nb-box #plTakes, html.nb-box .pl-set { display: none; }
+  html.nb-box .pl-go, html.nb-box .pl-stop { min-width: 64px; }
+  html.nb-box .bx-mlhint { display: block; }
+}
+.bx-mlhint { display: none; font-size: 0.72rem; line-height: 1.35; color: var(--dim); padding: 4px 2px 0; border-top: 1px solid var(--line); }
+.bx-mlhint b { color: var(--ink); font-weight: 600; }
 /* (box) songs from a USB stick */
 .bx-music .bx-card { width: min(720px, 96vw); height: 88vh; }
 .bx-music .bx-head .bx-info { margin-left: 6px; }

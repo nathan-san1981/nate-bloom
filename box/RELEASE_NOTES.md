@@ -8,6 +8,13 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: made for the 5" screen.** Play is zoomed up on the 5" panel (bigger knobs, pads and text), and the faders,
+set list and Capture step aside there (the MiniLab has the faders). Plugging in a TV now moves the picture to the TV
+(the menu used to be stretched across both screens), and unplugging it brings the 5" screen back.
+
+**New: layers, arp and hold from the MiniLab.** On the box: click the big knob, then turn to add a sound on top;
+Shift + click switches the arp; the MiniLab's Hold button latches Play's Hold. Fixed: Play's Arp button did nothing.
+
 **New: Karaoke from your phone.** The karaoke phone page can open Karaoke on the TV and send it back home (the app asks
 the karaoke server every 2 s, /api/box); on the box the karaoke screen starts by itself, so the phone is the whole remote.
 

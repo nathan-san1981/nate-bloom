@@ -249,9 +249,24 @@ function createWindow() {
   // (box: the whole screen at its own resolution, whatever is plugged in, nothing remembered. Text size is the page
   // zoom, NB_BOX_ZOOM from /etc/nb-box.conf's SCALE: auto = 1.333 on a screen 800 px tall or less (the 5" panel, 720
   // once turned) and 1 on a TV or monitor; 1.25 / 1.333 / 1.5 force one)
+  // One screen shows at a time (box/session.sh: a TV on HDMI while it's plugged in, else the panel) and it writes
+  // which one to /run/nb-box/display ("panel 1.333", "tv 2.000", "monitor 1"): the zoom follows it, so plugging a TV
+  // in or out resizes everything. Nate Bloom itself is played by touch on the panel: there it gets 1.6 (an 800 x 450
+  // layout with bigger knobs, pads and text) while the box's own pages keep theirs; BLOOM_ZOOM= in nb-box.conf overrides.
   const boxBounds = () => screen.getPrimaryDisplay().bounds;
-  const boxZoom = () => { const z = parseFloat(process.env.NB_BOX_ZOOM); return z >= 0.5 && z <= 4 ? z : (boxBounds().height <= 800 ? 1.333 : 1); };
+  const boxShows = () => { try { const [k, z] = fs.readFileSync("/run/nb-box/display", "utf8").trim().split(/\s+/); return { kind: k, z: parseFloat(z) }; } catch (e) { return null; } };
+  const boxZoom = () => {
+    const d = boxShows(), env = parseFloat(process.env.NB_BOX_ZOOM);
+    let z = d && d.z >= 0.5 && d.z <= 4 ? d.z : env >= 0.5 && env <= 4 ? env : (boxBounds().height <= 800 ? 1.333 : 1);
+    const panel = d ? d.kind === "panel" : boxBounds().height <= 800;
+    let u = ""; try { u = win.webContents.getURL(); } catch (e) {}
+    if (panel && u.startsWith(ORIGIN + "/") && !u.startsWith(ORIGIN + "/box/") && !karaokeUrl(u)) {
+      const bz = parseFloat(boxConf("BLOOM_ZOOM")); z = bz >= 0.5 && bz <= 4 ? bz : Math.max(z, 1.6);
+    }
+    return z;
+  };
   const boxFit = () => { if (!win || win.isDestroyed()) return; win.setBounds(boxBounds()); win.setFullScreen(true); win.webContents.setZoomFactor(boxZoom()); };
+  if (BOX) fs.watchFile("/run/nb-box/display", { interval: 1000 }, () => setTimeout(boxFit, 300));
   if (BOX) st = { width: boxBounds().width, height: boxBounds().height };
   win = new BrowserWindow({
     width: st.width, height: st.height, x: st.x, y: st.y, minWidth: BOX ? 320 : 360, minHeight: BOX ? 240 : 560, show: false,

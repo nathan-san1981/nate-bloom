@@ -58,7 +58,7 @@
       $id("plBank").addEventListener("click", () => { PLAY.bankHi = !PLAY.bankHi; plPaintPads(); });
       $id("plKit").addEventListener("click", click("lvKit"));
       $id("plHold").addEventListener("click", click("lvHold"));
-      $id("plArp").addEventListener("click", click("lvArp"));
+      $id("plArp").addEventListener("click", () => { if (window.__arpTap) window.__arpTap(); try { plPaintTop(); } catch (e) {} });
       $id("plScale").addEventListener("click", () => { PLAY.pickKind = "scale"; const b = $id("scaleBtn") || document.querySelector("[data-open=\"scaleSheet\"]"); if (b) b.click(); else { const s = $id("scaleSheet"); if (s) s.hidden = false; } });
       $id("plOctD").addEventListener("click", () => { const b = $id("octDown"); if (b) b.click(); plPaintTop(); });
       $id("plOctU").addEventListener("click", () => { const b = $id("octUp"); if (b) b.click(); plPaintTop(); });

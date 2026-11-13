@@ -3725,6 +3725,38 @@ html.nb-box #djView .dj-align { height: 52px; }
 html.nb-box #djView .dj-dial { width: 112px; height: 112px; }
 html.nb-box #djView .dj-mid { gap: 6px; }
 html.nb-box #djlBox { display: none !important; }
+/* (box) Play on the 5" panel: the app zooms Nate Bloom to 1.6 there (800 x 450), so everything is bigger to the finger
+   and the eye. What the MiniLab already has in hand (the four faders) and what's for bigger screens (the set list,
+   Capture, the takes list, the Log, the status chips) steps aside so the knobs, the pads and the thumb controls fit. */
+@media (max-width: 860px) {
+  html.nb-box .pl-top { gap: 6px; padding: 4px 6px; min-height: 48px; }
+  html.nb-box .pl-top > strong, html.nb-box #plLog, html.nb-box .bx-chip:not(.warn):not(.bad) { display: none; }
+  html.nb-box .pl-top .btn { min-height: 40px; padding: 0 10px; }
+  html.nb-box .pl-snd { flex: 1 1 auto; max-width: none; min-width: 0; padding: 2px 10px; }
+  html.nb-box .pl-snd b { font-size: 1.05rem; }
+  html.nb-box .pl-sp { display: none; }
+  html.nb-box .pl-body { grid-template-columns: 172px minmax(0, 1fr) 104px; }
+  html.nb-box .pl-stack { padding: 6px; }
+  html.nb-box #plPick { height: 36px; font-size: 0.95rem; font-weight: 600; background: var(--lilac); color: #1a1426; border-color: var(--lilac); }
+  html.nb-box .pl-h > span:not(.pl-sp):not(.pl-note) { font-size: 0.95rem; }
+  html.nb-box .pl-h .btn { height: 32px; min-width: 32px; }
+  html.nb-box .pl-mid { padding: 4px 6px; gap: 4px; }
+  html.nb-box #plFaders { display: none; }
+  html.nb-box .pl-mid .lv-knobs { --kz: 50px; gap: 0 4px; }
+  html.nb-box .pl-mid .lv-name { font-size: 0.78rem; min-height: 20px; }
+  html.nb-box .pl-pads .lv-pads { gap: 6px; }
+  html.nb-box .pl-thumb { gap: 5px; padding: 6px; }
+  html.nb-box .pl-thumb button { font-size: 1rem; min-height: 0; }
+  html.nb-box .pl-thumb button.on-sus { background: #3b2f5c; border-color: var(--lilac); }
+  html.nb-box .pl-bar { min-height: 52px; padding: 4px 6px; gap: 6px; }
+  html.nb-box .pl-tr { flex-wrap: nowrap; }
+  html.nb-box .pl-tr .btn { height: 42px; }
+  html.nb-box #plCap, html.nb-box #plTakes, html.nb-box .pl-set { display: none; }
+  html.nb-box .pl-go, html.nb-box .pl-stop { min-width: 64px; }
+  html.nb-box .bx-mlhint { display: block; }
+}
+.bx-mlhint { display: none; font-size: 0.72rem; line-height: 1.35; color: var(--dim); padding: 4px 2px 0; border-top: 1px solid var(--line); }
+.bx-mlhint b { color: var(--ink); font-weight: 600; }
 /* (box) songs from a USB stick */
 .bx-music .bx-card { width: min(720px, 96vw); height: 88vh; }
 .bx-music .bx-head .bx-info { margin-left: 6px; }
@@ -31507,7 +31539,10 @@ z: [z]=Z
         if (mom) { if (!was) arpSet(false); } else { arpSet(!was); arpSay(!was); } };
       b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up);
       b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); arpSet(!arpLive()); } });
-      b.addEventListener("click", e => e.preventDefault()); }
+      b.addEventListener("click", e => e.preventDefault());
+      // (a tap from elsewhere: Play's Arp and the box MiniLab's Shift + click. b.click() did nothing here, since this
+      // button works on press and release and swallows the click: Play's Arp never switched the arp on)
+      window.__arpTap = () => { start(); const w = arpLive(); arpSet(!w); try { arpSay(!w); } catch (x) {} return !w; }; }
     $id("lvArpOct").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { start(); arpOct(+b.dataset.o); }));
     $id("lvArpMore").addEventListener("click", () => { start(); openArp(); });
     function openArp() {
@@ -34023,7 +34058,7 @@ registerProcessor("nb-rec", NBRec);`;
       $id("plBank").addEventListener("click", () => { PLAY.bankHi = !PLAY.bankHi; plPaintPads(); });
       $id("plKit").addEventListener("click", click("lvKit"));
       $id("plHold").addEventListener("click", click("lvHold"));
-      $id("plArp").addEventListener("click", click("lvArp"));
+      $id("plArp").addEventListener("click", () => { if (window.__arpTap) window.__arpTap(); try { plPaintTop(); } catch (e) {} });
       $id("plScale").addEventListener("click", () => { PLAY.pickKind = "scale"; const b = $id("scaleBtn") || document.querySelector("[data-open=\"scaleSheet\"]"); if (b) b.click(); else { const s = $id("scaleSheet"); if (s) s.hidden = false; } });
       $id("plOctD").addEventListener("click", () => { const b = $id("octDown"); if (b) b.click(); plPaintTop(); });
       $id("plOctU").addEventListener("click", () => { const b = $id("octUp"); if (b) b.click(); plPaintTop(); });
@@ -40420,6 +40455,7 @@ registerProcessor("nb-aw", NBAwProc);
   // ======================================================================
   {
     const PK = window.__pk = { flashT: 0, el: null };
+    PK.flashOn = (a, b) => pkFlash(a, b);   // (899m: the box MiniLab layer flashes the same way)
     const L4 = () => window.__live4 || {};
     function pkFlash(name, sub) {
       if (!name) return;
@@ -41057,6 +41093,83 @@ html.nb-synths .recbanner { display: none !important; }
       $s("startBtn") && $s("startBtn").addEventListener("click", () => setTimeout(() => { toSynths(); paintAll(true); }, 50));
       window.__synths.paint = paintAll; window.__synths.defaults = yamahaDefaults;
     }
+  }
+  // ======================================================================
+  // (box) The MiniLab on the box's Play: layers, the arp and hold without touching the screen. On the box the big knob
+  // is the way to play more than one sound, so its click and Shift + click change jobs (899j's ★ Favorite and
+  // Sample stay on the screen: the sound picker's star and Sample in the pad bar):
+  //   turn            the sound on the knobs, as before
+  //   click           Layer: the next sound you turn to is added on top of what's playing (click again: cancel)
+  //   Shift + turn    the knob pages (Sound, FX, FX Lab, Mix, Mine), as before
+  //   Shift + click   Arp on / off
+  //   Hold (button)   Play's Hold: notes and arps keep going until Hold is pressed again (not just a sustain pedal)
+  // A line under the stack says so, and Sounds… reads "+ Layer". Off the box nothing changes.
+  // ======================================================================
+  {
+    const BXL = { armed: false, list: null, i: 0, t: 0, hwHold: false };
+    const boxOn = () => !!(window.__box && window.__box.on);
+    const playOpen = () => document.body.classList.contains("play-on");
+    const flash = (a, b) => { try { const P = window.__pk; if (P && P.flashOn) P.flashOn(a, b); } catch (e) {} mlHud(a, b || "", null); };
+    function layerList() {
+      const all = allEntries().filter(x => x.cat !== "kits" && !/^e:(samp|pads|drum)$/.test(x.id));
+      let cat = state.cur && state.cur.cat; if (!cat || cat === "kits" || (cat === "fav" && !favs.length)) cat = "engines";
+      const list = cat === "fav" ? all.filter(x => favs.includes(x.id)) : all.filter(x => x.cat === cat);
+      let i = list.findIndex(x => state.cur && x.id === state.cur.id); if (i < 0) i = list.findIndex(x => x.id === "e:" + state.engine);
+      return { list, i: Math.max(0, i) };
+    }
+    function layerArm(on) {
+      BXL.armed = on; BXL.list = null; clearTimeout(BXL.t);
+      document.body.classList.toggle("bx-layering", on);
+      if (on) flash("+ Layer", "turn the big knob to pick a sound to add on top · click again to cancel");
+      else mlHud("Layer", "cancelled", null);
+      paintHint(); ML.lay = null; try { mlRefresh(true); } catch (e) {}
+    }
+    function layerTurn(d) {
+      if (!BXL.list) { const r = layerList(); if (!r.list.length) return; BXL.list = r.list; BXL.i = r.i; }
+      BXL.i = (BXL.i + d + BXL.list.length) % BXL.list.length;
+      const e = BXL.list[BXL.i];
+      flash("+ " + e.name, (BXL.i + 1) + " of " + BXL.list.length + " · added when you stop turning");
+      clearTimeout(BXL.t); BXL.t = setTimeout(layerGo, 700);
+    }
+    async function layerGo() {
+      const e = BXL.list && BXL.list[BXL.i]; BXL.armed = false; BXL.list = null; document.body.classList.remove("bx-layering"); paintHint();
+      if (!e) return;
+      start();
+      let ok = false; try { ok = await window.__stk.together(e); } catch (x) {}
+      if (ok !== false) { const n = (() => { try { return window.__stk.items().length; } catch (x) { return 0; } })(); flash("Layered: " + e.name, n > 1 ? n + " sounds play together · ✕ on a card takes one out" : ""); }
+      setTimeout(() => { ML.lay = null; try { mlRefresh(true); } catch (x) {} try { lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 120);
+    }
+    function arpToggle() { if (window.__arpTap) window.__arpTap(); }
+    { const l0 = L.live; L.live = function () {
+        const o = l0.apply(this, arguments);
+        if (!boxOn()) return o;
+        const M = o.M || {}, turn = M.turn;
+        o.M = {
+          turn: BXL.armed ? ["+ Layer: pick the sound to add", d => layerTurn(d)] : turn,
+          click: [BXL.armed ? "Cancel the layer" : "+ Layer a sound (then turn)", () => layerArm(!BXL.armed)],
+          sturn: M.sturn,
+          sclick: ["Arp on / off", arpToggle],
+        };
+        return o;
+      }; }
+    // the MiniLab's Hold button (sustain, CC 64) is Play's Hold on the box: an arp keeps going too
+    { const ns0 = nbSustain; nbSustain = function (on) {
+        if (!boxOn() || !playOpen()) return ns0.apply(this, arguments);
+        const hb = $id("plHold") || $id("lvHold"); if (!hb) return ns0.apply(this, arguments);
+        if (on && !state.hold) { BXL.hwHold = true; hb.click(); }
+        else if (!on && BXL.hwHold) { BXL.hwHold = false; if (state.hold) hb.click(); }
+      }; }
+    // a line under the stack: what the MiniLab's big knob and Hold do here; Sounds… is "+ Layer"
+    function paintHint() {
+      const st = document.querySelector("#playView .pl-stack"); if (!st) return;
+      let h = $id("bxMlHint");
+      if (!h) { h = document.createElement("div"); h.id = "bxMlHint"; h.className = "bx-mlhint"; st.appendChild(h); }
+      const html = BXL.armed ? "<b>Turn the big knob</b> to pick a sound to add on top. <b>Click</b> to cancel."
+        : "MiniLab big knob: <b>turn</b> sound · <b>click</b> + layer · <b>Shift+click</b> arp · <b>Hold</b> holds";
+      if (h.innerHTML !== html) h.innerHTML = html;
+      const pk = $id("plPick"); if (pk && pk.textContent !== "+ Layer") { pk.textContent = "+ Layer"; pk.title = "Add a sound on top of what's playing (or swap it)"; }
+    }
+    if (boxOn()) setInterval(() => { if (playOpen()) paintHint(); }, 1000);
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
