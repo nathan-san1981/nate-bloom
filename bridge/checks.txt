@@ -1,0 +1,18 @@
+PASS the app installed the plugin in ~/.clap · /home/runner/.clap/NateBloomBridge.clap
+PASS the bridge is up in the app (shared memory) · {"ok":true,"why":"","plugin":{"path":"/home/runner/.clap/NateBloomBridge.clap","installed":true,"why":"","updated":false}}
+latency 2688
+note at 48000 -> sound from 51647: +75.98 ms after · rms 0.0381
+note at 168000 -> sound from 171183: +66.31 ms after · rms 0.0374
+note at 288000 -> sound from 291354: +69.88 ms after · rms 0.0363
+before the first note: rms 0.00000 · between (2.5 s after an off): 0.00163
+PASS e:pluck: the notes come back ([76.33, 67.38, 70.81] ms after each, the plugin's latency 56.0 ms) · {"notes":3,"late":1,"leads":[-0.5,7,10.7,3.5,5.5,12.5]}
+FAIL e:pluck: in time once the host makes up the latency (within 8 ms; CI's audio has no real device, so this one is a guide) · [11.4, 14.8]
+latency 2688
+note at 48000 -> sound from 52075: +84.90 ms after · rms 0.0194
+note at 168000 -> sound from 164093: -81.40 ms after · rms 0.0174
+note at 288000 -> sound from 284155: -80.10 ms after · rms 0.0167
+before the first note: rms 0.00000 · between (2.5 s after an off): 0.00200
+PASS stack: the notes come back ([86.88, 76.08, 69.98] ms after each, the plugin's latency 56.0 ms) · {"notes":3,"late":3,"leads":[-9.9,-7.5,0.3,2.1,6.3,4.8]}
+FAIL stack: in time once the host makes up the latency (within 8 ms; CI's audio has no real device, so this one is a guide) · [20.1, 14.0]
+PASS no page errors · []
+RESULT FAILED: e:pluck: in time once the host makes up the latency (within 8 ms; CI's audio has no real device, so this one is a guide); stack: in time once the host makes up the latency (within 8 ms; CI's audio has no real device, so this one is a guide)

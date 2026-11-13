@@ -1,0 +1,8 @@
+M 23:41:19.584145             mod.rt ../src/modules/module-rt.c:224:translate_error: RTKit error: org.freedesktop.DBus.Error.AccessDenied
+M 23:41:19.584203             mod.rt ../src/modules/module-rt.c:526:set_nice: could not set nice-level to -11: Permission denied
+M 23:41:19.586641             mod.rt ../src/modules/module-rt.c:224:translate_error: RTKit error: org.freedesktop.DBus.Error.AccessDenied
+M 23:41:19.586657             mod.rt ../src/modules/module-rt.c:716:impl_acquire_rt: could not make thread 7697 realtime using RTKit: Permission denied
+Error acquiring session bus address: Cannot autolaunch D-Bus without X11 $DISPLAY
+W 23:41:19.591323       GLib-GObject (null):(null):(null): invalid unclassed pointer in cast to 'WpTransition'
+C 23:41:19.591327      wp-transition (null):(null):(null): wp_transition_return_error: assertion 'WP_IS_TRANSITION (self)' failed
+M 23:41:19.591633        wireplumber ../src/main.c:346:on_disconnected: disconnected from pipewire

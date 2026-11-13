@@ -1,0 +1,17 @@
+create sine
+gui create
+gui parent 10485761 child 12582913
+gui destroy
+destroy procs=6425 ticks=90 mainOk=1 audioOk=1 gain=0.500
+create gain
+destroy procs=2973 ticks=0 mainOk=1 audioOk=1 gain=0.500
+create gain
+create sine
+gui create
+gui parent 10485761 child 12582913
+gui destroy
+destroy procs=6435 ticks=88 mainOk=1 audioOk=1 gain=0.500
+create gain
+destroy procs=2994 ticks=0 mainOk=1 audioOk=1 gain=0.500
+create gain
+create sine

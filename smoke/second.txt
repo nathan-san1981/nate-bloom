@@ -1,0 +1,4 @@
+Authorization required, but no authorization protocol specified
+[3638:1113/233123.201966:ERROR:ui/ozone/platform/x11/ozone_platform_x11.cc:257] Missing X server or $DISPLAY
+[3638:1113/233123.201990:ERROR:ui/aura/env.cc:246] The platform failed to initialize.  Exiting.
+[3638:1113/233123.204547:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")

@@ -1,0 +1,16 @@
+19
+Server String: /tmp/nbxdg/pulse/native
+Library Protocol Version: 35
+Server Protocol Version: 35
+Is Local: yes
+Client Index: 2
+Tile Size: 65472
+User Name: runner
+Host Name: runnervmy75tu
+Server Name: pulseaudio
+Server Version: 15.99.1
+Default Sample Specification: s16le 2ch 44100Hz
+Default Channel Map: front-left,front-right
+Default Sink: nbnull
+Default Source: nbnull.monitor
+Cookie: 8444:451d

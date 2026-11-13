@@ -1,0 +1,12 @@
+/home/runner/.clap:
+total 56
+drwxr-xr-x  2 runner runner  4096 Nov 13 23:35 .
+drwxr-x--- 17 runner runner  4096 Nov 13 23:35 ..
+-rwxr-xr-x  1 runner runner 22664 Nov 13 23:30 NateBloomBridge.clap
+-rwxr-xr-x  1 runner runner 23928 Nov 13 23:35 nbtest.clap
+
+/home/runner/.vst3/nbtest.vst3/Contents/x86_64-linux:
+total 80
+drwxr-xr-x 2 runner runner  4096 Nov 13 23:35 .
+drwxr-xr-x 3 runner runner  4096 Nov 13 23:35 ..
+-rwxr-xr-x 1 runner runner 72936 Nov 13 23:35 nbtest.so

@@ -1,0 +1,5 @@
+output list screen
+add monitor screen
+output name screen
+Monitors: 1
+ 0: +screen 3840/1016x1080/286+0+0  screen
