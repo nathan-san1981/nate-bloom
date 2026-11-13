@@ -3804,10 +3804,51 @@ html.nb-tabs .tb-mix .pl-tr > #plStop { display: none !important; }
 html.nb-tabs .tb-mixmore { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 html.nb-tabs .tb-mixmore button { min-height: 48px; border-radius: 12px; font-size: 1.05rem; }
 /* the tabs */
-html.nb-tabs .tb-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); flex: 0 0 56px; }
+html.nb-tabs .tb-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--line); flex: 0 0 56px; }
 html.nb-tabs .tb-tab { background: none; border: 0; border-right: 1px solid var(--line); color: var(--dim); font: 600 1.05rem var(--font-display); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 html.nb-tabs .tb-tab:last-child { border-right: 0; }
 html.nb-tabs .tb-tab small { font: 0.62rem var(--font-mono); letter-spacing: 0.03em; }
+/* (899o) Track: make a loop, play to it */
+html.nb-tabs #playView.tab-track .pl-body > .tb-track { display: flex; }
+html.nb-tabs .tb-track { flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; min-height: 0; }
+html.nb-tabs .tk-beat { display: flex; gap: 5px; align-items: stretch; flex: 0 0 50px; }
+html.nb-tabs .tk-two { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; min-width: 60px; }
+html.nb-tabs .tk-two small { font: 0.58rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+html.nb-tabs .tk-two.off b { opacity: 0.55; text-decoration: line-through; }
+html.nb-tabs .tk-arrow { flex: 0 0 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font-size: 1.6rem; }
+html.nb-tabs .tk-style { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+html.nb-tabs .tk-style b { font: 600 1.25rem var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+html.nb-tabs .tk-style small { font: 0.64rem var(--font-mono); color: var(--dim); }
+html.nb-tabs .tk-btn { min-width: 52px; padding: 0 8px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font: 600 0.95rem var(--font-body, inherit); }
+html.nb-tabs .tk-go { min-width: 64px; font-size: 1.3rem; background: #1d3a2a; border-color: #2d5a40; color: #7ee2a8; }
+html.nb-tabs .tk-go.on { background: #7ee2a8; color: #0f2418; }
+html.nb-tabs .tk-parts { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+html.nb-tabs .tk-row { flex: 1 1 0; min-height: 40px; display: flex; gap: 6px; align-items: stretch; padding: 3px 4px 3px 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.02); }
+html.nb-tabs .tk-name { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.15; }
+html.nb-tabs .tk-name b { font: 600 1rem var(--font-display); }
+html.nb-tabs .tk-name small { font: 0.64rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.nb-tabs .tk-sp { flex: 1 1 auto; }
+html.nb-tabs .tk-row .tk-btn { min-width: 64px; }
+html.nb-tabs .tk-mute.off { opacity: 0.55; text-decoration: line-through; }
+html.nb-tabs .tk-rec { color: #ff8fab; }
+html.nb-tabs .tk-rec.on { background: #ff4f7b; border-color: #ff4f7b; color: #fff; animation: tkPulse 1s ease-in-out infinite; }
+@keyframes tkPulse { 50% { opacity: 0.65; } }
+html.nb-tabs .tk-foot { display: flex; gap: 8px; align-items: center; flex: 0 0 40px; }
+html.nb-tabs .tk-foot > span { font: 0.7rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+html.nb-tabs .tk-foot .tb-seg { flex: 1 1 auto; }
+html.nb-tabs .tk-foot .tb-seg button { height: 38px; }
+/* (899o) the fifteen sounds as big buttons */
+html.nb-tabs .tb-sheet { position: absolute; inset: 52px 0 56px 0; z-index: 40; background: var(--bg, #121019); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; }
+html.nb-tabs .tb-sheet[hidden] { display: none; }
+html.nb-tabs .tb-sh-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+html.nb-tabs .tb-sh-head strong { font: 600 1.05rem var(--font-display); }
+html.nb-tabs .tb-sh-head .btn { height: 40px; min-width: 80px; font-size: 1rem; }
+html.nb-tabs .tb-sh-grid { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 6px; }
+html.nb-tabs .tb-snd { border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 2px 4px; min-width: 0; }
+html.nb-tabs .tb-snd b { font: 600 0.92rem var(--font-display); line-height: 1.1; text-align: center; }
+html.nb-tabs .tb-snd small { font: 0.56rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+html.nb-tabs .tb-snd.on { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+html.nb-tabs .tb-snd.on small { color: #1a1426; }
 html.nb-tabs .tb-tab[aria-selected="true"] { color: var(--ink); background: linear-gradient(to top, rgba(201,182,255,0.16), transparent); box-shadow: inset 0 -4px 0 var(--lilac); }
 html:not(.nb-tabs) :is(.tb-pick, .tb-arp, .tb-mix, .tb-tabs, .tb-lamps, .tb-stop) { display: none !important; }
 /* a MiniLab knob or fader: a big readout in the middle of whichever tab is up */

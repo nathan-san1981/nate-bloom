@@ -17,6 +17,7 @@
     const playOpen = () => document.body.classList.contains("play-on");
     const flash = (a, b) => { try { const P = window.__pk; if (P && P.flashOn) P.flashOn(a, b); } catch (e) {} mlHud(a, b || "", null); };
     function layerList() {
+      if (window.__box15) { const list = window.__box15(); let i = list.findIndex(x => state.cur && x.id === state.cur.id); if (i < 0) i = list.findIndex(x => x.id === "e:" + state.engine); return { list, i: Math.max(0, i) }; }
       const all = allEntries().filter(x => x.cat !== "kits" && !/^e:(samp|pads|drum)$/.test(x.id));
       let cat = state.cur && state.cur.cat; if (!cat || cat === "kits" || (cat === "fav" && !favs.length)) cat = "engines";
       const list = cat === "fav" ? all.filter(x => favs.includes(x.id)) : all.filter(x => x.cat === cat);

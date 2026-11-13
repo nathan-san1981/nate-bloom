@@ -3828,10 +3828,51 @@ html.nb-tabs .tb-mix .pl-tr > #plStop { display: none !important; }
 html.nb-tabs .tb-mixmore { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 html.nb-tabs .tb-mixmore button { min-height: 48px; border-radius: 12px; font-size: 1.05rem; }
 /* the tabs */
-html.nb-tabs .tb-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); flex: 0 0 56px; }
+html.nb-tabs .tb-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--line); flex: 0 0 56px; }
 html.nb-tabs .tb-tab { background: none; border: 0; border-right: 1px solid var(--line); color: var(--dim); font: 600 1.05rem var(--font-display); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 html.nb-tabs .tb-tab:last-child { border-right: 0; }
 html.nb-tabs .tb-tab small { font: 0.62rem var(--font-mono); letter-spacing: 0.03em; }
+/* (899o) Track: make a loop, play to it */
+html.nb-tabs #playView.tab-track .pl-body > .tb-track { display: flex; }
+html.nb-tabs .tb-track { flex: 1 1 auto; flex-direction: column; gap: 6px; min-width: 0; min-height: 0; }
+html.nb-tabs .tk-beat { display: flex; gap: 5px; align-items: stretch; flex: 0 0 50px; }
+html.nb-tabs .tk-two { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; min-width: 60px; }
+html.nb-tabs .tk-two small { font: 0.58rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+html.nb-tabs .tk-two.off b { opacity: 0.55; text-decoration: line-through; }
+html.nb-tabs .tk-arrow { flex: 0 0 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font-size: 1.6rem; }
+html.nb-tabs .tk-style { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+html.nb-tabs .tk-style b { font: 600 1.25rem var(--font-display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+html.nb-tabs .tk-style small { font: 0.64rem var(--font-mono); color: var(--dim); }
+html.nb-tabs .tk-btn { min-width: 52px; padding: 0 8px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font: 600 0.95rem var(--font-body, inherit); }
+html.nb-tabs .tk-go { min-width: 64px; font-size: 1.3rem; background: #1d3a2a; border-color: #2d5a40; color: #7ee2a8; }
+html.nb-tabs .tk-go.on { background: #7ee2a8; color: #0f2418; }
+html.nb-tabs .tk-parts { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+html.nb-tabs .tk-row { flex: 1 1 0; min-height: 40px; display: flex; gap: 6px; align-items: stretch; padding: 3px 4px 3px 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,0.02); }
+html.nb-tabs .tk-name { display: flex; flex-direction: column; justify-content: center; min-width: 0; line-height: 1.15; }
+html.nb-tabs .tk-name b { font: 600 1rem var(--font-display); }
+html.nb-tabs .tk-name small { font: 0.64rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.nb-tabs .tk-sp { flex: 1 1 auto; }
+html.nb-tabs .tk-row .tk-btn { min-width: 64px; }
+html.nb-tabs .tk-mute.off { opacity: 0.55; text-decoration: line-through; }
+html.nb-tabs .tk-rec { color: #ff8fab; }
+html.nb-tabs .tk-rec.on { background: #ff4f7b; border-color: #ff4f7b; color: #fff; animation: tkPulse 1s ease-in-out infinite; }
+@keyframes tkPulse { 50% { opacity: 0.65; } }
+html.nb-tabs .tk-foot { display: flex; gap: 8px; align-items: center; flex: 0 0 40px; }
+html.nb-tabs .tk-foot > span { font: 0.7rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+html.nb-tabs .tk-foot .tb-seg { flex: 1 1 auto; }
+html.nb-tabs .tk-foot .tb-seg button { height: 38px; }
+/* (899o) the fifteen sounds as big buttons */
+html.nb-tabs .tb-sheet { position: absolute; inset: 52px 0 56px 0; z-index: 40; background: var(--bg, #121019); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; }
+html.nb-tabs .tb-sheet[hidden] { display: none; }
+html.nb-tabs .tb-sh-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+html.nb-tabs .tb-sh-head strong { font: 600 1.05rem var(--font-display); }
+html.nb-tabs .tb-sh-head .btn { height: 40px; min-width: 80px; font-size: 1rem; }
+html.nb-tabs .tb-sh-grid { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 6px; }
+html.nb-tabs .tb-snd { border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 2px 4px; min-width: 0; }
+html.nb-tabs .tb-snd b { font: 600 0.92rem var(--font-display); line-height: 1.1; text-align: center; }
+html.nb-tabs .tb-snd small { font: 0.56rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+html.nb-tabs .tb-snd.on { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+html.nb-tabs .tb-snd.on small { color: #1a1426; }
 html.nb-tabs .tb-tab[aria-selected="true"] { color: var(--ink); background: linear-gradient(to top, rgba(201,182,255,0.16), transparent); box-shadow: inset 0 -4px 0 var(--lilac); }
 html:not(.nb-tabs) :is(.tb-pick, .tb-arp, .tb-mix, .tb-tabs, .tb-lamps, .tb-stop) { display: none !important; }
 /* a MiniLab knob or fader: a big readout in the middle of whichever tab is up */
@@ -41194,6 +41235,7 @@ html.nb-synths .recbanner { display: none !important; }
     const playOpen = () => document.body.classList.contains("play-on");
     const flash = (a, b) => { try { const P = window.__pk; if (P && P.flashOn) P.flashOn(a, b); } catch (e) {} mlHud(a, b || "", null); };
     function layerList() {
+      if (window.__box15) { const list = window.__box15(); let i = list.findIndex(x => state.cur && x.id === state.cur.id); if (i < 0) i = list.findIndex(x => x.id === "e:" + state.engine); return { list, i: Math.max(0, i) }; }
       const all = allEntries().filter(x => x.cat !== "kits" && !/^e:(samp|pads|drum)$/.test(x.id));
       let cat = state.cur && state.cur.cat; if (!cat || cat === "kits" || (cat === "fav" && !favs.length)) cat = "engines";
       const list = cat === "fav" ? all.filter(x => favs.includes(x.id)) : all.filter(x => x.cat === cat);
@@ -41268,6 +41310,7 @@ html.nb-synths .recbanner { display: none !important; }
   //   Pads   the eight pads (5–8 above 1–4) and their set (Beat Pads banks, notes, chords…), 9–16, Kit
   //   Arp    Hold and Arp, big; the arp's octaves and its settings; octave − / + and scale lock for the keys
   //   Mix    the four faders (F1–F4); the beat (what ▶ plays, ▶, Rec, tap tempo), FX, Jam
+  //   Track  make a loop and play to it (899o): a beat, your pads, three loops of keys
   // Changing tab never touches the sound: layers, Hold and the arp keep going until Hold is pressed again or ■ Stop is
   // held (a short tap on Stop only says to hold it, so a stray tap can't end a jam). The top bar always shows the
   // sound, HOLD and ARP lamps, Home and Box…. The MiniLab's pads always play the Pads screen's set, and moving a knob
@@ -41277,7 +41320,7 @@ html.nb-synths .recbanner { display: none !important; }
   {
     const BOX = window.__box;
     if (BOX && BOX.on) {
-      const TABS = [["sound", "Sound", "layers"], ["knobs", "Knobs", "K1–K8"], ["pads", "Pads", "P1–P8"], ["arp", "Arp", "hold"], ["mix", "Mix", "F1–F4 · beat"]];
+      const TABS = [["sound", "Sound", "layers"], ["knobs", "Knobs", "K1–K8"], ["pads", "Pads", "P1–P8"], ["arp", "Arp", "hold"], ["mix", "Mix", "F1–F4 · beat"], ["track", "Track", "make a loop"]];
       const TB = { built: false, tab: "sound", stopT: 0 };
       try { const t = localStorage.getItem("nb-box-tab"); if (TABS.some(x => x[0] === t)) TB.tab = t; } catch (e) {}
       const small = () => window.innerWidth <= 720;
@@ -41301,9 +41344,9 @@ html.nb-synths .recbanner { display: none !important; }
           <button type="button" class="tb-sname" id="tbName" title="All the sounds"><small id="tbCat">Sound</small><b></b><small id="tbSub"></small></button>
           <button type="button" class="tb-arrow" id="tbNext" aria-label="Next sound">›</button>`);
         body.prepend(pick);
-        $id("tbPrev").addEventListener("click", () => { const b = $id("lvPrev"); if (b) b.click(); setTimeout(paint, 120); });
-        $id("tbNext").addEventListener("click", () => { const b = $id("lvNext"); if (b) b.click(); setTimeout(paint, 120); });
-        $id("tbName").addEventListener("click", () => { const b = $id("plPick"); if (b) b.click(); });
+        $id("tbPrev").addEventListener("click", () => { if (window.__box15browse) window.__box15browse(-1); else { const b = $id("lvPrev"); if (b) b.click(); } setTimeout(paint, 700); });
+        $id("tbNext").addEventListener("click", () => { if (window.__box15browse) window.__box15browse(1); else { const b = $id("lvNext"); if (b) b.click(); } setTimeout(paint, 700); });
+        $id("tbName").addEventListener("click", () => { if (window.__box15sheet) window.__box15sheet("pick"); else { const b = $id("plPick"); if (b) b.click(); } });
         // Arp: Hold and Arp big, then the arp's octaves, its settings, and the keys' octave and scale
         const arp = mk("section", "tb-arp", `<div class="tb-bigs"></div><div class="tb-opts">
             <div class="tb-opt"><span>Arp octaves</span><div class="tb-seg" id="tbOct">${[1, 2, 3, 4].map(n => `<button type="button" data-o="${n}">${n}</button>`).join("")}</div></div>
@@ -41355,6 +41398,211 @@ html.nb-synths .recbanner { display: none !important; }
       window.addEventListener("resize", () => setTimeout(apply, 50));
       setInterval(apply, 400);
       window.__boxTabs = { setTab, TB };
+    }
+  }
+  // ======================================================================
+  // (box) Fifteen sounds and a Track tab.
+  // SOUNDS: on the box the big knob, ‹ › and + Layer walk fifteen synths, not the hundreds of library and classic
+  // presets: Supersaw, Analog Poly, Morph Pad, Juno Strings, Alpha Juno, Blade Brass, Ghost Choir, Spectral Drone,
+  // Natewave, Mono Bass & Lead, Sync Lead, Pluck, Hoover, Comb Bells, Speech. A tap on the sound's name (or + Layer)
+  // opens them as fifteen big buttons: tap one to play it (or, from + Layer, to add it on top).
+  // TRACK: make something, then play to it. The Rhythm Creator makes the beat (a style, New for another take, Vary),
+  // Pads records your finger drumming on the MiniLab's pads into Beat Pads, and Keys 1–3 each record a loop of what
+  // you play on the keys, with the sound (and layers) you had then, so you can change sound and play over them.
+  // A recording starts on the next bar, lasts the loop (1, 2 or 4 bars) and plays straight back; ● Rec again adds to
+  // it. Everything follows the Rhythm Creator's clock, so it all stays in time. Loops are kept on the box.
+  // ======================================================================
+  {
+    const BOX = window.__box;
+    if (BOX && BOX.on) {
+      // ---------- the fifteen ----------
+      const PICK = ["saw", "analog", "vital", "juno", "alpha", "tyrell", "choir", "zeb", "wave", "mono", "sync", "pluck", "hoover", "bells", "speech"];
+      const box15 = () => {
+        const ids = PICK.filter(id => ENGINES[id]); if (ids.length < 15 && ENGINES.fm) ids.splice(ids.length - 2, 0, "fm");
+        return ids.slice(0, 15).map(id => allEntries().find(e => e.id === "e:" + id)).filter(Boolean);
+      };
+      window.__box15 = box15;
+      const BR = { i: -1, t: 0 };
+      function curIdx(list) { let i = list.findIndex(e => state.cur && e.id === state.cur.id); if (i < 0) i = list.findIndex(e => e.id === "e:" + state.engine); return i; }
+      function browse15(d) {
+        const list = box15(); if (!list.length) return;
+        if (BR.i < 0 || !BR.t) { const i = curIdx(list); BR.i = i < 0 ? (d > 0 ? -1 : 0) : i; }
+        BR.i = (BR.i + d + list.length) % list.length;
+        const e = list[BR.i];
+        try { window.__pk.flashOn(e.name, (BR.i + 1) + " of " + list.length + " · plays when you stop"); } catch (x) {}
+        clearTimeout(BR.t); BR.t = setTimeout(() => { BR.t = 0; play15(e); }, 450);
+      }
+      function play15(e) { start(); try { chooseEntry(e); } catch (x) {} setTimeout(() => { ML.lay = null; try { mlRefresh(true); lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 100); }
+      async function add15(e) {
+        start(); let ok = false; try { ok = await window.__stk.together(e); } catch (x) {}
+        mlHud(ok === false ? e.name : "Layered: " + e.name, ok === false ? "already playing" : "added on top", null);
+        setTimeout(() => { ML.lay = null; try { mlRefresh(true); lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 120);
+      }
+      if (window.__live4) window.__live4.browse = browse15;   // the big knob (899j turns through __live4.browse)
+      window.__box15browse = browse15; window.__box15add = add15;
+      // the fifteen as big buttons
+      function sheet(mode) {
+        let el = $id("tbSheet");
+        if (!el) {
+          el = document.createElement("div"); el.id = "tbSheet"; el.className = "tb-sheet"; el.hidden = true;
+          el.innerHTML = `<div class="tb-sh-head"><strong id="tbShTitle"></strong><button type="button" class="btn" id="tbShClose">Done</button></div><div class="tb-sh-grid" id="tbShGrid"></div>`;
+          ($id("playView") || document.body).appendChild(el);
+          $id("tbShClose").addEventListener("click", () => { el.hidden = true; });
+        }
+        el.dataset.mode = mode;
+        nbT($id("tbShTitle"), mode === "add" ? "Add a sound on top" : "Pick the sound");
+        const g = $id("tbShGrid"); g.innerHTML = "";
+        let playing = []; try { playing = window.__stk.keys(); } catch (x) {}
+        box15().forEach(e => {
+          const b = document.createElement("button"); b.type = "button"; b.className = "tb-snd" + (playing.includes(e.name) ? " on" : "");
+          b.innerHTML = "<b></b><small></small>"; b.querySelector("b").textContent = e.name; b.querySelector("small").textContent = (e.sub || "").replace(/^after /, "");
+          b.addEventListener("click", () => { el.hidden = true; if (mode === "add") add15(e); else play15(e); });
+          g.appendChild(b);
+        });
+        el.hidden = false;
+      }
+      window.__box15sheet = sheet;
+      // + Layer on the 5" tab screen: the fifteen to add on top
+      document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#plPick"); if (!b || !document.documentElement.classList.contains("nb-tabs")) return; e.preventDefault(); e.stopImmediatePropagation(); sheet("add"); }, true);
+
+      // ---------- the loops ----------
+      const LP = { bars: 2, parts: [{ ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }, { ev: [], snd: "", mute: false }], beatMute: false, style: "Boom bap",
+        rec: -1, recStart: 0, pass: 0, sched: null, inPlay: false, timer: 0 };
+      try { const o = JSON.parse(localStorage.getItem("nb-box-loops") || "null"); if (o && Array.isArray(o.parts)) { LP.bars = [1, 2, 4].includes(o.bars) ? o.bars : 2; o.parts.slice(0, 3).forEach((p, i) => { LP.parts[i] = { ev: Array.isArray(p.ev) ? p.ev : [], snd: p.snd || "", mute: !!p.mute }; }); LP.beatMute = !!o.beatMute; if (o.style) LP.style = o.style; } } catch (e) {}
+      const lpSave = () => { try { localStorage.setItem("nb-box-loops", JSON.stringify({ bars: LP.bars, parts: LP.parts.map(p => ({ ev: p.ev.map(e => ({ s: e.s, m: e.m, id: e.id, mix: e.mix, d: e.d })), snd: p.snd, mute: p.mute })), beatMute: LP.beatMute, style: LP.style })); } catch (e) {} };
+      const L = () => LP.bars * 16;
+      const sd = () => rcStepDur();
+      const posAt = t => RC.step - (RC.nextT - t) / sd();
+      const timeAt = p => RC.nextT - (RC.step - p) * sd();
+      // every synth voice made while a Keys part records is written down (layers and the arp included)
+      { const mv0 = makeVoice; makeVoice = function (midi, id, mix, when) {
+          const v = mv0.apply(this, arguments);
+          if (LP.rec >= 0 && !LP.inPlay && v && ctx && RC.playing) {
+            const t = when ?? ctx.currentTime, p = posAt(t), rel = p - LP.recStart;
+            if (rel >= -0.5 && rel < L()) {
+              const ev = { s: Math.max(0, rel) % L(), m: midi, id, mix, d: 0, pass: LP.pass, open: t };
+              LP.parts[LP.rec].ev.push(ev);
+              const st0 = v.stop; v.stop = function (at) { if (ev.open != null) { const te = at ?? ctx.currentTime; ev.d = Math.max(0.25, (te - ev.open) / sd()); ev.open = null; } return st0.apply(this, arguments); };
+            }
+          }
+          return v;
+        }; }
+      // the beat can sit out while the loops keep its clock
+      { const h0 = rcHit; rcHit = function () { if (LP.beatMute && RC.playing && !LP.audition) return; return h0.apply(this, arguments); }; }
+      function lpTick() {
+        if (!ctx || !RC.playing) { LP.sched = null; return; }
+        const now = ctx.currentTime;
+        // a recording ends after one loop
+        if (LP.rec >= 0 && posAt(now) >= LP.recStart + L()) {
+          const P = LP.parts[LP.rec]; P.ev.forEach(e => { if (e.open != null) { e.d = Math.max(0.25, LP.recStart + L() - (LP.recStart + e.s)); e.open = null; } delete e.pass; });
+          mlHud("Keys " + (LP.rec + 1), "recorded · it plays back now", null); LP.rec = -1; lpSave(); paint();
+        }
+        const from = LP.sched == null ? posAt(now) : LP.sched, to = posAt(now + NB_LA);
+        if (to <= from) return;
+        LP.parts.forEach((P, pi) => {
+          if (P.mute || !P.ev.length) return;
+          P.ev.forEach(e => {
+            if (LP.rec === pi && e.pass === LP.pass) return;   // (being played live right now)
+            if (e.s >= L()) return;
+            let abs = Math.ceil((from - e.s) / L()) * L() + e.s;
+            for (; abs < to; abs += L()) {
+              const when = Math.max(now, timeAt(abs));
+              LP.inPlay = true;
+              try { const v = makeVoice(e.m, e.id, e.mix, when); if (v) v.stop(when + Math.max(0.25, Math.min(L(), e.d || 1)) * sd()); } catch (x) {}
+              LP.inPlay = false;
+            }
+          });
+        });
+        LP.sched = to;
+      }
+      setInterval(lpTick, 20);
+      // ---------- the transport and the parts ----------
+      const hasPads = () => { try { return BPS.ev.length > 0; } catch (e) { return false; } };
+      function go(on) {
+        start(); if (!ctx) return;
+        if (on) { rcPlay(true); if (hasPads()) setTimeout(() => { try { bpTransport(true); } catch (e) {} }, 30); }
+        else { if (LP.rec >= 0) { LP.rec = -1; } rcPlay(false); try { bpTransport(false); } catch (e) {} try { rcHush(); } catch (e) {} }
+        paint();
+      }
+      function recKeys(i) {
+        start(); if (!ctx) return;
+        if (LP.rec === i) { LP.rec = -1; LP.parts[i].ev.forEach(e => { if (e.open != null) { e.d = 1; e.open = null; } delete e.pass; }); lpSave(); paint(); return; }
+        if (!RC.playing) go(true);
+        LP.pass++; LP.rec = i;
+        const p = posAt(ctx.currentTime + 0.05); LP.recStart = Math.ceil(p / 16) * 16; if (LP.recStart - p < 1) LP.recStart += 16;
+        let names = []; try { names = window.__stk.keys(); } catch (e) {}
+        if (!LP.parts[i].ev.length) LP.parts[i].snd = names.join(" + ") || ($id("lvSnd") && $id("lvSnd").querySelector("b") ? $id("lvSnd").querySelector("b").textContent : "");
+        mlHud("Keys " + (i + 1), "recording from the next bar · " + LP.bars + (LP.bars === 1 ? " bar" : " bars"), null);
+        paint();
+      }
+      function recPads() {
+        start(); if (!ctx) return;
+        try { BPS.bars = LP.bars; BPS.seqs[BPS.cur].bars = LP.bars; } catch (e) {}
+        if (!RC.playing) go(true);
+        try { bpStartRec(); } catch (e) {}
+        paint();
+      }
+      function clearPart(k) {
+        if (k === "pads") { try { BPS.ev.splice(0); bpSave(); bpPaintGrid(); } catch (e) {} }
+        else { if (LP.rec === k) LP.rec = -1; LP.parts[k].ev = []; LP.parts[k].snd = ""; lpSave(); }
+        paint();
+      }
+      function setStyle(d) {
+        const ks = Object.keys(RC_STYLES); let i = ks.indexOf(LP.style); i = ((i < 0 ? 0 : i) + d + ks.length) % ks.length;
+        LP.style = ks[i]; newBeat(); lpSave();
+      }
+      function newBeat() { try { rcMakeBeat(LP.style, RCP.busy ?? 0.5, RCP.cplx ?? 0.3); } catch (e) {} paint(); }
+      // ---------- the Track screen ----------
+      function build(pv) {
+        if ($id("tbTrack")) return;
+        const body = pv.querySelector(".pl-body"); if (!body) return;
+        const sec = document.createElement("section"); sec.className = "tb-track"; sec.id = "tbTrack";
+        sec.innerHTML = `<div class="tk-beat">
+            <button type="button" class="tk-arrow" id="tkPrev" aria-label="Previous style">‹</button>
+            <div class="tk-style"><small>Beat</small><b id="tkStyle"></b><small id="tkBpm"></small></div>
+            <button type="button" class="tk-arrow" id="tkNext" aria-label="Next style">›</button>
+            <button type="button" class="tk-btn" id="tkNew">New</button><button type="button" class="tk-btn" id="tkVary">Vary</button>
+            <button type="button" class="tk-btn tk-two" id="tkBars" title="How long a loop is"><small>loop</small><b></b></button>
+            <button type="button" class="tk-btn tk-two" id="tkBeatOn" title="The beat on or off (the loops keep its time)"><small>beat</small><b></b></button>
+            <button type="button" class="tk-btn tk-go" id="tkGo">▶</button></div>
+          <div class="tk-parts">
+            <div class="tk-row" data-k="pads"><span class="tk-name"><b>Pads</b><small id="tkPadsSub"></small></span><span class="tk-sp"></span><button type="button" class="tk-btn tk-rec" data-a="rec">● Rec</button><button type="button" class="tk-btn" data-a="clear">Clear</button></div>
+            ${[0, 1, 2].map(i => `<div class="tk-row" data-k="${i}"><span class="tk-name"><b>Keys ${i + 1}</b><small id="tkSub${i}"></small></span><span class="tk-sp"></span><button type="button" class="tk-btn tk-mute" data-a="mute">On</button><button type="button" class="tk-btn tk-rec" data-a="rec">● Rec</button><button type="button" class="tk-btn" data-a="clear">Clear</button></div>`).join("")}
+          </div>`;
+        body.appendChild(sec);
+        $id("tkPrev").addEventListener("click", () => setStyle(-1)); $id("tkNext").addEventListener("click", () => setStyle(1));
+        $id("tkNew").addEventListener("click", newBeat);
+        $id("tkVary").addEventListener("click", () => { try { rcVary(); rcSave(); rcRender(); } catch (e) {} mlHud("Beat", "a variation", null); });
+        $id("tkGo").addEventListener("click", () => go(!RC.playing));
+        sec.querySelectorAll(".tk-row").forEach(r => r.addEventListener("click", e => {
+          const b = e.target.closest("button[data-a]"); if (!b) return; const k = r.dataset.k, a = b.dataset.a;
+          if (k === "pads") { if (a === "rec") recPads(); else clearPart("pads"); }
+          else { const i = +k; if (a === "rec") recKeys(i); else if (a === "clear") clearPart(i); else { LP.parts[i].mute = !LP.parts[i].mute; lpSave(); } }
+          paint();
+        }));
+        $id("tkBars").addEventListener("click", () => { LP.bars = { 1: 2, 2: 4, 4: 1 }[LP.bars] || 2; lpSave(); paint(); mlHud("Loop", LP.bars + (LP.bars === 1 ? " bar" : " bars") + " · for the next recording", null); });
+        $id("tkBeatOn").addEventListener("click", () => { LP.beatMute = !LP.beatMute; lpSave(); paint(); });
+      }
+      function paint() {
+        const sec = $id("tbTrack"); if (!sec) return;
+        nbT($id("tkStyle"), LP.style); nbT($id("tkBpm"), Math.round(rcBpm()) + " bpm");
+        nbT($id("tkGo"), RC.playing ? "■" : "▶"); $id("tkGo").classList.toggle("on", RC.playing);
+        nbT($id("tkBeatOn").querySelector("b"), LP.beatMute ? "Off" : "On"); $id("tkBeatOn").classList.toggle("off", LP.beatMute);
+        let padsRec = false, padsN = 0; try { padsRec = BP.rec || BP.armed; padsN = BPS.ev.length; } catch (e) {}
+        nbT($id("tkPadsSub"), padsRec ? "recording: play the pads" : padsN ? padsN + " hits" : "your finger drums");
+        sec.querySelector('[data-k="pads"] .tk-rec').classList.toggle("on", padsRec);
+        LP.parts.forEach((P, i) => {
+          const row = sec.querySelector('[data-k="' + i + '"]'), rec = LP.rec === i;
+          let sub = P.ev.length ? (P.snd || "a loop") + " · " + P.ev.length + " notes" : "empty: ● Rec, then play the keys";
+          if (rec && ctx) { const left = LP.recStart - posAt(ctx.currentTime); sub = left > 0 ? "get ready… " + Math.ceil(left / 4) : "recording: play the keys"; }
+          nbT($id("tkSub" + i), sub);
+          row.querySelector(".tk-rec").classList.toggle("on", rec);
+          const m = row.querySelector(".tk-mute"); nbT(m, P.mute ? "Off" : "On"); m.classList.toggle("off", P.mute); m.hidden = !P.ev.length;
+        });
+        nbT($id("tkBars").querySelector("b"), LP.bars + (LP.bars === 1 ? " bar" : " bars"));
+      }
+      setInterval(() => { const pv = $id("playView"); if (pv && document.documentElement.classList.contains("nb-tabs")) { build(pv); if (pv.classList.contains("tab-track")) paint(); } }, 250);
+      window.__boxTrack = { LP, go, recKeys, recPads, clearPart, newBeat, setStyle, paint };
     }
   }
     if (window.__mod) window.__mod.nbCC = nbCC;

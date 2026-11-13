@@ -8,6 +8,11 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: make a track.** A Track tab on the 5" screen: a Rhythm Creator beat (thirteen styles, New, Vary), your finger
+drumming on the pads, and three Keys loops that keep the sound you recorded them with, all on one clock, so you can
+build a loop and play over it. **Fifteen sounds** instead of hundreds on the box: the big knob, ‹ › and + Layer walk
+the best synths (Speech and Comb Bells kept). **Drum kits fixed**: the Studio, Sessions and library kits now load.
+
 **New: made for the 5" screen.** Play is zoomed up on the 5" panel (bigger knobs, pads and text), and the faders,
 set list and Capture step aside there (the MiniLab has the faders). Plugging in a TV now moves the picture to the TV
 (the menu used to be stretched across both screens), and unplugging it brings the 5" screen back.

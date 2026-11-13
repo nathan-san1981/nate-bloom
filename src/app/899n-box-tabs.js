@@ -8,6 +8,7 @@
   //   Pads   the eight pads (5–8 above 1–4) and their set (Beat Pads banks, notes, chords…), 9–16, Kit
   //   Arp    Hold and Arp, big; the arp's octaves and its settings; octave − / + and scale lock for the keys
   //   Mix    the four faders (F1–F4); the beat (what ▶ plays, ▶, Rec, tap tempo), FX, Jam
+  //   Track  make a loop and play to it (899o): a beat, your pads, three loops of keys
   // Changing tab never touches the sound: layers, Hold and the arp keep going until Hold is pressed again or ■ Stop is
   // held (a short tap on Stop only says to hold it, so a stray tap can't end a jam). The top bar always shows the
   // sound, HOLD and ARP lamps, Home and Box…. The MiniLab's pads always play the Pads screen's set, and moving a knob
@@ -17,7 +18,7 @@
   {
     const BOX = window.__box;
     if (BOX && BOX.on) {
-      const TABS = [["sound", "Sound", "layers"], ["knobs", "Knobs", "K1–K8"], ["pads", "Pads", "P1–P8"], ["arp", "Arp", "hold"], ["mix", "Mix", "F1–F4 · beat"]];
+      const TABS = [["sound", "Sound", "layers"], ["knobs", "Knobs", "K1–K8"], ["pads", "Pads", "P1–P8"], ["arp", "Arp", "hold"], ["mix", "Mix", "F1–F4 · beat"], ["track", "Track", "make a loop"]];
       const TB = { built: false, tab: "sound", stopT: 0 };
       try { const t = localStorage.getItem("nb-box-tab"); if (TABS.some(x => x[0] === t)) TB.tab = t; } catch (e) {}
       const small = () => window.innerWidth <= 720;
@@ -41,9 +42,9 @@
           <button type="button" class="tb-sname" id="tbName" title="All the sounds"><small id="tbCat">Sound</small><b></b><small id="tbSub"></small></button>
           <button type="button" class="tb-arrow" id="tbNext" aria-label="Next sound">›</button>`);
         body.prepend(pick);
-        $id("tbPrev").addEventListener("click", () => { const b = $id("lvPrev"); if (b) b.click(); setTimeout(paint, 120); });
-        $id("tbNext").addEventListener("click", () => { const b = $id("lvNext"); if (b) b.click(); setTimeout(paint, 120); });
-        $id("tbName").addEventListener("click", () => { const b = $id("plPick"); if (b) b.click(); });
+        $id("tbPrev").addEventListener("click", () => { if (window.__box15browse) window.__box15browse(-1); else { const b = $id("lvPrev"); if (b) b.click(); } setTimeout(paint, 700); });
+        $id("tbNext").addEventListener("click", () => { if (window.__box15browse) window.__box15browse(1); else { const b = $id("lvNext"); if (b) b.click(); } setTimeout(paint, 700); });
+        $id("tbName").addEventListener("click", () => { if (window.__box15sheet) window.__box15sheet("pick"); else { const b = $id("plPick"); if (b) b.click(); } });
         // Arp: Hold and Arp big, then the arp's octaves, its settings, and the keys' octave and scale
         const arp = mk("section", "tb-arp", `<div class="tb-bigs"></div><div class="tb-opts">
             <div class="tb-opt"><span>Arp octaves</span><div class="tb-seg" id="tbOct">${[1, 2, 3, 4].map(n => `<button type="button" data-o="${n}">${n}</button>`).join("")}</div></div>

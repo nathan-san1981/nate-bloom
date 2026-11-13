@@ -107,8 +107,13 @@ async function serve(req) {
   try {
     const dest = inside(CACHE, rel); if (!dest) return new Response("", { status: 404 });
     let src = null;
-    const waf = /^snd\/([\w.-]+)\.json$/.exec(rel);
-    if (waf) src = REMOTE_WAF + waf[1] + ".js";
+    // the page's own sound files (the Studio kit, the library drum kits, the speech dictionary) are on the website; every
+    // other snd/*.json is a WebAudioFont instrument from its home. (These used to go to the WebAudioFont site too, so on
+    // an app without them bundled the Studio kit, Studio percussion and the library kits never loaded.)
+    const own = /^snd\/(studio-kit\.json|kit-[\w.-]+\.json|sp-dict\.b64)$/.test(rel);
+    const waf = !own && /^snd\/([\w.-]+)\.json$/.exec(rel);
+    if (own) src = SITE + rel;
+    else if (waf) src = REMOTE_WAF + waf[1] + ".js";
     else if (/^(inst|wam)\//.test(rel) || /\.(png|webmanifest)$/.test(rel)) src = SITE + rel;   // (plugins added to the website later)
     if (!src) return new Response("", { status: 404 });
     const buf = await fetchTo(src, dest);
