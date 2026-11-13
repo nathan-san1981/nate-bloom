@@ -251,8 +251,8 @@ function createWindow() {
   // once turned) and 1 on a TV or monitor; 1.25 / 1.333 / 1.5 force one)
   // One screen shows at a time (box/session.sh: a TV on HDMI while it's plugged in, else the panel) and it writes
   // which one to /run/nb-box/display ("panel 1.333", "tv 2.000", "monitor 1"): the zoom follows it, so plugging a TV
-  // in or out resizes everything. Nate Bloom itself is played by touch on the panel: there it gets 1.6 (an 800 x 450
-  // layout with bigger knobs, pads and text) while the box's own pages keep theirs; BLOOM_ZOOM= in nb-box.conf overrides.
+  // in or out resizes everything. Nate Bloom itself is played by touch on the panel: there it gets 2 (a 640 x 360
+  // page: Play in five big tabs, 899n-box-tabs.js) while the box's own pages keep theirs; BLOOM_ZOOM= in nb-box.conf overrides.
   const boxBounds = () => screen.getPrimaryDisplay().bounds;
   const boxShows = () => { try { const [k, z] = fs.readFileSync("/run/nb-box/display", "utf8").trim().split(/\s+/); return { kind: k, z: parseFloat(z) }; } catch (e) { return null; } };
   const boxZoom = () => {
@@ -261,7 +261,7 @@ function createWindow() {
     const panel = d ? d.kind === "panel" : boxBounds().height <= 800;
     let u = ""; try { u = win.webContents.getURL(); } catch (e) {}
     if (panel && u.startsWith(ORIGIN + "/") && !u.startsWith(ORIGIN + "/box/") && !karaokeUrl(u)) {
-      const bz = parseFloat(boxConf("BLOOM_ZOOM")); z = bz >= 0.5 && bz <= 4 ? bz : Math.max(z, 1.6);
+      const bz = parseFloat(boxConf("BLOOM_ZOOM")); z = bz >= 0.5 && bz <= 4 ? bz : Math.max(z, 2);
     }
     return z;
   };

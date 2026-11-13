@@ -3753,6 +3753,87 @@ html.nb-box #djlBox { display: none !important; }
 }
 .bx-mlhint { display: none; font-size: 0.72rem; line-height: 1.35; color: var(--dim); padding: 4px 2px 0; border-top: 1px solid var(--line); }
 .bx-mlhint b { color: var(--ink); font-weight: 600; }
+/* (box) Play in tabs on the 5" panel (899n-box-tabs.js): a 640 x 360 page, five screens, big targets */
+html.nb-tabs #playView .pl-top { min-height: 52px; padding: 4px 6px; gap: 6px; }
+html.nb-tabs #playView .pl-top > :is(#plDone, #plLock, strong, #plGear, #plLog, #bxDjBtn, .pl-sp, .bx-strip) { display: none !important; }
+html.nb-tabs #playView .pl-top .btn { min-height: 44px; font-size: 1rem; }
+html.nb-tabs #playView #plSnd { flex: 1 1 auto; min-width: 0; max-width: none; }
+html.nb-tabs .tb-lamps { display: flex; gap: 4px; }
+html.nb-tabs .tb-lamp { font: 600 0.72rem var(--font-mono); letter-spacing: 0.06em; padding: 6px 7px; border-radius: 7px; border: 1px solid var(--line); color: var(--dim); }
+html.nb-tabs .tb-lamp.h.on { background: #f6ad55; border-color: #f6ad55; color: #2a1a05; }
+html.nb-tabs .tb-lamp.a.on { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+html.nb-tabs .tb-stop { background: #3a1820; border-color: #5b2532; color: #ff8fab; font-weight: 600; }
+html.nb-tabs .tb-stop.holding { background: #ff8fab; color: #2a1018; transition: background 0.6s; }
+html.nb-tabs #playView .pl-bar, html.nb-tabs #playView .pl-thumb { display: none !important; }
+html.nb-tabs #playView .pl-body { display: flex; flex-direction: row; gap: 10px; padding: 8px 10px; min-height: 0; flex: 1 1 auto; overflow: hidden; }
+html.nb-tabs #playView { overflow: hidden; }
+html.nb-tabs #playView .pl-body > * { display: none; }
+html.nb-tabs #playView.tab-sound .pl-body > :is(.tb-pick, .pl-stack) { display: flex; }
+html.nb-tabs #playView:is(.tab-knobs, .tab-pads, .tab-mix) .pl-body > .pl-mid { display: flex; }
+html.nb-tabs #playView.tab-arp .pl-body > .tb-arp, html.nb-tabs #playView.tab-mix .pl-body > .tb-mix { display: flex; }
+/* Sound */
+html.nb-tabs .tb-pick { flex: 1.35 1 0; min-width: 0; align-items: stretch; gap: 8px; }
+html.nb-tabs .tb-arrow { flex: 0 0 54px; border-radius: 14px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font-size: 2rem; }
+html.nb-tabs .tb-sname { flex: 1 1 auto; min-width: 0; background: none; border: 0; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; font: inherit; }
+html.nb-tabs .tb-sname b { font-family: var(--font-display); font-size: 1.9rem; line-height: 1.05; font-weight: 600; overflow-wrap: anywhere; }
+html.nb-tabs .tb-sname small { font: 0.74rem var(--font-mono); color: var(--dim); }
+html.nb-tabs #playView .pl-stack { flex: 1 1 0; min-width: 0; border-right: 0; padding: 0; flex-direction: column; gap: 6px; }
+html.nb-tabs #playView .pl-stack .pl-h > span:first-child { font-size: 0.8rem; }
+html.nb-tabs #playView #plPick { height: 44px; flex: 1 1 auto; font-size: 1rem; }
+html.nb-tabs #playView .bx-mlhint { display: block; }
+/* Knobs, Pads, Mix share the middle column, one part at a time */
+html.nb-tabs #playView .pl-mid { flex: 1 1 auto; padding: 0; gap: 8px; min-width: 0; }
+html.nb-tabs #playView .pl-mid > * { display: none !important; }
+html.nb-tabs #playView.tab-knobs .pl-mid > :is(.tb-hpage, #plKnobs) { display: flex !important; }
+html.nb-tabs #playView.tab-pads .pl-mid > :is(.tb-hset, #plPads) { display: flex !important; }
+html.nb-tabs #playView.tab-mix .pl-mid > #plFaders { display: flex !important; }
+html.nb-tabs #playView .pl-mid .pl-h .btn { height: 40px; min-width: 44px; font-size: 1rem; }
+html.nb-tabs #playView .pl-mid .pl-h > span:not(.pl-sp):not(.pl-note) { font-size: 1rem; }
+html.nb-tabs #playView #plKnobs { flex: 1 1 auto; min-height: 0; }
+html.nb-tabs #playView #plKnobs .lv-knobs { width: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); --kz: 62px; gap: 2px 10px; }
+html.nb-tabs #playView .pl-mid .lv-name { font-size: 0.9rem; }
+html.nb-tabs #playView #plPads { flex: 1 1 auto; min-height: 0; }
+html.nb-tabs #playView .pl-pads .lv-pads { gap: 8px; }
+html.nb-tabs #playView #plFaders { flex: 1 1 auto; min-height: 0; }
+html.nb-tabs #playView #plFaders .lv-faders { width: 100%; }
+html.nb-tabs #playView .pl-mid .lv-f .lv-ftrack { height: auto; flex: 1 1 auto; min-height: 80px; }
+/* Arp */
+html.nb-tabs .tb-arp { flex: 1 1 auto; gap: 10px; min-width: 0; }
+html.nb-tabs .tb-bigs { flex: 1 1 0; display: flex; flex-direction: column; gap: 8px; }
+html.nb-tabs .tb-big { flex: 1 1 0; border-radius: 16px; font: 600 1.6rem var(--font-display) !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+html.nb-tabs .tb-big, html.nb-tabs .tb-mixmore button { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); cursor: pointer; }
+html.nb-tabs .tb-big[aria-pressed="true"], html.nb-tabs .tb-mixmore button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+html.nb-tabs .tb-mixmore button { font-family: var(--font-display); font-weight: 600; }
+html.nb-tabs .tb-big small { font: 0.7rem var(--font-mono); opacity: 0.75; }
+html.nb-tabs #plHold.tb-big[aria-pressed="true"] { background: #f6ad55; border-color: #f6ad55; color: #2a1a05; }
+html.nb-tabs .tb-opts { flex: 1.2 1 0; display: flex; flex-direction: column; justify-content: center; gap: 10px; min-width: 0; }
+html.nb-tabs .tb-opt { display: flex; flex-direction: column; gap: 5px; }
+html.nb-tabs .tb-opt > span { font: 0.72rem var(--font-mono); color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+html.nb-tabs .tb-seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+html.nb-tabs .tb-seg button { height: 48px; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--ink); font: 600 1rem var(--font-body, inherit); }
+html.nb-tabs .tb-seg button[aria-pressed="true"] { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
+html.nb-tabs .tb-more { height: 46px; border-radius: 10px; background: none; border: 1px dashed var(--line); color: var(--ink); font: 600 0.95rem var(--font-body, inherit); }
+/* Mix */
+html.nb-tabs .tb-mix { flex: 0 0 46%; flex-direction: column; gap: 8px; min-width: 0; }
+html.nb-tabs .tb-mix .pl-tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; flex: 1 1 auto; align-content: stretch; }
+html.nb-tabs .tb-mix .pl-tr > * { display: none; }
+html.nb-tabs .tb-mix .pl-tr > :is(#plTarget, #plGo, #plRec, #plTap) { display: flex; align-items: center; justify-content: center; height: auto; min-height: 48px; font-size: 1.05rem; }
+html.nb-tabs .tb-mix .pl-tr > #plBpm { display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--ink); }
+html.nb-tabs .tb-mix .pl-tr > #plStop { display: none !important; }
+html.nb-tabs .tb-mixmore { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+html.nb-tabs .tb-mixmore button { min-height: 48px; border-radius: 12px; font-size: 1.05rem; }
+/* the tabs */
+html.nb-tabs .tb-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); flex: 0 0 56px; }
+html.nb-tabs .tb-tab { background: none; border: 0; border-right: 1px solid var(--line); color: var(--dim); font: 600 1.05rem var(--font-display); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+html.nb-tabs .tb-tab:last-child { border-right: 0; }
+html.nb-tabs .tb-tab small { font: 0.62rem var(--font-mono); letter-spacing: 0.03em; }
+html.nb-tabs .tb-tab[aria-selected="true"] { color: var(--ink); background: linear-gradient(to top, rgba(201,182,255,0.16), transparent); box-shadow: inset 0 -4px 0 var(--lilac); }
+html:not(.nb-tabs) :is(.tb-pick, .tb-arp, .tb-mix, .tb-tabs, .tb-lamps, .tb-stop) { display: none !important; }
+/* a MiniLab knob or fader: a big readout in the middle of whichever tab is up */
+html.nb-tabs .mini-hud { top: 50% !important; transform: translate(-50%, -50%); min-width: 300px; padding: 14px 26px; gap: 6px; border: 1px solid var(--lilac); background: rgba(15, 16, 19, 0.95); border-radius: 18px; }
+html.nb-tabs .mini-hud b { font-size: 0.95rem; }
+html.nb-tabs .mini-hud span { font-size: 1.7rem; }
+html.nb-tabs .mini-hud i { height: 7px; border-radius: 4px; }
 /* (box) songs from a USB stick */
 .bx-music .bx-card { width: min(720px, 96vw); height: 88vh; }
 .bx-music .bx-head .bx-info { margin-left: 6px; }
@@ -41033,6 +41114,104 @@ html.nb-synths .recbanner { display: none !important; }
       const pk = $id("plPick"); if (pk && pk.textContent !== "+ Layer") { pk.textContent = "+ Layer"; pk.title = "Add a sound on top of what's playing (or swap it)"; }
     }
     if (boxOn()) setInterval(() => { if (playOpen()) paintHint(); }, 1000);
+  }
+  // ======================================================================
+  // (box) Play in tabs on the 5" panel. At the panel's zoom (2: a 640 x 360 page) one screen can't hold everything at
+  // a size a finger can hit, so Play becomes five screens with big tabs along the bottom, the MiniLab's controls on
+  // each laid out as on the MiniLab:
+  //   Sound  the sound on the knobs, big, with ‹ ›, and the stack of layers with + Layer
+  //   Knobs  the eight knobs (K1–K8) and their page (Sound, FX, FX Lab, Mix, Mine)
+  //   Pads   the eight pads (5–8 above 1–4) and their set (Beat Pads banks, notes, chords…), 9–16, Kit
+  //   Arp    Hold and Arp, big; the arp's octaves and its settings; octave − / + and scale lock for the keys
+  //   Mix    the four faders (F1–F4); the beat (what ▶ plays, ▶, Rec, tap tempo), FX, Jam
+  // Changing tab never touches the sound: layers, Hold and the arp keep going until Hold is pressed again or ■ Stop is
+  // held (a short tap on Stop only says to hold it, so a stray tap can't end a jam). The top bar always shows the
+  // sound, HOLD and ARP lamps, Home and Box…. The MiniLab's pads always play the Pads screen's set, and moving a knob
+  // or fader shows a big readout over whichever tab is up. The TV (and any screen wider than 720 points) keeps the
+  // one-screen Play. The last tab is remembered.
+  // ======================================================================
+  {
+    const BOX = window.__box;
+    if (BOX && BOX.on) {
+      const TABS = [["sound", "Sound", "layers"], ["knobs", "Knobs", "K1–K8"], ["pads", "Pads", "P1–P8"], ["arp", "Arp", "hold"], ["mix", "Mix", "F1–F4 · beat"]];
+      const TB = { built: false, tab: "sound", stopT: 0 };
+      try { const t = localStorage.getItem("nb-box-tab"); if (TABS.some(x => x[0] === t)) TB.tab = t; } catch (e) {}
+      const small = () => window.innerWidth <= 720;
+      const mk = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+      const say = (a, b) => { try { mlHud(a, b || "", null); } catch (e) {} };
+      function setTab(t) {
+        TB.tab = t; try { localStorage.setItem("nb-box-tab", t); } catch (e) {}
+        const pv = $id("playView"); if (!pv) return;
+        TABS.forEach(([k]) => pv.classList.toggle("tab-" + k, k === t));
+        pv.querySelectorAll(".tb-tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === t)));
+        paint();
+      }
+      function build() {
+        const pv = $id("playView"); if (!pv || TB.built) return !!pv;
+        const body = pv.querySelector(".pl-body"), mid = $id("plMid"), top = pv.querySelector(".pl-top"); if (!body || !mid || !top) return false;
+        TB.built = true;
+        // the two header rows in the middle: the knob page and the pad set
+        const hs = mid.querySelectorAll(":scope > .pl-h"); if (hs[0]) hs[0].classList.add("tb-hpage"); if (hs[1]) hs[1].classList.add("tb-hset");
+        // Sound: the big picker
+        const pick = mk("section", "tb-pick", `<button type="button" class="tb-arrow" id="tbPrev" aria-label="Previous sound">‹</button>
+          <button type="button" class="tb-sname" id="tbName" title="All the sounds"><small id="tbCat">Sound</small><b></b><small id="tbSub"></small></button>
+          <button type="button" class="tb-arrow" id="tbNext" aria-label="Next sound">›</button>`);
+        body.prepend(pick);
+        $id("tbPrev").addEventListener("click", () => { const b = $id("lvPrev"); if (b) b.click(); setTimeout(paint, 120); });
+        $id("tbNext").addEventListener("click", () => { const b = $id("lvNext"); if (b) b.click(); setTimeout(paint, 120); });
+        $id("tbName").addEventListener("click", () => { const b = $id("plPick"); if (b) b.click(); });
+        // Arp: Hold and Arp big, then the arp's octaves, its settings, and the keys' octave and scale
+        const arp = mk("section", "tb-arp", `<div class="tb-bigs"></div><div class="tb-opts">
+            <div class="tb-opt"><span>Arp octaves</span><div class="tb-seg" id="tbOct">${[1, 2, 3, 4].map(n => `<button type="button" data-o="${n}">${n}</button>`).join("")}</div></div>
+            <div class="tb-opt"><span>Keys</span><div class="tb-seg tb-keys"></div></div>
+            <button type="button" class="tb-more" id="tbArpMore">Arp speed &amp; pattern…</button></div>`);
+        body.appendChild(arp);
+        const bigs = arp.querySelector(".tb-bigs");
+        [["plHold", "keeps playing until you tap again · MiniLab Hold"], ["plArp", "or press the big knob twice"]].forEach(([id, sub]) => { const b = $id(id); if (!b) return; b.classList.add("tb-big"); if (!b.querySelector("small")) b.insertAdjacentHTML("beforeend", "<small>" + sub + "</small>"); bigs.appendChild(b); });
+        const keys = arp.querySelector(".tb-keys"); ["plOctD", "plOctU", "plScale"].forEach(id => { const b = $id(id); if (b) keys.appendChild(b); });
+        $id("tbOct").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const o = $id("lvArpOct") && $id("lvArpOct").querySelector('button[data-o="' + b.dataset.o + '"]'); if (o) o.click(); setTimeout(paint, 80); }));
+        $id("tbArpMore").addEventListener("click", () => { const b = $id("lvArpMore"); if (b) b.click(); });
+        // Mix: the transport and FX beside the faders
+        const mix = mk("section", "tb-mix", "");
+        const tr = pv.querySelector(".pl-tr"); if (tr) mix.appendChild(tr);
+        const more = mk("div", "tb-mixmore", ""); ["plFx", "plJam"].forEach(id => { const b = $id(id); if (b) more.appendChild(b); }); mix.appendChild(more);
+        body.appendChild(mix);
+        // top bar: HOLD / ARP lamps and a Stop you hold
+        const lamps = mk("div", "tb-lamps", `<span class="tb-lamp h" id="tbLampH">HOLD</span><span class="tb-lamp a" id="tbLampA">ARP</span>`);
+        const snd = $id("plSnd"); if (snd) snd.after(lamps); else top.appendChild(lamps);
+        const stop = mk("button", "btn tb-stop", "■ Stop"); stop.type = "button"; stop.id = "tbStop"; stop.title = "Hold to stop everything (layers, Hold, the arp, the beat)";
+        stop.addEventListener("pointerdown", () => { clearTimeout(TB.stopT); stop.classList.add("holding"); TB.stopT = setTimeout(() => { TB.stopT = 0; stop.classList.remove("holding"); const s = $id("plStop"); if (s) s.click(); try { if (state.hold) { const h = $id("plHold"); if (h) h.click(); } } catch (e) {} say("Stopped", "everything let go"); paint(); }, 600); });
+        ["pointerup", "pointercancel", "pointerleave"].forEach(n => stop.addEventListener(n, () => { if (TB.stopT) { clearTimeout(TB.stopT); TB.stopT = 0; stop.classList.remove("holding"); say("■ Stop", "hold it to stop everything"); } }));
+        top.appendChild(stop);
+        // the tabs
+        const nav = mk("nav", "tb-tabs", TABS.map(([k, n, s]) => `<button type="button" class="tb-tab" role="tab" data-t="${k}">${n}<small>${s}</small></button>`).join(""));
+        nav.setAttribute("role", "tablist"); nav.setAttribute("aria-label", "Play screens");
+        nav.querySelectorAll(".tb-tab").forEach(b => b.addEventListener("click", () => setTab(b.dataset.t)));
+        pv.appendChild(nav);
+        setTab(TB.tab);
+        return true;
+      }
+      function paint() {
+        if (!TB.built) return;
+        const on = id => { const b = $id(id); return !!b && b.getAttribute("aria-pressed") === "true"; };
+        let sus = false; try { sus = !!SUS.on; } catch (e) {}
+        $id("tbLampH").classList.toggle("on", on("plHold") || sus); $id("tbLampA").classList.toggle("on", on("plArp"));
+        const s = $id("lvSnd"), nb = $id("tbName");
+        if (s && nb) { const b = s.querySelector("b"), sm = s.querySelector("small"); nbT(nb.querySelector("b"), b ? b.textContent : ""); nbT($id("tbSub"), ((sm && sm.textContent) || "").replace(/\s*·\s*tap.*$/i, "") || "big knob turns this"); }
+        let n = 0; try { n = window.__stk.items().length; } catch (e) {}
+        nbT($id("tbCat"), n > 1 ? n + " sounds layered · this one on the knobs" : "Sound · big knob turns it");
+        const oc = $id("lvArpOct"); if (oc) $id("tbOct").querySelectorAll("button").forEach(b => { const o = oc.querySelector('button[data-o="' + b.dataset.o + '"]'); b.setAttribute("aria-pressed", String(!!o && o.getAttribute("aria-pressed") === "true")); });
+      }
+      function apply() {
+        const want = small();
+        if (!want && TB.built) { location.reload(); return; }   // (a TV plugged in while Play is in tabs: the one-screen Play again, freshly laid out)
+        document.documentElement.classList.toggle("nb-tabs", want);
+        if (want && document.body.classList.contains("play-on")) { build(); paint(); }
+      }
+      window.addEventListener("resize", () => setTimeout(apply, 50));
+      setInterval(apply, 400);
+      window.__boxTabs = { setTab, TB };
+    }
   }
     if (window.__mod) window.__mod.nbCC = nbCC;
     window.__ml = { pv: () => [...PV.entries()].map(([k, v]) => [k, v.flatMap(x => x.tones || [])]), ML, L, mlPage, mlLayout, mlRefresh, mlGet, mlName, mlText, ctlOf, keyChords, paintMap, mlLive, learnPage };
