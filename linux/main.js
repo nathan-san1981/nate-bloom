@@ -343,7 +343,7 @@ function createWindow() {
         if (!add()) { let n = 0; const t = setInterval(() => { if (add() || ++n > 40) clearInterval(t); }, 250); } })()`).catch(() => {});
       return;
     }
-    if (!(u.startsWith(ORIGIN + "/box/keys/") || karaokeUrl(u))) return;
+    if (!(u.startsWith(ORIGIN + "/box/keys/") || karaokeUrl(u) || soundmapUrl(u))) return;
     win.webContents.executeJavaScript(`(() => { if (document.getElementById("nbBoxHome")) return;
       const b = document.createElement("button"); b.id = "nbBoxHome"; b.type = "button"; b.title = "Back to the home screen";
       b.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg><span>Home</span>';
@@ -452,7 +452,7 @@ function createWindow() {
     }, 1500);
   }
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
-  win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
+  win.webContents.on("will-navigate", (e, url) => { if (process.env.NB_DEBUG) console.log("[nb] will-navigate", url.slice(0, 80)); if (!url.startsWith(ORIGIN) && !karaokeUrl(url) && !soundmapUrl(url)) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   // (176) a page that crashes is reloaded; two crashes within 2 minutes of each other switch the native synth engine off
   // (preload reads engine-crash.json), so a fault in it can never keep the app from working. 10 minutes without one clears it.
   const crashPath = path.join(app.getPath("userData"), "engine-crash.json");
@@ -508,6 +508,10 @@ function boxConf(key) { try { return (new RegExp("^" + key + "=(\\S*)", "m").exe
 const KARAOKE = BOX ? boxConf("KARAOKE").replace(/\/+$/, "") : "";
 const KARAOKE_CERT = BOX ? boxConf("KARAOKE_CERT") : "";
 function karaokeUrl(u) { if (!KARAOKE || !u) return false; try { return new URL(u).origin === new URL(KARAOKE).origin; } catch (e) { return false; } }
+// (box) Sound Map: the phone Sound Map's web app, served on the box itself by ~/soundmap/app/box-server.py (the
+// nb-soundmap service, 127.0.0.1:8797) over a pack of every map and slice in Opus, so it plays away from home too
+const SOUNDMAP = BOX ? "http://127.0.0.1:8797" : "", SOUNDMAP_DIR = path.join(app.getPath("home"), "soundmap");
+function soundmapUrl(u) { if (!SOUNDMAP || !u) return false; try { return new URL(u).origin === SOUNDMAP; } catch (e) { return false; } }
 function boxStartPage() {
   if (!hasFile(path.join(BOX_APPS, "home.html"))) return BOX_PAGES.bloom;   // (an install without the home screen, or CI: straight to Play)
   const want = process.env.NB_BOX_START || boxConf("START");
@@ -533,6 +537,7 @@ async function boxApps() {
     sheets: hasFile(path.join(BOX_APPS, "sheets.html")) && hasFile("/usr/bin/pdftoppm"),
     retro: hasFile(path.join(BOX_APPS, "retro.html")) && hasFile(RETROARCH), players: hasFile(path.join(BOX_APPS, "players.html")),
     stream: hasFile(BOX_OUT.stream), media: hasFile(BOX_OUT.media), games: await gameStick(),
+    soundmap: !!SOUNDMAP && hasFile(path.join(SOUNDMAP_DIR, "app", "box-server.py")),
     start: boxConf("START") || "ask", last: boxLast,
   };
 }
@@ -540,6 +545,11 @@ const RETRO_HEAVY = /mupen64|parallel_n64|ppsspp|flycast|dolphin|pcsx2/i;
 async function boxGo(a, arg) {
   a = String(a || "");
   if (a === "karaoke") { if (!KARAOKE) return { ok: false, error: "not set up" }; win.loadURL(KARAOKE + "/host"); return { ok: true }; }
+  if (a === "soundmap") {
+    if (!SOUNDMAP || !hasFile(path.join(SOUNDMAP_DIR, "app", "box-server.py"))) return { ok: false, error: "not installed" };
+    try { const r = await net.fetch(SOUNDMAP + "/api/maps", { cache: "no-store" }); if (!r.ok) throw new Error(r.status); } catch (e) { return { ok: false, error: "Sound Map isn't running (nb-soundmap)" }; }
+    win.loadURL(SOUNDMAP + "/"); return { ok: true };
+  }
   if (BOX_PAGES[a] && !(a === "retro" && arg && arg.rom)) {   // (retro with a game starts it: below)
     if (a !== "bloom" && !hasFile(path.join(BOX_APPS, BOX_PAGES[a].replace(/^\/box\//, "").replace(/\?.*$/, "")))) return { ok: false, error: "not installed" };
     win.loadURL(ORIGIN + BOX_PAGES[a]); return { ok: true };
@@ -951,8 +961,8 @@ app.whenReady().then(async () => {
   const ses = session.defaultSession;
   // MIDI (with SysEx), the microphone, choosing the sound output, and nothing else
   const ok = new Set(["midi", "midiSysex", "media", "speaker-selection", "clipboard-sanitized-write", "fullscreen"]);
-  ses.setPermissionRequestHandler((wc, perm, cb, details) => cb(ok.has(perm) && ((details.requestingUrl || "").startsWith(ORIGIN) || karaokeUrl(details.requestingUrl))));
-  ses.setPermissionCheckHandler((wc, perm, origin) => ok.has(perm) && ((origin || "").startsWith(ORIGIN) || karaokeUrl(origin)));
+  ses.setPermissionRequestHandler((wc, perm, cb, details) => cb(ok.has(perm) && ((details.requestingUrl || "").startsWith(ORIGIN) || karaokeUrl(details.requestingUrl) || soundmapUrl(details.requestingUrl))));
+  ses.setPermissionCheckHandler((wc, perm, origin) => ok.has(perm) && ((origin || "").startsWith(ORIGIN) || karaokeUrl(origin) || soundmapUrl(origin)));
   if (KARAOKE) {   // (box) Karaoke: only its own self-made certificate is trusted, and nothing it sends is kept on disk
     const kHost = new URL(KARAOKE).hostname;
     ses.setCertificateVerifyProc((req, cb) => cb(req.hostname === kHost && KARAOKE_CERT && req.certificate && req.certificate.fingerprint === KARAOKE_CERT ? 0 : -3));

@@ -8,6 +8,10 @@ curl -fsSL https://raw.githubusercontent.com/nathan-san1981/nate-bloom/main/box/
 
 Instructions, parts and troubleshooting: `box/README.md` in the repository. Once installed, **Box… → Check for an update** in Play installs newer versions from this page.
 
+**New: Sound Map on the box.** A Sound Map tile on the home screen opens the phone Sound Map (touch the dots,
+the jams, the pictures, Pick dots, ● Rec) running on the box itself, with every map and sound kept on the box in a
+compact form, so it works without the beelink.
+
 **New: make a track.** A Track tab on the 5" screen: a Rhythm Creator beat (thirteen styles, New, Vary), your finger
 drumming on the pads, and three Keys loops that keep the sound you recorded them with, all on one clock, so you can
 build a loop and play over it. **Fifteen sounds** instead of hundreds on the box: the big knob, ‹ › and + Layer walk
