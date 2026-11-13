@@ -41433,7 +41433,7 @@ html.nb-synths .recbanner { display: none !important; }
           return r;
         }; }
       // (a look at the output stages, for checks: what the drive, compressor and limiter are doing right now)
-      window.__nbOut = () => { try { return { fx: Object.assign({}, state.fx), comp: fx.comp && +fx.comp.reduction.toFixed(1), lim: fx.limiter && +fx.limiter.reduction.toFixed(1), level: (() => { try { return __nbTest.level(); } catch (e) { return null; } })(), sound: state.cur && state.cur.name, layers: Object.keys(state.layers).filter(k => state.layers[k].on).map(k => [k, state.layers[k].level]) }; } catch (e) { return String(e); } };
+      window.__nbStages = () => { try { return { fx: Object.assign({}, state.fx), comp: fx.comp && +fx.comp.reduction.toFixed(1), lim: fx.limiter && +fx.limiter.reduction.toFixed(1), level: (() => { try { return __nbTest.level(); } catch (e) { return null; } })(), sound: state.cur && state.cur.name, layers: Object.keys(state.layers).filter(k => state.layers[k].on).map(k => [k, state.layers[k].level]) }; } catch (e) { return String(e); } };
       // ---------- the fifteen ----------
       const PICK = ["saw", "analog", "vital", "juno", "alpha", "tyrell", "choir", "zeb", "wave", "mono", "sync", "pluck", "hoover", "bells", "speech"];
       const box15 = () => {
