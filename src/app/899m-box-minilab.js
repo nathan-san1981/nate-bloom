@@ -5,13 +5,14 @@
   // Sample stay on the screen: the sound picker's star and Sample in the pad bar):
   //   turn            the sound on the knobs, as before
   //   click           Layer: the next sound you turn to is added on top of what's playing (click again: cancel)
+  //   double-click    Arp on / off (no Shift needed: the MiniLab's Shift may not reach the app)
   //   Shift + turn    the knob pages (Sound, FX, FX Lab, Mix, Mine), as before
   //   Shift + click   Arp on / off
   //   Hold (button)   Play's Hold: notes and arps keep going until Hold is pressed again (not just a sustain pedal)
   // A line under the stack says so, and Sounds… reads "+ Layer". Off the box nothing changes.
   // ======================================================================
   {
-    const BXL = { armed: false, list: null, i: 0, t: 0, hwHold: false };
+    const BXL = { armed: false, list: null, i: 0, t: 0, hwHold: false, ct: 0 };
     const boxOn = () => !!(window.__box && window.__box.on);
     const playOpen = () => document.body.classList.contains("play-on");
     const flash = (a, b) => { try { const P = window.__pk; if (P && P.flashOn) P.flashOn(a, b); } catch (e) {} mlHud(a, b || "", null); };
@@ -45,13 +46,18 @@
       setTimeout(() => { ML.lay = null; try { mlRefresh(true); } catch (x) {} try { lvPaintTop(); lvPaintKnobs(); paintCards(true); } catch (x) {} }, 120);
     }
     function arpToggle() { if (window.__arpTap) window.__arpTap(); }
+    // one click waits a moment for a second: two quick clicks are the arp, one is the layer
+    function knobClick() {
+      if (BXL.ct) { clearTimeout(BXL.ct); BXL.ct = 0; arpToggle(); return; }
+      BXL.ct = setTimeout(() => { BXL.ct = 0; layerArm(!BXL.armed); }, 380);
+    }
     { const l0 = L.live; L.live = function () {
         const o = l0.apply(this, arguments);
         if (!boxOn()) return o;
         const M = o.M || {}, turn = M.turn;
         o.M = {
           turn: BXL.armed ? ["+ Layer: pick the sound to add", d => layerTurn(d)] : turn,
-          click: [BXL.armed ? "Cancel the layer" : "+ Layer a sound (then turn)", () => layerArm(!BXL.armed)],
+          click: [BXL.armed ? "Cancel the layer (double-click: Arp)" : "+ Layer a sound (then turn) · double-click: Arp", knobClick],
           sturn: M.sturn,
           sclick: ["Arp on / off", arpToggle],
         };
@@ -70,7 +76,7 @@
       let h = $id("bxMlHint");
       if (!h) { h = document.createElement("div"); h.id = "bxMlHint"; h.className = "bx-mlhint"; st.appendChild(h); }
       const html = BXL.armed ? "<b>Turn the big knob</b> to pick a sound to add on top. <b>Click</b> to cancel."
-        : "MiniLab big knob: <b>turn</b> sound · <b>click</b> + layer · <b>Shift+click</b> arp · <b>Hold</b> holds";
+        : "MiniLab big knob: <b>turn</b> sound · <b>press</b> + layer · <b>press twice</b> arp · <b>Hold</b> button holds";
       if (h.innerHTML !== html) h.innerHTML = html;
       const pk = $id("plPick"); if (pk && pk.textContent !== "+ Layer") { pk.textContent = "+ Layer"; pk.title = "Add a sound on top of what's playing (or swap it)"; }
     }
