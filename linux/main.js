@@ -351,7 +351,8 @@ function createWindow() {
       b.style.cssText = "position:fixed;left:14px;bottom:14px;z-index:2147483647;display:flex;align-items:center;gap:8px;height:48px;padding:0 18px 0 14px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(20,21,26,.88);color:#fff;font:600 16px Inter,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45);-webkit-tap-highlight-color:transparent";
       b.addEventListener("click", e => { e.stopPropagation(); if (window.NBBox && NBBox.go) NBBox.go("home"); else location.href = ${JSON.stringify(ORIGIN + "/box/home.html")}; });
       document.documentElement.appendChild(b);
-      if (location.port === "8797") { const st = document.createElement("style"); st.textContent = "body{padding-bottom:84px!important}"; document.head.appendChild(st); }   // (Sound Map: its list scrolls clear of Home)
+      // (Sound Map: Home sits in its top bar, left of its own buttons, clear of the dots and ▶ Play jam; its Singer isn't on the box)
+      if (location.port === "8797") { const st = document.createElement("style"); st.textContent = "#nbBoxHome{left:auto!important;right:140px!important;top:12px!important;bottom:auto!important;height:52px!important}#singerBtn{display:none!important}"; document.head.appendChild(st); }
       })()`).catch(() => {});
   });
   // (box) the phone controllers' QR code (box/pad-server.py, port 8810), bottom-right on the box's own pages: scan it and
