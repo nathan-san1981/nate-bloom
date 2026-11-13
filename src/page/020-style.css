@@ -3849,6 +3849,9 @@ html.nb-tabs .tb-snd b { font: 600 0.92rem var(--font-display); line-height: 1.1
 html.nb-tabs .tb-snd small { font: 0.56rem var(--font-mono); color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 html.nb-tabs .tb-snd.on { background: var(--lilac); border-color: var(--lilac); color: #1a1426; }
 html.nb-tabs .tb-snd.on small { color: #1a1426; }
+html.nb-tabs .tk-wide { min-width: 70px; }
+html.nb-tabs .tk-two.on { background: #f6ad55; border-color: #f6ad55; color: #2a1a05; }
+html.nb-tabs .tk-two.on small { color: #2a1a05; }
 html.nb-tabs .tb-tab[aria-selected="true"] { color: var(--ink); background: linear-gradient(to top, rgba(201,182,255,0.16), transparent); box-shadow: inset 0 -4px 0 var(--lilac); }
 html:not(.nb-tabs) :is(.tb-pick, .tb-arp, .tb-mix, .tb-tabs, .tb-lamps, .tb-stop) { display: none !important; }
 /* a MiniLab knob or fader: a big readout in the middle of whichever tab is up */

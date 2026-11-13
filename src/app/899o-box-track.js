@@ -14,6 +14,18 @@
   {
     const BOX = window.__box;
     if (BOX && BOX.on) {
+      // ---------- keeping the sound clean ----------
+      // The Pi's audio thread drops out (a crackle) when too many voices sound at once: a held chord on Hoover, Sync Lead
+      // or Comb Bells with the last chord's tails still ringing was enough (measured: 8 notes plus tails, dropouts every
+      // second). Nate Bloom already has a lighter setting for that (fewer ringing tails, the plainer filter past 16
+      // voices), but it switches on only when Chrome reports a dropout, which the box's Chrome never does; on the box it's
+      // simply always on. And at most 10 notes sound at once (the oldest is let go), not the desktop's 32.
+      setInterval(() => { NB_HOT = performance.now() + 3000; }, 1000);
+      { const BOX_MAX = 10, on0 = noteOn; noteOn = function () {
+          const r = on0.apply(this, arguments);
+          while (voices.size > BOX_MAX && order.length) { const o = order.shift(); const v = voices.get(o); if (v) { try { v.stop(); } catch (e) {} voices.delete(o); try { markTones(v.tones, markKey, false); } catch (e) {} } }
+          return r;
+        }; }
       // ---------- the fifteen ----------
       const PICK = ["saw", "analog", "vital", "juno", "alpha", "tyrell", "choir", "zeb", "wave", "mono", "sync", "pluck", "hoover", "bells", "speech"];
       const box15 = () => {
@@ -150,6 +162,21 @@
         mlHud("Keys " + (i + 1), "recording from the next bar · " + LP.bars + (LP.bars === 1 ? " bar" : " bars"), null);
         paint();
       }
+      // Pads only: the beat steps out (its clock keeps going, so everything stays in time) and Beat Pads' click counts
+      // while you record; Beat + pads brings the pattern back
+      LP.clickWas = null;
+      function padsOnly(on) {
+        LP.beatMute = on; lpSave();
+        mlHud(on ? "Pads only" : "Beat + pads", on ? "just your pads · a click keeps time while you record" : "the beat plays with your pads", null);
+        paint();
+      }
+      function clickSync() {   // (the click only while recording pads alone)
+        let rec = false; try { rec = BP.rec || BP.armed; } catch (e) { return; }
+        const want = rec && LP.beatMute;
+        if (want && LP.clickWas == null) { LP.clickWas = !!BPS.click; BPS.click = true; }
+        else if (!want && LP.clickWas != null) { BPS.click = LP.clickWas; LP.clickWas = null; }
+      }
+      setInterval(clickSync, 100);
       function recPads() {
         start(); if (!ctx) return;
         try { BPS.bars = LP.bars; BPS.seqs[BPS.cur].bars = LP.bars; } catch (e) {}
@@ -181,7 +208,7 @@
             <button type="button" class="tk-btn tk-two" id="tkBeatOn" title="The beat on or off (the loops keep its time)"><small>beat</small><b></b></button>
             <button type="button" class="tk-btn tk-go" id="tkGo">▶</button></div>
           <div class="tk-parts">
-            <div class="tk-row" data-k="pads"><span class="tk-name"><b>Pads</b><small id="tkPadsSub"></small></span><span class="tk-sp"></span><button type="button" class="tk-btn tk-rec" data-a="rec">● Rec</button><button type="button" class="tk-btn" data-a="clear">Clear</button></div>
+            <div class="tk-row" data-k="pads"><span class="tk-name"><b>Pads</b><small id="tkPadsSub"></small></span><span class="tk-sp"></span><button type="button" class="tk-btn tk-two tk-wide" data-a="only" id="tkPadsOnly" title="Record and play your pads with the beat, or your pads alone (a click keeps time)"><small>pads</small><b></b></button><button type="button" class="tk-btn tk-rec" data-a="rec">● Rec</button><button type="button" class="tk-btn" data-a="clear">Clear</button></div>
             ${[0, 1, 2].map(i => `<div class="tk-row" data-k="${i}"><span class="tk-name"><b>Keys ${i + 1}</b><small id="tkSub${i}"></small></span><span class="tk-sp"></span><button type="button" class="tk-btn tk-mute" data-a="mute">On</button><button type="button" class="tk-btn tk-rec" data-a="rec">● Rec</button><button type="button" class="tk-btn" data-a="clear">Clear</button></div>`).join("")}
           </div>`;
         body.appendChild(sec);
@@ -191,7 +218,7 @@
         $id("tkGo").addEventListener("click", () => go(!RC.playing));
         sec.querySelectorAll(".tk-row").forEach(r => r.addEventListener("click", e => {
           const b = e.target.closest("button[data-a]"); if (!b) return; const k = r.dataset.k, a = b.dataset.a;
-          if (k === "pads") { if (a === "rec") recPads(); else clearPart("pads"); }
+          if (k === "pads") { if (a === "rec") recPads(); else if (a === "only") padsOnly(!LP.beatMute); else clearPart("pads"); }
           else { const i = +k; if (a === "rec") recKeys(i); else if (a === "clear") clearPart(i); else { LP.parts[i].mute = !LP.parts[i].mute; lpSave(); } }
           paint();
         }));
@@ -204,7 +231,8 @@
         nbT($id("tkGo"), RC.playing ? "■" : "▶"); $id("tkGo").classList.toggle("on", RC.playing);
         nbT($id("tkBeatOn").querySelector("b"), LP.beatMute ? "Off" : "On"); $id("tkBeatOn").classList.toggle("off", LP.beatMute);
         let padsRec = false, padsN = 0; try { padsRec = BP.rec || BP.armed; padsN = BPS.ev.length; } catch (e) {}
-        nbT($id("tkPadsSub"), padsRec ? "recording: play the pads" : padsN ? padsN + " hits" : "your finger drums");
+        nbT($id("tkPadsSub"), padsRec ? "recording: play the pads · " + padsN + " hits" : padsN ? padsN + " hits" + (LP.beatMute ? " · pads only" : "") : "your finger drums");
+        nbT($id("tkPadsOnly").querySelector("b"), LP.beatMute ? "Only" : "+ Beat"); $id("tkPadsOnly").classList.toggle("on", LP.beatMute);
         sec.querySelector('[data-k="pads"] .tk-rec').classList.toggle("on", padsRec);
         LP.parts.forEach((P, i) => {
           const row = sec.querySelector('[data-k="' + i + '"]'), rec = LP.rec === i;
